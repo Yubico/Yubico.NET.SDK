@@ -23,14 +23,13 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 /// <summary>
 /// Windows implementation of a Human Interface Device (HID).
 /// </summary>
-[SupportedOSPlatform("windows")]
 internal sealed class WindowsHidInterface : IHidInterface
 {
     private static readonly ILogger<WindowsHidInterface> Logger = YubiKitLogging.CreateLogger<WindowsHidInterface>();
 
     private readonly string _devicePath;
 
-    private WindowsHidInterface(HidDescriptorInfo descriptorInfo)
+    internal WindowsHidInterface(HidDescriptorInfo descriptorInfo)
     {
         DescriptorInfo = descriptorInfo;
         InterfaceType = HidInterfaceClassifier.Classify(descriptorInfo);
@@ -43,6 +42,9 @@ internal sealed class WindowsHidInterface : IHidInterface
 
     public HidInterfaceType InterfaceType { get; }
 
+    /// <summary>Synchronously enumerates ConfigMgr HID paths and descriptor properties.</summary>
+    /// <remarks>This retained enumeration boundary is not covered by the asynchronous connection owners.</remarks>
+    [SupportedOSPlatform("windows")]
     public static IReadOnlyList<IHidInterface> GetList()
     {
         var devices = new List<IHidInterface>();
@@ -77,6 +79,7 @@ internal sealed class WindowsHidInterface : IHidInterface
         return devices;
     }
 
+    [SupportedOSPlatform("windows")]
     private static HidDescriptorInfo GetDescriptorInfo(string interfacePath) =>
         new()
         {
@@ -87,6 +90,7 @@ internal sealed class WindowsHidInterface : IHidInterface
             ProductId = unchecked((short)GetInterfaceProperty<ushort>(interfacePath, Cfgmgr32NativeMethods.DEVPKEY_DeviceInterface_HID_ProductId))
         };
 
+    [SupportedOSPlatform("windows")]
     private static T GetInterfaceProperty<T>(string interfacePath, Cfgmgr32NativeMethods.DEVPROPKEY propertyKey)
     {
         var value = CmPropertyAccessHelper.TryGetProperty(

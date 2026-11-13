@@ -3,7 +3,7 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 
 namespace Yubico.YubiKit.Core.UnitTests.Transports.SmartCard;
 
-public class UsbSmartCardConnectionTests
+public class PcscConnectionTests
 {
     [Theory]
     [InlineData(PscsConnectionKind.Nfc, Transport.Nfc)]
@@ -12,7 +12,7 @@ public class UsbSmartCardConnectionTests
     [InlineData(PscsConnectionKind.Any, Transport.Usb)]
     public void Transport_MapsPcscConnectionKind(PscsConnectionKind kind, Transport expectedTransport)
     {
-        using var connection = new UsbSmartCardConnection(new FakePcscDevice(kind));
+        using var connection = new PcscConnection(new FakePcscDevice(kind));
 
         Assert.Equal(expectedTransport, connection.Transport);
     }
@@ -20,7 +20,7 @@ public class UsbSmartCardConnectionTests
     [Fact]
     public void Transport_WhenPcscDeviceKindIsDefaultAny_FailsClosedToUsb()
     {
-        using var connection = new UsbSmartCardConnection(new FakePcscDevice());
+        using var connection = new PcscConnection(new FakePcscDevice());
 
         Assert.Equal(Transport.Usb, connection.Transport);
     }
@@ -32,7 +32,7 @@ public class UsbSmartCardConnectionTests
     [InlineData(PscsConnectionKind.Any, false)]
     public void SupportsExtendedApdu_ReturnsTrueOnlyForConfirmedUsb(PscsConnectionKind kind, bool expected)
     {
-        using var connection = new UsbSmartCardConnection(new FakePcscDevice(kind));
+        using var connection = new PcscConnection(new FakePcscDevice(kind));
 
         Assert.Equal(expected, connection.SupportsExtendedApdu());
     }

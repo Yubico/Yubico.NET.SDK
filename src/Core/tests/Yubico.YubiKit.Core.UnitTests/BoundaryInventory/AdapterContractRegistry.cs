@@ -11,6 +11,22 @@ internal static class AdapterContractRegistry
     // Independent of the JSON rows: deleting one cannot shrink the gate.
     private static readonly (string Route, string Operation, string Owner, string Symbol, string[] Roles)[] Required =
     [
+        ("Windows HID FIDO", "open", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidConnection", "OpenAsync", ["pending", "failure", "cancel before"]),
+        ("Windows HID FIDO", "send", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidConnection", "SendAsync", ["native drain", "cancel before", "submitted cancellation"]),
+        ("Windows HID FIDO", "receive", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidConnection", "ReceiveAsync", ["terminal", "failure cleanup", "submitted cancellation"]),
+        ("Windows HID FIDO", "dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsFidoHidConnection", "DisposeAsync", ["claim drain", "failure"]),
+        ("Windows HID OTP", "open", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsOtpHidConnection", "OpenAsync", ["pending", "failure", "cancel before"]),
+        ("Windows HID OTP", "send", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsOtpHidConnection", "SendAsync", ["owned output", "submitted cancellation"]),
+        ("Windows HID OTP", "receive", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsOtpHidConnection", "ReceiveAsync", ["failure cleanup", "cancel before"]),
+        ("Windows HID OTP", "dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsOtpHidConnection", "DisposeAsync", ["claim drain", "failure"]),
+        ("Windows direct input (sync)", "open", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", ".ctor", ["partial open failure"]),
+        ("Windows direct input (sync)", "get", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "GetReport", ["descriptor sized input"]),
+        ("Windows direct input (sync)", "set", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "SetReport", ["native drain"]),
+        ("Windows direct input (sync)", "dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidIOReportConnection", "Dispose", ["shared close drain"]),
+        ("Windows direct feature (sync)", "open", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", ".ctor", ["partial open failure"]),
+        ("Windows direct feature (sync)", "get", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "GetReport", ["descriptor sized input"]),
+        ("Windows direct feature (sync)", "set", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "SetReport", ["native drain"]),
+        ("Windows direct feature (sync)", "dispose", "Yubico.YubiKit.Core.Transports.Hid.Windows.WindowsHidFeatureReportConnection", "Dispose", ["shared close drain"]),
         ("Linux HID FIDO", "open", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "OpenAsync", ["pending", "failure", "cancel before"]),
         ("Linux HID FIDO", "send", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "SendAsync", ["native drain", "failure"]),
         ("Linux HID FIDO", "receive", "Yubico.YubiKit.Core.Transports.Hid.Linux.LinuxFidoHidConnection", "ReceiveAsync", ["terminal", "cancel detach"]),
@@ -35,11 +51,11 @@ internal static class AdapterContractRegistry
         ("macOS OTP", "send", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSOtpHidConnection", "SendAsync", ["overlap", "cancel during"]),
         ("macOS OTP", "receive", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSOtpHidConnection", "ReceiveAsync", ["failure", "cancel during"]),
         ("macOS OTP", "dispose", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSOtpHidConnection", "DisposeAsync", ["failure"]),
-        ("portable PCSC", "open", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "InitializeAsync", ["failure"]),
-        ("portable PCSC", "transmit", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "TransmitAndReceiveAsync", ["overlap", "cancel before", "cancel during"]),
-        ("portable PCSC", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransactionAsync", ["pending", "cancel before", "cancel during"]),
-        ("portable PCSC", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "DisposeAsync", ["drain", "failure"]),
-        ("portable PCSC", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "DisposeAsync", ["drain", "failure", "native worker"]),
+        ("portable PCSC", "open", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "InitializeAsync", ["failure"]),
+        ("portable PCSC", "transmit", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "TransmitAndReceiveAsync", ["overlap", "cancel before", "cancel during"]),
+        ("portable PCSC", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "BeginTransactionAsync", ["pending", "cancel before", "cancel during"]),
+        ("portable PCSC", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeOwner+TransactionScope", "DisposeAsync", ["drain", "failure"]),
+        ("portable PCSC", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "DisposeAsync", ["drain", "failure", "native worker"]),
         ("macOS direct input (sync)", "open", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", ".ctor", ["constructor failure"]),
         ("macOS direct input (sync)", "get", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "GetReport", ["timeout then retry", "buffer ownership"]),
         ("macOS direct input (sync)", "set", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidIOReportConnection", "SetReport", ["native drain", "failure"]),
@@ -52,9 +68,9 @@ internal static class AdapterContractRegistry
         ("macOS listener (sync)", "stop", "Yubico.YubiKit.Core.Transports.Hid.MacOS.MacOSHidDeviceListener", "Stop", ["callback drain", "shared stop after timeout"]),
         // Built-in PC/SC behavior only. Custom ISmartCardConnection implementations' native
         // lifetime behavior is not verified; the default async fallback only verifies caller blocking.
-        ("portable PCSC (sync)", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "BeginTransaction", ["native wait"]),
-        ("portable PCSC (sync)", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeState+TransactionScope", "Dispose", ["native drain"]),
-        ("portable PCSC (sync)", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.UsbSmartCardConnection", "Dispose", ["native drain"]),
+        ("portable PCSC (sync)", "transaction begin", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "BeginTransaction", ["native wait"]),
+        ("portable PCSC (sync)", "transaction end", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnectionNativeOwner+TransactionScope", "Dispose", ["native drain"]),
+        ("portable PCSC (sync)", "dispose", "Yubico.YubiKit.Core.Transports.SmartCard.PcscConnection", "Dispose", ["native drain"]),
         ("portable PCSC (sync)", "async default begin", "Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection", "BeginTransactionAsync", ["caller block"])
     ];
 
@@ -64,14 +80,12 @@ internal static class AdapterContractRegistry
         var errors = new List<string>();
         var keys = new HashSet<(string, string)>();
         var seenProfiles = new HashSet<string>(StringComparer.Ordinal);
-        var core = typeof(UsbSmartCardConnection).Assembly;
+        var core = typeof(PcscConnection).Assembly;
         var tests = typeof(AdapterContractRegistryTests).Assembly;
 
         foreach (var row in rows)
         {
             var key = (row.Route, row.Operation);
-            if (row.Route.StartsWith("Windows HID", StringComparison.Ordinal))
-                errors.Add($"deferred route cannot be verified: {row.Route}");
             if (!Required.Any(item => item.Route == key.Route && item.Operation == key.Operation))
                 errors.Add($"unexpected operation: {row.Route}/{row.Operation}");
             if (!keys.Add(key))
@@ -161,8 +175,10 @@ internal static class AdapterContractRegistry
         var separator = profile.LastIndexOf('.');
         var type = separator > 0 ? tests.GetType(profile[..separator]) : null;
         var name = separator > 0 ? profile[(separator + 1)..] : "";
-        const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
-        if (type is null || !type.GetMethods(flags).Any(method => method.Name == name &&
+        // xUnit discovers inherited public tests on concrete containers. Owner resolution above
+        // remains declared-only; this exception is confined to runnable test links.
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+        if (type is null || type.IsAbstract || !type.GetMethods(flags).Any(method => method.Name == name &&
             method.GetCustomAttributes(false).OfType<FactAttribute>().Any(IsRunnable)))
             errors.Add($"stale profile: {profile}");
     }

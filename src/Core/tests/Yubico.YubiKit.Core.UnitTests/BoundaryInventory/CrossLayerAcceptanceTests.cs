@@ -77,7 +77,7 @@ public class CrossLayerAcceptanceTests
         }
     }
 
-    private sealed class FramedFidoBridge : IHidInputBridge
+    private sealed class FramedFidoBridge : IMacOSHidInputBridge
     {
         private Action<ReadOnlyMemory<byte>>? _report;
         private byte[]? _continuation;

@@ -212,7 +212,7 @@ public class ResponsivenessProbeTests
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
-    private sealed class BlockingOtpLifetime(WithheldNativeProbe probe) : IIOKitDeviceLifetime, IDisposable
+    private sealed class BlockingOtpLifetime(WithheldNativeProbe probe) : IMacOSHidReportApi, IDisposable
     {
         public bool HoldGet { get; init; }
         public bool HoldOpen { get; init; }
@@ -240,7 +240,7 @@ public class ResponsivenessProbeTests
         public void Dispose() => OpenEntered.Dispose();
     }
 
-    private sealed class BlockingFidoBridge(WithheldNativeProbe probe) : IHidInputBridge
+    private sealed class BlockingFidoBridge(WithheldNativeProbe probe) : IMacOSHidInputBridge
     {
         public nint CreateDevice(long id) => 1;
         public void OpenDevice(nint device) => probe.EnterNative();

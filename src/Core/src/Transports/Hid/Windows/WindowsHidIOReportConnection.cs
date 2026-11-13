@@ -12,73 +12,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Native.Windows.HidD;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 
+/// <summary>Synchronous expert reports over the independently rooted Windows FIDO native owner.</summary>
+/// <remarks>
+/// Construction, reports and disposal wait for the owner's actual native last use. Direct reports use
+/// descriptor payload sizes rather than typed FIDO64; SET must match the output descriptor exactly.
+/// Returned arrays belong to the caller, including sensitive-data clearing. Disposal has no drain timeout.
+/// </remarks>
 internal sealed class WindowsHidIOReportConnection : IHidConnection
 {
-    private readonly IWindowsHidReportAccess _reportAccess;
-    private bool _disposed;
+    private readonly WindowsFidoHidNativeOwner _owner;
 
     internal WindowsHidIOReportConnection(string path)
-        : this(new WindowsHidReportAccess(path))
+        : this(path, new WindowsHidReportApi())
     {
     }
 
-    /// <remarks>
-    ///     Takes an already-constructed device so the open can be made failure-safe: if the open throws, this
-    ///     constructor never completes, so nothing else can dispose the device and its native handle would leak.
-    ///     The seam also lets the failure path be unit-tested without Windows hardware.
-    /// </remarks>
-    internal WindowsHidIOReportConnection(IWindowsHidReportAccess reportAccess)
-    {
-        _reportAccess = reportAccess;
-        try
-        {
-            _reportAccess.OpenIOConnection();
+    /// <summary>Synchronously waits for worker-owned open and checked failed-open cleanup.</summary>
+    internal WindowsHidIOReportConnection(string path, IWindowsHidReportApi reportApi) =>
+        _owner = WindowsFidoHidNativeOwner.OpenAsync(path, reportApi, CancellationToken.None).GetAwaiter().GetResult();
 
-            // HidD report lengths include the report ID byte; IHidConnection sizes are payload-only.
-            InputReportSize = _reportAccess.InputReportByteLength - 1;
-            OutputReportSize = _reportAccess.OutputReportByteLength - 1;
-        }
-        catch
-        {
-            _reportAccess.Dispose();
-            throw;
-        }
-    }
-
-    public int InputReportSize { get; }
-    public int OutputReportSize { get; }
+    public int InputReportSize => _owner.Metadata.InputReportByteLength - 1;
+    public int OutputReportSize => _owner.Metadata.OutputReportByteLength - 1;
     public ConnectionType Type => ConnectionType.Hid;
 
     public byte[] GetReport()
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        return _reportAccess.GetInputReport();
+        _owner.ThrowIfWorkerThread();
+        var report = _owner.ReceiveAsync(false, CancellationToken.None).GetAwaiter().GetResult();
+        // Transfer the exact independent payload array, not native report-ID framing or a second copy.
+        return MemoryMarshal.TryGetArray(report, out var segment) && segment.Array is { } array &&
+            segment.Offset == 0 && segment.Count == array.Length
+            ? array : throw new InvalidOperationException("Windows HID owner did not return an exact owned report.");
     }
 
     public void SetReport(byte[] report)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        _owner.ThrowIfWorkerThread();
         ArgumentNullException.ThrowIfNull(report);
-        _reportAccess.SetOutputReport(report);
+        _owner.SendAsync(report, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     public void Dispose()
     {
-        if (_disposed)
-            return;
-
-        _reportAccess.Dispose();
-        _disposed = true;
+        _owner.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     public ValueTask DisposeAsync()
     {
-        Dispose();
-        return ValueTask.CompletedTask;
+        var closed = _owner.ShutdownAsync();
+        GC.SuppressFinalize(this); // Shutdown retains its independently rooted owner through native last use.
+        return new ValueTask(closed);
     }
+
+    ~WindowsHidIOReportConnection() => _owner?.RequestShutdown();
 }

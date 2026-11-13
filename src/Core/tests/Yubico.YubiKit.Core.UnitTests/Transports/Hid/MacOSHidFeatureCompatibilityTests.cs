@@ -83,7 +83,7 @@ public class MacOSHidFeatureCompatibilityTests
         Assert.Single(native.Calls, call => call == "close");
     }
 
-    private sealed class FeatureLifetime : IIOKitDeviceLifetime
+    private sealed class FeatureLifetime : IMacOSHidReportApi
     {
         public List<string> Calls { get; } = [];
         public List<int> Threads { get; } = [];

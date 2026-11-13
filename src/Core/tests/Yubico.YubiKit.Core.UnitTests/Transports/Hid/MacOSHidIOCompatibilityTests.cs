@@ -150,7 +150,7 @@ public class MacOSHidIOCompatibilityTests
         Assert.Equal(0, bridge.ReleaseCount);
     }
 
-    private sealed class Bridge : IHidInputBridge
+    private sealed class Bridge : IMacOSHidInputBridge
     {
         private Action<ReadOnlyMemory<byte>>? _report;
         public TaskCompletionSource InputReady { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);

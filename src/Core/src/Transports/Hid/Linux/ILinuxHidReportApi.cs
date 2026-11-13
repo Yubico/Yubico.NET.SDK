@@ -75,22 +75,3 @@ internal enum LinuxReadDisposition
 /// <param name="ActualBytes">Valid payload prefix length for Data; zero for every other disposition.</param>
 /// <param name="Error">Immediately captured errno; meaningful for failed reads, not evidence of failure after success.</param>
 internal readonly record struct LinuxReadResult(LinuxReadDisposition Disposition, int ActualBytes, int Error);
-
-/// <summary>Borrowed synchronous syscall seam beneath report framing, also used by exact ABI/framing tests.</summary>
-/// <remarks>No method retains buffers. Native counts include any report-ID framing supplied in the buffer.</remarks>
-internal interface ILinuxHidNativeApi
-{
-    /// <summary>Acquires a descriptor with the requested flags; returns an invalid handle on failure with errno preserved for immediate capture.</summary>
-    LinuxFileSafeHandle Open(string path, NativeMethods.OpenFlags flags);
-    /// <summary>Performs one read into borrowed storage and captures count/errno before another native call can overwrite them.</summary>
-    LinuxIoResult Read(LinuxFileSafeHandle handle, Span<byte> buffer);
-    /// <summary>Performs one write from borrowed native-framed storage and captures count/errno without retry.</summary>
-    LinuxIoResult Write(LinuxFileSafeHandle handle, ReadOnlySpan<byte> buffer);
-    /// <summary>Performs one ioctl with borrowed request storage; Count is request-specific status or transfer count.</summary>
-    LinuxIoResult Ioctl(LinuxFileSafeHandle handle, nuint request, Span<byte> buffer);
-}
-
-/// <summary>Native return value and errno captured together, with no deferred thread-local error lookup.</summary>
-/// <param name="Count">Native return: byte count for read/write, ready-descriptor count for poll, request-specific result for ioctl; -1 on failure.</param>
-/// <param name="Error">Captured errno, meaningful only when the native return indicates failure; it may be stale on success.</param>
-internal readonly record struct LinuxIoResult(nint Count, int Error);

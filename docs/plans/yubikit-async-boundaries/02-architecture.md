@@ -2,6 +2,28 @@
 
 # Architecture: one key's asynchronous lifecycle
 
+**Windows acceptance and consistency update — 2026-11-12:** implementation head
+`bdac2f4f4` passed the bounded Windows unit/device, redirected GetInfo and unsealed
+JIT synthetic-pipe checks recorded in [Windows native acceptance](../../research/windows-async-native-acceptance.md).
+AOT/sealed publication remains blocked by the missing linker. The user approved a
+stacked internal naming/owner-extraction follow-up, including macOS changes with
+macOS native/hardware testing explicitly required. These edits preserve distinct
+platform mechanisms and public contracts; earlier native results retain their original
+source identity. Global acceptance remains 19/72.
+
+**Historical Windows implementation checkpoint — 2026-11-11 (`a0b133f97`):** separate FIDO/OTP native
+owners, typed routing, synchronous direct facades and pre-open factory/discovery claim transfer
+are implemented and reviewed. FIDO uses `ThreadPoolBoundHandle` overlapped completion; OTP
+preserves zero-access open and worker-owned feature GET/SET. Unproven checked close or BCL
+request preparation retains resources/claims while exposing public faults. Public interfaces remain
+unchanged. At pre-public-routing `378a7bb0`, 86 controlled-seam cases passed on Linux and Windows
+with zero skips/warnings; this does not attest native completion APIs or HID drivers. Subsequent Core
+routing/facade managed checks are separate evidence, not additive counts or native acceptance.
+Windows native JIT/AOT, HID hardware and PC/SC acceptance remain pending. The Windows execution
+gate is READY: no (M4 owner); C1/C2 consistency remains blocked on functional native/integration
+acceptance. Verifier integration/certification and refreshed inventories remain pending. Retain
+19/72 acceptance; no new criterion is checked. See [current status](00-status.md).
+
 **Linux implementation checkpoint — 2026-11-11:** the `yubikit-linux-async`
 worktree implements typed FIDO/OTP owners, shared direct synchronous facades,
 poll/eventfd input and pre-open factory/discovery claim transfer. L0–L6b passed
@@ -196,7 +218,7 @@ table rather than being repeated in every cell.
 
 | Platform/transport | Classified execution and direction | Implementation/evidence status |
 |---|---|---|
-| Windows HID | FIDO input and output use owned overlapped `ReadFile`/`WriteFile` completion; immediate-success notification rules prevent double completion. `CancelIoEx` requests cancellation, while terminal completion controls storage release. Preserve OTP zero-desired-access opening; classify feature GET and SET independently, using the connection's blocking owner unless that direction is separately verified for overlapped execution. | Approved design only for this effort. Existing HID code/tests remain, but no Windows HID route has migrated and native-runtime/hardware evidence is pending. |
+| Windows HID | `WindowsFidoHidNativeOwner` uses `WindowsHidReportApi` and `ThreadPoolBoundHandle` for overlapped `ReadFile`/`WriteFile`; accepted immediate/pending requests require notification and retirement joins submit return with callback resource-last-use. Targeted `CancelIoEx` is not completion proof. `WindowsOtpHidNativeOwner` uses separate `WindowsHidFeatureReportApi` zero-access open and worker-owned GET/SET. Both have one ordinary admission, no backlog and checked release; uncertain ownership is retained. | Implemented/reviewed typed routing and direct synchronous facades share these owners; factory/discovery claims transfer before open. Typed FIDO64/OTP8 remains separate from direct descriptor-sized reports. Controlled-seam managed evidence passed at bounded checkpoints; actual Windows-native JIT/AOT and HID hardware acceptance remain pending. |
 | macOS HID | FIDO input uses persistent IOKit event delivery and bounded owned reports instead of per-call caller-run-loop pumping. FIDO output and OTP feature GET and SET use connection-owned workers, not unverified callback APIs. | Final-source `21498d24` selected-key `.8` Native AOT passed typed FIDO/OTP, direct IO/feature, automatic active cancellation, and real matching listener/late-drain modes. The public pending-read completion barrier was fixed without weakening its probe. Earlier physical removal and late-drain evidence supports bounded ISC-33. Public direct calls remain synchronous; fresh-host permission was user-deferred and universal coverage remains open. |
 | Linux HID | FIDO input uses nonblocking read plus `poll`/`eventfd` readiness and wake signaling. FIDO output uses its connection worker. OTP feature GET/SET and checked close use the OTP connection worker. Registration activation, actual quiescence and owner-worker reference release are separate observations. | Implemented and managed-tested in `yubikit-linux-async`; real-libc synthetic-descriptor routes and selected-key read-only physical typed/direct/raw routes passed under JIT/AOT on serial 103. Capture `20261111T115147Z` supersedes historical usbfs blockage. Operator touch/cancel/removal and global acceptance remain pending. |
 | Windows smart card | Apply the portable smart-card policy: adapt classified blocking context/connect/transmit/transaction/end/disconnect/release calls through the connection owner; keep status monitoring's context/lifetime independent. Platform release and monitor semantics require their own evidence. | Portable owner slice implemented and managed-tested. Windows native-runtime/hardware evidence remains pending. |

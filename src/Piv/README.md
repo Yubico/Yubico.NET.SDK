@@ -207,7 +207,19 @@ with SmartCard-only eligibility. The argument-driven CLI never prompts, even on 
 when multiple devices are connected. Picker labels reuse discovery metadata, not authoritative live configuration.
 ## Maintainer verification
 
-For maintainers, run unit tests with `dotnet toolchain.cs -- test --project Piv`. On an explicitly allowlisted
+For maintainers, run unit tests with `dotnet toolchain.cs -- test --project Piv`.
+To run the hardware-free PIN-only recovery and owned-response clearing cases specifically:
+
+```bash
+dotnet toolchain.cs -- test --project Piv --filter "FullyQualifiedName~PivPinOnlyModeSessionTests"
+```
+
+These cases retain response-clearing and recovery assertions. They do not check pooled
+command buffers after return: that memory can already belong to another renter. The
+production authentication implementation is unchanged; pre-return pooled-buffer clearing
+has no direct runtime assertion in this fixture.
+
+On an explicitly allowlisted
 dedicated test key, run smoke with `dotnet toolchain.cs -- test --integration --project Piv --smoke`, then full
 unattended coverage with `dotnet toolchain.cs -- test --integration --project Piv --filter "Category!=RequiresUserPresence"`.
 These tests reset and mutate PIV, including a protected-mode enable/reopen/recover/disable round trip. Touch

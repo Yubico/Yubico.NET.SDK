@@ -133,7 +133,7 @@ its parameters for reset. Base `Protocol` remains the disposal owner even while 
 ### Built-in macOS FIDO lifetime
 
 The built-in macOS FIDO report connection opens asynchronously through
-`MacOSFidoHidConnection` and its internal `IHidInputBridge`. A persistent native IOKit
+`MacOSFidoHidConnection` and its internal `IMacOSHidInputBridge`. A persistent native IOKit
 input owner copies bounded reports; blocking output and checked shutdown run on the
 connection's worker. Acknowledgment and accepted-report drain precede release; a failed
 close retains the owner and physical claim rather than allowing unsafe reopen. Terminal
@@ -141,9 +141,58 @@ wake and registry/discovery claim transfer belong to this same connection lifeti
 `FidoHidProtocol.Configure` performs local setup only; `ApplicationSession` awaits FIDO
 channel initialization. Public lower-level `IHidConnection` compatibility remains
 synchronous; the typed macOS OTP path uses a separate worker. Linux has its own FIDO/OTP
-owners described below; Windows/custom HID retains the compatibility adapters. See
+owners described below; Windows has separate owners too, while custom HID retains the compatibility adapters. See
 [retained synchronous compatibility paths](../../docs/architecture/raw-access-tiers.md#retained-synchronous-compatibility-paths)
 for public entry points and known limits.
+
+The connection facades delegate lifetime work to `MacOSFidoHidNativeOwner` and
+`MacOSOtpHidNativeOwner`. `MacOSHidInputBridge` owns the mechanism-specific native
+input callback glue; `IMacOSHidReportApi` / `MacOSHidReportApi` name the mechanical
+IOKit report seam. Extracting these types does not change worker, callback, root or
+claim-release ordering. The consistency follow-up requires macOS native/hardware
+verification; portable fake-seam tests are not that evidence.
+
+### Windows HID native lifetime and routing
+
+`WindowsFidoHidConnection` and `WindowsOtpHidConnection` are thin typed facades over
+`WindowsFidoHidNativeOwner` and `WindowsOtpHidNativeOwner` in `Transports/Hid/Windows/`.
+Each independently rooted owner exists before native acquisition and admits one ordinary operation,
+with no ordinary backlog, per-operation Task.Run or replacement worker. `HidConnectionSlot` selects
+these owners for built-in Windows interfaces; custom interfaces retain synchronous adapters.
+Per-open factories create fresh, unopened report APIs. They must not acquire native resources before
+owner transfer; factory failure has an explicit no-native claim-release path.
+
+FIDO's `WindowsHidReportApi` implements `IWindowsHidReportApi`: worker-directed open/metadata,
+overlapped ReadFile/WriteFile submission, targeted cancellation, retirement and checked close.
+`ThreadPoolBoundHandle` observes completion independently of the connection worker. Both accepted
+immediate and pending submissions require the default completion notification. Retirement joins
+submission return with callback resource-last-use; `CancelIoEx` (including ERROR_NOT_FOUND) is not
+completion proof. Pre-dispatch cancellation submits nothing; after dispatch the operation retains
+storage/admission until terminal native completion and retirement. Native success wins a cancellation race.
+
+OTP's separate `IWindowsHidFeatureReportApi` / `WindowsHidFeatureReportApi` preserves zero-desired-access
+opening. Its owner worker performs synchronous feature GET/SET and checked close. Pre-dispatch
+cancellation submits nothing; cancellation after dispatch cannot detach the call or borrowed storage.
+An admitted call may succeed after cancellation. Both owners copy outgoing payloads before dispatch
+and clear owned staging after last use; successful returned payload storage belongs to the caller.
+
+`YubiKeyDevice` and `SharedDeviceInfoRead` transfer the original grouped connection/discovery claim
+before native open. After transfer, only the native owner releases it, including failed/canceled open
+cleanup. Discovery wait expiry and public faults are not release proof. Unproven checked close retains
+the rooted owner/resources/claim. A known pre-dispatch BCL overlapped-preparation failure faults the
+public operation and shutdown while retaining unproven BCL resources; do not convert it into a clean
+rejection or leave the public task pending after worker exit.
+
+`WindowsHidIOReportConnection` / `WindowsHidFeatureReportConnection` synchronously drain the same
+owners, without a report cancellation token or drain timeout. Direct opens acquire no implicit grouped
+claim. Direct payload metadata excludes the report-ID byte; SET must match the output/feature descriptor
+length exactly. Typed FIDO remains 64 bytes and typed OTP eight bytes. Public interfaces are unchanged.
+Controlled-seam owner/routing/facade tests are managed evidence; actual Windows completion APIs,
+HID-driver JIT/AOT and hardware acceptance remain pending at the 2026-11-11 checkpoint. Do not infer
+scanner completeness or whole-platform acceptance from these routes.
+The later `bdac2f4f4` device/JIT/RDP results are recorded separately in
+[Windows native acceptance](../../docs/research/windows-async-native-acceptance.md);
+preserve that source identity when assessing this consistency follow-up.
 
 ### Linux native report boundary (L1)
 
@@ -240,7 +289,7 @@ See [L4 handoff](../../docs/research/linux-otp-async-lifetime.md).
 
 ### Linux public factory and discovery routing (L5)
 
-`HidConnectionSlot.OwnsNativeLifetime` describes built-in macOS **or Linux** HID; it is not a
+`HidConnectionSlot.OwnsNativeLifetime` describes built-in macOS, Linux or Windows HID; it is not a
 platform-wide async-provider abstraction. Linux slots call `LinuxFidoHidConnection.OpenAsync` /
 `LinuxOtpHidConnection.OpenAsync`, bypassing the synchronous `IHidConnection` adapters. The internal
 slot accepts optional `ILinuxHidReportApi` / `ILinuxHidReadReactor` seams, alongside its existing macOS
@@ -253,7 +302,8 @@ to the native owner instead of wrapping it. The requested transport must still m
 transfers the per-interface discovery lease before invoking open (even if it later throws). Once
 transferred, only the native owner releases it: neither a caller timeout nor a disposal exception is
 release proof. EINTR/EIO report disposal diagnostics **after** releasing the original claim; unknown
-release retains/quarantines it. Windows/custom adapters and PC/SC paths keep their prior behavior.
+release retains/quarantines it. Custom adapters and PC/SC paths keep their prior behavior; Windows
+now uses its own pre-open claim-owning route described above.
 `DiscoveryDeviceInfoReader` bounds the caller's wait; `SharedDeviceInfoRead` owns admission, the lease,
 worker, connection, and read pipeline. `ProtocolDeviceInfo.ReadAsync` only borrows an already-open
 connection and owns the matching protocol, not discovery scheduling or connection teardown.
@@ -486,8 +536,8 @@ an error in `.editorconfig`. A clean build does not mean you used `LibraryImport
 ### Connection Factory Pattern
 
 Built-in PC/SC creation defaults to strict `SmartCardSharing.Exclusive`: sharing violations throw
-`ConnectionInUseException` without a shared retry. Keep the `UsbSmartCardConnection`,
-`PcscConnectionNativeState`, and `PcscNativeResources` constructor defaults consistent with the initial
+`ConnectionInUseException` without a shared retry. Keep the `PcscConnection`,
+`PcscConnectionNativeOwner`, and `PcscNativeResources` constructor defaults consistent with the initial
 `SmartCardConnectionFactory.DefaultSharing`. Parameterless factories (including `CreateDefault` behind
 `FindYubiKeys.Create` / `YubiKeyManager`) snapshot the process-wide policy at construction; changing it
 does not reconfigure existing factories. Migration/coexistence requires an explicit `Shared` or
@@ -580,7 +630,8 @@ handles; they are not `IYubiKey` objects. Only `YubiKeyDevice` is published by p
 
 `IYubiKey` models the physical key; `IHidInterface` models one operating-system-exposed HID report
 interface discovered by `FindHidInterfaces`. `IHidConnection` is an opened report connection, while
-`IWindowsHidReportAccess` is the internal Windows report-handle seam. These names do not imply a
+`IWindowsHidReportApi` and `IWindowsHidFeatureReportApi` are internal Windows mechanical seams
+subordinate to their native owners. These names do not imply a
 one-to-one mapping between operating-system interfaces and physical USB interfaces.
 
 ### ConnectionType Semantics
@@ -873,7 +924,7 @@ Behavior added by the discovery/session concurrency hardening (see `ExchangeGuar
   scans/publications; `DeviceChangeFeed` owns membership, identity retention, and isolated subscriptions.
   Disposal stops listeners, cancels and awaits the loop without a timeout, retires discovery, then completes
   the feed; bounded native waits do not release native leases before actual teardown.
-- **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Built-in macOS/Linux HID transfer claims to their native owners before open; Windows/custom HID registered-wrapper release behavior is unchanged. Linux EINTR/EIO close diagnostics still release proven-closed descriptors' original claims.
+- **Registered connections dispose exactly once, and disposal shares one outcome.** `DisposalGate` gives the first `Dispose`/`DisposeAsync` caller the claim via one atomic compare-exchange. Every other caller observes that same completion — async callers await it and sync callers block on it. Built-in PC/SC connections create their lifetime owner before native open, run open/transmit/transaction/end/checked release on one lazy background worker, refuse overlapping ordinary raw calls, and release the registry lease only after successful disconnect plus context release. A release error retains and quarantines the claim; `UnrecoveredConnectionException` distinguishes it from ordinary live contention. External SmartCard implementations that fault disposal likewise retain their claim because Core has no native release proof. Built-in Windows/macOS/Linux HID transfer claims to their native owners before open; custom HID retains the registered compatibility wrapper. Linux EINTR/EIO close diagnostics still release proven-closed descriptors' original claims.
 
 ## Known Gotchas
 

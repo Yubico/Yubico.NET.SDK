@@ -1,5 +1,138 @@
 # Status: YubiKit async boundaries
 
+## Windows acceptance and approved consistency follow-up — 2026-11-12
+
+The Windows implementation at `bdac2f4f4224fa0ccf92006971af8659736aa2b1` passed
+native Windows Core units (2210 executed, three skipped), 59 selected physical-device
+cases, a source-bound redirected SmartCard GetInfo diagnostic, and an unsealed JIT
+synthetic-pipe run (10 scenarios / 65 checks). All successful runs had native exit
+zero. See [the bounded acceptance record](../../research/windows-async-native-acceptance.md)
+for job identities, source binding, fixture effects and limitations.
+
+The user approved C1/C2 as a stacked follow-up on #771, including macOS mechanical
+renames and owner extraction. **macOS native/hardware testing remains required before
+merge.** The absent Windows C++ linker still blocks AOT/sealed publication; approving
+the cleanup does not satisfy that original acceptance requirement. New source bytes
+need their own applicable validation. The overall ISA count remains **19/72**.
+
+The dated record below preserves the earlier checkpoint and its then-active pause;
+its unexecuted/paused statements are superseded only by the bounded results above.
+
+C1/C2 is implemented in the consistency follow-up: macOS report seams/bridge and
+native owners occupy matching files; PC/SC connection/owner names are aligned;
+Linux supporting seams are split. The scanner retains 245 sites with 229 unchanged
+identities and 16 one-to-one mappings, without acceptance-status promotion. The
+separately reviewed PIV test correction (#773) is a verification prerequisite;
+it retains recovery and owned-response clearing assertions without reading command
+storage after pool return. At the user's review request, the original production
+authentication method is restored and no injected-pool test seam is retained.
+The [Mac handoff](../../research/adapter-consistency-macos-handoff.md) records exact
+commands and evidence limits for later execution. The user approved Linux delivery
+now, with Mac native/hardware and a separately prepared native-AOT VM to follow.
+
+## Historical Windows execution and consistency checkpoint — 2026-11-11
+
+The user approved phased Windows FIDO/OTP async-boundary implementation, Windows
+PC/SC acceptance and a subsequent cross-platform adapter consistency pass. Astra is
+the orchestrator; each bounded implementation/review assignment uses a fresh
+**GPT-6 Astra, low-effort** context. Independent file-owned work runs in parallel;
+shared integration, Windows workspace execution and physical hardware are serialized.
+
+The execution base is `f99cf78fe90b257653aa0a3de60bbffe896b34fb`, on
+`yubikit-windows-async`, with the stack explicitly rooted at `yubikit`. The local
+approved execution plan is
+`/home/rupicola/.opencode/plan/2026-11-11-windows-async-boundaries-and-adapter-consistency.md`;
+it supplements this existing ISA/status record without creating new ISC IDs.
+
+| Phase | Current state and finite exit |
+|---|---|
+| W0 baseline/conventions | Source, naming and test/evidence maps complete. No Windows execution or hardware evidence. |
+| W1 native FIDO boundary | Native API, owner and sealed verifier implemented/reviewed. VM AOT publication blocked by missing C++ linker; native acceptance user-paused. |
+| W2 public FIDO route | Core routing/facades and public CTAP2 managed journeys implemented/reviewed. Native/device acceptance user-paused. |
+| W3 Windows OTP | Owner, native feature API, routing and public YubiOTP managed journeys implemented/reviewed. Actual zero-access device execution user-paused. |
+| W4 Windows PC/SC | Existing portable owner is the starting point; Windows-native lifecycle/context/release and device proof remain pending. |
+| C1/C2 consistency | Gated on functional unit/integration acceptance. Mechanical names/moves precede test-backed structural or logic changes. |
+| F delivery | Software gate passed; draft PR/Copilot review being prepared. Native/hardware gates remain paused; no automatic merge. |
+
+The external runner gate `~/.local/share/windows-sdk/STATUS.md` reopened after M4
+at `6fb832395`. The native target then stopped at AOT publication with
+**Platform linker not found**; a leased diagnostic found neither vswhere nor cl/link.
+The user explicitly paused Windows native/AOT and hardware acceptance. A future
+READY: yes alone does not override that pause. When acceptance resumes, reread
+the current invoke section and linked runbook;
+hardware uses the elevated console task, RDP smart-card redirection is SmartCard-only,
+and disconnected jobs are collected by ID rather than replayed.
+
+Untouched Windows baseline at `f99cf78fe` passed three Core builds and **2,039 unit
+tests, three skips, zero warnings**. The wrapper job `f2c95fd064fc40aba9bdc8517e066564`
+failed result collection because its run-directory validator rejected `+` in the
+combined `build+test` name. Leased read-only job `8dae778cd1924fabb7fc3bf99cf05cf9`
+collected the existing passing `result.json` without replay. Future runner calls
+use separate targets. This distinguishes toolchain success from the failed wrapper job.
+
+The first integrated Windows HID implementation at `378a7bb03` passed **86** focused
+managed tests on both Linux and Windows, zero skips/warnings (Linux run
+`20261111-201349-567-test`, Windows job `e9c3c9a7e0c04fd980b9b543c033a34d`). Review
+fixed creation-token authority after open-success publication in both owners. An
+allocator-only failure marker now reports an actual operation error and shared
+unrecovered shutdown while retaining uncertain BCL resources and the physical claim;
+known non-dispatch is not mistaken for proven allocation cleanup. Windows runtime
+execution, driver behavior and hardware acceptance remain separate gates.
+
+Subsequent Core routing/facade integration and the public CTAP2/YubiOTP managed
+journeys passed independent review. Three CTAP2 and four YubiOTP cases use actual
+Windows interfaces/slots/owners under controlled report seams. Dedicated synchronous
+facade-disposal tests now hold report last use and checked close separately; the
+four corresponding no-wait negative controls failed as intended. The current registries
+validate **245 source sites, 59 operations / 104 unique runnable profile links and
+31 public-sync entries**. All 104 profile methods were executed as 145 cases;
+these overlap the unit suite. Required Windows synchronous entries reject the legacy
+`No held-native` exemption; eight negative mutations failed before that correction.
+
+The no-hardware native verifier now requires an independent exact ten-scenario,
+44-child-check and 21-coordinator-check contract per runtime, and validates sealed
+source/assets/published-output manifests before and after execution. Its 40 portable
+evidence-gate cases passed (`20261111-204913-321-windows-hid-verification-evidence-test`).
+This is verifier-validation evidence; no actual Windows JIT/AOT native fixture or
+device scenario has run yet. Missing raw immediate-success versus pending-submission
+observations remain explicitly unattested.
+
+Final software gate
+`20261111-215914-508-build+test+docs-qa+native-aot-contract-qa+complexity+windows-hid-verification-evidence-test`
+passed the full build, **4,306 unit tests (zero failures, five skips), zero warnings**,
+docs QA, Native AOT contract QA and the **40** portable verifier evidence cases.
+The portable verifier compile/evidence target is also wired into Ubuntu CI; it does
+not execute Windows native APIs. Whole-branch complexity assessed **123** shipping
+methods; three reviewed commit justifications retain the FIDO transition/completion
+ordering and flat factory switch. Scoped solution/verifier formatting is separate
+from the manually reviewed file-based toolchain sources. The only subsequent C#
+format corrections remove final newlines in two test files.
+
+Native job `227f93c224eb459baf6c9cac5fc10f00` successfully published JIT output but
+failed before any native scenario ran because the required AOT linker was absent.
+No device job, touch or removal ceremony has run during this Windows effort.
+Software/PR progress is not Windows acceptance, and C1/C2 remains gated.
+
+Untouched-source run
+`20261111-193614-552-build+test+docs-qa+native-aot-contract-qa+complexity`
+passed the full build and executed **4,128 unit tests, one failure, five skips,
+zero warnings**. The sole failure was temporary-file creation with `EDQUOT` in
+`LinuxNativeAbiTests.RealFile_ReadWriteCountsAndIoctlErrnoRoundTripThroughProductionAdapter`.
+After preserving and relocating prior PR770 temporary evidence off quota-limited
+tmpfs, the unchanged test passed **1/1** in
+`20261111-193907-594-test+docs-qa+native-aot-contract-qa+complexity`; docs QA,
+Native AOT contract QA and complexity also passed. The initial full failed run
+remains a failed run, not relabeled as an all-green execution.
+
+Naming decisions preserve the public `PscsConnectionKind` name and public raw/app
+contracts, and retain the already-consistent `IO` facade spelling. Internal
+PC/SC owner/connection names and macOS owner/bridge extraction are finite later
+consistency candidates. A handle-owning Windows report wrapper cannot become a
+mechanical API by rename alone. The Windows lifecycle proposal retains submitted
+request storage through terminal native completion; cancellation is only an intent.
+No Windows criterion or universal acceptance count is advanced by these preparation
+results. Older deferred-Windows lane entries below are historical checkpoints.
+
 ## PR 770 hotplug closeout — 2026-11-11
 
 [PR 770](https://github.com/Yubico/Yubico.NET.SDK/pull/770) was merged at

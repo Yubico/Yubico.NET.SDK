@@ -35,7 +35,11 @@ public class MigrationDiagnosticsTests
         foreach (string path in new[]
         {
             "Transports/Hid/MacOS/MacOSFidoHidConnection.cs",
-            "Transports/Hid/MacOS/MacOSOtpHidConnection.cs"
+            "Transports/Hid/MacOS/MacOSOtpHidConnection.cs",
+            "Transports/Hid/MacOS/MacOSFidoHidNativeOwner.cs",
+            "Transports/Hid/MacOS/MacOSOtpHidNativeOwner.cs",
+            "Transports/Hid/MacOS/MacOSHidInputBridge.cs",
+            "Transports/Hid/MacOS/MacOSHidReportApi.cs"
         })
         {
             Assert.Empty(LogInvocations(Path.Combine(root, path)));
@@ -48,7 +52,7 @@ public class MigrationDiagnosticsTests
             "Smart card connection initialized to reader {ReaderName}",
             "SCardEndTransaction returned {Error}",
             "SCardEndTransaction returned {Error}"
-        }, LogInvocations(Path.Combine(root, "Transports/SmartCard/UsbSmartCardConnection.cs")));
+        }, LogInvocations(Path.Combine(root, "Transports/SmartCard/PcscConnection.cs")));
     }
 
     [Fact]

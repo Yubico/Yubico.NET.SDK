@@ -15,10 +15,10 @@ public class AdapterContractRegistryTests
     {
         var rows = Load();
         // Independent acceptance totals, not values derived from the manifest under test:
-        // baseline 27 operations / 49 profile links + Linux 16 operations / 27 links.
-        // Linux: FIDO 4/10, OTP 4/9, direct input 4/4, direct feature 4/4 (operations/links).
-        Assert.Equal(43, rows.Length);
-        Assert.Equal(76, rows.Sum(row => row.Profiles.Length));
+        // Baseline 43/76 plus Windows: FIDO 4/11, OTP 4/9, direct input 4/4,
+        // direct feature 4/4 (operations/unique concrete test links).
+        Assert.Equal(59, rows.Length);
+        Assert.Equal(104, rows.Sum(row => row.Profiles.Length));
         Assert.Empty(AdapterContractRegistry.Validate(rows));
         Assert.Equal(4, rows.Count(row => row.Route == "macOS FIDO"));
         Assert.Equal(4, rows.Count(row => row.Route == "macOS OTP"));
@@ -30,6 +30,22 @@ public class AdapterContractRegistryTests
     }
 
     [Theory]
+    [InlineData("Windows HID FIDO", "open")]
+    [InlineData("Windows HID FIDO", "send")]
+    [InlineData("Windows HID FIDO", "receive")]
+    [InlineData("Windows HID FIDO", "dispose")]
+    [InlineData("Windows HID OTP", "open")]
+    [InlineData("Windows HID OTP", "send")]
+    [InlineData("Windows HID OTP", "receive")]
+    [InlineData("Windows HID OTP", "dispose")]
+    [InlineData("Windows direct input (sync)", "open")]
+    [InlineData("Windows direct input (sync)", "get")]
+    [InlineData("Windows direct input (sync)", "set")]
+    [InlineData("Windows direct input (sync)", "dispose")]
+    [InlineData("Windows direct feature (sync)", "open")]
+    [InlineData("Windows direct feature (sync)", "get")]
+    [InlineData("Windows direct feature (sync)", "set")]
+    [InlineData("Windows direct feature (sync)", "dispose")]
     [InlineData("Linux HID FIDO", "open")]
     [InlineData("Linux HID FIDO", "send")]
     [InlineData("Linux HID FIDO", "receive")]
@@ -46,7 +62,7 @@ public class AdapterContractRegistryTests
     [InlineData("Linux direct feature (sync)", "get")]
     [InlineData("Linux direct feature (sync)", "set")]
     [InlineData("Linux direct feature (sync)", "dispose")]
-    public void Removing_any_Linux_boundary_or_required_role_fails_closed(string route, string operation)
+    public void Removing_any_Linux_or_Windows_boundary_or_required_role_fails_closed(string route, string operation)
     {
         var rows = Load();
         var row = Assert.Single(rows, row => row.Route == route && row.Operation == operation);
@@ -113,7 +129,7 @@ public class AdapterContractRegistryTests
     public void Missing_duplicate_and_stale_rows_or_profiles_fail_closed()
     {
         // Keep the existing macOS multi-role mutation fixture independent of JSON row ordering.
-        var rows = Load().OrderBy(row => row.Route.StartsWith("Linux", StringComparison.Ordinal)).ToArray();
+        var rows = Load().OrderBy(row => row.Route != "macOS FIDO").ToArray();
         Assert.Contains($"missing required operation: {rows[0].Route}/{rows[0].Operation}", AdapterContractRegistry.Validate(rows.Skip(1)));
         Assert.Contains(AdapterContractRegistry.Validate([.. rows, rows[0]]), error => error.Contains("duplicate", StringComparison.Ordinal));
         Assert.Contains(AdapterContractRegistry.Validate(rows.Select((row, i) => i == 0 ? row with { Owner = "Missing.Owner" } : row)),
@@ -148,10 +164,31 @@ public class AdapterContractRegistryTests
             error => error.Contains("duplicate profile", StringComparison.Ordinal));
         Assert.Contains(AdapterContractRegistry.Validate(rows.Select((row, i) => i == 0 ? row with { Profiles = [rows[0].Profiles[0], rows[0].Profiles[1]] } : row)),
             error => error.Contains("missing role", StringComparison.Ordinal));
-        Assert.Contains(AdapterContractRegistry.Validate(rows.Select((row, i) => i == 0 ? row with { Route = "Windows HID FIDO" } : row)),
-            error => error.Contains("deferred", StringComparison.Ordinal));
+        Assert.Contains(AdapterContractRegistry.Validate(rows.Select((row, i) => i == 0 ? row with { Route = "Windows HID unknown" } : row)),
+            error => error.Contains("unexpected operation", StringComparison.Ordinal));
         Assert.Contains(AdapterContractRegistry.Validate(rows.Where(row => row.Route != "portable PCSC")),
             error => error == "missing required operation: portable PCSC/open");
+    }
+
+    [Fact]
+    public void Windows_inherited_profiles_require_concrete_containers_and_preserve_owner_and_uniqueness_gates()
+    {
+        var rows = Load();
+        var row = Assert.Single(rows, row => row.Route == "Windows direct input (sync)" && row.Operation == "dispose");
+        var profile = Assert.Single(row.Profiles);
+        Assert.Empty(AdapterContractRegistry.Validate(rows));
+        foreach (var method in new[]
+        {
+            profile.Method.Replace("WindowsFidoDirectFacadeTests", "WindowsRoutingDirectContract", StringComparison.Ordinal),
+            profile.Method + "Stale"
+        })
+            Assert.Contains($"stale profile: {method}", AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row
+                ? row with { Profiles = [profile with { Method = method }] } : candidate)));
+        var other = Assert.Single(rows, row => row.Route == "Windows direct input (sync)" && row.Operation == "set");
+        Assert.Contains($"duplicate profile: {other.Profiles[0].Method}", AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row
+            ? row with { Profiles = [profile with { Method = other.Profiles[0].Method }] } : candidate)));
+        Assert.Contains($"wrong owner: {row.Route}/{row.Operation}/{other.Owner}Stale", AdapterContractRegistry.Validate(rows.Select(candidate => candidate == row
+            ? row with { Owner = other.Owner + "Stale" } : candidate)));
     }
 
     [Fact]

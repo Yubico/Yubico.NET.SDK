@@ -273,7 +273,7 @@ public class MacOSHidFidoRouteLifetimeTests
     public void NativeCallbackStateContainsReportAndTerminalExceptions()
     {
         var faults = 0;
-        var state = new NativeHidInputBridge.CallbackState(
+        var state = new MacOSHidInputBridge.CallbackState(
             _ => throw new InvalidOperationException("report callback failed"),
             _ => { faults++; throw new InvalidOperationException("terminal callback failed"); });
         state.Deliver(new byte[64]);
@@ -314,7 +314,7 @@ public class MacOSHidFidoRouteLifetimeTests
         public void Dispose() => Released = true;
     }
 
-    private sealed class ControlledBridge : IHidInputBridge
+    private sealed class ControlledBridge : IMacOSHidInputBridge
     {
         public readonly TaskCompletionSource OpenEntered = new(TaskCreationOptions.RunContinuationsAsynchronously);
         public readonly TaskCompletionSource ReleaseOpen = new(TaskCreationOptions.RunContinuationsAsynchronously);

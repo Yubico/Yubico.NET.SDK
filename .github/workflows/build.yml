@@ -65,6 +65,9 @@ jobs:
       - name: Run unit tests
         run: dotnet toolchain.cs test
 
+      - name: Run portable Windows HID verification evidence guards
+        run: dotnet toolchain.cs windows-hid-verification-evidence-test
+
       - name: Run runtime resilience checks
         run: dotnet toolchain.cs -- resilience --fast
 
@@ -82,3 +85,50 @@ jobs:
         env:
           NUGET_API_KEY: ${{ secrets.GITHUB_TOKEN }}
         run: dotnet toolchain.cs publish-remote --nuget-feed-url https://nuget.pkg.github.com/Yubico/index.json
+
+      - name: Capture failure diagnostics
+        if: failure()
+        continue-on-error: true
+        shell: bash
+        run: |
+          diagnostics=artifacts/ci-failure
+          mkdir -p "$diagnostics/probes"
+          {
+            uname -srm
+            printf 'Available CPUs: '
+            nproc
+            printf 'Probe temp directory: %s\n' "${TMPDIR:-/tmp}"
+            if command -v dotnet >/dev/null 2>&1; then
+              dotnet --info || printf '.NET runtime context could not be read.\n'
+            else
+              printf '.NET is unavailable; SDK setup may not have completed.\n'
+            fi
+          } > "$diagnostics/runtime-context.txt" 2>&1
+          # Path.GetTempPath() uses TMPDIR on this Linux job, falling back to /tmp.
+          # Collect only the isolated helper's known output files, never the temp tree.
+          shopt -s nullglob
+          for log in "${TMPDIR:-/tmp}"/yubikit-pcsc-*-probe.log; do
+            if [[ -f "$log" && ! -L "$log" ]]; then
+              cp -- "$log" "$diagnostics/probes/"
+              if [[ "${log##*/}" == yubikit-pcsc-linux-fido-finalizer-probe.log ]]; then
+                printf '\nLinux FIDO finalizer child output (%s):\n' "$log"
+                cat -- "$log"
+              fi
+            fi
+          done
+
+      - name: Upload failure diagnostics
+        if: failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: build-failure-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          # Toolchain retention already bounds runs to the five newest directories.
+          path: |
+            artifacts/toolchain/runs/*/*.log
+            artifacts/toolchain/runs/*/result.json
+            artifacts/toolchain/runs/*/result.txt
+            artifacts/ci-failure/runtime-context.txt
+            artifacts/ci-failure/probes/yubikit-pcsc-*-probe.log
+          if-no-files-found: warn
+          retention-days: 7

@@ -47,7 +47,7 @@ public class MacOSHidConnectionLifetimeTests
         Assert.Contains(lifetime.CreatedDevice, lifetime.Released);
     }
 
-    private sealed class RecordingLifetime : IIOKitDeviceLifetime
+    private sealed class RecordingLifetime : IMacOSHidReportApi
     {
         private nint _nextHandle = 0x1000;
 

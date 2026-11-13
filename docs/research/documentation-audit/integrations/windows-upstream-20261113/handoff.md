@@ -1,9 +1,12 @@
 # Windows audit integration handoff
 
-The resolved successor preserves the audited runtime/documentation work and the received Windows HID
-ownership, adapter extraction and PC/SC rename delivery. Independent source and documentation reviews
-found no Critical or Important issue. The [software summary](validation/summary.md) records the verified
-Linux-hosted scope; final evidence review and publication approval are still required.
+The successor is published as normal two-parent merge
+[`d33f19f972c755c78b8d07edd3a47dd6e98ce4db`](https://github.com/Yubico/Yubico.NET.SDK/commit/d33f19f972c755c78b8d07edd3a47dd6e98ce4db)
+on `origin/yubikit-windows-audit-integration-20261113`, freshly verified by remote readback on 2026-11-13.
+It preserves the audited runtime/documentation work and received Windows HID ownership, adapter
+extraction and PC/SC rename delivery. Independent source/documentation reviews and final bounded
+publication rereview passed. The [software summary](validation/summary.md) retains the verified
+Linux-hosted scope; the [publication receipt](publication.md) records the successor identity.
 
 - Audited first parent: `d5d01ef99f1478e4d49911194c17667b2450d2fd`.
 - Incoming second parent: `e322712d609aaf03b9bd1cf2964a99326728866a`.
@@ -35,8 +38,14 @@ permission/expert-topology, loaded producer, listener/touch/removal and later-so
 No fresh physical/native campaign, credential work or broader deferred implementation was performed.
 PIV physical isolation/power/separate-process/touch/cancellation gaps and F9 preservation remain.
 
-Before committing, Sol verifies final staged scope, unchanged source and frozen/original-file identities,
-then obtains a fresh independent final evidence/publication review through the parent orchestrator.
-The merge message carries the three applicable incoming complexity justifications. After approval,
-Sol commits the two parents, pushes only the named successor and freshly reads back the exact remote
-OID. Publication receipts are additive; no commit claims its own future identity.
+Sol verified all 67 receipt entries against staged bytes and explicitly retained the 40 ignored logs
+identified by the predecessor review. The fresh bounded rereview closed that blocker without reruns.
+The final merge tree is `110339e9db4be1b287a9256b107cf4f11ab736df`: 135 product/incoming-tooling paths
+and 169 packet records, 304 change-path spellings. The merge message retains all three applicable
+incoming complexity justifications. Frozen 13,666-file and four-original-user-file identities and
+the original checkout were verified unchanged. The merge was pushed without force only to the named
+successor. This additive docs-only publication handoff changes no runtime source or acceptance result;
+the merge commit remains the runtime baseline. Publication receipts predict no future commit OID.
+
+This completes the authorized integration endpoint. The successor is ready to serve as the baseline
+for a separately scoped deferred-fix task; this integration does not implement those deferred findings.

@@ -1,6 +1,10 @@
 # Windows refactor intake and integration preparation
 
-**The resolved integration has passed its bounded software checks. Final evidence review and publication remain pending.**
+**The integration is complete and published on the successor branch.** The normal two-parent merge
+is `d33f19f972c755c78b8d07edd3a47dd6e98ce4db`, freshly verified on
+`origin/yubikit-windows-audit-integration-20261113` on 2026-11-13. The final independent bounded rereview
+closed the evidence-retention blocker with no Critical or Important issue. See the
+[publication receipt](publication.md) and [handoff](handoff.md). Deferred implementation remains separate.
 
 - Audited campaign parent: `d5d01ef99f1478e4d49911194c17667b2450d2fd`.
 - Incoming v2 parent: `e322712d609aaf03b9bd1cf2964a99326728866a` (`origin/yubikit` after fetch).

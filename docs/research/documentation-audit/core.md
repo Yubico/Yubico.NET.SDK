@@ -48,7 +48,7 @@ The user's separate Windows CCID/HID concurrency work remains unready/unreviewed
 **Stopping point reached: publish Core Pass 1, deliver the deferred findings, then stop.** No separate
 Pass-2 planning or implementation project is authorized.
 
-## Windows integration successor — verified software candidate
+## Published Windows integration successor
 
 The subsequent [Windows integration packet](integrations/windows-upstream-20261113/intake-review/report.md)
 receives upstream `e322712d609aaf03b9bd1cf2964a99326728866a` against audited parent
@@ -58,8 +58,11 @@ accepted the resolved product tree without Critical or Important findings. The
 [software results](integrations/windows-upstream-20261113/validation/summary.md) record a clean solution
 build, 4,620 ordinary unit executions across 13 projects with five existing skips, portable evidence
 guards, three additional hardware-free lifecycle cases, scoped formatting and ten docs-inclusive local
-packages. Compiler/analyzer warnings and test failures were zero. Final evidence/publication approval
-and remote identity are separate gates in the [handoff](integrations/windows-upstream-20261113/handoff.md).
+packages. Compiler/analyzer warnings and test failures were zero. Final independent bounded rereview
+passed and the successor was published as normal two-parent merge
+`d33f19f972c755c78b8d07edd3a47dd6e98ce4db`, verified by remote readback on 2026-11-13. The
+[handoff](integrations/windows-upstream-20261113/handoff.md) and
+[publication receipt](integrations/windows-upstream-20261113/publication.md) retain exact scope and identity.
 The original checkout stays untouched; only the successor integration branch is a publication target.
 
 The [successor finding map](integrations/windows-upstream-20261113/deferred-findings-successor.md)

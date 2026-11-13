@@ -1,0 +1,32 @@
+{
+  "actor": "GPT-6.1 Sol",
+  "captured_utc": "2026-11-13T11:41:08.454705+00:00",
+  "runtime_baseline": "d33f19f972c755c78b8d07edd3a47dd6e98ce4db",
+  "merge_tree": "110339e9db4be1b287a9256b107cf4f11ab736df",
+  "parents": [
+    "d5d01ef99f1478e4d49911194c17667b2450d2fd",
+    "e322712d609aaf03b9bd1cf2964a99326728866a"
+  ],
+  "initial_remote_readback": "d33f19f972c755c78b8d07edd3a47dd6e98ce4db\trefs/heads/yubikit-windows-audit-integration-20261113",
+  "source_fingerprint": "c05c4010789edd3424ec62dc143c68bb3fa3cdc36cacc2eef4069c27d6e82b02",
+  "followup_scope": "additive publication metadata only; no product code or software evidence change",
+  "followup_files": [
+    {
+      "path": "docs/research/documentation-audit/core.md",
+      "sha256": "d5fa57f7cabf1c544dab76fa1c5c26f084eab9815c4bb75b1c59e80afb2ade55"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/status.md",
+      "sha256": "26aa00a8f6a7b13c48ef70328eb9444748f26511a16f4a35d88698b4458fda16"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/handoff.md",
+      "sha256": "da8365a6e5140801ea9a2816f573183e5c6c84951557d9595d29dbb50803d699"
+    },
+    {
+      "path": "docs/research/documentation-audit/integrations/windows-upstream-20261113/publication.md",
+      "sha256": "a645be413d282dbbd83db887dfc2c6f532f5f4e88a4822e931af2c121fefc8e0"
+    }
+  ],
+  "self_reference": "This receipt excludes itself. The docs-only commit identity and final remote readback are verified after publication, not predicted here."
+}

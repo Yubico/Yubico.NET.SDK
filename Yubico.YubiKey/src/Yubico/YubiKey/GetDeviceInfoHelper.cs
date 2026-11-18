@@ -39,23 +39,30 @@ namespace Yubico.YubiKey
             int page = 0;
             var combinedPages = new Dictionary<int, ReadOnlyMemory<byte>>();
 
-            bool hasMoreData = true;
-            while (hasMoreData)
+            // The MoreData tag holds the number of remaining pages, not a boolean flag.
+            int remainingPages = 1;
+            while (remainingPages > 0)
             {
+                remainingPages--;
+
                 var response = connection.SendCommand(new TCommand { Page = (byte)page++ });
                 if (response.Status == ResponseStatus.Success)
                 {
                     var tlvData = response.GetData();
                     foreach (var tlv in tlvData)
                     {
-                        combinedPages.Add(tlv.Key, tlv.Value);
+                        if (tlv.Key == YubikeyDeviceManagementTags.MoreDataTag)
+                        {
+                            if (!tlv.Value.IsEmpty)
+                            {
+                                remainingPages = tlv.Value.Span[tlv.Value.Length - 1];
+                            }
+
+                            continue;
+                        }
+
+                        combinedPages[tlv.Key] = tlv.Value;
                     }
-
-                    const int moreDataTag = 0x10;
-
-                    hasMoreData = tlvData.TryGetValue(moreDataTag, out var hasMoreDataByte)
-                        && hasMoreDataByte.Span.Length == 1
-                        && hasMoreDataByte.Span[0] == 1;
                 }
                 else
                 {

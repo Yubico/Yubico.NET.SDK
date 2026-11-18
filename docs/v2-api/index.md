@@ -19,7 +19,7 @@ V2 targets .NET 10. Select a namespace to browse its public types and members.
 | Namespace | Purpose |
 | --- | --- |
 | [Yubico.YubiKit.Core](xref:Yubico.YubiKit.Core) | Device discovery and connections |
-| [Yubico.YubiKit.Fido2](xref:Yubico.YubiKit.Fido2) | FIDO2 operations |
+| [Yubico.YubiKit.Ctap2](xref:Yubico.YubiKit.Ctap2) | CTAP2 authenticator operations |
 | [Yubico.YubiKit.Management](xref:Yubico.YubiKit.Management) | Device configuration |
 | [Yubico.YubiKit.Oath](xref:Yubico.YubiKit.Oath) | OATH credentials |
 | [Yubico.YubiKit.OpenPgp](xref:Yubico.YubiKit.OpenPgp) | OpenPGP operations |

@@ -5,7 +5,7 @@
         {
           "files": [
             "src/Core/src/Yubico.YubiKit.Core.csproj",
-            "src/Fido2/src/Yubico.YubiKit.Fido2.csproj",
+            "src/Ctap2/src/Yubico.YubiKit.Ctap2.csproj",
             "src/Management/src/Yubico.YubiKit.Management.csproj",
             "src/Oath/src/Yubico.YubiKit.Oath.csproj",
             "src/OpenPgp/src/Yubico.YubiKit.OpenPgp.csproj",

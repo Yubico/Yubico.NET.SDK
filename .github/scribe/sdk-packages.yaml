@@ -1,0 +1,15 @@
+# Scribe job: NuGet author-sign the SDK packages and symbol packages built from signed assemblies.
+# Symbol packages are submitted as *.snupkg.nupkg (see .github/actions/scribe-sign), so these
+# patterns match both. Paths are relative to the directory holding the downloaded package artifacts.
+stub: yubico-net-sdk
+releaseType: public
+jobs:
+  - name: sdk-packages
+    platform: linux
+    steps:
+      - id: 1
+        action: windows
+        description: Yubico .NET SDK
+        files:
+          - Yubico.Core/src/bin/Release/Yubico.Core.*.nupkg
+          - Yubico.YubiKey/src/bin/Release/Yubico.YubiKey.*.nupkg

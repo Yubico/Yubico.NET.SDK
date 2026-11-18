@@ -1,0 +1,15 @@
+# Scribe job: Authenticode-sign the Windows NativeShims libraries before packing.
+# Paths are relative to the directory holding the downloaded win-* build artifacts.
+stub: yubico-net-sdk
+releaseType: public
+jobs:
+  - name: nativeshims-assemblies
+    platform: linux
+    steps:
+      - id: 1
+        action: windows
+        description: Yubico.NativeShims
+        files:
+          - win-x64/Yubico.NativeShims.dll
+          - win-x86/Yubico.NativeShims.dll
+          - win-arm64/Yubico.NativeShims.dll

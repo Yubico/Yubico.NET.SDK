@@ -1,31 +1,50 @@
 # DropRelease Workflow
 
-End-to-end Yubico .NET SDK release wizard. Drives 7 phases with explicit gates. the operator answers AskUserQuestion prompts; everything else is automated.
+End-to-end Yubico .NET SDK release wizard. The operator answers AskUserQuestion prompts, approves the Scribe signing jobs and the GitHub `nuget-org` deployment; everything else runs in GitHub Actions. Nothing is downloaded or signed locally.
+
+## How a release runs in CI
+
+`build-nativeshims.yml` and `build.yml` have a release mode (`-f release=true -f version=<v>`). A release run:
+
+1. Fails fast in a preflight if the branch is not allowed, the tag exists or the version is already on NuGet.org (SDK: also if `whats-new.md` has no `### <version>` section).
+2. Builds and tests as usual.
+3. **Scribe round 1** — Authenticode-signs the Windows binaries (NativeShims DLLs, or the Core and YubiKey assemblies) before packing.
+4. Packs from the signed binaries.
+5. **Scribe round 2** — NuGet-signs the packages (and SDK symbol packages).
+6. Verifies every signature on Windows against the pinned certificate and attests the signed packages.
+7. **Waits for approval of the `nuget-org` environment**, then tags the built commit, publishes to NuGet.org (Trusted Publishing), waits for indexing and creates the GitHub release with the signed packages attached. An SDK release also deploys the docs to prod.
+
+Each Scribe round needs two approvals in Scribe (approvers are notified on Slack) within about 5h45m, or the run fails and must be re-run (a new submission). Only one release runs at a time.
+
+| Release | Branch | Tag | GitHub release |
+|---|---|---|---|
+| NativeShims | `develop` or `main` | `nativeshims-<v>` | "Yubico.NativeShims <v>" |
+| SDK (Core + YubiKey) | `main` | `<v>` | "<v>" |
+
+NativeShims is released from `develop` when `develop` holds Core/YubiKey changes that are not ready for `main`. When a release needs both, NativeShims is released first; the SDK build on `main` then resolves it from NuGet.org.
 
 ## State file
 
-Location: `~/Releases/<version>/.state.json`. Created in phase 1, updated at every phase boundary, read by `/Release resume`.
+Location: `~/Releases/<version>/.state.json` (for a NativeShims-only release, `~/Releases/nativeshims-<nsVersion>/`). Created in phase 1, updated at every phase boundary, read by `/Release resume`.
 
 ```json
 {
+  "scope": "sdk",
   "version": "1.16.1",
   "previousTag": "1.16.0",
   "releaseDate": "2026-04-29",
-  "nativeShimsRebuild": false,
   "nativeShimsVersion": null,
+  "nativeShimsRef": null,
   "nativeShimsRunId": null,
-  "nativeShimsPublished": false,
-  "nativeShimsBuildRef": null,
   "buildRunId": null,
-  "tagPushed": false,
-  "docsImageTag": null,
   "currentPhase": 4,
   "complete": false,
   "releasePrNumber": null,
-  "notesFile": null,
   "categorizedPRs": { "features": [], "bugfixes": [], "docs": [], "deps": [], "security": [], "misc": [] }
 }
 ```
+
+`scope` is `sdk`, `nativeshims` or `both`.
 
 **Date storage convention**: `releaseDate` is always stored as ISO `YYYY-MM-DD`. The Phase 1 prompt collects it in human form (`Month Dth, YYYY`), but the skill normalizes to ISO before writing state. Display formatting is reapplied at write time for `whats-new.md` (long form: `April 29th, 2026`) and the Slack draft (long form). Always derive the display string from the ISO field — never store both.
 
@@ -33,7 +52,25 @@ Location: `~/Releases/<version>/.state.json`. Created in phase 1, updated at eve
 
 The state file is the single source of truth for resume. Update it before any operation that could fail.
 
-## Phase 1 — Pre-flight (cross-platform)
+## Watching a release run
+
+Used by phases 2 and 4. After `gh workflow run`, capture the run ID (`gh run list --workflow=<file> --limit 1 --json databaseId -q '.[0].databaseId'`), store it in state, and poll in the background every 120s:
+
+```bash
+while true; do
+  status=$(gh run view <runId> --json status,conclusion -q '[.status,.conclusion] | join(",")')
+  if [[ "$status" == completed,* ]]; then echo "$status"; break; fi
+  sleep 120
+done
+```
+
+While it runs, tell the operator when action is needed — check `gh run view <runId> --json jobs` for:
+- a running `Sign …` job: "Scribe signing job submitted — approvals needed in Scribe (two approvers, Slack notifies them)." Print the run URL; it is the reference shown in Scribe.
+- `gh api repos/Yubico/Yubico.NET.SDK/actions/runs/<runId>/pending_deployments` non-empty: "Signed packages verified. Approve the `nuget-org` deployment to publish: <run URL>."
+
+On `failure`: STOP and print `gh run view <runId> --log-failed`. A failed publish job can be re-run with `gh run rerun <runId> --failed`; tagging, pushing and the GitHub release skip what already exists. Never start a new release run for a version that is already partly published.
+
+## Phase 1 — Pre-flight
 
 **Prerequisites**:
 - `gh auth status` — must be authenticated
@@ -41,57 +78,30 @@ The state file is the single source of truth for resume. Update it before any op
 
 **Steps**:
 1. `git fetch --tags origin`
-2. `git tag --sort=-v:refname | head -5` → show recent tags, parse latest as `previousTag`
-3. `gh pr list --base develop --state open --json number,title,author --limit 20` → display, then `AskUserQuestion`: "Any of these need to merge before release?" Options: "All clear, proceed" / "Wait — I'll merge manually" / "Specific PRs blocking"
-4. `AskUserQuestion`: "Confirm release version" — default option is `+1 patch` of `previousTag` (e.g., `1.16.0` → `1.16.1`); also offer `+1 minor`, `+1 major`, custom
-5. `AskUserQuestion`: "Release date" — default today (in `Month Dth, YYYY` format matching whats-new.md style)
-6. **Hardware test reminder** — print: "Before continuing, confirm you've tested PIV + SCP on real YubiKey hardware. The skill cannot do this for you." Gate with `AskUserQuestion`: "Hardware tests pass?" / "Skip (not recommended)"
-7. **Code-signing YubiKey safety gate** — `AskUserQuestion`: "⚠️ IMPORTANT: Your code-signing YubiKey must be UNPLUGGED from this machine during phases 1–4. Integration tests that enumerate YubiKeys can run PIV/PGP resets against any connected key. Only plug it back in when Phase 5 (sign+publish) explicitly asks for it. Is the code-signing YubiKey unplugged?" Options: "Yes, it's unplugged" / "Let me unplug it now". If the operator needs to unplug, wait for confirmation before proceeding.
-8. Create `~/Releases/<version>/` and write initial `.state.json`
+2. `git tag --sort=-v:refname | head -5` → show recent tags, parse the latest SDK tag (`X.Y.Z`) as `previousTag`
+3. `AskUserQuestion`: "What are we releasing?" Options: "SDK (Yubico.Core + Yubico.YubiKey)" / "NativeShims only" / "Both (NativeShims first)". Hint with `git diff <previousTag>..origin/develop --stat -- Yubico.NativeShims/` whether NativeShims changed. Store as `scope`.
+4. For `sdk`/`both`: `gh pr list --base develop --state open --json number,title,author --limit 20` → display, then `AskUserQuestion`: "Any of these need to merge before release?" Options: "All clear, proceed" / "Wait — I'll merge manually" / "Specific PRs blocking"
+5. For `sdk`/`both`: `AskUserQuestion`: "Confirm release version" — default `+1 patch` of `previousTag`; also offer `+1 minor`, `+1 major`, custom
+6. For `nativeshims`/`both`: `AskUserQuestion`: "NativeShims version" — default `+1 patch` of the latest `nativeshims-*` tag (or the latest version on NuGet.org)
+7. For `sdk`/`both`: `AskUserQuestion`: "Release date" — default today (in `Month Dth, YYYY` format matching whats-new.md style)
+8. **Hardware test reminder** — print: "Before continuing, confirm you've tested PIV + SCP on real YubiKey hardware. The skill cannot do this for you." Gate with `AskUserQuestion`: "Hardware tests pass?" / "Skip (not recommended)". The skill must NEVER run integration tests itself.
+9. Create the release directory and write initial `.state.json`
 
-## Phase 2 — NativeShims gate (cross-platform, conditional)
+## Phase 2 — NativeShims release (scope `nativeshims` or `both`)
 
-**Detection**:
-```bash
-git diff <previousTag>..origin/develop -- Yubico.NativeShims/ --stat
-```
+1. `AskUserQuestion`: "Release NativeShims from which branch?" Options:
+   - "develop (release now)" — required when develop has Core/YubiKey changes that must not reach main yet
+   - "main (after the release PR merges)" — only for scope `both`; then continue with phase 3 and come back here from phase 4
+2. Dispatch: `gh workflow run build-nativeshims.yml --ref <branch> -f release=true -f version=<nsVersion>`
+3. Watch the run (see above). Expect two Scribe rounds and the `nuget-org` approval.
+4. **Verify**: `curl -sfI https://api.nuget.org/v3-flatcontainer/yubico.nativeshims/<nsVersion>/yubico.nativeshims.<nsVersion>.nupkg` returns 200, `gh release view nativeshims-<nsVersion>` succeeds.
+5. Scope `nativeshims`: go to phase 7 (Slack draft only; no merge-back unless released from main). Scope `both`: continue with phase 3 (or phase 4 if NativeShims waits for main).
 
-**If output is empty** → set `nativeShimsRebuild: false` in state, print "✓ No NativeShims changes since <previousTag>, skipping rebuild", continue to phase 3.
-
-**If output non-empty** →
-1. Print the file list
-2. `AskUserQuestion`: "NativeShims changed in N files. Rebuild and publish new NativeShims package?" Options: "Yes — rebuild and bump" / "No — current published NativeShims is sufficient" / "Show me the diff first" (in which case loop back after `git diff`)
-3. If yes:
-   - `AskUserQuestion`: "NativeShims version" — fetch latest from NuGet (`gh api /repos/Yubico/Yubico.NET.SDK/contents/Yubico.NativeShims/version.txt` or query NuGet API), default +1 patch
-   - `AskUserQuestion`: "Build NativeShims from which branch?" Options:
-     - "develop (build now)" — dispatch immediately; NativeShims must be signed+published before `build.yml`
-     - "main (build after PR merge)" — defer dispatch to Phase 4; build from main after the release PR merges
-   - Store choice in `state.nativeShimsBuildRef` (`"develop"` or `"main"`)
-   - **If develop (immediate)**:
-     - `gh workflow run build-nativeshims.yml --ref develop -f version=<nsVersion> -f push-to-dev=false`
-     - Capture run ID: `gh run list --workflow=build-nativeshims.yml --limit 1 --json databaseId -q '.[0].databaseId'`
-     - Update state: `nativeShimsRebuild: true`, `nativeShimsVersion`, `nativeShimsRunId`
-     - **Poll in background** — NativeShims builds are cross-platform and typically take 15–25 minutes. Start a background Bash task:
-       ```bash
-       while true; do
-         status=$(gh run view <runId> --json status,conclusion -q '[.status,.conclusion] | join(",")')
-         if [[ "$status" == completed,* ]]; then echo "$status"; break; fi
-         sleep 120
-       done
-       ```
-       Print: "NativeShims build dispatched (run ID: `<id>`). Polling in background every 120s — you can continue working."
-     - When background task completes, check conclusion. On `failure`: STOP, print `gh run view <runId> --log-failed`. On `success`: update status board.
-     - **HARD GATE**: NativeShims MUST be signed (Phase 5 wizard) AND published to NuGet.org BEFORE Phase 4 dispatches `build.yml`. The skill enforces this by deferring `build.yml` dispatch in Phase 4 until Phase 5's NativeShims half completes.
-   - **If main (deferred)**:
-     - Skip dispatch. Print: "NativeShims build deferred to main. Will dispatch `build-nativeshims.yml --ref main` after PR merges in Phase 4."
-     - Update state: `nativeShimsRebuild: true`, `nativeShimsVersion`, `nativeShimsRunId: null`
-     - Proceed directly to Phase 3.
-
-## Phase 3 — Release branch (cross-platform)
+## Phase 3 — Release branch (scope `sdk` or `both`)
 
 1. `git checkout develop && git pull origin develop`
 2. `git checkout -b release/<version>` (per gitflow + project CLAUDE.md)
-3. **Lockfile note**: No manual lockfile repin commit is needed on the release branch. The `build-artifacts` job in `build.yml` runs `dotnet restore --force-evaluate` on main, which auto-resolves to the latest stable NativeShims from nuget.org. The `enforce-branch-policy` job issues a warning (not an error) if a prerelease pin is detected, since the build self-corrects.
+3. **Lockfile note**: No manual lockfile repin commit is needed on the release branch. The `build-artifacts` job in `build.yml` runs `dotnet restore --force-evaluate` on main, which auto-resolves to the latest stable NativeShims from nuget.org. The `enforce-branch-policy` job issues a warning (not an error) if a prerelease pin is detected, since the build self-corrects. If this release needs a new NativeShims, it must already be on NuGet.org (phase 2) before the SDK release run.
 4. **Generate release notes draft**:
    - Get last release date from the annotated tag (NOT `gh release view --json publishedAt`, which returns GitHub release creation date, not the actual release cut):
      ```bash
@@ -135,213 +145,37 @@ git diff <previousTag>..origin/develop -- Yubico.NativeShims/ --stat
      --title "Release <version>" \
      --body-file "$notes_file"
    ```
-   Capture the returned PR number into `state.releasePrNumber`. Keep the temp file path in state too so phase 6 can reuse it.
+   Capture the returned PR number into `state.releasePrNumber`. CI builds the GitHub release notes from the same `whats-new.md` section, so the section heading must be exactly `### <version>`.
 10. Print PR URL, instruct the operator to get reviewers
 
-## Phase 4 — Merge + CI dispatch (cross-platform)
+## Phase 4 — Merge + SDK release (scope `sdk` or `both`)
 
-1. **Wait for merge** — poll `gh pr view <prNumber> --json state,mergedAt` every 60s until `state=MERGED`. Print poll updates. If the operator wants to abort polling and resume later, the state file already has the PR number — `/Release resume <version>` continues from here.
+1. **Wait for merge** — poll `gh pr view <prNumber> --json state,mergedAt` every 60s until `state=MERGED`. If the operator wants to stop and resume later, the state file already has the PR number.
 2. After merge: `git checkout main && git pull origin main`
-3. **NativeShims ordering gate** — two paths depending on `state.nativeShimsBuildRef`:
-   - **If `nativeShimsBuildRef == "main"` (deferred build)**:
-     - Dispatch now: `gh workflow run build-nativeshims.yml --ref main -f version=<nsVersion> -f push-to-dev=false`
-     - Capture run ID, update state
-     - **Poll in background** (120s interval, ~15–25 min build):
-       ```bash
-       while true; do
-         status=$(gh run view <runId> --json status,conclusion -q '[.status,.conclusion] | join(",")')
-         if [[ "$status" == completed,* ]]; then echo "$status"; break; fi
-         sleep 120
-       done
-       ```
-      - On failure: STOP. On success: jump to Phase 5 NativeShims half; sign+publish, verify NuGet 200, then return here for step 4.
-   - **If `nativeShimsBuildRef == "develop"` (already built in Phase 2)**:
-     - Check if NativeShims signed+published: poll `https://www.nuget.org/packages/Yubico.NativeShims/<nsVersion>` — must return 200
-     - If NOT published: jump to Phase 5 NativeShims half, then return here
-   - **If `nativeShimsRebuild == false`**: skip, proceed to step 4.
-4. Dispatch main build: `gh workflow run build.yml --ref main -f version=<version> -f push-to-docs=true` — capture run ID to state as `buildRunId`. The `-f push-to-docs=true` triggers the docs upload job which produces the Docker image tag needed for Phase 6.
-5. **Poll in background** (~7–10 min build). Same pattern as NativeShims:
-   ```bash
-   while true; do
-     status=$(gh run view <buildRunId> --json status,conclusion -q '[.status,.conclusion] | join(",")')
-     if [[ "$status" == completed,* ]]; then echo "$status"; break; fi
-     sleep 60
-   done
-   ```
-   Print: "Main build dispatched (run ID: `<id>`). Polling in background every 60s."
-   On failure: STOP, print `gh run view <buildRunId> --log-failed`.
-6. On success:
-   - **Extract docs image tag** from the build run. The `deploy-docs.yml` `sed` command appends the tag after `/yesdk/yesdk-docserver:`, so `state.docsImageTag` must store ONLY the short tag (the commit SHA), NOT the full image URI. Derive from the merge commit on main:
-     ```bash
-     docsImageTag=$(git rev-parse HEAD)
-     ```
-     Store in `state.docsImageTag`.
-   - **Tag the release**:
-     - **Branch sanity check**: `git branch --show-current` must equal `main`; `git log -1 --oneline` should be the merge commit
-     - `git tag -a <version> -m "Release <version>"`
-     - `git push origin <version>`
-     - Update state: `tagPushed: true`
+3. If scope is `both` and NativeShims waits for main: run phase 2 now from `main`, and continue only once NativeShims is on NuGet.org.
+4. Dispatch: `gh workflow run build.yml --ref main -f release=true -f version=<version>` — store `buildRunId`.
+5. Watch the run (see above). Expect two Scribe rounds and the `nuget-org` approval.
 
-## Phase 5 — Sign + publish (cross-platform)
+## Phase 5 — Verify the release
 
-Follow `build/release-sign/README.md`. Hard gates before signing:
+1. **Tag**: `git ls-remote --tags origin <version>` returns the merge commit on main.
+2. **NuGet.org**: `https://api.nuget.org/v3-flatcontainer/yubico.core/<version>/yubico.core.<version>.nupkg` and the same for `yubico.yubikey` return 200.
+3. **GitHub release**: `gh release view <version> --json isDraft,assets -q '[.isDraft, [.assets[].name]]'` — published, with both `.nupkg` and both `.snupkg`.
+4. **Docs**: the run's `Deploy docs` job succeeded.
 
-- `gh auth status` succeeds.
-- `nuget-sign`, Go, and `dotnet` are available. `nuget-sign capabilities` must
-  report schema 1 with `privateStdin` and `batchSign` both true; see the pinned
-  installation revision in `build/release-sign/README.md`.
-- `RELEASE_SIGN_KEY`, `RELEASE_SIGN_CERTIFICATE`, `RELEASE_SIGN_ROOT`, and
-  `RELEASE_SIGN_TIMESTAMP_ROOT` identify the production key and certificate files.
-- The code-signing YubiKey stays disconnected until the signing commands below;
-  build the wrapper and download artifacts first.
-- `NUGET_API_KEY` is set for this session and is never printed or persisted.
+## Phase 6 — Merge main back to develop
 
-Build the wrapper once:
-
-```sh
-go -C build/release-sign build -o "$HOME/Releases/<version>/release-sign" .
+```bash
+git checkout develop && git pull
+git merge main --no-ff -m "Merge main back into develop after <version> release"
+git push origin develop
 ```
 
-Download the exact artifact ZIPs for each recorded workflow run and obtain that
-run's `headSha` with `gh run view <run-id> --json headSha --jq .headSha`.
-Connect the code-signing YubiKey only after these preparation steps.
+Assert `build/Versions.props` still has `<CommonVersion>0.0.0-dev</CommonVersion>` — print a warning if drifted.
 
-The Go signer prompts for the PIV PIN once per invocation after checking
-attestations and package identities; it sends the PIN through private stdin pipes
-only to signing children. Packages are signed together after assembly signing
-and repacking, and the PIN buffer is cleared before verification. Signing children
-do not inherit `NUGET_API_KEY` or GitHub tokens. Invoke the signer directly when
-the agent has an attached terminal.
-If the agent shell has no terminal input on macOS, invoke each command below as:
+## Phase 7 — Closing
 
-```sh
-zsh build/release-sign/launch-macos.zsh \
-  "$HOME/Releases/<version>/<component>/signing.status" \
-  "$HOME/Releases/<version>/release-sign" run <the same flags as below>
-```
-
-Ensure the component working directory exists and the status file does not
-before launching. The helper opens Terminal; the operator enters the PIN there,
-never in chat or an argument. Poll for `signing.status`, require its exit code
-to be `0`, then inspect `signed/report.json`. If the status file is missing or
-nonzero, stop instead of publishing. On Windows or Linux without an attached
-agent terminal, have the operator run the exact signer command in a local
-interactive terminal and verify its report before continuing. If NativeShims
-was not rebuilt, only the main Core invocation is needed: one PIN prompt for
-both managed packages and their symbols. When NativeShims is rebuilt, its
-earlier signing run has a separate prompt; never retain the PIN across the
-intervening build.
-
-For NativeShims, when rebuilt:
-
-```sh
-"$HOME/Releases/<version>/release-sign" run \
-  --component nativeshims \
-  --working-directory "$HOME/Releases/<version>/nativeshims" \
-  --artifact NativeShims-Package.zip \
-  --manifest build/release-sign/manifests/nativeshims.json \
-  --source-digest <native-workflow-headSha> \
-  --key "$RELEASE_SIGN_KEY" \
-  --certificate "$RELEASE_SIGN_CERTIFICATE" \
-  --root "$RELEASE_SIGN_ROOT" \
-  --timestamp-root "$RELEASE_SIGN_TIMESTAMP_ROOT"
-```
-
-Publish its signed `.nupkg`, wait for NuGet indexing, set
-`state.nativeShimsPublished: true`, then return to Phase 4 step 4 if the main
-build has not run yet.
-
-For the main packages:
-
-```sh
-"$HOME/Releases/<version>/release-sign" run \
-  --component core \
-  --working-directory "$HOME/Releases/<version>/core" \
-  --artifact Nuget-Packages.zip \
-  --artifact Symbols-Packages.zip \
-  --manifest build/release-sign/manifests/core.json \
-  --source-digest <main-workflow-headSha> \
-  --key "$RELEASE_SIGN_KEY" \
-  --certificate "$RELEASE_SIGN_CERTIFICATE" \
-  --root "$RELEASE_SIGN_ROOT" \
-  --timestamp-root "$RELEASE_SIGN_TIMESTAMP_ROOT"
-```
-
-Require `signed/report.json` and the expected package count before publication.
-Publish `.nupkg` files first with `dotnet nuget push`, stop on any failure, wait
-until both ordinary packages are indexed, and only then publish `.snupkg` files.
-Never use `--skip-duplicate` during the normal release path. Verify the live
-NuGet pages before marking phase 5 complete.
-
-## Phase 6 — GitHub release (cross-platform; can run on Windows continuation or back on dev machine)
-
-1. **Prepare release body** — extract the new `### <version>` section from `whats-new.md` to a temp file. Reuse the temp file from Phase 3 step 9 if `state.notesFile` exists; otherwise regenerate. Then transform headers from plain text (`Bug Fixes:`) to bold markdown (`**Bug Fixes**:`) for GitHub rendering, and append the full changelog link:
-
-   **bash / zsh**:
-   ```bash
-   notes_file="${state_notes_file:-$(mktemp -t release-notes-<version>.XXXXXX.md)}"
-   if [ ! -s "$notes_file" ]; then
-     awk -v v="### <version>" '
-       $0 == v {flag=1; print; next}
-       flag && /^### / {exit}
-       flag {print}
-     ' docs/users-manual/getting-started/whats-new.md > "$notes_file"
-   fi
-   # Transform plain headers to bold and append changelog (use sed -i'' for macOS compat)
-   sed -i'' -e 's/^\([A-Z][A-Za-z /]*\):$/**\1**:/' "$notes_file"
-   echo "" >> "$notes_file"
-   echo "**Full Changelog**: https://github.com/Yubico/Yubico.NET.SDK/compare/<previousTag>...<version>" >> "$notes_file"
-   ```
-
-   **PowerShell** (when Phase 6 runs on Windows after sign+publish):
-   ```powershell
-   $notesFile = if ($state.notesFile -and (Test-Path $state.notesFile)) { $state.notesFile } else { New-TemporaryFile }
-   if ((Get-Item $notesFile).Length -eq 0) {
-     $whatsNew = Get-Content docs/users-manual/getting-started/whats-new.md
-     $start = ($whatsNew | Select-String -Pattern "^### <version>$" | Select-Object -First 1).LineNumber
-     $end = ($whatsNew[$start..($whatsNew.Length - 1)] | Select-String -Pattern "^### " | Select-Object -First 1).LineNumber
-     $section = if ($end) { $whatsNew[($start - 1)..($start + $end - 2)] } else { $whatsNew[($start - 1)..($whatsNew.Length - 1)] }
-     $section | Set-Content $notesFile
-   }
-   # Transform plain headers to bold and append changelog
-   (Get-Content $notesFile) -replace '^([A-Z][A-Za-z /]*):$', '**$1**:' | Set-Content $notesFile
-   Add-Content $notesFile "`n**Full Changelog**: https://github.com/Yubico/Yubico.NET.SDK/compare/<previousTag>...<version>"
-   ```
-
-   Do NOT use `--generate-notes` — it adds redundant auto-generated content on top of the curated notes.
-
-2. **Create draft release WITH signed assets in one command** — assets attached to a draft are immutable after publish, so they MUST be attached before the draft is finalized:
-   ```bash
-   gh release create <version> \
-     --draft \
-     --title "<version>" \
-     --notes-file "$notes_file" \
-     ~/Releases/<version>/nativeshims/signed/packages/*.nupkg \
-     ~/Releases/<version>/core/signed/packages/*.nupkg \
-     ~/Releases/<version>/core/signed/packages/*.snupkg
-   ```
-   (Include NativeShims nupkg only if `nativeShimsRebuild: true`.)
-
-   **Verify draft**: `gh release view <version> --json assets -q '.assets[].name'` — assert all expected files are listed.
-
-3. `AskUserQuestion`: "Draft release ready at <URL>. Publish now?" Options: "Publish" / "Leave as draft" / "Open in browser first"
-
-4. If "Publish":
-   - `gh release edit <version> --draft=false`
-   - **Verify published**: `gh release view <version> --json isDraft -q .isDraft` must return `false`
-
-5. **Trigger docs deploy**: `gh workflow run deploy-docs.yml --ref main -f gitops-branch=prod -f image-tag=<docsImageTag>` — uses the image tag stored in `state.docsImageTag` from Phase 4 step 6. The `push-to-docs=true` flag in Phase 4's build.yml dispatch triggers the Upload docs job which builds and pushes the Docker image.
-
-## Phase 7 — Closing (cross-platform)
-
-1. **Merge main back to develop** (gitflow):
-   ```bash
-   git checkout develop && git pull
-   git merge main --no-ff -m "Merge main back into develop after <version> release"
-   git push origin develop
-   ```
-2. **Assert** `build/Versions.props:43` is still `<CommonVersion>0.0.0-dev</CommonVersion>` — print warning if drifted (we never edit it; if drifted, something else changed it)
-3. **Generate Slack #ask-tla announcement** — print as fenced code block ready to copy. Use cached `categorizedPRs` from state. Exact format:
+1. **Generate Slack #ask-tla announcement** — print as fenced code block ready to copy. Use cached `categorizedPRs` from state. Exact format:
 
 ```
 NET SDK <version> Release Announcement! 🎉🚀
@@ -371,16 +205,20 @@ Category emojis (Features → Security/CI match prior 1.15.1 announcement exactl
 - Security / CI: 🔒🤖
 - Miscellaneous: 🧰📌
 
-4. **Print closing checklist** (manual — skill cannot automate):
+For a NativeShims-only release, post a short note instead: version, `https://www.nuget.org/packages/Yubico.NativeShims/<nsVersion>` and the GitHub release link.
+
+2. **Print closing checklist** (manual — skill cannot automate):
    - [ ] Post drafted message in Slack #ask-tla
    - [ ] Post on GitHub Discussions (link to release)
    - [ ] Close release in Jira
-5. Mark `~/Releases/<version>/.state.json` as `currentPhase: 7, complete: true`
+3. Mark `.state.json` as `currentPhase: 7, complete: true`
 
 ## Failure modes & recovery
 
-- **CI build fails** → STOP, do not tag, do not proceed. Re-dispatch after fix.
-- **Sign fails** → leave artifacts in staging; do not delete. Inspect, retry. State preserved.
-- **NuGet publish 409 (already exists)** → version conflict; abort entire release, never overwrite published packages.
-- **Tag push fails** (e.g., already exists) → STOP, investigate. Never force-push tags.
-- **Resume on different machine** → `/Release resume <version>` reads `~/Releases/<version>/.state.json` and skips completed phases. Phase boundaries are the resume points.
+- **Preflight fails** → fix the cause (version, branch, existing tag) and dispatch again.
+- **Build or tests fail** → nothing was signed or tagged. Fix, merge, dispatch again.
+- **Scribe round times out or is rejected** → re-run the workflow run (`gh run rerun <runId> --failed`); it is a new Scribe submission needing new approvals.
+- **Signature verification fails** → STOP. Do not approve `nuget-org`. Investigate the signed artifacts in the run.
+- **Publish job fails part-way** → `gh run rerun <runId> --failed`. The tag, NuGet.org packages and GitHub release are only created if missing.
+- **NuGet.org rejects the package (certificate)** → the signing certificate must be registered on the NuGet.org package owner account (rotation due before 2027-02-26).
+- **Resume on different machine** → `/Release resume <version>` reads the state file and skips completed phases. Phase boundaries are the resume points.

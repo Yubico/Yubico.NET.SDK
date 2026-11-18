@@ -1,0 +1,157 @@
+# Copyright 2026 Yubico AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Sign with Scribe
+description: >
+  Submits files to Yubico's Scribe signing service, waits for the job to be approved and signed,
+  and replaces the files in place with their signed versions. Linux runners only (Docker).
+  The repository must be checked out at the workspace root.
+
+inputs:
+  config:
+    description: Scribe job configuration, relative to the workspace.
+    required: true
+  directory:
+    description: Directory, relative to the workspace, that the configuration's file paths are relative to.
+    required: true
+  round:
+    description: Short name for this submission, unique within the workflow run (part of the Scribe reference).
+    required: true
+  expected-count:
+    description: Number of files the configuration must match.
+    required: true
+  scribe-sa:
+    description: Scribe job submission service account credentials (JSON).
+    required: true
+  github-token:
+    description: Token used to pull the scribe-ci image from GitHub Container Registry.
+    required: true
+  bucket:
+    description: Scribe bucket for unsigned public artifacts.
+    default: scribe-u-pub-yubico-net-sdk-kd52g9
+  image:
+    description: scribe-ci container image.
+    # TODO: pin by digest once the digest can be read (requires read:packages on ghcr.io/yubico/scribe-ci).
+    default: ghcr.io/yubico/scribe-ci:v1
+  timeout:
+    description: How long to wait for approvals and signing. GitHub-hosted jobs are limited to 6 hours.
+    default: 5h45m
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare files
+      shell: bash
+      env:
+        DIRECTORY: ${{ inputs.directory }}
+      run: |
+        set -euo pipefail
+        rm -rf scribe-download
+        # Scribe picks the signature type by file extension and does not know .snupkg. A symbol
+        # package is a NuGet package, so submit it as .snupkg.nupkg and rename it back afterwards.
+        # Remove once Yubico/yes-scribe#771 is deployed.
+        find "$DIRECTORY" -type f -name '*.snupkg' -exec mv '{}' '{}.nupkg' \;
+
+    - name: Submit to Scribe and wait for the signed files
+      shell: bash
+      env:
+        CONFIG: ${{ inputs.config }}
+        DIRECTORY: ${{ inputs.directory }}
+        BUCKET: ${{ inputs.bucket }}
+        IMAGE: ${{ inputs.image }}
+        TIMEOUT: ${{ inputs.timeout }}
+        REFERENCE: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}#${{ inputs.round }}
+        SCRIBE_SA: ${{ inputs.scribe-sa }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set -euo pipefail
+        credentials="$RUNNER_TEMP/scribe-sa.json"
+        trap 'rm -f "$credentials"; docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+        (umask 077 && printf '%s' "$SCRIBE_SA" > "$credentials")
+        printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+
+        echo "Scribe reference: $REFERENCE"
+        echo "Approve the job in Scribe; this step waits up to $TIMEOUT."
+        # CI=false: scribe-ci only derives a reference itself for push and pull_request events,
+        # so the reference is passed explicitly. Each submission needs a unique reference because
+        # --synchronous matches notifications by reference.
+        docker run --rm \
+          --user "$(id -u):$(id -g)" \
+          --volume "$GITHUB_WORKSPACE:/scribe" \
+          --volume "$credentials:/credentials/scribe-sa.json:ro" \
+          --env GOOGLE_APPLICATION_CREDENTIALS=/credentials/scribe-sa.json \
+          --env CI=false \
+          --env HOME=/tmp \
+          "$IMAGE" \
+          --bucket "$BUCKET" \
+          --config "/scribe/$CONFIG" \
+          submit "$DIRECTORY" \
+          --reference "$REFERENCE" \
+          --synchronous \
+          --download-artifacts \
+          --timeout "$TIMEOUT"
+
+    - name: Replace files with their signed versions
+      shell: bash
+      env:
+        DIRECTORY: ${{ inputs.directory }}
+        EXPECTED_COUNT: ${{ inputs.expected-count }}
+      run: |
+        set -euo pipefail
+        python3 - <<'PY'
+        import glob, os, posixpath, sys, zipfile
+
+        directory = posixpath.normpath(os.environ["DIRECTORY"])
+        expected = int(os.environ["EXPECTED_COUNT"])
+        # Scribe archives keep the submitted paths: /scribe/<directory>/<file>.
+        prefix = "scribe/" if directory == "." else f"scribe/{directory}/"
+
+        archives = sorted(glob.glob("scribe-download/*/*/*.zip"))
+        if not archives:
+            sys.exit("No signed archives were downloaded.")
+
+        replaced = []
+        for archive in archives:
+            with zipfile.ZipFile(archive) as signed:
+                for entry in signed.infolist():
+                    if entry.is_dir():
+                        continue
+                    name = posixpath.normpath(entry.filename.lstrip("/"))
+                    if not name.startswith(prefix):
+                        sys.exit(f"Unexpected path in {archive}: {entry.filename}")
+                    relative = name[len(prefix):]
+                    target = os.path.join(directory, relative)
+                    if relative.startswith("../") or not os.path.isfile(target):
+                        sys.exit(f"Signed file does not match a submitted file: {entry.filename}")
+                    contents = signed.read(entry)
+                    with open(target, "rb") as original:
+                        if original.read() == contents:
+                            sys.exit(f"Scribe returned an unchanged file: {relative}")
+                    with open(target, "wb") as output:
+                        output.write(contents)
+                    replaced.append(relative)
+                    print(f"signed: {relative}")
+
+        if len(replaced) != expected or len(set(replaced)) != expected:
+            sys.exit(f"Expected {expected} signed files, got {len(replaced)}.")
+        PY
+
+    - name: Clean up
+      if: always()
+      shell: bash
+      env:
+        DIRECTORY: ${{ inputs.directory }}
+      run: |
+        rm -rf scribe-download
+        find "$DIRECTORY" -type f -name '*.snupkg.nupkg' -exec sh -c 'mv "$1" "${1%.nupkg}"' _ '{}' \;

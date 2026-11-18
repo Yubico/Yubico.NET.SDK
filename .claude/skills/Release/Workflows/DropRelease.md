@@ -187,7 +187,9 @@ git diff <previousTag>..origin/develop -- Yubico.NativeShims/ --stat
 Follow `build/release-sign/README.md`. Hard gates before signing:
 
 - `gh auth status` succeeds.
-- `nuget-sign`, Go, and `dotnet` are available.
+- `nuget-sign`, Go, and `dotnet` are available. `nuget-sign capabilities` must
+  report schema 1 with `privateStdin` and `batchSign` both true; see the pinned
+  installation revision in `build/release-sign/README.md`.
 - `RELEASE_SIGN_KEY`, `RELEASE_SIGN_CERTIFICATE`, `RELEASE_SIGN_ROOT`, and
   `RELEASE_SIGN_TIMESTAMP_ROOT` identify the production key and certificate files.
 - The code-signing YubiKey stays disconnected until the signing commands below;
@@ -205,8 +207,11 @@ run's `headSha` with `gh run view <run-id> --json headSha --jq .headSha`.
 Connect the code-signing YubiKey only after these preparation steps.
 
 The Go signer prompts for the PIV PIN once per invocation after checking
-attestations and package identities; it reuses the PIN only for its signing child
-processes. Invoke the signer directly when the agent has an attached terminal.
+attestations and package identities; it sends the PIN through private stdin pipes
+only to signing children. Packages are signed together after assembly signing
+and repacking, and the PIN buffer is cleared before verification. Signing children
+do not inherit `NUGET_API_KEY` or GitHub tokens. Invoke the signer directly when
+the agent has an attached terminal.
 If the agent shell has no terminal input on macOS, invoke each command below as:
 
 ```sh

@@ -18,6 +18,24 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.18.x Releases
 
+### 1.18.1
+
+Release date: October 30th, 2026
+
+Features:
+
+- Persistent macOS input ownership has been added to Yubico.NativeShims, keeping callback context alive until shutdown has completed. ([#677](https://github.com/Yubico/Yubico.NET.SDK/pull/677))
+
+Documentation:
+
+- Documentation has been corrected to link to the PIN complexity section in the YubiKey technical manual. ([#678](https://github.com/Yubico/Yubico.NET.SDK/pull/678))
+
+Dependencies:
+
+- Dependencies across the SDK, GitHub Actions workflows, and Docker-based documentation image have been updated to newer versions. ([#713](https://github.com/Yubico/Yubico.NET.SDK/pull/713), [#706](https://github.com/Yubico/Yubico.NET.SDK/pull/706), [#679](https://github.com/Yubico/Yubico.NET.SDK/pull/679))
+
+_________
+
 ### 1.18.0
 
 Release date: September 18th, 2026

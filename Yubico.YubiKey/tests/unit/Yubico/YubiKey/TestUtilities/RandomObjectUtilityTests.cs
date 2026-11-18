@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Linq;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
@@ -20,6 +21,63 @@ namespace Yubico.YubiKey.TestUtilities;
 
 public class RandomObjectUtilityTests
 {
+    [Fact]
+    public void GetRandomObject_GetBytes_ConsumesFixedBytesAcrossOverloads()
+    {
+        using var random = RandomObjectUtility.GetRandomObject(new byte[] { 1, 2, 3, 4 });
+        var first = new byte[2];
+        var second = new byte[4];
+
+        random.GetBytes(first);
+        random.GetBytes(second, 1, 2);
+
+        Assert.Equal(new byte[] { 1, 2 }, first);
+        Assert.Equal(new byte[] { 0, 3, 4, 0 }, second);
+        Assert.Throws<ArgumentException>(() => random.GetBytes(new byte[1]));
+        random.GetBytes(Array.Empty<byte>());
+    }
+
+    [Fact]
+    public void GetRandomObject_CopiesInputAndCreatesIndependentGenerators()
+    {
+        byte[] fixedBytes = { 1, 2 };
+        using var first = RandomObjectUtility.GetRandomObject(fixedBytes);
+        using var second = RandomObjectUtility.GetRandomObject(fixedBytes);
+        fixedBytes[0] = 99;
+        var buffer = new byte[2];
+
+        first.GetBytes(buffer);
+        Assert.Equal(new byte[] { 1, 2 }, buffer);
+        second.GetBytes(buffer);
+        Assert.Equal(new byte[] { 1, 2 }, buffer);
+    }
+
+    [Fact]
+    public void GetRandomObject_EmptyInput_RejectsNonemptyRequests()
+    {
+        using var random = RandomObjectUtility.GetRandomObject(Array.Empty<byte>());
+
+        random.GetBytes(Array.Empty<byte>());
+        Assert.Throws<ArgumentException>(() => random.GetBytes(new byte[1]));
+    }
+
+    [Fact]
+    public void GetRandomObject_InvalidArguments_DoNotConsumeBytes()
+    {
+        using var random = RandomObjectUtility.GetRandomObject(new byte[] { 1, 2 });
+        var buffer = new byte[2];
+
+        Assert.Throws<ArgumentNullException>(() => random.GetBytes(null!));
+        Assert.Throws<ArgumentNullException>(() => random.GetBytes(null!, 0, 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => random.GetBytes(buffer, -1, 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => random.GetBytes(buffer, 0, -1));
+        Assert.Throws<ArgumentException>(() => random.GetBytes(buffer, 1, 2));
+        Assert.Throws<ArgumentException>(() => random.GetBytes(new byte[3]));
+
+        random.GetBytes(buffer);
+        Assert.Equal(new byte[] { 1, 2 }, buffer);
+    }
+
     [Fact]
     public void FixedBytes_Replace()
     {

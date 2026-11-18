@@ -1,4 +1,5 @@
-﻿// Copyright 2025 Yubico AB
+﻿
+// Copyright 2025 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -15,7 +16,6 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -263,10 +263,11 @@ namespace Yubico.YubiKey
                     case YubikeyDeviceManagementTags.MoreDataTag:
                     case YubikeyDeviceManagementTags.FreeFormTag:
                     case YubikeyDeviceManagementTags.HidInitDelay:
+                    case YubikeyDeviceManagementTags.NameTag:
                         // Ignore these tags for now
                         break;
                     default:
-                        Debug.Assert(false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
+                        // Newer firmware may report tags we don't know about yet. Ignore them, like ykman does.
                         break;
                 }
             }

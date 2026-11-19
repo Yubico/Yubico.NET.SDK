@@ -282,7 +282,7 @@ internal static partial class NativeMethods
         StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial CmErrorCode CM_Get_Device_Interface_List(
-        Guid interfaceClassGuid,
+        in Guid interfaceClassGuid,
         string? deviceId,
         byte[] byteBuffer,
         int bufferLengthCch,
@@ -294,7 +294,7 @@ internal static partial class NativeMethods
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial CmErrorCode CM_Get_Device_Interface_List_Size(
         out int bufferLengthCch,
-        Guid interfaceClassGuid,
+        in Guid interfaceClassGuid,
         string? deviceId,
         CM_GET_DEVICE_LIST flags
     );

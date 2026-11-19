@@ -50,4 +50,21 @@ public class CfgMgr32InteropTests
 
         Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
     }
+
+    // CM_Get_Device_Interface_List(_Size)W take the class GUID as LPGUID. Passing it by value happens to
+    // work on x64 (16-byte structs go by hidden pointer) but shifts every argument on Arm64, where the
+    // call then fails with CR_INVALID_DEVNODE. Only an Arm64 run can turn this test red.
+    [Fact]
+    public void GetDevicePaths_HidInterfaceClass_ReturnsOnlyHidInterfacePaths()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Skip("Windows-only");
+        }
+
+        var paths = CmDevice.GetDevicePaths(CmInterfaceGuid.Hid, null);
+
+        var hidClass = CmInterfaceGuid.Hid.ToString("B");
+        Assert.All(paths, path => Assert.Contains(hidClass, path, StringComparison.OrdinalIgnoreCase));
+    }
 }

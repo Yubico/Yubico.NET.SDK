@@ -51,8 +51,8 @@ internal static class PinUvAuthHelpers
     /// Unknown labels are ignored and are not echoed in the platform key. CTAP's getPublicKey
     /// profile does not define extra parameters; accepting them does not relax any required label.
     /// Import forces P-256 and delegates point validation to the
-    /// provider. The ephemeral crypto objects are disposed, but allocation of the public dictionary
-    /// after derivation is not protected by a Z-clearing guard.
+    /// provider. The ephemeral crypto objects are disposed. The platform public map is allocated
+    /// before deriving the raw secret.
     /// </remarks>
     /// <exception cref="ArgumentException">Thrown for missing/invalid coordinate types or lengths, or a wrapped cryptographic error from raw-secret derivation.</exception>
     /// <exception cref="CryptographicException">Peer-key import can raise an unwrapped provider error before the derivation catch.</exception>
@@ -101,17 +101,6 @@ internal static class PinUvAuthHelpers
 
         using var peerEcdh = ECDiffieHellman.Create(peerParams);
 
-        // Derive raw shared secret (X coordinate of ECDH shared point)
-        byte[] z;
-        try
-        {
-            z = ecdh.DeriveRawSecretAgreement(peerEcdh.PublicKey);
-        }
-        catch (CryptographicException ex)
-        {
-            throw new ArgumentException("Failed to derive shared secret. Peer key may be invalid.", nameof(peerCoseKey), ex);
-        }
-
         // Build our COSE key for key agreement
         var keyAgreement = new Dictionary<int, object?>
         {
@@ -122,7 +111,15 @@ internal static class PinUvAuthHelpers
             { CoseEC2Y, ourParams.Q.Y }
         };
 
-        return (keyAgreement, z);
+        using var peerPublicKey = peerEcdh.PublicKey;
+        try
+        {
+            return (keyAgreement, ecdh.DeriveRawSecretAgreement(peerPublicKey));
+        }
+        catch (CryptographicException ex)
+        {
+            throw new ArgumentException("Failed to derive shared secret. Peer key may be invalid.", nameof(peerCoseKey), ex);
+        }
     }
 
     private static bool HasRequiredLabels(IReadOnlyDictionary<int, object?> peerKey) =>

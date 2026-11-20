@@ -162,13 +162,14 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
         aes.Padding = PaddingMode.None;
         byte[]? keyArray = null;
         byte[]? inputArray = null;
+        byte[]? plaintext = null;
         try
         {
             keyArray = key.ToArray();
             aes.Key = keyArray;
             aes.IV = new byte[AesBlockSize];
 
-            var plaintext = new byte[ciphertext.Length];
+            plaintext = new byte[ciphertext.Length];
 
             inputArray = ciphertext.ToArray();
             using (var decryptor = aes.CreateDecryptor())
@@ -176,10 +177,13 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
                 decryptor.TransformBlock(inputArray, 0, inputArray.Length, plaintext, 0);
             }
 
-            return plaintext;
+            byte[] result = plaintext;
+            plaintext = null;
+            return result;
         }
         finally
         {
+            if (plaintext is not null) CryptographicOperations.ZeroMemory(plaintext);
             if (keyArray is not null) CryptographicOperations.ZeroMemory(keyArray);
             if (inputArray is not null) CryptographicOperations.ZeroMemory(inputArray);
         }
@@ -199,10 +203,15 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
 
         // Compute HMAC-SHA-256
         Span<byte> fullHash = stackalloc byte[32];
-        HMACSHA256.HashData(key, message, fullHash);
-
-        // V1 returns only first 16 bytes
-        return fullHash[..V1AuthTagLength].ToArray();
+        try
+        {
+            HMACSHA256.HashData(key, message, fullHash);
+            return fullHash[..V1AuthTagLength].ToArray();
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(fullHash);
+        }
     }
 
     /// <inheritdoc />

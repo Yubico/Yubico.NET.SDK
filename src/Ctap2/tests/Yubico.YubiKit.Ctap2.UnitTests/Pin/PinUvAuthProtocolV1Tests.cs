@@ -208,6 +208,17 @@ public sealed class PinUvAuthProtocolV1Tests
         Assert.Equal(plaintext, decrypted);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Decrypt_PreservesAes256ZeroBlockVector(bool protocol2)
+    {
+        using IPinUvAuthProtocol protocol = protocol2 ? new PinUvAuthProtocolV2() : new PinUvAuthProtocolV1();
+        byte[] ciphertext = Convert.FromHexString("DC95C078A2408989AD48A21492842087");
+        byte[] wire = protocol2 ? [.. new byte[16], .. ciphertext] : ciphertext;
+        Assert.Equal(new byte[16], protocol.Decrypt(new byte[protocol2 ? 64 : 32], wire));
+    }
+
     [Fact]
     public void Decrypt_InvalidKeyLength_ThrowsArgumentException()
     {

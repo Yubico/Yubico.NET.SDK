@@ -453,8 +453,8 @@ using var protocol = new PinUvAuthProtocolV2();
 
 The ephemeral ECDH key pair lives entirely inside a single `Encapsulate` call:
 `PinUvAuthHelpers.PerformEcdhKeyAgreement` creates it with `using var ecdh = ...`; after the helper
-returns, `Encapsulate` zeroes raw `z` in its `finally`. This does not cover the helper's post-derivation
-allocation-failure gap or all provider/internal copies. `Encapsulate` hands the derived shared secret
+returns, `Encapsulate` zeroes raw `z` in its `finally`. The helper allocates its public map before deriving
+the secret; this does not guarantee clearing of provider-internal copies. `Encapsulate` hands the derived shared secret
 to the caller, who owns it — `ClientPin` zeroes it in its own `finally`. Still use `using` on the
 protocol so its crypto methods reject disposed-instance use; Version/AuthenticationTagLength remain readable.
 

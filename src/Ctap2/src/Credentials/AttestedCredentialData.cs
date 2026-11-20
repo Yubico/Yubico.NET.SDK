@@ -14,6 +14,7 @@
 
 using System.Buffers.Binary;
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2.Cbor;
 
 namespace Yubico.YubiKit.Ctap2.Credentials;
@@ -81,6 +82,21 @@ public sealed class AttestedCredentialData
     /// <exception cref="CborContentException">The following encoded CBOR value cannot be read.</exception>
     public static AttestedCredentialData Parse(ReadOnlySpan<byte> data, out int bytesRead)
     {
+        // The span may include the signed extension suffix. Never retain this scratch copy.
+        byte[] scratch = data.ToArray();
+        try
+        {
+            AttestedCredentialData parsed = ParseBorrowed(scratch, out bytesRead);
+            return new AttestedCredentialData(parsed.Aaguid, parsed.CredentialId.ToArray(), parsed.CredentialPublicKey.ToArray());
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(scratch);
+        }
+    }
+
+    internal static AttestedCredentialData ParseBorrowed(ReadOnlyMemory<byte> data, out int bytesRead)
+    {
         if (data.Length < MinimumLength)
         {
             throw new ArgumentException(
@@ -91,12 +107,12 @@ public sealed class AttestedCredentialData
         int offset = 0;
 
         // Parse AAGUID (16 bytes, big-endian UUID format)
-        var aaguidBytes = data.Slice(offset, 16);
+        var aaguidBytes = data.Span.Slice(offset, 16);
         var aaguid = ParseAaguid(aaguidBytes);
         offset += 16;
 
         // Parse credential ID length (2 bytes, big-endian)
-        var credentialIdLength = BinaryPrimitives.ReadUInt16BigEndian(data.Slice(offset, 2));
+        var credentialIdLength = BinaryPrimitives.ReadUInt16BigEndian(data.Span.Slice(offset, 2));
         offset += 2;
 
         if (data.Length < offset + credentialIdLength)
@@ -107,13 +123,13 @@ public sealed class AttestedCredentialData
         }
 
         // Parse credential ID
-        var credentialId = data.Slice(offset, credentialIdLength).ToArray();
+        var credentialId = data.Slice(offset, credentialIdLength);
         offset += credentialIdLength;
 
         // Extract one CBOR value for the public key; COSE structure and algorithm policy are separate checks.
         var coseKeyBytes = data[offset..];
         var coseKeyLength = GetCborLength(coseKeyBytes);
-        var credentialPublicKey = coseKeyBytes[..coseKeyLength].ToArray();
+        var credentialPublicKey = coseKeyBytes[..coseKeyLength];
         offset += coseKeyLength;
 
         bytesRead = offset;
@@ -126,10 +142,10 @@ public sealed class AttestedCredentialData
         return AaguidConverter.FromBigEndianBytes(bytes);
     }
 
-    private static int GetCborLength(ReadOnlySpan<byte> data)
+    private static int GetCborLength(ReadOnlyMemory<byte> data)
     {
         // Use CborReader to determine the length of the CBOR value
-        var reader = new CborReader(data.ToArray(), CborConformanceMode.Lax);
+        var reader = new CborReader(data, CborConformanceMode.Lax);
         reader.SkipValue();
         return data.Length - reader.BytesRemaining;
     }

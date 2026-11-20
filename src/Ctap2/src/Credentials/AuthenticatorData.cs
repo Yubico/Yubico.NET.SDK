@@ -35,10 +35,10 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// 2026, §6.1.3 (https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#sctn-credential-backup).
 /// </para>
 /// <para>
-/// Parse copies the full input, RP hash, attested fields and extension suffix into independent storage.
-/// RawData preserves authenticator data, not a surrounding CTAP response. Extension/raw bytes can contain
-/// secret-derived material; this type has no disposal/zeroing API. Do not log that material or assume
-/// clearing the original input or disposing a session clears these copies.
+/// Parse copies the input once. The hash, attested fields and extensions are views into that snapshot.
+/// Keep it unchanged through signature verification. The caller can zero <see cref="RawData"/> when
+/// finished; this also clears every aliased view. Neither clearing the input nor disposing the session
+/// clears the returned snapshot. Do not log secret-derived extension material.
 /// </para>
 /// <para>
 /// Flags report received bits, not independently verified events. Parsing and RP-hash comparison do not
@@ -80,13 +80,13 @@ public sealed class AuthenticatorData
     /// <summary>
     /// Gets the CBOR-encoded extensions data, if present (when ED flag is set).
     /// </summary>
-    /// <remarks>Copies the complete remaining suffix without checking that it is one complete CBOR map.</remarks>
-    public ReadOnlyMemory<byte>? Extensions { get; }
+    /// <remarks>Aliases the remaining suffix in RawData; does not validate it as a complete CBOR map.</remarks>
+    public Memory<byte>? Extensions { get; }
 
     /// <summary>
     /// Gets the raw authenticator data bytes.
     /// </summary>
-    public ReadOnlyMemory<byte> RawData { get; }
+    public Memory<byte> RawData { get; }
 
     /// <summary>
     /// Gets whether the received UP bit reports user presence.
@@ -119,12 +119,12 @@ public sealed class AuthenticatorData
     public bool HasExtensions => Flags.HasFlag(AuthenticatorDataFlags.ExtensionData);
 
     private AuthenticatorData(
-        ReadOnlyMemory<byte> rawData,
+        Memory<byte> rawData,
         ReadOnlyMemory<byte> rpIdHash,
         AuthenticatorDataFlags flags,
         uint signCount,
         AttestedCredentialData? attestedCredentialData,
-        ReadOnlyMemory<byte>? extensions)
+        Memory<byte>? extensions)
     {
         RawData = rawData;
         RpIdHash = rpIdHash;
@@ -148,6 +148,21 @@ public sealed class AuthenticatorData
     /// <exception cref="System.Formats.Cbor.CborContentException">An extracted attested CBOR value cannot be read.</exception>
     public static AuthenticatorData Parse(ReadOnlySpan<byte> data)
     {
+        byte[] owned = data.ToArray();
+        try
+        {
+            return ParseOwned(owned);
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(owned);
+            throw;
+        }
+    }
+
+    internal static AuthenticatorData ParseOwned(Memory<byte> rawData)
+    {
+        ReadOnlySpan<byte> data = rawData.Span;
         if (data.Length < MinimumLength)
         {
             throw new ArgumentException(
@@ -155,11 +170,10 @@ public sealed class AuthenticatorData
                 nameof(data));
         }
 
-        var rawData = data.ToArray();
         int offset = 0;
 
         // Parse RP ID hash (32 bytes)
-        var rpIdHash = data.Slice(offset, 32).ToArray();
+        var rpIdHash = rawData.Slice(offset, 32);
         offset += 32;
 
         // Parse flags (1 byte)
@@ -174,17 +188,16 @@ public sealed class AuthenticatorData
         AttestedCredentialData? attestedCredentialData = null;
         if (flags.HasFlag(AuthenticatorDataFlags.AttestedCredentialData))
         {
-            var remaining = data[offset..];
-            attestedCredentialData = AttestedCredentialData.Parse(remaining, out var bytesRead);
+            attestedCredentialData = AttestedCredentialData.ParseBorrowed(rawData[offset..], out var bytesRead);
             offset += bytesRead;
         }
 
         // Parse extensions if present
-        ReadOnlyMemory<byte>? extensions = null;
+        Memory<byte>? extensions = null;
         if (flags.HasFlag(AuthenticatorDataFlags.ExtensionData))
         {
             // Preserve the ED suffix; this extraction does not validate its CBOR map or full consumption.
-            extensions = data[offset..].ToArray();
+            extensions = rawData[offset..];
         }
 
         return new AuthenticatorData(

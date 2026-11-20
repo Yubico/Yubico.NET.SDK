@@ -108,7 +108,7 @@ internal static class PreviewSignCodec
     /// </remarks>
     public static PreviewSign.PreviewSignRegistrationOutput? ParseRegistrationOutput(
         WebAuthnAuthenticatorData authData,
-        IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs)
+        IReadOnlyDictionary<string, Memory<byte>>? unsignedExtensionOutputs)
     {
         if (!authData.ParsedExtensions.TryGetValue(ExtensionId, out var rawCbor))
         {

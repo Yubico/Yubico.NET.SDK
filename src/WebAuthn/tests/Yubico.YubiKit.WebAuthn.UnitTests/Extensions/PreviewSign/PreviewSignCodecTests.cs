@@ -118,7 +118,7 @@ public class PreviewSignCodecTests
 
         var parsedAuthData = WebAuthnAuthenticatorData.Decode(authData);
 
-        var unsignedExtensionOutputs = new Dictionary<string, ReadOnlyMemory<byte>>
+        var unsignedExtensionOutputs = new Dictionary<string, Memory<byte>>
         {
             ["previewSign"] = unsignedExtension.Encode()
         };

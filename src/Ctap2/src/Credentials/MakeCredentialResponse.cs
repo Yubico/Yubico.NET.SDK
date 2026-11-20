@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Ctap2.Credentials;
 
@@ -35,11 +36,11 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// - 0x06: unsignedExtensionOutputs (map, optional) - unsigned outputs (CTAP 2.3 §6.1)
 /// </para>
 /// <para>
-/// Decode borrows attestation-statement and unsigned-output slices from the input buffer. Keep that
-/// buffer unchanged while these views are used. Authenticator-data byte strings, parsed authenticator
-/// fields and largeBlobKey are independent copies. This result has no disposal/zeroing API, and session
-/// disposal does not clear it. Clearing the input cannot clear independent secret-bearing copies;
-/// do not log large-blob keys or secret-derived extension data.
+/// Decoding leaves the input unchanged. The caller owns <see cref="LargeBlobKey"/>,
+/// <see cref="AuthenticatorDataRaw"/> and the encoded <see cref="UnsignedExtensionOutputs"/> values
+/// and should zero them after use. <see cref="ExtensionOutputs"/> aliases the signed authenticator
+/// data; keep it intact through verification. Session disposal does not clear these buffers.
+/// Do not log large-blob keys or secret-derived extension data.
 /// </para>
 /// <para>
 /// Unknown outer fields are skipped, not retained in a complete RawData envelope. Raw authenticator
@@ -65,7 +66,7 @@ public sealed class MakeCredentialResponse
     /// <summary>
     /// Gets the raw authenticator data bytes.
     /// </summary>
-    public ReadOnlyMemory<byte> AuthenticatorDataRaw { get; }
+    public Memory<byte> AuthenticatorDataRaw => AuthenticatorData.RawData;
 
     /// <summary>
     /// Gets the parsed or opaque attestation statement, not a verified attestation result.
@@ -81,43 +82,39 @@ public sealed class MakeCredentialResponse
     /// Gets the secret symmetric large-blob storage key from response key 0x05, if supplied.
     /// </summary>
     /// <remarks>The decoder does not validate key length or whether the extension was requested.</remarks>
-    public ReadOnlyMemory<byte>? LargeBlobKey { get; }
+    public Memory<byte>? LargeBlobKey { get; }
 
     /// <summary>
     /// Gets the signed authenticator-data extension bytes, if the ED bit is set.
     /// </summary>
-    public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
+    public Memory<byte>? ExtensionOutputs => AuthenticatorData.Extensions;
 
     /// <summary>
     /// Gets the unsigned extension outputs from makeCredential response key 0x06.
     /// </summary>
     /// <remarks>
     /// CTAP 2.3 §6.1 defines text extension identifiers mapped to unsigned values. Each value here is
-    /// its complete encoded CBOR slice, not necessarily a CBOR byte string, and borrows the input buffer.
+    /// its complete encoded CBOR value, not necessarily a CBOR byte string, in caller-owned storage.
     /// An empty map and an omitted field must be treated equivalently by clients, although this model
     /// preserves empty versus null. These values are separate from signed authData outputs; extensions
     /// such as experimental previewSign can carry proof objects that require their own verification.
     /// WebAuthn client-extension processing is a separate layer, not this integer-key envelope.
     /// </remarks>
-    public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; }
+    public IReadOnlyDictionary<string, Memory<byte>>? UnsignedExtensionOutputs { get; }
 
     private MakeCredentialResponse(
         string format,
         AuthenticatorData authenticatorData,
-        ReadOnlyMemory<byte> authenticatorDataRaw,
         AttestationStatement attestationStatement,
         bool? enterpriseAttestation,
-        ReadOnlyMemory<byte>? largeBlobKey,
-        ReadOnlyMemory<byte>? extensionOutputs,
-        IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs)
+        Memory<byte>? largeBlobKey,
+        IReadOnlyDictionary<string, Memory<byte>>? unsignedExtensionOutputs)
     {
         Format = format;
         AuthenticatorData = authenticatorData;
-        AuthenticatorDataRaw = authenticatorDataRaw;
         AttestationStatement = attestationStatement;
         EnterpriseAttestation = enterpriseAttestation;
         LargeBlobKey = largeBlobKey;
-        ExtensionOutputs = extensionOutputs;
         UnsignedExtensionOutputs = unsignedExtensionOutputs;
     }
 
@@ -127,7 +124,7 @@ public sealed class MakeCredentialResponse
     /// <param name="data">The CBOR-encoded response (excluding status byte).</param>
     /// <returns>The parsed response.</returns>
     /// <remarks>
-    /// The input is borrowed as described on this type. Uses lax CBOR parsing and requires fmt,
+    /// The input is not modified or retained. Uses lax CBOR parsing and requires fmt,
     /// authData and attStmt, but does not enforce every attestation shape or complete envelope consumption.
     /// CBOR failures can raise <see cref="CborContentException"/>; missing modeled required fields raise
     /// <see cref="InvalidOperationException"/>. Authenticator-data parsing can also reject short input.
@@ -135,7 +132,22 @@ public sealed class MakeCredentialResponse
     public static MakeCredentialResponse Decode(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Lax);
-        return DecodeInternal(reader, data);
+        byte[]? authDataRaw = null;
+        byte[]? largeBlobKey = null;
+        byte[]? attestation = null;
+        Dictionary<string, Memory<byte>>? unsigned = null;
+        try
+        {
+            return DecodeCore(reader, ref authDataRaw, ref largeBlobKey, ref attestation, ref unsigned);
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(authDataRaw);
+            CryptographicOperations.ZeroMemory(largeBlobKey);
+            CryptographicOperations.ZeroMemory(attestation);
+            ClearUnsigned(unsigned);
+            throw;
+        }
     }
 
     /// <summary>
@@ -144,8 +156,7 @@ public sealed class MakeCredentialResponse
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The parsed response.</returns>
     /// <remarks>
-    /// Consumes one encoded value and applies the memory decoder's checks. Attestation and unsigned
-    /// values can reference the reader's underlying buffer; keep it unchanged while those views are used.
+    /// Consumes one encoded value and applies the memory decoder's checks.
     /// This overload is not a complete-input or cryptographic-verification boundary.
     /// </remarks>
     public static MakeCredentialResponse Decode(CborReader reader)
@@ -154,27 +165,17 @@ public sealed class MakeCredentialResponse
         return Decode(reader.ReadEncodedValue(disableConformanceModeChecks: true));
     }
 
-    /// <summary>
-    /// Decodes one response map while retaining slices of the borrowed response bytes.
-    /// </summary>
-    private static MakeCredentialResponse DecodeInternal(
+    private static MakeCredentialResponse DecodeCore(
         CborReader reader,
-        ReadOnlyMemory<byte> fullCbor)
+        ref byte[]? authDataRaw,
+        ref byte[]? largeBlobKey,
+        ref byte[]? attestation,
+        ref Dictionary<string, Memory<byte>>? unsigned)
     {
         var mapLength = reader.ReadStartMap();
 
         string? format = null;
-        byte[]? authDataRaw = null;
-        AuthenticatorData? authData = null;
-        AttestationStatement? attStmt = null;
         bool? epAtt = null;
-        byte[]? largeBlobKey = null;
-        ReadOnlyMemory<byte>? extensionOutputs = null;
-        Dictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs = null;
-
-        // Track offset for raw CBOR capture
-        int attStmtOffset = -1;
-        int attStmtLength = -1;
 
         for (var i = 0; i < mapLength; i++)
         {
@@ -185,47 +186,24 @@ public sealed class MakeCredentialResponse
                     format = reader.ReadTextString();
                     break;
                 case 2: // authData
+                    CryptographicOperations.ZeroMemory(authDataRaw);
                     authDataRaw = reader.ReadByteString();
-                    authData = AuthenticatorData.Parse(authDataRaw);
-                    if (authData.HasExtensions && authData.Extensions.HasValue)
-                    {
-                        extensionOutputs = authData.Extensions;
-                    }
                     break;
                 case 3: // attStmt
-                    // Calculate offset before reading
-                    var attStmtBytesBefore = reader.BytesRemaining;
-
-                    // Skip the CBOR value to calculate its length
-                    reader.SkipValue();
-
-                    // Calculate how many bytes were consumed
-                    var attStmtBytesConsumed = attStmtBytesBefore - reader.BytesRemaining;
-                    attStmtLength = attStmtBytesConsumed;
-                    attStmtOffset = fullCbor.Length - attStmtBytesBefore;
+                    CryptographicOperations.ZeroMemory(attestation);
+                    attestation = reader.ReadEncodedValue().ToArray();
                     break;
                 case 4: // epAtt
                     epAtt = reader.ReadBoolean();
                     break;
                 case 5: // largeBlobKey
+                    CryptographicOperations.ZeroMemory(largeBlobKey);
                     largeBlobKey = reader.ReadByteString();
                     break;
-                case 6: // makeCredential unsignedExtensionOutputs (CTAP 2.3 §6.1); values borrow fullCbor.
-                    unsignedExtensionOutputs = new Dictionary<string, ReadOnlyMemory<byte>>();
-                    int? extMapSize = reader.ReadStartMap();
-                    for (int j = 0; j < extMapSize; j++)
-                    {
-                        string extId = reader.ReadTextString();
-
-                        // Capture the raw CBOR value bytes
-                        int bytesRemainingBefore = reader.BytesRemaining;
-                        reader.SkipValue();
-                        int bytesConsumed = bytesRemainingBefore - reader.BytesRemaining;
-
-                        int valueOffset = fullCbor.Length - bytesRemainingBefore;
-                        unsignedExtensionOutputs[extId] = fullCbor.Slice(valueOffset, bytesConsumed);
-                    }
-                    reader.ReadEndMap();
+                case 6: // unsignedExtensionOutputs (CTAP 2.3 §6.1)
+                    ClearUnsigned(unsigned);
+                    unsigned = new Dictionary<string, Memory<byte>>();
+                    ReadUnsigned(reader, unsigned);
                     break;
                 default:
                     reader.SkipValue();
@@ -235,33 +213,50 @@ public sealed class MakeCredentialResponse
 
         reader.ReadEndMap();
 
-        if (format is null || authData is null || authDataRaw is null)
+        if (format is null || authDataRaw is null)
         {
             throw new InvalidOperationException("MakeCredential response missing required fields.");
         }
 
-        // Decode attestation statement using the format-aware typed decoder
-        if (attStmtOffset >= 0 && attStmtLength > 0)
-        {
-            var rawAttStmt = fullCbor.Slice(attStmtOffset, attStmtLength);
-            var attestationFormat = ParseAttestationFormat(format);
-            attStmt = AttestationStatement.Decode(attestationFormat, rawAttStmt);
-        }
-        else
+        if (attestation is null)
         {
             throw new InvalidOperationException("MakeCredential response missing attestation statement.");
         }
 
         return new MakeCredentialResponse(
             format,
-            authData,
-            authDataRaw,
-            attStmt,
+            AuthenticatorData.ParseOwned(authDataRaw),
+            AttestationStatement.Decode(ParseAttestationFormat(format), attestation),
             epAtt,
-            // byte[]? → ReadOnlyMemory<byte>? converts a null array to an EMPTY memory; keep absent as null.
-            largeBlobKey is null ? null : (ReadOnlyMemory<byte>?)largeBlobKey,
-            extensionOutputs,
-            unsignedExtensionOutputs);
+            largeBlobKey is null ? (Memory<byte>?)null : largeBlobKey.AsMemory(),
+            unsigned?.AsReadOnly());
+    }
+
+    private static void ReadUnsigned(CborReader reader, Dictionary<string, Memory<byte>> outputs)
+    {
+        reader.ReadStartMap();
+        while (reader.PeekState() is not CborReaderState.EndMap)
+        {
+            string key = reader.ReadTextString();
+            if (outputs.TryGetValue(key, out Memory<byte> previous))
+            {
+                CryptographicOperations.ZeroMemory(previous.Span);
+            }
+            outputs[key] = reader.ReadEncodedValue().ToArray();
+        }
+        reader.ReadEndMap();
+    }
+
+    private static void ClearUnsigned(Dictionary<string, Memory<byte>>? outputs)
+    {
+        if (outputs is null)
+        {
+            return;
+        }
+        foreach (Memory<byte> value in outputs.Values)
+        {
+            CryptographicOperations.ZeroMemory(value.Span);
+        }
     }
 
     /// <summary>

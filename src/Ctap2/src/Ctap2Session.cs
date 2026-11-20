@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
@@ -316,14 +317,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         }
 
         // CTAP status and terminal notification resolution precede decode; failure here is not rollback.
-        var result = MakeCredentialResponse.Decode(response);
-
-        _logger.LogInformation(
-            "Credential created. Format: {Format}, CredentialId length: {Length}",
-            result.Format,
-            result.GetCredentialId().Length);
-
-        return result;
+        return DecodeCredentialResponse(response, MakeCredentialResponse.Decode);
     }
 
     /// <inheritdoc />
@@ -378,13 +372,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         }
 
         // Parsing is not relying-party verification and can fail after a successful device exchange.
-        var result = GetAssertionResponse.Decode(response);
-
-        _logger.LogInformation(
-            "Assertion obtained. NumberOfCredentials: {Count}",
-            result.NumberOfCredentials ?? 1);
-
-        return result;
+        return DecodeCredentialResponse(response, GetAssertionResponse.Decode);
     }
 
     /// <inheritdoc />
@@ -402,7 +390,21 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
                 cancellationToken)
             .ConfigureAwait(false);
 
-        return GetAssertionResponse.Decode(response);
+        return DecodeCredentialResponse(response, GetAssertionResponse.Decode);
+    }
+
+    private static T DecodeCredentialResponse<T>(ReadOnlyMemory<byte> response, Func<ReadOnlyMemory<byte>, T> decode)
+    {
+        try
+        {
+            return decode(response);
+        }
+        finally
+        {
+            // Both backends transfer their writable response storage to this session.
+            // Typed decoders no longer retain any view of it, even on success.
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+        }
     }
 
     /// <summary>

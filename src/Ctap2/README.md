@@ -351,8 +351,11 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
   have scoped cleanup, but requests, builder-retained copies and successful responses do not have an
   end-to-end zeroing guarantee. Protocol disposal does not clear caller-owned returned tokens or outputs.
 - Never log PINs, PIN tokens, or secret-derived extension outputs such as hmac-secret and PRF results.
-- Credential/extension response copies, including plaintext large-blob keys, have no general disposable
-  secret-owner contract. Clearing a caller copy or disposing the session does not clear those copies.
+- `MakeCredentialResponse` and `GetAssertionResponse` are not disposable. Their `LargeBlobKey`, signed
+  `AuthenticatorDataRaw` and (for registration) encoded `UnsignedExtensionOutputs` are caller-owned
+  `Memory<byte>` buffers. Use them unchanged for verification, then zero their spans when finished.
+  `ExtensionOutputs` aliases `AuthenticatorDataRaw`, so clearing the latter also clears signed outputs.
+  Disposing a session does not clear returned buffers or copies made by downstream decoders.
 - hmac-secret derives from credential-scoped random secrets, with distinct verified/unverified modes.
   WebAuthn PRF adds client-side input hashing and requires the verified variant; the current WebAuthn
   adapter's UV-override and result-cleanup limitations remain disclosed in its guide.

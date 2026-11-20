@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Ctap2.Credentials;
 
@@ -35,11 +36,10 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// field and other unknown outer fields; it does not retain a complete response envelope.
 /// </para>
 /// <para>
-/// Decoding copies byte strings, including the signature, IDs, large-blob key and authenticator data.
-/// Authenticator-data parsing creates further independent copies; <see cref="ExtensionOutputs"/>
-/// refers to its extension copy. Neither this result nor session disposal clears these buffers.
-/// Large-blob keys and secret-derived extension data are sensitive: do not log them or assume that
-/// clearing the original input clears the decoded copies. This type provides no disposal/zeroing API.
+/// Decoding leaves the input unchanged. The caller owns <see cref="LargeBlobKey"/> and
+/// <see cref="AuthenticatorDataRaw"/> and should zero them after use; <see cref="ExtensionOutputs"/>
+/// aliases the signed authenticator-data buffer. Keep the bytes intact through verification.
+/// Session disposal does not clear these buffers. Do not log secret extension data or keys.
 /// </para>
 /// <para>
 /// Parsing is not authentication. The RP must verify the signature and client-data challenge/origin,
@@ -67,7 +67,7 @@ public sealed class GetAssertionResponse
     /// <summary>
     /// Gets the raw authenticator data bytes.
     /// </summary>
-    public ReadOnlyMemory<byte> AuthenticatorDataRaw { get; }
+    public Memory<byte> AuthenticatorDataRaw => AuthenticatorData.RawData;
 
     /// <summary>
     /// Gets the received assertion signature bytes; their encoding depends on the credential algorithm.
@@ -108,34 +108,30 @@ public sealed class GetAssertionResponse
     /// Gets the secret symmetric large-blob storage key from response key 0x07, if supplied.
     /// </summary>
     /// <remarks>Presence does not establish the required key length; the decoder does not check it.</remarks>
-    public ReadOnlyMemory<byte>? LargeBlobKey { get; }
+    public Memory<byte>? LargeBlobKey { get; }
 
     /// <summary>
     /// Gets the signed authenticator-data extension bytes, if the ED bit is set.
     /// </summary>
     /// <remarks>These bytes are not the unsigned output map at response key 0x08, and are not verified here.</remarks>
-    public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
+    public Memory<byte>? ExtensionOutputs => AuthenticatorData.Extensions;
 
     private GetAssertionResponse(
         PublicKeyCredentialDescriptor? credential,
         AuthenticatorData authenticatorData,
-        ReadOnlyMemory<byte> authenticatorDataRaw,
         ReadOnlyMemory<byte> signature,
         PublicKeyCredentialUserEntity? user,
         int? numberOfCredentials,
         bool? userSelected,
-        ReadOnlyMemory<byte>? largeBlobKey,
-        ReadOnlyMemory<byte>? extensionOutputs)
+        Memory<byte>? largeBlobKey)
     {
         Credential = credential;
         AuthenticatorData = authenticatorData;
-        AuthenticatorDataRaw = authenticatorDataRaw;
         Signature = signature;
         User = user;
         NumberOfCredentials = numberOfCredentials;
         UserSelected = userSelected;
         LargeBlobKey = largeBlobKey;
-        ExtensionOutputs = extensionOutputs;
     }
 
     /// <summary>
@@ -163,17 +159,30 @@ public sealed class GetAssertionResponse
     /// <remarks>Consumes one response map using the supplied reader; the same model/verification limits apply.</remarks>
     public static GetAssertionResponse Decode(CborReader reader)
     {
-        var mapLength = reader.ReadStartMap();
+        ArgumentNullException.ThrowIfNull(reader);
+        byte[]? authDataRaw = null;
+        byte[]? largeBlobKey = null;
+        try
+        {
+            return DecodeCore(reader, ref authDataRaw, ref largeBlobKey);
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(authDataRaw);
+            CryptographicOperations.ZeroMemory(largeBlobKey);
+            throw;
+        }
+    }
+
+    private static GetAssertionResponse DecodeCore(CborReader reader, ref byte[]? authDataRaw, ref byte[]? largeBlobKey)
+    {
+        int? mapLength = reader.ReadStartMap();
 
         PublicKeyCredentialDescriptor? credential = null;
-        byte[]? authDataRaw = null;
-        AuthenticatorData? authData = null;
         byte[]? signature = null;
         PublicKeyCredentialUserEntity? user = null;
         int? numberOfCredentials = null;
         bool? userSelected = null;
-        byte[]? largeBlobKey = null;
-        ReadOnlyMemory<byte>? extensionOutputs = null;
 
         for (var i = 0; i < mapLength; i++)
         {
@@ -184,12 +193,8 @@ public sealed class GetAssertionResponse
                     credential = PublicKeyCredentialDescriptor.Parse(reader);
                     break;
                 case 2: // authData
+                    CryptographicOperations.ZeroMemory(authDataRaw);
                     authDataRaw = reader.ReadByteString();
-                    authData = AuthenticatorData.Parse(authDataRaw);
-                    if (authData.HasExtensions && authData.Extensions.HasValue)
-                    {
-                        extensionOutputs = authData.Extensions;
-                    }
                     break;
                 case 3: // signature
                     signature = reader.ReadByteString();
@@ -204,6 +209,7 @@ public sealed class GetAssertionResponse
                     userSelected = reader.ReadBoolean();
                     break;
                 case 7: // largeBlobKey
+                    CryptographicOperations.ZeroMemory(largeBlobKey);
                     largeBlobKey = reader.ReadByteString();
                     break;
                 default:
@@ -214,22 +220,19 @@ public sealed class GetAssertionResponse
 
         reader.ReadEndMap();
 
-        if (authData is null || authDataRaw is null || signature is null)
+        if (authDataRaw is null || signature is null)
         {
             throw new InvalidOperationException("GetAssertion response missing required fields.");
         }
 
         return new GetAssertionResponse(
             credential,
-            authData,
-            authDataRaw,
+            AuthenticatorData.ParseOwned(authDataRaw),
             signature,
             user,
             numberOfCredentials,
             userSelected,
-            // byte[]? → ReadOnlyMemory<byte>? converts a null array to an EMPTY memory; keep absent as null.
-            largeBlobKey is null ? null : (ReadOnlyMemory<byte>?)largeBlobKey,
-            extensionOutputs);
+            largeBlobKey is null ? (Memory<byte>?)null : largeBlobKey.AsMemory());
     }
 
     /// <summary>

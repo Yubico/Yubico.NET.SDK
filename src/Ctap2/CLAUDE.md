@@ -415,8 +415,10 @@ peer labels and validates coordinate widths before point import. Unknown respons
 fields must not be blindly copied into requests. Credential/GetInfo decoders also have known required-
 field/envelope-validation gaps; preserve valid unknown data without promising universal malformed rejection.
 
-Add `RawData` to models that own a complete, non-secret authenticator response. A response that can contain
-secret material instead needs explicit disposable ownership. `StoredCredentialInfo` owns one private complete
+Add `RawData` to models that own a complete, non-secret authenticator response. For credential creation and
+assertion, result buffers are caller-owned writable memory; signed extensions alias the raw authenticator data.
+The session clears its typed-response input after parsing; public decoders don't clear borrowed input. No
+complete credential response envelope is exposed. `StoredCredentialInfo` owns one private complete
 response clone; `LargeBlobKey` is a view into it, and disposal clears that clone, including unknown fields.
 The public decoder never clears its borrowed input, and the session's read-only response contract is unchanged,
 so this is not an end-to-end cleanup guarantee. Do not duplicate the same buffer on nested entities.

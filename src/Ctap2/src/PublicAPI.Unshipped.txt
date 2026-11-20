@@ -241,11 +241,11 @@ Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData
 Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.AttestedCredentialData.get -> Yubico.YubiKit.Ctap2.Credentials.AttestedCredentialData?
 Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.BackedUp.get -> bool
 Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.BackupEligible.get -> bool
-Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.Extensions.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.Extensions.get -> System.Memory<byte>?
 Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.Flags.get -> Yubico.YubiKit.Ctap2.Credentials.AuthenticatorDataFlags
 Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.HasAttestedCredentialData.get -> bool
 Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.HasExtensions.get -> bool
-Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.RawData.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.RawData.get -> System.Memory<byte>
 Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.RpIdHash.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.SignCount.get -> uint
 Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData.UserPresent.get -> bool
@@ -287,12 +287,12 @@ Yubico.YubiKit.Ctap2.Credentials.GetAssertionOptions.WithPinUvAuth(System.ReadOn
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionOptions.WithUserVerification(bool value) -> Yubico.YubiKit.Ctap2.Credentials.GetAssertionOptions!
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.AuthenticatorData.get -> Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData!
-Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.AuthenticatorDataRaw.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.AuthenticatorDataRaw.get -> System.Memory<byte>
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.Credential.get -> Yubico.YubiKit.Ctap2.Credentials.PublicKeyCredentialDescriptor?
-Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.ExtensionOutputs.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.ExtensionOutputs.get -> System.Memory<byte>?
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.GetCredentialId() -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.GetUserHandle() -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.LargeBlobKey.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.LargeBlobKey.get -> System.Memory<byte>?
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.NumberOfCredentials.get -> int?
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.Signature.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.User.get -> Yubico.YubiKit.Ctap2.Credentials.PublicKeyCredentialUserEntity?
@@ -322,15 +322,15 @@ Yubico.YubiKit.Ctap2.Credentials.MakeCredentialOptions.WithUserVerification(bool
 Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse
 Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.AttestationStatement.get -> Yubico.YubiKit.Ctap2.Credentials.AttestationStatement!
 Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.AuthenticatorData.get -> Yubico.YubiKit.Ctap2.Credentials.AuthenticatorData!
-Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.AuthenticatorDataRaw.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.AuthenticatorDataRaw.get -> System.Memory<byte>
 Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.EnterpriseAttestation.get -> bool?
-Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.ExtensionOutputs.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.ExtensionOutputs.get -> System.Memory<byte>?
 Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.Format.get -> string!
 Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.GetAaguid() -> System.Guid
 Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.GetCredentialId() -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.GetCredentialPublicKey() -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.LargeBlobKey.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.UnsignedExtensionOutputs.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.ReadOnlyMemory<byte>>?
+Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.LargeBlobKey.get -> System.Memory<byte>?
+Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse.UnsignedExtensionOutputs.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Memory<byte>>?
 Yubico.YubiKit.Ctap2.Credentials.NoneAttestationStatement
 Yubico.YubiKit.Ctap2.Credentials.NoneAttestationStatement.Equals(Yubico.YubiKit.Ctap2.Credentials.NoneAttestationStatement? other) -> bool
 Yubico.YubiKit.Ctap2.Credentials.NoneAttestationStatement.NoneAttestationStatement(System.ReadOnlyMemory<byte> rawCbor) -> void

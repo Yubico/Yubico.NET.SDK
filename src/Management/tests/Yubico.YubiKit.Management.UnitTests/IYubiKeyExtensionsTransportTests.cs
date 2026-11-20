@@ -220,12 +220,34 @@ public class IYubiKeyExtensionsTransportTests
         }
     }
 
+    [Theory]
+    [InlineData(0, VersionQualifierType.Final)]
+    [InlineData(4, VersionQualifierType.Beta)]
+    [InlineData(5, VersionQualifierType.Final)]
+    public async Task CachedFirmwareControlsGateWithoutSubstitutingLiveMetadata(int major, VersionQualifierType qualifier)
+    {
+        using var field = new Yubico.YubiKit.Core.Utilities.Tlv(0x05, [(byte)major, 7, 0]);
+        var cached = DeviceInfo.CreateFromTlvs([field], null) with
+        {
+            VersionQualifier = new VersionQualifier(new FirmwareVersion(major, 7, 0), qualifier, 1),
+        };
+        var connection = new ManagementSessionTests.VersionedSmartCardConnection(4, 1);
+        var device = new FallbackProbeYubiKey(ConnectionType.SmartCard) { CachedDeviceInfo = cached }
+            .Returns(ConnectionType.SmartCard, connection);
+        await using var session = await device.CreateManagementSessionAsync(cancellationToken: Ct);
+
+        Assert.True(session.IsSupported(new Feature("configuration", 5, 0, 0)));
+        Assert.Equal(new FirmwareVersion(4, 1, 0), (await session.GetDeviceInfoAsync(Ct)).FirmwareVersion);
+        Assert.Equal(2, connection.Reads);
+    }
+
     private sealed class FallbackProbeYubiKey(ConnectionType available) : IYubiKey
     {
         private readonly Dictionary<ConnectionType, Func<IConnection>> _behaviors = new();
 
         public string DeviceId => "fallback-probe";
         public ConnectionType AvailableConnections { get; } = available;
+        public DeviceInfo? CachedDeviceInfo { get; init; }
         public List<ConnectionType> Attempts { get; } = [];
 
         public FallbackProbeYubiKey Returns(ConnectionType transport, IConnection connection)

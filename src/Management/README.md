@@ -30,6 +30,9 @@ rejected without sending a reset command.
 
 Public reads check the 4.1 firmware minimum before sending a command; the factory's best-effort metadata
 probe does not use this gate. Reads, writes and reset check the effective session firmware;
+the device extension uses cached device information first, then the applet's firmware read or transport
+version. Unknown and prerelease firmware admit the gates optimistically. Live reads are not served from
+that cache, and required transport-setup errors and cancellation still propagate. Separately,
 passing those generic checks does not establish support for every field or device family. In particular,
 NFC restriction needs NFC-capable hardware with firmware 5.7 or later.
 

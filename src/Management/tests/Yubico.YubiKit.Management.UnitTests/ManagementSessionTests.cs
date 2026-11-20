@@ -403,13 +403,26 @@ public class ManagementSessionTests
         }
     }
 
-    private sealed class VersionedSmartCardConnection(byte major, byte minor) : ISmartCardConnection
+    [Fact]
+    public async Task CreateAsync_UnknownFirmwareAfterSuccessfulSelect_AllowsGatesButDoesNotFabricateMetadata()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(4, 0) { UnknownSelectVersion = true };
+        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+
+        Assert.True(session.IsSupported(new Feature("configuration", 5, 0, 0)));
+        _ = await Assert.ThrowsAsync<ApduException>(() => session.GetDeviceInfoAsync(ct));
+        Assert.Equal(2, connection.Reads);
+    }
+
+    internal sealed class VersionedSmartCardConnection(byte major, byte minor) : ISmartCardConnection
     {
         public int Reads { get; private set; }
         public int Selects { get; private set; }
         public byte[] ResetCommand { get; private set; } = [];
         public bool RejectReset { get; init; }
         public bool FailReselect { get; init; }
+        public bool UnknownSelectVersion { get; init; }
         public Transport Transport => Transport.Usb;
         public ConnectionType Type => ConnectionType.SmartCard;
 
@@ -429,6 +442,8 @@ public class ManagementSessionTests
         private byte[] Select()
         {
             Selects++;
+            if (UnknownSelectVersion)
+                return [0x90, 0];
             return FailReselect && Selects > 1
                 ? [0x6A, 0x82]
                 : [.. System.Text.Encoding.UTF8.GetBytes($"{major}.{minor}.0"), 0x90, 0];

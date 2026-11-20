@@ -731,8 +731,8 @@ for Final, whereas `VersionQualifier.ToString()` itself includes the qualifier t
 
 Operations call inherited `EnsureSupports(FeatureSetConfig)` (5.0.0) or
 `EnsureSupports(FeatureDeviceReset)` (5.6.0). Do not replace these with a local `_version` comparison:
-the inherited check uses effective `FirmwareVersion`, including overrides and major-zero development
-version policy. Alpha/Beta display qualifiers are not that major-zero bypass.
+the inherited check uses effective `FirmwareVersion`, including overrides and the optimistic development
+policy. Management represents an explicit Alpha/Beta qualifier as development firmware for those checks.
 
 `FeatureDeviceInfo` enforces the 4.1.0 minimum before public reads, not during the factory's best-effort
 probe. The generic write check does not enforce device-supported masks. A separate 5.7 feature gate applies to
@@ -762,7 +762,9 @@ public static Task<ManagementSession> CreateAsync(
 The applet callback calls `PrepareProtocolAsync`, then explicitly dispatches discovery: SmartCard uses
 `SmartCardBackend.SelectApplicationAsync`, OTP HID uses `OtpBackend.ReadStatusVersionAsync`, and FIDO HID
 reads firmware from the prepared protocol. These static probes do not require an operational backend.
-Firmware resolution prefers DeviceInfo and falls back to the discovered version. After `ConfigureProtocolAsync`,
+Feature firmware prefers the discovery snapshot supplied by the device extension, then the applet's own
+metadata probe and transport version; absent or prerelease firmware admits gates optimistically. Cache
+values never stand in for live metadata or feed the post-reset refresh. After `ConfigureProtocolAsync`,
 the session constructs its backend with the effective protocol. The shared factory marks the session ready only
 after this callback completes. The session snapshots settings needed for a refresh, including the borrowed
 SCP parameters. The owner must keep those parameters alive through any later reset.
@@ -770,7 +772,8 @@ SCP parameters. The owner must keep those parameters alive through any later res
 The metadata probe occurs before optional SCP establishment; an SCP-authenticated return does not imply
 that every initialization exchange used SCP. A firmware override does not skip probes. It configures
 the protocol and feature checks, while `_version` retains discovered metadata for subsequent reads.
-Non-cancellation metadata-probe failures fall back to the transport version; cancellation propagates.
+Non-cancellation metadata-probe failures fall back to the transport version if available. Mandatory
+initialization exchange failures and cancellation propagate, not as fabricated device metadata.
 
 Public reads pass captured `_version` as the decoder default: it wins over tag 05, while non-final
 qualifier firmware can win again. Initial probing passes null. Neither public reads nor configuration

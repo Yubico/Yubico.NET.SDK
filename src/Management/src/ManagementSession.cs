@@ -87,7 +87,8 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     ///     Only one live session may use a connection; do not perform raw I/O alongside the session.
     ///     Initialization prepares the protocol, probes the firmware, and attempts a device-information
     ///     read before establishing optional SCP. Non-cancellation failure of that read falls back to
-    ///     the transport's firmware probe. Initialization metadata is therefore not all SCP-protected.
+    ///     the transport's firmware probe. If neither source yields a version, firmware gates are optimistic.
+    ///     Mandatory transport setup failures and cancellation still propagate. Initialization metadata is not all SCP-protected.
     ///     A firmware override configures the protocol and feature checks; it neither skips discovery
     ///     nor replaces the hardware metadata returned by later reads.
     ///     Creation settings are not retained as an options object. SCP parameters remain caller-owned
@@ -110,19 +111,24 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     /// <exception cref="ArgumentException">The preferred connection type is invalid or does not match the connection.</exception>
     /// <exception cref="NotSupportedException">The connection type is unsupported, or SCP is requested over HID.</exception>
     /// <exception cref="ConnectionInUseException">The connection already has a live session.</exception>
-    /// <exception cref="InvalidOperationException">Initialization cannot determine a firmware version.</exception>
     public static Task<ManagementSession> CreateAsync(
         IConnection connection,
         SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default) =>
+        CreateWithCachedDeviceInfoAsync(connection, options, null, cancellationToken);
+
+    internal static Task<ManagementSession> CreateWithCachedDeviceInfoAsync(
+        IConnection connection, SessionCreationOptions? options, DeviceInfo? cachedDeviceInfo,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
             () => new ManagementSession(connection, options),
-            (session, token) => session.InitializeAsync(token),
+            (session, token) => session.InitializeAsync(token, cachedDeviceInfo),
             cancellationToken);
 
-    private async Task InitializeAsync(CancellationToken cancellationToken, bool afterReset = false)
+    private async Task InitializeAsync(
+        CancellationToken cancellationToken, DeviceInfo? cachedDeviceInfo = null, bool afterReset = false)
     {
         if (IsInitialized)
             return;
@@ -138,10 +144,12 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             _ => throw new NotSupportedException("Unsupported Management protocol.")
         };
 
-        _version = afterReset
-            ? (await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false)).FirmwareVersion
-            : await ResolveFirmwareVersionAsync(protocol, fallbackVersion, cancellationToken).ConfigureAwait(false);
-        var effectiveFirmwareVersion = _firmwareVersionOverride ?? _version;
+        var liveInfo = afterReset
+            ? await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false)
+            : await TryReadInitialDeviceInfoAsync(protocol, cancellationToken).ConfigureAwait(false);
+        _version = liveInfo?.FirmwareVersion ?? fallbackVersion;
+        var effectiveFirmwareVersion = _firmwareVersionOverride ??
+                                       GetFeatureFirmware(cachedDeviceInfo ?? liveInfo, fallbackVersion);
 
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
@@ -259,25 +267,25 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         }
     }
 
-    private async Task<FirmwareVersion> ResolveFirmwareVersionAsync(
+    private async Task<DeviceInfo?> TryReadInitialDeviceInfoAsync(
         IProtocol protocol,
-        FirmwareVersion? fallbackVersion,
         CancellationToken cancellationToken)
     {
         try
         {
-            var deviceInfo = await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
-            return deviceInfo.FirmwareVersion;
+            return await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false);
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
-            _logger.LogDebug(e,
-                "Could not get version from DeviceInfo, fallback to versionHeader in Management.Select");
+            _logger.LogDebug(e, "Could not read Management initialization metadata.");
+            return null;
         }
-
-        return fallbackVersion
-            ?? throw new InvalidOperationException("Could not determine firmware version from device");
     }
+
+    private static FirmwareVersion GetFeatureFirmware(DeviceInfo? info, FirmwareVersion? fallback) =>
+        info?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta
+            ? new FirmwareVersion()
+            : info?.FirmwareVersion ?? fallback ?? new FirmwareVersion();
 
     private static IManagementBackend CreateBackend(IProtocol protocol) =>
         protocol switch

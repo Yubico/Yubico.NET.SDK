@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Ctap2.Cose;
 
@@ -80,7 +81,7 @@ public sealed record CoseArkgP256SeedKey(
     /// <param name="seedKeyAlgorithm">Seed-key COSE algorithm (must be -65700).</param>
     /// <returns>A <see cref="CoseArkgP256SeedKey"/> instance.</returns>
     /// <exception cref="InvalidOperationException">
-    /// A required parameter is missing, a nested key is not an EC2 carrier, or coordinates exceed 32 bytes.
+    /// A required parameter is missing or a nested key is not a valid P-256 point.
     /// </exception>
     internal static CoseArkgP256SeedKey Decode(Dictionary<int, object?> parameters, CoseAlgorithm seedKeyAlgorithm)
     {
@@ -98,7 +99,7 @@ public sealed record CoseArkgP256SeedKey(
             ? a
             : throw new InvalidOperationException("ARKG seed key missing -3 (derived key algorithm)");
 
-        // Require EC2 carriers; generic decoding does not establish curve=1 or valid P-256 points.
+        // Generic COSE decoding intentionally does not validate mathematical points.
         var kemKey = CoseKey.Decode(kemKeyCbor) as CoseEc2Key
             ?? throw new InvalidOperationException("ARKG KEM public key is not CoseEc2Key");
 
@@ -124,25 +125,27 @@ public sealed record CoseArkgP256SeedKey(
     /// <returns>65-byte array: 0x04 || x (32 bytes) || y (32 bytes).</returns>
     private static byte[] ReconstructSec1Uncompressed(CoseEc2Key ec2, string keyName)
     {
-        // Limit slot width; short/empty coordinates are padded, without proving P-256 point validity.
-        if (ec2.X.Length > 32 || ec2.Y.Length > 32)
+        if (ec2.Curve != 1 || ec2.X.Length != 32 || ec2.Y.Length != 32)
         {
-            throw new InvalidOperationException(
-                $"ARKG {keyName} inner P-256 coordinate exceeds 32 bytes (X={ec2.X.Length}, Y={ec2.Y.Length})");
+            throw new InvalidOperationException($"ARKG {keyName} key requires P-256 and two 32-byte coordinates.");
         }
 
-        byte[] sec1 = new byte[65];
-        sec1[0] = 0x04; // SEC1 uncompressed point marker
+        byte[] x = ec2.X.ToArray();
+        byte[] y = ec2.Y.ToArray();
+        try
+        {
+            using var point = ECDsa.Create(new ECParameters
+            {
+                Curve = ECCurve.NamedCurves.nistP256,
+                Q = new ECPoint { X = x, Y = y },
+            });
+        }
+        catch (CryptographicException ex)
+        {
+            throw new InvalidOperationException($"ARKG {keyName} key is not a valid P-256 point.", ex);
+        }
 
-        // Right-align coordinates in their 32-byte slots (left-pad with zeros if needed)
-        // X goes in bytes [1..33), Y goes in bytes [33..65)
-        int xOffset = 33 - ec2.X.Length;
-        int yOffset = 65 - ec2.Y.Length;
-
-        ec2.X.Span.CopyTo(sec1.AsSpan(xOffset, ec2.X.Length));
-        ec2.Y.Span.CopyTo(sec1.AsSpan(yOffset, ec2.Y.Length));
-
-        return sec1;
+        return [0x04, .. x, .. y];
     }
 
     /// <summary>

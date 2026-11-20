@@ -121,13 +121,16 @@ public class OathPasswordChangeTests
                 });
             });
 
-            // Fresh session: the OLD password no longer does.
+            // Fresh session: require device rejection of the old key, not cancellation or a failed exchange.
             await WithFreshSessionAsync(state, token, async session =>
             {
                 Assert.True(session.IsLocked);
 
-                await WithDerivedKeyAsync(session, originalPassword, key =>
-                    Assert.ThrowsAnyAsync<Exception>(() => session.ValidateAsync(key, token)));
+                await WithDerivedKeyAsync(session, originalPassword, async key =>
+                {
+                    var rejection = await Assert.ThrowsAsync<OathException>(() => session.ValidateAsync(key, token));
+                    Assert.Equal(OathFailureReason.WrongPassword, rejection.Reason);
+                });
             });
         }
         catch (Exception exception)

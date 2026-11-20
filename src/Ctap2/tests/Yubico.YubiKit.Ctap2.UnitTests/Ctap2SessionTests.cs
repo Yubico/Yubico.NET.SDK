@@ -493,15 +493,44 @@ public class Ctap2SessionTests
         Assert.Same(requested, Assert.Single(prompt.Resolved).Context);
     }
 
-    private static byte[] MinimalGetInfoResponse()
+    [Theory]
+    [InlineData(null, 1024)]
+    [InlineData(1200, 1200)]
+    public async Task SendsAtAdvertisedSizeButRejectsOversizedRawAndTypedRequests(int? advertised, int limit)
     {
-        // Versions-only fake probe; not a conforming GetInfo envelope (required AAGUID is omitted).
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(advertised), 0x90, 0x00], [0x00, 0x90, 0x00])
+        {
+            ExtendedApdu = true
+        };
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+        int initialTransmissions = connection.TransmittedCommands.Count;
+        var oversized = new byte[limit + 1];
+        oversized[0] = CtapCommand.GetInfo;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => session.SendCborRequestAsync(oversized, ct));
+        await Assert.ThrowsAsync<ArgumentException>(() => session.GetAssertionAsync(new string('a', limit), new byte[32], cancellationToken: ct));
+        Assert.Equal(initialTransmissions, connection.TransmittedCommands.Count);
+        await session.SendCborRequestAsync(oversized.AsMemory(0, limit), ct);
+        Assert.Equal(initialTransmissions + 1, connection.TransmittedCommands.Count);
+    }
+
+    private static byte[] MinimalGetInfoResponse(int? maxMsgSize = null)
+    {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(1);
+        writer.WriteStartMap(maxMsgSize.HasValue ? 3 : 2);
         writer.WriteInt32(0x01);
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_0");
         writer.WriteEndArray();
+        writer.WriteInt32(0x03);
+        writer.WriteByteString(new byte[16]);
+        if (maxMsgSize is int maxSize)
+        {
+            writer.WriteInt32(0x05);
+            writer.WriteInt32(maxSize);
+        }
         writer.WriteEndMap();
         return writer.Encode();
     }
@@ -592,7 +621,8 @@ public class Ctap2SessionTests
         public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
             NullDisposable.Instance;
 
-        public bool SupportsExtendedApdu() => false;
+        public bool ExtendedApdu { get; init; }
+        public bool SupportsExtendedApdu() => ExtendedApdu;
 
         public void Dispose() => DisposeCount++;
 

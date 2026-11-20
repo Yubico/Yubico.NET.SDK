@@ -46,6 +46,8 @@ namespace Yubico.YubiKit.Ctap2;
 /// </remarks>
 public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 {
+    private const int DefaultMaxMessageSize = 1024;
+    private int _maxMessageSize = DefaultMaxMessageSize;
     /// <summary>
     /// Nominal firmware threshold for FIDO2 (5.0+), not a per-device capability or authorization check.
     /// </summary>
@@ -180,6 +182,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         }
 
         _backend = backend;
+        _maxMessageSize = info.MaxMsgSize ?? DefaultMaxMessageSize;
 
         _logger.LogDebug(
             "FIDO session initialized. Firmware: {Version}, Versions: [{Versions}]",
@@ -291,7 +294,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
                     Scope = rp.Id
                 });
 
-            response = await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken)
+            response = await SendWithinMessageLimitAsync(request, userPresenceNotification, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -353,7 +356,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
                         Scope = rpId
                     });
 
-            response = await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken)
+            response = await SendWithinMessageLimitAsync(request, userPresenceNotification, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -384,7 +387,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         // The caller preserves device sequence adjacency and tracks the first response's count.
         var request = CtapRequestBuilder.Create(CtapCommand.GetNextAssertion).Build();
 
-        var response = await _backend.SendCborAsync(
+        var response = await SendWithinMessageLimitAsync(
                 request,
                 UserPresenceNotification.None,
                 cancellationToken)
@@ -422,7 +425,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             request = new byte[] { command };
         }
 
-        return await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken).ConfigureAwait(false);
+        return await SendWithinMessageLimitAsync(request, userPresenceNotification, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -431,8 +434,19 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        return await _backend.SendCborAsync(request, UserPresenceNotification.None, cancellationToken)
+        return await SendWithinMessageLimitAsync(request, UserPresenceNotification.None, cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    private Task<ReadOnlyMemory<byte>> SendWithinMessageLimitAsync(
+        ReadOnlyMemory<byte> request,
+        UserPresenceNotification notification,
+        CancellationToken cancellationToken)
+    {
+        if (request.Length > _maxMessageSize)
+            throw new ArgumentException($"The CTAP request exceeds the authenticator's {_maxMessageSize}-byte message limit.", nameof(request));
+
+        return _backend.SendCborAsync(request, notification, cancellationToken);
     }
 
     private static async Task<AuthenticatorInfo> GetInfoCoreAsync(

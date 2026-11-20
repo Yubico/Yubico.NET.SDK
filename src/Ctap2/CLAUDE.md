@@ -394,7 +394,8 @@ Key rules:
 - Keep operation-level request builders as pure encoding helpers; do not introduce operation-specific CTAP command classes
 - WithBytes/encoded inputs retain private copies with no disposal owner; WithValue callbacks run at Build.
   Keep callback inputs valid until Build. Clear caller-owned encoded request arrays after the awaited send.
-  Canonical mode alone does not enforce command schema, CTAP depth, device maxMsgSize or full input exhaustion.
+  The session enforces GetInfo maxMsgSize (1024 bytes if absent) on typed and raw sends, including
+  the command byte. Canonical encoding alone does not enforce command schema, CTAP depth or full input exhaustion.
 
 ## Forward compatibility and escape hatches
 

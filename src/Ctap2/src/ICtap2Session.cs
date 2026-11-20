@@ -63,11 +63,11 @@ public interface ICtap2Session : IApplicationSession
     /// <para>
     /// The request must include the CTAP command byte as the first byte, followed by
     /// the CBOR-encoded parameters (if any). The caller selects the command schema, authorization
-    /// and stateful sequence, and must meet CTAP canonical encoding, nesting and device message-size
-    /// limits. This method does not perform capability, PIN/UV or command-schema preflight and does
+    /// and stateful sequence, and must meet CTAP canonical encoding and nesting limits. This method
+    /// does not perform capability, PIN/UV or command-schema preflight and does
     /// not infer user-presence notifications. Transport framing and CTAP status handling still apply.
-    /// CTAP2.1 §8 limits nesting to four levels and messages to 1024 bytes unless GetInfo maxMsgSize
-    /// advertises a larger limit; the session does not enforce that device limit at this boundary.
+    /// The session enforces the maxMsgSize from initialization (1024 bytes if absent), counting
+    /// both the command byte and its parameters, not the transport framing.
     /// </para>
     /// <para>
     /// Keep request storage valid and unchanged until the call completes, and clear caller-owned
@@ -78,7 +78,7 @@ public interface ICtap2Session : IApplicationSession
     /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The successful response payload without the CTAP status byte; it can be empty.</returns>
-    /// <exception cref="ArgumentException">The request has no command byte.</exception>
+    /// <exception cref="ArgumentException">The request has no command byte or exceeds the device's message limit.</exception>
     /// <exception cref="CtapException">A nonzero CTAP status is received.</exception>
     /// <exception cref="Core.BadResponseException">The response lacks a CTAP status byte.</exception>
     Task<ReadOnlyMemory<byte>> SendCborRequestAsync(

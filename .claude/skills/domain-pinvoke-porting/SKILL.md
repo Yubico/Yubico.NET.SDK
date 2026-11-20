@@ -73,8 +73,8 @@ internal static extern int Foo(string name, bool flag);
 internal static partial int Foo(string name, [MarshalAs(UnmanagedType.U1)] bool flag);
 ```
 
-`[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]` stays — it is required by the
-analyzer settings and is a Windows security control.
+Set `[DefaultDllImportSearchPaths]` explicitly: use `System32` for direct imports from Windows
+operating-system DLLs and `SafeDirectories` for packaged shims and existing non-Windows imports.
 
 `SYSLIB1054` (the analyzer that suggests this conversion) is informational and is **not** escalated
 to an error in `.editorconfig`. A clean build does not prove you used `LibraryImport`.
@@ -109,15 +109,10 @@ public void Dispose()
 
 ### Native Callbacks
 
-Every declaration in this repo is `[LibraryImport]`, so the source-generated marshaller applies
-everywhere — and it does not marshal C# delegate types at all. There are two ways through that, and
-they are not interchangeable.
-
-**Default: use a function pointer.** The source-generated marshaller does not
-marshal C# delegate types at all. Declare the parameter as `delegate* unmanaged[Cdecl]<...>` and
-point it at a `static` `[UnmanagedCallersOnly]` method. Per-instance state travels through the
-native `context` pointer, not through a closure. There is no delegate to keep alive, so no `GCHandle`
-for the callback itself.
+**Default for new imports: use a function pointer.** Match the native calling convention and point
+it at a `static` `[UnmanagedCallersOnly]` method. Per-instance state travels through the native
+`context` pointer, not through a closure. Preserve existing working delegate marshalling, such as
+`CM_Register_Notification`, and keep the delegate rooted for as long as native code can call it.
 
 ```csharp
 // See Native/MacOS/HidInput/HidInput.Interop.cs + Transports/Hid/MacOS/MacOSFidoHidConnection.cs

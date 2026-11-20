@@ -21,28 +21,28 @@ namespace Yubico.YubiKit.Core.Native.Windows.Kernel32;
 internal static partial class NativeMethods
 {
     [LibraryImport(Libraries.Kernel32, EntryPoint = "CloseHandle", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial int CloseHidHandle(nint handle);
 
     [LibraryImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true,
         StringMarshalling = StringMarshalling.Utf16)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial nint CreateHidFile(string path, DESIRED_ACCESS access, FILE_SHARE share,
         nint securityAttributes, CREATION_DISPOSITION disposition, FILE_FLAG flags, nint template);
 
     // Win32 BOOL is four bytes. Buffers and OVERLAPPED are retained by the caller beyond this call.
     [LibraryImport(Libraries.Kernel32, EntryPoint = "ReadFile", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static unsafe partial int ReadFile(nint handle, byte* buffer, uint length,
         uint* synchronousBytesRead, NativeOverlapped* overlapped);
 
     [LibraryImport(Libraries.Kernel32, EntryPoint = "WriteFile", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static unsafe partial int WriteFile(nint handle, byte* buffer, uint length,
         uint* synchronousBytesWritten, NativeOverlapped* overlapped);
 
     [LibraryImport(Libraries.Kernel32, EntryPoint = "CancelIoEx", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static unsafe partial int CancelIoEx(nint handle, NativeOverlapped* overlapped);
 
     [Flags]
@@ -174,8 +174,6 @@ internal static partial class NativeMethods
         // Security QOS
     }
 
-
-
     [LibraryImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true,
         StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
@@ -188,28 +186,4 @@ internal static partial class NativeMethods
         FILE_FLAG dwFlagsAndAttributes,
         IntPtr hTemplateFile
     );
-
-    //SYSLIB1092: The usage of 'LibraryImportAttribute' does not follow recommendations. It is recommended to use explicit '[In]' and '[Out]' attributes on array parameters.
-    [LibraryImport(Libraries.Kernel32, EntryPoint = "WriteFile", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool WriteFile(
-        SafeFileHandle handle,
-        [In] byte[] lpBuffer,
-        int numBytesToWrite,
-        out int numBytesWritten,
-        IntPtr mustBeZero
-    );
-
-    [LibraryImport(Libraries.Kernel32, EntryPoint = "ReadFile", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool ReadFile(
-        SafeFileHandle handle,
-        [Out] byte[] lpBuffer,
-        int numBytesToRead,
-        out int numBytesRead,
-        IntPtr mustBeZero
-    );
-
 }

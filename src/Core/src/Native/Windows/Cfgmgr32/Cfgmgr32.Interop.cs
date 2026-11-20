@@ -205,24 +205,13 @@ internal static partial class NativeMethods
         int devInstance)
         => CM_Get_Child(out childInstance, devInstance, 0);
 
-    internal static CmErrorCode CM_Get_Device_Id(
-        int dnDevInst,
-        byte[] buffer,
-        int bufferLen)
-        => CM_Get_Device_Id(dnDevInst, buffer, bufferLen, 0);
-
-    internal static CmErrorCode CM_Get_Device_Id_Size(
-        out IntPtr pulLen,
-        int dnDevInst)
-        => CM_Get_Device_Id_Size(out pulLen, dnDevInst, 0);
-
     internal static CmErrorCode CM_Get_Device_Interface_Property(
         string deviceInterface,
         in DEVPROPKEY propertyKey,
         out DEVPROP_TYPE propertyType,
         byte[]? propertyBuffer,
-        ref IntPtr propertyBufferSize)
-        => CM_Get_Device_Interface_Property(deviceInterface, propertyKey, out propertyType, propertyBuffer,
+        ref uint propertyBufferSize)
+        => CM_Get_Device_Interface_Property(deviceInterface, in propertyKey, out propertyType, propertyBuffer,
             ref propertyBufferSize, 0);
 
     internal static CmErrorCode CM_Get_DevNode_Property(
@@ -230,7 +219,7 @@ internal static partial class NativeMethods
         in DEVPROPKEY propertyKey,
         out DEVPROP_TYPE propertyType,
         byte[]? propertyBuffer,
-        ref IntPtr propertyBufferSize)
+        ref uint propertyBufferSize)
         => CM_Get_DevNode_Property(devInstance, in propertyKey, out propertyType, propertyBuffer,
             ref propertyBufferSize, 0);
 
@@ -308,25 +297,7 @@ internal static partial class NativeMethods
         int mustBeZero
     );
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_IDW", SetLastError = true,
-        StringMarshalling = StringMarshalling.Utf16)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    private static partial CmErrorCode CM_Get_Device_Id(
-        int dnDevInst,
-        byte[] buffer,
-        int bufferLen,
-        int mustBeZero
-    );
-
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_ID_Size", SetLastError = true,
-        StringMarshalling = StringMarshalling.Utf16)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    private static partial CmErrorCode CM_Get_Device_Id_Size(
-        out IntPtr pulLen,
-        int dnDevInst,
-        int mustBeZero
-    );
-
+    // Both property APIs use PULONG for the byte count; Windows ULONG is 32 bits on all architectures.
     [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_PropertyW",
         StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
@@ -335,19 +306,18 @@ internal static partial class NativeMethods
         in DEVPROPKEY propertyKey,
         out DEVPROP_TYPE propertyType,
         byte[]? propertyBuffer,
-        ref IntPtr propertyBufferSize,
+        ref uint propertyBufferSize,
         int mustBeZero
     );
 
-    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_DevNode_PropertyW", SetLastError = true,
-        StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_DevNode_PropertyW")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static partial CmErrorCode CM_Get_DevNode_Property(
         int devInstance,
         in DEVPROPKEY propertyKey,
         out DEVPROP_TYPE propertyType,
         byte[]? propertyBuffer,
-        ref IntPtr propertyBufferSize,
+        ref uint propertyBufferSize,
         int mustBeZero
     );
 

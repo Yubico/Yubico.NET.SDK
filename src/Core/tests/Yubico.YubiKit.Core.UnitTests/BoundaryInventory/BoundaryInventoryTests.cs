@@ -219,10 +219,10 @@ public class BoundaryInventoryTests
     {
         var root = BoundaryScanner.CoreSourceRoot();
         var sites = BoundaryScanner.ScanDirectory(root);
-        // Retain all 245 reviewed sites through the one-to-one native owner/seam identity refresh.
-        Assert.Equal(245, sites.Count);
+        // The Windows interop cleanup removed 11 unused imports; other site counts did not change.
+        Assert.Equal(234, sites.Count);
         Assert.Equal(sites.Count, sites.Select(site => site.Id).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(141, sites.Count(site => site.Kind == "native-import"));
+        Assert.Equal(130, sites.Count(site => site.Kind == "native-import"));
         Assert.Equal(46, sites.Count(site => site.Kind == "blocking-wait"));
         Assert.Equal(22, sites.Count(site => site.Kind == "scheduling"));
         Assert.Equal(22, sites.Count(site => site.Kind == "dispatch-gap"));

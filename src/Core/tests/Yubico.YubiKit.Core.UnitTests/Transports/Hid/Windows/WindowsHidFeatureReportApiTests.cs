@@ -22,7 +22,7 @@ public class WindowsHidFeatureReportApiTests
         Assert.True(import.SetLastError);
         Assert.Equal(typeof(byte), method.ReturnType);
         Assert.Equal(new[] { typeof(nint), typeof(byte[]), typeof(uint) }, method.GetParameters().Select(p => p.ParameterType));
-        Assert.Equal(DllImportSearchPath.SafeDirectories,
+        Assert.Equal(DllImportSearchPath.System32,
             method.GetCustomAttribute<DefaultDllImportSearchPathsAttribute>()?.Paths);
     }
 

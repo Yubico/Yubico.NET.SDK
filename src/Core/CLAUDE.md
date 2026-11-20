@@ -461,6 +461,10 @@ var scanner = SdkPlatformInfo.OperatingSystem switch
 **`DllImport` is wrong for new code.** Every native entry point added to `Native/` must be declared
 with `[LibraryImport]` on an `internal static partial` method inside a `partial` class.
 
+Use `[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]` for direct imports from Windows
+operating-system DLLs (such as Cfgmgr32, Hid and Kernel32). Use `SafeDirectories` for packaged
+native shims and existing non-Windows imports, not `System32`.
+
 ```csharp
 // ❌ WRONG — runtime-generated IL stub
 [DllImport(Libraries.NativeShims, CharSet = CharSet.Ansi, EntryPoint = "Native_Foo", SetLastError = true)]
@@ -490,8 +494,9 @@ Conversion traps, in the order they bite:
 |---|---|
 | `extern` → `partial` | The method **and** its enclosing class both need `partial`. `NativeMethods` classes in `Native/` are already declared that way where converted. |
 | `CharSet = CharSet.Ansi` | There is no direct equivalent. On Unix it meant UTF-8 → use `StringMarshalling = StringMarshalling.Utf8`. On Windows it meant the ANSI code page → marshal `byte*`/`ReadOnlySpan<byte>` yourself rather than pretending it is UTF-8. `CharSet.Unicode` → `StringMarshalling.Utf16`. |
-| `bool` parameters/returns | Not blittable. Annotate `[MarshalAs(UnmanagedType.U1)]` (or `.I4` — match the C header), or change the signature to the native integer type. |
-| Delegate callbacks | Not marshalled at all by the generator. Use `delegate* unmanaged[Cdecl]<...>` with an `[UnmanagedCallersOnly]` target, as `Native/MacOS/HidInput/HidInput.Interop.cs` does. A function pointer also avoids the per-instance thunk and the "keep the delegate alive" `GCHandle` dance. |
+| `bool` parameters/returns | Match the native width: Windows `BOOLEAN` is one byte (`byte` or `[MarshalAs(UnmanagedType.U1)]`); `BOOL` is four bytes (`int` or `[MarshalAs(UnmanagedType.Bool)]`). |
+| Windows size arguments | Windows `ULONG` stays 32 bits on all architectures: use `uint`, or `ref uint` for an input/output `PULONG`, not `IntPtr`. |
+| Delegate callbacks | Prefer `delegate* unmanaged<...>` with an `[UnmanagedCallersOnly]` target for new imports, using the native calling convention. The Windows HID listener uses a delegate with `CM_Register_Notification`; preserve its rooting through unregister. |
 | `string` return values | Needs an explicit marshaller (`Utf8StringMarshaller`) or return `nint` and convert. Silent ownership bugs live here — say who frees the buffer in a comment. |
 | `SafeHandle` | Supported for pointer-width native handles, including returns such as `LinuxUdevSafeHandle`. Its default unmanaged representation is `IntPtr`, **not** an `int` file descriptor. For libc `open`/`eventfd`, return native `int` into a preallocated managed SafeHandle, retaining SafeHandle ownership and references on caller APIs. |
 | `SetLastError = true` | Keep it only where a caller actually reads `errno`/`GetLastError`. It is not free. |

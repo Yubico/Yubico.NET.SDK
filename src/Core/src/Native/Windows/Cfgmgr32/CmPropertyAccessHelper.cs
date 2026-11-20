@@ -26,7 +26,7 @@ internal class CmPropertyAccessHelper
     {
         NativeMethods.CmErrorCode errorCode;
 
-        var propertyBufferSize = IntPtr.Zero;
+        uint propertyBufferSize = 0;
         errorCode = getObjectProperty(
             objectId,
             propertyKey,
@@ -44,7 +44,7 @@ internal class CmPropertyAccessHelper
                 $"Failed to get the size needed for the property {propertyKey} for ConfigMgr object {objectId}."
             );
 
-        var propertyBuffer = new byte[propertyBufferSize.ToInt64()];
+        var propertyBuffer = new byte[checked((int)propertyBufferSize)];
         errorCode = getObjectProperty(
             objectId,
             propertyKey,
@@ -66,7 +66,7 @@ internal class CmPropertyAccessHelper
                 return propertyBuffer[0] != 0;
 
             case NativeMethods.DEVPROP_TYPE.GUID:
-                Debug.Assert(propertyBufferSize.ToInt32() == 16);
+                Debug.Assert(propertyBufferSize == 16);
                 return new Guid(propertyBuffer);
 
             case NativeMethods.DEVPROP_TYPE.STRING:
@@ -76,11 +76,11 @@ internal class CmPropertyAccessHelper
                 return MultiString.GetStrings(propertyBuffer, Encoding.Unicode);
 
             case NativeMethods.DEVPROP_TYPE.UINT32:
-                Debug.Assert(propertyBufferSize.ToInt32() == 4);
+                Debug.Assert(propertyBufferSize == 4);
                 return BinaryPrimitives.ReadUInt32LittleEndian(propertyBuffer);
 
             case NativeMethods.DEVPROP_TYPE.UINT16:
-                Debug.Assert(propertyBufferSize.ToInt32() == 2);
+                Debug.Assert(propertyBufferSize == 2);
                 return BinaryPrimitives.ReadUInt16LittleEndian(propertyBuffer);
 
             default:
@@ -94,7 +94,7 @@ internal class CmPropertyAccessHelper
         in NativeMethods.DEVPROPKEY propertyKey,
         out NativeMethods.DEVPROP_TYPE propertyType,
         byte[]? propertyBuffer,
-        ref IntPtr propertyBufferSize
+        ref uint propertyBufferSize
     );
 
 }

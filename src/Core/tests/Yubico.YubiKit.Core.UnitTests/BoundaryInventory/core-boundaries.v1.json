@@ -156,23 +156,23 @@
     {
       "path": "Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs", "reviewOwner": "Core maintainers",
       "rationale": "Configuration Manager device topology, property and notification registration calls execute synchronously; notifications can invoke managed callbacks independently and their lifetime must be reviewed separately.",
-      "evidence": ["Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs:243-354 declares Configuration Manager topology/property/notification entry points."],
+      "evidence": ["Native/Windows/Cfgmgr32/Cfgmgr32.Interop.cs declares Configuration Manager topology/property/notification entry points, with unsigned 32-bit property buffer sizes."],
       "status": ["documented", "outstanding"],
-      "entries": ["CM_Get_Child#5C8064A7E78C", "CM_Get_DevNode_Property#8DCA484C06AE", "CM_Get_Device_Id#999EBF5209D8", "CM_Get_Device_Id_Size#0144432B91E3", "CM_Get_Device_Interface_List#B80CAA80374B", "CM_Get_Device_Interface_List_Size#EC951EA4DF03", "CM_Get_Device_Interface_Property#4B1F68D7B2AB", "CM_Get_Parent#4D60E07A24B5", "CM_Get_Sibling#F502306DFB2F", "CM_Locate_DevNode#557DAC30DE98", "CM_Register_Notification#EC47406779E3", "CM_Unregister_Notification#D600C39E955B"]
+      "entries": ["CM_Get_Child#5C8064A7E78C", "CM_Get_DevNode_Property#0968523B6567", "CM_Get_Device_Interface_List#B80CAA80374B", "CM_Get_Device_Interface_List_Size#EC951EA4DF03", "CM_Get_Device_Interface_Property#C3FDA893399A", "CM_Get_Parent#4D60E07A24B5", "CM_Get_Sibling#F502306DFB2F", "CM_Locate_DevNode#557DAC30DE98", "CM_Register_Notification#EC47406779E3", "CM_Unregister_Notification#D600C39E955B"]
     },
     {
       "path": "Native/Windows/HidD/HidD.Interop.cs", "reviewOwner": "Core maintainers",
-      "rationale": "HID feature reports and metadata queries cross synchronous Windows HID APIs; GetFeature/SetFeature can wait on hardware, unlike a nonblocking async operation.",
-      "evidence": ["Native/Windows/HidD/HidD.Interop.cs:58-117 declares HID feature, attribute, preparsed data and capability imports."],
+      "rationale": "HID capability queries cross a synchronous Windows HID parser API.",
+      "evidence": ["Native/Windows/HidD/HidD.Interop.cs:HidP_GetCaps parses capabilities from preparsed HID data."],
       "status": ["documented", "outstanding"],
-      "entries": ["HidD_FreePreparsedData#4E492D2172B9", "HidD_GetAttributes#2BFA13D73336", "HidD_GetFeature#7FCB390D6B5A", "HidD_GetManufacturerString#D55B77A9676F", "HidD_GetPreparsedData#BCB2850159A5", "HidD_GetProductString#10C6E975E5CC", "HidD_SetFeature#7FD4C5B1021B", "HidP_GetCaps#F4269298FEFC"]
+      "entries": ["HidP_GetCaps#F4269298FEFC"]
     },
     {
       "path": "Native/Windows/Kernel32/Kernel32.Interop.cs", "reviewOwner": "Core maintainers",
-      "rationale": "CreateFile/ReadFile/WriteFile are synchronous handle and report I/O boundaries; no overlapped completion semantics or async platform result is demonstrated here.",
-      "evidence": ["Native/Windows/Kernel32/Kernel32.Interop.cs:155-180 declares CreateFile, ReadFile and WriteFile."],
+      "rationale": "CreateFile opens a synchronous device handle.",
+      "evidence": ["Native/Windows/Kernel32/Kernel32.Interop.cs:CreateFile returns the SafeFileHandle used by CmDevice.OpenDevice."],
       "status": ["documented", "outstanding"],
-      "entries": ["CreateFile#292922498A8F", "ReadFile#4EC00383E931", "WriteFile#0E1F3D62B1FC"]
+      "entries": ["CreateFile#292922498A8F"]
     },
     {
       "path": "Native/Windows/WinSCard/WinSCard.Interop.cs", "reviewOwner": "Core maintainers",

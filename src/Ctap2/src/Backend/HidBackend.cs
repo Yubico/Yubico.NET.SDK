@@ -73,10 +73,9 @@ internal sealed class HidBackend : ICtap2Backend
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            // A missing status byte is reported as synthetic Other, not a received device status.
             if (response.Length < 1)
             {
-                throw new CtapException(CtapStatus.Other, "Empty response from authenticator");
+                throw new BadResponseException("The HID CTAP response did not contain a status byte.");
             }
 
             var status = (CtapStatus)response.Span[0];

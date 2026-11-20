@@ -79,8 +79,8 @@ public interface ICtap2Session : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The successful response payload without the CTAP status byte; it can be empty.</returns>
     /// <exception cref="ArgumentException">The request has no command byte.</exception>
-    /// <exception cref="CtapException">A nonzero CTAP status is received, or Other is synthesized
-    /// for a response with no status byte. Transport/APDU errors have separate origins.</exception>
+    /// <exception cref="CtapException">A nonzero CTAP status is received.</exception>
+    /// <exception cref="Core.BadResponseException">The response lacks a CTAP status byte.</exception>
     Task<ReadOnlyMemory<byte>> SendCborRequestAsync(
         ReadOnlyMemory<byte> request,
         CancellationToken cancellationToken = default);

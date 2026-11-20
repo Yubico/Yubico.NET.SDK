@@ -49,8 +49,8 @@ internal sealed class SmartCardBackend : ICtap2Backend
     /// <summary>
     /// Selects the FIDO2 application.
     /// </summary>
-    /// <remarks>Any SELECT ApduException is currently wrapped as NotSupportedException with its
-    /// original inner exception. The wrapper alone does not prove the FIDO AID was absent.</remarks>
+    /// <remarks>Only unavailable SELECT responses (6A82, 6D00 and 6E00) are wrapped as
+    /// <see cref="NotSupportedException"/>. Other APDU failures propagate unchanged.</remarks>
     public async Task SelectApplicationAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -58,7 +58,7 @@ internal sealed class SmartCardBackend : ICtap2Backend
             _logger.LogDebug("Selecting FIDO2 application via SmartCard");
             await _protocol.SelectAsync(ApplicationIds.Fido, cancellationToken).ConfigureAwait(false);
         }
-        catch (ApduException ex)
+        catch (ApduException ex) when (ex.SW is 0x6A82 or 0x6D00 or 0x6E00)
         {
             throw new NotSupportedException(
                 "FIDO2 over SmartCard is not supported because the authenticator did not expose the FIDO2 AID.",
@@ -105,10 +105,9 @@ internal sealed class SmartCardBackend : ICtap2Backend
             var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
             responseData = apduResponse.Data;
 
-            // The first payload byte is CTAP status; missing status produces synthetic Other.
             if (responseData.Length < 1)
             {
-                throw new CtapException(CtapStatus.Other, "Empty response from authenticator");
+                throw new BadResponseException("The SmartCard CTAP response did not contain a status byte.");
             }
 
             var status = (CtapStatus)responseData.Span[0];

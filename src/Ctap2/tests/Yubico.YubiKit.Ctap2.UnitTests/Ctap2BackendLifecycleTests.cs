@@ -1,14 +1,52 @@
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Ctap2.Backend;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
 public class Ctap2BackendLifecycleTests
 {
+    [Theory]
+    [InlineData(0x6A82, true)]
+    [InlineData(0x6D00, true)]
+    [InlineData(0x6E00, true)]
+    [InlineData(0x6F00, false)]
+    public async Task SmartCardSelect_MapsOnlyUnavailableStatuses(short sw, bool unavailable)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var expected = ApduException.FromStatusWord(sw);
+        var protocol = Substitute.For<ISmartCardProtocol>();
+        protocol.SelectAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct).ThrowsAsync(expected);
+        var backend = new SmartCardBackend(protocol);
+
+        var actual = await Record.ExceptionAsync(() => backend.SelectApplicationAsync(ct));
+
+        if (unavailable)
+            Assert.Same(expected, Assert.IsType<NotSupportedException>(actual).InnerException);
+        else
+            Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task CborBackends_RejectMissingStatusByte()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var smartCard = Substitute.For<ISmartCardProtocol>();
+        smartCard.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), cancellationToken: ct)
+            .Returns(new ApduResponse(new byte[] { 0x90, 0x00 }));
+        var hid = Substitute.For<IFidoHidProtocol>();
+        hid.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(ReadOnlyMemory<byte>.Empty);
+        byte[] request = [CtapCommand.GetInfo];
+
+        await Assert.ThrowsAsync<BadResponseException>(() => new SmartCardBackend(smartCard).SendCborAsync(request, UserPresenceNotification.None, ct));
+        await Assert.ThrowsAsync<BadResponseException>(() => new HidBackend(hid).SendCborAsync(request, UserPresenceNotification.None, ct));
+    }
+
     [Fact]
     public void ICtap2Backend_DoesNotAdvertiseResourceOwnership()
     {

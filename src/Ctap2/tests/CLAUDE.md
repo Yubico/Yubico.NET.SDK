@@ -195,6 +195,6 @@ public void RegistrationExtensions_EncodePolicyAndHmacEnablement()
 - **Resident key limits**: Read credential metadata; remaining discoverable capacity is an estimate, not a fixed slot count
 - **Evidence scope**: Parsed responses, nonempty signatures and fake-wire assertions are not RP/attestation,
   firmware, biometric or FIPS qualification. Bio APIs have known standard wire/schema/completion limitations.
-- **Secret lifetime**: Existing integration fixtures have cleanup gaps; the optional AuditV2 blob interop
-  fixture can export a large-blob key as immutable hex text to disk. It is a human-controlled secret-export
-  path, not a no-persistence or unattended safety example.
+- **Secret lifetime**: The SDK-write fixture checks the blob in-process without exporting its key. The
+  separate external-writer fixture still requires a human-authorized key supplied via an environment
+  variable; it does not erase the environment text and is not an unattended safety example.

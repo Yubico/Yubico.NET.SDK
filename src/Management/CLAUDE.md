@@ -679,8 +679,8 @@ await session.SetDeviceConfigAsync(
 Timeout setters validate 0–3600 auto-eject seconds and 0–60 challenge-response seconds at assignment.
 Those are SDK limits, not firmware maxima. Zero disables auto-eject or requests the challenge-response
 default (normally 15 seconds), respectively. Auto-eject is an inactivity timer; assigning it does not
-implicitly set TouchEject. `Validate()` only rejects exact USB `None`; it does not validate supported
-device applications or all arbitrary enum widths. Check supported masks before writing.
+implicitly set TouchEject. `Validate()` rejects exact USB `None` and out-of-width request values before
+encoding; in-width unknown bits are preserved. Check device-supported masks before writing.
 
 `CurrentLockCode` authorizes each protected command. `NewLockCode` sets/replaces the code, or removes
 it when all sixteen bytes are zero; an empty memory value is invalid. The session borrows both buffers
@@ -909,8 +909,8 @@ var yubiKey = devices.SingleOrDefault(device => device.SerialNumber == 12345678)
    reset-based recovery; retain it securely until a replacement/removal write succeeds.
 2. **Reboot**: A reboot request is not factory reset. End old scopes and rediscover/reopen afterwards;
    neither three seconds nor a discovery result's position proves the intended key is ready.
-3. **USB reachability**: Exact USB `None` is rejected; device-supported-mask and arbitrary-width validation
-   are not comprehensive. Preserve a supported application and a recovery route.
+3. **USB reachability**: Exact USB `None` and out-of-width masks are rejected, but device support is not
+   checked. Preserve a supported application and a recovery route.
 4. **Metadata interpretation**: Flagged form factors can miss equality filters; current FIPS masks use the
    wrong mapping. Do not derive approval, active mode or product-family eligibility from these filters.
 5. **NFC**: Check hardware and 5.7+ support for restriction; false encoding alone is not verified recovery.

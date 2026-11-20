@@ -122,9 +122,10 @@ order and a fixed delay do not establish device identity or readiness.
 `ChallengeResponseTimeout`, `DeviceFlags` and `NfcRestricted`. Leave a property `null` to keep the device's
 current value, so deriving from what the key reports is a one-liner:
 `new DeviceConfig { UsbEnabled = info.UsbEnabled & ~DeviceCapabilities.Otp }`. At least one USB capability must
-remain enabled. The SDK rejects exactly `DeviceCapabilities.None` for USB, but does not check the requested
-mask against this key's supported applications or comprehensively validate arbitrary cast values. NFC
-`None` is accepted and clears that transport's enabled application set.
+remain enabled. The SDK rejects `DeviceCapabilities.None` for USB and values outside the wire widths
+(16 bits for capability masks, 8 bits for flags). It preserves unknown bits within those widths and does
+not check whether the device supports the requested applications. NFC `None` clears that transport's
+enabled application set.
 
 ### Timeouts, flags and NFC restriction
 

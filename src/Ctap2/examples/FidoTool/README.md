@@ -9,6 +9,11 @@ The tool retains its FIDO CLI identity: the application is FIDO and its PIN is a
 `Yubico.YubiKit.Ctap2` provides CTAP2 operations over the shared CTAPHID USB transport or the
 FIDO SmartCard application. WebAuthn is the higher-level ceremony API, not the HID transport.
 
+**Demo only.** FidoTool demonstrates CTAP exchanges; it does not register accounts or verify sign-ins.
+Its credential demo uses a generated account handle and a synthetic client-data hash, and its assertion
+demo displays the first result rather than running account selection. A relying party needs its own
+challenge, exact client data, account binding, and independent verification of the returned data.
+
 ## Quick Start
 
 PIN-changing and token-authorized flows select PIN/UV protocol 2 without negotiation. Before using

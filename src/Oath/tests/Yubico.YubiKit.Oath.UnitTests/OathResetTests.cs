@@ -133,7 +133,11 @@ public sealed class OathResetTests
         if (cancel)
             connection.AfterReset = cancellation.Cancel;
 
-        var failure = await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetAsync(cancellation.Token));
+        var failure = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await using var ownedSession = session;
+            await ownedSession.ResetAsync(cancellation.Token);
+        });
         Assert.Contains("reset succeeded", failure.Message, StringComparison.OrdinalIgnoreCase);
         Assert.IsType<Core.Protocols.SmartCard.Apdu.ApduException>(failure.InnerException);
 
@@ -141,7 +145,7 @@ public sealed class OathResetTests
         Assert.False(session.IsAuthenticated);
         Assert.Equal(3, connection.Inner.TransmittedCommands.Count);
         Assert.Equal(1, connection.Inner.DisposeCount);
-        Assert.Same(cleanupFailure, Assert.Throws<InvalidOperationException>(session.Dispose));
+        session.Dispose();
         Assert.Equal(1, connection.Inner.DisposeCount);
         await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListCredentialsAsync(TestContext.Current.CancellationToken));
     }

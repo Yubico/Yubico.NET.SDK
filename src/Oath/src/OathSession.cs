@@ -44,6 +44,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private IOathBackend _backend = null!;
     private byte[] _salt = [];
     private byte[] _challenge = [];
+    private bool _endingAfterResetFailure;
 
     /// <inheritdoc />
     public string DeviceId { get; private set; } = string.Empty;
@@ -695,8 +696,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
         }
         catch (Exception exception)
         {
-            try { await DisposeAsync().ConfigureAwait(false); }
-            catch { /* Preserve the reinitialization failure even if teardown also fails. */ }
+            _endingAfterResetFailure = true;
+            await DisposeAsync().ConfigureAwait(false);
             throw new InvalidOperationException("OATH reset succeeded, but reinitialization failed and the session ended.", exception);
         }
     }
@@ -929,6 +930,19 @@ public sealed class OathSession : ApplicationSession, IOathSession
             cancellationToken).ConfigureAwait(false);
     }
 #pragma warning restore RS0026
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        catch when (_endingAfterResetFailure)
+        {
+            // ResetAsync already has a primary failure. Keep the disposal gate from replaying a
+            // secondary failure when the caller's await using disposes the terminal session again.
+        }
+    }
 
     protected override void Dispose(bool disposing)
     {

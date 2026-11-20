@@ -410,8 +410,8 @@ Valid authenticator response data that is not yet modeled must remain usable wit
 - `ICtap2Session.SendCborRequestAsync` for explicitly constructed raw CTAP CBOR requests and responses.
 
 PIN/UV key agreement is a separate security-critical boundary: do not relax required P-256 key type,
-curve, coordinates or protocol structure for forward compatibility. Current helper checks coordinates
-but omits required peer-label checks; that is a validation gap, not a sanctioned bypass. Unknown response
+curve, coordinates or protocol structure for forward compatibility. The helper requires all three
+peer labels and validates coordinate widths before point import. Unknown response
 fields must not be blindly copied into requests. Credential/GetInfo decoders also have known required-
 field/envelope-validation gaps; preserve valid unknown data without promising universal malformed rejection.
 

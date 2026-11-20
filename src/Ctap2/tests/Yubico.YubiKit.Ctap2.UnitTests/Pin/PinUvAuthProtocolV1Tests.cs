@@ -49,8 +49,8 @@ public sealed class PinUvAuthProtocolV1Tests
 
         var peerCoseKey = new Dictionary<int, object?>
         {
-            // The fixture omits required alg=-25; success reflects the current missing label check.
             { 1, 2 },
+            { 3, -25 },
             { -1, 1 },
             { -2, peerParams.Q.X },
             { -3, peerParams.Q.Y }
@@ -64,6 +64,27 @@ public sealed class PinUvAuthProtocolV1Tests
         Assert.Equal(2, keyAgreement[1]);
         Assert.Equal(-25, keyAgreement[3]);
         Assert.Equal(1, keyAgreement[-1]);
+    }
+
+    [Theory]
+    [InlineData(1, null)]
+    [InlineData(1, 1)]
+    [InlineData(3, null)]
+    [InlineData(3, -7)]
+    [InlineData(-1, null)]
+    [InlineData(-1, 2)]
+    public void Encapsulate_RejectsMissingOrWrongPeerLabels(int label, int? replacement)
+    {
+        using var protocol = new PinUvAuthProtocolV1();
+        using var peer = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        var q = peer.ExportParameters(false).Q;
+        var key = new Dictionary<int, object?> { [1] = 2, [3] = -25, [-1] = 1, [-2] = q.X, [-3] = q.Y };
+        if (replacement is int value)
+            key[label] = value;
+        else
+            key.Remove(label);
+
+        Assert.Throws<ArgumentException>(() => protocol.Encapsulate(key));
     }
 
     [Fact]

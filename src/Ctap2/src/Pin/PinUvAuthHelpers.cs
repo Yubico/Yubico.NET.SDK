@@ -40,7 +40,7 @@ internal static class PinUvAuthHelpers
     /// <summary>
     /// Performs ECDH P-256 key agreement with the peer's COSE key.
     /// </summary>
-    /// <param name="peerCoseKey">The borrowed peer key, required by CTAP to contain kty=2, alg=-25, crv=1 and 32-byte big-endian X/Y coordinates, without other optional parameters.</param>
+    /// <param name="peerCoseKey">The borrowed peer key: kty=2, alg=-25, crv=1 and 32-byte big-endian X/Y coordinates.</param>
     /// <returns>
     /// A new platform public-key dictionary and a caller-owned raw ECDH secret (Z), the 32-byte
     /// big-endian X coordinate of the shared point. Clear Z after deriving protocol-specific keys,
@@ -48,8 +48,7 @@ internal static class PinUvAuthHelpers
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="peerCoseKey"/> is null.</exception>
     /// <remarks>
-    /// Explicit checks currently cover only coordinate types and lengths, not required COSE labels
-    /// or optional-parameter restrictions. Import forces P-256 and delegates point validation to the
+    /// Import forces P-256 and delegates point validation to the
     /// provider. The ephemeral crypto objects are disposed, but allocation of the public dictionary
     /// after derivation is not protected by a Z-clearing guard.
     /// </remarks>
@@ -60,7 +59,7 @@ internal static class PinUvAuthHelpers
     {
         ArgumentNullException.ThrowIfNull(peerCoseKey);
 
-        // Check coordinate storage here; required kty/alg/crv labels are not yet validated.
+        // Check coordinate storage before using the public point.
         if (!peerCoseKey.TryGetValue(CoseEC2X, out var xObj) || xObj is not byte[] peerX)
         {
             throw new ArgumentException("Peer COSE key missing or invalid X coordinate (-2).", nameof(peerCoseKey));
@@ -80,6 +79,11 @@ internal static class PinUvAuthHelpers
         if (peerY.Length != 32)
         {
             throw new ArgumentException($"Invalid Y coordinate length: expected 32, got {peerY.Length}.", nameof(peerCoseKey));
+        }
+
+        if (!HasRequiredLabels(peerCoseKey))
+        {
+            throw new ArgumentException("Peer COSE key must identify EC2, ECDH-ES + HKDF-256, and P-256.", nameof(peerCoseKey));
         }
 
         // Generate ephemeral ECDH key pair
@@ -118,4 +122,9 @@ internal static class PinUvAuthHelpers
 
         return (keyAgreement, z);
     }
+
+    private static bool HasRequiredLabels(IReadOnlyDictionary<int, object?> peerKey) =>
+        peerKey.GetValueOrDefault(CoseKeyType) is CoseKeyTypeEC2
+        && peerKey.GetValueOrDefault(CoseAlgorithm) is CoseAlgEcdhEsHkdf256
+        && peerKey.GetValueOrDefault(CoseEC2Curve) is CoseEC2CurveP256;
 }

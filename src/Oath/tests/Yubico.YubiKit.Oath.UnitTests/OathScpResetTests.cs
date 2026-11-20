@@ -19,8 +19,9 @@ public sealed class OathScpResetTests
     [InlineData(true)]
     public async Task ResetAsync_Scp03_ClearsOldKeysAndRehandshakesOrEndsSession(bool rejectRehandshake)
     {
-        using var parameters = Scp03KeyParameters.Default;
-        await using var connection = new OathScpConnection(rejectRehandshake);
+        using var parameters = new Scp03KeyParameters(new KeyReference(1, 0x42),
+            new StaticKeys("fixture-enc-key!"u8, "fixture-mac-key!"u8, "fixture-dek-key!"u8));
+        await using var connection = new OathScpConnection(parameters, rejectRehandshake);
         await using var session = await OathSession.CreateAsync(connection,
             new SessionCreationOptions { ScpKeyParameters = parameters }, TestContext.Current.CancellationToken);
         Assert.True(session.IsAuthenticated);
@@ -95,10 +96,10 @@ public sealed class OathScpResetTests
     // Adapt SELECT metadata and synthesize an R-MAC-bearing empty RESET response for the cleanup oracle.
     // The existing fake handles the handshake, but does not verify outbound encryption or command MACs.
     // Actual key-array clearing/order is tested; whole-SCP conformance and live secure reset are separate.
-    private sealed class OathScpConnection(bool rejectRehandshake) : ISmartCardConnection
+    private sealed class OathScpConnection(Scp03KeyParameters parameters, bool rejectRehandshake) : ISmartCardConnection
     {
-        private readonly Scp03HandshakeFakeConnection _handshake = new();
-        private readonly Scp03HandshakeFakeConnection _rehandshake = new();
+        private readonly Scp03HandshakeFakeConnection _handshake = CreateHandshake(parameters.Keys);
+        private readonly Scp03HandshakeFakeConnection _rehandshake = CreateHandshake(parameters.Keys);
         public List<byte[]> Commands { get; } = [];
         public int DisposeCount { get; private set; }
         public Transport Transport => Transport.Usb;
@@ -107,6 +108,8 @@ public sealed class OathScpResetTests
         {
             Commands.Add(command.ToArray());
             var handshake = Commands.Count <= 4 ? _handshake : _rehandshake;
+            if (command.Span[1] == 0x50)
+                Assert.Equal(parameters.KeyReference.Kvn, command.Span[2]);
             if (Commands.Count == 6 && rejectRehandshake)
                 return new byte[] { 0x6A, 0x88 };
 
@@ -129,9 +132,25 @@ public sealed class OathScpResetTests
                 }
             }
             var response = await handshake.TransmitAndReceiveAsync(command, cancellationToken);
+            if (command.Span[1] == 0x50)
+            {
+                byte[] initializeUpdate = response.ToArray();
+                initializeUpdate[10] = parameters.KeyReference.Kvn;
+                return initializeUpdate;
+            }
             return command.Span[1] == 0xA4
                 ? new byte[] { 0x79, 3, 5, 7, 0, 0x71, 1, (byte)(Commands.Count == 1 ? 1 : 2), 0x90, 0 }
                 : response;
+        }
+        private static Scp03HandshakeFakeConnection CreateHandshake(StaticKeys keys)
+        {
+            // Configure the linked fixture's own key buffers without changing the Security Domain fixture.
+            var handshake = new Scp03HandshakeFakeConnection();
+            var storage = Field(handshake, "_staticKeys");
+            keys.Enc.CopyTo(Assert.IsType<byte[]>(Field(storage, "_enc")));
+            keys.Mac.CopyTo(Assert.IsType<byte[]>(Field(storage, "_mac")));
+            keys.Dek.CopyTo(Assert.IsType<byte[]>(Field(storage, "_dek")));
+            return handshake;
         }
         public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => _handshake.BeginTransaction(cancellationToken);
         public bool SupportsExtendedApdu() => false;

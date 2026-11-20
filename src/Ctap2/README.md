@@ -177,9 +177,9 @@ an already configured, known evaluation PIN. It does not set a PIN. If `pinUvAut
 and RP scope. This is not protocol-1 negotiation or a guarantee of administrative authorization.
 
 `GetPinRetriesAsync` and `GetUvRetriesAsync` return `PinRetryStatus` and
-`UserVerificationRetryStatus`. Their missing counts/defaulted booleans do not prove known retry state;
-`PowerCycleRequired=false` is not assurance that a power cycle is unnecessary, and CTAP 2.1 defines no such
-UV power-cycle field. Stop on blocked states rather than blindly retrying: temporary `PinAuthBlocked`
+`UserVerificationRetryStatus`. Both require a retry count. PIN `PowerCycleRequired` is nullable:
+use `is true` to act on an affirmative indication; `null` means the authenticator did not report it.
+CTAP defines no such UV power-cycle field. Stop on blocked states rather than blindly retrying: temporary `PinAuthBlocked`
 differs from exhausted `PinBlocked`. `ClientPin` also exposes PIN set/change operations. PIN bytes must
 represent NFC-normalized UTF-8, satisfy the current code-point minimum and byte limit, and not end in NUL;
 the SDK's 4–63-byte check alone does not establish these requirements.

@@ -626,7 +626,7 @@ Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol.Kdf(System.ReadOnlySpan<byte> z) -> 
 Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol.Verify(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message, System.ReadOnlySpan<byte> signature) -> bool
 Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol.Version.get -> int
 Yubico.YubiKit.Ctap2.Pin.PinRetryStatus
-Yubico.YubiKit.Ctap2.Pin.PinRetryStatus.PowerCycleRequired.get -> bool
+Yubico.YubiKit.Ctap2.Pin.PinRetryStatus.PowerCycleRequired.get -> bool?
 Yubico.YubiKit.Ctap2.Pin.PinRetryStatus.RetriesRemaining.get -> int
 Yubico.YubiKit.Ctap2.Pin.PinUvAuthProtocolV1
 Yubico.YubiKit.Ctap2.Pin.PinUvAuthProtocolV1.Authenticate(System.ReadOnlySpan<byte> key, System.ReadOnlySpan<byte> message) -> byte[]!

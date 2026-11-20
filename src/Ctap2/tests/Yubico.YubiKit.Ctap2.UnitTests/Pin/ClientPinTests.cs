@@ -15,6 +15,7 @@
 using NSubstitute;
 using System.Formats.Cbor;
 using System.Text;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
@@ -69,14 +70,14 @@ public sealed class ClientPinTests : IDisposable
     {
         using var clientPin = CreateClientPin();
 
-        // powerCycleState is omitted: false below is the parser default, not explicit device state.
+        // powerCycleState is omitted, not encoded as false.
         var responseData = CreatePinRetriesResponse(5, false);
         SetupMockResponse(responseData);
 
         var status = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(5, status.RetriesRemaining);
-        Assert.False(status.PowerCycleRequired);
+        Assert.Null(status.PowerCycleRequired);
     }
 
     [Fact]
@@ -105,6 +106,36 @@ public sealed class ClientPinTests : IDisposable
         var status = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(3, status.RetriesRemaining);
+        Assert.False(status.PowerCycleRequired);
+    }
+
+    [Theory]
+    [InlineData(false, "A0")]
+    [InlineData(false, "A10320")]
+    [InlineData(false, "A1031A80000000")]
+    [InlineData(false, "A1030000")]
+    [InlineData(true, "A104F5")]
+    [InlineData(true, "A10520")]
+    [InlineData(true, "A1051A80000000")]
+    [InlineData(true, "A1050000")]
+    public async Task RetryQueries_RejectMalformedCountsInsteadOfReportingExhaustion(bool uv, string wireHex)
+    {
+        using var clientPin = CreateClientPin();
+        SetupMockResponse(Convert.FromHexString(wireHex));
+        var ct = TestContext.Current.CancellationToken;
+
+        await Assert.ThrowsAsync<BadResponseException>(() => uv ? (Task)clientPin.GetUvRetriesAsync(ct) : clientPin.GetPinRetriesAsync(ct));
+    }
+
+    [Fact]
+    public async Task UvRetryQuery_IgnoresPinPowerCycleField()
+    {
+        using var clientPin = CreateClientPin();
+        SetupMockResponse(CreateUvRetriesResponse(0, true));
+
+        var status = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, status.RetriesRemaining);
         Assert.False(status.PowerCycleRequired);
     }
 

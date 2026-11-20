@@ -14,6 +14,7 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Ctap2.Cbor;
 using static Yubico.YubiKit.Ctap2.Cbor.CoseKeyWriter;
 
@@ -106,8 +107,8 @@ public sealed class ClientPin : IDisposable
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The authenticator's current PIN retry status.</returns>
     /// <remarks>
-    /// Missing response fields currently default to zero retries and false power-cycle state;
-    /// false therefore does not prove another attempt is safe. PIN_AUTH_BLOCKED indicates a
+    /// Omitted power-cycle state is unknown, and a snapshot does not prove another attempt is safe.
+    /// PIN_AUTH_BLOCKED indicates a
     /// temporary block requiring a power cycle, whereas PIN_BLOCKED indicates exhausted retries
     /// requiring reset. Do not blindly retry an incorrect PIN.
     /// </remarks>
@@ -124,7 +125,7 @@ public sealed class ClientPin : IDisposable
         var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
-        var (retriesRemaining, powerCycleRequired) = ParsePinRetriesResponse(response);
+        var (retriesRemaining, powerCycleRequired) = ParseRetriesResponse(response, ClientPinResponse.PinRetries);
         return new PinRetryStatus(retriesRemaining, powerCycleRequired);
     }
 
@@ -134,8 +135,8 @@ public sealed class ClientPin : IDisposable
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The authenticator's current user-verification retry status.</returns>
     /// <remarks>
-    /// Missing counts currently default to zero. CTAP 2.1 defines no power-cycle field for this
-    /// response; the result's false default is not recovery evidence. Exhausted built-in UV retries
+    /// The count must be present. CTAP defines no power-cycle field for this response.
+    /// Exhausted built-in UV retries
     /// can be re-enabled by reset or a successful configured ClientPIN token request. This method
     /// does not attempt recovery or decide whether the caller should fall back to PIN.
     /// </remarks>
@@ -152,8 +153,8 @@ public sealed class ClientPin : IDisposable
         var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
-        var (retriesRemaining, powerCycleRequired) = ParseUvRetriesResponse(response);
-        return new UserVerificationRetryStatus(retriesRemaining, powerCycleRequired);
+        var (retriesRemaining, _) = ParseRetriesResponse(response, ClientPinResponse.UvRetries);
+        return new UserVerificationRetryStatus(retriesRemaining);
     }
 
     /// <summary>
@@ -605,66 +606,43 @@ public sealed class ClientPin : IDisposable
         }
     }
 
-    private static (int Retries, bool PowerCycleRequired) ParsePinRetriesResponse(ReadOnlyMemory<byte> data)
+    private static (int Retries, bool? PowerCycleRequired) ParseRetriesResponse(ReadOnlyMemory<byte> data, int retryKey)
     {
-        // Omitted powerCycleState means unknown in CTAP; this model collapses it to false.
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
         var mapLength = reader.ReadStartMap();
-
-        int retries = 0;
-        var powerCycleRequired = false;
+        int? retries = null;
+        bool? powerCycleRequired = null;
 
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
 
-            switch (key)
+            if (key == retryKey)
             {
-                case ClientPinResponse.PinRetries:
-                    retries = reader.ReadInt32();
-                    break;
-                case ClientPinResponse.PowerCycleState:
-                    powerCycleRequired = reader.ReadBoolean();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
+                if (reader.PeekState() != CborReaderState.UnsignedInteger)
+                    throw new BadResponseException("The ClientPIN retry count is not a nonnegative Int32.");
+
+                ulong count = reader.ReadUInt64();
+                if (count > int.MaxValue)
+                    throw new BadResponseException("The ClientPIN retry count exceeds Int32.MaxValue.");
+
+                retries = (int)count;
+            }
+            else if (retryKey == ClientPinResponse.PinRetries && key == ClientPinResponse.PowerCycleState)
+            {
+                powerCycleRequired = reader.ReadBoolean();
+            }
+            else
+            {
+                reader.SkipValue();
             }
         }
 
         reader.ReadEndMap();
-        return (retries, powerCycleRequired);
-    }
+        if (reader.BytesRemaining != 0 || retries is null)
+            throw new BadResponseException("The ClientPIN retry response must contain the retry count in one complete map.");
 
-    private static (int Retries, bool PowerCycleRequired) ParseUvRetriesResponse(ReadOnlyMemory<byte> data)
-    {
-        // CTAP 2.1 defines no UV powerCycleState; current parsing still accepts field 4.
-        var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
-        var mapLength = reader.ReadStartMap();
-
-        int retries = 0;
-        var powerCycleRequired = false;
-
-        for (var i = 0; i < mapLength; i++)
-        {
-            var key = reader.ReadInt32();
-
-            switch (key)
-            {
-                case ClientPinResponse.UvRetries:
-                    retries = reader.ReadInt32();
-                    break;
-                case ClientPinResponse.PowerCycleState:
-                    powerCycleRequired = reader.ReadBoolean();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
-            }
-        }
-
-        reader.ReadEndMap();
-        return (retries, powerCycleRequired);
+        return (retries.Value, powerCycleRequired);
     }
 
     private static Dictionary<int, object?> ParseKeyAgreementResponse(ReadOnlyMemory<byte> data)

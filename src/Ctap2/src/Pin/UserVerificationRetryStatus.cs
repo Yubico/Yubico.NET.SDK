@@ -21,19 +21,18 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 public sealed class UserVerificationRetryStatus
 {
     /// <summary>
-    /// Gets the parsed built-in UV retry count, currently defaulted to zero if omitted.
+    /// Gets the built-in UV retry count reported by the authenticator.
     /// </summary>
     public int RetriesRemaining { get; }
 
     /// <summary>
-    /// Gets response field 4 when present, otherwise the parser's false default.
+    /// Gets <c>false</c>; UV retry responses do not report a power-cycle indication.
     /// </summary>
-    /// <remarks>CTAP 2.1 defines powerCycleState only for PIN retries, not UV retries. The current parser accepts it here, but neither true nor false establishes a standardized UV power-cycle recovery rule.</remarks>
-    public bool PowerCycleRequired { get; }
+    /// <remarks>Use <see cref="RetriesRemaining"/> for the UV retry count; this property is not evidence about recovery.</remarks>
+    public bool PowerCycleRequired => false;
 
-    internal UserVerificationRetryStatus(int retriesRemaining, bool powerCycleRequired)
+    internal UserVerificationRetryStatus(int retriesRemaining)
     {
         RetriesRemaining = retriesRemaining;
-        PowerCycleRequired = powerCycleRequired;
     }
 }

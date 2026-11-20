@@ -166,11 +166,9 @@ bool hasHmacSecret = info.Extensions.Contains("hmac-secret");
 bool hasRk = info.Options.TryGetValue("rk", out var rk) && rk;
 ```
 
-Do not generalize optional-field null preservation. Optional numeric, Boolean and text fields retain
-null when absent, but decoded `EncIdentifier`/`EncCredStoreState` convert absent byte arrays to present
-empty nullable memory. `HasValue` is not a wire-presence/capability check, and nullable presence/length
-does not distinguish missing fields from encoded empty byte strings. Use the complete `RawData` map
-to inspect encoded presence. Missing required AAGUID separately defaults to empty, not a valid response.
+GetInfo decoding requires a nonempty `Versions` list and a 16-byte `Aaguid`. It rejects trailing bytes
+and preserves unknown fields in `RawData`. Absent `EncIdentifier` and `EncCredStoreState` remain null;
+an empty byte string is present but does not establish support or decryptability.
 
 ### PIN/UV Auth Protocols
 
@@ -476,13 +474,14 @@ owned pending-exchange disposal with claim retention through true quiescence. It
 [Fact]
 public void AuthenticatorInfo_Decode_ParsesVersions()
 {
-    // Partial parser fixture, not a conforming GetInfo envelope: the required AAGUID is absent.
     var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-    writer.WriteStartMap(1);
+    writer.WriteStartMap(2);
     writer.WriteInt32(1);
     writer.WriteStartArray(1);
     writer.WriteTextString("FIDO_2_0");
     writer.WriteEndArray();
+    writer.WriteInt32(3);
+    writer.WriteByteString(new byte[16]);
     writer.WriteEndMap();
     byte[] cborData = writer.Encode();
     

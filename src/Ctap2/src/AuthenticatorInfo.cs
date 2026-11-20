@@ -26,9 +26,8 @@ namespace Yubico.YubiKit.Ctap2;
 /// <para>
 /// A GetInfo response is a snapshot, not SDK enforcement or permission to use a feature. Some option
 /// values describe configured state. Query again after state changes, outside any continuation sequence.
-/// Absent lists and maps become empty; optional numeric, Boolean and text fields remain null.
-/// A missing required AAGUID also becomes empty. The encrypted metadata properties expose absent
-/// fields as present empty memory. Use RawData to inspect encoded presence rather than these fallbacks.
+/// Absent optional lists and maps become empty; absent optional scalar and encrypted metadata fields
+/// remain null. Decoding requires a nonempty versions list and a 16-byte AAGUID.
 /// </para>
 /// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#authenticatorGetInfo
@@ -98,7 +97,7 @@ public sealed class AuthenticatorInfo
     /// </summary>
     /// <remarks>
     /// The protocol requires a 16-byte identifier for the authenticator type, not an individual
-    /// credential. This decoder does not enforce field presence or length; a missing field becomes empty.
+    /// credential. An all-zero AAGUID is not treated as missing.
     /// </remarks>
     public ReadOnlyMemory<byte> Aaguid { get; init; }
 
@@ -240,9 +239,7 @@ public sealed class AuthenticatorInfo
     /// Field availability depends on product, firmware and persistent-token state; an ordinary
     /// permission-scoped token is not interchangeable. Decode reads the bytes without validating
     /// encrypted length or decryptability.
-    /// When this field is absent, Decode produces a present zero-length memory value, not null.
-    /// HasValue therefore does not establish that the authenticator returned the field or supports it;
-    /// inspect RawData for encoded presence.
+    /// Null means the field was absent; a present value does not establish decryptability.
     /// </para>
     /// </remarks>
     public ReadOnlyMemory<byte>? EncIdentifier { get; init; }
@@ -301,9 +298,7 @@ public sealed class AuthenticatorInfo
     /// <para>
     /// Availability depends on product, firmware and persistent-token state. Decode retains the
     /// byte string without validating encrypted length or proving decryptability.
-    /// When this field is absent, Decode produces a present zero-length memory value, not null.
-    /// HasValue therefore does not establish that the authenticator returned the field or supports it;
-    /// inspect RawData for encoded presence.
+    /// Null means the field was absent; a present value does not establish decryptability.
     /// </para>
     /// </remarks>
     public ReadOnlyMemory<byte>? EncCredStoreState { get; init; }
@@ -327,12 +322,8 @@ public sealed class AuthenticatorInfo
     /// </summary>
     /// <remarks>The input is borrowed and left unchanged; the result owns an independent complete
     /// RawData copy and separately materialized fields. Unknown fields are skipped at the typed
-    /// surface and preserved in RawData. Absent EncIdentifier and EncCredStoreState fields become
-    /// present empty memory values; use RawData to check encoded presence, not HasValue alone.
-    /// This parser does not enforce required Versions/AAGUID
-    /// presence, AAGUID length or all protocol integer constraints. It does not check for unread
-    /// bytes after the map: ReadEndMap and the default single-root reader setting do not establish
-    /// complete input consumption. A decoded result is not a conformance verdict.</remarks>
+    /// surface and preserved in RawData. Absent EncIdentifier and EncCredStoreState fields are null;
+    /// an encoded empty byte string remains present. A decoded result is not a conformance verdict.</remarks>
     /// <param name="data">The CBOR-encoded response data.</param>
     /// <returns>The decoded AuthenticatorInfo.</returns>
     public static AuthenticatorInfo Decode(ReadOnlyMemory<byte> data)
@@ -383,7 +374,7 @@ public sealed class AuthenticatorInfo
 
         for (var i = 0; i < mapLength; i++)
         {
-            var key = reader.ReadInt32();
+            var key = reader.ReadUInt64();
 
             switch (key)
             {
@@ -404,7 +395,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxMsgSize:
-                    maxMsgSize = reader.ReadInt32();
+                    maxMsgSize = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyPinUvAuthProtocols:
@@ -412,11 +403,11 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxCredentialCountInList:
-                    maxCredentialCountInList = reader.ReadInt32();
+                    maxCredentialCountInList = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyMaxCredentialIdLength:
-                    maxCredentialIdLength = reader.ReadInt32();
+                    maxCredentialIdLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyTransports:
@@ -428,7 +419,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxSerializedLargeBlobArray:
-                    maxSerializedLargeBlobArray = reader.ReadInt32();
+                    maxSerializedLargeBlobArray = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyForcePinChange:
@@ -436,7 +427,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMinPinLength:
-                    minPinLength = reader.ReadInt32();
+                    minPinLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyFirmwareVersion:
@@ -445,19 +436,19 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxCredBlobLength:
-                    maxCredBlobLength = reader.ReadInt32();
+                    maxCredBlobLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyMaxRpidsForSetMinPinLength:
-                    maxRpidsForSetMinPinLength = reader.ReadInt32();
+                    maxRpidsForSetMinPinLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyPreferredPlatformUvAttempts:
-                    preferredPlatformUvAttempts = reader.ReadInt32();
+                    preferredPlatformUvAttempts = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyUvModality:
-                    uvModality = reader.ReadInt32();
+                    uvModality = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyCertifications:
@@ -465,7 +456,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyRemainingDiscoverableCredentials:
-                    remainingDiscoverableCredentials = reader.ReadInt32();
+                    remainingDiscoverableCredentials = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyVendorPrototypeConfigCommands:
@@ -477,7 +468,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyUvCountSinceLastPinEntry:
-                    uvCountSinceLastPinEntry = reader.ReadInt32();
+                    uvCountSinceLastPinEntry = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyLongTouchForReset:
@@ -503,7 +494,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxPinLength:
-                    maxPinLength = reader.ReadInt32();
+                    maxPinLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyEncCredStoreState:
@@ -522,12 +513,19 @@ public sealed class AuthenticatorInfo
 
         reader.ReadEndMap();
 
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("GetInfo contains data after the response map.");
+        if (versions is not { Count: > 0 })
+            throw new CborContentException("GetInfo must report at least one version.");
+        if (aaguid is not { Length: 16 })
+            throw new CborContentException("GetInfo must report a 16-byte AAGUID.");
+
         return new AuthenticatorInfo
         {
             RawData = rawCbor,
-            Versions = versions ?? [],
+            Versions = versions,
             Extensions = extensions ?? [],
-            Aaguid = aaguid ?? [],
+            Aaguid = aaguid,
             Options = options is not null
                 ? new ReadOnlyDictionary<string, bool>(options)
                 : ReadOnlyDictionary<string, bool>.Empty,
@@ -553,12 +551,12 @@ public sealed class AuthenticatorInfo
             AttestationFormats = attestationFormats ?? [],
             UvCountSinceLastPinEntry = uvCountSinceLastPinEntry,
             LongTouchForReset = longTouchForReset,
-            EncIdentifier = encIdentifier,
+            EncIdentifier = encIdentifier is null ? (ReadOnlyMemory<byte>?)null : encIdentifier.AsMemory(),
             TransportsForReset = transportsForReset ?? [],
             PinComplexityPolicy = pinComplexityPolicy,
             PinComplexityPolicyUrl = pinComplexityPolicyUrl,
             MaxPinLength = maxPinLength,
-            EncCredStoreState = encCredStoreState,
+            EncCredStoreState = encCredStoreState is null ? (ReadOnlyMemory<byte>?)null : encCredStoreState.AsMemory(),
             AuthenticatorConfigCommands = authenticatorConfigCommands ?? []
         };
     }

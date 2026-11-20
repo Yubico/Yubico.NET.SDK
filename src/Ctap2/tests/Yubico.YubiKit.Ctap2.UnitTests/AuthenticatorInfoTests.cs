@@ -5,8 +5,7 @@ using Yubico.YubiKit.Core.Cryptography.Cose;
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
 /// <summary>Mechanical decoding checks using synthetic field fixtures.</summary>
-/// <remarks>Several fixtures omit required AAGUID or other protocol conditions. They exercise
-/// selected parser behavior, not minimal conforming GetInfo responses or live feature support.</remarks>
+/// <remarks>These fixtures exercise decoding, not live feature support.</remarks>
 public class AuthenticatorInfoTests
 {
     [Fact]
@@ -41,9 +40,8 @@ public class AuthenticatorInfoTests
     [Fact]
     public void Decode_MinimalGetInfoResponse_ParsesVersions()
     {
-        // Versions-only parser fixture: omits the protocol-required AAGUID, not a conforming minimum.
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(1);
+        WriteMapWithAaguid(writer, 1);
         writer.WriteInt32(0x01); // versions key
         writer.WriteStartArray(2);
         writer.WriteTextString("FIDO_2_0");
@@ -59,6 +57,29 @@ public class AuthenticatorInfoTests
         info.Versions.Should().HaveCount(2);
         info.Versions.Should().Contain("FIDO_2_0");
         info.Versions.Should().Contain("U2F_V2");
+        Assert.Null(info.EncIdentifier);
+        Assert.Null(info.EncCredStoreState);
+    }
+
+    [Theory]
+    [InlineData("A10181684649444F5F325F30")] // missing AAGUID
+    [InlineData("A1035000000000000000000000000000000000")] // missing versions
+    [InlineData("A20180035000000000000000000000000000000000")] // empty versions
+    [InlineData("A20181684649444F5F325F300340")] // zero-length AAGUID
+    [InlineData("A20181684649444F5F325F3003500000000000000000000000000000000000")] // trailing byte
+    public void Decode_RejectsMalformedGetInfo(string encoded) =>
+        Assert.Throws<CborContentException>(() => AuthenticatorInfo.Decode(Convert.FromHexString(encoded)));
+
+    [Fact]
+    public void Decode_PreservesPresentEmptyEncryptedFields()
+    {
+        var info = AuthenticatorInfo.Decode(Convert.FromHexString(
+            "A40181684649444F5F325F30035000000000000000000000000000000000181940181E40"));
+
+        Assert.True(info.EncIdentifier.HasValue);
+        Assert.True(info.EncIdentifier.Value.IsEmpty);
+        Assert.True(info.EncCredStoreState.HasValue);
+        Assert.True(info.EncCredStoreState.Value.IsEmpty);
     }
 
     [Fact]
@@ -91,7 +112,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -122,7 +143,7 @@ public class AuthenticatorInfoTests
     public void Decode_WithUnknownBooleanOptionAndUnknownTopLevelKey_ParsesKnownFieldsAndPreservesRawData()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(3);
+        WriteMapWithAaguid(writer, 3);
         writer.WriteInt32(0x01);
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -173,7 +194,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_0");
@@ -195,7 +216,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -222,7 +243,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_0");
@@ -254,7 +275,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -283,7 +304,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange - Include an unknown key (0xFF)
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_0");
@@ -310,7 +331,7 @@ public class AuthenticatorInfoTests
                                 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10];
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -333,7 +354,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -360,7 +381,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -382,7 +403,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -407,7 +428,7 @@ public class AuthenticatorInfoTests
         byte[] urlBytes = System.Text.Encoding.UTF8.GetBytes(expectedUrl);
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -429,7 +450,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -455,7 +476,7 @@ public class AuthenticatorInfoTests
                                      0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -478,7 +499,7 @@ public class AuthenticatorInfoTests
     {
         // Arrange
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        WriteMapWithAaguid(writer, 2);
         writer.WriteInt32(0x01); // versions
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
@@ -502,4 +523,11 @@ public class AuthenticatorInfoTests
         info.AuthenticatorConfigCommands.Should().Contain(0x03);
     }
 
+
+    private static void WriteMapWithAaguid(CborWriter writer, int additionalFields)
+    {
+        writer.WriteStartMap(additionalFields + 1);
+        writer.WriteInt32(0x03);
+        writer.WriteByteString(new byte[16]);
+    }
 }

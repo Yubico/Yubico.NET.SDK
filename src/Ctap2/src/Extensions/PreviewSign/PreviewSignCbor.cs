@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Formats.Cbor;
+using Yubico.YubiKit.Core;
 
 namespace Yubico.YubiKit.Ctap2.Extensions;
 
@@ -464,10 +466,8 @@ public static class PreviewSignCbor
     /// signed algorithm agreement, generated-key binding or inner UP/UV policy.
     /// </para>
     /// <para>
-    /// Returns false for absent output/attested data, another key carrier, or caught CborContentException
-    /// and InvalidOperationException. Other malformed-authData failures, such as ArgumentException,
-    /// can propagate. Extraction also requires a reported algorithm in the signed previewSign output;
-    /// it is returned as metadata, not verified here.
+    /// Returns false for absent output, malformed present output or another key carrier. Malformed
+    /// output is diagnosed without logging its contents. The reported algorithm is not verified here.
     /// </para>
     /// </remarks>
     public static bool TryExtractGeneratedKey(
@@ -486,6 +486,7 @@ public static class PreviewSignCbor
             if (response.ExtensionOutputs is not { } signedOutputs ||
                 !ExtensionOutput.Decode(signedOutputs).TryGetRawExtension("previewSign", out var signedPreviewSign))
             {
+                LogMalformedRegistration();
                 return false;
             }
             var signedReader = new CborReader(signedPreviewSign, CborConformanceMode.Ctap2Canonical);
@@ -497,6 +498,7 @@ public static class PreviewSignCbor
 
             if (authData.AttestedCredentialData is null)
             {
+                LogMalformedRegistration();
                 return false;
             }
 
@@ -514,13 +516,18 @@ public static class PreviewSignCbor
 
             return true;
         }
-        catch (System.Formats.Cbor.CborContentException)
+        catch (Exception ex) when (ex is CborContentException or InvalidOperationException or ArgumentException or OverflowException)
         {
+            LogMalformedRegistration();
             return false;
         }
-        catch (InvalidOperationException)
-        {
-            return false;
-        }
+    }
+
+    internal static void LogMalformedRegistration() =>
+        PreviewSignDiagnostics.Logger.LogWarning("Malformed previewSign registration output was ignored.");
+
+    private static class PreviewSignDiagnostics
+    {
+        internal static readonly ILogger Logger = YubiKitLogging.LoggerFactory.CreateLogger(nameof(PreviewSignCbor));
     }
 }

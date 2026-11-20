@@ -102,9 +102,9 @@ public sealed class PreviewSignRegistrationOutput
 
             return null;
         }
-        catch
+        catch (Exception ex) when (ex is System.Formats.Cbor.CborContentException or InvalidOperationException or ArgumentException or OverflowException)
         {
-            // CBOR decode failure or invalid shape - return null
+            PreviewSignCbor.LogMalformedRegistration();
             return null;
         }
     }

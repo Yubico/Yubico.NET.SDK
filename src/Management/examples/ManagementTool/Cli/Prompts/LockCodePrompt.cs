@@ -57,14 +57,16 @@ public static class LockCodePrompt
     /// Prompts for a lock code (16 bytes / 32 hex characters).
     /// </summary>
     /// <param name="prompt">The prompt message to display.</param>
+    /// <param name="cancellationToken">Cancellation token for console input.</param>
     /// <returns>The lock code as a byte array, or null if user cancelled or input was invalid.</returns>
     /// <remarks>
     /// <b>CRITICAL:</b> Caller MUST zero the returned byte array when done using
     /// <see cref="CryptographicOperations.ZeroMemory(Span{byte})"/> in a finally block.
     /// </remarks>
-    public static byte[]? PromptForLockCode(string prompt = "Enter lock code (32 hex characters)")
+    public static byte[]? PromptForLockCode(string prompt = "Enter lock code", CancellationToken cancellationToken = default)
     {
-        using var entry = new ConsoleCredentialReader().ReadCredential(Options(prompt));
+        cancellationToken.ThrowIfCancellationRequested();
+        using var entry = new ConsoleCredentialReader().ReadCredential(Options(prompt), cancellationToken);
         return entry?.Memory.ToArray(); // Transfer a copy to the existing caller-owned array scope.
     }
 
@@ -72,14 +74,16 @@ public static class LockCodePrompt
     /// Prompts for a new lock code with confirmation.
     /// </summary>
     /// <param name="prompt">The prompt message for the first entry.</param>
+    /// <param name="cancellationToken">Cancellation token for console input.</param>
     /// <returns>The confirmed lock code, or null if user cancelled or entries didn't match.</returns>
     /// <remarks>
     /// <b>CRITICAL:</b> Caller MUST zero the returned byte array when done using
     /// <see cref="CryptographicOperations.ZeroMemory(Span{byte})"/> in a finally block.
     /// </remarks>
-    public static byte[]? PromptForNewLockCode(string prompt = "Enter new lock code (32 hex characters)")
+    public static byte[]? PromptForNewLockCode(string prompt = "Enter new lock code", CancellationToken cancellationToken = default)
     {
-        using var entry = new ConsoleCredentialReader().ReadCredentialWithConfirmation(Options(prompt));
+        cancellationToken.ThrowIfCancellationRequested();
+        using var entry = new ConsoleCredentialReader().ReadCredentialWithConfirmation(Options(prompt), cancellationToken);
         return entry?.Memory.ToArray();
     }
 

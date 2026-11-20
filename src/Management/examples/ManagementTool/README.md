@@ -122,9 +122,9 @@ The menu reports success only after the device confirms the reset and the sessio
   current code does not remove the lock; removal sends the current code and sixteen zero replacement bytes.
 - Configuration menus ask for confirmation; reset asks twice (yes/no and typing `RESET`). The feature
   helpers themselves do not prompt, so direct callers must authorize the operation first.
-- Cancellation is not consistent end to end: menu callbacks discard the console token, and feature
-  wrappers/metadata lookup can turn cancellation exceptions into ordinary failure results. This is a
-  sample limitation, not the SDK session's cancellation contract. Cancellation never rolls back a sent write.
+- Ctrl+C requests cancellation and exits with status 5 when observed. The tool awaits the active
+  operation; cancellation never rolls back a write already sent. Some console input and transport
+  operations can only observe cancellation at their own boundaries.
 
 ## Metadata display limits
 

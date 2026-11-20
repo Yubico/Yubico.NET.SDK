@@ -9,6 +9,9 @@ ManagementTool demonstrates device-information queries and persistent configurat
 `config` commands below. These commands still prompt for device selection; this is not an unattended
 or serial-selectable command-line client.
 
+This example is for demonstration, not production credential management. Interactive lock-code entry
+uses the SDK's masked hex reader; type exactly 32 hexadecimal digits without separators.
+
 The tool selects SmartCard (CCID) devices only because its combined reset menu requires SmartCard.
 HID-only keys are not offered, even though the SDK supports device-information and configuration
 operations over FIDO HID and OTP HID.
@@ -107,14 +110,13 @@ The tool's reset eligibility display checks firmware only. The documented combin
 **Bio Multi-protocol Edition**, not every 5.6+ key or every Bio key. It deletes FIDO credentials,
 fingerprints, the shared PIN and PIV keys/certificates/user data, except the F9 attestation slot. It
 cannot be undone and is not a documented way to recover a lost Management configuration lock code.
-The menu's broader erasure/default-PIN wording must not be used as a product-support check.
+The menu reports success only after the device confirms the reset and the session refresh finishes.
 
 ## Security Considerations
 
-- The sample masks lock-code input and clears returned mutable byte arrays in the callers' `finally`
-  blocks. Confirmation uses a fixed-time byte comparison. The input and normalized copies are immutable
-  strings and cannot be erased by clearing the arrays. If the confirmation prompt throws before returning,
-  the first parsed array can also escape cleanup. Do not use this prompt as a production secret-input primitive.
+- The sample uses the SDK's hex credential reader and clears the returned mutable arrays in the callers'
+  `finally` blocks. Confirmation uses a fixed-time comparison and disposes unreturned entries. Redirected
+  input uses line-based console input and does not provide the same string-lifetime guarantees.
 - Keep borrowed lock-code buffers valid and unchanged until the awaited write completes; clear owned
   secrets even when a write fails or is cancelled. Never log codes. Authorizing one write with the
   current code does not remove the lock; removal sends the current code and sixteen zero replacement bytes.

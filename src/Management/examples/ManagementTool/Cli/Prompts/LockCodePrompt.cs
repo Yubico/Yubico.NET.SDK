@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Spectre.Console;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Credentials;
 
 namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 
 /// <summary>
 /// Masks lock-code input and validates the parsed length.
 /// Lock codes are 16 bytes (32 hex characters).
-/// Prompt input and normalized copies are immutable strings; clearing returned arrays cannot erase them.
+/// Interactive input uses the SDK's masked hex credential reader.
 /// The confirmation prompt can throw before the first parsed array enters cleanup. This sample is not
 /// a production secret-input primitive.
 /// 
@@ -54,11 +54,6 @@ public static class LockCodePrompt
     public const int LockCodeSize = 16;
 
     /// <summary>
-    /// Lock code size as hex string (32 characters).
-    /// </summary>
-    public const int LockCodeHexLength = LockCodeSize * 2;
-
-    /// <summary>
     /// Prompts for a lock code (16 bytes / 32 hex characters).
     /// </summary>
     /// <param name="prompt">The prompt message to display.</param>
@@ -69,27 +64,8 @@ public static class LockCodePrompt
     /// </remarks>
     public static byte[]? PromptForLockCode(string prompt = "Enter lock code (32 hex characters)")
     {
-        AnsiConsole.MarkupLine($"[grey]{Markup.Escape(prompt)}[/]");
-        AnsiConsole.MarkupLine("[grey]Format: 32 hexadecimal characters (16 bytes), e.g., 00112233445566778899AABBCCDDEEFF[/]");
-
-        var input = AnsiConsole.Prompt(
-            new TextPrompt<string>("[blue]Lock code:[/]")
-                .Secret()
-                .AllowEmpty());
-
-        if (string.IsNullOrWhiteSpace(input))
-        {
-            AnsiConsole.MarkupLine("[yellow]Operation cancelled.[/]");
-            return null;
-        }
-
-        if (!TryParseHex(input, out var lockCode))
-        {
-            AnsiConsole.MarkupLine($"[red]Invalid lock code. Must be exactly {LockCodeHexLength} hexadecimal characters.[/]");
-            return null;
-        }
-
-        return lockCode;
+        using var entry = new ConsoleCredentialReader().ReadCredential(Options(prompt));
+        return entry?.Memory.ToArray(); // Transfer a copy to the existing caller-owned array scope.
     }
 
     /// <summary>
@@ -103,70 +79,15 @@ public static class LockCodePrompt
     /// </remarks>
     public static byte[]? PromptForNewLockCode(string prompt = "Enter new lock code (32 hex characters)")
     {
-        var lockCode = PromptForLockCode(prompt);
-        if (lockCode is null)
-        {
-            return null;
-        }
-
-        bool transferred = false;
-        try
-        {
-            var confirmCode = PromptForLockCode("Confirm lock code");
-            if (confirmCode is null)
-                return null;
-
-            try
-            {
-                if (!CryptographicOperations.FixedTimeEquals(lockCode, confirmCode))
-                {
-                    AnsiConsole.MarkupLine("[red]Lock codes do not match.[/]");
-                    return null;
-                }
-
-                transferred = true;
-                return lockCode;
-            }
-            finally
-            {
-                CryptographicOperations.ZeroMemory(confirmCode);
-            }
-        }
-        finally
-        {
-            if (!transferred)
-                CryptographicOperations.ZeroMemory(lockCode);
-        }
+        using var entry = new ConsoleCredentialReader().ReadCredentialWithConfirmation(Options(prompt));
+        return entry?.Memory.ToArray();
     }
 
-    /// <summary>
-    /// Tries to parse a hex string into a lock code byte array.
-    /// </summary>
-    /// <param name="hexString">The hex string to parse.</param>
-    /// <param name="lockCode">The parsed lock code, or null if parsing failed.</param>
-    /// <returns>True if parsing succeeded, false otherwise.</returns>
-    private static bool TryParseHex(string hexString, out byte[] lockCode)
+    private static CredentialReaderOptions Options(string prompt) => CredentialReaderOptions.ForHexKey(LockCodeSize) with
     {
-        lockCode = [];
-
-        // Remove any whitespace or dashes
-        var cleaned = hexString.Replace(" ", "").Replace("-", "").ToUpperInvariant();
-
-        if (cleaned.Length != LockCodeHexLength)
-        {
-            return false;
-        }
-
-        try
-        {
-            lockCode = Convert.FromHexString(cleaned);
-            return lockCode.Length == LockCodeSize;
-        }
-        catch (FormatException)
-        {
-            return false;
-        }
-    }
+        Prompt = $"{prompt.TrimEnd(':')} (32 hex digits): ",
+        ConfirmPrompt = "Confirm lock code (32 hex digits): ",
+    };
 
     /// <summary>
     /// Creates a zeroed lock code (all zeros, 16 bytes).

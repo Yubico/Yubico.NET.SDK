@@ -53,9 +53,10 @@ public readonly record struct DeviceInfo
     /// <summary>Whether the reported form-factor byte has the FIPS product flag (0x80).</summary>
     /// <remarks>This manufacturing flag is separate from application approval or operation-specific FIPS requirements.</remarks>
     public required bool IsFips { get; init; }
-    /// <summary>The reported form-factor byte, including any product flags and unnamed numeric values.</summary>
-    /// <remarks>For example, 0x81 remains an unnamed value rather than <see cref="FormFactor.UsbAKeychain"/>.</remarks>
+    /// <summary>The low nibble of the form-factor byte, preserving unnamed base values.</summary>
     public required FormFactor FormFactor { get; init; }
+    /// <summary>The complete form-factor byte, including known and unknown product flags.</summary>
+    public byte RawFormFactor { get; init; }
     /// <summary>The serial decoded from four big-endian bytes, or null when the response omits it.</summary>
     public int? SerialNumber { get; init; }
     /// <summary>Whether the configuration-lock field equals 1; false when absent.</summary>
@@ -121,6 +122,7 @@ public readonly record struct DeviceInfo
         IsSky == other.IsSky &&
         IsFips == other.IsFips &&
         FormFactor == other.FormFactor &&
+        RawFormFactor == other.RawFormFactor &&
         SerialNumber == other.SerialNumber &&
         IsLocked == other.IsLocked &&
         UsbEnabled == other.UsbEnabled &&
@@ -148,6 +150,7 @@ public readonly record struct DeviceInfo
         hash.Add(IsSky);
         hash.Add(IsFips);
         hash.Add(FormFactor);
+        hash.Add(RawFormFactor);
         hash.Add(SerialNumber);
         hash.Add(IsLocked);
         hash.Add(UsbEnabled);
@@ -194,7 +197,7 @@ public readonly record struct DeviceInfo
         int formFactorTagData = ReadByte(tlvDict, TAG_FORMFACTOR);
         var isFips = (formFactorTagData & 0x80) != 0;
         var isSky = (formFactorTagData & 0x40) != 0;
-        var formFactor = (FormFactor)formFactorTagData;
+        var formFactor = (FormFactor)(formFactorTagData & 0x0F);
 
         var resetBlocked = ReadCapabilities(tlvDict, TAG_RESET_BLOCKED);
         var usbEnabled = ReadCapabilities(tlvDict, TAG_USB_ENABLED);
@@ -228,6 +231,7 @@ public readonly record struct DeviceInfo
             IsLocked = isLocked,
             SerialNumber = serialNumber,
             FormFactor = formFactor,
+            RawFormFactor = (byte)formFactorTagData,
             IsFips = isFips,
             IsSky = isSky,
             ResetBlocked = resetBlocked,

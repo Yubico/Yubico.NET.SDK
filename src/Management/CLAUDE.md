@@ -103,8 +103,8 @@ public async Task MultiFormFactor_Test(YubiKeyTestState state)
 }
 ```
 
-Current Core parsing can retain product flag bits in `FormFactor`, so exact base-enum filters can miss
-flagged devices. The enum itself is not a flags enum. `FipsCapable`/`FipsApproved` filters describe
+Core parses the low nibble into `FormFactor`, so base-enum filters also match flagged devices. The full
+byte remains in `RawFormFactor`. `FipsCapable`/`FipsApproved` filters describe
 reported applet metadata; they do not establish approved operation. `IsFips` is a distinct manufacturing
 indicator, not an operating mode. Do not
 use these fields to identify Bio MPE reset eligibility.
@@ -831,7 +831,7 @@ dispatching reset or rejecting HID; HID backends do not expose unsupported reset
 1. **Backend owns nothing**: it borrows the protocol and holds no disposable state, so it is not `IDisposable`. Ownership rule is Core's — see [Core CLAUDE.md](../Core/CLAUDE.md) gotcha #2 and the `IProtocol` doc comment: the session disposes the protocol, and whoever created the connection disposes it.
 2. **SCP wrapping works**: the backend can be recreated over an SCP-wrapped protocol without disposing anything.
 3. **Narrow delegation**: writes share one backend contract; info reads use Core and reset is SmartCard-only.
-   There is no current public legacy `SetMode` surface, even though the backend retains that primitive.
+    There is no current public legacy `SetMode` surface, even though the backend retains that primitive.
 
 `ManagementBackendLifecycleTests` pins the non-disposable invariant. It does not prove zero branching,
 hardware feature support, or correctness of Core's multi-page reader.
@@ -910,8 +910,8 @@ var yubiKey = devices.SingleOrDefault(device => device.SerialNumber == 12345678)
    neither three seconds nor a discovery result's position proves the intended key is ready.
 3. **USB reachability**: Exact USB `None` and out-of-width masks are rejected, but device support is not
    checked. Preserve a supported application and a recovery route.
-4. **Metadata interpretation**: Flagged form factors can miss equality filters. Do not derive approved
-   operation, active mode or product-family eligibility from these filters.
+4. **Metadata interpretation**: Base form factors exclude product flags. Do not derive approved operation,
+   active mode or product-family eligibility from metadata filters.
 5. **NFC**: Check hardware and 5.7+ support for restriction; false encoding alone is not verified recovery.
 6. **Test proof**: Readback checks persisted metadata, not necessarily active interfaces. A broad
    `ThrowsAnyAsync<Exception>` does not isolate authentication or lock enforcement. Existing restoration

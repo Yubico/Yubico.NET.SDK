@@ -89,8 +89,8 @@ also contains memory-backed timeout data; copying the record or a result wrapper
 
 Core decodes the reported FIPS capability and approval masks separately from ordinary application masks.
 These are metadata, not proof that a particular operation ran in an approved configuration. `IsFips` is
-a separate manufacturing indicator, not an operating mode. Product flag bits can remain in
-`FormFactor`, so equality with a named base value can miss a flagged device.
+a separate manufacturing indicator, not an operating mode. `FormFactor` holds the base form factor;
+`RawFormFactor` preserves the complete byte, including unknown product flags.
 
 ### Enable or disable applications
 

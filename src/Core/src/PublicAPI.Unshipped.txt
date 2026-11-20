@@ -354,6 +354,8 @@ Yubico.YubiKit.Core.Devices.DeviceInfo.FirmwareVersion.get -> Yubico.YubiKit.Cor
 Yubico.YubiKit.Core.Devices.DeviceInfo.FirmwareVersion.init -> void
 Yubico.YubiKit.Core.Devices.DeviceInfo.FormFactor.get -> Yubico.YubiKit.Core.Devices.FormFactor
 Yubico.YubiKit.Core.Devices.DeviceInfo.FormFactor.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.RawFormFactor.get -> byte
+Yubico.YubiKit.Core.Devices.DeviceInfo.RawFormFactor.init -> void
 Yubico.YubiKit.Core.Devices.DeviceInfo.FpsVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion?
 Yubico.YubiKit.Core.Devices.DeviceInfo.FpsVersion.init -> void
 Yubico.YubiKit.Core.Devices.DeviceInfo.HasPinComplexity.get -> bool

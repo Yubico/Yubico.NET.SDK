@@ -305,6 +305,18 @@ public class OathToolCancellationTests
         Assert.True(session.Disposed);
     }
 
+    [Fact]
+    public async Task ResetSuccess_DisposalFailureReturnsErrorWithoutRepeatingReset()
+    {
+        var session = new FakeSession { DisposeFailure = new InvalidOperationException("Connection teardown failed.") };
+
+        int exitCode = await ResetCommand.ExecuteAsync(true, TestContext.Current.CancellationToken, Services(session));
+
+        Assert.Equal(1, exitCode);
+        Assert.Equal(1, session.Operations);
+        Assert.True(session.Disposed);
+    }
+
     [Theory]
     [InlineData("add")]
     [InlineData("uri")]

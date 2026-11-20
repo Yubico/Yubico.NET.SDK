@@ -36,31 +36,35 @@ public static class ResetCommand
             return 1;
         }
 
-        Exception? resetFailure = null;
+        Exception? disposalFailure = null;
         try
         {
             await session.ResetAsync(cancellationToken);
-            OutputHelpers.WriteSuccess("OATH application reset.");
-            return 0;
         }
-        catch (OperationCanceledException ex)
+        catch (OperationCanceledException)
         {
-            resetFailure = ex;
             OutputHelpers.WriteInfo("Reset cancelled. Device data may already have been erased; close/reopen the connection and create a fresh session to inspect its state.");
             throw;
         }
         catch (Exception ex)
         {
-            resetFailure = ex;
             OutputHelpers.WriteError($"Reset failed: {ex.Message}. Device data may already have been erased.");
             return 1;
         }
         finally
         {
-            // RESET disposes on success. Also close after a send failure, without replaying
-            // teardown over the original cancellation/error or the CLI's reported outcome.
+            // Close after reset or failure without masking the original cancellation/error.
             try { await session.DisposeAsync(); }
-            catch when (resetFailure is not null) { }
+            catch (Exception ex) { disposalFailure = ex; }
         }
+
+        if (disposalFailure is not null)
+        {
+            OutputHelpers.WriteError($"OATH application reset, but closing the session failed: {disposalFailure.Message}");
+            return 1;
+        }
+
+        OutputHelpers.WriteSuccess("OATH application reset.");
+        return 0;
     }
 }

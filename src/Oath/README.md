@@ -201,9 +201,11 @@ finally
 
 `UnsetKeyAsync` removes the password. `AuthenticateAndRetryAsync` retries a locked operation once after your callback supplies the password.
 
-A failed `ValidateAsync` attempt leaves the session locked, not disposed. If the device's authentication HMAC
-does not match, `BadResponseException` does not prove that the password was wrong. You can retry with the same
-access key in the same session: the applet challenge is retained and the SDK sends a fresh host challenge.
+If the device's authentication HMAC does not match, `ValidateAsync` throws `BadResponseException`. The SDK
+keeps the session open, leaves `IsLocked` true, and retains the original device challenge. This is SDK state,
+not confirmation that the applet is still locked or that the password was wrong. You can attempt validation
+again with the same key in the same session. The SDK sends a fresh host challenge but cannot guarantee the
+applet will accept the retry.
 
 ### Delete a credential
 

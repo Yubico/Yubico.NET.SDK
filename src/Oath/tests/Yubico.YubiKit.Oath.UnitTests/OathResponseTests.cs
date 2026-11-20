@@ -122,6 +122,7 @@ public sealed class OathResponseTests
         byte[] hostProof = HMACSHA1.HashData(key, deviceChallenge);
         var backend = new ResponseBackend(command =>
         {
+            // Deliberately script a LIST rejection to exercise status mapping, not device lock behavior.
             if (command.Ins == 0xA1)
                 throw ApduException.FromStatusWord(0x6982);
 
@@ -158,8 +159,11 @@ public sealed class OathResponseTests
                 await Assert.ThrowsAsync<BadResponseException>(() => session.ValidateAsync(key, TestContext.Current.CancellationToken));
                 Assert.True(session.IsLocked);
                 AssertCleared(backend.LastResponse);
-                var locked = await Assert.ThrowsAsync<OathException>(() => session.ListCredentialsAsync(TestContext.Current.CancellationToken));
-                Assert.Equal(OathFailureReason.Locked, locked.Reason);
+                int sendsBeforeList = backend.SendCount;
+                var listRejection = await Assert.ThrowsAsync<OathException>(() => session.ListCredentialsAsync(TestContext.Current.CancellationToken));
+                Assert.Equal(sendsBeforeList + 1, backend.SendCount);
+                Assert.Equal(OathFailureReason.Locked, listRejection.Reason);
+                Assert.Equal((short)0x6982, listRejection.StatusWord);
 
                 mode = "retry";
                 await session.ValidateAsync(key, TestContext.Current.CancellationToken);

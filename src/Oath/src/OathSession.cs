@@ -692,7 +692,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             _salt,
             iterations: 1000,
             HashAlgorithmName.SHA1,
-            outputLength: 16);
+            outputLength: OathConstants.AccessKeyLength);
     }
 
     /// <inheritdoc />
@@ -700,8 +700,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
 
-        if (key.Length == 0)
-            throw new ArgumentException("Key must not be empty.", nameof(key));
+        if (key.Length != OathConstants.AccessKeyLength)
+            throw new ArgumentException("Access key must be 16 bytes.", nameof(key));
 
         if (_challenge.Length == 0)
             throw new InvalidOperationException("Device is not locked; no challenge to validate against.");
@@ -783,8 +783,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
 
-        if (key.Length == 0)
-            throw new ArgumentException("Key must not be empty.", nameof(key));
+        if (key.Length != OathConstants.AccessKeyLength)
+            throw new ArgumentException("Access key must be 16 bytes.", nameof(key));
 
         byte[] clientChallenge = new byte[OathConstants.ChallengeLength];
         byte[]? clientResponse = null;

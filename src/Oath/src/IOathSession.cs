@@ -267,7 +267,7 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Validates the access key using mutual HMAC-SHA1 challenge-response authentication.
     /// </summary>
-    /// <param name="key">The borrowed access key, normally obtained from <see cref="DeriveKey" />.</param>
+    /// <param name="key">The borrowed 16-byte access key, normally obtained from <see cref="DeriveKey" />.</param>
     /// <param name="cancellationToken">The cancellation token for the operation.</param>
     /// <remarks>
     ///     <para>
@@ -285,6 +285,7 @@ public interface IOathSession : IApplicationSession
     ///         needed, including if validation fails.
     ///     </para>
     /// </remarks>
+    /// <exception cref="ArgumentException">The access key is not exactly 16 bytes.</exception>
     /// <exception cref="InvalidOperationException">The session has no outstanding challenge.</exception>
     /// <exception cref="Core.BadResponseException">
     ///     The device's authentication HMAC does not match verification, or its required response is missing.
@@ -295,7 +296,7 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Sets or changes the access key for the OATH applet.
     /// </summary>
-    /// <param name="key">The borrowed new access key, normally obtained from <see cref="DeriveKey" />.</param>
+    /// <param name="key">The borrowed new 16-byte access key, normally obtained from <see cref="DeriveKey" />.</param>
     /// <param name="cancellationToken">The cancellation token for the operation.</param>
     /// <remarks>
     ///     <para>
@@ -310,6 +311,7 @@ public interface IOathSession : IApplicationSession
     ///         needed, including if setting the key fails.
     ///     </para>
     /// </remarks>
+    /// <exception cref="ArgumentException">The access key is not exactly 16 bytes.</exception>
     Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
 
     /// <summary>

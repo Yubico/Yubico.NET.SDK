@@ -35,9 +35,10 @@ public sealed class SessionCreationOptions
     public ProtocolConfiguration? ProtocolConfiguration { get; init; }
 
     /// <summary>
-    ///     Gets optional Secure Channel Protocol key parameters. The parameters are borrowed for initialization;
-    ///     the caller retains ownership and disposal responsibility. Security Domain also retains them for
-    ///     reset and reinitialization. Keep the parameters alive until that session has been disposed.
+    ///     Gets optional Secure Channel Protocol key parameters. Sessions borrow them for initialization;
+    ///     sessions that retain them for reset reinitialization, including OATH and Security Domain, may
+    ///     use them again after initialization. For those sessions, keep the parameters alive and unchanged
+    ///     until session disposal. The caller retains ownership and is responsible for disposing them.
     /// </summary>
     public ScpKeyParameters? ScpKeyParameters { get; init; }
 

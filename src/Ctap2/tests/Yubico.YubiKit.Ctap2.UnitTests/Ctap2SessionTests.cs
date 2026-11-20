@@ -516,10 +516,39 @@ public class Ctap2SessionTests
         Assert.Equal(initialTransmissions + 1, connection.TransmittedCommands.Count);
     }
 
-    private static byte[] MinimalGetInfoResponse(int? maxMsgSize = null)
+    [Theory]
+    [InlineData(0x000001u, 5, 7, false)]
+    [InlineData(0x050700u, 5, 8, true)]
+    [InlineData(0x050700u, 0, 0, true)]
+    [InlineData(0x050700u, null, null, false)]
+    [InlineData(null, null, null, true)]
+    public async Task UsbSmartCard_UsesCachedFirmwareBeforeAppletFirmware(uint? applet, int? cachedMajor, int? cachedMinor, bool supported)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(firmwareVersion: applet), 0x90, 0x00]);
+        var device = new SingleConnectionYubiKey(connection)
+        {
+            CachedDeviceInfo = cachedMajor is int major && cachedMinor is int minor
+                ? DeviceInfo.CreateFromTlvs([], new FirmwareVersion(major, minor, 0))
+                : null
+        };
+
+        if (supported)
+        {
+            await using var session = await device.CreateCtap2SessionAsync(cancellationToken: ct);
+            Assert.Equal(device.CachedDeviceInfo?.FirmwareVersion ?? new FirmwareVersion(), session.FirmwareVersion);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => device.CreateCtap2SessionAsync(cancellationToken: ct));
+        }
+    }
+
+    private static byte[] MinimalGetInfoResponse(int? maxMsgSize = null, uint? firmwareVersion = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(maxMsgSize.HasValue ? 3 : 2);
+        writer.WriteStartMap(2 + (maxMsgSize.HasValue ? 1 : 0) + (firmwareVersion.HasValue ? 1 : 0));
         writer.WriteInt32(0x01);
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_0");
@@ -530,6 +559,11 @@ public class Ctap2SessionTests
         {
             writer.WriteInt32(0x05);
             writer.WriteInt32(maxSize);
+        }
+        if (firmwareVersion is uint wireVersion)
+        {
+            writer.WriteInt32(0x0E);
+            writer.WriteUInt32(wireVersion);
         }
         writer.WriteEndMap();
         return writer.Encode();
@@ -649,6 +683,7 @@ public class Ctap2SessionTests
     {
         public string DeviceId => "fido-disposal-probe";
         public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+        public DeviceInfo? CachedDeviceInfo { get; init; }
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection =>

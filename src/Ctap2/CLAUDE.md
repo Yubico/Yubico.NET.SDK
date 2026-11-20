@@ -143,8 +143,9 @@ blob read-modify-write, or post-exchange parsing and callbacks. Keep borrowed in
 and caller-owned prompts usable through their last continuation. A callback must not reenter or dispose
 the session awaiting it. Prefer async disposal, but do not treat it as a whole-workflow completion join.
 
-Detected GetInfo firmware gates USB SmartCard before an override sets effective session/protocol
-firmware. HID INIT vendor bytes and Management firmware are separate observations. Initial SmartCard
+Cached device firmware, then GetInfo firmware if the cache is absent, gates USB SmartCard before an
+override sets effective session/protocol firmware. A direct connection factory has no device cache.
+HID INIT vendor bytes and Management firmware are separate observations. Initial SmartCard
 SELECT/GetInfo precede options-based configuration; major-zero configuration selects APDU format from
 connection support before ordinary `ForceShortApdus` handling. SCP setup rebinds the backend without
 another SELECT or protected CTAP probe. Applet-selection survival and FIDO-over-SCP product acceptance

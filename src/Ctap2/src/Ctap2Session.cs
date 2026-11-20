@@ -136,18 +136,27 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         IConnection connection,
         SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default) =>
+        CreateAsync(connection, options, cachedFirmwareVersion: null, cancellationToken);
+
+    internal static Task<Ctap2Session> CreateAsync(
+        IConnection connection,
+        SessionCreationOptions? options,
+        FirmwareVersion? cachedFirmwareVersion,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
             () => new Ctap2Session(connection, options?.UserPresencePrompt),
             (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters,
+                cachedFirmwareVersion, token),
             cancellationToken);
 
     private async Task InitializeAsync(
         ProtocolConfiguration? configuration,
         FirmwareVersion? firmwareVersionOverride,
         ScpKeyParameters? scpKeyParams,
+        FirmwareVersion? cachedFirmwareVersion,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
@@ -160,7 +169,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 
         // The transport gate uses detected firmware; an override only affects later configuration.
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
-        var detectedFirmwareVersion = info.FirmwareVersion ?? new FirmwareVersion();
+        var detectedFirmwareVersion = cachedFirmwareVersion ?? info.FirmwareVersion ?? new FirmwareVersion();
 
         if (Connection is ISmartCardConnection smartCardConnection)
         {

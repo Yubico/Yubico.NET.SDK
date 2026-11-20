@@ -45,12 +45,16 @@ public class ManagementSessionTests
     }
 
     [Fact]
-    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
+    public async Task CreateAsync_AppletProbeFailure_ReleasesGuardWithoutDisposingBorrowedConnection()
     {
         var connection = new FailingSmartCardConnection();
+        var cancellationToken = TestContext.Current.CancellationToken;
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            ManagementSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+            ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken));
+        // The exact type excludes ConnectionInUseException from a stale factory attachment.
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken));
 
         // Borrowed: a failed CreateAsync must not dispose a connection it did not create.
         Assert.Equal(0, connection.DisposeCount);

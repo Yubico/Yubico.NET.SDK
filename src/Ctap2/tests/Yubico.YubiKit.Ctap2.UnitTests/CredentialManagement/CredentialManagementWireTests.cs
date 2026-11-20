@@ -37,6 +37,31 @@ public sealed class CredentialManagementWireTests
     private readonly byte[] _pinUvAuthToken = [0x01, 0x02, 0x03, 0x04];
 
     [Fact]
+    public async Task DisposedHelper_RejectsOperationsWithoutSendingOrReleasingBorrowedDependencies()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var protocol = new PinUvAuthProtocolV1();
+        _session.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), cancellationToken)
+            .Returns(CreateCredentialMetadataResponse());
+        byte[] token = Enumerable.Repeat((byte)1, 32).ToArray();
+        var helper = new Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement(_session, protocol, token);
+        var descriptor = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var user = new PublicKeyCredentialUserEntity(new byte[] { 2 }, "name", "Name");
+
+        helper.Dispose();
+        helper.Dispose();
+
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.GetCredentialsMetadataAsync(cancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.EnumerateRelyingPartiesAsync(cancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.EnumerateCredentialsAsync(new byte[32], cancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.DeleteCredentialAsync(descriptor, cancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.UpdateUserInformationAsync(descriptor, user, cancellationToken));
+        Assert.Empty(_session.ReceivedCalls());
+        Assert.Equal(16, protocol.Authenticate(new byte[32], new byte[] { 1 }).Length);
+        Assert.All(token, value => Assert.Equal(1, value));
+    }
+
+    [Fact]
     public async Task GetCredentialsMetadataAsync_SendsCanonicalCredentialManagementRequest()
     {
         byte[]? capturedRequest = null;

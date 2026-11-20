@@ -97,6 +97,7 @@ public sealed class CredentialManagement : IDisposable
     public async Task<CredentialMetadata> GetCredentialsMetadataAsync(
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
         var payload = BuildCommandPayload(CredManagementSubCommand.GetCredsMetadata);
         var response = await SendCredentialManagementCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -121,6 +122,7 @@ public sealed class CredentialManagement : IDisposable
     public async Task<RelyingPartyEnumerationResult> EnumerateRelyingPartiesAsync(
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
         var results = new List<RelyingPartyInfo>();
 
         // Begin enumeration
@@ -181,6 +183,7 @@ public sealed class CredentialManagement : IDisposable
         ReadOnlyMemory<byte> rpIdHash,
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
         var results = new List<StoredCredentialInfo>();
 
         // Begin enumeration
@@ -246,6 +249,7 @@ public sealed class CredentialManagement : IDisposable
         PublicKeyCredentialDescriptor credentialId,
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
         var payload = BuildDeleteCredentialPayload(credentialId);
         await SendCredentialManagementCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -271,6 +275,7 @@ public sealed class CredentialManagement : IDisposable
         PublicKeyCredentialUserEntity user,
         CancellationToken cancellationToken = default)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
         var payload = BuildUpdateUserPayload(credentialId, user);
         await SendCredentialManagementCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -280,9 +285,9 @@ public sealed class CredentialManagement : IDisposable
     /// Marks this helper disposed without releasing its borrowed dependencies.
     /// </summary>
     /// <remarks>
-    /// Current operation methods do not check this marker and can still send requests.
-    /// Do not use the helper after disposal or rely on disposal to prevent operations,
-    /// clear token memory, dispose the session/protocol or revoke device authorization.
+    /// Subsequent operations throw <see cref="ObjectDisposedException"/>. Await the complete
+    /// operation before disposing. Disposal does not clear token memory, dispose the
+    /// session or protocol, or revoke device authorization.
     /// </remarks>
     public void Dispose()
     {

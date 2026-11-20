@@ -23,10 +23,10 @@ namespace Yubico.YubiKit.Oath;
 ///     Inherited IsAuthenticated records Core SCP setup, not OATH password validation or ongoing channel
 ///     health. IsLocked and IsPasswordProtected describe this session's observed applet state. Cached
 ///     metadata getters can retain historical values after disposal; operations refuse a terminal session.
-///     Serialize calls: await each complete public operation before starting another or disposing the session.
-///     Aggregate followups, authentication
-///     retry and user-presence callbacks extend beyond Core's individual guarded exchanges. Keep borrowed
-///     inputs and callback/prompt resources alive until those tasks finish, without reentrant disposal.
+///     Await each complete public operation before starting an independent operation or disposing the session.
+///     The operation delegate passed to <c>AuthenticateAndRetryAsync</c> can use this session as part of
+///     that workflow. Keep borrowed inputs and callback/prompt resources alive through completion. Do not
+///     start independent operations from prompt callbacks or dispose the session from within a workflow.
 /// </remarks>
 public interface IOathSession : IApplicationSession
 {
@@ -238,9 +238,13 @@ public interface IOathSession : IApplicationSession
     ///     Cancellation after the successful RESET exchange does not interrupt reinitialization. Cancellation
     ///     before the exchange leaves the session intact. A transport failure or device error does not
     ///     confirm RESET success or prove that no data changed.
+    ///     If post-reset reinitialization fails and you supplied the connection, close and reopen it before
+    ///     creating a new session. The failed exchange may have left the connection out of sync.
     /// </remarks>
     /// <exception cref="InvalidOperationException">
-    ///     RESET succeeded but reinitialization failed. The session has ended; the inner exception gives the cause.
+    ///     The exchange was refused before RESET (for example, because recovery was required or another exchange
+    ///     was active), or RESET succeeded but reinitialization failed. In the latter case the error reports
+    ///     confirmed reset and the inner exception gives the reinitialization failure; the session has ended.
     /// </exception>
     Task ResetAsync(CancellationToken cancellationToken = default);
 

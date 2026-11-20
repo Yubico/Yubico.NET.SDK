@@ -239,11 +239,11 @@ The context uses application `OATH`, basis `PolicyRequires`, and the public `iss
 `CalculateAllAsync` is silent. Cancelling the token before the calculation's SmartCard exchange is admitted
 resolves a requested notification as cancelled; once admitted, the exchange runs to completion and cancellation
 does not interrupt the device or necessarily change the notification outcome.
-Await the complete public task before starting another operation on the session, disposing it, or clearing inputs.
-`CalculateAllAsync` can issue followup
-calculations; `AuthenticateAndRetryAsync` includes password acquisition, VALIDATE and retry; presence
-callbacks can run after an exchange. Keep prompt/provider resources alive until the workflow finishes,
-and avoid reentering or disposing the session from a callback.
+Await the complete public task before starting an independent operation on the session, disposing it, or clearing
+inputs. `CalculateAllAsync` can issue followup calculations, and the operation delegate passed to
+`AuthenticateAndRetryAsync` can use the same session as part of that workflow. Keep prompt/provider resources
+alive until the workflow finishes. Do not start independent operations from prompt callbacks or dispose the
+session from within a workflow.
 
 ## Constraints
 
@@ -258,6 +258,9 @@ and avoid reentering or disposing the session from a callback.
   metadata, and re-establishes SCP if configured. If reinitialization fails, the session ends and the error
   distinguishes that failure from a failed RESET. Cancellation after confirmed RESET does not interrupt
   reinitialization; a transport/device error during RESET does not prove that no mutation occurred.
+  An `InvalidOperationException` alone does not confirm RESET: the protocol may refuse the exchange before
+  transmission. If reinitialization fails on a connection you supplied, close and reopen it before creating
+  another session; it may be out of sync.
 - `RenameCredentialAsync` throws `NotSupportedException` through `EnsureSupports` below effective version 5.3.1,
   as does passing any non-null `ScpKeyParameters` below 5.6.3. Core additionally requires 5.7.2+ for SCP11.
   While the applet is locked, protected operations fail with an `OathException`

@@ -91,15 +91,16 @@ public class ManagementSessionSimpleTests
     }
 
     /// <summary>
-    ///     Reads a key exposing HID FIDO using the unpinned one-shot extension's default transport selection.
+    ///     Reads live metadata over the row's FIDO HID interface.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetDeviceInfo_WithHidFidoDevice_ReturnsValidInfo(YubiKeyTestState state)
     {
-        Assert.Equal(ConnectionType.HidFido, state.ConnectionType);
-
-        var deviceInfo = await state.Device.GetDeviceInfoAsync();
+        await using var session = await state.Device.CreateManagementSessionAsync(
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido });
+        Assert.Equal(ConnectionType.HidFido, session.ConnectionType);
+        var deviceInfo = await session.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
         Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
     }
@@ -117,15 +118,16 @@ public class ManagementSessionSimpleTests
     }
 
     /// <summary>
-    ///     Reads a key exposing HID OTP using the unpinned one-shot extension's default transport selection.
+    ///     Reads live metadata over the row's OTP HID interface.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
     public async Task GetDeviceInfo_WithHidOtpDevice_ReturnsValidInfo(YubiKeyTestState state)
     {
-        Assert.Equal(ConnectionType.HidOtp, state.ConnectionType);
-
-        var deviceInfo = await state.Device.GetDeviceInfoAsync();
+        await using var session = await state.Device.CreateManagementSessionAsync(
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
+        Assert.Equal(ConnectionType.HidOtp, session.ConnectionType);
+        var deviceInfo = await session.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
         Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
     }

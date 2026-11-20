@@ -113,9 +113,8 @@ public sealed class CredentialManagement : IDisposable
     /// <remarks>
     /// Use a token with no associated RP ID (CTAP 2.1, 2022-06-21 errata, Section 6.8.3).
     /// This eagerly sends begin, then total-1 next requests if the first total exceeds one.
-    /// If the first total is missing, only the first entry is returned; this fallback does
-    /// not establish a complete standard response. Totals are copied, not validated against
-    /// the collection. Begin NoCredentials becomes an empty result with a null total;
+    /// A successful begin must report a positive, bounded total. Begin NoCredentials becomes
+    /// an empty result with a null total;
     /// a continuation failure throws rather than returning a partial result. Keep the
     /// entire sequence free of intervening commands, including GetInfo and token requests.
     /// </remarks>
@@ -141,14 +140,15 @@ public sealed class CredentialManagement : IDisposable
         }
 
         var firstRp = RelyingPartyInfo.Decode(response);
+        int total = ValidateBeginTotal(firstRp.TotalRpCount);
         results.Add(firstRp);
 
         // Get remaining RPs if any
-        if (firstRp.TotalRpCount.HasValue && firstRp.TotalRpCount.Value > 1)
+        if (total > 1)
         {
             var nextPayload = BuildCommandPayload(CredManagementSubCommand.EnumerateRPsGetNextRP);
 
-            for (var i = 1; i < firstRp.TotalRpCount.Value; i++)
+            for (var i = 1; i < total; i++)
             {
                 response = await SendCredentialManagementCommandAsync(nextPayload, cancellationToken)
                     .ConfigureAwait(false);
@@ -156,7 +156,7 @@ public sealed class CredentialManagement : IDisposable
             }
         }
 
-        return new RelyingPartyEnumerationResult(results, firstRp.TotalRpCount);
+        return new RelyingPartyEnumerationResult(results, total);
     }
 
     /// <summary>
@@ -164,7 +164,7 @@ public sealed class CredentialManagement : IDisposable
     /// </summary>
     /// <param name="rpIdHash">The raw 32-byte SHA-256 hash of the original UTF-8 RP ID, preferably
     /// the unchanged RelyingPartyInfo.RpIdHash from RP enumeration. Do not hash a possibly
-    /// truncated returned RP identifier. This helper does not validate the hash length.</param>
+    /// truncated returned RP identifier.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>
     /// The credentials and the total reported by the authenticator. The caller must dispose the
@@ -173,8 +173,7 @@ public sealed class CredentialManagement : IDisposable
     /// <remarks>
     /// The token must be unbound or bound to this RP (CTAP 2.1, 2022-06-21 errata, Section 6.8.4).
     /// This eagerly sends begin and, when the first total exceeds one, total-1 next requests.
-    /// A missing total yields one entry and a null ReportedTotal, not proof of complete
-    /// enumeration. The reported total is copied without count or range validation.
+    /// A successful begin must report a positive, bounded total.
     /// Begin NoCredentials becomes an empty result; a continuation or decode failure
     /// disposes entries already decoded and throws, with no partial result. Do not interleave
     /// other authenticator commands before the awaited sequence completes.
@@ -184,6 +183,8 @@ public sealed class CredentialManagement : IDisposable
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        if (rpIdHash.Length != SHA256.HashSizeInBytes)
+            throw new ArgumentException("The RP ID hash must be exactly 32 bytes.", nameof(rpIdHash));
         var results = new List<StoredCredentialInfo>();
 
         // Begin enumeration
@@ -205,13 +206,14 @@ public sealed class CredentialManagement : IDisposable
         {
             var firstCred = StoredCredentialInfo.Decode(response);
             results.Add(firstCred);
+            int total = ValidateBeginTotal(firstCred.TotalCredentials);
 
             // Get remaining credentials if any
-            if (firstCred.TotalCredentials.HasValue && firstCred.TotalCredentials.Value > 1)
+            if (total > 1)
             {
                 var nextPayload = BuildCommandPayload(CredManagementSubCommand.EnumerateCredentialsGetNextCredential);
 
-                for (var i = 1; i < firstCred.TotalCredentials.Value; i++)
+                for (var i = 1; i < total; i++)
                 {
                     response = await SendCredentialManagementCommandAsync(nextPayload, cancellationToken)
                         .ConfigureAwait(false);
@@ -219,7 +221,7 @@ public sealed class CredentialManagement : IDisposable
                 }
             }
 
-            return new CredentialEnumerationResult(results, firstCred.TotalCredentials);
+            return new CredentialEnumerationResult(results, total);
         }
         catch
         {
@@ -231,6 +233,11 @@ public sealed class CredentialManagement : IDisposable
             throw;
         }
     }
+
+    private static int ValidateBeginTotal(int? reportedTotal) =>
+        reportedTotal is > 0 and <= ushort.MaxValue
+            ? reportedTotal.Value
+            : throw new InvalidOperationException("Invalid enumeration begin response: expected an entry count between 1 and 65535 (SDK limit).");
 
     /// <summary>
     /// Deletes a discoverable credential.

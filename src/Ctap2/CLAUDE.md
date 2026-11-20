@@ -330,9 +330,9 @@ collection count. `ClientPin.GetPinRetriesAsync` and `GetUvRetriesAsync` return 
 `PinRetryStatus` and `UserVerificationRetryStatus` models; their response parsers retain the existing protocol
 behavior.
 
-Use the returned RP hash unchanged: RP display text can be truncated. Enumeration eagerly sends begin
-and the reported number of next calls; missing total yields one result, and malformed totals are not
-fully validated. Do not interleave other device operations. A continuation failure throws rather than
+Use the returned 32-byte RP hash unchanged: RP display text can be truncated. Enumeration eagerly sends
+begin, then `total - 1` next calls. A successful begin must report 1–65535 entries (SDK limit);
+`NoCredentials` on begin is the empty result. Do not interleave other device operations. A continuation failure throws rather than
 returning partial results. `CredentialManagement.Dispose` rejects subsequent operations but neither
 owns nor clears the borrowed token, and does not end device authorization. Config/bio/storage
 helpers also borrow these dependencies. Toggle alwaysUv only after reading current state; after an

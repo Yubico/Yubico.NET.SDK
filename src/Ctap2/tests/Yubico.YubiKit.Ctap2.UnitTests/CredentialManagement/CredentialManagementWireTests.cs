@@ -184,24 +184,41 @@ public sealed class CredentialManagementWireTests
             Arg.Any<CancellationToken>());
     }
 
-    [Fact]
-    public async Task EnumerateCredentialsAsync_WithoutReportedTotal_ReturnsOneCredentialAndNullTotal()
+    [Theory]
+    [InlineData(null)]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(int.MaxValue)]
+    public async Task Enumerations_WithInvalidBeginTotal_StopWithoutContinuation(int? reportedTotal)
     {
-        _session.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(CreateStoredCredentialResponse(0x11));
+        var ct = TestContext.Current.CancellationToken;
+        _session.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateStoredCredentialResponse(0x11, reportedTotal),
+            CreateRelyingPartyResponse("example.com", reportedTotal));
 
         using var credentialManagement = new Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement(
             _session,
             _protocol,
             _pinUvAuthToken);
 
-        using var result = await credentialManagement.EnumerateCredentialsAsync(
-            new byte[32],
-            TestContext.Current.CancellationToken);
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => credentialManagement.EnumerateCredentialsAsync(new byte[32], ct));
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => credentialManagement.EnumerateRelyingPartiesAsync(ct));
 
-        Assert.Null(result.ReportedTotal);
-        Assert.Single(result.Credentials);
-        Assert.Equal(0x11, result.Credentials[0].CredentialId.Id.Span[0]);
-        Assert.Null(result.Credentials[0].TotalCredentials);
+        await _session.Received(2).SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct);
+    }
+
+    [Fact]
+    public async Task EnumerateCredentialsAsync_WithMalformedRpHash_DoesNotSend()
+    {
+        using var helper = new Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement(
+            _session, _protocol, _pinUvAuthToken);
+
+        await Assert.ThrowsAsync<ArgumentException>("rpIdHash", () =>
+            helper.EnumerateCredentialsAsync(new byte[31], TestContext.Current.CancellationToken));
+
+        Assert.Empty(_session.ReceivedCalls());
     }
 
     [Fact]

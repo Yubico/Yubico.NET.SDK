@@ -54,17 +54,16 @@ public sealed class CredentialMetadata
     /// <param name="data">The CBOR-encoded response data.</param>
     /// <returns>The decoded credential metadata.</returns>
     /// <remarks>
-    /// Copies the complete response without modifying the borrowed input. Missing count
-    /// fields currently default to zero; required-field and nonnegative-count validation
-    /// is not performed, so defaults are not evidence of empty or full device storage.
+    /// Copies the complete response without modifying the borrowed input. Both count fields
+    /// must be present and nonnegative.
     /// </remarks>
     public static CredentialMetadata Decode(ReadOnlyMemory<byte> data)
     {
         ReadOnlyMemory<byte> rawData = data.ToArray();
         var reader = new CborReader(rawData, CborConformanceMode.Ctap2Canonical);
 
-        var existingCount = 0;
-        var maxRemaining = 0;
+        int? existingCount = null;
+        int? maxRemaining = null;
 
         var mapLength = reader.ReadStartMap();
         for (var i = 0; i < mapLength; i++)
@@ -85,7 +84,10 @@ public sealed class CredentialMetadata
         }
         reader.ReadEndMap();
 
-        return new CredentialMetadata(rawData, existingCount, maxRemaining);
+        if (existingCount is null or < 0 || maxRemaining is null or < 0)
+            throw new InvalidOperationException("Invalid credential metadata response: expected both nonnegative counts.");
+
+        return new CredentialMetadata(rawData, existingCount.Value, maxRemaining.Value);
     }
 }
 
@@ -111,7 +113,7 @@ public sealed class RelyingPartyInfo
     /// <summary>
     /// Gets the raw SHA-256 hash of the original, untruncated RP ID.
     /// </summary>
-    /// <remarks>Pass it unchanged to credential enumeration. The decoder does not enforce its 32-byte length.</remarks>
+    /// <remarks>Pass the 32-byte hash unchanged to credential enumeration.</remarks>
     public ReadOnlyMemory<byte> RpIdHash { get; }
 
     /// <summary>
@@ -167,9 +169,9 @@ public sealed class RelyingPartyInfo
         }
         reader.ReadEndMap();
 
-        if (rp is null || rpIdHash is null)
+        if (rp is null || rpIdHash is not { Length: 32 })
         {
-            throw new InvalidOperationException("Invalid RP info response: missing required fields.");
+            throw new InvalidOperationException("Invalid RP info response: expected an RP entity and a 32-byte hash.");
         }
 
         return new RelyingPartyInfo(rawData, rp, rpIdHash, totalRpCount);

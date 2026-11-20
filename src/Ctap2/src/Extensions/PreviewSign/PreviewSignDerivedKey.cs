@@ -103,8 +103,7 @@ public sealed class PreviewSignDerivedKey
     /// The signature must be in DER-encoded ECDSA format, as returned by the
     /// YubiKey's previewSign extension. The message should be the original raw data,
     /// not a pre-hashed value.
-    /// The current DER converter reads two INTEGERs without checking complete sequence/root consumption
-    /// or all positive/canonical component conditions. Do not rely on it as strict DER validation.
+    /// The signature must contain exactly two positive DER INTEGERs within the P-256 component width.
     /// </para>
     /// </remarks>
     /// <param name="message">
@@ -121,7 +120,7 @@ public sealed class PreviewSignDerivedKey
     public bool VerifySignature(ReadOnlySpan<byte> message, ReadOnlySpan<byte> signature)
     {
         // PublicKey is SEC1 uncompressed: 0x04 || X(32) || Y(32).
-        if (PublicKey.Length != 65 || PublicKey.Span[0] != 0x04)
+        if (PublicKey.Length != 65 || PublicKey.Span[0] != 0x04 || signature.Length is < 8 or > 72)
         {
             return false;
         }
@@ -141,49 +140,22 @@ public sealed class PreviewSignDerivedKey
             };
             ecdsa.ImportParameters(parameters);
 
-            // Convert DER signature to IEEE P1363 format (r||s) for VerifyData
-            var ieeeSignature = ConvertDerToIeee(signature);
-
-            // Verify using SHA-256 (P-256 standard)
-            return ecdsa.VerifyData(message, ieeeSignature, HashAlgorithmName.SHA256);
+            var reader = new AsnReader(signature.ToArray(), AsnEncodingRules.DER);
+            var sequence = reader.ReadSequence();
+            var r = sequence.ReadIntegerBytes();
+            var s = sequence.ReadIntegerBytes();
+            sequence.ThrowIfNotEmpty();
+            reader.ThrowIfNotEmpty();
+            return IsPositiveComponent(r.Span) && IsPositiveComponent(s.Span)
+                && ecdsa.VerifyData(message, signature, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
         }
-        catch
+        catch (Exception ex) when (ex is AsnContentException or CryptographicException)
         {
             return false;
         }
     }
 
-    private static byte[] ConvertDerToIeee(ReadOnlySpan<byte> derSignature)
-    {
-        // Read r and s; complete consumption and full component validation are not checked here.
-        var reader = new AsnReader(derSignature.ToArray(), AsnEncodingRules.DER);
-        var sequence = reader.ReadSequence();
-        var r = sequence.ReadIntegerBytes();
-        var s = sequence.ReadIntegerBytes();
-
-        // Pad or trim to 32 bytes each (P-256 coordinate size)
-        byte[] ieee = new byte[64];
-        CopyWithPadding(r.Span, ieee.AsSpan(0, 32));
-        CopyWithPadding(s.Span, ieee.AsSpan(32, 32));
-        return ieee;
-    }
-
-    private static void CopyWithPadding(ReadOnlySpan<byte> source, Span<byte> destination)
-    {
-        // Remove leading zero byte if present (DER encoding of positive integers)
-        if (source.Length > destination.Length && source[0] == 0x00)
-        {
-            source = source[1..];
-        }
-
-        if (source.Length > destination.Length)
-        {
-            throw new InvalidOperationException("Signature component too large");
-        }
-
-        // Pad with leading zeros if needed
-        int padding = destination.Length - source.Length;
-        destination[..padding].Clear();
-        source.CopyTo(destination[padding..]);
-    }
+    private static bool IsPositiveComponent(ReadOnlySpan<byte> component) =>
+        (component[0] & 0x80) == 0 && component is not [0]
+        && (component.Length <= 32 || (component.Length == 33 && component[0] == 0));
 }

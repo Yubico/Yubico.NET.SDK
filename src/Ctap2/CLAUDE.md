@@ -255,7 +255,7 @@ and byte-string-wrapped nested maps differ from the draft's kty=-65537/direct ma
 an integer derived algorithm where the draft permits an optional int/text value. This partial agreement
 is not full-profile conformance; the draft's stated expiry is 2026-08-31. Signing and derived-key
 identifiers remain distinct; the convenience verifier handles raw
-messages with P-256/SHA-256 and limited DER parsing, not arbitrary generic TBS algorithms.
+messages with P-256/SHA-256 and strict DER signatures, not arbitrary generic TBS algorithms.
 
 #### Example Usage
 

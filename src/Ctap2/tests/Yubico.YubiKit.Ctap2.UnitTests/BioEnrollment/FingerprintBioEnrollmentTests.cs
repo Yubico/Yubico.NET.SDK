@@ -250,7 +250,8 @@ public class FingerprintBioEnrollmentTests
     {
         // Arrange
         var templateId = new byte[] { 0xAB, 0xCD };
-        var templateResponse = CreateTemplateInfoResponse(templateId, "My Finger");
+        // {7: [{1: h'abcd', 2: 'My Finger'}, {1: h'ef'}]}
+        byte[] templateResponse = Convert.FromHexString("A10782A20142ABCD02694D792046696E676572A10141EF");
 
         _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
@@ -263,19 +264,20 @@ public class FingerprintBioEnrollmentTests
         var templates = await bioEnroll.EnumerateEnrollmentsAsync(TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Single(templates);
+        Assert.Equal(2, templates.Count);
         Assert.Equal(templateId, templates[0].TemplateId.ToArray());
         Assert.Equal("My Finger", templates[0].FriendlyName);
+        Assert.Equal(new byte[] { 0xEF }, templates[1].TemplateId.ToArray());
+        Assert.Null(templates[1].FriendlyName);
     }
 
     [Fact]
     public async Task EnumerateEnrollmentsAsync_WhenNoTemplates_ReturnsEmptyList()
     {
-        // Arrange unsupported InvalidCommand, not the standard no-enrollment InvalidOption status.
         _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
-            .Returns<ReadOnlyMemory<byte>>(x => throw new CtapException(CtapStatus.InvalidCommand, "No templates"));
+            .Returns<ReadOnlyMemory<byte>>(_ => throw new CtapException(CtapStatus.InvalidOption, "No templates"));
 
         var bioEnroll = CreateBioEnrollment();
 
@@ -284,6 +286,31 @@ public class FingerprintBioEnrollmentTests
 
         // Assert
         Assert.Empty(templates);
+    }
+
+    [Fact]
+    public async Task EnumerateEnrollmentsAsync_UnsupportedCommandDoesNotLookEmpty()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var error = new CtapException(CtapStatus.InvalidCommand);
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct)
+            .Returns<ReadOnlyMemory<byte>>(_ => throw error);
+
+        var actual = await Assert.ThrowsAsync<CtapException>(() => CreateBioEnrollment().EnumerateEnrollmentsAsync(ct));
+
+        Assert.Same(error, actual);
+    }
+
+    [Theory]
+    [InlineData("A10781A1026161")] // Entry is missing its required ID.
+    [InlineData("A0")] // Success is missing the inventory array.
+    public async Task EnumerateEnrollmentsAsync_RejectsMalformedInventory(string hex)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct)
+            .Returns((ReadOnlyMemory<byte>)Convert.FromHexString(hex));
+
+        await Assert.ThrowsAsync<CborContentException>(() => CreateBioEnrollment().EnumerateEnrollmentsAsync(ct));
     }
 
     [Fact]

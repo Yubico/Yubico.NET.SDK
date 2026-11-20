@@ -203,16 +203,13 @@ public sealed class FingerprintBioEnrollment
     }
 
     /// <summary>
-    /// Requests enrollment inventory and decodes the helper's current flat-template shape.
+    /// Requests enrollment inventory.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>At most one flat decoded template, or an empty list for InvalidCommand.</returns>
+    /// <returns>The returned templates, or an empty list for InvalidOption (no enrollments).</returns>
     /// <remarks>
-    /// No sensor capture is needed. CTAP 2.1 Section 6.7.6 instead returns a key-7 array
-    /// of nested templates (ID key 1, name key 2); this decoder does not handle that shape.
-    /// The standard no-enrollment status is InvalidOption, not InvalidCommand. Because this
-    /// helper converts InvalidCommand to an empty list, emptiness is not evidence of an
-    /// empty device inventory. The class's request/transcript limitations also apply.
+    /// No sensor capture is needed. CTAP 2.1 Section 6.7.6 returns a key-7 array
+    /// of nested templates (required ID key 1, optional name key 2). Other CTAP statuses propagate.
     /// </remarks>
     public async Task<IReadOnlyList<TemplateInfo>> EnumerateEnrollmentsAsync(
         CancellationToken cancellationToken = default)
@@ -225,49 +222,56 @@ public sealed class FingerprintBioEnrollment
             response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
                 .ConfigureAwait(false);
         }
-        catch (CtapException ex) when (ex.Status == CtapStatus.InvalidCommand)
+        catch (CtapException ex) when (ex.Status == CtapStatus.InvalidOption)
         {
-            // Unsupported command is currently normalized to empty; standard no-enrollment is InvalidOption.
             return [];
         }
 
-        var results = new List<TemplateInfo>();
-        var reader = new CborReader(response, CborConformanceMode.Lax);
+        return ReadTemplateInventory(response);
+    }
 
-        // Current flat decoder; Section 6.7.6 instead defines key 7 as an array of nested templates.
+    private static IReadOnlyList<TemplateInfo> ReadTemplateInventory(ReadOnlyMemory<byte> response)
+    {
+        var reader = new CborReader(response, CborConformanceMode.Ctap2Canonical);
+        List<TemplateInfo>? results = null;
         var mapCount = reader.ReadStartMap() ?? 0;
-        ReadOnlyMemory<byte>? templateId = null;
-        string? friendlyName = null;
-
         for (var i = 0; i < mapCount; i++)
         {
-            var key = reader.ReadInt32();
-            switch (key)
+            if (reader.ReadInt32() != 7)
             {
-                case 4: // templateId
-                    templateId = reader.ReadByteString();
-                    break;
-                case 7: // Locally treated as a name; standard envelope key 7 is templateInfos array.
-                    friendlyName = reader.ReadTextString();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
+                reader.SkipValue();
+                continue;
             }
+
+            int count = reader.ReadStartArray() ?? throw new CborContentException("Template array must have a definite length.");
+            results = [];
+            for (int j = 0; j < count; j++)
+                results.Add(ReadInventoryEntry(reader));
+            reader.ReadEndArray();
         }
 
         reader.ReadEndMap();
-
-        if (templateId.HasValue)
-        {
-            results.Add(new TemplateInfo
-            {
-                TemplateId = templateId.Value,
-                FriendlyName = friendlyName
-            });
-        }
-
+        if (reader.BytesRemaining != 0 || results is null)
+            throw new CborContentException("Expected a complete template inventory response with templateInfos.");
         return results;
+    }
+
+    private static TemplateInfo ReadInventoryEntry(CborReader reader)
+    {
+        byte[]? id = null;
+        string? name = null;
+        int fields = reader.ReadStartMap() ?? 0;
+        for (int i = 0; i < fields; i++)
+        {
+            int key = reader.ReadInt32();
+            if (key == 1) id = reader.ReadByteString();
+            else if (key == 2) name = reader.ReadTextString();
+            else reader.SkipValue();
+        }
+        reader.ReadEndMap();
+        if (id is null || id.Length == 0)
+            throw new CborContentException("Template inventory entry lacks an ID.");
+        return new TemplateInfo { TemplateId = id, FriendlyName = name };
     }
 
     /// <summary>

@@ -14,6 +14,7 @@
 
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
@@ -59,11 +60,11 @@ public class ManagementLockCodeTests
                 var lockedInfo = await mgmt.GetDeviceInfoAsync();
                 Assert.True(lockedInfo.IsLocked);
 
-                // Expect rejection without the code. Any exception satisfies this assertion,
-                // so unrelated failures can pass it; the device error/status is not pinned.
+                // Require a SmartCard command rejection, not a validation or transport failure.
+                // The exact device status remains a hardware qualification question.
                 var configWithoutCode = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
-                await Assert.ThrowsAnyAsync<Exception>(async () =>
+                await Assert.ThrowsAsync<ApduException>(async () =>
                     await mgmt.SetDeviceConfigAsync(configWithoutCode));
 
                 // Verify that a config change WITH the lock code succeeds

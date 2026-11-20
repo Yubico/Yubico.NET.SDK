@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -221,7 +222,7 @@ public class ManagementSessionSimpleTests
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.3.0", ConnectionType = ConnectionType.SmartCard)]
-    public async Task CreateManagementSession_WithScp03WrongKeys_ThrowsException(YubiKeyTestState state)
+    public async Task CreateManagementSession_WithScp03WrongKeys_RejectsCardCryptogram(YubiKeyTestState state)
     {
         // Create SCP03 key parameters with intentionally wrong keys
         var wrongKeyBytes = new byte[16];
@@ -234,13 +235,14 @@ public class ManagementSessionSimpleTests
 
         await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>();
 
-        // Any creation exception satisfies this assertion; it does not pin the authentication error.
-        await Assert.ThrowsAnyAsync<Exception>(async () =>
+        // A wrong key should fail verification of the card cryptogram, not selection or transport.
+        var exception = await Assert.ThrowsAsync<BadResponseException>(async () =>
         {
             await using var mgmtSession = await ManagementSession.CreateAsync(
                 connection,
                 new SessionCreationOptions { ScpKeyParameters = scpKeyParams });
         });
+        Assert.Contains("card cryptogram verification failed", exception.Message, StringComparison.Ordinal);
     }
 
 

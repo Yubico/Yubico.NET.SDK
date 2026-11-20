@@ -87,10 +87,10 @@ can replace it. A firmware override changes session policy, not this returned va
 do not refresh `IYubiKey.CachedDeviceInfo` or a test fixture's initial snapshot. The current `DeviceInfo`
 also contains memory-backed timeout data; copying the record or a result wrapper does not clone those bytes.
 
-The current Core decoder has two metadata limitations: FIPS capability/approval tags use the wrong bit
-mapping, so `FipsCapabilities`, `FipsApproved` and derived filters must not be used to establish application
-approval. `IsFips` is a separate manufacturing indicator, not an operating mode. Also, product flag bits
-can remain in `FormFactor`, so equality with a named base value can miss a flagged device.
+Core decodes the reported FIPS capability and approval masks separately from ordinary application masks.
+These are metadata, not proof that a particular operation ran in an approved configuration. `IsFips` is
+a separate manufacturing indicator, not an operating mode. Product flag bits can remain in
+`FormFactor`, so equality with a named base value can miss a flagged device.
 
 ### Enable or disable applications
 

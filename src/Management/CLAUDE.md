@@ -104,9 +104,9 @@ public async Task MultiFormFactor_Test(YubiKeyTestState state)
 ```
 
 Current Core parsing can retain product flag bits in `FormFactor`, so exact base-enum filters can miss
-flagged devices. The enum itself is not a flags enum. FIPS capability/approval tags also currently use
-the wrong bit mapping; `FipsCapable`/`FipsApproved` filters and their derived helpers cannot establish
-application approval. `IsFips` is a distinct manufacturing indicator, not an operating mode. Do not
+flagged devices. The enum itself is not a flags enum. `FipsCapable`/`FipsApproved` filters describe
+reported applet metadata; they do not establish approved operation. `IsFips` is a distinct manufacturing
+indicator, not an operating mode. Do not
 use these fields to identify Bio MPE reset eligibility.
 
 ## YubiKeyTestState - Device Context
@@ -511,10 +511,9 @@ public async Task PivCapability_EnabledDevices_Accessible(YubiKeyTestState state
 
 ### 5. FIPS Metadata Tests
 
-The shared harness exposes `FipsCapable` and `FipsApproved` filters, but the current Core decoder uses
-the application-bit mapping for the distinct FIPS-tag encoding. The derived masks and filters are not
-reliable evidence of application approval. Comparing a filter result with the same decoded property
-only checks consistency of that interpretation; it does not validate the mapping or approved operations.
+The shared harness exposes `FipsCapable` and `FipsApproved` filters over Core's decoded FIPS-tag mapping.
+Comparing a filter result with the same decoded property checks consistency of that interpretation; it
+does not validate the mapping or approved operations. The FIPS tags accept one or two big-endian bytes.
 Keep decoder/filter fixture work separate from hardware operation tests. `IsFips` comes from a distinct
 manufacturing flag and must not be relabeled as an active FIPS mode.
 
@@ -911,8 +910,8 @@ var yubiKey = devices.SingleOrDefault(device => device.SerialNumber == 12345678)
    neither three seconds nor a discovery result's position proves the intended key is ready.
 3. **USB reachability**: Exact USB `None` and out-of-width masks are rejected, but device support is not
    checked. Preserve a supported application and a recovery route.
-4. **Metadata interpretation**: Flagged form factors can miss equality filters; current FIPS masks use the
-   wrong mapping. Do not derive approval, active mode or product-family eligibility from these filters.
+4. **Metadata interpretation**: Flagged form factors can miss equality filters. Do not derive approved
+   operation, active mode or product-family eligibility from these filters.
 5. **NFC**: Check hardware and 5.7+ support for restriction; false encoding alone is not verified recovery.
 6. **Test proof**: Readback checks persisted metadata, not necessarily active interfaces. A broad
    `ThrowsAnyAsync<Exception>` does not isolate authentication or lock enforcement. Existing restoration

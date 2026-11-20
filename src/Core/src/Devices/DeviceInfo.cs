@@ -201,8 +201,8 @@ public readonly record struct DeviceInfo
         var usbSupported = ReadCapabilities(tlvDict, TAG_USB_SUPPORTED);
         var nfcEnabled = ReadCapabilities(tlvDict, TAG_NFC_ENABLED);
         var nfcSupported = ReadCapabilities(tlvDict, TAG_NFC_SUPPORTED);
-        var fipsCapabilities = ReadCapabilities(tlvDict, TAG_FIPS_CAPABLE);
-        var fipsApprovedCapabilities = ReadCapabilities(tlvDict, TAG_FIPS_APPROVED);
+        var fipsCapabilities = ReadFipsCapabilities(tlvDict, TAG_FIPS_CAPABLE);
+        var fipsApprovedCapabilities = ReadFipsCapabilities(tlvDict, TAG_FIPS_APPROVED);
 
         var isNfcRestricted = ReadByte(tlvDict, TAG_NFC_RESTRICTED) == 1;
         var hasPinComplexity = ReadByte(tlvDict, TAG_PIN_COMPLEXITY) == 1;
@@ -288,6 +288,15 @@ public readonly record struct DeviceInfo
         if (value.IsEmpty)
             throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length 0; expected a capability value.");
         return CapabilityMapper.FromApp(value);
+    }
+
+    private static DeviceCapabilities ReadFipsCapabilities(IDictionary<int, ReadOnlyMemory<byte>> data, int tag)
+    {
+        if (!data.TryGetValue(tag, out var value))
+            return DeviceCapabilities.None;
+        if (value.Length is not (1 or 2))
+            throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length {value.Length}; expected 1 or 2 bytes.");
+        return CapabilityMapper.FromFips(value);
     }
 
     private static (FirmwareVersion, VersionQualifier) DetermineFirmwareVersion(
@@ -387,10 +396,10 @@ internal static class CapabilityMapper
 
     public static DeviceCapabilities FromFips(ReadOnlyMemory<byte> value)
     {
-        if (value.IsEmpty) return 0;
-        if (value.Length == 1 && value.Span[0] == 0) return DeviceCapabilities.None;
+        if (value.IsEmpty)
+            return DeviceCapabilities.None;
 
-        int fips = BinaryPrimitives.ReadInt16BigEndian(value.Span);
+        int fips = value.Length == 1 ? value.Span[0] : BinaryPrimitives.ReadUInt16BigEndian(value.Span);
         DeviceCapabilities capabilities = 0;
 
         foreach (var (bit, cap) in FipsMapping)

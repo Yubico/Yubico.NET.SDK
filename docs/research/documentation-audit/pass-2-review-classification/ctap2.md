@@ -9,7 +9,7 @@ Sibling pins: python-fido2 @ 5bc9d3a1c; yubikit-android @ f46268563; yubikey-man
 | A2 | 3 | CTAP-IMP-011, 014, 039 |
 | A3 | 3 | CTAP-IMP-013, 031 (A4 for empty and oversize), 033 |
 | A4 | 1 | CTAP-IMP-023 |
-| A5 | 2 | CTAP-IMP-018, 027 |
+| A5 | 2 (historical) | CTAP-IMP-018, 027 (027 proposal superseded by AG-26) |
 | A6 | 1 | CTAP-IMP-044 |
 | Interview (gated) | 33 | G1: 009, 012, 029, 048. G2: 006, 007, 036. G3: 001, 008, 010, 019, 030, 040, 043. G5: 016, 047. No matching rule (no gate): 002, 003, 004, 015, 020, 021, 026, 028, 032, 034, 037, 038, 041, 042, 046, X020, DEC-002 |
 | T1 | 2 | CTAP-IMP-022, CTAP-DEC-003 |
@@ -49,7 +49,7 @@ Notes:
 | CTAP-IMP-024 | Medium | A1 | No-brainer yes. Finally-clear named admin temporaries; Android changePin does this; borrowed token untouched. |
 | CTAP-IMP-025 | Low | A1 | No-brainer yes. AAGUID conversion must be unconditional; siblings treat AAGUID as raw RFC-order bytes. |
 | CTAP-IMP-026 | Low | Interview (no rule) | Siblings split on name optionality (python optional, Android required). Overlaps the DEC-002 privacy decision. |
-| CTAP-IMP-027 | Medium | A5 (T2) | Make response owners disposable, following StoredCredentialInfo and CredentialEnumerationResult in this module. |
+| CTAP-IMP-027 | Medium | A5 (T2; superseded) | Original proposal: make response owners disposable. [AG-26](../pass-2-review-decisions.md#ag-26-ctap-imp-027-ownership) applies X3/R1 instead. |
 | CTAP-IMP-028 | Medium | Interview (no rule) | Unsigned count width is settled. ED-suffix and AT conditionals are a request-aware decision. |
 | CTAP-IMP-029 | High | Interview (G1) | High severity. Only python-fido2 implements ARKG and it assumes P-256 without reading crv. Experimental draft. T2. |
 | CTAP-IMP-030 | Medium | Interview (G3) | No sibling exposes GetAssertion key 0x08. The 2.1 errata text searched here runs GetAssertion response keys to 0x07 and has no key 0x08 or unsigned-output field; check CTAP 2.2 first. |
@@ -496,6 +496,10 @@ FromBigEndianBytes(b): copy b, apply the same reversal, return new Guid(copy)
 - E1 escalation risk: stop if `Guid.ToByteArray` is host-dependent on a target runtime; then build the Guid from the 16 RFC bytes explicitly.
 
 ### CTAP-IMP-027: Credential and extension result owners
+
+**Historical proposal, superseded by [AG-26](../pass-2-review-decisions.md#ag-26-ctap-imp-027-ownership).**
+The proposal and evidence below are retained for context, not as implementation instructions.
+
 - Rule: A5 (.NET-only lifetime). Follow the StoredCredentialInfo and CredentialEnumerationResult pattern in this module.
 - Evidence pin (E2): internal precedent `src/Ctap2/src/CredentialManagement/CredentialEnumerationResult.cs:63` (_disposed) and `src/Ctap2/src/CredentialManagement/StoredCredentialInfo.cs:210` (owned clone cleared). Site: `src/Ctap2/src/Credentials/MakeCredentialResponse.cs:187–189` (BEFORE).
 - Pseudocode:

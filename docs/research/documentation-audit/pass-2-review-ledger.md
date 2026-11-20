@@ -25,7 +25,7 @@ pins, options and pseudocode. Agreement numbers (AG-n) point into `pass-2-review
 | --- | --- | --- |
 | X1 | A failed login never ends the session; it clears only that credential's earlier success; a failed SCP handshake ends it | AG-23 |
 | X2 | Sessions continue after a confirmed reset in every applet: reselect, clear cached and authenticated state, re-read, re-run SCP; Security Domain re-authenticates with the default SCP03 keys (Q12 a). Flips PGP-IMP-005 and MGMT-IMP-010 | AG-22, AG-23 |
-| X3 | Secret results are caller-owned writable `Memory<byte>` (single and composite, R1); `IDisposable` only for secret holders (`CredentialPassword`, `SessionKeys`); no `Clear()`. Samples follow S1 | AG-21, AG-24, AG-25 |
+| X3 | Secret results are caller-owned writable `Memory<byte>` (single and composite, R1); `IDisposable` only for secret holders (`CredentialPassword`, `SessionKeys`). No new public `Clear()` convenience methods on applet result types. Existing public `ApduResponse.Clear()` remains supported; the SDK must still clear sensitive buffers it owns. Samples follow S1 | AG-21, AG-24, AG-25, [AG-27](pass-2-review-decisions.md#ag-27-r1-clear-scope) |
 | X4 | Rule C1: one operation at a time per session, simple Core guard; no workflow lease | AG-21 |
 | X5, X6 | Cancellation and error mapping settled through their cards | AG-20, AG-21 |
 | X7 | Rule M1: strict parsing per the repo doctrine (`CLAUDE.md`), unknown well-formed values preserved | AG-19 |
@@ -39,8 +39,10 @@ pins, options and pseudocode. Agreement numbers (AG-n) point into `pass-2-review
 | D1 | Every PR labels each divergence from the sibling SDKs with its reason | AG-21 |
 | C1 | See X4 | AG-21 |
 
-Delivery (AG-5, AG-6, AG-7): one commit per card with `Audit-Card` and `Triage-Rule` trailers, one draft PR per applet
-against `--base yubikit-docs-audit`, cross-cutting PRs first, then the Copilot review-fix loop.
+Delivery (AG-5, AG-6, AG-7, [AG-28](pass-2-review-decisions.md#ag-28-delivery-commit-scope)): one commit per unsplit
+card or per approved, independently scoped facet of a split card, with `Audit-Card` and `Triage-Rule` trailers.
+One draft PR per applet against `--base yubikit-docs-audit`, foundational cross-cutting PRs first, then the Copilot
+review-fix loop.
 
 ## Cards
 
@@ -123,7 +125,7 @@ against `--base yubikit-docs-audit`, cross-cutting PRs first, then the Copilot r
 | CTAP-IMP-024 | CTAP2 | Medium | A1 | Auto | No-brainer yes. Finally-clear named admin temporaries; Android changePin does this; borrowed token untouched. Veto pass: no veto | AG-25 |
 | CTAP-IMP-025 | CTAP2 | Low | A1 | Auto | No-brainer yes. AAGUID conversion must be unconditional; siblings treat AAGUID as raw RFC-order bytes. Veto pass: no veto | AG-25 |
 | CTAP-IMP-026 | CTAP2 | Low | Interview (no rule) | Dennis | Lean accepted: (a) | AG-12 |
-| CTAP-IMP-027 | CTAP2 | Medium | A5 (T2) | Auto | Make response owners disposable, following StoredCredentialInfo and CredentialEnumerationResult in this module. Veto pass: no veto | AG-25 |
+| CTAP-IMP-027 | CTAP2 | Medium | A5 (T2; historical) | Dennis | Apply X3/R1: `MakeCredentialResponse` and `GetAssertionResponse` stay non-disposable. Return caller-owned writable `Memory<byte>` for sensitive output, retain SDK cleanup on decode failure, and eliminate inaccessible sensitive copies. Exact raw-envelope API remains open. | [AG-26](pass-2-review-decisions.md#ag-26-ctap-imp-027-ownership); supersedes the earlier A5 proposal |
 | CTAP-IMP-028 | CTAP2 | Medium | Interview (no rule) | Dennis | Lean accepted: (a) | AG-12 |
 | CTAP-IMP-029 | CTAP2 | High | Interview (G1) | Dennis | (a): validate curve, coordinate length and on-curve points before ARKG derivation; surface behind `[Experimental]` | AG-11 |
 | CTAP-IMP-030 | CTAP2 | Medium | Interview (G3) | Dennis | Defer | AG-20 |

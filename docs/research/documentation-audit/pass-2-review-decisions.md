@@ -40,6 +40,9 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | AG-23 | 2026-11-20 | Dennis's round 3 answers (edited 13:54): Q12 (a) always continue on default SCP03 after SD reset; KeyReplacement SD only, overwrite documented elsewhere; X1 A (failed login never ends the session, clears that credential's success only, SCP handshake failure ends it); X12 B (`CredentialPassword` with `FromUtf8` padded and `FromRaw` exactly 16, seven `IHsmAuthSession` signatures). WA-IMP-014 answered with a question (siblings only send largeBlobKey when largeBlob is requested); X3 answered "combine A and B case by case, house style; show call sites". Examples in `Inbox/YubiKit pass-2 answers 2026-11-20 round 4.md` | Logged 2026-11-20 14:05; WA-IMP-014 letter, X3 shape and the veto skim awaiting Dennis |
 | AG-24 | 2026-11-20 | Dennis's round 4 answers (edited 14:54): WA-IMP-014 A (refuse before sending, NotSupported); X3 single secrets P1 `Memory<byte>`, including OATH `CalculateAsync` and YubiOTP `CalculateHmacSha1Async` (plus OpenPGP `DecryptAsync`; PIV unchanged). Composite shape (P3 disposable result objects) not accepted yet; Dennis asked for .NET ecosystem idioms. Survey and new lean R1 in `Inbox/YubiKit pass-2 answers 2026-11-20 round 5.md` | Logged 2026-11-20 15:05; X3 composite shape (R1) and the veto skim awaiting Dennis; all gated cards decided |
 | AG-25 | 2026-11-20 | Dennis's round 5 answer (edited 21:24) and chat 21:27: R1 approved (X3 composite results are plain records with writable caller-owned `Memory<byte>` fields; `IDisposable` only for secret holders `CredentialPassword` and `SessionKeys`; no `Clear()`). Veto skim: "I approve all of the skim-through auto-approved cards", so no vetoes on the 53 original autos, the 16 AG-19 autos or the 14 split facets. The earlier WA-IMP-015 veto (AG-20) stands. Review closed; per-card ledger `pass-2-review-ledger.md` | Approved; review complete |
+| [AG-26](#ag-26-ctap-imp-027-ownership) | 2026-11-20 | Dennis explicitly approved applying X3/R1 to CTAP-IMP-027, superseding the earlier A5 disposable-response proposal. | Ownership approved; exact raw-envelope API open |
+| [AG-27](#ag-27-r1-clear-scope) | 2026-11-20 | Dennis clarified R1: no new public `Clear()` convenience methods on applet result types. Existing public `ApduResponse.Clear()` remains supported; the SDK must still clear sensitive buffers it owns. | Approved |
+| [AG-28](#ag-28-delivery-commit-scope) | 2026-11-20 | Dennis approved reconciliation #3: one commit per unsplit card or per approved, independently scoped facet of a split card. | Interpretation only; no implementation authorized |
 
 ### AG-8 classification run
 
@@ -567,6 +570,30 @@ edited (last modified 2026-11-18 20:30); the chat answer is the veto pass.
   WA-IMP-015 veto), the ledger states the final call. The per-applet classification files keep the original
   analysis and their disposition columns are superseded by the ledger.
 
+### AG-26 CTAP-IMP-027 ownership
+
+Dennis explicitly approved the R1 ownership model for `MakeCredentialResponse` and `GetAssertionResponse` in chat.
+Both stay non-disposable. Sensitive result buffers must be caller-owned writable `Memory<byte>` so callers can zero
+them. The SDK retains cleanup of sensitive buffers it owns on decode failure and must eliminate inaccessible
+sensitive copies. This supersedes the [earlier disposable-response proposal](pass-2-review-classification/ctap2.md#ctap-imp-027-credential-and-extension-result-owners).
+The exact raw-envelope API remains an open engineering detail; no `RawData` property was approved.
+
+### AG-27 R1 Clear scope
+
+In R1 (AG-25), “no `Clear()`” prohibits adding public `Clear()` convenience methods to applet result types. It does not
+remove or deprecate the existing public `ApduResponse.Clear()` or change the SDK’s obligation to clear sensitive
+buffers it owns.
+
+### AG-28 Delivery commit scope
+
+- Keep one commit per unsplit card. For a split card, use one commit per approved, independently scoped facet.
+- Each card or facet commit carries the canonical `Audit-Card` ID and its actual applicable `Triage-Rule`. Identify
+  the facet in the subject or body; do not add a trailer. Each commit must build and pass the affected module's
+  unit tests so it remains a meaningful unit to bisect or revert.
+- Implement shared cross-applet changes once in the foundational cross-cutting PRs, not again in each applet PR.
+  For a genuinely indivisible change spanning multiple cards, confirm attribution case by case; do not invent a
+  trailer convention.
+
 ### AG-14 firmware rule detail
 
 - Dennis, 2026-11-17: "If the applet's version read comes up as 000, or if it equals the static firmware version
@@ -614,6 +641,8 @@ edited (last modified 2026-11-18 20:30); the chat answer is the veto pass.
     previewSign and ARKG surface so consumers must opt in (new proposal, G5-style: better than siblings' doc-only warning).
 
 ### AG-5 delivery proposal
+
+The original rule is retained below; [AG-28](#ag-28-delivery-commit-scope) clarifies the split-card exception.
 
 - One commit per card. Conventional subject, for example `fix(oath): require 16-byte access key`, with trailers
   `Audit-Card: OATH-DEC-002` and `Triage-Rule: A4`. Each commit builds and passes the module's unit tests, so any

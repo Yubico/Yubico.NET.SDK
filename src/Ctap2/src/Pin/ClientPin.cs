@@ -14,6 +14,7 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
+using System.Text.Unicode;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Ctap2.Cbor;
 using static Yubico.YubiKit.Ctap2.Cbor.CoseKeyWriter;
@@ -41,9 +42,8 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 /// <para>
 /// Supply PINs as NFC-normalized UTF-8, with at least four Unicode characters and no final 0x00
 /// byte. For a new PIN, also meet the authenticator's current minimum in Unicode code points and
-/// any additional device policy. The SDK checks only 4–63 input bytes: it does not validate UTF-8,
-/// normalization, code-point count, a final zero byte or the advertised minimum. It hashes the
-/// exact supplied bytes, so do not append padding to a PIN argument.
+/// any additional device policy. An existing PIN must be valid UTF-8 and is hashed exactly as
+/// supplied without applying new-PIN rules. Do not append padding to a PIN argument.
 /// </para>
 /// <para>
 /// If GetInfo reports forcePINChange=true, change the PIN before requesting a PIN token.
@@ -217,7 +217,7 @@ public sealed class ClientPin : IDisposable
     /// Changes the existing PIN on the authenticator.
     /// </summary>
     /// <param name="currentPin">
-    ///     The borrowed, unpadded NFC UTF-8 current PIN, 4–63 bytes, with no final 0x00.
+    ///     The borrowed, unpadded UTF-8 bytes of the current PIN, hashed unchanged.
     ///     Keep it unchanged through task completion and clear it after its last use, including on failure.
     /// </param>
     /// <param name="newPin">
@@ -226,7 +226,7 @@ public sealed class ClientPin : IDisposable
     ///     only. Keep it unchanged through task completion and clear it after its last use.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <exception cref="ArgumentException">If either PIN byte length is invalid.</exception>
+    /// <exception cref="ArgumentException">If the current PIN is not valid UTF-8 or the new PIN byte length is invalid.</exception>
     /// <exception cref="CtapException">If the authenticator rejects the change, including an incorrect/blocked current PIN or a new PIN that violates policy.</exception>
     /// <remarks>
     /// A successful change invalidates existing authenticator tokens. This helper does not retain
@@ -239,7 +239,7 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(currentPin, nameof(currentPin));
+        ValidateExistingPin(currentPin.Span, nameof(currentPin));
         ValidatePin(newPin, nameof(newPin));
 
         // Get authenticator's key agreement key
@@ -300,13 +300,13 @@ public sealed class ClientPin : IDisposable
     /// Requests a token with the legacy getPinToken subcommand using the PIN.
     /// </summary>
     /// <param name="pin">
-    ///     The borrowed, unpadded NFC UTF-8 PIN, 4–63 bytes, with no final 0x00. The SDK checks
-    ///     byte length only. Keep it unchanged through task completion and clear it after its last use.
+    ///     The borrowed, unpadded UTF-8 bytes of the existing PIN. Keep them unchanged through task
+    ///     completion and clear them after their last use.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A new caller-owned decrypted token. Clear it after its last use, including if a subsequent operation fails. V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes.</returns>
     /// <exception cref="BadResponseException">The token is missing or has an invalid decrypted length for protocol 1 or 2.</exception>
-    /// <exception cref="ArgumentException">If the PIN byte length is outside 4–63 bytes.</exception>
+    /// <exception cref="ArgumentException">If the PIN is not valid UTF-8.</exception>
     /// <exception cref="CtapException">If the PIN is incorrect.</exception>
     /// <remarks>
     /// Use <see cref="IPinUvAuthProtocol.Authenticate"/> to compute pinUvAuthParam, not to
@@ -321,7 +321,7 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(pin, nameof(pin));
+        ValidateExistingPin(pin.Span, nameof(pin));
 
         // Get authenticator's key agreement key
         var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
@@ -362,15 +362,15 @@ public sealed class ClientPin : IDisposable
     /// Requests a PIN/UV auth token using PIN, with explicit permissions when supported.
     /// </summary>
     /// <param name="pin">
-    ///     The borrowed, unpadded NFC UTF-8 PIN, 4–63 bytes, with no final 0x00. The SDK checks
-    ///     byte length only. Keep it unchanged through task completion and clear it after its last use.
+    ///     The borrowed, unpadded UTF-8 bytes of the existing PIN. Keep them unchanged through task
+    ///     completion and clear them after their last use.
     /// </param>
     /// <param name="permissions">The nonzero permissions to request. The caller must choose a valid combination supported by the authenticator; only None is locally rejected.</param>
     /// <param name="rpId">Required for MakeCredential/GetAssertion permissions; optional to restrict CredentialManagement to one RP; ignored for BioEnrollment, LargeBlobWrite, AuthenticatorConfig and CredentialManagementRO. Null or empty omits the field.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes. The array carries no permission, RP, expiry or persistence metadata.</returns>
     /// <exception cref="BadResponseException">The token is missing or has an invalid decrypted length for protocol 1 or 2.</exception>
-    /// <exception cref="ArgumentException">If the PIN byte length is outside 4–63 bytes or permissions is None.</exception>
+    /// <exception cref="ArgumentException">If the PIN is not valid UTF-8 or permissions is None.</exception>
     /// <exception cref="CtapException">If the PIN is incorrect or permissions are invalid.</exception>
     /// <remarks>
     /// <para>
@@ -400,7 +400,7 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(pin, nameof(pin));
+        ValidateExistingPin(pin.Span, nameof(pin));
 
         if (permissions == PinUvAuthTokenPermissions.None)
         {
@@ -552,6 +552,12 @@ public sealed class ClientPin : IDisposable
             .ConfigureAwait(false);
 
         return ParseKeyAgreementResponse(response);
+    }
+
+    private static void ValidateExistingPin(ReadOnlySpan<byte> pin, string paramName)
+    {
+        if (!Utf8.IsValid(pin))
+            throw new ArgumentException("PIN must be valid UTF-8.", paramName);
     }
 
     /// <summary>

@@ -218,11 +218,11 @@ public sealed class ClientPinTests : IDisposable
     }
 
     [Fact]
-    public async Task ChangePinAsync_WithShortCurrentPin_ThrowsArgumentExceptionNamingCurrentPin()
+    public async Task ChangePinAsync_WithMalformedCurrentPin_ThrowsArgumentExceptionNamingCurrentPin()
     {
         using var clientPin = CreateClientPin();
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("ab"), Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(new byte[] { 0xC0, 0x80, 0x61, 0x62 }, Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken));
 
         Assert.Equal("currentPin", exception.ParamName);
     }
@@ -238,11 +238,11 @@ public sealed class ClientPinTests : IDisposable
     }
 
     [Fact]
-    public async Task GetPinTokenAsync_WithShortPin_ThrowsArgumentExceptionNamingPin()
+    public async Task GetPinTokenAsync_WithMalformedPin_ThrowsArgumentExceptionNamingPin()
     {
         using var clientPin = CreateClientPin();
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.GetPinTokenAsync(Encoding.UTF8.GetBytes("ab"), TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.GetPinTokenAsync(new byte[] { 0xC0, 0x80, 0x61, 0x62 }, TestContext.Current.CancellationToken));
 
         Assert.Equal("pin", exception.ParamName);
     }
@@ -317,15 +317,35 @@ public sealed class ClientPinTests : IDisposable
     }
 
     [Fact]
-    public async Task GetPinUvAuthTokenUsingPinAsync_WithShortPin_ThrowsArgumentExceptionNamingPin()
+    public async Task GetPinUvAuthTokenUsingPinAsync_WithMalformedPin_ThrowsArgumentExceptionNamingPin()
     {
         using var clientPin = CreateClientPin();
 
         // Permissions are valid here, so "permissions" is the name this must not report.
         var exception = await Assert.ThrowsAsync<ArgumentException>(
-            () => clientPin.GetPinUvAuthTokenUsingPinAsync(Encoding.UTF8.GetBytes("ab"), PinUvAuthTokenPermissions.MakeCredential, cancellationToken: TestContext.Current.CancellationToken));
+            () => clientPin.GetPinUvAuthTokenUsingPinAsync(new byte[] { 0xC0, 0x80, 0x61, 0x62 }, PinUvAuthTokenPermissions.MakeCredential, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("pin", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task ChangePinAsync_HashesExactCurrentPinWithoutApplyingNewPinPolicy()
+    {
+        byte[] currentPin = "e\u0301"u8.ToArray(); // Valid UTF-8, but decomposed and fewer than four characters.
+        var ct = TestContext.Current.CancellationToken;
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateKeyAgreementResponse(CreateMockCoseKey()), CreateEmptyResponse());
+        using var clientPin = CreateClientPin();
+
+        await clientPin.ChangePinAsync(currentPin, "5678"u8.ToArray(), ct);
+
+        var request = (ReadOnlyMemory<byte>)_mockSession.ReceivedCalls().Last().GetArguments()[0]!;
+        var reader = new CborReader(request[1..], CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap();
+        while (reader.ReadInt32() != 6) // pinHashEnc; the fake encrypts by copying.
+            reader.SkipValue();
+        Assert.Equal(System.Security.Cryptography.SHA256.HashData(currentPin)[..16], reader.ReadByteString());
+        Assert.Equal("e\u0301"u8.ToArray(), currentPin);
     }
 
     [Fact]

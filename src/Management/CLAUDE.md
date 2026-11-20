@@ -810,7 +810,6 @@ private IManagementBackend _backend = null!;
 internal interface IManagementBackend
 {
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
-    ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
 }
 ```
 
@@ -831,7 +830,8 @@ dispatching reset or rejecting HID; HID backends do not expose unsupported reset
 1. **Backend owns nothing**: it borrows the protocol and holds no disposable state, so it is not `IDisposable`. Ownership rule is Core's — see [Core CLAUDE.md](../Core/CLAUDE.md) gotcha #2 and the `IProtocol` doc comment: the session disposes the protocol, and whoever created the connection disposes it.
 2. **SCP wrapping works**: the backend can be recreated over an SCP-wrapped protocol without disposing anything.
 3. **Narrow delegation**: writes share one backend contract; info reads use Core and reset is SmartCard-only.
-    There is no current public legacy `SetMode` surface, even though the backend retains that primitive.
+    There is no public legacy `SetMode` surface. The dormant SmartCard primitive packs `<BBH` and
+    uses P1 `0x11`. For firmware 5.0 and up or development firmware, use DeviceConfig, never legacy SET_MODE.
 
 `ManagementBackendLifecycleTests` pins the non-disposable invariant. It does not prove zero branching,
 hardware feature support, or correctness of Core's multi-page reader.

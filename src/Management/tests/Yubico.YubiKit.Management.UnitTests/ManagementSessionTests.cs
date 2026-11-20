@@ -227,9 +227,33 @@ public class ManagementSessionTests
             return ValueTask.CompletedTask;
         }
 
-        public ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
+    }
 
+    [Fact]
+    public async Task LegacySmartCardMode_SendsSetModeWithDeviceSelector()
+    {
+        using var protocol = new RecordingSmartCardProtocol();
+        var backend = new SmartCardBackend(protocol);
+        await backend.SetModeAsync(new FirmwareVersion(4, 3, 0), 0x02, 0x0F, 0x1234, TestContext.Current.CancellationToken);
+
+        var command = Assert.Single(protocol.Commands);
+        Assert.Equal(0x16, command.Ins);
+        Assert.Equal(0x11, command.P1);
+        Assert.Equal(0, command.P2);
+        Assert.Equal(new byte[] { 0x02, 0x0F, 0x34, 0x12 }, protocol.CommandData);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(5)]
+    [InlineData(6)]
+    public async Task LegacySmartCardMode_DoesNotReachModernOrDevelopmentFirmware(int major)
+    {
+        using var protocol = new RecordingSmartCardProtocol();
+        var backend = new SmartCardBackend(protocol);
+        await Assert.ThrowsAsync<NotSupportedException>(() => backend.SetModeAsync(
+            new FirmwareVersion(major, 0, 0), 0x02, 0x0F, 0x1234, TestContext.Current.CancellationToken).AsTask());
+        Assert.Empty(protocol.Commands);
     }
 
     [Theory]
@@ -324,7 +348,6 @@ public class ManagementSessionTests
 
         public void Fail() => _completion.SetException(Failure);
 
-        public ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class InertHidProtocol : IFidoHidProtocol, IOtpHidProtocol

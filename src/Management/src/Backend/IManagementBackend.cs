@@ -33,11 +33,4 @@ internal interface IManagementBackend
     /// <param name="cancellationToken">Cancellation token.</param>
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
 
-    /// <summary>
-    /// Set device mode (legacy operation for older YubiKeys).
-    /// </summary>
-    /// <param name="data">Mode configuration data.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
-
 }

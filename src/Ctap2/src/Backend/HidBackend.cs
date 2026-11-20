@@ -110,10 +110,14 @@ internal sealed class HidBackend : ICtap2Backend
         }
         finally
         {
-            await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
-            if (!responseTransferred && !response.IsEmpty)
+            try
             {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+                await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (!responseTransferred && !response.IsEmpty)
+                    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
             }
         }
     }

@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Yubico.YubiKit.Core;
@@ -8,8 +10,57 @@ using Yubico.YubiKit.Ctap2.Backend;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
+[CollectionDefinition(nameof(Ctap2BackendLifecycleTests), DisableParallelization = true)]
+public sealed class Ctap2BackendLoggingCollection;
+
+[Collection(nameof(Ctap2BackendLifecycleTests))]
 public class Ctap2BackendLifecycleTests
 {
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task FailedExchange_PreservesStatusAndClearsResponseWhenResolutionAndLoggingFail(bool useHid)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        const CtapStatus status = CtapStatus.PinInvalid;
+        byte[] response = [(byte)status, 0x11, 0x22, 0x33];
+        byte[] apduBytes = [.. response, 0x90, 0x00];
+        var apdu = new ApduResponse(apduBytes);
+        var hid = Substitute.For<IFidoHidProtocol>();
+        hid.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(call => RequestAndReturnResponseAsync(call.ArgAt<UserPresenceNotification>(2), response, ct));
+        var smartCard = Substitute.For<ISmartCardProtocol>();
+        smartCard.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), cancellationToken: ct).Returns(apdu);
+        ICtap2Backend backend = useHid ? new HidBackend(hid) : new SmartCardBackend(smartCard);
+        ReadOnlyMemory<byte> retained = useHid ? response : apdu.Data;
+        var callbackFailure = new InvalidOperationException("resolution failed");
+        var loggerFailure = new InvalidOperationException("logging failed");
+        var notification = CreateNotification(new RecordingUserPresencePrompt(callbackFailure));
+        using var factory = new FailingResolutionLoggerFactory(loggerFailure);
+        using var logging = YubiKitLogging.UseTemporary(factory);
+
+        var error = await Assert.ThrowsAsync<CtapException>(() => backend.SendCborAsync(new byte[] { 4 }, notification, ct));
+
+        Assert.Equal(status, error.Status);
+        Assert.Same(callbackFailure, error.Data["UserPresenceResolutionException"]);
+        Assert.Same(loggerFailure, error.Data["UserPresenceLoggingException"]);
+        Assert.All(retained.ToArray(), value => Assert.Equal(0, value));
+    }
+
+    private sealed class FailingResolutionLoggerFactory(Exception failure) : ILoggerFactory
+    {
+        public ILogger CreateLogger(string categoryName) => categoryName.EndsWith(nameof(UserPresenceNotification), StringComparison.Ordinal)
+            ? new FailingResolutionLogger(failure) : NullLogger.Instance;
+        public void AddProvider(ILoggerProvider provider) { }
+        public void Dispose() { }
+    }
+
+    private sealed class FailingResolutionLogger(Exception failure) : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) => throw failure;
+    }
     [Theory]
     [InlineData(0x6A82, true)]
     [InlineData(0x6D00, true)]

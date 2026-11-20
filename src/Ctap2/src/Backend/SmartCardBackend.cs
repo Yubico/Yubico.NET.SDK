@@ -142,10 +142,14 @@ internal sealed class SmartCardBackend : ICtap2Backend
         }
         finally
         {
-            await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
-            if (!responseTransferred && !responseData.IsEmpty)
+            try
             {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(responseData).Span);
+                await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (!responseTransferred && !responseData.IsEmpty)
+                    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(responseData).Span);
             }
         }
     }

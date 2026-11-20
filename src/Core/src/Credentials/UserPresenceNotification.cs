@@ -46,9 +46,6 @@ internal sealed class UserPresenceNotification
         Terminal
     }
 
-    /// <summary>Writes cleanup callback failures without adding a public logger dependency.</summary>
-    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<UserPresenceNotification>();
-
     /// <summary>The application-owned callback, or <c>null</c> only for <see cref="None" />.</summary>
     private readonly IUserPresencePrompt? _prompt;
 
@@ -162,10 +159,19 @@ internal sealed class UserPresenceNotification
         }
         catch (Exception ex) when (primaryException is not null)
         {
-            Logger.LogWarning(
-                ex,
-                "User-presence resolution callback failed while preserving primary {ExceptionType}",
-                primaryException.GetType().Name);
+            primaryException.Data["UserPresenceResolutionException"] = ex;
+            try
+            {
+                // Logger creation is also fallible; keep it within the secondary failure boundary.
+                YubiKitLogging.CreateLogger<UserPresenceNotification>().LogWarning(
+                    ex,
+                    "User-presence resolution callback failed while preserving primary {ExceptionType}",
+                    primaryException.GetType().Name);
+            }
+            catch (Exception loggingFailure)
+            {
+                primaryException.Data["UserPresenceLoggingException"] = loggingFailure;
+            }
         }
     }
 

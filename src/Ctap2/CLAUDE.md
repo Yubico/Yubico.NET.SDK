@@ -358,8 +358,8 @@ MakeCredential and GetAssertion emit `PolicyRequires` immediately before the APD
 effective `UserPresence` option is `false`. Their scope is the RP ID.
 Successful response ownership transfers only after terminal resolution succeeds. The backends clear
 their untransferred response view after resolution on failure, including secret-derived extension
-output. Cleanup is not unconditional: when a terminal callback fails alongside a primary exception,
-a logging provider throwing while that failure is logged can bypass the later clearing statement.
+output. Cleanup runs even when notification resolution fails. A callback or logger failure does not
+replace a primary exchange error; secondary failures are recorded in its exception data.
 APDU failures before a backend receives a response and independent report/APDU/decoded copies also
 remain outside that view's cleanup scope.
 

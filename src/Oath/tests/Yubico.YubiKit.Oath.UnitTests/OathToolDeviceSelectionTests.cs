@@ -128,6 +128,8 @@ public class OathToolDeviceSelectionTests
             {
                 Ansi = AnsiSupport.Yes,
                 Interactive = InteractionSupport.Yes,
+                // Spectre's GitHub Actions enricher would override the fake's interactivity.
+                Enrichment = new ProfileEnrichment { UseDefaultEnrichers = false },
                 Out = new AnsiConsoleOutput(_output)
             });
         }

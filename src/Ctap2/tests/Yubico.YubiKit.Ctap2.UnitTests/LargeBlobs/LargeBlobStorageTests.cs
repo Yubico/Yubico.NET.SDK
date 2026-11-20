@@ -129,7 +129,7 @@ public class LargeBlobStorageTests
         _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
+            .Returns(Task.FromResult(CreateReadResponse([])));
 
         var storage = new LargeBlobStorage(_mockSession);
 
@@ -139,6 +139,34 @@ public class LargeBlobStorageTests
         // Assert
         Assert.NotNull(result);
         Assert.Empty(result.Entries);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("A0")]
+    [InlineData("A10101")]
+    [InlineData("A10140F5")]
+    public async Task ReadLargeBlobArrayAsync_RejectsMalformedFragment(string hex)
+    {
+        ReadOnlyMemory<byte> response = Convert.FromHexString(hex);
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+        var storage = new LargeBlobStorage(_mockSession);
+
+        await Assert.ThrowsAsync<CborContentException>(() => storage.ReadLargeBlobArrayAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ReadLargeBlobArrayAsync_StopsAtAdvertisedArrayLimit()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _mockSession.GetInfoAsync(ct).Returns(new AuthenticatorInfo { MaxMsgSize = 128, MaxSerializedLargeBlobArray = 128 });
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct)
+            .Returns(CreateReadResponse(new byte[64]));
+        var storage = new LargeBlobStorage(_mockSession);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => storage.ReadLargeBlobArrayAsync(ct));
+        await _mockSession.Received(3).SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct);
     }
 
     [Fact]

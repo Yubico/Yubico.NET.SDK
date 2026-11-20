@@ -19,7 +19,7 @@ public class Fido2LargeBlobAuditReproTests
         var session = Substitute.For<ICtap2Session>();
         ReadOnlyMemory<byte> request = default;
         session.SendCborRequestAsync(Arg.Do<ReadOnlyMemory<byte>>(x => request = x.ToArray()), Arg.Any<CancellationToken>())
-            .Returns(ReadOnlyMemory<byte>.Empty);
+            .Returns((ReadOnlyMemory<byte>)new byte[] { 0xA1, 0x01, 0x40 }); // {1: h''}
 
         await new LargeBlobStorage(session).ReadLargeBlobArrayAsync(TestContext.Current.CancellationToken);
 

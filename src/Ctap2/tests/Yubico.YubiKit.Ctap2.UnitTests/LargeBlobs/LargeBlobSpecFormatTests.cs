@@ -188,7 +188,7 @@ public class LargeBlobSpecFormatTests
         var session = SessionWithInfo(maxMsgSize);
         ReadOnlyMemory<byte> request = default;
         session.SendCborRequestAsync(Arg.Do<ReadOnlyMemory<byte>>(r => request = r.ToArray()), Arg.Any<CancellationToken>())
-            .Returns(ReadOnlyMemory<byte>.Empty);
+            .Returns((ReadOnlyMemory<byte>)new byte[] { 0xA1, 0x01, 0x40 }); // {1: h''}
 
         await new LargeBlobStorage(session).ReadLargeBlobArrayAsync(TestContext.Current.CancellationToken);
 

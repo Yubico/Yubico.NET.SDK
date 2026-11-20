@@ -83,6 +83,8 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
     private const int DefaultMaxMsgSize = 1024;   // CTAP §6.4: "If this member is absent, a default value of 1024 is assumed"
     private const int FragmentOverhead = 64;       // CTAP §6.10.2: maxFragmentLength = maxMsgSize − 64
+    private const int MaxSerializedReadSize = 16 * 1024 * 1024;
+    private const int MaxReadFragments = 32768;
 
     private int? _maxFragmentLength;
     private int? _maxSerializedLargeBlobArray;
@@ -137,9 +139,9 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The large blob array.</returns>
     /// <remarks>
-    /// Short/hash-corrupt data becomes the initial empty array. The current response parser also treats
-    /// missing config or an empty successful response as an empty fragment; this is a decoding limitation,
-    /// not evidence of a conforming empty device array. Malformed CBOR behind a valid hash can throw.
+    /// Short/hash-corrupt data becomes the initial empty array. Malformed fragments and malformed
+    /// CBOR behind a valid hash throw. Reads are bounded by the advertised size (when present),
+    /// an SDK ceiling of 16 MiB and at most 32768 fragments.
     /// </remarks>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
     public async Task<LargeBlobArray> ReadLargeBlobArrayAsync(CancellationToken cancellationToken = default)
@@ -342,18 +344,25 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
     private async Task<byte[]> ReadRawBlobAsync(CancellationToken cancellationToken)
     {
-        var maxFragmentLength = await GetMaxFragmentLengthAsync(cancellationToken).ConfigureAwait(false);
-        using var result = new MemoryStream();
-        var offset = 0;
-
-        while (true)
+        int maxFragmentLength = await GetMaxFragmentLengthAsync(cancellationToken).ConfigureAwait(false);
+        int maximum = Math.Min(_maxSerializedLargeBlobArray ?? MaxSerializedReadSize, MaxSerializedReadSize);
+        if (maxFragmentLength <= 0 || maximum < 0)
         {
+            throw new InvalidOperationException("Invalid large-blob limits in GetInfo.");
+        }
+        using var result = new MemoryStream();
+        int offset = 0;
+        int maxReads = Math.Min(maximum / maxFragmentLength + 1, MaxReadFragments);
+
+        for (int i = 0; i < maxReads; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             var fragment = await ReadFragmentAsync(offset, maxFragmentLength, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (fragment.Length == 0)
+            if (fragment.Length > maxFragmentLength || fragment.Length > maximum - offset)
             {
-                break;
+                throw new InvalidOperationException("Large-blob fragment exceeds the request or array limit.");
             }
 
             result.Write(fragment.Span);
@@ -362,11 +371,11 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
             // If we got less than requested, we're done
             if (fragment.Length < maxFragmentLength)
             {
-                break;
+                return result.ToArray();
             }
         }
 
-        return result.ToArray();
+        throw new InvalidOperationException("Large-blob read exceeded the fragment limit.");
     }
 
     /// <summary>
@@ -500,21 +509,21 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
     private static ReadOnlyMemory<byte> ParseReadResponse(ReadOnlyMemory<byte> response)
     {
-        if (response.Length == 0)
-        {
-            return ReadOnlyMemory<byte>.Empty;
-        }
-
         var reader = new CborReader(response, CborConformanceMode.Ctap2Canonical);
-        var mapCount = reader.ReadStartMap() ?? 0;
+        reader.ReadStartMap();
+        ReadOnlyMemory<byte>? config = null;
 
-        for (var i = 0; i < mapCount; i++)
+        while (reader.PeekState() is not CborReaderState.EndMap)
         {
             var key = reader.ReadInt32();
 
             if (key == KeyConfig)
             {
-                return reader.ReadByteString();
+                if (reader.PeekState() is not CborReaderState.ByteString)
+                {
+                    throw new CborContentException("Large-blob fragment must be a byte string.");
+                }
+                config = reader.ReadDefiniteLengthByteString();
             }
             else
             {
@@ -522,6 +531,11 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
             }
         }
 
-        return ReadOnlyMemory<byte>.Empty;
+        reader.ReadEndMap();
+        if (reader.BytesRemaining != 0)
+        {
+            throw new CborContentException("Unexpected bytes after the large-blob response map.");
+        }
+        return config ?? throw new CborContentException("Large-blob response is missing its fragment.");
     }
 }

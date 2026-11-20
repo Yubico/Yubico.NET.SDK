@@ -54,6 +54,10 @@ CTAP2 delivery: [draft PR #790](https://github.com/Yubico/Yubico.NET.SDK/pull/79
 Software changes and checks are ready for independent review. CTAP-IMP-030 stays deferred;
 CTAP-IMP-022 and CTAP-DEC-003 are not hardware-qualified by this PR.
 
+OATH delivery: [draft PR #789](https://github.com/Yubico/Yubico.NET.SDK/pull/789) carries the approved software and
+documentation, including the OATH policy adoptions. OATH-DEC-004/006/007 and secure-reset qualification remain pending;
+the CORE-OATH-X005 fixture changes were compiled but not exercised on hardware.
+
 ## Cards
 
 | Card | Applet | Severity | Classified as | Status | Final call | Recorded in |

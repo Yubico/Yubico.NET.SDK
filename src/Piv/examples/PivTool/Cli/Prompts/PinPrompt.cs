@@ -23,7 +23,8 @@ using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Output;
 namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Prompts;
 
 /// <summary>
-/// Provides secure credential prompting with proper memory zeroing.
+/// Prompts for credentials and returns disposable buffer owners. Some generated source arrays
+/// still need explicit clearing; see the example README's credential-handling limits.
 /// </summary>
 public static class PinPrompt
 {
@@ -308,7 +309,8 @@ public static class PinPrompt
     }
 
     /// <summary>
-    /// Creates a secure memory owner from a span, zeroing the source after copy.
+    /// Copies a borrowed read-only span into a disposable owner. The caller retains responsibility
+    /// for clearing a mutable source after copying; this method leaves the source unchanged.
     /// </summary>
     private static IMemoryOwner<byte> CreateFromSpan(ReadOnlySpan<byte> source) =>
         DisposableArrayPoolBuffer.CreateFromSpan(source);

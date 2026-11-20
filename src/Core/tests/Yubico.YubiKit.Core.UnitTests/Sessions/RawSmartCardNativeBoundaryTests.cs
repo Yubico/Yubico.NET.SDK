@@ -22,6 +22,11 @@ using Yubico.YubiKit.Core.UnitTests.Transports.SmartCard.Fakes;
 
 namespace Yubico.YubiKit.Core.UnitTests.Sessions;
 
+/// <summary>
+///     Exercises production managed PC/SC/session lifetime code over a controlled SCard API seam.
+///     Held calls model admission, drain, and sequential reuse; they do not execute an operating-system
+///     resource manager or establish physical-device release or recovery.
+/// </summary>
 [Collection(DiscoveryWorkerAdmissionCollection.Name)]
 public class RawSmartCardNativeBoundaryTests
 {

@@ -17,7 +17,7 @@ using System.Runtime.InteropServices;
 namespace Yubico.YubiKit.Core.Native.Linux.Libc;
 
 // Every raw int extracted for a native call remains borrowed from its SafeHandle.
-// A future reactor must retain a SafeHandle reference for its entire registration,
+// The read reactor retains a separate SafeHandle reference for its entire registration,
 // not just poll(). This stack-only lease is for synchronous native call scopes.
 internal readonly ref struct LinuxDescriptorLease : IDisposable
 {

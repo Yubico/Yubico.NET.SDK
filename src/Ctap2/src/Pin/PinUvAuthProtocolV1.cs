@@ -17,7 +17,7 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKit.Ctap2.Pin;
 
 /// <summary>
-/// PIN/UV authentication protocol version 1 implementation (legacy).
+/// PIN/UV authentication protocol version 1 implementation.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -25,13 +25,20 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 /// <list type="bullet">
 ///   <item><description>ECDH P-256 for key agreement</description></item>
 ///   <item><description>SHA-256 of raw ECDH output as shared secret (32 bytes)</description></item>
-///   <item><description>AES-256-CBC with zero IV for encryption</description></item>
+///   <item><description>AES-256-CBC with zero IV and no AES padding</description></item>
 ///   <item><description>HMAC-SHA-256 for authentication (truncated to 16 bytes)</description></item>
 /// </list>
 /// </para>
 /// <para>
-/// V1 is considered legacy and has security limitations compared to V2.
-/// New implementations should prefer V2 when supported by the authenticator.
+/// V1 uses the same 32-byte shared secret for AES and HMAC. V2 derives separate keys, prefixes
+/// ciphertext with a random IV, and uses full 32-byte tags. Callers may prefer V2 when both sides
+/// support it; constructing this object does not negotiate a protocol with the authenticator.
+/// </para>
+/// <para>
+/// The instance retains no keys. Dispose marks it disposed: cryptographic operations then throw,
+/// while Version and AuthenticationTagLength remain readable. Caller-owned outputs are not cleared
+/// by disposal. Encapsulate clears its raw ECDH secret after derivation, and AES operations clear
+/// their temporary key/input arrays; this is not an end-to-end or all-exception-path cleanup guarantee.
 /// </para>
 /// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#pinProto1
@@ -219,7 +226,7 @@ public sealed class PinUvAuthProtocolV1 : IPinUvAuthProtocol
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>Marks this instance disposed without clearing caller-owned inputs or outputs.</summary>
     public void Dispose()
     {
         _disposed = true;

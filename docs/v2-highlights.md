@@ -17,23 +17,23 @@ Two YubiKey applications the SDK simply didn't speak to before.
 
 ### WebAuthn
 
-If you've ever squinted at a WebAuthn spec trying to work out which field
-goes where, that part is over. `Yubico.YubiKit.WebAuthn` runs the whole FIDO
-ceremony for you — preparing payloads, building `clientDataJSON`, formatting
-requests, making credentials, and getting assertions.
+`Yubico.YubiKit.WebAuthn` orchestrates client-side registration and authentication
+over CTAP2. It builds `clientDataJSON`, prepares authenticator requests, handles
+PIN/UV acquisition, and processes typed extensions, so you do not have to assemble
+those client steps from individual CTAP commands.
 
-This was the single most common source of confusion in v1, so we designed the
-package to match how the Android, Python, and Rust SDKs already do it. If you
-know the ceremony on one platform, it transfers.
-
-It's a client-side package. Server-side validation isn't in scope, and we're
-not planning to add it.
+Your application supplies a supported origin and its RP-validity/authorization
+policy. In production, the relying party supplies ceremony options and challenges;
+the application sends the returned bytes to that RP for independent verification.
+Creating a credential or retrieving an assertion is not, by itself, completed account
+registration or sign-in. The [module guide](../src/WebAuthn/README.md) shows that
+boundary, the first-use flow, and current extension/protocol limitations.
 
 ### OpenPGP
 
 `Yubico.YubiKit.OpenPgp` brings OpenPGP support to the .NET SDK for the first
-time. Supported operations and firmware requirements live in the per-applet
-documentation rather than here.
+time. The [OpenPGP guide](../src/OpenPgp/README.md) covers key provisioning, PIN recovery,
+raw signing/decipher/agreement formats, certificates, touch policy and current firmware/implementation limits.
 
 ## Async applet operations
 
@@ -72,14 +72,15 @@ dispose and create a new one instead of restarting. Last-known metadata is not l
 
 `IYubiKey` represents a physical key when discovery has enough evidence to
 group its interfaces. `SerialNumber` and the tri-state `SameDeviceAs` help you
-correlate references; when the evidence is ambiguous, discovery splits
-interfaces rather than guessing.
+correlate references. Ambiguity often splits interfaces, but complementary partial observations from
+same-PID keys can satisfy the grouping heuristic and produce a cross-key composite. Use the
+[discovery bounds](architecture/device-discovery-guarantees.md#g2-the-epistemic-bound) for identity-sensitive work.
 
 Within your process, a grouped physical key admits one live connection, and
 that connection one live session. Conflicting acquisition throws
 `ConnectionInUseException` before another applet or transport can disrupt work
-already in progress. Another process holding the same interface still surfaces
-an ordinary platform `SCardException`.
+already in progress, within its known-member scope. Cross-process access follows the OS sharing policy;
+built-in strict-exclusive PC/SC maps a sharing violation to `ConnectionInUseException`.
 
 ## One session grammar across applets
 
@@ -119,9 +120,11 @@ x64, and Linux x64. Deeper Management, PIV, and device-monitoring runtime
 evidence is currently macOS-only; the remaining applets are link-verified but
 not yet runtime-exercised under Native AOT.
 
-Stable deployments are not a single standalone binary: ship the complete
-publish output, which includes the platform-specific `Yubico.NativeShims`
-native library.
+Ship the complete publish output. With NativeShims 1.18.1, Native AOT links the RID-specific static
+shim archive and removes the separate shared shim; non-AOT deployment retains the shared library.
+System libraries and permissions remain deployment prerequisites. The
+[Native AOT guide](NATIVE-AOT.md) separates historical execution, current compatibility metadata,
+native producer/ABI qualification, and remaining protocol/device gaps.
 
 ## Why v2 breaks so much, on purpose
 

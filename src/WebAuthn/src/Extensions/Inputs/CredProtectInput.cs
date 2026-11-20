@@ -24,7 +24,9 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 /// </remarks>
 /// <param name="Policy">The credential protection policy level.</param>
 /// <param name="EnforceCredentialProtectionPolicy">
-/// If true, credential creation fails if the policy cannot be honored.
+/// Requests client-side enforcement of the policy. Enforcement is not currently implemented:
+/// the client can omit an unsupported request and does not prevent creation with insufficient
+/// protection. Do not rely on this flag to prevent unprotected credential creation.
 /// </param>
 public sealed record class CredProtectInput(
     CredProtectPolicy Policy,

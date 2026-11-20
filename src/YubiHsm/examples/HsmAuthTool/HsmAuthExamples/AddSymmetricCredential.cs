@@ -8,6 +8,10 @@ using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
 
+/// <summary>
+///     Stores keys on the YubiKey for diagnostic evaluation. Enroll the identical K-ENC/K-MAC pair
+///     in the intended HSM authentication object through the separate provisioning workflow.
+/// </summary>
 public static class AddSymmetricCredential
 {
     public static async Task RunAsync(
@@ -36,8 +40,8 @@ public static class AddSymmetricCredential
             keyEnc = RandomNumberGenerator.GetBytes(16);
             keyMac = RandomNumberGenerator.GetBytes(16);
 
-            // SECURITY NOTE: Keys displayed for developer diagnostics only.
-            // Never display key material in production applications.
+            // Diagnostic output exposes long-lived authentication keys. Use disposable test material;
+            // a deployed application's provisioning layer should protect any retained recovery copy.
             OutputHelpers.WriteHex("K-ENC (generated)", keyEnc);
             OutputHelpers.WriteHex("K-MAC (generated)", keyMac);
         }
@@ -49,6 +53,8 @@ public static class AddSymmetricCredential
             keyMac = Convert.FromHexString(keyMacHex);
         }
 
+        // Earlier allocation/parsing and this prompt precede the clearing scope. When adapting the
+        // sample, include those failure paths in the key owner's acquisition/cleanup scope.
         var touchRequired = AnsiConsole.Confirm("Require touch?", defaultValue: false);
 
         var managementKey = Convert.FromHexString(mgmtKeyHex);

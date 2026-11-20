@@ -200,8 +200,8 @@ public class CredentialPasswordTests
 
     /// <summary>
     ///     A session on a recorded connection reporting firmware new enough for every password-taking
-    ///     command. All the tests above throw before any APDU is transmitted, so one OK response for
-    ///     the applet SELECT is all the connection needs to supply.
+    ///     command. The factory transmits SELECT; the operation-level length checks then throw before
+    ///     their command APDU, so a single OK SELECT response supplies the required device traffic.
     /// </summary>
     private static Task<HsmAuthSession> CreateSessionAsync() =>
         HsmAuthSession.CreateAsync(

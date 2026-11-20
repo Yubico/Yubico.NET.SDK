@@ -15,14 +15,22 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 
 /// <summary>
-/// Authenticates using an existing CTAP2 credential on the authenticator.
+/// Obtains the first discoverable CTAP2 assertion for a protocol demonstration.
 /// </summary>
+/// <remarks>
+/// This does not sign an account in or verify the signature. The random hash is not returned and has
+/// no collected-client-data context, so the result is not an RP-verifiable WebAuthn response. Production
+/// requires a fresh RP challenge, exact client-data bytes, credential/account association and RP
+/// verification. Multiple assertions are not collected here; getNext calls would have to precede any
+/// unrelated command and session disposal. The PIN branch still combines mutually exclusive uv/token
+/// fields; executable correction is pending. Protocol 2 is not negotiated. General catches flatten
+/// cancellation and other failure provenance; failure is not rollback. PIN input remains caller-owned.
+/// </remarks>
 public static class GetAssertion
 {
     /// <summary>
@@ -66,7 +74,7 @@ public static class GetAssertion
         byte[]? pinToken = null;
         try
         {
-            // Generate random clientDataHash (32 bytes) for demo/testing purposes
+            // Demo stand-in, not collected client data; this hash is not exposed in the result.
             var clientDataHash = new byte[32];
             RandomNumberGenerator.Fill(clientDataHash);
 
@@ -89,6 +97,7 @@ public static class GetAssertion
 
                 var authParam = protocol.Authenticate(pinToken, clientDataHash);
                 options.WithPinUvAuth(authParam, protocol.Version);
+                // Known sample defect: omit uv entirely beside pinUvAuthParam; executable fix is deferred.
                 options.WithUserVerification(true);
             }
 
@@ -100,6 +109,7 @@ public static class GetAssertion
 
             var totalCredentials = response.NumberOfCredentials ?? 1;
 
+            // This sample returns the first response only, not the reported set of credentials.
             return GetAssertionResult.Succeeded(response, totalCredentials);
         }
         catch (CtapException ex)

@@ -52,7 +52,7 @@ public class CodeTests
             touchRequired: false);
 
         byte[] truncated = [0x06, 0x00, 0x00, 0x00, 0x01];
-        long timestamp = 1700000010L; // 10 seconds into a 30s window
+        long timestamp = 1700000010L; // Exactly on a 30-second window boundary
 
         var code = Code.FormatCode(credential, timestamp, truncated);
 

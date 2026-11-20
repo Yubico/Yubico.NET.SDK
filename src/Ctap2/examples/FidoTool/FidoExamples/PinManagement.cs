@@ -14,7 +14,6 @@
 
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
@@ -22,6 +21,13 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 /// <summary>
 /// PIN management operations: set, change, and query retry counts.
 /// </summary>
+/// <remarks>
+/// These examples select protocol 2 without negotiation and borrow caller PIN bytes; keep them valid
+/// through the await, then clear them. Local 4–63-byte validation is not complete UTF-8/NFC/code-point/
+/// device-policy validation. General catches turn cancellation/transport/decode failures into failed
+/// results; failure does not establish unchanged PIN state or safe retry. Temporary PinAuthBlocked
+/// differs from exhausted PinBlocked. Returned token finally-zeroing is not end-to-end request cleanup.
+/// </remarks>
 public static class PinManagement
 {
     /// <summary>
@@ -134,6 +140,11 @@ public static class PinManagement
     /// <summary>
     /// Verifies the PIN by attempting to obtain a PIN token.
     /// </summary>
+    /// <remarks>
+    /// The current permission-token request asks for GetAssertion without its required RP ID; permission-
+    /// capable devices can reject it for request scope, not a wrong PIN. Legacy fallback drops permissions.
+    /// Executable request correction is deferred. This method does not perform an RP assertion/verification.
+    /// </remarks>
     /// <param name="yubiKey">The YubiKey device.</param>
     /// <param name="pin">The PIN as UTF-8 bytes to verify.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -215,6 +226,10 @@ public static class PinManagement
     /// <summary>
     /// Gets the number of UV (user verification) retries remaining.
     /// </summary>
+    /// <remarks>
+    /// The result copies the parser's defaulted count/boolean. CTAP 2.1 provides no UV power-cycle field;
+    /// false does not prove a cycle is unnecessary, and missing counts are not known zero-retry evidence.
+    /// </remarks>
     /// <param name="yubiKey">The YubiKey device.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The UV retries result.</returns>

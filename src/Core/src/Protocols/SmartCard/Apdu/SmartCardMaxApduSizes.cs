@@ -17,19 +17,20 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 public static class SmartCardMaxApduSizes
 {
     /// <summary>
-    ///     The max APDU command size for the YubiKey NEO
+    ///     The SDK's NEO complete-command ceiling in bytes, including framing rather than just data.
     /// </summary>
     public const int Neo = 1390;
 
     /// <summary>
-    ///     The max APDU command size for the YubiKey 4 and greater
+    ///     The SDK's YubiKey 4 complete-command ceiling in bytes, including framing.
     /// </summary>
     public const int Yk4 = 2038;
 
     /// <summary>
-    ///     The max APDU command size for the YubiKey 4.3 and greater
+    ///     The SDK's YubiKey 4.3-and-later complete-command ceiling in bytes, including framing.
     /// </summary>
     public const int Yk43 = 3062;
 
+    /// <summary>Maximum command-data bytes per short APDU fragment, distinct from a complete-command ceiling.</summary>
     public const int ShortApduMaxChunkSize = 255;
 }

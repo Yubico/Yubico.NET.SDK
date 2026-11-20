@@ -67,6 +67,22 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <summary>
     ///     Creates and initializes an OATH session.
     /// </summary>
+    /// <param name="connection">The caller-owned SmartCard connection to borrow for the session lifetime.</param>
+    /// <param name="options">
+    ///     Optional session creation settings. If specified, <see cref="SessionCreationOptions.PreferredConnectionType" />
+    ///     must match the supplied SmartCard connection; it does not select another connection.
+    /// </param>
+    /// <param name="cancellationToken">The cancellation token for initialization.</param>
+    /// <returns>An initialized session that the caller must dispose with <c>await using</c>.</returns>
+    /// <remarks>
+    ///     Disposing the session leaves the borrowed connection open. Dispose the connection separately with
+    ///     <c>await using</c>, after the session. Only one live session may use a connection; dispose it before
+    ///     creating the next session on that connection.
+    /// </remarks>
+    /// <exception cref="BadResponseException">
+    ///     SELECT lacks required version or nonempty device-ID metadata, the version is not three bytes,
+    ///     or a present authentication challenge is empty.
+    /// </exception>
     public static Task<OathSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
@@ -203,6 +219,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 continue;
 
             var value = tlv.Value.Span;
+            if (value.Length < 2)
+                throw new BadResponseException("LIST entry requires a type/algorithm byte and a credential ID.");
+
             byte typeByte = value[0];
             var oathType = (OathType)(typeByte & OathConstants.MaskType);
             var credentialId = value[1..].ToArray();
@@ -231,6 +250,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credentialData);
 
+        credentialData.ValidateRequest();
         byte[] credId = credentialData.GetId();
         byte[] secret = credentialData.GetProcessedSecret();
 
@@ -405,9 +425,14 @@ public sealed class OathSession : ApplicationSession, IOathSession
                                 if (tlv.Tag != OathConstants.TagResponse)
                                     continue;
 
+                                // YKOATH full response: [digits][HMAC]. The credential does not
+                                // carry an algorithm, so validate structure, not a fixed digest size.
+                                if (tlv.Value.Length < 2)
+                                    throw new BadResponseException("CALCULATE response requires a digit header and HMAC payload.");
+
                                 await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
                                     .ConfigureAwait(false);
-                                return tlv.Value.ToArray();
+                                return tlv.Value[1..].ToArray();
                             }
 
                             throw new BadResponseException("No TAG_RESPONSE in CALCULATE response.");
@@ -437,6 +462,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ThrowIfFromAnotherDevice(credential);
 
         long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        ArgumentOutOfRangeException.ThrowIfNegative(ts, nameof(timestamp));
         byte[] challenge;
 
         if (credential.OathType == OathType.Totp)
@@ -446,6 +472,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             if (credential.Period <= 0)
                 throw new ArgumentException("TOTP credential period must be positive (RFC 6238 §4.1).", nameof(credential));
 
+            _ = Code.GetTotpWindow(ts, credential.Period);
             long timeStep = ts / credential.Period;
             challenge = new byte[OathConstants.ChallengeLength];
             BinaryPrimitives.WriteInt64BigEndian(challenge, timeStep);
@@ -517,9 +544,9 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <summary>
-    ///     Parses a credential ID from a device response. A malformed ID (for example a TOTP period
-    ///     prefix of 0, written by another client) is logged by length and skipped, so one bad entry
-    ///     does not hide the rest of the device's credentials.
+    ///     Parses a credential ID from a device response. A recognized ASCII-digit TOTP period prefix
+    ///     that is zero or exceeds Int32.MaxValue is logged by ID length and skipped, so that entry
+    ///     does not hide the rest of the device's credentials. This is not general raw-ID validation.
     /// </summary>
     private bool TryParseCredentialId(
         byte[] credentialId,
@@ -554,6 +581,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ThrowIfDisposed();
 
         long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        _ = Code.GetTotpWindow(ts, OathConstants.DefaultPeriod);
         long timeStep = ts / OathConstants.DefaultPeriod;
 
         byte[] challenge = new byte[OathConstants.ChallengeLength];
@@ -564,51 +592,78 @@ public sealed class OathSession : ApplicationSession, IOathSession
         // P2=0x01 requests truncated responses
         var command = new ApduCommand(0x00, OathConstants.InsCalculateAll, 0x00, 0x01, challengeTlv.AsMemory());
         var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
-        var responseData = response.Data;
-
-        var result = new Dictionary<Credential, Code?>();
-
-        if (responseData.Length == 0)
-            return result;
-
-        using var tlvs = TlvHelper.DecodeList(responseData.Span);
-        var tlvList = tlvs.ToList();
-
-        for (int i = 0; i < tlvList.Count - 1; i += 2)
+        try
         {
-            var nameTlv = tlvList[i];
-            var responseTlv = tlvList[i + 1];
+            var result = new Dictionary<Credential, Code?>();
+            using var tlvs = TlvHelper.DecodeList(response.Data.Span);
 
-            if (nameTlv.Tag != OathConstants.TagName)
-                continue;
-
-            // In CALCULATE_ALL, TAG_NAME (0x71) contains the raw credential ID directly.
-            // The oath type is derived from the response TLV tag (TAG_HOTP/TAG_TOUCH = HOTP,
-            // TAG_TRUNCATED = TOTP). This differs from LIST where TAG_NAME_LIST (0x72) prepends
-            // a type byte before the credential ID.
-            var credentialId = nameTlv.Value.ToArray();
-            var oathType = responseTlv.Tag == OathConstants.TagHotp ? OathType.Hotp : OathType.Totp;
-            if (!TryParseCredentialId(credentialId, oathType, "CALCULATE ALL", out var issuer, out var name, out var period))
-                continue;
-
-            bool touchRequired = responseTlv.Tag == OathConstants.TagTouch;
-            var credential = new Credential(DeviceId, credentialId, issuer, name, oathType, period, touchRequired);
-
-            Code? code = responseTlv.Tag switch
+            for (int i = 0; i < tlvs.Count; i++)
             {
-                OathConstants.TagTruncated when credential.OathType == OathType.Totp
-                    && credential.Period != OathConstants.DefaultPeriod
-                    => await CalculateCodeAsync(credential, ts, cancellationToken).ConfigureAwait(false),
-                OathConstants.TagTruncated => Code.FormatCode(credential, ts, responseTlv.Value.Span),
-                OathConstants.TagHotp => null,
-                OathConstants.TagTouch => null,
-                _ => null
-            };
+                var nameTlv = tlvs[i];
+                Tlv? responseTlv = ParseCalculateAllEntry(tlvs, i);
+                if (responseTlv is null)
+                    continue;
+                i++;
 
-            result[credential] = code;
+                // Required wire structure is independent of the host's credential-name grammar.
+                Code.ParsedCode? parsedCode = responseTlv.Tag == OathConstants.TagTruncated
+                    ? Code.ParseTruncatedResponse(responseTlv.Value.Span)
+                    : null;
+
+                // TAG_NAME contains the raw ID, unlike LIST's [type/algorithm][ID].
+                // Preserve the existing unknown-result behavior; only known results produce codes.
+                var credentialId = nameTlv.Value.ToArray();
+                var oathType = responseTlv.Tag == OathConstants.TagHotp ? OathType.Hotp : OathType.Totp;
+                if (!TryParseCredentialId(credentialId, oathType, "CALCULATE ALL", out var issuer, out var name, out var period))
+                    continue;
+
+                bool touchRequired = responseTlv.Tag == OathConstants.TagTouch;
+                var credential = new Credential(DeviceId, credentialId, issuer, name, oathType, period, touchRequired);
+                Code? code = null;
+                if (parsedCode is { } parsed)
+                {
+                    code = credential.Period != OathConstants.DefaultPeriod
+                        ? await CalculateCodeAsync(credential, ts, cancellationToken).ConfigureAwait(false)
+                        : Code.FormatCode(credential, ts, parsed);
+                }
+
+                result[credential] = code;
+            }
+
+            return result;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
+        }
+    }
+
+    private static Tlv? ParseCalculateAllEntry(IReadOnlyList<Tlv> tlvs, int index)
+    {
+        ReadOnlySpan<int> nonResultTags = [OathConstants.TagName, OathConstants.TagNameList,
+            OathConstants.TagKey, OathConstants.TagChallenge, OathConstants.TagResponse,
+            OathConstants.TagProperty, OathConstants.TagVersion, OathConstants.TagImf, OathConstants.TagAlgorithm];
+        var nameTlv = tlvs[index];
+        if (nameTlv.Tag != OathConstants.TagName)
+        {
+            if (nonResultTags.Contains(nameTlv.Tag) || nameTlv.Tag is OathConstants.TagTruncated
+                or OathConstants.TagHotp or OathConstants.TagTouch)
+                throw new BadResponseException("CALCULATE ALL response is missing its credential ID.");
+
+            // Unknown standalone metadata must not shift the following name/response pair.
+            return null;
         }
 
-        return result;
+        if (nameTlv.Value.Length == 0 || index + 1 == tlvs.Count)
+            throw new BadResponseException("CALCULATE ALL entry requires a credential ID and response.");
+
+        var responseTlv = tlvs[index + 1];
+        // P2=1 requests truncated values. A known full-response or metadata tag is not
+        // an unknown future marker, regardless of whether its value is well formed.
+        if (nonResultTags.Contains(responseTlv.Tag))
+            throw new BadResponseException("CALCULATE ALL entry requires a truncated response or marker.");
+
+        return responseTlv;
     }
 
     /// <inheritdoc />
@@ -619,12 +674,12 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var command = new ApduCommand(0x00, OathConstants.InsReset, 0xDE, 0xAD);
         await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
-        // Re-select and re-parse to get new state
-        var initialization = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
-        // Preserve the effective version selected at creation; reset refreshes applet state, not caller policy.
-        ApplyInitialization(initialization, FirmwareVersion);
-
-        _logger.LogInformation("OATH application reset, new DeviceId={DeviceId}", DeviceId);
+        // Confirmed RESET success is terminal for plain and SCP sessions. DisposeAsync clears
+        // readiness immediately, then drains/disposes the protocol, derived keys and applet secrets.
+        // It intentionally does not observe caller cancellation after this destructive exchange.
+        // Cancellation/overlap refusal before admission never reaches this boundary.
+        await DisposeAsync().ConfigureAwait(false);
+        _logger.LogInformation("OATH application reset; session ended. Reopen the connection before creating a new session.");
     }
 
     /// <inheritdoc />
@@ -688,7 +743,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                         throw new BadResponseException("No TAG_RESPONSE in VALIDATE response.");
 
                     if (!CryptographicOperations.FixedTimeEquals(expectedResponse, deviceResponse))
-                        throw new OathException(OathFailureReason.WrongPassword);
+                        throw new BadResponseException("The OATH device authentication response did not match verification.");
 
                     IsLocked = false;
                     CryptographicOperations.ZeroMemory(_challenge);
@@ -696,6 +751,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 }
                 finally
                 {
+                    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
                     CryptographicOperations.ZeroMemory(expectedResponse);
                     if (deviceResponse is not null)
                         CryptographicOperations.ZeroMemory(deviceResponse);
@@ -705,8 +761,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 ex.SW == SWConstants.ReferenceDataUnusable ||
                 ex.SW == SWConstants.InvalidCommandDataParameter)
             {
-                // The device rejected the VALIDATE command itself because the supplied
-                // (wrong) key produced a client response it did not recognize.
+                // Preserve the existing rejection category and raw status. These statuses
+                // do not by themselves prove that a user supplied an incorrect password.
                 throw new OathException(OathFailureReason.WrongPassword, ex.SW, ex);
             }
             finally

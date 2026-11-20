@@ -20,8 +20,10 @@ public sealed class ManagementResetSettings : GlobalSettings
 }
 
 /// <summary>
-///     Factory resets the YubiKey, erasing all credentials, keys, and configuration.
-///     Requires firmware 5.6.0 or later. Prompts for double confirmation unless --force is used.
+///     Requests Bio Multi-protocol Edition combined FIDO/PIV reset, retaining the F9 attestation slot.
+///     Checks firmware 5.6.0, not product eligibility; reset itself requires SmartCard. An advertised HID
+///     preference reaches SDK rejection rather than a reset. Prompts twice unless --force is used.
+///     Does not establish Management configuration-lock recovery.
 /// </summary>
 public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettings>
 {

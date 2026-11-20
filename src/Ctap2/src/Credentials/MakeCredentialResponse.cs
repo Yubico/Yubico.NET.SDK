@@ -21,8 +21,9 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Contains the attestation object with the newly created credential's
-/// public key and attestation statement.
+/// Exposes the received authenticator data and attestation statement for registration processing.
+/// Decoding does not verify the attestation signature, certificate chain, challenge/origin, RP/account
+/// binding, required UP/UV or RP attestation policy. Those checks belong to the RP registration workflow.
 /// </para>
 /// <para>
 /// CTAP2 makeCredential response structure:
@@ -31,7 +32,18 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// - 0x03: attStmt (map) - attestation statement
 /// - 0x04: epAtt (bool, optional) - enterprise attestation used
 /// - 0x05: largeBlobKey (byte string, optional) - large blob key
-/// - 0x06: unsignedExtensionOutputs (map, optional) - unsigned extension outputs (CTAP 2.2 / WebAuthn L3)
+/// - 0x06: unsignedExtensionOutputs (map, optional) - unsigned outputs (CTAP 2.3 §6.1)
+/// </para>
+/// <para>
+/// Decode borrows attestation-statement and unsigned-output slices from the input buffer. Keep that
+/// buffer unchanged while these views are used. Authenticator-data byte strings, parsed authenticator
+/// fields and largeBlobKey are independent copies. This result has no disposal/zeroing API, and session
+/// disposal does not clear it. Clearing the input cannot clear independent secret-bearing copies;
+/// do not log large-blob keys or secret-derived extension data.
+/// </para>
+/// <para>
+/// Unknown outer fields are skipped, not retained in a complete RawData envelope. Raw authenticator
+/// data and attestation-statement bytes preserve only their respective nested structures.
 /// </para>
 /// </remarks>
 public sealed class MakeCredentialResponse
@@ -46,7 +58,7 @@ public sealed class MakeCredentialResponse
     public string Format { get; }
 
     /// <summary>
-    /// Gets the authenticator data containing the new credential.
+    /// Gets the parsed authenticator data; the decoder does not require the AT bit or new credential data.
     /// </summary>
     public AuthenticatorData AuthenticatorData { get; }
 
@@ -56,7 +68,7 @@ public sealed class MakeCredentialResponse
     public ReadOnlyMemory<byte> AuthenticatorDataRaw { get; }
 
     /// <summary>
-    /// Gets the attestation statement.
+    /// Gets the parsed or opaque attestation statement, not a verified attestation result.
     /// </summary>
     public AttestationStatement AttestationStatement { get; }
 
@@ -66,23 +78,26 @@ public sealed class MakeCredentialResponse
     public bool? EnterpriseAttestation { get; }
 
     /// <summary>
-    /// Gets the large blob key if the largeBlobKey extension was requested.
+    /// Gets the secret symmetric large-blob storage key from response key 0x05, if supplied.
     /// </summary>
+    /// <remarks>The decoder does not validate key length or whether the extension was requested.</remarks>
     public ReadOnlyMemory<byte>? LargeBlobKey { get; }
 
     /// <summary>
-    /// Gets the CBOR-encoded extension outputs, if any.
+    /// Gets the signed authenticator-data extension bytes, if the ED bit is set.
     /// </summary>
     public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
 
     /// <summary>
-    /// Gets the unsigned extension outputs map (CTAP 2.2 / WebAuthn L3 key 6).
+    /// Gets the unsigned extension outputs from makeCredential response key 0x06.
     /// </summary>
     /// <remarks>
-    /// Per CTAP 2.2 / WebAuthn L3, unsigned extension outputs is a map keyed by extension
-    /// identifier (text string) with values as raw CBOR bytes. Used by extensions
-    /// like previewSign to deliver attestation objects via top-level response.
-    /// Aligned with yubikit-swift, yubikit-android, yubikit-python.
+    /// CTAP 2.3 §6.1 defines text extension identifiers mapped to unsigned values. Each value here is
+    /// its complete encoded CBOR slice, not necessarily a CBOR byte string, and borrows the input buffer.
+    /// An empty map and an omitted field must be treated equivalently by clients, although this model
+    /// preserves empty versus null. These values are separate from signed authData outputs; extensions
+    /// such as experimental previewSign can carry proof objects that require their own verification.
+    /// WebAuthn client-extension processing is a separate layer, not this integer-key envelope.
     /// </remarks>
     public IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? UnsignedExtensionOutputs { get; }
 
@@ -111,6 +126,12 @@ public sealed class MakeCredentialResponse
     /// </summary>
     /// <param name="data">The CBOR-encoded response (excluding status byte).</param>
     /// <returns>The parsed response.</returns>
+    /// <remarks>
+    /// The input is borrowed as described on this type. Uses lax CBOR parsing and requires fmt,
+    /// authData and attStmt, but does not enforce every attestation shape or complete envelope consumption.
+    /// CBOR failures can raise <see cref="CborContentException"/>; missing modeled required fields raise
+    /// <see cref="InvalidOperationException"/>. Authenticator-data parsing can also reject short input.
+    /// </remarks>
     public static MakeCredentialResponse Decode(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Lax);
@@ -122,7 +143,11 @@ public sealed class MakeCredentialResponse
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The parsed response.</returns>
-    /// <remarks>The returned response may reference the reader's underlying buffer.</remarks>
+    /// <remarks>
+    /// Consumes one encoded value and applies the memory decoder's checks. Attestation and unsigned
+    /// values can reference the reader's underlying buffer; keep it unchanged while those views are used.
+    /// This overload is not a complete-input or cryptographic-verification boundary.
+    /// </remarks>
     public static MakeCredentialResponse Decode(CborReader reader)
     {
         ArgumentNullException.ThrowIfNull(reader);
@@ -130,7 +155,7 @@ public sealed class MakeCredentialResponse
     }
 
     /// <summary>
-    /// Core decoder for the owned response bytes.
+    /// Decodes one response map while retaining slices of the borrowed response bytes.
     /// </summary>
     private static MakeCredentialResponse DecodeInternal(
         CborReader reader,
@@ -185,7 +210,7 @@ public sealed class MakeCredentialResponse
                 case 5: // largeBlobKey
                     largeBlobKey = reader.ReadByteString();
                     break;
-                case 6: // unsignedExtensionOutputs (CTAP 2.2 / WebAuthn L3, aligned with sister SDKs)
+                case 6: // makeCredential unsignedExtensionOutputs (CTAP 2.3 §6.1); values borrow fullCbor.
                     unsignedExtensionOutputs = new Dictionary<string, ReadOnlyMemory<byte>>();
                     int? extMapSize = reader.ReadStartMap();
                     for (int j = 0; j < extMapSize; j++)
@@ -258,6 +283,7 @@ public sealed class MakeCredentialResponse
     /// Gets the credential ID from the attested credential data.
     /// </summary>
     /// <returns>The credential ID, or empty if not present.</returns>
+    /// <remarks>Empty is a helper fallback, not proof that a makeCredential response satisfies the protocol.</remarks>
     public ReadOnlyMemory<byte> GetCredentialId() =>
         AuthenticatorData.AttestedCredentialData?.CredentialId ?? ReadOnlyMemory<byte>.Empty;
 
@@ -265,6 +291,7 @@ public sealed class MakeCredentialResponse
     /// Gets the credential public key from the attested credential data.
     /// </summary>
     /// <returns>The COSE-encoded public key, or empty if not present.</returns>
+    /// <remarks>The attested-data parser extracts the encoding without verifying key structure or mathematical validity.</remarks>
     public ReadOnlyMemory<byte> GetCredentialPublicKey() =>
         AuthenticatorData.AttestedCredentialData?.CredentialPublicKey ?? ReadOnlyMemory<byte>.Empty;
 
@@ -272,6 +299,7 @@ public sealed class MakeCredentialResponse
     /// Gets the AAGUID from the attested credential data.
     /// </summary>
     /// <returns>The AAGUID, or <see cref="Guid.Empty"/> if not present.</returns>
+    /// <remarks>Guid.Empty can also be received on the wire; inspect AttestedCredentialData to distinguish absence.</remarks>
     public Guid GetAaguid() =>
         AuthenticatorData.AttestedCredentialData?.Aaguid ?? Guid.Empty;
 }

@@ -15,12 +15,12 @@
 namespace Yubico.YubiKit.Piv;
 
 /// <summary>
-/// Exception thrown when PIN or PUK verification fails.
+/// Reports rejected PIN, PUK or biometric verification with a device-provided retry count.
 /// </summary>
 public class InvalidPinException : Exception
 {
     /// <summary>
-    /// Gets the number of retries remaining before the PIN/PUK is locked.
+    /// Gets the device-reported attempts remaining before the credential or biometric method is blocked.
     /// </summary>
     public int RetriesRemaining { get; }
 

@@ -25,29 +25,35 @@ namespace Yubico.YubiKit.Ctap2.Cose;
 /// must not be treated as production cryptographic guidance.
 /// </para>
 /// <para>
-/// An ARKG-P256 seed-key is a specialized COSE_Key structure encoding two P-256 public keys
-/// (pkKem and pkBl) used for offline key derivation. Unlike standard EC2 keys where parameter -1
-/// is the curve identifier, ARKG seed-keys use -1/-2 to carry NESTED COSE_Key maps (not flat
-/// SEC1 byte strings).
+/// The experimental SDK profile carries blinding and KEM public keys for offline key derivation.
+/// Unlike ordinary EC2 curve/coordinate parameters, -1 and -2 contain byte strings whose contents
+/// are encoded COSE EC2 maps. The decoder also accepts direct nested maps through CoseKey.Decode.
 /// </para>
 /// <para>
-/// Wire format (per draft-bradleylundberg-cfrg-arkg-10, python-fido2 ARKG_P256_PLACEHOLDER
-/// at fido2/cose.py:428-433, and the legacy SDK's PreviewSignExtension.cs:317-323):
+/// SDK-emitted wire profile (not a claim of draft or vendor conformance):
 /// - kty (1) = 2 (EC2 family)
 /// - alg (3) = -65700 (ARKG-P256 seed-key marker)
-/// - -1 = pkBl  as NESTED COSE_Key map (CoseEc2Key with P-256 coordinates)
-/// - -2 = pkKem as NESTED COSE_Key map (CoseEc2Key with P-256 coordinates)
+/// - -1 = pkBl as a byte string containing an EC2/P-256 COSE map
+/// - -2 = pkKem as a byte string containing an EC2/P-256 COSE map
 /// - -3 = derived-key algorithm (e.g., -9 for Esp256)
 /// </para>
 /// <para>
-/// This class stores the reconstructed 65-byte SEC1 uncompressed points for each nested key
-/// to simplify downstream ARKG derivation logic.
+/// draft-bradleylundberg-cfrg-arkg-10 §5.1 agrees on BL=-1/KEM=-2 and illustrates derived ESP256=-9;
+/// §§5.1/5.2/8.3 explicitly specify the ARKG-P256 seed algorithm placeholder -65700. The SDK's outer
+/// kty=2 and byte-string wrappers differ from the draft's kty placeholder -65537 and direct maps.
+/// The SDK also requires an integer derived algorithm; the draft's dkalg is optional and permits
+/// int/tstr. These agreements do not establish full-profile interoperability. The Internet-Draft is
+/// work in progress, with stated expiry 31 August 2026, not production cryptographic authority.
 /// </para>
 /// <para>
-/// Discriminate this variant from standard EC2 keys by checking alg == -65700.
+/// Decode dispatches on alg=-65700 before outer kty, then requires nested EC2 carriers and coordinates
+/// no longer than 32 bytes. It does not check nested curve=1 or point validity. Coordinates, including
+/// short/empty values, are left-padded into 04 || X[32] || Y[32] for downstream helpers; that SEC1 layout
+/// is not proof of a valid P-256 point. Direct construction borrows both points and does not enforce
+/// the algorithm marker or point shape; keep supplied storage unchanged during use.
 /// </para>
 /// </remarks>
-/// <param name="Algorithm">COSE algorithm identifier (must be ArkgP256SeedKey = -65700).</param>
+/// <param name="Algorithm">Seed marker for this profile (ArkgP256SeedKey=-65700); construction does not enforce it.</param>
 /// <param name="DerivedKeyAlgorithm">Algorithm for the derived signing key (e.g., Esp256 = -9).</param>
 /// <param name="KemPublicKey">KEM public key as 65-byte SEC1 uncompressed point.</param>
 /// <param name="BlPublicKey">Blinding public key as 65-byte SEC1 uncompressed point.</param>
@@ -63,7 +69,7 @@ public sealed record CoseArkgP256SeedKey(
     public override int KeyType => 2;
 
     /// <summary>
-    /// Gets the COSE algorithm identifier (alg = -65700).
+    /// Gets the supplied seed-key algorithm identifier; this profile uses -65700.
     /// </summary>
     public override CoseAlgorithm Algorithm { get; } = Algorithm;
 
@@ -74,11 +80,11 @@ public sealed record CoseArkgP256SeedKey(
     /// <param name="seedKeyAlgorithm">Seed-key COSE algorithm (must be -65700).</param>
     /// <returns>A <see cref="CoseArkgP256SeedKey"/> instance.</returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if required parameters are missing or nested keys are invalid.
+    /// A required parameter is missing, a nested key is not an EC2 carrier, or coordinates exceed 32 bytes.
     /// </exception>
     internal static CoseArkgP256SeedKey Decode(Dictionary<int, object?> parameters, CoseAlgorithm seedKeyAlgorithm)
     {
-        // -1 = pkBl, -2 = pkKem (per draft-bradleylundberg-cfrg-arkg-10 and python-fido2)
+        // Preserve the distinct derivation roles: -1 = BL, -2 = KEM (ARKG-10 §5.1 label mapping).
         byte[] blKeyCbor = parameters.TryGetValue(-1, out var v1) && v1 is byte[] b1
             ? b1
             : throw new InvalidOperationException("ARKG seed key missing -1 (BL public key COSE map)");
@@ -92,7 +98,7 @@ public sealed record CoseArkgP256SeedKey(
             ? a
             : throw new InvalidOperationException("ARKG seed key missing -3 (derived key algorithm)");
 
-        // Recursively decode each nested COSE_Key — both must be CoseEc2Key (kty=2, P-256)
+        // Require EC2 carriers; generic decoding does not establish curve=1 or valid P-256 points.
         var kemKey = CoseKey.Decode(kemKeyCbor) as CoseEc2Key
             ?? throw new InvalidOperationException("ARKG KEM public key is not CoseEc2Key");
 
@@ -118,7 +124,7 @@ public sealed record CoseArkgP256SeedKey(
     /// <returns>65-byte array: 0x04 || x (32 bytes) || y (32 bytes).</returns>
     private static byte[] ReconstructSec1Uncompressed(CoseEc2Key ec2, string keyName)
     {
-        // P-256: x and y are each 32 bytes (may be shorter if leading zeros were stripped)
+        // Limit slot width; short/empty coordinates are padded, without proving P-256 point validity.
         if (ec2.X.Length > 32 || ec2.Y.Length > 32)
         {
             throw new InvalidOperationException(
@@ -142,10 +148,11 @@ public sealed record CoseArkgP256SeedKey(
     /// <summary>
     /// Encodes this ARKG-P256 seed-key to CBOR bytes.
     /// </summary>
-    /// <returns>CBOR-encoded COSE_Key with nested EC2 keys.</returns>
+    /// <returns>A new byte array containing the encoded COSE map with byte-string-wrapped EC2 key maps.</returns>
     /// <remarks>
-    /// Wire format: {1: 2, 3: -65700, -3: derivedAlg, -2: kemKeyMap, -1: blKeyMap}
-    /// Each nested key is a full COSE_Key EC2 map. Per spec: -1 = pkBl, -2 = pkKem.
+    /// Emits kty=2, the supplied alg, -1=bstr(encoded BL map), -2=bstr(encoded KEM map), and
+    /// -3=derivedAlg. Nested maps use EC2/P-256/ES256 labels; the outer profile expects alg=-65700.
+    /// SEC1 length/prefix are checked during encoding, but mathematical point validity is not.
     /// </remarks>
     public override byte[] Encode()
     {
@@ -156,7 +163,7 @@ public sealed record CoseArkgP256SeedKey(
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
 
-        // Keys must be in sorted order for canonical CBOR: -3, -2, -1, 1, 3
+        // Numeric insertion order is not canonical encoded order; the writer sorts to 1, 3, -1, -2, -3.
         writer.WriteInt32(-3);
         writer.WriteInt32(DerivedKeyAlgorithm.Value);
 

@@ -22,7 +22,7 @@ public static class RSAParametersExtensions
     /// Performs a deep copy of the RSA parameters.
     /// </summary>
     /// <param name="original">The original RSAParameters to copy.</param>
-    /// <returns>A new RSAParameters with the same values as the original.</returns>
+    /// <returns>Parameters with independent arrays. The caller must clear copied private components after use.</returns>
     public static RSAParameters DeepCopy(this RSAParameters original)
     {
         var copy = new RSAParameters
@@ -41,18 +41,17 @@ public static class RSAParametersExtensions
     }
 
     /// <summary>
-    /// Normalizes the RSA parameters to ensure consistent cross-platform behavior:
-    /// - If D is present, it must have the same length as Modulus
-    /// - If D is present, P, Q, DP, DQ, and InverseQ are required and must have half the length of Modulus (rounded up)
-    /// 
-    /// This ensures compatibility with stricter platforms like Windows BCrypt while preserving the original key data.
+    /// Copies the parameters and, when all private components and Modulus are present, left-pads
+    /// shorter D to the modulus width and shorter CRT components to half that width (rounded up).
+    /// Oversized arrays are preserved. Missing components leave the copy unpadded; this helper does
+    /// not establish mathematical validity or acceptance by every platform provider.
     /// </summary>
     /// <param name="parameters">The RSA parameters to normalize</param>
     /// <returns>A new (copied) RSAParameters with normalized values</returns>
     internal static RSAParameters NormalizeParameters(this RSAParameters parameters) =>
         NormalizeParameters(parameters, parametersCopied: null);
 
-    // Test observation hook. The callback must not retain or mutate the copied arrays.
+    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
     internal static RSAParameters NormalizeParameters(
         this RSAParameters parameters,
         Action<RSAParameters>? parametersCopied)

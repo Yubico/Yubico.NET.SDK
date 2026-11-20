@@ -22,6 +22,7 @@ public class LargeBlobOutputTests
     [Fact]
     public void LargeBlobOutput_DecodesCorrectly()
     {
+        // Synthetic legacy {largeBlobKey, written} shape, not a standard direct CTAP output.
         var key = new byte[32];
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);

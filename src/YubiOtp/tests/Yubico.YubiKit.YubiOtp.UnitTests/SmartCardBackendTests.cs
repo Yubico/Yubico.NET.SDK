@@ -97,7 +97,7 @@ public class SmartCardBackendTests
     [Fact]
     public async Task WriteUpdateAsync_ProgSeqNotIncremented_ThrowsInvalidOperation()
     {
-        // prog_seq stays at 0 instead of incrementing to 1 — but 0 is rollover, so test with 5->5
+        // Initial 3 expects 4; returned 5 is rejected outside the firmware bypass interval.
         var response = MakeStatusResponse(progSeq: 5);
 
         _protocol.TransmitAndReceiveAsync(
@@ -133,7 +133,7 @@ public class SmartCardBackendTests
     [Fact]
     public async Task WriteUpdateAsync_Firmware5x_SkipsProgSeqValidation()
     {
-        // Firmware 5.0.0-5.4.3 doesn't reliably update prog_seq
+        // The current implementation bypasses 5.0.0 <= version < 5.5.0; this fake exercises 5.2.0.
         var response = MakeStatusResponse(progSeq: 99);
 
         _protocol.TransmitAndReceiveAsync(
@@ -350,7 +350,8 @@ public class SmartCardBackendTests
             Arg.Any<CancellationToken>());
     }
 
-    // ISC-30: valid-length challenge-response keys must reach the wire unmodified.
+    // Valid-length challenge-response keys must reach the wire unmodified; fake APDUs do not establish
+    // real-device SmartCard challenge support.
 
     [Fact]
     public async Task WriteUpdateAsync_HmacSha1ValidKey_PreservesExactKeyBytesThroughEncoding()

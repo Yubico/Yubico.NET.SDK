@@ -29,6 +29,9 @@ namespace Yubico.YubiKit.OpenPgp;
 ///     Byte 5:   Remaining attempts Reset Code
 ///     Byte 6:   Remaining attempts Admin PIN
 ///     </code>
+///     The parser currently exposes length bytes literally, including any format bits, and maps unknown
+///     signature-policy bytes to Once. Interpret limits with the card's credential format; use raw C4
+///     when inspecting newer profiles. User PIN modes share AttemptsUser; AttemptsReset belongs to the Reset Code.
 /// </remarks>
 public sealed class PwStatus
 {
@@ -38,17 +41,17 @@ public sealed class PwStatus
     public PinPolicy SignaturePinPolicy { get; init; }
 
     /// <summary>
-    ///     Maximum length of the User PIN.
+    ///     Raw User PIN length/format byte interpreted as an integer; UTF-8 limits count encoded bytes.
     /// </summary>
     public int MaxLenUser { get; init; }
 
     /// <summary>
-    ///     Maximum length of the Reset Code.
+    ///     Raw Reset Code length/format byte interpreted as an integer.
     /// </summary>
     public int MaxLenReset { get; init; }
 
     /// <summary>
-    ///     Maximum length of the Admin PIN.
+    ///     Raw Admin PIN length/format byte interpreted as an integer.
     /// </summary>
     public int MaxLenAdmin { get; init; }
 

@@ -64,7 +64,8 @@ public class SecurityDomainSession_Scp11cTests : SecurityDomainStateRestoringTes
             {
                 Assert.True(session.IsAuthenticated);
 
-                // Verify we can perform an authenticated operation
+                // Check protected key listing, which is also available without host authentication;
+                // this does not establish restricted administrative authority.
                 var keyInfo = await session.ListKeyInformationAsync(ct);
                 Assert.True(keyInfo.Count > 0);
             }, scpKeyParams: keyParams, cancellationToken: ct);

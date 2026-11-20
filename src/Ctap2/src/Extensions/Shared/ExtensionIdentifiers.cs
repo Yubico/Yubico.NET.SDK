@@ -15,10 +15,12 @@
 namespace Yubico.YubiKit.Ctap2.Extensions;
 
 /// <summary>
-/// CTAP2 extension identifiers as defined in the CTAP2 specification.
+/// Identifiers for modeled CTAP extensions and the experimental Yubico Labs previewSign extension.
 /// </summary>
 /// <remarks>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-defined-extensions
+/// That revision defines the base extensions, not hmac-secret-mc or previewSign. hmac-secret-mc is
+/// defined in CTAP 2.2-2.3 §12.8. previewSign uses the separate Yubico Labs v4 Editor's Draft.
 /// </remarks>
 public static class ExtensionIdentifiers
 {
@@ -35,8 +37,8 @@ public static class ExtensionIdentifiers
     /// The hmac-secret-mc extension identifier (during makeCredential).
     /// </summary>
     /// <remarks>
-    /// Variant of hmac-secret that allows retrieving the secret during
-    /// credential creation, not just assertion.
+    /// Evaluates hmac-secret during credential creation (CTAP 2.2-2.3 §12.8), returning encrypted
+    /// output. Requires separate advertisement and hmac-secret:true in the same request.
     /// </remarks>
     public const string HmacSecretMakeCredential = "hmac-secret-mc";
 
@@ -62,9 +64,9 @@ public static class ExtensionIdentifiers
     /// The largeBlob extension identifier.
     /// </summary>
     /// <remarks>
-    /// Allows storing large blobs of data using a separate command.
-    /// The extension during makeCredential/getAssertion only indicates
-    /// support; actual data storage uses authenticatorLargeBlobs command.
+    /// CTAP 2.3 §12.4's direct storage alternative: registration requests support; assertion requests
+    /// read/write. Outputs are unsigned, with compressed read data plus originalSize. This route is
+    /// not implemented by ExtensionBuilder/LargeBlobStorage and is distinct from WebAuthn output.
     /// </remarks>
     public const string LargeBlob = "largeBlob";
 
@@ -72,8 +74,9 @@ public static class ExtensionIdentifiers
     /// The largeBlobKey extension identifier.
     /// </summary>
     /// <remarks>
-    /// Retrieved during assertion when largeBlob is supported. Contains
-    /// the key used to encrypt large blob data for this credential.
+    /// Requests the credential's secret storage key for use with authenticatorLargeBlobs (§6.10).
+    /// Returned at makeCredential key 5 or getAssertion key 7, not in authData extensions (§12.3).
+    /// Check largeBlobKey advertisement and largeBlobs:true; it is mutually exclusive with direct largeBlob.
     /// </remarks>
     public const string LargeBlobKey = "largeBlobKey";
 
@@ -82,20 +85,22 @@ public static class ExtensionIdentifiers
     /// </summary>
     /// <remarks>
     /// Returns the minimum PIN length required by the authenticator.
-    /// Can be requested during makeCredential if the RP needs to know
-    /// the PIN complexity requirements.
+    /// Requested during makeCredential for an authorized RP; reports Unicode code points without
+    /// changing policy or attesting all PIN complexity rules.
     /// </remarks>
     public const string MinPinLength = "minPinLength";
 
 
     /// <summary>
-    /// The previewSign extension identifier (CTAP v4).
+    /// The experimental previewSign identifier (Yubico Labs version 4 Editor's Draft, 26 August 2025).
     /// </summary>
     /// <remarks>
     /// Allows a CTAP2 credential to sign arbitrary data using a separate
     /// signing key bound to the same authenticator. Registration generates
     /// a new signing key pair; authentication signs data without clientDataJSON
     /// or authenticator data wrapping.
+    /// See https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension.
+    /// This is not CTAP version 4. Preview algorithms and identifiers may change; do not use in production.
     /// </remarks>
     public const string PreviewSign = "previewSign";
 }

@@ -55,7 +55,8 @@ public sealed class InfoCommand : OpenPgpCommand<InfoCommand.Settings>
         AnsiConsole.WriteLine();
         OutputHelpers.WriteKeyValue("Signature Counter", sigCount.ToString());
 
-        // Key information
+        // Current display infers status from fingerprint length, including zero-filled reset fields.
+        // Use ListKeyInformationAsync when key presence/status is needed for a decision.
         AnsiConsole.WriteLine();
         OutputHelpers.WriteHeader("Keys");
 

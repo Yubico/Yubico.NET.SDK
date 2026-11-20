@@ -18,12 +18,23 @@ namespace Yubico.YubiKit.YubiHsm;
 
 /// <summary>
 ///     Holds the three 16-byte session keys (S-ENC, S-MAC, S-RMAC) derived from
-///     a YubiHSM Auth CALCULATE response. All key material is zeroed on disposal.
+///     a YubiHSM Auth CALCULATE response. Disposal clears the three arrays owned by this instance.
 /// </summary>
+/// <remarks>
+///     Key properties expose spans over the owned arrays. Use these views within the instance's lifetime;
+///     disposal also clears the storage seen by previously obtained spans. Accessing a key property
+///     after disposal throws <see cref="ObjectDisposedException" />. The caller clears the original
+///     <see cref="Parse" /> input and any additional copies it makes separately.
+///     Parsing accepts exactly the 48-byte key region. A full applet CALCULATE response can contain
+///     additional bytes: vendor host code has handled 56-byte responses since 2023, and a supplied
+///     symmetric cryptogram produced that length on a tested development YubiKey. The session currently
+///     passes the full response here, so that path raises <see cref="ArgumentException" />. This parser
+///     leaves the additional bytes' meaning and firmware applicability to a separately verified response contract.
+/// </remarks>
 public sealed class SessionKeys : IDisposable
 {
     /// <summary>
-    ///     The expected length of the raw CALCULATE response (3 x 16 bytes).
+    ///     The length accepted by this key parser: S-ENC, S-MAC and S-RMAC (3 x 16 bytes).
     /// </summary>
     public const int ExpectedResponseLength = 48;
 
@@ -78,9 +89,9 @@ public sealed class SessionKeys : IDisposable
     }
 
     /// <summary>
-    ///     Parses a 48-byte CALCULATE response into session keys.
+    ///     Copies a 48-byte CALCULATE response into three independently owned key arrays.
     /// </summary>
-    /// <param name="response">The 48-byte response from the CALCULATE command.</param>
+    /// <param name="response">The borrowed 48-byte key region. The caller retains responsibility for clearing its storage.</param>
     /// <returns>A new <see cref="SessionKeys" /> instance. The caller must dispose it.</returns>
     /// <exception cref="ArgumentException">Thrown when the response is not exactly 48 bytes.</exception>
     public static SessionKeys Parse(ReadOnlySpan<byte> response)
@@ -97,7 +108,9 @@ public sealed class SessionKeys : IDisposable
         return new SessionKeys(sEnc, sMac, sRmac);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    ///     Clears the owned key arrays and rejects subsequent key-property access. Repeated disposal is safe.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed)

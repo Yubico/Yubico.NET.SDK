@@ -34,6 +34,13 @@ public static class IYubiKeyExtensions
         /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">Token used to cancel the operation.</param>
         /// <returns>An initialized <see cref="OpenPgpSession" />. The caller owns its lifetime.</returns>
+        /// <remarks>
+        ///     Uses only SmartCard transport; an unsupported preference or a failed open/initialization does not
+        ///     select another transport. Dispose the returned session with <c>await using</c> to close its hidden
+        ///     connection after protocol teardown. Failed creation also cleans up that connection.
+        ///     SCP parameters are borrowed through factory completion. The session retains but does not dispose
+        ///     the caller's user-presence prompt; keep it alive through all session operations and callbacks.
+        /// </remarks>
         public async Task<OpenPgpSession> CreateOpenPgpSessionAsync(
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)

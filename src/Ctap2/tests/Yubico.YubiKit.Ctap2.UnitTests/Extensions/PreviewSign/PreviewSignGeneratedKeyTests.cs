@@ -24,10 +24,12 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 /// <remarks>
 /// WARNING -- EXPERIMENTAL -- test only: ARKG previewSign derivation is not ready for production use and must not
 /// be treated as production cryptographic guidance.
+/// The point/vector comparisons do not assert algorithm propagation from either extraction accessor,
+/// signature verification, uniqueness for every context or full Internet-Draft conformance.
 /// </remarks>
 public class PreviewSignGeneratedKeyTests
 {
-    // Reuse Phase B KAT vectors from Core
+    // Reuse fixed public-seed/derivation fixtures also used by Core; no device ceremony is involved.
     private static readonly byte[] PkBl = HexToBytes(
         "046d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df" +
         "65ed42169c69675f936ff7de5f9bd93adbc8ea73036b16e8d90adbfabdaddba7");
@@ -58,7 +60,7 @@ public class PreviewSignGeneratedKeyTests
 
         // Assert
         Assert.Equal(ExpectedDerivedA, derived.PublicKey.ToArray());
-        Assert.NotEmpty(derived.ArkgKeyHandle.ToArray()); // Should be 16+65 bytes
+        Assert.NotEmpty(derived.ArkgKeyHandle.ToArray()); // Presence only; exact 81-byte size is not asserted here.
         Assert.Equal(generatedKey.KeyHandle.ToArray(), derived.DeviceKeyHandle.ToArray());
         Assert.Equal(CtxA, derived.Context.ToArray());
     }

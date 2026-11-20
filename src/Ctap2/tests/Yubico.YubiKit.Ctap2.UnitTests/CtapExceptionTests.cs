@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
@@ -66,6 +65,8 @@ public class CtapExceptionTests
             .Which.Status.Should().Be(CtapStatus.PinBlocked);
     }
 
+    // Checks retained numeric values only. PIN_TOKEN_EXPIRED 0x38 is assigned in CTAP2.0,
+    // but reserved in CTAP2.1/2.2 RD/2.3; the method name does not imply all-revision assignment.
     [Theory]
     [InlineData(CtapStatus.PinNotSet, 0x35)]
     [InlineData(CtapStatus.PuatRequired, 0x36)]

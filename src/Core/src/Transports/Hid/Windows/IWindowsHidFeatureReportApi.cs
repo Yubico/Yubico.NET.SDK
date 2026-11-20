@@ -8,6 +8,8 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 /// One instance records resources at the owner's direction, without scheduling or physical claims.
 /// Arrays include a zero report-ID prefix and are borrowed only synchronously through method return,
 /// including exceptional return. No native operation may retain them after return.
+/// Descriptor lengths include the prefix; connection payload sizes exclude it. The typed OTP
+/// connection separately requires eight payload bytes.
 /// </remarks>
 internal interface IWindowsHidFeatureReportApi
 {

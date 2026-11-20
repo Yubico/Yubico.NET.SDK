@@ -24,6 +24,9 @@ namespace Yubico.YubiKit.Tests.Shared;
 /// <remarks>
 ///     Use this in unit tests that assert byte-level SmartCard command flow. It is not a hardware
 ///     integration-test abstraction and does not emulate APDU processing beyond queued responses.
+///     Commands are copied into TransmittedCommands; queued response arrays are retained and returned
+///     without copying. Dispose only increments DisposeCount and clears neither collection nor bytes.
+///     Use nonsecret fixtures, or clear each owned command/response array after its final use.
 /// </remarks>
 public sealed class RecordingSmartCardConnection(params byte[][] responses) : ISmartCardConnection
 {

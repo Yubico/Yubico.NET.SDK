@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
@@ -33,31 +34,38 @@ internal sealed class OathBackend(ISmartCardProtocol protocol) : IOathBackend
     {
         var selectResponse = await SelectAsync(cancellationToken).ConfigureAwait(false);
 
-        var firmwareVersion = new FirmwareVersion();
-        byte[] salt = [];
-        byte[] challenge = [];
+        ReadOnlyMemory<byte> version = default;
+        ReadOnlyMemory<byte> salt = default;
+        ReadOnlyMemory<byte> challenge = default;
 
         using var tlvs = TlvHelper.DecodeList(selectResponse.Span);
         foreach (var tlv in tlvs)
         {
-            switch (tlv.Tag)
+            if (tlv.Tag == OathConstants.TagVersion)
             {
-                case OathConstants.TagVersion:
-                    var versionBytes = tlv.Value.Span;
-                    firmwareVersion = new FirmwareVersion(versionBytes[0], versionBytes[1], versionBytes[2]);
-                    break;
-
-                case OathConstants.TagName:
-                    salt = tlv.Value.ToArray();
-                    break;
-
-                case OathConstants.TagChallenge:
-                    challenge = tlv.Value.ToArray();
-                    break;
+                if (tlv.Value.Length != 3)
+                    throw new BadResponseException("OATH SELECT version must contain three bytes.");
+                version = tlv.Value;
+            }
+            else if (tlv.Tag == OathConstants.TagName)
+            {
+                if (tlv.Value.Length == 0)
+                    throw new BadResponseException("OATH SELECT requires a nonempty device ID.");
+                salt = tlv.Value;
+            }
+            else if (tlv.Tag == OathConstants.TagChallenge)
+            {
+                if (tlv.Value.Length == 0)
+                    throw new BadResponseException("OATH SELECT authentication challenge must not be empty.");
+                challenge = tlv.Value;
             }
         }
 
-        return new OathInitialization(firmwareVersion, salt, challenge);
+        if (version.IsEmpty || salt.IsEmpty)
+            throw new BadResponseException("OATH SELECT requires version and device ID metadata.");
+
+        var firmwareVersion = new FirmwareVersion(version.Span[0], version.Span[1], version.Span[2]);
+        return new OathInitialization(firmwareVersion, salt.ToArray(), challenge.ToArray());
     }
 
     public Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken = default) =>

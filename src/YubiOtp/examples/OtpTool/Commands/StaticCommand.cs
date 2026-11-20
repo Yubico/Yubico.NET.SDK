@@ -21,9 +21,15 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// <summary>
 /// Programs a static password on a slot (ykman otp static SLOT).
 /// </summary>
+/// <remarks>
+/// Current sample limitation: UTF-8 bytes are passed as raw scan codes and KeyboardLayout is unused.
+/// For correctly translated text, use StaticPasswordSlotConfiguration(string, KeyboardLayout).
+/// That convenient overload cannot erase its immutable source string; raw translated mutable scan codes
+/// permit source-buffer cleanup. Generated passwords are intentionally displayed only in human mode.
+/// </remarks>
 public static class StaticCommand
 {
-    // ModHex characters that map to US keyboard scan codes the YubiKey can type.
+    // Layout-friendly characters still need translation; UTF-8/ASCII values are not HID scan codes.
     private const string ModHexChars = "cbdefghijklnrtuv";
 
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
@@ -70,8 +76,11 @@ public static class StaticCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
+            // These bytes are currently UTF-8, not translated scan codes (for example 'a' is 0x61,
+            // not HID 0x04). This handoff is a sample defect, not a raw-overload usage recipe.
             using var config = new StaticPasswordSlotConfiguration(scanCodes);
 
+            // Omitting the new code can remove write protection even when current authentication succeeds.
             await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
 
             if (options.Json)

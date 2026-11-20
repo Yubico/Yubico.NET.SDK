@@ -27,6 +27,13 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// Enterprise attestation allows an authenticator to return a uniquely identifying
 /// attestation certificate when requested by an enterprise relying party.
 /// </summary>
+/// <remarks>
+/// Requires a human-coordinated dedicated device with known PIN state and an approved test RP.
+/// Setup can normalize the PIN, enables persistent enterprise configuration on the selected path,
+/// and cleanup deletes all credentials for this RP, not just this run. Prior configuration is not
+/// restored, and token/auth buffers are not comprehensively cleared. Assertions inspect statement
+/// presence and epAtt only if supplied; they do not qualify a certificate, format or attestation trust.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Feature", "EnterpriseAttestation")]
 public class Ctap2EnterpriseAttestationTests
@@ -39,7 +46,8 @@ public class Ctap2EnterpriseAttestationTests
         {
             var info = await session.GetInfoAsync();
 
-            // Check if enterprise attestation is supported (ep option)
+            // This test proceeds only with ep=true. Under CTAP, ep=false means supported but disabled;
+            // the unchanged skip diagnostic below does not distinguish that state from absence.
             if (!info.Options.TryGetValue("ep", out var epSupported) || !epSupported)
             {
                 Skip.If(true, "YubiKey does not support enterprise attestation (ep option)");
@@ -105,8 +113,7 @@ public class Ctap2EnterpriseAttestationTests
                 Assert.NotNull(makeResult);
                 Assert.NotNull(makeResult.AttestationStatement);
 
-                // With enterprise attestation, the format should be "packed" with a certificate
-                // (not "none" / self-attestation)
+                // Check epAtt only if returned; no assertion requires packed format or a certificate.
                 if (makeResult.EnterpriseAttestation.HasValue)
                 {
                     Assert.True(makeResult.EnterpriseAttestation.Value,

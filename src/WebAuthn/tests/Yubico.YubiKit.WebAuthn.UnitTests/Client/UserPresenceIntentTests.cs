@@ -28,8 +28,9 @@ using Yubico.YubiKit.WebAuthn.Client.Registration;
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
 /// <summary>
-///     Runs a real <see cref="Ctap2Session" /> under the WebAuthn client, so the intent has to cross every layer between
-///     the application's call and the user-presence prompt.
+///     Checks requested intent and operation context through WebAuthn, a real <see cref="Ctap2Session" />
+///     and Core's SmartCard protocol over a fake connection. The assertions cover request context,
+///     not terminal notifications, native transport completion or physical user presence.
 /// </summary>
 public sealed class UserPresenceIntentTests
 {

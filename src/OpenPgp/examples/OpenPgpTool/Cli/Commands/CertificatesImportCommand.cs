@@ -11,6 +11,10 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 /// <summary>
 ///     Imports a certificate into a key slot (openpgp certificates import).
 /// </summary>
+/// <remarks>
+///     The sample currently leaves the loaded certificate undisposed. Direct SDK callers should own a using
+///     scope through transmission. Certificate storage is independent of private-key import and key binding.
+/// </remarks>
 public sealed class CertificatesImportCommand : OpenPgpCommand<CertificatesImportCommand.Settings>
 {
     public sealed class Settings : CommandSettings

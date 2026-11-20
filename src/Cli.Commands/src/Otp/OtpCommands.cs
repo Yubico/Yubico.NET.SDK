@@ -208,7 +208,8 @@ public static class OtpHelpers
 
     /// <summary>
     ///     Parses a <c>--keyboard-layout</c> value by enum name, case-insensitively. Defaults to
-    ///     <see cref="KeyboardLayout.ModHex" />, because ModHex renders identically on every host.
+    ///     <see cref="KeyboardLayout.ModHex" />. Its restricted letter scan codes are compatible with
+    ///     many common host layouts, not a guarantee for every layout or input method.
     /// </summary>
     public static KeyboardLayout ParseKeyboardLayout(string? text) =>
         string.IsNullOrWhiteSpace(text)
@@ -228,7 +229,8 @@ public static class OtpHelpers
 
     /// <summary>
     ///     Generates a random password from the characters <paramref name="layout" /> can type, excluding
-    ///     whitespace. ModHex yields the familiar 16-letter alphabet.
+    ///     whitespace. The ModHex table exposes 32 case-sensitive characters: its 16 letters in
+    ///     both lower and upper case. Upper-case entries include the shift modifier.
     /// </summary>
     public static string GenerateStaticPassword(int length, KeyboardLayout layout = KeyboardLayout.ModHex)
     {

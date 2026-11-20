@@ -21,8 +21,8 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Key attestation proves that a private key was generated on-device and
-/// provides metadata about the key. Requires YubiKey 4.3+.
+/// Retrieve evidence for an on-device-generated key on YubiKey 4.3+. The caller validates
+/// the chain against its trust policy and binds the attested public key to the intended slot.
 /// </para>
 /// <para>
 /// The attestation certificate chain can be validated against
@@ -40,15 +40,16 @@ public static class Attestation
     /// <returns>Result containing the attestation certificate or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await Attestation.GetAttestationAsync(
     ///     session, Slot.Authentication, ct);
     /// 
-    /// if (result.Success)
+    /// using var attestCert = result.AttestationCertificate;
+    /// using var signerCert = result.IntermediateCertificate;
+    /// if (result.Success &amp;&amp; attestCert is not null)
     /// {
-    ///     var attestCert = result.AttestationCertificate;
-    ///     Console.WriteLine($"Key attested: {attestCert!.Subject}");
+    ///     Console.WriteLine($"Retrieved attestation: {attestCert.Subject}");
     /// }
     /// </code>
     /// </example>
@@ -87,9 +88,12 @@ public static class Attestation
     /// <example>
     /// <code>
     /// var result = await Attestation.GetIntermediateCertificateAsync(session, ct);
-    /// if (result.Success)
+    /// // This helper returns F9 in AttestationCertificate; IntermediateCertificate remains null.
+    /// using var f9Cert = result.AttestationCertificate;
+    /// using var additionalCert = result.IntermediateCertificate;
+    /// if (result.Success &amp;&amp; f9Cert is not null)
     /// {
-    ///     var intermediateCert = result.IntermediateCertificate;
+    ///     Console.WriteLine(f9Cert.Subject);
     /// }
     /// </code>
     /// </example>

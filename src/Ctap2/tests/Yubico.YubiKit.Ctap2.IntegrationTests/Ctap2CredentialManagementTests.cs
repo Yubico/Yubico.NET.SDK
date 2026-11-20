@@ -27,6 +27,15 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// <summary>
 /// Integration tests for credential management operations.
 /// </summary>
+/// <remarks>
+/// Default known-PIN normalization runs before callback capability checks; it can set/change
+/// a PIN or consume retries and requires approved PIN work with known device state. Unsupported
+/// credMgmt callbacks return normally, not as an explicit skip. Enumeration asserts the created
+/// ID is present; metadata asserts only nonnegative counts, not exact capacity or a count delta.
+/// The deletion test also permits a successful GetAssertion, so it does not prove deletion.
+/// Cleanup is best effort and several token/auth-param arrays are not cleared, or are cleared
+/// only after success. These paths are not complete restoration or secret-cleanup guarantees.
+/// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2CredentialManagementTests
 {
@@ -142,7 +151,7 @@ public class Ctap2CredentialManagementTests
                 }
                 catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
                 {
-                    // Expected behavior
+                    // This test permits NoCredentials too, although the helper normalizes it at begin to empty.
                 }
             }
 
@@ -229,6 +238,8 @@ public class Ctap2CredentialManagementTests
             var assertPinUvAuthParam = Ctap2TestHelpers.ComputeGetAssertionAuthParam(
                 clientPin.Protocol, assertPinToken, assertChallenge);
 
+            // Missing proof: a successful assertion here does not fail this test.
+            // Strengthening the deletion assertion is separate from this explanatory comment.
             try
             {
                 await session.GetAssertionAsync(
@@ -243,7 +254,7 @@ public class Ctap2CredentialManagementTests
             }
             catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
             {
-                // Expected - credential was deleted
+                // NoCredentials is accepted, but the successful-call branch above also passes without an assertion.
             }
         });
 
@@ -297,7 +308,7 @@ public class Ctap2CredentialManagementTests
         }
         catch
         {
-            // Cleanup failures should not fail the test
+            // Cleanup errors are swallowed; the created credential can remain and token clearing can be bypassed.
         }
     }
 }

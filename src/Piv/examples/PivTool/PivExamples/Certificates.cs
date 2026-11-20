@@ -32,6 +32,9 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 /// <para>
 /// Most write operations require management key authentication.
 /// Certificate generation requires PIN if the slot's PIN policy requires it.
+/// Callers dispose returned Certificate objects; result records themselves provide no disposal.
+/// Examples borrow managementKey/pin buffers from the caller, which keeps them alive through each
+/// awaited call and clears them afterward. Existing certificates and keys are separate resources.
 /// </para>
 /// </remarks>
 public static class Certificates
@@ -45,12 +48,13 @@ public static class Certificates
     /// <returns>Result containing the certificate or error information.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await Certificates.GetCertificateAsync(session, Slot.Authentication, ct);
-    /// if (result.Success)
+    /// using var certificate = result.Certificate;
+    /// if (result.Success &amp;&amp; certificate is not null)
     /// {
-    ///     Console.WriteLine($"Subject: {result.Certificate!.Subject}");
+    ///     Console.WriteLine($"Subject: {certificate.Subject}");
     /// }
     /// </code>
     /// </example>
@@ -80,17 +84,18 @@ public static class Certificates
     /// <param name="session">An authenticated PIV session (management key verified).</param>
     /// <param name="slot">The target slot.</param>
     /// <param name="certificateData">Certificate data in PEM or DER format.</param>
-    /// <param name="compress">Whether to compress the certificate data.</param>
+    /// <param name="compress">True forces GZip; false selects SDK Automatic compression (GZip above 1856 DER bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// await session.AuthenticateAsync(managementKey, ct);
     /// 
     /// var certData = await File.ReadAllBytesAsync("certificate.pem", ct);
     /// var result = await Certificates.ImportCertificateAsync(
-    ///     session, Slot.Authentication, certData, CertificateCompression.Automatic, ct);
+    ///     session, Slot.Authentication, certData, compress: false, cancellationToken: ct);
+    /// using var certificate = result.Certificate;
     /// </code>
     /// </example>
     public static async Task<CertificateResult> ImportCertificateAsync(
@@ -132,15 +137,16 @@ public static class Certificates
     /// <param name="session">A PIV session.</param>
     /// <param name="slot">The slot to export from.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Result containing the PEM string or error.</returns>
+    /// <returns>Result containing a caller-owned certificate to export/dispose, or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await Certificates.ExportCertificatePemAsync(session, Slot.Authentication, ct);
-    /// if (result.Success &amp;&amp; result.Certificate is not null)
+    /// using var certificate = result.Certificate;
+    /// if (result.Success &amp;&amp; certificate is not null)
     /// {
-    ///     var pem = result.Certificate.ExportCertificatePem();
+    ///     var pem = certificate.ExportCertificatePem();
     ///     await File.WriteAllTextAsync("certificate.pem", pem, ct);
     /// }
     /// </code>
@@ -177,7 +183,7 @@ public static class Certificates
     /// <returns>Result indicating success or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// await session.AuthenticateAsync(managementKey, ct);
     /// 
     /// var result = await Certificates.DeleteCertificateAsync(session, Slot.Authentication, ct);
@@ -212,12 +218,13 @@ public static class Certificates
     /// <returns>Result containing the generated certificate or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// await session.AuthenticateAsync(managementKey, ct);
     /// await session.VerifyPinAsync(pin, ct);
     /// 
     /// var result = await Certificates.GenerateSelfSignedAsync(
     ///     session, Slot.Authentication, "CN=Test User", 365, ct);
+    /// using var certificate = result.Certificate;
     /// </code>
     /// </example>
     public static async Task<CertificateResult> GenerateSelfSignedAsync(
@@ -322,14 +329,16 @@ public static class Certificates
     /// <returns>Result containing the CSR in PEM format or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
-    /// 
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+    /// await session.VerifyPinAsync(pin, ct); // Borrowed caller-owned PIN; required by the slot policy.
+    ///
     /// var result = await Certificates.GenerateCsrAsync(
     ///     session, Slot.Authentication, "CN=Test User", ct);
     /// 
-    /// if (result.Success)
+    /// using var certificate = result.Certificate;
+    /// if (result.Success &amp;&amp; result.CsrPem is { } csrPem)
     /// {
-    ///     await File.WriteAllTextAsync("request.csr", result.CsrPem!, ct);
+    ///     await File.WriteAllTextAsync("request.csr", csrPem, ct);
     /// }
     /// </code>
     /// </example>

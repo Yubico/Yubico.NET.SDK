@@ -15,8 +15,12 @@
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 /// <summary>
-///     Base interface for SCP key parameters used during authentication.
+///     Base disposable record for SCP key parameters used during channel setup.
 /// </summary>
+/// <remarks>
+///     Sessions borrow parameters; the caller owns their disposal. Concrete records retain contained key
+///     and certificate owners, and with-clones share those references rather than creating independent owners.
+/// </remarks>
 public abstract record ScpKeyParameters : IDisposable
 {
     /// <summary>

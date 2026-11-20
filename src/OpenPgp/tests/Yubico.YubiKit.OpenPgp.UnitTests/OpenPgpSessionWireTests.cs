@@ -35,9 +35,7 @@ public sealed class OpenPgpSessionWireTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             OpenPgpSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
-        // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // The factory borrows this connection; session teardown leaves its disposal with the caller.
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -728,7 +726,8 @@ public sealed class OpenPgpSessionWireTests
     public async Task VerifyPinAsync_TransmitsVerifyWithUserPinPayload()
     {
         var connection = CreateInitializedConnection(
-            // KDF DO absent: session falls back to raw PIN bytes through KdfNone.
+            // 6A82 means file/application not found. The broad F9 APDU-error catch caches KdfNone,
+            // producing the raw PIN payload asserted below; this response establishes no KDF absence.
             [0x6A, 0x82],
             OkResponse());
         await using var session = await OpenPgpSession.CreateAsync(

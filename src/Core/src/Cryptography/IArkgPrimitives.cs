@@ -47,8 +47,8 @@ internal interface IArkgPrimitives
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This method implements the ARKG-P256 key derivation algorithm as specified
-    /// in the previewSign WebAuthn extension. Given the blinding and KEM public
+    /// This method targets ARKG-P256 from draft-bradleylundberg-cfrg-arkg-09 for use by
+    /// the previewSign WebAuthn extension. Given the blinding and KEM public
     /// keys from the YubiKey, along with application-provided input keying material
     /// and context, it derives a new public key.
     /// </para>
@@ -59,9 +59,8 @@ internal interface IArkgPrimitives
     /// YubiKey during signing operations.
     /// </para>
     /// <para>
-    /// The context string allows multiple independent public keys to be derived
-    /// from the same generated key material. Each unique context produces a
-    /// unique derived key pair.
+    /// The context bytes domain-separate derivations from the same input keying material.
+    /// Distinct contexts are not a mathematical guarantee of distinct outputs in a finite key space.
     /// </para>
     /// </remarks>
     /// <param name="pkBl">The blinding public key in uncompressed SEC1 format.</param>
@@ -71,7 +70,9 @@ internal interface IArkgPrimitives
     /// <returns>
     /// A tuple containing the derived public key (in uncompressed SEC1 format)
     /// and the ARKG key handle (to be passed to the YubiKey during signing).
-    /// Both returned arrays are owned by the caller and should be zeroed after use.
+    /// Both returned arrays are caller-owned. The derived point is public; the handle contains an
+    /// authentication tag and ephemeral public point. Clear retained output when its application
+    /// meaning requires it. Secret inputs and intermediate material have independent cleanup scopes.
     /// </returns>
     (byte[] derivedPk, byte[] arkgKeyHandle) Derive(
         ReadOnlySpan<byte> pkBl,

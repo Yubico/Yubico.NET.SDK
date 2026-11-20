@@ -92,7 +92,7 @@ public class ExtensionBuilderTests
         Assert.True(reader.ReadBoolean());
     }
 
-    /// <summary>CTAP 2.1-2.3 §12.7 makeCredential input: "hmac-secret": true (the WebAuthn prf registration request).</summary>
+    /// <summary>CTAP 2.1 §12.5 / 2.2-2.3 §12.7: makeCredential sends hmac-secret:true for credential support.</summary>
     [Fact]
     public void Build_WithHmacSecretRequested_EncodesBooleanTrue()
     {
@@ -125,6 +125,7 @@ public class ExtensionBuilderTests
     /// CTAP 2.2-2.3 §12.8: hmac-secret-mc carries "the same as the hmac secret extension's getAssertion input" and
     /// "the hmac-secret extension MUST also be present with the value of "hmac-secret" set to true".
     /// </summary>
+    /// <remarks>The synthetic key/tag values test map/companion presence, not protocol-2 cryptography or complete nested bytes.</remarks>
     [Fact]
     public void Build_WithHmacSecretMakeCredential_EncodesHmacSecretTrueAndTheInputMap()
     {
@@ -169,7 +170,7 @@ public class ExtensionBuilderTests
     public void Build_WithCredBlobOversized_AllowsOversizedInput()
     {
         // Arrange
-        var oversizedBlob = new byte[128]; // Max spec limit is 64 bytes
+        var oversizedBlob = new byte[128]; // Builder has no size gate; maxCredBlobLength is device-specific (at least 32).
         var builder = new ExtensionBuilder()
             .WithCredBlob(oversizedBlob);
 
@@ -206,7 +207,7 @@ public class ExtensionBuilderTests
         var count = reader.ReadStartMap();
         Assert.Equal(3, count);
 
-        // Keys should be sorted: credBlob < credProtect < minPinLength
+        // For these keys, encoded-length canonical order is credBlob, credProtect, minPinLength.
         Assert.Equal("credBlob", reader.ReadTextString());
         reader.SkipValue(); // byte string
 
@@ -384,6 +385,7 @@ public class ExtensionBuilderTests
 /// <summary>
 /// Mock PIN/UV auth protocol for unit testing.
 /// </summary>
+/// <remarks>Version 2 with 16-byte tags and XOR is deliberately a fake, not CTAP protocol-2 crypto evidence.</remarks>
 internal class MockPinProtocol : Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol
 {
     public int Version => 2;

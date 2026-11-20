@@ -12,6 +12,8 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 
 /// <summary>
 /// CLI menu for configuring USB/NFC capabilities.
+/// Writes complete replacement sets. The active selector requires SmartCard; disabling its last
+/// supporting application can prevent this tool from selecting the key after reboot.
 /// </summary>
 public static class CapabilitiesMenu
 {

@@ -88,7 +88,7 @@ public class PivResetTests
         // Reset again
         await session.ResetAsync();
 
-        // Verify slot is empty via metadata (null means no key)
+        // Check 9A only via metadata. The test name does not imply all-slot or F9 scope coverage.
         var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
         Assert.Null(metadata);
     }

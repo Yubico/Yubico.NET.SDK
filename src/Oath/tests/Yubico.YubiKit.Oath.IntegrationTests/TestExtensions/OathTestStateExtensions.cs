@@ -46,7 +46,16 @@ public static class OathTestStateExtensions
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
-            await using var session = await state.Device
+            if (resetBeforeUse)
+            {
+                // RESET ends its session and owned connection. The test body must open afresh.
+                var resetSession = await state.Device.CreateOathSessionAsync(
+                    new SessionCreationOptions { ScpKeyParameters = scpKeyParams, ProtocolConfiguration = configuration },
+                    cancellationToken).ConfigureAwait(false);
+                await WithSessionLifetimeAsync(resetSession, session => session.ResetAsync(cancellationToken)).ConfigureAwait(false);
+            }
+
+            var session = await state.Device
                 .CreateOathSessionAsync(
                     new SessionCreationOptions
                     {
@@ -56,12 +65,25 @@ public static class OathTestStateExtensions
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            if (resetBeforeUse)
-            {
-                await session.ResetAsync(cancellationToken).ConfigureAwait(false);
-            }
+            await WithSessionLifetimeAsync(session, action).ConfigureAwait(false);
+        }
+    }
 
-            await action(session).ConfigureAwait(false);
+    private static async Task WithSessionLifetimeAsync(OathSession session, Func<OathSession, Task> action)
+    {
+        Exception? primaryFailure = null;
+        try { await action(session).ConfigureAwait(false); }
+        catch (Exception exception)
+        {
+            primaryFailure = exception;
+            throw;
+        }
+        finally
+        {
+            // RESET already disposes after success. Also close after a send/body failure,
+            // without a second implicit owner replaying teardown over the original failure.
+            try { await session.DisposeAsync().ConfigureAwait(false); }
+            catch when (primaryFailure is not null) { }
         }
     }
 }

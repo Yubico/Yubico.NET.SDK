@@ -17,7 +17,8 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKit.WebAuthn.Client;
 
 /// <summary>
-/// The result of one CTAP key agreement (§6.5.5.4 getKeyAgreement + §6.5.6 encapsulate): the platform's
+/// The result of one CTAP2.3 key agreement (§6.5.5.4 getKeyAgreement and protocol-specific encapsulation,
+/// §6.5.7 for the concrete protocol-2 backend): the platform's
 /// COSE key to send as <c>keyAgreement</c> and the shared secret that encrypts and authenticates
 /// extension material such as hmac-secret salts. Dispose zeroes the secret.
 /// </summary>

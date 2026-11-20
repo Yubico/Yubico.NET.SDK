@@ -21,14 +21,15 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 
 /// <summary>
 ///     Integration tests for Management lock code operations.
-///     These tests set a lock code, verify it is required for configuration changes,
-///     and then clear the lock code to restore the device to its original state.
+///     These tests set a lock code, exercise configuration writes, and attempt to clear the code in finally.
+///     The helper passes cached starting metadata and uses default transport selection.
+///     Cleanup can fail: lock-code zeroing currently follows fallible device restoration and can be skipped.
 /// </summary>
 public class ManagementLockCodeTests
 {
     /// <summary>
-    ///     Sets a configuration lock code on the device, verifies that subsequent
-    ///     configuration changes require the lock code, then clears the lock code.
+    ///     Sets a lock, reads the locked flag, expects a missing-code write to fail, and writes with the code.
+    ///     Attempts to clear the lock and reads the unlocked flag in finally; device failures can prevent cleanup.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0.0", ConnectionType = ConnectionType.SmartCard)]
@@ -58,7 +59,8 @@ public class ManagementLockCodeTests
                 var lockedInfo = await mgmt.GetDeviceInfoAsync();
                 Assert.True(lockedInfo.IsLocked);
 
-                // Verify that a config change WITHOUT the lock code fails
+                // Expect rejection without the code. Any exception satisfies this assertion,
+                // so unrelated failures can pass it; the device error/status is not pinned.
                 var configWithoutCode = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
                 await Assert.ThrowsAnyAsync<Exception>(async () =>
@@ -82,6 +84,7 @@ public class ManagementLockCodeTests
                 var unlockedInfo = await mgmt.GetDeviceInfoAsync();
                 Assert.False(unlockedInfo.IsLocked);
 
+                // A preceding cleanup failure skips this zeroing; it needs an independent finally.
                 CryptographicOperations.ZeroMemory(lockCode);
             }
         });
@@ -90,6 +93,7 @@ public class ManagementLockCodeTests
     /// <summary>
     ///     Verifies that the auto-eject timeout can be changed while
     ///     a lock code is active, provided the lock code is supplied.
+    ///     Teardown sends the cached timeout and requests lock removal without readback; it does not verify restoration.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0.0", ConnectionType = ConnectionType.SmartCard)]
@@ -125,13 +129,14 @@ public class ManagementLockCodeTests
             }
             finally
             {
-                // Restore original timeout and clear lock code
+                // Attempt to restore the cached timeout and clear the code; no restoration readback follows.
                 var restoreConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = originalAutoEject };
 
                 await mgmt.SetDeviceConfigAsync(
                     restoreConfig,
                     new SetDeviceConfigOptions { CurrentLockCode = lockCode, NewLockCode = clearCode });
 
+                // A preceding cleanup failure skips this zeroing; it needs an independent finally.
                 CryptographicOperations.ZeroMemory(lockCode);
             }
         });

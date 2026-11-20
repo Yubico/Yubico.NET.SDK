@@ -21,9 +21,10 @@ namespace Yubico.YubiKit.Piv.DataObjects;
 /// Typed representation of the Key History object (<see cref="DataObject.KeyHistory"/>).
 /// </summary>
 /// <remarks>
-/// The YubiKey does not update this object automatically when certificates are imported or
-/// generated; callers are responsible for keeping it in sync with the certificates actually
-/// present on the device.
+/// Callers maintain this record of retired key-management keys and their certificate locations.
+/// The SDK emits/requires four TLVs, including F3 even for a null URL, and validates URL encoding
+/// length rather than the complete SP 800-73-4 Part 1 §3.3.3 profile (retired-key counts and URL form).
+/// Inspect broader valid layouts through IPivSession.GetObjectAsync. Encode returns a new nonsecret buffer.
 /// </remarks>
 public readonly record struct KeyHistory
 {
@@ -49,10 +50,10 @@ public readonly record struct KeyHistory
     /// <summary>Gets whether this instance represents no Key History on the YubiKey.</summary>
     public bool IsEmpty => !_hasValue;
 
-    /// <summary>Gets the number of keys with on-card certificates.</summary>
+    /// <summary>Gets the recorded number of retired key-management keys with on-card certificates.</summary>
     public byte OnCardCertificates { get; }
 
-    /// <summary>Gets the number of keys with off-card certificates.</summary>
+    /// <summary>Gets the recorded number of retired key-management keys with off-card certificates.</summary>
     public byte OffCardCertificates { get; }
 
     /// <summary>Gets the URL where off-card certificates can be found, or <see langword="null"/> if none.</summary>

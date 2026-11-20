@@ -21,12 +21,13 @@ namespace Yubico.YubiKit.Core.Utilities;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Sessions support one operation at a time. An overlapping caller receives an
+///         This guard supports one logical exchange at a time, rather than leasing an entire public workflow.
+///         An overlapping caller receives an
 ///         <see cref="InvalidOperationException" /> immediately rather than waiting. Once entered, the exchange
-///         runs to completion: the delegate receives
-///         <see cref="CancellationToken.None" />, so a caller's token can never abort a logical exchange
-///         between its constituent transmits (which would strand chained command/response or SCP MAC state
-///         on the card and poison the next caller's exchange).
+///         retains admission until its delegate terminates. The delegate receives
+///         <see cref="CancellationToken.None" />, so entry cancellation does not interrupt constituent
+///         transmits. Transport failures and protocol-level cancellation/recovery have separate behavior;
+///         this token alone guarantees neither completion within a deadline nor reusable device state.
 ///     </para>
 ///     <para>
 ///         The guard must not be re-entered from within a running exchange. Keep the wrapped delegate confined
@@ -43,8 +44,7 @@ internal sealed class ExchangeGuard
     /// <summary>
     ///     Runs <paramref name="exchange" /> exclusively; overlapping calls are refused immediately.
     ///     A pre-canceled <paramref name="cancellationToken" /> throws before the guard is claimed.
-    ///     The delegate is invoked with <see cref="CancellationToken.None" /> so the in-flight exchange always
-    ///     completes.
+    ///     The delegate is invoked with <see cref="CancellationToken.None" /> and retains admission until terminal.
     /// </summary>
     public async Task<T> RunAsync<T>(
         Func<CancellationToken, Task<T>> exchange,

@@ -4,7 +4,7 @@ using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
 using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Menus;
 
 // Non-interactive mode: any argument triggers CLI mode
-// Interactive mode: no args, or stdin is not a TTY
+// Interactive mode: no arguments; this branch does not inspect terminal capabilities.
 if (args.Length > 0)
 {
     return await CliRunner.RunAsync(args);

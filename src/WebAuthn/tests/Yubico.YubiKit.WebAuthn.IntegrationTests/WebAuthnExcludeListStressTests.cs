@@ -33,17 +33,17 @@ namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 /// and verify that the exclude list mechanism works at scale.
 /// </summary>
 /// <remarks>
-/// PRECONDITION: These tests require a freshly-Reset FIDO2 application on the
-/// YubiKey. Run <c>ykman fido reset</c> before invoking this suite. The Reset
-/// requires a physical reinsert of the key, which cannot be automated, so this
-/// is an operator step. This mirrors yubikit-android's contract: its
-/// <c>FidoTestState.withCtap2()</c> harness also assumes operator-driven Reset
-/// (see FidoTestState.java:233 — "Please reset" error path).
-///
-/// On lived-in devices that have not been Reset, available discoverable-credential
-/// capacity may be insufficient (other RPs, fingerprint enrollments, FIDO config
-/// residue all consume slots). The test will Skip with a clear message in that
-/// case rather than fail.
+/// <para>
+/// Requires a freshly reset FIDO2 application on a dedicated test YubiKey. Reset destroys FIDO
+/// credentials: only an operator who has explicitly approved this destructive run should use
+/// <c>ykman fido reset</c> and perform the required physical reinsert before invoking the suite.
+/// The test also deletes all credentials for its test RP during setup and cleanup.
+/// </para>
+/// <para>
+/// Available discoverable-credential capacity may be insufficient on a device already in use.
+/// The test reads credential-management metadata and skips when the reported capacity is too small;
+/// it does not assume that unrelated FIDO settings or fingerprint enrollments consume credential slots.
+/// </para>
 /// </remarks>
 [Trait("Category", "Integration")]
 [Trait(TestCategories.Category, TestCategories.Slow)]
@@ -51,19 +51,18 @@ namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 public class WebAuthnExcludeListStressTests
 {
     /// <summary>
-    /// Number of credentials to create for the stress test. 17 matches yubikit-android
-    /// Ctap2ClientTests.testMakeCredentialWithExcludeList (line 615) verbatim.
-    /// On a freshly-Reset YubiKey 5, RK capacity (~25 slots) accommodates 17+1
-    /// with headroom. See class-level remarks for the Reset precondition.
+    /// Number of credentials to create before the excluded request. This exercises an exclude list
+    /// larger than typical small-list limits. Discoverable capacity varies by model and firmware;
+    /// devices with about 25 slots can accommodate 17+1, but reported metadata is the actual guard.
     /// </summary>
     private const int CredentialCount = 17;
 
     /// <summary>
     /// Creates 17 resident credentials for the same RP, builds an exclude list
     /// containing all of them, then attempts to create another credential for the
-    /// same RP and user. The WebAuthn Client should reject the request with
+    /// same RP with a new random user ID. The WebAuthn Client should reject the request with
     /// <see cref="WebAuthnClientError"/> (code: <see cref="WebAuthnClientErrorCode.InvalidState"/>)
-    /// because the same user already has a credential on that RP in the exclude list.
+    /// because the authenticator recognizes a listed credential for that RP, regardless of the new user ID.
     /// </summary>
     /// <remarks>
     /// This test is marked as Slow because creating 17 credentials requires
@@ -84,11 +83,8 @@ public class WebAuthnExcludeListStressTests
 
         try
         {
-            // SETUP SESSION: PIN normalize + cleanup + capacity probe.
-            // Disposed before the body opens a fresh session — connection-reuse
-            // and PIN/UV protocol state from setup work would otherwise contaminate
-            // the WebAuthnClient's internal ClientPin and produce PinAuthInvalid
-            // on the first MakeCredential call.
+            // Use a separate setup session for PIN normalization, RP cleanup, and the capacity probe.
+            // Release its connection before the client opens and owns the test body's session.
             int remainingCapacity;
             {
                 await using var setupSession = await state.Device.CreateCtap2SessionAsync();
@@ -130,7 +126,7 @@ public class WebAuthnExcludeListStressTests
                     remainingCapacity = metadata.MaxPossibleRemainingResidentCredentialsCount;
                 }
                 CryptographicOperations.ZeroMemory(capacityToken);
-            } // setupSession disposed here, releasing connection + PIN/UV state
+            } // Release the setup connection before opening the test body's session.
 
             Skip.If(remainingCapacity < CredentialCount + 1,
                 $"Insufficient FIDO2 RK capacity ({remainingCapacity} remaining, " +

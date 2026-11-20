@@ -17,9 +17,9 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.Management.UnitTests.AuditV2;
 
 /// <summary>
-///     Audit 26n (YESDK-1634): a built DeviceConfig must not change when its source changes, and the
-///     "at least one USB application" rule must hold for every configuration that reaches the key,
-///     however it was constructed.
+///     YESDK-1634 regression checks for immutable record derivation, explicit USB None rejection,
+///     null USB omission, SDK timeout limits, and a representative encoded configuration.
+///     These checks do not validate arbitrary masks against device-supported applications.
 /// </summary>
 public sealed class ManagementAuditReproTests
 {
@@ -68,7 +68,10 @@ public sealed class ManagementAuditReproTests
     public void YESDK1634_ChallengeResponseTimeoutAboveLimit_RejectedAtAssignment() =>
         Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { ChallengeResponseTimeout = 61 });
 
-    /// <summary>Wire order follows yubikit/management.py DeviceConfig.get_bytes (4ca60f7).</summary>
+    /// <summary>
+    ///     Pins this encoder's representative TLV order, matching yubikit/management.py DeviceConfig.get_bytes (4ca60f7).
+    ///     Sibling implementation agreement is not a protocol requirement that TLVs use this order.
+    /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1634_GetBytes_EmitsTlvsInYkmanOrder()

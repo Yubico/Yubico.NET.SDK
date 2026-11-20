@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
 /// <summary>
 /// Non-interactive CLI mode entry point.
 ///
-/// All commands write results to stdout. Errors and diagnostics go to stderr.
+/// Commands write results to stdout, including JSON error fields. Separate diagnostics go to stderr.
 /// Exit code 0 = success, 1 = failure.
 ///
 /// SECURITY NOTE: Credentials supplied via CLI flags (--pin, --puk, --management-key)

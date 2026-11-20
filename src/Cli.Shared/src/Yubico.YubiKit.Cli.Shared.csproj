@@ -11,6 +11,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Yubico.YubiKit.Cli.Shared.UnitTests" />
+    <!-- Let OathTool's application-I/O seam use the shared selector's internal constructor. -->
+    <InternalsVisibleTo Include="OathTool" />
   </ItemGroup>
 
   <ItemGroup>

@@ -32,6 +32,11 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// <para>
 /// See: https://www.w3.org/TR/webauthn-2/#sctn-attested-credential-data
 /// </para>
+/// <para>
+/// Parse copies the credential ID and encoded key. It extracts one CBOR value for the key without
+/// requiring a COSE map, alg or algorithm-specific parameters. Decode the key separately and apply
+/// RP algorithm/trust policy; extraction is not attestation or mathematical-key verification.
+/// </para>
 /// </remarks>
 public sealed class AttestedCredentialData
 {
@@ -71,7 +76,9 @@ public sealed class AttestedCredentialData
     /// <param name="data">The raw data starting at attested credential data.</param>
     /// <param name="bytesRead">The number of bytes consumed from the input.</param>
     /// <returns>The parsed AttestedCredentialData.</returns>
-    /// <exception cref="ArgumentException">If the data is malformed.</exception>
+    /// <remarks>Consumes this structure, not any following authenticator extension suffix.</remarks>
+    /// <exception cref="ArgumentException">The fixed prefix or declared credential ID is too short.</exception>
+    /// <exception cref="CborContentException">The following encoded CBOR value cannot be read.</exception>
     public static AttestedCredentialData Parse(ReadOnlySpan<byte> data, out int bytesRead)
     {
         if (data.Length < MinimumLength)
@@ -103,7 +110,7 @@ public sealed class AttestedCredentialData
         var credentialId = data.Slice(offset, credentialIdLength).ToArray();
         offset += credentialIdLength;
 
-        // Parse COSE public key (CBOR-encoded, need to determine length)
+        // Extract one CBOR value for the public key; COSE structure and algorithm policy are separate checks.
         var coseKeyBytes = data[offset..];
         var coseKeyLength = GetCborLength(coseKeyBytes);
         var credentialPublicKey = coseKeyBytes[..coseKeyLength].ToArray();

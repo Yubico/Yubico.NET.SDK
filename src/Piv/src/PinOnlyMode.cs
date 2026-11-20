@@ -26,18 +26,18 @@ namespace Yubico.YubiKit.Piv;
 [Flags]
 public enum PinOnlyMode
 {
-    /// <summary>No PIN-only mode is set, and both modes are available to be set.</summary>
+    /// <summary>No mode is recorded/detected, or no recovery candidate succeeded, according to the operation.
+    /// Absence of ADMIN DATA leaves PRINTED occupancy unknown. Pass this value to SetPinOnlyModeAsync to disable.</summary>
     None = 0,
 
     /// <summary>
-    /// PIN-protected mode is unavailable, generally because another application is using the
-    /// PRINTED storage location for something other than a PIN-protected management key.
+    /// ADMIN DATA could not be decoded as expected, so protected-mode detection is unavailable.
+    /// Inspect raw objects before provisioning; this flag is not an independent PRINTED capability probe.
     /// </summary>
     PinProtectedUnavailable = 1,
 
     /// <summary>
-    /// PIN-derived mode is unavailable, generally because another application is using the ADMIN
-    /// DATA storage location for something other than PIN-only mode state.
+    /// ADMIN DATA could not be decoded as expected, so derived-mode detection is unavailable.
     /// </summary>
     PinDerivedUnavailable = 2,
 

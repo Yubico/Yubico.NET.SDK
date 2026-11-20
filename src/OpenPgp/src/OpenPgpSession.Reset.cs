@@ -41,6 +41,9 @@ public sealed partial class OpenPgpSession
         await BlockPinAsync((byte)Pw.Admin, status.AttemptsAdmin, cancellationToken)
             .ConfigureAwait(false);
 
+        // TERMINATE/ACTIVATE statuses are currently ignored. A later successful SELECT/read
+        // establishes access, rather than a complete reset postcondition; callers need state readback.
+        // YubiKey's proprietary ATT key/certificate survive application reset.
         // Step 4: TERMINATE
         _logger.LogDebug("Sending TERMINATE");
         var terminateCmd = new ApduCommand(0x00, (int)Ins.Terminate, 0x00, 0x00);
@@ -51,7 +54,9 @@ public sealed partial class OpenPgpSession
         var activateCmd = new ApduCommand(0x00, (int)Ins.Activate, 0x00, 0x00);
         await TransmitNoThrowAsync(activateCmd, cancellationToken).ConfigureAwait(false);
 
-        // Step 6: Re-initialize — re-SELECT and refresh cached state
+        // Step 6: Re-SELECT with the existing backend and refresh cached application state.
+        // An SCP session retains its secure graph: SELECT is plain, subsequent sends use the retained
+        // keys/state, and no new handshake runs. Existing readiness/authentication flags are not reset here.
         _logger.LogDebug("Re-initializing session after reset");
 
         // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet
@@ -63,6 +68,7 @@ public sealed partial class OpenPgpSession
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
         _updatedUifs.Clear();
+        // The previous KDF reference is dropped without disposal; its owner needs a later cleanup scope.
         _kdf = null;
 
         _logger.LogInformation("OpenPGP factory reset complete");

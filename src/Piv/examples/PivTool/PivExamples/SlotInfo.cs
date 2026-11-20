@@ -43,15 +43,21 @@ public static class SlotInfoQuery
     /// <returns>Result containing slot information or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await SlotInfoQuery.GetAllSlotsInfoAsync(session, ct);
-    /// if (result.Success)
+    /// try
+    /// {
+    ///     if (result.Success)
+    ///     {
+    ///         foreach (var slot in result.Slots)
+    ///             Console.WriteLine($"{slot.Name}: Key={slot.HasKey}, Cert={slot.HasCertificate}");
+    ///     }
+    /// }
+    /// finally
     /// {
     ///     foreach (var slot in result.Slots)
-    ///     {
-    ///         Console.WriteLine($"{slot.Name}: Key={slot.HasKey}, Cert={slot.HasCertificate}");
-    ///     }
+    ///         slot.Certificate?.Dispose();
     /// }
     /// </code>
     /// </example>

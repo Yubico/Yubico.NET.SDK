@@ -8,6 +8,13 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool;
 
 /// <summary>OTP selection and session creation over SmartCard or OTP HID.</summary>
+/// <remarks>
+/// The shared selector filters grouped physical views and prefers SmartCard without interaction.
+/// Session creation uses the SDK's SmartCard-first default and opens the selected transport once;
+/// an open failure propagates. Use explicit OTP HID through the public SDK for the documented USB
+/// challenge recipe. This tool supplies no transport option or presence prompt. Selection metadata
+/// is best-effort display information; flagged form factors alone establish no product-family eligibility.
+/// </remarks>
 public static class DeviceHelper
 {
     /// <summary>Finds a YubiKey and creates a YubiOTP session using its usual SmartCard-first transport order.</summary>

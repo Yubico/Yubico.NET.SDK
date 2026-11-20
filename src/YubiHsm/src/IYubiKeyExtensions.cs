@@ -14,8 +14,6 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -36,7 +34,8 @@ public static class IYubiKeyExtensions
         /// <returns>A new <see cref="HsmAuthSession" /> instance.</returns>
         /// <remarks>
         ///     The returned session owns the underlying connection and will dispose it when the session is disposed.
-        ///     Always use a <c>using</c> statement or call <c>Dispose</c> when finished.
+        ///     Use <c>await using</c> to close the session and its connection when finished.
+        ///     The applet uses SmartCard transport; an explicitly requested incompatible transport is rejected.
         /// </remarks>
         public async Task<HsmAuthSession> CreateHsmAuthSessionAsync(
             SessionCreationOptions? options = null,

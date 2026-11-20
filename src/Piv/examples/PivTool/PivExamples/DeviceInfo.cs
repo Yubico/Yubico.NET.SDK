@@ -35,7 +35,7 @@ public static class DeviceInfoQuery
     /// <returns>Result containing retry information or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await DeviceInfoQuery.GetPivRetryInfoAsync(session, ct);
     /// if (result.Success)

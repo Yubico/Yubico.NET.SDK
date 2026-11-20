@@ -22,6 +22,13 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Config;
 /// <summary>
 /// Unit tests for <see cref="AuthenticatorConfig"/>.
 /// </summary>
+/// <remarks>
+/// Mock exchanges check selected fields and the enterprise/toggle authentication prefix,
+/// not device policy, state restoration or real protocol-2 MACs. The fake advertises version
+/// 2 but returns 16-byte tags rather than protocol 2's 32 bytes. RP-list/force tests check
+/// parameter-map size, not the actual RP strings or force Boolean. Numeric 4/63 acceptance
+/// here is local validation with mocked success, not proof that any device accepts that policy.
+/// </remarks>
 public class AuthenticatorConfigTests
 {
     private readonly ICtap2Session _mockSession;
@@ -39,7 +46,7 @@ public class AuthenticatorConfigTests
     }
 
     /// <summary>
-    /// Test implementation of PIN/UV auth protocol that captures authenticate calls.
+    /// Captures authentication inputs and supplies artificial 16-byte tags; not real protocol 2.
     /// </summary>
     private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
     {
@@ -194,7 +201,7 @@ public class AuthenticatorConfigTests
         reader.ReadInt32(); // key 0x02
 
         var paramsCount = reader.ReadStartMap();
-        Assert.True(paramsCount >= 2); // newMinPINLength + minPinLengthRPIDs
+        Assert.True(paramsCount >= 2); // Checks map size only, not RP-list key/strings or persisted recipients.
     }
 
     [Fact]
@@ -222,7 +229,7 @@ public class AuthenticatorConfigTests
         reader.ReadInt32(); // key 0x02
 
         var paramsCount = reader.ReadStartMap();
-        Assert.Equal(2, paramsCount); // newMinPINLength + forceChangePin
+        Assert.Equal(2, paramsCount); // Checks map size only, not the force-change key/Boolean or device flag.
     }
 
     [Fact]

@@ -36,7 +36,7 @@ public sealed class OpenPgpAuditReproTests
         Assert.Equal([crtTag, 0x00], import.AsSpan(9, 2).ToArray());
     }
 
-    /// <summary>RFC 9580 §3.7.1.3: a count below salt+PIN still hashes one full copy (libgcrypt does the same).</summary>
+    /// <summary>RFC 9580 §3.7.1.3: a count below salt+PIN still hashes one full copy; checked against a host hash.</summary>
     [Theory]
     [InlineData(0)]
     [InlineData(1)]
@@ -103,7 +103,7 @@ public sealed class OpenPgpAuditReproTests
         Assert.Equal(expected, kdf.Process(Pw.User, "123456"u8));
     }
 
-    /// <summary>Known answers from libgcrypt 1.12.3 gcry_kdf_derive(GCRY_KDF_ITERSALTED_S2K, SHA256), what gpg-agent computes.</summary>
+    /// <summary>Checks retained SHA-256 S2K vectors; this test executes the SDK derivation, not libgcrypt/GnuPG.</summary>
     [Theory]
     [InlineData(8, "1ae0f1043e1492a1acffc2319de52fa4713cf4bfd7123563345550f0da8eee9a")]
     [InlineData(100_000, "8fc77436ded3825377da921acc4fb1e0c619e426b926c30f06fbb428c6ac9701")]

@@ -60,7 +60,9 @@ internal static class SmartCardScenario
             IDisposable transaction = await connection.BeginTransactionAsync();
             try
             {
-                // Management creation selects the applet; both operations are read-only.
+                // Management creation selects the applet and queries metadata, without writing
+                // persistent configuration. Selection can change card application/security state;
+                // these reads do not measure PIN isolation or physical state clearing.
                 Console.WriteLine($"PHASE_SMARTCARD_MANAGEMENT_SELECT_READ serial={serial} cycle={cycle}");
                 await using ManagementSession session = await ManagementSession.CreateAsync(connection,
                     new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });

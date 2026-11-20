@@ -18,31 +18,23 @@ using Yubico.YubiKit.Ctap2.Extensions;
 namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 
 /// <summary>
-/// Byte-level verification that the C# CBOR encoder produces wire format matching the Rust reference
-/// and the python-fido2 ARKG test vectors.
+/// Structural and exact-byte fixtures for the experimental previewSign encoder.
 /// </summary>
 /// <remarks>
 /// <b>WARNING -- EXPERIMENTAL -- test only:</b> ARKG previewSign vectors and helper shapes are not ready for
 /// production use and must not be treated as production cryptographic guidance.
-///
-/// References:
-/// - cnh-authenticator-rs-extension @ get_assertion.rs:290-323 (serde_cbor encoder)
-/// - python-fido2/tests/test_arkg.py:36-73 (deterministic ARKG vectors — used for KH/CTX shapes)
-/// - Yubico.NET.SDK-Legacy commit fe82b007 — EncodeArkgSignArgs in GetAssertionParameters.cs:402-499
-///
-/// The Rust upstream uses BTreeMap with Value::Integer keys and Value::Bytes values, which
-/// serializes positive integer keys before negative ones under canonical encoding: 2 → 6 → 7
-/// at the outer level, and 3 → -1 → -2 inside the COSE_Sign_Args map.
+/// The Yubico Labs previewSign v4 Editor's Draft is not CTAP version 4. These local fixtures use
+/// synthetic handles/points and do not execute sibling clients, firmware or draft-conformance checks.
+/// Ctap2Canonical supplies ordering: these keys emit 2, 6, 7 externally and 3, -1, -2 in the args map.
 /// </remarks>
 public class PreviewSignCborTests
 {
     [Fact]
     public void EncodeAuthenticationInput_SingleCredential_NoArgs_MatchesRustByteStructure()
     {
-        // Arrange: Mimic hid-test inputs (32-byte SHA-256 TBS, fixed key handle)
-        // Rust hid-test uses: tbs = Sha256("Hello, previewSign v4!"), kh from registration
+        // Synthetic fixed handle and 32-byte TBS; no message hashing or sibling client is executed.
         byte[] keyHandle = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
-        byte[] tbs = new byte[32]; // SHA-256 hash (all zeros for deterministic test)
+        byte[] tbs = new byte[32]; // Filled below with a deterministic 0xAA pattern, not an actual digest.
         Array.Fill(tbs, (byte)0xAA);
 
         var signingParams = new PreviewSignSigningParams(
@@ -53,7 +45,7 @@ public class PreviewSignCborTests
         // Act
         byte[] cborBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
 
-        // Assert: Decode and verify structure matches Rust {2: bytes, 6: bytes}
+        // Assert the encoded {2: bytes, 6: bytes} structure and exact supplied values.
         var reader = new CborReader(cborBytes, CborConformanceMode.Ctap2Canonical);
         int? mapSize = reader.ReadStartMap();
         Assert.Equal(2, mapSize); // Two keys: 2 (kh) and 6 (tbs)
@@ -79,12 +71,12 @@ public class PreviewSignCborTests
         // Arrange: WARNING -- EXPERIMENTAL -- ARKG case, not production cryptographic guidance.
         // Exercise the typed builder end-to-end through EncodeAuthenticationInput.
         // alg = -65539 (Esp256SplitArkgPlaceholder / "ARKG-P256-ESP256") — NOT -9 (Esp256, the
-        // output signature alg). YK 5.8.0-beta firmware rejects everything but -65539 here.
+        // derived verification alg). This fixture does not establish device algorithm acceptance.
         byte[] keyHandle = [0x01, 0x02, 0x03, 0x04];
         byte[] tbs = new byte[32];
         Array.Fill(tbs, (byte)0xBB);
 
-        // Real ARKG-P256 KH shape: 16-byte HMAC tag || 65-byte SEC1 uncompressed P-256 point.
+        // Synthetic ARKG-P256 KH shape: tag16 || point65; the point is not cryptographically valid.
         byte[] arkgKeyHandle = BuildArkgKeyHandleFixture(tagPattern: 0xCD, pubKeyPattern: 0xEF);
         // Real ARKG context: ASCII label per python-fido2 vectors.
         byte[] context = "ARKG-P256.test vectors"u8.ToArray();
@@ -100,7 +92,7 @@ public class PreviewSignCborTests
         // Act
         byte[] cborBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
 
-        // Assert: Verify structure {2: bytes, 6: bytes, 7: bytes} with BTreeMap ascending order
+        // Assert canonical encoded-key order and the exact wrapped args bytes.
         var reader = new CborReader(cborBytes, CborConformanceMode.Ctap2Canonical);
         int? mapSize = reader.ReadStartMap();
         Assert.Equal(3, mapSize); // Three keys: 2, 6, 7
@@ -134,7 +126,7 @@ public class PreviewSignCborTests
         // Act
         byte[] actual = PreviewSignCbor.EncodeCoseSignArgs(new ArkgP256SignArgs(kh, ctx));
 
-        // Build expected per LEGACY_PREVIEWSIGN_FORENSICS.md §3.4:
+        // Build the expected experimental three-key encoding explicitly:
         //   A3                                # map(3)
         //     03 3A 0001 0002                 #   3 : -65539
         //     20 58 51 <81 KH bytes>          #  -1 : bstr(81)
@@ -149,8 +141,7 @@ public class PreviewSignCborTests
 
         Assert.Equal(expected.ToArray(), actual);
         // Sanity: 1 + 6 + 3 + 81 + 3 + 32 = 126 bytes.
-        // (PRD §4 said 125 — arithmetic error in PRD; corrected here. The byte-for-byte
-        // structural assertion above is the binding contract.)
+        // The exact-byte assertion and this length assertion cover this synthetic encoding only.
         Assert.Equal(126, actual.Length);
     }
 
@@ -171,8 +162,7 @@ public class PreviewSignCborTests
     {
         // Arrange: realistic context string from python-fido2/tests/test_arkg.py:38
         // ("ARKG-P256.test vectors") — 22 bytes, mirrors the shape used in the upstream test
-        // vectors. KH is the deterministic placeholder fixture (no crypto required for encoder
-        // correctness — see PRD §7-7).
+        // vectors. KH is a deterministic placeholder: this checks encoding, not cryptographic validity.
         byte[] kh = BuildArkgKeyHandleFixture(tagPattern: 0xA5, pubKeyPattern: 0x5A);
         byte[] ctx = "ARKG-P256.test vectors"u8.ToArray();
         Assert.Equal(22, ctx.Length);
@@ -273,7 +263,7 @@ public class PreviewSignCborTests
     /// <remarks>
     /// Bytes are NOT cryptographically valid — that's intentional. Encoder correctness does not
     /// depend on the bytes representing a real ARKG ciphertext + EC point; the on-the-wire shape
-    /// is what we're asserting. See PRD §5.1 / §7-7.
+    /// is what these assertions cover, not a live interoperability or attestation result.
     /// </remarks>
     private static byte[] BuildArkgKeyHandleFixture(byte tagPattern, byte pubKeyPattern)
     {

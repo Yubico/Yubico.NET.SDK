@@ -20,6 +20,13 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.BioEnrollment;
 /// <summary>
 /// Tests for BioEnrollment model parsing.
 /// </summary>
+/// <remarks>
+/// Synthetic fixtures check decoded values and selected raw-copy behavior, not sensor
+/// enrollment. Flat template maps below reflect the current decoder, not CTAP 2.1's
+/// key-7 template array with nested keys 1/2. Status-value assertions preserve current
+/// enum mappings, including 0x0B-0x0D names that differ from the standard table. No test
+/// here establishes rejection of missing sample fields or independent enrollment completion.
+/// </remarks>
 public class BioEnrollmentModelsTests
 {
     [Fact]
@@ -68,14 +75,14 @@ public class BioEnrollmentModelsTests
     [Fact]
     public void FingerprintSensorInfo_Decode_ParsesMaxTemplateCount()
     {
-        // Arrange - CBOR map with vendor extension for max templates
+        // Arrange - locally interpreted key 4; no original vendor definition establishes this sensor field.
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
         writer.WriteInt32(2); // fingerprintKind key
         writer.WriteInt32(1); // Touch
         writer.WriteInt32(3); // maxCaptureSamplesRequiredForEnroll key
         writer.WriteInt32(5);
-        writer.WriteInt32(4); // maxTemplateCount key (vendor extension)
+        writer.WriteInt32(4); // Local maxTemplateCount interpretation, not standard sensor-info schema.
         writer.WriteInt32(3);
         writer.WriteEndMap();
         var cbor = writer.Encode();
@@ -153,7 +160,7 @@ public class BioEnrollmentModelsTests
     [Fact]
     public void EnrollmentSampleResult_Decode_ParsesCompletedEnrollment()
     {
-        // Arrange - CBOR response with remainingSamples = 0
+        // Arrange - supplied zero count exercises IsComplete equality, not actual enrolled-template persistence.
         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
@@ -186,7 +193,7 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(5); // lastEnrollSampleStatus key
         writer.WriteInt32(7); // PoorQuality = 0x07
         writer.WriteInt32(6); // remainingSamples key
-        writer.WriteInt32(3); // May not decrement on poor quality
+        writer.WriteInt32(3); // Supplied count; this single fixture does not compare successive samples.
         writer.WriteEndMap();
         var cbor = writer.Encode();
 
@@ -291,7 +298,7 @@ public class BioEnrollmentModelsTests
         writer.WriteByteString(templateId);
         writer.WriteInt32(7); // templateFriendlyName key
         writer.WriteTextString("Left Thumb");
-        writer.WriteInt32(8); // sampleCount key (vendor extension)
+        writer.WriteInt32(8); // Local sampleCount interpretation; standard envelope key 8 is maxTemplateFriendlyName.
         writer.WriteInt32(5);
         writer.WriteEndMap();
         var cbor = writer.Encode();

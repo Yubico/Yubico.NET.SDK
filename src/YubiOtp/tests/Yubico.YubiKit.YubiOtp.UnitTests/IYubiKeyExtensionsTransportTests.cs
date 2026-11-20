@@ -22,8 +22,8 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
 
 /// <summary>
-///     Phase 38: YubiOTP transport selection — app-specific smart default (SmartCard, then HID OTP) plus
-///     explicit caller override, validated over a fake probe that records the requested connection type.
+///     YubiOTP transport selection: SmartCard-first default and explicit override, checked by a fake
+///     probe recording the requested connection type. The probe does not initialize a device session.
 /// </summary>
 public class IYubiKeyExtensionsTransportTests
 {

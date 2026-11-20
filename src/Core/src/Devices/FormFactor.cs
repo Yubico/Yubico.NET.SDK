@@ -14,6 +14,11 @@
 
 namespace Yubico.YubiKit.Core.Devices;
 
+/// <summary>Named base form factors for YubiKey hardware.</summary>
+/// <remarks>
+///     <see cref="DeviceInfo.FormFactor"/> retains the complete reported byte, including product flags.
+///     A flagged value such as 0x81 differs from the named base value 0x01; callers should allow unnamed values.
+/// </remarks>
 public enum FormFactor
 {
     /// <summary>

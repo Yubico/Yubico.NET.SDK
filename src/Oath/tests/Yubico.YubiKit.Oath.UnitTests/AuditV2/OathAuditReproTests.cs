@@ -118,7 +118,7 @@ public sealed class OathAuditReproTests
     {
         byte[] operationResponse = operation switch
         {
-            "calculate" => [0x75, 0x01, 0x01, 0x90, 0x00],
+            "calculate" => [0x75, 0x15, 0x06, .. new byte[20], 0x90, 0x00],
             "code" => [0x76, 0x05, 0x06, 0, 0, 0, 1, 0x90, 0x00],
             _ => [0x90, 0x00]
         };
@@ -149,7 +149,7 @@ public sealed class OathAuditReproTests
     {
         byte[] operationResponse = operation switch
         {
-            "calculate" => [0x75, 0x01, 0x01, 0x90, 0x00],
+            "calculate" => [0x75, 0x15, 0x06, .. new byte[20], 0x90, 0x00],
             "code" => [0x76, 0x05, 0x06, 0, 0, 0, 1, 0x90, 0x00],
             _ => [0x90, 0x00]
         };

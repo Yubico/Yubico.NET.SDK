@@ -25,7 +25,8 @@ public enum PinPolicy : byte
     Always = 0x00,
 
     /// <summary>
-    ///     PIN is verified once and remains valid until the session ends.
+    ///     User signature authorization remains valid while the card access state persists.
+    ///     Reset, another application selection or explicit unverification can end that state.
     /// </summary>
     Once = 0x01,
 }

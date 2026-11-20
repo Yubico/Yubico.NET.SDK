@@ -20,6 +20,11 @@ using Yubico.YubiKit.Core.Native.Windows;
 
 namespace Yubico.YubiKit.Core.Native;
 
+/// <summary>Owns an explicitly opened library and resolves function delegates from it.</summary>
+/// <remarks>
+///     Keep this owner undisposed until every resolved function call has finished. A returned delegate does
+///     not itself retain the library handle. This support loader is separate from NativeShims import resolution.
+/// </remarks>
 internal abstract class UnmanagedDynamicLibrary : IDisposable
 {
     protected readonly SafeLibraryHandle _handle;

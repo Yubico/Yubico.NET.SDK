@@ -42,7 +42,7 @@ public static class Verification
     /// <returns>Result indicating whether signature is valid.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await Verification.VerifySignatureAsync(
     ///     session,

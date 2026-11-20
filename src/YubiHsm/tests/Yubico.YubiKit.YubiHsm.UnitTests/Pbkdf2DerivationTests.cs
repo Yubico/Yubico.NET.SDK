@@ -22,7 +22,8 @@ public class Pbkdf2DerivationTests
     [Fact]
     public void DeriveKeys_KnownVector_MatchesExpected()
     {
-        // Independently compute PBKDF2-HMAC-SHA256("password", "Yubico", 10000, 32)
+        // Recompute through the same .NET PBKDF2 primitive with independently stated parameters.
+        // This checks the helper's parameters rather than comparing against an external fixed vector.
         var expected = Rfc2898DeriveBytes.Pbkdf2(
             Encoding.UTF8.GetBytes("password"),
             "Yubico"u8,

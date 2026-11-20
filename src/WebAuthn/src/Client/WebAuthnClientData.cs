@@ -27,8 +27,8 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// to the authenticator.
 /// </para>
 /// <para>
-/// Per WebAuthn spec, the JSON key order MUST be: type, challenge, origin, crossOrigin
-/// (when present), topOrigin (when present).
+/// WebAuthn L3 §5.8.1.1 orders the JSON keys as type, challenge, origin, crossOrigin, then topOrigin
+/// when present. This builder always emits crossOrigin, using false when it is unspecified.
 /// </para>
 /// </remarks>
 public sealed class WebAuthnClientData
@@ -71,6 +71,13 @@ public sealed class WebAuthnClientData
     /// validates this before building client data.
     /// </param>
     /// <returns>A WebAuthnClientData instance with populated JSON and hash.</returns>
+    /// <remarks>
+    /// This is a low-level builder, not ceremony validation: it accepts any nonblank type and does not
+    /// enforce the relationship between crossOrigin and topOrigin. The client's ceremony methods
+    /// validate their options separately. Manual JSON escaping currently uses short escapes for some
+    /// controls, rather than the four-digit Unicode escapes required by L3 §5.8.1.1's CCDToString;
+    /// it should not be treated as an exact implementation of that serialization algorithm for all inputs.
+    /// </remarks>
     public static WebAuthnClientData Create(
         string type,
         ReadOnlyMemory<byte> challenge,
@@ -91,11 +98,11 @@ public sealed class WebAuthnClientData
     }
 
     /// <summary>
-    /// Hand-builds JSON with exact key ordering per WebAuthn spec.
+    /// Builds JSON in WebAuthn L3 §5.8.1.1 key order.
     /// </summary>
     /// <remarks>
-    /// Key order MUST be: type, challenge, origin, crossOrigin (if not null), topOrigin (if not null).
-    /// String escaping uses System.Text.Json.JsonEncodedText for spec-compliant output.
+    /// Always writes type, challenge, origin, and crossOrigin; appends topOrigin when supplied.
+    /// Escaping is manual and uses short JSON control escapes, not exact CCDToString control encoding.
     /// </remarks>
     private static string BuildJson(
         string type,
@@ -124,7 +131,7 @@ public sealed class WebAuthnClientData
         sb.Append(",\"crossOrigin\":");
         sb.Append(crossOrigin == true ? "true" : "false");
 
-        // "topOrigin": only present for cross-origin requests (WebAuthn L3 §5.8.1)
+        // The ceremony validates that topOrigin is supplied only with crossOrigin:true (L3 §5.8.1).
         if (topOrigin is not null)
         {
             sb.Append(",\"topOrigin\":");

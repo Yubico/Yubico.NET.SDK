@@ -18,13 +18,19 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.Backend;
 
 /// <summary>
 /// FIDO backend that communicates over FIDO HID (CTAPHID_CBOR command).
 /// </summary>
+/// <remarks>Uses a borrowed protocol. HID keep-alive status 0x02 can request a device-wait
+/// notification; the backend resolves the operation from the drained CTAP status before typed
+/// decoding. Completed means CTAP success, not verified presence, UV or RP authentication.
+/// A successful status-stripped view shares Core's accumulated response array and has no cleanup owner.
+/// Failure cleanup clears that untransferred array after terminal resolution, not independent input-report
+/// or decoded copies. A logging provider throwing while a secondary resolution failure is logged can
+/// bypass the later clearing statement.</remarks>
 internal sealed class HidBackend : ICtap2Backend
 {
     private readonly IFidoHidProtocol _protocol;
@@ -67,7 +73,7 @@ internal sealed class HidBackend : ICtap2Backend
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            // First byte is the CTAP status
+            // A missing status byte is reported as synthetic Other, not a received device status.
             if (response.Length < 1)
             {
                 throw new CtapException(CtapStatus.Other, "Empty response from authenticator");
@@ -88,7 +94,7 @@ internal sealed class HidBackend : ICtap2Backend
 
             await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
 
-            // Return the response data (without status byte)
+            // Transfer the status-stripped view after notification resolution; typed decode follows later.
             responseTransferred = true;
             return response[1..];
         }

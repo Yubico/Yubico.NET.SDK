@@ -26,7 +26,7 @@ internal static class DiscoveryDeviceInfoReader
 
     /// <summary>
     ///     Opens a short-lived connection over the given interface and reads <see cref="DeviceInfo" />,
-    ///     bounded by a hard wall-clock budget.
+    ///     with a budget for the caller's wait.
     /// </summary>
     /// <remarks>
     ///     <para>

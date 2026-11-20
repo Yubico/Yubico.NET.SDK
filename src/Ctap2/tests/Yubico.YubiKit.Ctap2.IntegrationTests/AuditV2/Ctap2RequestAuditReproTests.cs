@@ -28,8 +28,9 @@ public sealed class Ctap2RequestAuditReproTests
     public async Task YESDK1618_MakeCredentialFalseUserPresenceIsRejectedBeforeReachingTheKey(YubiKeyTestState state) =>
         await state.WithCtap2SessionAsync(async session =>
         {
-            // Previously the key answered CTAP2_ERR_INVALID_OPTION (0x2C); the SDK now refuses first, so
-            // the request never leaves the host and no touch is requested.
+            // The SDK rejects this makeCredential request before encoding/transmission or its touch prompt.
+            // Session creation/GetInfo and default PIN normalization can already have performed device I/O.
+            // This assertion checks ArgumentException/ParamName, not absence of all device traffic.
             var error = await Assert.ThrowsAsync<ArgumentException>(() =>
                 session.MakeCredentialAsync(
                     new byte[32],

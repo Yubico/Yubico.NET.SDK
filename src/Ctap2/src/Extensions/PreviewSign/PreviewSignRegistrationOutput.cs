@@ -18,7 +18,11 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// Output from the previewSign extension registration.
 /// </summary>
 /// <remarks>
-/// Contains the generated signing key information returned by the authenticator.
+/// Contains experimental generated signing-key information, not verified attestation or device identity.
+/// The signed outer previewSign output carries the chosen algorithm; the unsigned wrapped signing-key
+/// attestation carries the generated key and inner signing policy. Verify attestation/key binding and
+/// policy before trusting it. The constructor borrows memory; decoders may allocate independent copies.
+/// This DTO supplies no disposal/zeroing boundary.
 /// </remarks>
 public sealed class PreviewSignRegistrationOutput
 {
@@ -72,8 +76,11 @@ public sealed class PreviewSignRegistrationOutput
     /// an ARKG seed-key variant.
     /// </para>
     /// <para>
-    /// This is a backwards-compatible accessor: the raw <see cref="PublicKey"/>
-    /// field remains available for direct CBOR processing.
+    /// This is syntactic extraction, not attestation verification. The raw PublicKey remains available.
+    /// Currently this accessor propagates the seed-key marker (-65700) into DerivedKeyAlgorithm,
+    /// unlike PreviewSignCbor.TryExtractGeneratedKey, which propagates the derived algorithm (-9 in
+    /// the P-256 profile). Do not treat those algorithm properties as interchangeable or validated
+    /// negotiation. The signing-operation identifier (-65539) has a third, distinct role.
     /// </para>
     /// </remarks>
     /// <returns>

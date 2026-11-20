@@ -464,6 +464,8 @@ public class AsnPrivateKeyEncoderTests
             AsnPrivateKeyEncoder.EncodeToPkcs8(new byte[32], point, KeyType.P256));
     }
 
+    // P-256 cases isolate point width. P-384/P-521 also supply a 32-byte scalar, so those cases
+    // reach scalar-width rejection first and do not independently cover point-length validation.
     [Theory]
     [InlineData(KeyType.P256, 64)] // one byte short
     [InlineData(KeyType.P256, 66)] // one byte long

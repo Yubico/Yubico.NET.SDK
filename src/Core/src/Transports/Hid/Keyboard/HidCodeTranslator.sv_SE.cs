@@ -14,7 +14,8 @@
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
-// Keyboard Mapping for sv_SE.
+// Current sv_SE table is US-shaped and omits Swedish letters. Its name is not a claim of complete
+// Swedish host-layout coverage; table corrections and host validation are separate work.
 public sealed partial class HidCodeTranslator
 {
     private static HidCodeTranslator GetSV_SE()

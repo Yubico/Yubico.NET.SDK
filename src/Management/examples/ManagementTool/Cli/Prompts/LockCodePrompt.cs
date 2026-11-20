@@ -18,8 +18,11 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 
 /// <summary>
-/// Handles secure lock code input with validation.
+/// Masks lock-code input and validates the parsed length.
 /// Lock codes are 16 bytes (32 hex characters).
+/// Prompt input and normalized copies are immutable strings; clearing returned arrays cannot erase them.
+/// The confirmation prompt can throw before the first parsed array enters cleanup. This sample is not
+/// a production secret-input primitive.
 /// 
 /// <para><b>Security Pattern:</b> Always use try/finally to ensure lock codes are zeroed:</para>
 /// <code>
@@ -29,7 +32,10 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 ///     lockCode = LockCodePrompt.PromptForLockCode("Enter lock code");
 ///     if (lockCode is null) return; // User cancelled
 ///     
-///     // Use lock code...
+///     // session is an initialized IManagementSession; ct is the caller's CancellationToken.
+///     await session.SetDeviceConfigAsync(
+///         new DeviceConfig { ChallengeResponseTimeout = 15 },
+///         new SetDeviceConfigOptions { CurrentLockCode = lockCode }, ct);
 /// }
 /// finally
 /// {

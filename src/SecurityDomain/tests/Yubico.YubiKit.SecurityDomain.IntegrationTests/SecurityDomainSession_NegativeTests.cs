@@ -23,16 +23,16 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.SecurityDomain.IntegrationTests;
 
 /// <summary>
-///     Negative integration tests verifying security boundary enforcement.
-///     These tests confirm that authentication fails when using incorrect or blocked keys.
+///     Attempts session creation with mismatched SCP keys and expects an exception.
+///     Broad exception assertions do not distinguish authentication rejection from setup or transport failure.
 /// </summary>
 public class SecurityDomainSession_NegativeTests : SecurityDomainStateRestoringTests
 {
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
 
     /// <summary>
-    ///     Verifies that SCP11b authentication fails when using an incorrect (random) public key
-    ///     that does not match the key stored on the device.
+    ///     Expects an exception when creating SCP11b with a random public key that does not match
+    ///     the generated device key; the assertion does not identify the failure's cause.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
@@ -66,8 +66,7 @@ public class SecurityDomainSession_NegativeTests : SecurityDomainStateRestoringT
     }
 
     /// <summary>
-    ///     Verifies that SCP03 authentication fails with incorrect (non-default) symmetric keys
-    ///     when only the default keys are loaded on the device.
+    ///     Expects an exception from an SCP03 creation attempt with wrong symmetric keys after a reset request.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
@@ -75,7 +74,7 @@ public class SecurityDomainSession_NegativeTests : SecurityDomainStateRestoringT
     {
         var ct = CancellationTokenSource.Token;
 
-        // Reset to ensure only default keys are loaded
+        // Request reset before attempting default-reference authentication with wrong key bytes.
         await state.WithSecurityDomainSessionAsync(true,
             session => Task.CompletedTask,
             cancellationToken: ct);
@@ -92,8 +91,7 @@ public class SecurityDomainSession_NegativeTests : SecurityDomainStateRestoringT
         var wrongKeyParams = new Scp03KeyParameters(wrongKeyRef, wrongStaticKeys);
 
         // Attempt authentication with wrong keys -- should fail.
-        // Wrong SCP03 keys may cause either ApduException (device rejects) or
-        // BadResponseException (SDK-level cryptographic verification failure).
+        // The assertion accepts any exception; it does not pin the wrapper or underlying failure type.
         await Assert.ThrowsAnyAsync<Exception>(async () =>
         {
             await state.WithSecurityDomainSessionAsync(false,

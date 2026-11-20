@@ -2,7 +2,7 @@
 
 In v2 of the SDK, an `IYubiKey` represents **one physical YubiKey**, not a single transport interface.
 A composite USB YubiKey exposes several interfaces at once — PC/SC CCID (smart card), HID FIDO, and HID OTP
-— and discovery returns **one** `IYubiKey` for that physical key, with the interfaces it exposes described
+— and discovery groups observed interfaces into an `IYubiKey` when its evidence permits, with those interfaces described
 by `AvailableConnections`. This document explains the model, how to discover and connect, where read-only
 metadata lives, how each applet picks a transport, and how to migrate code written against the old
 per-interface-handle model.
@@ -23,8 +23,10 @@ See also: [device identity and physical-device correlation](./device-identity.md
 - `string DeviceId` — a human-readable correlation identifier. Once a device object is published through
   an owned `YubiKeyMonitor` repository, its `DeviceId` remains stable for that uninterrupted physical presence while its
   physical interface identity and `AvailableConnections` remain unchanged. The repository retains the
-  originally published object across evidence-tier flips so its eventual `Removed` event correlates with
-  the earlier `Added` event. A fresh direct scan object can still have an evidence-tier-derived ID
+  object only while fresh known serial evidence does not contradict it. A known-serial substitution
+  produces `DeviceRemoved` followed by `DeviceAdded` for a new object. The repository retains the
+  originally published object across evidence-tier flips so its eventual `DeviceRemoved` event correlates with
+  the earlier `DeviceAdded` event. A fresh direct scan object can still have an evidence-tier-derived ID
   (`ykphysical:topology:*`, `ykphysical:{serial}`, or `ykphysical:pid:*`) different from an earlier scan;
   do not treat independently created scan objects as durable identity records. The repository correlates
   physical presence by interface set (`YubiKeyDevice.PhysicalIdentityKeyFor`, internal).
@@ -35,7 +37,7 @@ See also: [device identity and physical-device correlation](./device-identity.md
 - `int? SerialNumber` — discovery's independently latched durable hardware identity, when known; see
   [device identity](device-identity.md). It is not derived from the latest metadata snapshot.
 - `DeviceInfo? CachedDeviceInfo` — last-known read-only metadata, available without I/O. It can be null or
-  stale; existing discovery/repository updates may replace it without a device event. The default interface
+  stale; changed metadata on a retained monitor object produces `DeviceUpdated`. The default interface
   implementation returns null for custom implementations.
 - `bool SupportsConnection(ConnectionType)` — whether a given interface is present on this device. The
   concrete values (`SmartCard`, `HidFido`, `HidOtp`) test a specific openable interface; the `Hid` group
@@ -82,11 +84,11 @@ the PC/SC reader name (serial number is consulted only to disambiguate multiple 
 physical key is returned as one device even when no connection is opened and even when another process holds
 the CCID exclusively. NFC PC/SC devices are never merged with USB interfaces.
 
-The one-device-per-physical-key result is the common merge case, not an absolute guarantee. Discovery
-intentionally degrades to conservative **no-merge** in ambiguous cases — for example when a USB CCID reader
-name cannot be parsed for its Product ID, or when a serial number needed to disambiguate same-Product-ID
-keys cannot be read. In those cases interfaces are left unmerged rather than risk wrongly collapsing two
-distinct keys, so one physical key can surface as more than one row.
+The one-device-per-physical-key result is the common merge case, not an absolute guarantee. Ambiguous
+observations can leave a key split across rows. Conversely, complementary partial observations from
+two same-PID keys can satisfy the PID-completeness heuristic and form a cross-key composite. A slot
+still opens its enumerated path, but selecting the composite by serial does not independently verify
+every slot against that serial. See the [G2 evidence bound](device-discovery-guarantees.md#g2-the-epistemic-bound).
 
 Every `FindAllAsync`, `FindFirstAsync`, and `FindFirstOrDefaultAsync` call performs independent one-shot
 discovery with fresh per-call evidence, including after an earlier empty result. First-result methods
@@ -107,8 +109,10 @@ await foreach (var change in monitor.WatchAsync(cancellationToken))
 
 manager watch creates a producer; monitor watch subscribes to an existing one.
 
-The monitor's finder retains successful identity/metadata evidence until observed interface absence,
-PID change, or listener activity invalidates it. When a later scan obtains metadata for an unchanged
+The monitor's finder retains successful evidence until invalidation. Observed absence and listener
+activity evict identity and metadata; PID changes are checked by the identity cache, while the metadata
+cache currently lacks an equivalent PID check. Successful serial-less metadata can also remain cached.
+When a later scan obtains metadata for an unchanged
 physical device, the diff updates its retained object and emits `DeviceUpdated` if metadata changed.
 This is last-known data, not continuously refreshed configuration. Request live Management data when
 current configuration matters. `WatchAsync` changes come from snapshot diffs, not native hints.
@@ -175,8 +179,10 @@ exposes `YubiKeyDevice`'s existing atomically published snapshot, not a second c
 DeviceInfo? lastKnown = device.CachedDeviceInfo; // No I/O or presence check.
 ```
 
-Null means unavailable. Failed metadata reads do not clear a successful snapshot, and returned values do
-not change when a later discovery/repository update replaces it. The data is not guaranteed current and
+Null means unavailable. Failed metadata reads preserve a successful snapshot, and replacing that snapshot
+preserves the scalar fields in a previously returned value. `ChallengeResponseTimeout` currently aliases its input
+TLV memory, so read-only access does not establish independent storage or stability after owner cleanup.
+The data is not guaranteed current and
 can remain historical on retained objects after configuration changes or disconnection. A replacement
 object does not inherit its predecessor's snapshot. `SerialNumber` keeps its independent identity contract
 even if the latest snapshot has no serial. See [cached device metadata](../usage/device-discovery.md#cached-device-metadata).
@@ -202,32 +208,41 @@ machinery.
 
 Applet session-entry extensions keep their ergonomic one-call shape while selecting a transport
 intentionally on a composite device. Each multi-transport applet documents a default order and accepts an
-optional explicit `preferredConnection` override. When SCP parameters are supplied without an override,
-the SCP-capable SmartCard transport is selected instead of the normal default:
+optional explicit `SessionCreationOptions.PreferredConnectionType` override. When SCP parameters are supplied
+without an override, the SCP-capable SmartCard transport is selected instead of the normal default:
 
-| Applet | Default order | Override (`preferredConnection`) |
+| Applet | Default order | `PreferredConnectionType` values |
 | --- | --- | --- |
 | Management (`CreateManagementSessionAsync`) | `SmartCard → HidFido → HidOtp` | any of those three |
 | YubiOTP (`CreateYubiOtpSessionAsync`) | `SmartCard → HidOtp` | `SmartCard` or `HidOtp` |
 | CTAP2 (`CreateCtap2SessionAsync`) | `HidFido → SmartCard` | `HidFido` or `SmartCard` |
 | WebAuthn (`CreateWebAuthnClientAsync`) | `HidFido → SmartCard` (forwards to CTAP2) | `HidFido` or `SmartCard` |
+| OATH (`CreateOathSessionAsync`) | `SmartCard` only | `SmartCard` |
 
-Single-transport applets (PIV, OATH, OpenPGP, Security Domain, YubiHSM) are SmartCard-only and take no
-override.
+Single-transport applets (PIV, OATH, OpenPGP, Security Domain, YubiHSM) are SmartCard-only. OATH accepts an
+explicit `PreferredConnectionType` of `SmartCard`; that is an accepted setting, not an alternative transport.
 
 ```csharp
 // Default order (no override): Management prefers SmartCard.
-await using var mgmt = await device.CreateManagementSessionAsync();
+await using (var mgmt = await device.CreateManagementSessionAsync())
+{
+    var info = await mgmt.GetDeviceInfoAsync();
+    Console.WriteLine(info.FirmwareVersion);
+}
 
 // Explicit override: force HID OTP for this session.
-await using var otpMgmt = await device.CreateManagementSessionAsync(
-    preferredConnection: ConnectionType.HidOtp);
+await using (var otpMgmt = await device.CreateManagementSessionAsync(
+    new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }))
+{
+    var info = await otpMgmt.GetDeviceInfoAsync();
+    Console.WriteLine(info.FirmwareVersion);
+}
 ```
 
 Override semantics, validated before any connect:
 
-- Explicit valid `preferredConnection` → use it exactly.
-- Otherwise, non-null `scpKeyParams` → select SmartCard.
+- Explicit valid `options.PreferredConnectionType` → use it exactly.
+- Otherwise, non-null `options.ScpKeyParameters` → select SmartCard.
 - Otherwise → use the applet's documented default order.
 - Not exactly one concrete transport (a group/combined/`Unknown` value) → `ArgumentException`.
 - A concrete transport that is not valid for the applet (even if the device exposes it) → `ArgumentException`.
@@ -238,9 +253,11 @@ interface after `ConnectionInUseException`, PC/SC sharing errors, cancellation, 
 
 ## One Connection Per Physical Device, One Session Per Connection
 
-A YubiKey's CCID interface holds exactly one selected application. Selecting another deselects the first and
-destroys its security state — measured: after a second applet is selected, the first session's next command
-returns `SW=0x6D00` (*instruction not supported*), and nothing at the intervening call site reports a problem.
+A YubiKey's basic CCID channel has one selected application. Selecting another applet changes that
+selection and can disturb the first session. In the recorded PIV/Management hardware sequence, the
+next PIV command returned `SW=0x6D00` (*instruction not supported*). That observation does not establish
+that every applet's security state is cleared by selection; PIV PIN state and power/reset effects have
+their own conditions.
 
 The SDK refuses that at acquisition, before any command reaches the card, so the error lands on the call that
 would have caused the damage rather than on the victim's next operation:
@@ -263,21 +280,22 @@ await using (var piv = await PivSession.CreateAsync(connection))
 await using var oath = await OathSession.CreateAsync(connection);
 ```
 
-This mirrors canonical yubikit: Rust's applet sessions take the connection by value and hand it back with
-`into_connection`, making a second concurrent session a compile error; Python's base `Session` binds itself
-to the connection at construction. Neither inspects the wire.
+Core enforces this lifetime through its connection/session guards before applet initialization. This
+managed ownership rule is separate from the operating system's sharing mode and the card's security state.
 
 **Who disposes what:** whoever created the connection. The `device.Create<App>SessionAsync()` convenience
 methods open a connection the caller never sees, so the session they return owns and disposes it through the
 internal `ApplicationSession.OwnConnection()` path. A direct `Session.CreateAsync(connection)` borrows the
 caller-created connection and does not dispose it. Use `await using` for both connections and sessions.
 Missing connection disposal can retain the physical-device lease for the connection lifetime
-(potentially the process lifetime), blocking later opens; there is intentionally no finalizer backstop,
-because deterministic disposal is the only point at which native-handle teardown and lease release can be
-ordered reliably.
+(potentially the process lifetime), blocking later opens. Sessions have no finalizer recovery. Some
+built-in connections request best-effort native cleanup from a finalizer, but that is not a guarantee of
+timely teardown or lease release. Use deterministic disposal to observe completion and failures.
 
-Opening any grouped member claims all known stable member interface IDs. When conservative discovery cannot
-prove grouping, a standalone record retains a one-element scope; the SDK does not guess associations.
+The registry is process-local; it does not exclude other processes' handles. Opening any grouped member
+claims all known stable member interface IDs. When conservative discovery cannot
+establish grouping, a standalone record retains a one-element scope. The PID-completeness exception
+described above remains a bound on what a grouped object proves.
 
 macOS FIDO HID must be opened with `kIOHIDOptionsTypeNone`, never `kIOHIDOptionsTypeSeizeDevice`. SDK
 exclusivity is enforced before native open; seizing would add a separate platform-wide exclusion policy
@@ -287,9 +305,9 @@ yubikit implementations open non-seizing on macOS: Rust enables hidapi's `macos-
 
 ## SCP Note
 
-Secure Channel Protocol is valid only on SmartCard. Supplying `scpKeyParams` without an explicit override
-selects SmartCard automatically. Explicitly selecting a non-SmartCard transport with SCP parameters throws
-`NotSupportedException` during session initialization.
+Secure Channel Protocol is valid only on SmartCard. Supplying `SessionCreationOptions.ScpKeyParameters`
+without an explicit override selects SmartCard automatically. Explicitly selecting a non-SmartCard transport
+with SCP parameters throws `NotSupportedException` during session initialization.
 
 ## Migration From The Per-Interface Handle Model
 
@@ -302,7 +320,7 @@ connection type and enumerated one row per interface. In v2:
 | Scalar `yubiKey.ConnectionType` to decide routing | `yubiKey.AvailableConnections` + `yubiKey.SupportsConnection(...)` |
 | Parameterless `ConnectAsync()` picks "the" transport | `ConnectAsync<TConnection>()` for a specific interface; parameterless throws on multi-interface devices |
 | Reaching for Management types to read metadata | Read-only metadata types now in `Yubico.YubiKit.Core.Devices`; read via `GetDeviceInfoAsync()` |
-| Applet extension assumed a single transport | Applet extensions select via documented default order + optional `preferredConnection` |
+| Applet extension assumed a single transport | Applet extensions select via documented default order + optional `SessionCreationOptions.PreferredConnectionType` |
 
 Practical steps:
 
@@ -310,8 +328,8 @@ Practical steps:
    `AvailableConnections` / `SupportsConnection(...)`.
 2. Replace any scalar connection-type routing with typed `ConnectAsync<TConnection>()` or an applet session
    extension.
-3. Where you need a specific transport, pass `preferredConnection`; otherwise rely on the documented default
-   order. Connection failures do not select another interface.
+3. Where you need a specific transport, set `SessionCreationOptions.PreferredConnectionType`; otherwise rely
+   on the documented default order. Connection failures do not select another interface.
 4. Update metadata type references to `Yubico.YubiKit.Core.Devices`.
 5. Dispose every connection at the scope that created it. If you create a connection and pass it to
    `Session.CreateAsync(connection)`, keep the connection in its own `await using`; the session will not

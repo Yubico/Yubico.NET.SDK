@@ -26,8 +26,8 @@ namespace Yubico.YubiKit.YubiOtp;
 /// The touch_level field (bytes 4-5, little-endian) encodes CFGSTATE flags:
 /// - Bit 0 (0x0001): Slot 1 is configured (requires firmware >= 2.1.0)
 /// - Bit 1 (0x0002): Slot 2 is configured (requires firmware >= 2.1.0)
-/// - Bit 2 (0x0004): Slot 1 requires touch (requires firmware >= 3.0.0)
-/// - Bit 3 (0x0008): Slot 2 requires touch (requires firmware >= 3.0.0)
+/// - Bit 2 (0x0004): Slot 1 is keyboard-touch-triggered (requires firmware >= 3.0.0)
+/// - Bit 3 (0x0008): Slot 2 is keyboard-touch-triggered (requires firmware >= 3.0.0)
 /// - Bit 4 (0x0010): LED behavior is inverted
 /// </remarks>
 public readonly struct ConfigState
@@ -42,7 +42,7 @@ public readonly struct ConfigState
     private static readonly FirmwareVersion MinVersionTouchTriggered = new(3, 0, 0);
 
     /// <summary>
-    /// The firmware version of the YubiKey.
+    /// The raw OTP-status firmware version, not necessarily the session's effective version or override.
     /// </summary>
     public FirmwareVersion FirmwareVersion { get; }
 
@@ -102,11 +102,12 @@ public readonly struct ConfigState
     }
 
     /// <summary>
-    /// Gets whether the specified slot requires physical touch to trigger.
+    /// Gets the device-reported keyboard-touch-trigger indicator for the slot.
     /// Requires firmware version 3.0.0 or later.
     /// </summary>
     /// <param name="slot">The slot to check.</param>
-    /// <returns><c>true</c> if the slot requires touch; otherwise <c>false</c>.</returns>
+    /// <remarks>This is not a read-back of challenge-response RequireTouch or of the slot's mode.</remarks>
+    /// <returns><c>true</c> if the status indicator is set; otherwise <c>false</c>.</returns>
     /// <exception cref="InvalidOperationException">Thrown when firmware is too old to report this information.</exception>
     public bool IsTouchTriggered(Slot slot)
     {

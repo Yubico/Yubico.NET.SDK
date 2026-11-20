@@ -26,16 +26,19 @@ using Yubico.YubiKit.WebAuthn.Util;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 
 /// <summary>
-/// WebAuthn prf (L3 §10.1.4) over CTAP hmac-secret (§12.7) and hmac-secret-mc (§12.8). Registration asks
+/// WebAuthn prf (L3 §10.1.4) over CTAP hmac-secret (2.1 §12.5; 2.2–2.3 §12.7) and
+/// hmac-secret-mc (2.2–2.3 §12.8). Registration asks
 /// for <c>hmac-secret: true</c> (plus a creation-time evaluation when the authenticator advertises
 /// hmac-secret-mc) and reports <c>enabled</c>;
 /// authentication hashes the relying party's inputs into salts, performs one key agreement, sends the
 /// salts encrypted and authenticated under the shared secret, and decrypts the result with it.
 /// </summary>
 /// <remarks>
-/// The relying party's <c>UserVerification</c> is not overridden for PRF. CTAP keeps separate PRFs for
-/// verified and unverified use, so relying parties that need stable PRF output across ceremonies must
-/// request <c>userVerification: required</c>.
+/// WebAuthn L3 REC 2026-08-25 §10.1.4 requires the verified PRF and a UV-preference override if needed.
+/// The current client does not enforce that requirement: this processor requests no extra token
+/// permissions and does not override UserVerification. Request Required for evaluation to avoid
+/// switching between CTAP's verified and unverified PRFs. That workaround does not establish general
+/// PRF conformance. The current WebAuthn backend uses protocol 2, without protocol-1 negotiation.
 /// </remarks>
 internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor, IDisposable
 {
@@ -168,7 +171,8 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
 
     private delegate void SaltAction(ReadOnlySpan<byte> salt1, ReadOnlySpan<byte> salt2);
 
-    /// <summary>L3 §10.1.4: salt = SHA-256("WebAuthn PRF" || 0x00 || input); salts are zeroed after use.</summary>
+    /// <summary>L3 §10.1.4: salt = SHA-256("WebAuthn PRF" || 0x00 || input); these salt arrays are zeroed after use.</summary>
+    /// <remarks>This does not clear ComputeSalt's input concatenation or copies retained by the CTAP builder.</remarks>
     private static void WithSalts(ReadOnlyMemory<byte> first, ReadOnlyMemory<byte>? second, SaltAction action)
     {
         var salt1 = PrfInput.ComputeSalt(first.Span);

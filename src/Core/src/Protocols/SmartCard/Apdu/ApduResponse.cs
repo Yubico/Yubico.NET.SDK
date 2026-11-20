@@ -20,6 +20,11 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 /// <summary>
 ///     Represents an ISO 7816 application response.
 /// </summary>
+/// <remarks>
+///     Constructors copy input into a private owner. For sensitive output, inspect status and parse data within
+///     a try block, then call Clear in finally. Clearing also zeroes status and all Data/RawData aliases; it
+///     leaves caller input, transport staging, previous fragments, and other intermediate copies unchanged.
+/// </remarks>
 public sealed class ApduResponse
 {
     private readonly byte[] _rawData;

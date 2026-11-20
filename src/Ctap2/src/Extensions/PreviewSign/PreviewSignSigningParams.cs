@@ -31,6 +31,17 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// byte string, matching the caller-supplied algorithm-specific value.
 /// Experimental typed helpers such as <see cref="CoseSignArgs"/> can be converted to raw
 /// <c>additionalArgs</c> bytes with <see cref="PreviewSignCbor.EncodeAdditionalArgs"/>.
+/// The Yubico Labs previewSign v4 Editor's Draft requires present additionalArgs to encode a
+/// COSE_Sign_Args CBOR map; this passthrough does not validate that requirement. An empty byte
+/// string is emitted unchanged but is not thereby valid for every algorithm. Tbs may be raw data
+/// or a digest depending on the selected algorithm; the encoder does not hash it.
+/// </para>
+/// <para>
+/// Inputs are borrowed until encoding and awaited transmission complete; keep storage unchanged.
+/// Encoders make independent copies without a disposable cleanup owner. Clear caller-owned
+/// application-sensitive data after use. This preview is experimental and not production guidance.
+/// The constructor's nonempty keyHandle/Tbs guards are SDK restrictions, not universal draft rules
+/// (the draft permits an empty handle); init properties can replace the checked values.
 /// </para>
 /// </remarks>
 public sealed class PreviewSignSigningParams
@@ -41,7 +52,7 @@ public sealed class PreviewSignSigningParams
     public ReadOnlyMemory<byte> KeyHandle { get; init; }
 
     /// <summary>
-    /// Gets the raw data to be signed.
+    /// Gets the algorithm-specific to-be-signed bytes, which may already be a digest.
     /// </summary>
     public ReadOnlyMemory<byte> Tbs { get; init; }
 

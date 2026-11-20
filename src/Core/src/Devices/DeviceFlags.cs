@@ -45,7 +45,7 @@ public enum DeviceFlags
     ///         must be disabled.
     ///     </para>
     ///     <para>
-    ///         To automatically eject the smart card following a touch, see
+    ///         To automatically eject the smart card after a period of inactivity, see
     ///         <see cref="DeviceInfo.AutoEjectTimeout" />.
     ///     </para>
     /// </remarks>

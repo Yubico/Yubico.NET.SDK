@@ -36,15 +36,26 @@ public static class SlotMetadataExtensions
     /// <exception cref="NotSupportedException">The metadata reports an algorithm not recognized by this SDK.</exception>
     /// <remarks>
     /// <para>
-    /// The returned RSA instance can be used with <c>CertificateRequest</c> to generate
-    /// certificate signing requests or self-signed certificates.
+    /// The caller owns and disposes the returned public-key object. Use it to encrypt or verify.
+    /// A CertificateRequest using this object needs an external X509SignatureGenerator that delegates
+    /// signing to the device; the host object contains public material only.
     /// </para>
     /// </remarks>
     /// <example>
     /// <code>
-    /// var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
-    /// using var rsa = metadata.Value.GetRsaPublicKey();
-    /// var request = new CertificateRequest("CN=Test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+    /// // Requires an open session, firmware 5.3+ and a provisioned RSA slot.
+    /// var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)
+    ///     ?? throw new InvalidOperationException("Provision an RSA key first.");
+    /// using var rsa = metadata.GetRsaPublicKey();
+    /// byte[] plaintext = "example"u8.ToArray();
+    /// try
+    /// {
+    ///     byte[] ciphertext = rsa.Encrypt(plaintext, RSAEncryptionPadding.OaepSHA256);
+    /// }
+    /// finally
+    /// {
+    ///     CryptographicOperations.ZeroMemory(plaintext);
+    /// }
     /// </code>
     /// </example>
     public static RSA GetRsaPublicKey(this SlotMetadata metadata)
@@ -58,7 +69,7 @@ public static class SlotMetadataExtensions
 
         // SlotMetadata.PublicKey stores the raw PIV TLV-encoded RSA public key:
         //   { tag 0x81: modulus bytes, tag 0x82: exponent bytes }
-        // We parse it the same way PivSession.ParseRsaPublicKey does.
+        // Extract the modulus/exponent fields into host-provider parameters.
         var rawSpan = metadata.PublicKey.Span;
         var tlvDict = TlvHelper.DecodeDictionary(rawSpan);
 
@@ -96,15 +107,18 @@ public static class SlotMetadataExtensions
     /// by .NET's <see cref="ECDsa"/> class and will throw an exception.
     /// </para>
     /// <para>
-    /// The returned ECDsa instance can be used with <c>CertificateRequest</c> to generate
-    /// certificate signing requests or self-signed certificates.
+    /// The caller owns and disposes this public-only host object. Use it to verify DER ECDSA
+    /// signatures with DSASignatureFormat.Rfc3279DerSequence. A CertificateRequest needs an external
+    /// X509SignatureGenerator for device signing; this object supplies only the public key.
     /// </para>
     /// </remarks>
     /// <example>
     /// <code>
-    /// var metadata = await session.GetSlotMetadataAsync(Slot.Authentication);
-    /// using var ecdsa = metadata.Value.GetECDsaPublicKey();
-    /// var request = new CertificateRequest("CN=Test", ecdsa, HashAlgorithmName.SHA256);
+    /// // Requires an open session, firmware 5.3+ and a provisioned P-256/P-384 slot.
+    /// var metadata = await session.GetSlotMetadataAsync(Slot.Authentication)
+    ///     ?? throw new InvalidOperationException("Provision an EC key first.");
+    /// using var ecdsa = metadata.GetECDsaPublicKey();
+    /// // The host object is now available for signature verification.
     /// </code>
     /// </example>
     public static ECDsa GetECDsaPublicKey(this SlotMetadata metadata)

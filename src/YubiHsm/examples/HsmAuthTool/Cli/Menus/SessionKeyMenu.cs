@@ -18,6 +18,8 @@ public static class SessionKeyMenu
 
         OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
+        // The diagnostic calculation is symmetric-only and this session supplies no presence prompt.
+        // A touch-required credential still follows device policy; applications can configure the prompt.
         await using var session = await selection.Device.CreateHsmAuthSessionAsync(
             cancellationToken: cancellationToken);
         await CalculateSessionKeys.RunAsync(session, cancellationToken);

@@ -17,12 +17,18 @@ using System.Formats.Cbor;
 namespace Yubico.YubiKit.Ctap2.Extensions;
 
 /// <summary>
-/// Output from the largeBlob extension during getAssertion.
+/// Legacy convenience container for key, blob and write-result values.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Contains the large blob key which can be used to encrypt/decrypt the large blob data
-/// stored via authenticatorLargeBlobs.
+/// This decoder consumes a synthetic map with largeBlobKey, blob and written members; that combined
+/// shape is not a standard CTAP extension output. The implemented largeBlobKey/storage route returns
+/// keys on MakeCredentialResponse.LargeBlobKey or GetAssertionResponse.LargeBlobKey, outside authData
+/// extensions. CTAP 2.3 §12.4's alternative direct largeBlob route uses unsigned supported/read/write
+/// outputs and compressed blob plus originalSize, not this container or WebAuthn's decompressed result.
+/// This DTO performs no storage read, decompression, decryption or authenticity verification.
+/// Direct init borrows supplied memory; keep it stable during use. Decoded byte strings are
+/// independent copies with no disposal/zeroing boundary.
 /// </para>
 /// </remarks>
 public sealed class LargeBlobOutput
@@ -32,26 +38,27 @@ public sealed class LargeBlobOutput
     /// </summary>
     /// <remarks>
     /// A 32-byte key used to encrypt/decrypt large blob data for this credential.
-    /// Derived from the credential's private key.
+    /// A key supplied to this container, not a guarantee about how an authenticator generated it.
+    /// This is secret material, not public metadata; do not log or persist it unprotected.
     /// </remarks>
     public ReadOnlyMemory<byte>? LargeBlobKey { get; init; }
 
     /// <summary>
-    /// Gets the decrypted blob data (if read was requested and data exists).
+    /// Gets blob bytes supplied to this convenience container, without a decryption guarantee.
     /// </summary>
     /// <remarks>
-    /// Only present if the client requested "read" and successfully decrypted
-    /// the large blob data. At CTAP level, only largeBlobKey is returned;
-    /// the actual data retrieval is done separately.
+    /// The container does not establish that these bytes were decrypted. Direct CTAP read output
+    /// is compressed and also requires originalSize, which this DTO does not model. Use LargeBlobStorage
+    /// for the implemented key/storage route; callers own plaintext returned by that helper.
     /// </remarks>
     public ReadOnlyMemory<byte>? Blob { get; init; }
 
     /// <summary>
-    /// Gets whether the write operation was successful.
+    /// Gets the supplied written value, without independently establishing a completed storage write.
     /// </summary>
     /// <remarks>
-    /// Only present if write was requested. Indicates whether the large blob
-    /// was successfully stored.
+    /// Null means no written value was supplied or decoded. True and false reflect the supplied
+    /// boolean, not a tracked request or independently established storage success.
     /// </remarks>
     public bool? Written { get; init; }
 

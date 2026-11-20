@@ -20,6 +20,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
 /// <summary>
 /// Unit tests for <see cref="PinUvAuthProtocolV1"/>.
 /// </summary>
+/// <remarks>SHA-256 and truncated-HMAC cases compare expected computations; AES cases check local shapes/round trips. These assertions do not establish device interoperability, token state or buffer clearing.</remarks>
 public sealed class PinUvAuthProtocolV1Tests
 {
     [Fact]
@@ -48,6 +49,7 @@ public sealed class PinUvAuthProtocolV1Tests
 
         var peerCoseKey = new Dictionary<int, object?>
         {
+            // The fixture omits required alg=-25; success reflects the current missing label check.
             { 1, 2 },
             { -1, 1 },
             { -2, peerParams.Q.X },

@@ -30,7 +30,9 @@ public sealed class YkDeviceContext
 
     /// <summary>
     ///     Last-known discovery metadata or selection's best-effort live fallback; null if unavailable.
-    ///     Not guaranteed current. Do not use this snapshot for configuration or reset prerequisites.
+    ///     Use a live read for configuration or reset prerequisites. Current Core FIPS masks have a
+    ///     mapping issue and flagged form factors can miss named enum values; establish approval and
+    ///     product-family eligibility independently of those fields.
     /// </summary>
     public DeviceInfo? Info { get; init; }
 

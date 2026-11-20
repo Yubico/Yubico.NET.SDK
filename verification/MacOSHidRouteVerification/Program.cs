@@ -7,8 +7,10 @@ using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Ctap2;
 
-// The verification executable itself contains the integration assertions. No fake bridge, HID
-// experiment library, device mutation, or implicit transport fallback is involved.
+// The executable contains the integration assertions and uses production routes, not the synthetic
+// HID experiment ABI. It does not provision persistent applet data or retry another selected transport.
+// Discovery and session initialization can still open interfaces and change applet selection/state;
+// these read-only tasks are not proof that every device state remains unchanged.
 Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
 if (!OperatingSystem.IsMacOS())
 {

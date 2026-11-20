@@ -20,8 +20,7 @@ public class PrivateKeyTemplateTests
 {
     /// <summary>
     ///     Parses tag+length descriptor pairs from an OpenPGP 0x7F48 header block.
-    ///     These are NOT standard TLVs — they contain only tag and BER-TLV length,
-    ///     no value bytes. The actual values live in the 0x5F48 block.
+    ///     Each descriptor contains a tag and BER length; its value bytes live in the separate 0x5F48 block.
     /// </summary>
     private static List<(int Tag, int Length)> ParseHeaderDescriptors(ReadOnlySpan<byte> headers)
     {

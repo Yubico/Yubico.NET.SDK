@@ -30,7 +30,7 @@ public enum Uif : byte
     On = 0x01,
 
     /// <summary>
-    ///     Touch is required and cannot be changed.
+    ///     Touch is required with fixed policy; changing it requires key deletion/replacement or supported reset.
     /// </summary>
     Fixed = 0x02,
 
@@ -40,7 +40,7 @@ public enum Uif : byte
     Cached = 0x03,
 
     /// <summary>
-    ///     Touch is required with caching and cannot be changed.
+    ///     Touch is required with caching and fixed policy; recovery depends on the associated slot.
     /// </summary>
     CachedFixed = 0x04,
 }
@@ -51,8 +51,13 @@ public enum Uif : byte
 public static class UifExtensions
 {
     /// <summary>
-    ///     Gets whether this UIF value is fixed (cannot be changed without a factory reset).
+    ///     Gets whether this value fixes touch policy for the associated key.
     /// </summary>
+    /// <remarks>
+    ///     Ordinary-slot fixed policy clears on key deletion/replacement or application reset. YubiKey ATT
+    ///     policy survives reset and requires replacement of the ATT private key, irreversibly losing factory
+    ///     key provenance. The current SDK ATT CRT encoding also limits that provisioning path.
+    /// </remarks>
     public static bool IsFixed(this Uif uif) =>
         uif is Uif.Fixed or Uif.CachedFixed;
 

@@ -17,7 +17,9 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
 /// <summary>
-/// Performs HMAC-SHA1 challenge-response calculation (ykman otp calculate SLOT [CHALLENGE]).
+/// Demonstrates HMAC-SHA1 calculation with a required hex challenge, despite help suggesting stdin.
+/// Uses the default session transport and prints secret-derived output. Response memory is not cleared
+/// here; use the module README's caller-owned response cleanup pattern in application code.
 /// </summary>
 public static class CalculateCommand
 {

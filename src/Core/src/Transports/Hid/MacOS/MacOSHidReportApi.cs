@@ -21,8 +21,8 @@ using IOKitNativeMethods = Yubico.YubiKit.Core.Native.MacOS.IOKitFramework.Nativ
 namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 
 /// <summary>
-///     The production <see cref="IMacOSHidReportApi" />: a direct pass-through to IOKit and
-///     CoreFoundation.
+///     The production <see cref="IMacOSHidReportApi" /> implementation, combining IOKit and CoreFoundation
+///     call forwarding with small managed compositions and status handling.
 /// </summary>
 [SupportedOSPlatform("macos")]
 internal sealed class MacOSHidReportApi : IMacOSHidReportApi
@@ -58,11 +58,8 @@ internal sealed class MacOSHidReportApi : IMacOSHidReportApi
     {
         // kIOHIDOptionsTypeNone (0), NOT kIOHIDOptionsTypeSeizeDevice (0x01). SDK exclusivity is enforced
         // by DeviceConnectionRegistry before native open; seizing would add a platform-wide policy and
-        // prevent other non-seizing clients from opening the interface. Both canonical implementations open
-        // non-seizing on macOS - Rust yubikit enables hidapi's `macos-shared-device`
-        // (hid_darwin_set_open_exclusive(0) => kIOHIDOptionsTypeNone), and python-fido2's macOS backend
-        // calls IOHIDDeviceOpen(handle, 0). The OTP feature-report path uses 0 as well, so both macOS
-        // HID paths stay consistent.
+        // prevent other non-seizing clients from opening the interface. The OTP path also passes zero.
+        // Process-local admission and OS access permissions remain separate policies.
         var result = OpenDeviceResult(device);
 
         if (result != 0)

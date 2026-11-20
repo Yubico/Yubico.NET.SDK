@@ -108,7 +108,13 @@ internal sealed class DeviceChangeFeed
         }
     }
 
-    /// <summary>Ends subscriptions normally after the producer has stopped; later subscriptions end empty.</summary>
+    /// <summary>
+    /// Requests normal completion for remaining healthy subscriptions; later subscriptions end empty.
+    /// </summary>
+    /// <remarks>
+    /// Call after the producer has stopped. Existing subscription faults, including overflow, retain
+    /// their errors. Captured replay and buffered changes may still drain before the stream ends.
+    /// </remarks>
     internal void Complete()
     {
         lock (_gate)

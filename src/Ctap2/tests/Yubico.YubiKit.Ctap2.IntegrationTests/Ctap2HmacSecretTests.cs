@@ -26,6 +26,13 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// <summary>
 /// Integration tests for CTAP2 hmac-secret extension.
 /// </summary>
+/// <remarks>
+/// Registration checks are conditional. Assertion fixtures decrypt a nonzero 32-byte result and compare
+/// two same-salt PIN-authorized results; they do not cover both UV variants or every protocol version.
+/// Setup can normalize the PIN even in the GetInfo fixture. Human approval/known device state is required.
+/// Tokens and secret-derived copies are not comprehensively cleared, and some clearing is success-only;
+/// these are not production-safe ownership/constant-time comparison examples.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Extension", "hmac-secret")]
 public class Ctap2HmacSecretTests

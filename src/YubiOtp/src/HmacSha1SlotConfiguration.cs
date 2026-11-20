@@ -27,6 +27,7 @@ namespace Yubico.YubiKit.YubiOtp;
 /// </list>
 /// The key must be exactly 20 bytes. Keys of any other length are rejected
 /// before any device I/O is attempted; they are never hashed or padded to fit.
+/// The configuration owns a copy of the key; dispose it and separately clear the source buffer.
 /// </remarks>
 public sealed class HmacSha1SlotConfiguration : SlotConfiguration
 {
@@ -67,6 +68,11 @@ public sealed class HmacSha1SlotConfiguration : SlotConfiguration
     /// slot hashes all 64 bytes as sent. The session does not enforce this mode; use one length
     /// convention per slot. See <see cref="IYubiOtpSession.CalculateHmacSha1Async"/>.
     /// </summary>
+    /// <remarks>
+    /// Minimum-one-byte behavior is expected by the supplied known-answer vectors; verify empty and
+    /// 64-byte boundaries on target firmware rather than inferring device hashing from wire-only tests.
+    /// Prefer 1–63 bytes in short mode.
+    /// </remarks>
     public HmacSha1SlotConfiguration UseShortChallenge(bool enable = true)
     {
         SetCfgFlag(ConfigFlag.HmacLt64, enable);

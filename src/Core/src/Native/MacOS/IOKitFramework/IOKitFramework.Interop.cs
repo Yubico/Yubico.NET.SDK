@@ -72,6 +72,10 @@ internal enum kern_return_t
     KERN_POLICY_STATIC = 51,
     KERN_INSUFFICIENT_BUFFER_SIZE = 52,
 
+    // IOReturn catalog finding: Apple's native definitions contain reserved gaps (including 0x2CB/0x2DC)
+    // that this sequential list omits. Preserve raw status when diagnosing errors; native NotOpen is
+    // 0xE00002CD and NotPermitted is 0xE00002E2. The current ExclusiveAccess literal/branch remains 0xE00002C5.
+    // Numeric corrections require a separate implementation change; these names are not an ABI validation.
     // err_system 0xE000_0000
     IOReturnError = unchecked((int)0xE000_02BC),
     IOReturnNoMemory,

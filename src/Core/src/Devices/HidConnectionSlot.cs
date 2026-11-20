@@ -88,7 +88,8 @@ internal sealed class HidConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryConn
         if (OwnsNativeLifetime)
             return OpenBuiltInConnectionAsync(physicalClaim: null, cancellationToken);
 
-        // Custom interfaces retain the synchronous compatibility adapters.
+        // Custom interfaces open synchronously before Task.FromResult. Their adapters also
+        // call report I/O inline; a Task return type adds neither native cancellation nor release proof.
         return Task.FromResult<IConnection>(ConnectionType == ConnectionType.HidFido
             ? new FidoHidConnection(_hidInterface.ConnectToIOReports())
             : new OtpHidConnection(_hidInterface.ConnectToFeatureReports()));

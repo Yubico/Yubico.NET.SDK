@@ -20,6 +20,10 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// <summary>
 /// Programs HMAC-SHA1 challenge-response on a slot (ykman otp chalresp SLOT).
 /// </summary>
+/// <remarks>
+/// Generated keys are intentionally shown in human mode, not JSON mode. This is provisioning output,
+/// not safe logging. The TOTP option sets touch/short mode only; time/counter/code generation is absent.
+/// </remarks>
 public static class ChalRespCommand
 {
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
@@ -72,6 +76,8 @@ public static class ChalRespCommand
                 config.UseShortChallenge();
             }
 
+            // Current code authenticates only. No new code is supplied, so this does not retain write
+            // protection. Production callers retain it by supplying accessCode in both code arguments.
             await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
 
             if (options.Json)

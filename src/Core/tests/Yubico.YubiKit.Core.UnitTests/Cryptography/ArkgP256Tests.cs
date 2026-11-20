@@ -19,15 +19,16 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 
 /// <summary>
 /// KAT (Known Answer Tests) for ARKG-P256 derivation.
-/// Vectors generated from the Rust reference implementation in
-/// cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs
-/// (see /tmp/gen_kat for the generator program). Vector A also matches the
-/// embedded `arkg.rs::tests::test_arkg_derive_key` expected output.
+/// The retained provenance names cnh-authenticator-rs-extension/native/crates/hid-test/src/arkg.rs
+/// and /tmp/gen_kat, but supplies no immutable source revision or retained generator. These literals
+/// therefore provide finite regression expectations, rather than an independently reproducible oracle
+/// or full draft-conformance proof. A checks the derived point and handle; B and C check derived
+/// points for selected IKM/context changes, without comparing their handles.
 /// </summary>
 public class ArkgP256Tests
 {
-    // Both vectors share these seeds, derived from ikm_bl=0x00..1F and
-    // ikm_kem=0x20..3F via the Rust reference's BL/KEM key-generation paths.
+    // A, B, and C share these public keys. Retained provenance attributes their derivation to
+    // ikm_bl=0x00..1F and ikm_kem=0x20..3F through the unpinned Rust BL/KEM paths.
     private static readonly byte[] PkBl = HexToBytes(
         "046d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df" +
         "65ed42169c69675f936ff7de5f9bd93adbc8ea73036b16e8d90adbfabdaddba7");

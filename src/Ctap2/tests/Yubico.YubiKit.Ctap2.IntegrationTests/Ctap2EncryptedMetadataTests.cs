@@ -25,13 +25,21 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// <summary>
 /// Integration tests for CTAP 2.3 encrypted metadata fields.
 /// </summary>
+/// <remarks>
+/// GetInfo fields are optional device-identifier/store-state values, not per-credential metadata.
+/// Firmware filters express fixture assumptions, not all-family availability. Setup normalizes the
+/// PIN; the token helper requests pcmr based on retained version checks, without establishing the
+/// perCredMgmtRO capability or asserting token persistence/distinctness. Returned plaintext is not
+/// comprehensively cleared. Run only on an explicitly approved dedicated device; CBC does not authenticate
+/// a token or ciphertext, and length/equality assertions are not semantic verification of opaque state.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("RequiresFirmware", "5.7+")]
 public class Ctap2EncryptedMetadataTests
 {
     /// <summary>
     /// Tests that encIdentifier can be decrypted with PPUAT and yields the same
-    /// plaintext across two separate sessions with different PPUATs.
+    /// plaintext across two sessions when both helpers return data. Token distinctness is not asserted.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido, MinFirmware = "5.7.0")]
@@ -46,7 +54,7 @@ public class Ctap2EncryptedMetadataTests
             return;
         }
 
-        // Session 2: Get encIdentifier and decrypt with different PPUAT
+        // Session 2 requests a token again; this does not assert that it differs from the first token.
         var (encIdentifier2, decryptedIdentifier2) = await GetEncryptedIdentifierWithDecryptionAsync(state);
 
         Assert.NotNull(decryptedIdentifier2);

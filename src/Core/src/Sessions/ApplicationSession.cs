@@ -36,6 +36,12 @@ namespace Yubico.YubiKit.Core.Sessions;
 ///         Protocol construction and initialization are internal SDK seams. External derived classes cannot
 ///         inject or replace Core protocol implementations; compose over a public raw session for low-level work.
 ///     </para>
+///     <para>
+///         Protocol guards admit individual logical exchanges, not an entire multi-exchange applet workflow.
+///         Await each complete public operation, including parsing and callbacks, before disposing the session
+///         or starting a competing workflow. Disposal drains the admitted exchange, not every public task or
+///         detached callback task. Keep disposal outside the operation and its user-presence callbacks.
+///     </para>
 /// </remarks>
 public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
 {
@@ -436,10 +442,11 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposalStarted) != 0, this);
     }
 
-    /// <summary>Closes operation admission, drains an admitted exchange, and releases session resources.</summary>
+    /// <summary>Closes session admission, drains an admitted protocol exchange, and releases session resources.</summary>
     /// <remarks>
     ///     This synchronous path blocks while an admitted exchange finishes. Prefer <see cref="DisposeAsync" />
-    ///     for asynchronous callers, and never invoke synchronous disposal from inside the operation being drained.
+    ///     for asynchronous callers. Invoke either disposal path outside the operation and its callbacks;
+    ///     awaiting asynchronous disposal from a callback can also wait on its own exchange.
     /// </remarks>
     public void Dispose()
     {
@@ -449,8 +456,9 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     }
 
     /// <summary>
-    ///     Closes operation admission, asynchronously drains an admitted exchange, and releases session resources.
+    ///     Closes session admission, asynchronously drains an admitted protocol exchange, and releases session resources.
     /// </summary>
+    /// <remarks>Await complete public workflows first; the drain covers the exchange rather than the whole workflow.</remarks>
     public async ValueTask DisposeAsync()
     {
         BeginDisposal();

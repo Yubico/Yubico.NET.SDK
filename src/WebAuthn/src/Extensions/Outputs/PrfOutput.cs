@@ -17,6 +17,13 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 /// <summary>
 /// PRF evaluation results (1-2 outputs).
 /// </summary>
+/// <remarks>
+/// These outputs are derived secrets. Do not log them. SDK-produced results expose read-only views
+/// over allocated arrays with no disposal or zeroing guarantee; disposing the client does not clear
+/// them. The current decoder also leaves intermediate copies uncleared. Clearing a caller-created
+/// copy does not clear those original or intermediate arrays. A directly constructed result can
+/// instead wrap caller-owned memory, whose lifetime and cleanup remain the caller's responsibility.
+/// </remarks>
 /// <param name="First">The first PRF output (required).</param>
 /// <param name="Second">The second PRF output (optional).</param>
 public sealed record class PrfEvaluationResults(

@@ -23,8 +23,15 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 
 /// <summary>
 /// Interactive menu for fingerprint enrollment operations.
-/// Mirrors ykman's "fido fingerprints" command group.
+/// Exposes a ykman-like subset, not compatible or qualified standardized enrollment.
 /// </summary>
+/// <remarks>
+/// Bio helpers have known standard wire/schema/status and completion-default limitations. The support
+/// probe treats bioEnroll=false as unsupported although it can mean no templates, and masks errors/
+/// cancellation. An empty list is not reliable absence evidence. Progress/result display is not verified
+/// enrollment completion; a thrown cancellation can skip explicit cancel. Prompts are synchronous.
+/// The current sensor display treats every non-Touch kind as Swipe; unknown-kind UI correction is deferred.
+/// </remarks>
 public static class FingerprintsMenu
 {
     /// <summary>

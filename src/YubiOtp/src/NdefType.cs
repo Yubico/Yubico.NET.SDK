@@ -17,6 +17,11 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <summary>
 /// The type of NDEF record to configure for NFC tap.
 /// </summary>
+/// <remarks>
+/// Use only these defined values. URI configuration uses UTF-8 with automatic prefix compression;
+/// text configuration uses UTF-8 and a fixed English language header. These identify programming content,
+/// not a full on-tap message or arbitrary-language/UTF-16 support.
+/// </remarks>
 public enum NdefType : byte
 {
     Uri = 0x55,

@@ -16,11 +16,20 @@ using NSubstitute;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Ctap2.CredentialManagement;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.CredentialManagement;
 
+/// <summary>
+/// Mock-wire checks for selected credential-management request fields, enumeration and owned views.
+/// </summary>
+/// <remarks>
+/// Metadata/delete tests inspect their encoded fields; enumeration tests check first totals,
+/// order and read-only storage, not continuation request bytes or global command adjacency.
+/// Cancellation/decode failures assert propagation and unchanged supplied responses, not
+/// observed clearing of inaccessible local entries or device recovery. Update-user transcripts
+/// are not covered. The fake's version-2/16-byte tags are artificial and do not qualify protocol 2.
+/// </remarks>
 public sealed class CredentialManagementWireTests
 {
     private readonly ICtap2Session _session = Substitute.For<ICtap2Session>();

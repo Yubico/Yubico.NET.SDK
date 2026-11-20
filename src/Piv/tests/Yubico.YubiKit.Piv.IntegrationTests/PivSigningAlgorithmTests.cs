@@ -29,10 +29,9 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 /// (SHA-1, SHA-256, SHA-384, SHA-512) with PKCS#1 v1.5 signing, and OAEP decrypt
 /// with SHA-1 vs SHA-256 MGF1.
 ///
-/// NOTE: RSA-PSS is not directly supported by PIV hardware -- PIV does raw RSA.
-/// PSS padding must be constructed on the host and is not testable in a standard
-/// round-trip because PSS uses randomized padding that .NET's RSA.VerifyData
-/// with Pkcs1 cannot verify. Instead, we test the hash algorithm dimension.
+/// RSA-PSS needs host EMSA-PSS encoding before the raw operation. Host RSA.VerifyData with
+/// RSASignaturePadding.Pss can verify randomized PSS signatures; this suite currently covers
+/// the PKCS#1 v1.5 hash dimension and OAEP, leaving PSS as additional coverage work.
 /// </summary>
 public class PivSigningAlgorithmTests
 {
@@ -239,8 +238,8 @@ public class PivSigningAlgorithmTests
     }
 
     /// <summary>
-    /// ECC P-256 signing with SHA-384 hash (truncated to 32 bytes by the PIV layer).
-    /// Verifies that the signature is valid when verified with the correct hash size.
+    /// Signs a SHA-256 digest with P-256 and verifies the DER signature on the host using
+    /// the generated public key and the same digest.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]

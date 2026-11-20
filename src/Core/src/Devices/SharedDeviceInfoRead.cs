@@ -142,13 +142,10 @@ internal sealed class SharedDeviceInfoRead
     {
         if (waitForWorkerSlot)
         {
-            // Identity reads WAIT for a bounded worker slot instead of skipping: with N same-PID keys, a
-            // scan legitimately issues more identity reads than there are workers, and skipping the
-            // excess orphans their interfaces (the Phase-0 "aborted" scan-1 failures were exactly this
-            // self-contention on the admission gate). The caller's wall-clock budget in DiscoveryDeviceInfoReader.ReadBoundedAsync
-            // bounds the wait, and the admission bound itself is preserved: at most
-            // MaximumConcurrentWorkers native reads run concurrently, so a hung native call still cannot
-            // multiply workers.
+            // Identity reads queue for worker admission: several same-PID keys can require more reads
+            // than there are worker slots. DiscoveryDeviceInfoReader bounds each caller's wait, while
+            // scope retirement cancels queued admission. Already-admitted work retains its slot through
+            // completion, preserving MaximumConcurrentWorkers even when native work is held.
             return StartQueuedSharedRead(scope, key, epoch, provider, leaseTracker, nativeAdmission);
         }
 
@@ -270,7 +267,7 @@ internal sealed class SharedDeviceInfoRead
             // START a new open against hardware its evidence no longer names.
             ThrowIfSuperseded(scope, key, epoch);
 
-            // Discovery creates and disposes this connection. Built-in PC/SC and macOS/Linux HID owners
+            // Discovery creates and disposes this connection. Built-in PC/SC and Windows/macOS/Linux HID owners
             // take the exact discovery registration before native open, including failed/late opens.
             // Resolve the published composite's selected member just as for a direct slot read. Set transfer
             // before invoking the owner: a throw or disposal diagnostic is not permission to release twice.

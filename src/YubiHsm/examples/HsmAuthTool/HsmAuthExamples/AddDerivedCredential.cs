@@ -8,6 +8,10 @@ using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
 
+/// <summary>
+///     Derives and stores a symmetric YubiKey credential for evaluation. Enroll the same derived
+///     K-ENC/K-MAC pair in the HSM; the derivation password and YubiKey credential password serve separate roles.
+/// </summary>
 public static class AddDerivedCredential
 {
     public static async Task RunAsync(

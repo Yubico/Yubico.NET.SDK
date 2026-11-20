@@ -38,6 +38,9 @@ Session method
 
 This is preferred:
 
+The following is an illustrative method shape; `Ins`, `GetKeyInfoTag`, `_protocol`, and `ParseKeyInfo`
+stand for the owning applet's actual constants, backend, and parser.
+
 ```csharp
 public async Task<KeyInfo[]> ListKeyInformationAsync(CancellationToken cancellationToken = default)
 {
@@ -50,7 +53,7 @@ public async Task<KeyInfo[]> ListKeyInformationAsync(CancellationToken cancellat
         p2: 0x00,
         data: GetKeyInfoTag);
 
-    var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken).ConfigureAwait(false);
+    var response = await _protocol.TransmitAndReceiveAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
 
     return ParseKeyInfo(response.Data.Span);
 }
@@ -143,6 +146,15 @@ and optional SCP establishment. Backend rebinding and applet-specific state rema
 discovery and cache population. Security Domain reset uses the same completion boundary after clearing readiness.
 Keep raw-session initialization contracts separate, including lazy raw FIDO channel initialization.
 
+Readiness means the initializer completed. It is separate from applet authorization and from the
+provenance of the effective firmware version. Raw HID sessions currently retain inherited `0.0.0`;
+major-zero feature checks are optimistic policy. Shared `IsSupported` queries do not guarantee runtime
+command success, and protected `EnsureSupports` remains derived-session enforcement machinery.
+
+Core guards logical exchanges, not complete multi-exchange public workflows. Callers await and
+serialize those workflows before disposal; a prompt callback must return without disposing its own
+session. Exchange drain supplies no lease for later parsing, cache updates, or callbacks.
+
 Pass creation-only SCP parameters directly to the initializer; retain them only when a later operation needs
 them, as Security Domain reinitialization does. `ApplicationSession.Protocol` owns protocol lifetime; avoid
 duplicate applet fields unless typed operational access requires them. Backend contracts describe shared
@@ -185,9 +197,13 @@ report seam `MacOSHidReportApi`, and its extracted lifetime authorities
 `PcscConnection`, backed by `PcscConnectionNativeOwner` and `PcscNativeResources`.
 These internal names do not change the public `PscsConnectionKind` or
 `DesktopSmartCardDeviceListener` contracts. Mechanical moves and structural extractions retain
-separate review/evidence. macOS native/hardware verification of the extraction and Windows
-AOT/sealed-publication acceptance remain pending; see the
-[Windows checkpoint](research/windows-async-native-acceptance.md).
+separate review and evidence. The Windows checkpoint at
+`bdac2f4f4224fa0ccf92006971af8659736aa2b1` and the later Windows/macOS results at
+`0f10775cecfb61f74d20851417746a5816863bb7` retain their tested-source limits. The received Mac
+results are PR-summary-only on this host; OTP permission and expert-facade permission/topology blocks
+remain. Windows first-open and mixed ceremony outcomes, sealed/AOT and HID-driver gaps also remain
+explicit. None of these results validates the combined audit/upstream candidate. See the
+[integration evidence review](https://github.com/Yubico/Yubico.NET.SDK/blob/db72706b9ebda1f9ff95fede125e270c755966d0/docs/research/documentation-audit/integrations/windows-upstream-20261113/intake-review/report.md#4-received-execution-evidence-and-its-limits).
 
 ## SmartCard And APDU Style
 

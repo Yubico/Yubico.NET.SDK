@@ -127,8 +127,9 @@ internal sealed class LinuxHidInterface : IHidInterface
     ///     Establishes a connection capable of transmitting feature reports to a keyboard device.
     /// </summary>
     /// <returns>
-    ///     An active connection object.
+    ///     A caller-owned connection. Open and report calls wait synchronously; dispose it after use.
     /// </returns>
+    /// <remarks>This direct open acquires no grouped-key registry claim.</remarks>
     public IHidConnection ConnectToFeatureReports() =>
         new LinuxHidFeatureReportConnection(ReaderName);
 
@@ -136,8 +137,9 @@ internal sealed class LinuxHidInterface : IHidInterface
     ///     Establishes a connection capable of transmitting IO reports to a FIDO device.
     /// </summary>
     /// <returns>
-    ///     An active connection object.
+    ///     A caller-owned connection. Open and report calls wait synchronously; dispose it after use.
     /// </returns>
+    /// <remarks>This direct open acquires no grouped-key registry claim.</remarks>
     public IHidConnection ConnectToIOReports() =>
         new LinuxHidIOReportConnection(ReaderName);
 
@@ -325,10 +327,8 @@ internal sealed class LinuxHidInterface : IHidInterface
 
     internal static (ushort UsagePage, ushort Usage) ParseHidDescriptorBytes(ReadOnlySpan<byte> descriptor)
     {
-        // HID descriptor parsing - looking for Usage Page and Usage items
-
-        // IMPORTANT: We need to validate the UsagePage + Usage combination
-        // Don't just return the first values found - parse both, then validate
+        // Extract the first Usage Page and first Usage independently. The caller classifies this pair;
+        // this scan does not validate collection nesting or the complete descriptor.
 
         ushort usagePage = 0;
         ushort usage = 0;
@@ -357,7 +357,7 @@ internal sealed class LinuxHidInterface : IHidInterface
                 }
             }
 
-            // Once we have both, we can stop (we want the first/primary usage)
+            // Stop after the first pair; HidInterfaceClassifier decides whether it is supported.
             if (usagePageFound && usageFound)
             {
                 break;

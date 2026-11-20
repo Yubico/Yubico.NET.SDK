@@ -49,7 +49,8 @@ public static class LockCodeMenu
         }
         AnsiConsole.WriteLine();
 
-        // Warning about lock codes
+        // The displayed reset-recovery suggestion is not established for Management lock codes.
+        // Preserve the current code securely; the combined reset is a Bio MPE application operation.
         AnsiConsole.MarkupLine("[red bold]⚠️  IMPORTANT WARNING ⚠️[/]");
         AnsiConsole.MarkupLine("[red]If you set a lock code and forget it, you will NOT be able to change[/]");
         AnsiConsole.MarkupLine("[red]the device configuration. The only recovery is a factory reset (5.6.0+),[/]");

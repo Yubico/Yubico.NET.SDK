@@ -121,6 +121,7 @@ public class PivImportTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
     public async Task ImportKeyAsync_Ed25519_CanSignAndVerify(YubiKeyTestState state)
     {
+        // Current assertions cover nonempty signing output and imported metadata, without host verification.
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));

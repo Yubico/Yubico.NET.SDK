@@ -17,8 +17,17 @@ using System.Collections;
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     Generation timestamps for each key slot (Unix epoch seconds).
+///     Stored generation-time metadata for reported key slots; zero denotes an unspecified time.
 /// </summary>
+/// <remarks>
+///     The card stores unsigned four-byte seconds since 1970-01-01 UTC, in big-endian order. This
+///     collection currently exposes each value as a signed int, so values above int.MaxValue appear
+///     negative: for example, card bytes 80 00 00 00 become int.MinValue. They represent unsigned
+///     seconds, rather than dates before 1970. Preserve the original four-byte representation, or
+///     interpret the same 32 bits as an unsigned value, when inspecting that range. Raw application
+///     data provides the original bytes. Card specification 3.4.1 §4.4.1 defines zero as unspecified;
+///     RFC 4880 §3.5 defines the unsigned time field.
+/// </remarks>
 public sealed class GenerationTimes : IReadOnlyDictionary<KeyRef, int>
 {
     private readonly Dictionary<KeyRef, int> _entries;

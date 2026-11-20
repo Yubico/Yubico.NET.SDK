@@ -21,9 +21,9 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.YubiOtp.IntegrationTests.AuditV2;
 
 /// <summary>
-///     Audit 26l (YESDK-1634): <see cref="SlotConfiguration.ProtectSlot2" /> must set the PROTECT_CFG2 bit
+///     <see cref="SlotConfiguration.ProtectSlot2" /> must set the PROTECT_CFG2 bit
 ///     (0x80, yubikit/yubiotp.py TKTFLAG.PROTECT_CFG2) and leave the challenge-response bit (0x40) alone.
-///     These tests write both slots of the test key and clear them afterwards.
+///     The suite overwrites both slots, attempts deletion in finally, and cannot restore original secrets.
 /// </summary>
 public sealed class YubiOtpProtectSlot2Tests
 {
@@ -40,8 +40,8 @@ public sealed class YubiOtpProtectSlot2Tests
     [Trait("Audit", "YESDK-1634")]
     public async Task YESDK1634_ProtectSlot2_DoesNotDisturbChallengeResponseBit(YubiKeyTestState state)
     {
-        // Challenge-response over CCID answers 6985 on this applet; pin the HID transport as the
-        // existing CalculateHmacSha1 test does.
+        // Pin OTP HID for this challenge test. Its results do not establish USB CCID/NFC support or a
+        // universal SmartCard rejection code across device generations and firmware.
         await using var session = await state.Device.CreateYubiOtpSessionAsync(
             new SessionCreationOptions { PreferredConnectionType = state.ConnectionType });
         try
@@ -69,16 +69,16 @@ public sealed class YubiOtpProtectSlot2Tests
     }
 
     /// <summary>
-    ///     The bit's meaning: set on slot 1, the YubiKey refuses to write slot 2 while slot 2 is not itself
-    ///     configured with the same bit. Rewriting slot 1 without it lifts the block.
+    ///     Checks rejection of a plain slot-2 write after protecting slot 1, then successful programming
+    ///     after replacing slot 1 without protection. The broad exception assertion does not pin the
+    ///     rejection's exact device reason or cover every pre-existing-slot protection combination.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     [Trait("Audit", "YESDK-1634")]
     public async Task YESDK1634_ProtectSlot2OnSlot1_BlocksSlot2Write(YubiKeyTestState state)
     {
-        // Challenge-response over CCID answers 6985 on this applet; pin the HID transport as the
-        // existing CalculateHmacSha1 test does.
+        // Pin OTP HID; no device/firmware-specific SmartCard challenge behavior is asserted here.
         await using var session = await state.Device.CreateYubiOtpSessionAsync(
             new SessionCreationOptions { PreferredConnectionType = state.ConnectionType });
         try
@@ -120,7 +120,8 @@ public sealed class YubiOtpProtectSlot2Tests
         }
     }
 
-    // Over HID, deleting an already-empty slot does not answer and times out; only delete what is there.
+    // Avoid unnecessary empty-slot deletion; historical HID timeout observations are not a universal
+    // device/firmware contract. This uses the session's cached configured status.
     private static async Task DeleteIfConfiguredAsync(IYubiOtpSession session, Slot slot)
     {
         if (session.GetConfigState().IsConfigured(slot))

@@ -18,15 +18,18 @@ namespace Yubico.YubiKit.Ctap2.Cbor;
 /// Helper for converting between big-endian AAGUID bytes and .NET Guid.
 /// </summary>
 /// <remarks>
-/// CTAP2/WebAuthn store AAGUIDs in big-endian (network byte order) format,
-/// while .NET Guid uses mixed-endian representation. This helper handles the conversion.
+/// CTAP2/WebAuthn encode AAGUIDs in network byte order. The default Guid byte APIs instead use
+/// little-endian order for the first 4-byte, 2-byte and 2-byte components, leaving the last eight
+/// bytes unchanged. This serialization convention is independent of native machine byte order.
+/// This implementation applies the required component reversal only on little-endian hosts;
+/// on a big-endian host it leaves those components in the wrong byte convention.
 /// </remarks>
 public static class AaguidConverter
 {
     /// <summary>
     /// Converts a big-endian AAGUID byte array to a .NET Guid.
     /// </summary>
-    /// <param name="bigEndianBytes">The 16-byte big-endian AAGUID.</param>
+    /// <param name="bigEndianBytes">Exactly 16 big-endian AAGUID bytes; borrowed, copied and left unchanged.</param>
     /// <returns>The corresponding Guid.</returns>
     public static Guid FromBigEndianBytes(ReadOnlySpan<byte> bigEndianBytes)
     {
@@ -35,12 +38,12 @@ public static class AaguidConverter
             throw new ArgumentException("AAGUID must be exactly 16 bytes", nameof(bigEndianBytes));
         }
 
-        // AAGUID is stored in big-endian (network byte order) format
-        // .NET Guid constructor expects mixed-endian (first 3 components little-endian on little-endian systems)
+        // The default Guid span constructor expects the first 4/2/2 component groups in little-endian
+        // byte order, regardless of native machine order; AAGUID input uses network order.
         Span<byte> guidBytes = stackalloc byte[16];
         bigEndianBytes.CopyTo(guidBytes);
 
-        // Convert from big-endian to little-endian for first 3 components on little-endian systems
+        // Required byte-convention reversal; this implementation applies it only on little-endian hosts.
         if (BitConverter.IsLittleEndian)
         {
             // Reverse bytes for Data1 (4 bytes)
@@ -58,28 +61,26 @@ public static class AaguidConverter
     }
 
     /// <summary>
-    /// Converts a .NET Guid to a big-endian AAGUID byte array.
+    /// Produces an AAGUID byte array from a .NET Guid.
     /// </summary>
     /// <param name="guid">The Guid to convert.</param>
-    /// <returns>A 16-byte array in big-endian format.</returns>
+    /// <returns>A newly allocated, caller-owned 16-byte array; network-order conversion has the
+    /// host limitation described in the class remarks.</returns>
     public static byte[] ToBigEndianBytes(Guid guid)
     {
-        // .NET Guid.ToByteArray() produces mixed endianness on little-endian systems:
-        // - First 4 bytes (time_low): little-endian
-        // - Next 2 bytes (time_mid): little-endian
-        // - Next 2 bytes (time_hi_and_version): little-endian
-        // - Last 8 bytes (clock_seq_and_node): big-endian
-        // WebAuthn/CTAP2 AAGUID is fully big-endian, so we reverse the first three components
+        // Default TryWriteBytes uses little-endian first 4/2/2 component groups and unchanged last8.
+        // This is a serialization convention, not Guid's native in-memory layout.
+        // Network-order output requires reversal of the first three groups.
         Span<byte> bytes = stackalloc byte[16];
         guid.TryWriteBytes(bytes);
 
         if (BitConverter.IsLittleEndian)
         {
-            // Reverse first 3 components to convert to big-endian
+            // The required reversal is currently applied only on little-endian hosts.
             bytes[0..4].Reverse();  // time_low
             bytes[4..6].Reverse();  // time_mid
             bytes[6..8].Reverse();  // time_hi_and_version
-            // bytes[8..16] already big-endian
+            // The last eight bytes have the same order in both byte conventions.
         }
 
         return bytes.ToArray();

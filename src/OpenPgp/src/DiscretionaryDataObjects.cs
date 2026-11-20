@@ -20,6 +20,12 @@ namespace Yubico.YubiKit.OpenPgp;
 ///     Parsed discretionary data objects (tag 0x73) from the application related data.
 ///     Contains algorithm attributes, PIN status, fingerprints, key information, and UIF values.
 /// </summary>
+/// <remarks>
+///     Parsing requires capabilities, ordinary-slot algorithms and PIN status. Optional collections contain
+///     reported complete entries: fingerprint/time parsers ignore trailing incomplete bytes, and key status
+///     parsing skips unknown slot identifiers while retaining status bytes for known slots. Optional UIF
+///     absence remains null. Preserve raw application data when inspecting fields outside this model.
+/// </remarks>
 public sealed class DiscretionaryDataObjects
 {
     /// <summary>
@@ -63,8 +69,13 @@ public sealed class DiscretionaryDataObjects
     public KeyFingerprints CaKeyFingerprints { get; init; } = new([]);
 
     /// <summary>
-    ///     Key generation timestamps for each key slot (Unix epoch seconds).
+    ///     Stored key generation times for reported slots; zero denotes an unspecified time.
     /// </summary>
+    /// <remarks>
+    ///     Card time uses unsigned four-byte seconds since 1970-01-01 UTC. The current signed int carrier
+    ///     displays values above int.MaxValue as negative; preserve the original representation when
+    ///     inspecting those values. See <see cref="Yubico.YubiKit.OpenPgp.GenerationTimes" /> for interpretation guidance.
+    /// </remarks>
     public GenerationTimes GenerationTimes { get; init; } = new([]);
 
     /// <summary>

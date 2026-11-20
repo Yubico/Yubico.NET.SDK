@@ -17,6 +17,11 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 /// <summary>
 /// Per-credential PRF input values.
 /// </summary>
+/// <remarks>
+/// Memory remains caller-owned. Keep the inputs unchanged until the ceremony completes, then clear
+/// any sensitive caller-owned buffers when no longer needed. See <see cref="PrfInput"/> for the
+/// current user-verification and temporary-buffer cleanup limitations.
+/// </remarks>
 public sealed class PrfInputValues
 {
     /// <summary>

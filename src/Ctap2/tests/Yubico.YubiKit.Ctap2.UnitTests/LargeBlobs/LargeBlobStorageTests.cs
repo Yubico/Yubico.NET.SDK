@@ -38,7 +38,7 @@ public class LargeBlobStorageTests
     }
 
     /// <summary>
-    /// Test implementation of PIN/UV auth protocol.
+    /// Mechanical request fake: Version 2 with 16-byte tags is not protocol-2 cryptography.
     /// </summary>
     private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
     {
@@ -185,7 +185,7 @@ public class LargeBlobStorageTests
         Assert.NotNull(capturedRequest);
         Assert.Equal(0x0C, capturedRequest![0]); // LargeBlobs command
 
-        // Verify CBOR structure has set, offset, length, pinUvAuthParam, pinUvAuthProtocol
+        // Check first-fragment map count only; this assertion does not inspect all five fields.
         var reader = new CborReader(capturedRequest.AsSpan(1).ToArray());
         var mapCount = reader.ReadStartMap();
         Assert.Equal(5, mapCount); // First fragment includes length

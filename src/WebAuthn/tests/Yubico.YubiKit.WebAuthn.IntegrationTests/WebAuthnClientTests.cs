@@ -212,19 +212,19 @@ public class WebAuthnClientTests
     }
 
     /// <summary>
-    /// Registration with <see cref="UserVerificationPreference.Discouraged"/> and no PIN must
-    /// succeed and produce a credential that was NOT user-verified.
+    /// Checks non-discoverable registration without UV on a modern authenticator that permits it.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The relying party asking for <c>discouraged</c> is asking for no user verification. Demanding
-    /// a PIN anyway would make a non-UV credential impossible to create, so the ceremony proceeds
-    /// with no <c>pinUvAuthParam</c> on the wire.
+    /// This expectation requires makeCredUvNotRqd enabled and alwaysUv disabled. Discouraged does not
+    /// override mandatory authenticator verification policy. The test currently lacks capability guards
+    /// for those prerequisites, so its assertion is not portable to every PIN-configured authenticator.
     /// </para>
     /// <para>
     /// The flag assertions are the point of the test: user presence and user verification are
-    /// independent. Touch is still required (CTAP never lets a client set <c>up</c> on
-    /// makeCredential, so the authenticator default of true applies), while UV must stay clear.
+    /// independent. The SDK omits <c>up</c> on makeCredential for CTAP2.0 compatibility; CTAP2.1/2.3
+    /// permit up:true but prohibit up:false. Required presence follows the authenticator/transport's
+    /// interaction model, not necessarily a separate touch. This HID test expects presence with UV clear.
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -236,7 +236,7 @@ public class WebAuthnClientTests
         await using var session = await state.Device
             .CreateCtap2SessionAsync();
 
-        // A PIN is deliberately set on the authenticator. Discouraged must still skip verification.
+        // Deliberately set a PIN; the expected no-UV result depends on the capabilities described above.
         await NormalizePinAsync(session);
 
         await using var client = CreateClient(session);

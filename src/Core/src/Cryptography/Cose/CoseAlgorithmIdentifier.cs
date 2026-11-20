@@ -18,6 +18,8 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose;
 /// Represents a COSE algorithm identifier.
 /// <remarks>
 /// This enumeration is based on the IANA COSE Algorithms registry.
+/// Registered identity does not establish a valid key/algorithm pairing or provider/applet support.
+/// Registry recommendation status is separate from the identifiers required by a protocol profile.
 /// <para>
 /// https://www.iana.org/assignments/cose/cose.xhtml#algorithms
 /// </para>
@@ -26,7 +28,7 @@ namespace Yubico.YubiKit.Core.Cryptography.Cose;
 public enum CoseAlgorithmIdentifier
 {
     /// <summary>
-    /// No algorithm specified.
+    /// Local sentinel for no selected algorithm. Zero is reserved in the IANA registry.
     /// </summary>
     None = 0,
 

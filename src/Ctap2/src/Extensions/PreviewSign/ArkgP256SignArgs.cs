@@ -29,15 +29,15 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <para>
 /// <b>Memory ownership:</b> Both <see cref="KeyHandle"/> and <see cref="Context"/> are
 /// <see cref="ReadOnlyMemory{T}"/> passthroughs — the encoder reads them at CBOR-write time
-/// and never copies. The caller owns the underlying buffers and is responsible for zeroing
-/// any sensitive material after the request is on the wire (see repo CLAUDE.md "Security"
-/// section: ROM passthrough is safe in record types because all copies reference the same
-/// caller-owned memory).
+/// without cloning the input into this record. Encoding nevertheless creates independent CBOR
+/// copies. Keep caller storage stable through encoding and awaited transmission, then clear it
+/// if application-sensitive. Neither this record nor its encoded copies have a disposal owner.
 /// </para>
 /// <para>
 /// <b>Algorithm identifier:</b> <see cref="CoseAlgorithm.ArkgP256"/> (<c>-65539</c>) — this is
 /// the wire signing-op alg, not the seed-key COSE-key alg (<c>-65700</c>). See
 /// <see cref="CoseAlgorithm.ArkgP256"/> XML doc for the full disambiguation.
+/// These are experimental profile identifiers, not production or full Internet-Draft conformance.
 /// </para>
 /// </remarks>
 public sealed record class ArkgP256SignArgs : CoseSignArgs
@@ -58,7 +58,8 @@ public sealed record class ArkgP256SignArgs : CoseSignArgs
     private const int ArkgP256KeyHandleLength = ArkgTagLength + Sec1UncompressedP256Length;
 
     /// <summary>
-    /// Maximum ARKG context length, bounded by the HKDF single-byte length-prefix encoding.
+    /// Maximum ARKG context length from draft-bradleylundberg-cfrg-arkg-10 §2.3's explicit algorithm bound,
+    /// not the representable capacity of its one-byte length prefix.
     /// </summary>
     private const int MaxContextLength = 64;
 
@@ -89,8 +90,7 @@ public sealed record class ArkgP256SignArgs : CoseSignArgs
     public ArkgP256SignArgs(ReadOnlyMemory<byte> keyHandle, ReadOnlyMemory<byte> context)
     {
         // 81-byte fixed shape: 16-byte HMAC tag || 65-byte SEC1 uncompressed P-256 point.
-        // Hard-validate at construct time so accidental concatenations / bad hex decodes fail
-        // before they reach firmware (which would just return CTAP2_ERR_INVALID_OPTION).
+        // Validate lengths locally; this does not validate the SEC1 prefix/point or predict a device error.
         if (keyHandle.Length != ArkgP256KeyHandleLength)
         {
             throw new ArgumentException(

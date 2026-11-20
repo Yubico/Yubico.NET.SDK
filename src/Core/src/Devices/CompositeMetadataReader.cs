@@ -22,13 +22,13 @@ namespace Yubico.YubiKit.Core.Devices;
 ///     Best-effort read of read-only <see cref="DeviceInfo"/> from a merged physical device for metadata only.
 /// </summary>
 /// <remarks>
-///     Distinct from <see cref="DiscoveryIdentityReader"/>: this is decoupled from merge correctness. It makes
-///     a single pass over the device's available transports in preference order (CCID → OTP HID → FIDO HID)
-///     with NO retries and a hard total wall-clock budget shared across all transports, so a busy or slow
-///     interface cannot stall discovery — a read that exceeds the remaining budget is abandoned, not aborted
-///     (see <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync" />), and the reader falls through to the next
-///     transport if budget remains. Total failure returns <c>null</c>; the merge never depends on the result.
-///     Transport preference is CCID → OTP HID → FIDO HID, matching the Rust reference.
+///     Runs after grouping, independently of <see cref="DiscoveryIdentityReader"/>. It makes one pass over
+///     available transports in preference order (CCID → OTP HID → FIDO HID), without retrying a failed transport.
+///     Each read receives the remaining caller-wait budget from a shared stopwatch. A read exceeding that
+///     remainder abandons the wait, while dispatched work retains its ownership through cleanup (see
+///     <see cref="DiscoveryDeviceInfoReader.ReadBoundedAsync"/>). After a failure the next transport is tried
+///     if budget remains. Total failure returns null; the already-computed grouping stays unchanged.
+///     Caller cancellation propagates rather than falling through to another transport.
 /// </remarks>
 internal static class CompositeMetadataReader
 {
@@ -52,8 +52,8 @@ internal static class CompositeMetadataReader
             if (DeviceConnectionRegistry.IsInterfaceInUse(device, connection))
             {
                 // Never disturb an interface this process is using (a discovery SELECT on a second shared
-                // CCID handle would deselect the session's applet). Other interfaces of the same physical
-                // key are independent USB interfaces and remain safe to read.
+                // CCID handle can change the session's selected applet). The next available interface can
+                // still be attempted under its own discovery admission and remaining wait budget.
                 logger.LogDebug(
                     "Metadata read for {DeviceId} over {Connection} skipped: interface has a live connection in this process; trying next transport.",
                     device.DeviceId,

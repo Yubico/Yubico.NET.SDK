@@ -15,7 +15,6 @@
 using NSubstitute;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Ctap2.BioEnrollment;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.BioEnrollment;
@@ -23,6 +22,14 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.BioEnrollment;
 /// <summary>
 /// Tests for FingerprintBioEnrollment operations.
 /// </summary>
+/// <remarks>
+/// Mock replies and all-zero authentication tags exercise current encoding/decoding and
+/// call counts, not a fingerprint sensor or standard transcript interoperability. Sensor
+/// and timeout assertions preserve the helper's known nonstandard fields. Flat inventory
+/// replies and InvalidCommand-as-empty likewise model current limitations, not the standard
+/// array/InvalidOption behavior. Cancel/rename/remove tests count one send without inspecting
+/// its payload. Required-field failures, real timeout and cancellation recovery are not covered.
+/// </remarks>
 public class FingerprintBioEnrollmentTests
 {
     private readonly ICtap2Session _mockSession;
@@ -97,8 +104,8 @@ public class FingerprintBioEnrollmentTests
         // Act
         await bioEnroll.GetFingerprintSensorInfoAsync(TestContext.Current.CancellationToken);
 
-        // Assert - request format is [command][cbor_payload]
-        // First byte is command, rest is CBOR
+        // Assert the current modality-only map; Section 6.7.3 requires subCommand=7 too.
+        // The prefix is skipped, not asserted to equal a particular command byte here.
         Assert.True(capturedRequest.Length > 1, "Request should have command + payload");
         var payload = capturedRequest.Slice(1); // Skip command byte
         var reader = new CborReader(payload, CborConformanceMode.Lax);
@@ -159,7 +166,7 @@ public class FingerprintBioEnrollmentTests
         for (var i = 0; i < mapCount; i++)
         {
             var key = reader.ReadInt32();
-            if (key == 6) // timeout key
+            if (key == 6) // Current nonstandard timeout field; standard top-level key 6 is Boolean getModality.
             {
                 hasTimeout = true;
                 Assert.Equal(15000, reader.ReadInt32());
@@ -202,7 +209,7 @@ public class FingerprintBioEnrollmentTests
         var enrollResponse = CreateEnrollmentResponse(
             templateId,
             FingerprintSampleStatus.TooFast,
-            3); // Remaining doesn't decrease
+            3); // Supplied count; this test asserts only the decoded TooFast status.
 
         _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
@@ -264,7 +271,7 @@ public class FingerprintBioEnrollmentTests
     [Fact]
     public async Task EnumerateEnrollmentsAsync_WhenNoTemplates_ReturnsEmptyList()
     {
-        // Arrange
+        // Arrange unsupported InvalidCommand, not the standard no-enrollment InvalidOption status.
         _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
@@ -374,14 +381,14 @@ public class FingerprintBioEnrollmentTests
         // Act
         await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        // Assert - FakePinUvAuthProtocol records calls
+        // Assert only that begin called Authenticate; neither all operations nor authenticated bytes are checked.
         Assert.True(_fakeProtocol.AuthenticateWasCalled);
     }
 
     [Fact]
     public async Task EnrollmentWorkflow_CompletesSuccessfully()
     {
-        // Arrange - simulate a complete enrollment workflow
+        // Arrange a queue-driven simulation; every next reply repeats the ID, so standard-permitted omission is untested.
         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
 
         var responses = new Queue<byte[]>(
@@ -391,7 +398,7 @@ public class FingerprintBioEnrollmentTests
             CreateEnrollmentResponse(templateId, FingerprintSampleStatus.TooFast, 3), // Rejected sample
             CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 2),
             CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 1),
-            CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 0) // Complete!
+            CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 0) // Decoded zero, not sensor persistence proof.
         ]);
 
         _mockSession.SendCborRequestAsync(
@@ -401,7 +408,8 @@ public class FingerprintBioEnrollmentTests
 
         var bioEnroll = CreateBioEnrollment();
 
-        // Act - simulate enrollment loop
+        // Simulated loop reuses each reply's ID. Real callers must retain begin's ID separately:
+        // standard next replies need not repeat it, a case this fixture does not cover.
         var result = await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
         Assert.False(result.IsComplete);
         Assert.Equal(4, result.RemainingSamples);
@@ -416,7 +424,7 @@ public class FingerprintBioEnrollmentTests
         Assert.Equal(0, result.RemainingSamples);
     }
 
-    // Helper methods to create CBOR responses
+    // Synthetic selected-field replies; the template helper emits the current flat, nonstandard inventory shape.
 
     private static byte[] CreateSensorInfoResponse(FingerprintKind kind, int maxSamples)
     {
@@ -464,7 +472,7 @@ public class FingerprintBioEnrollmentTests
 }
 
 /// <summary>
-/// Fake implementation of IPinUvAuthProtocol for testing.
+/// Call-recording fake with zero tags and identity encryption/decryption; not a protocol-conformance implementation.
 /// </summary>
 internal sealed class FakeBioPinUvAuthProtocol : IPinUvAuthProtocol
 {

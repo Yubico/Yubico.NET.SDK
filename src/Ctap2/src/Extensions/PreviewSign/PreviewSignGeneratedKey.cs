@@ -36,10 +36,11 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// a credential with the previewSign extension enabled.
 /// </para>
 /// <para>
-/// The generated key material enables offline derivation of multiple public
-/// keys from a single credential, each identified by a unique context string.
-/// The YubiKey can sign with any derived key when provided the corresponding
-/// ARKG key handle and context.
+/// The public seed permits offline derivations using input keying material and a context. It is not
+/// proof of attestation, device identity, key binding or uniqueness for every different context.
+/// Memory supplied to this object is borrowed; derived points/handles and copied contexts have no
+/// disposal owner. Public points are not secrets, but application-sensitive context/handle storage
+/// should not be logged and must follow the application's lifetime policy.
 /// </para>
 /// </remarks>
 public sealed class PreviewSignGeneratedKey
@@ -62,6 +63,11 @@ public sealed class PreviewSignGeneratedKey
     /// <summary>
     /// Gets the algorithm identifier for the derived key.
     /// </summary>
+    /// <remarks>
+    /// Extraction paths currently disagree: TryGetGeneratedKey supplies seed marker -65700, while
+    /// PreviewSignCbor.TryExtractGeneratedKey supplies the seed's derived algorithm (typically -9).
+    /// DerivePublicKey does not dispatch on this property; its verifier is fixed to P-256/SHA-256.
+    /// </remarks>
     public CoseAlgorithm DerivedKeyAlgorithm { get; init; }
 
     /// <summary>
@@ -97,9 +103,9 @@ public sealed class PreviewSignGeneratedKey
     /// YubiKey when provided with the corresponding ARKG key handle and context.
     /// </para>
     /// <para>
-    /// Multiple independent public keys can be derived from the same generated
-    /// key by using different context strings. Each context produces a unique
-    /// derived key pair.
+    /// Different input keying material/context values provide derivation/domain-separation inputs;
+    /// this helper does not establish unconditional uniqueness or full conformance to the cited ARKG
+    /// Internet-Draft. Context is limited to 64 bytes by the experimental algorithm's explicit bound.
     /// </para>
     /// <para>
     /// To request an ESP256-split-ARKG signature with this helper, pass the returned
@@ -115,8 +121,7 @@ public sealed class PreviewSignGeneratedKey
     /// unique to the derivation context.
     /// </param>
     /// <param name="ctx">
-    /// Context string for domain separation. Different contexts produce
-    /// different derived keys from the same input keying material.
+    /// Borrowed context bytes for domain separation (0–64 bytes); copied into the returned result.
     /// </param>
     /// <returns>
     /// A <see cref="PreviewSignDerivedKey"/> containing the derived public key,

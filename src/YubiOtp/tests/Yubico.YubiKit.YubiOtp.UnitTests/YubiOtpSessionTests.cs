@@ -320,20 +320,10 @@ public class YubiOtpSessionTests
                 Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
         }
 
-        // NOTE: HmacSha1SlotConfiguration/YubicoOtpChallengeResponseSlotConfiguration key-length
-        // validation used to have sham "NeverInitiatesDeviceIO" tests here that constructed a
-        // SlotConfiguration standalone (never wired to any session/connection) and asserted an
-        // unrelated fake connection received no calls -- trivially true regardless of whether
-        // pre-flight validation exists. They were removed because:
-        //   1. The constructors validate key length before any SlotConfiguration instance can
-        //      exist, so an invalid-length key can never reach PutConfigurationAsync (or any
-        //      session/backend) in the first place -- there is no "through the session" path to
-        //      exercise here, unlike CalculateYubicoOtpAsync's challenge validation above.
-        //   2. Genuine, session-independent constructor-validation coverage already exists in
-        //      SlotConfigurationTests.cs (e.g. HmacSha1_ShortKey_Throws/YubicoOtp equivalents).
-        // ISC-29/ISC-29.1 (invalid-length key inputs fail before device I/O) remain proven above
-        // by CalculateYubicoOtpAsync_ChallengeTooShort/TooLong_ThrowsBeforeAnyDeviceIO, which
-        // genuinely exercises the session -> backend -> fake-connection path.
+        // Mode-specific constructors reject wrong key lengths before a configuration can reach the
+        // session; SlotConfigurationTests covers those constructors independently. The challenge-length
+        // tests above exercise the session/fake-connection path and establish no I/O for bad challenges,
+        // not key validation or real-device SmartCard challenge support.
     }
 
     public class NdefUriEncoding

@@ -8,9 +8,17 @@ using SharedSelector = Yubico.YubiKit.Cli.Shared.Device.DeviceSelector;
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
 
 /// <summary>
-/// CTAP2 eligibility and noninteractive preference. Sessions enforce the FIDO AID and firmware requirements:
-/// USB SmartCard requires firmware 5.8+, while NFC SmartCard remains supported.
+/// Selects exposed FIDO HID or SmartCard candidates, preferring FIDO HID without interaction.
 /// </summary>
+/// <remarks>
+/// Session creation selects the FIDO AID and enforces the USB SmartCard firmware 5.8.0+ gate;
+/// NFC SmartCard uses the current connection's NFC classification and requires the FIDO AID.
+/// Interface eligibility alone can admit SmartCard-only devices without CTAP support. The shared
+/// selector uses cancellable prompts and best-effort display metadata. Both reset flows select again
+/// after reinsertion without correlating the new selection to the earlier key. The interactive menu
+/// reuses its earlier transport choice; the command-line flow chooses from the later selection.
+/// The operator must verify the physical target; selection does not enforce continuity.
+/// </remarks>
 public static class DeviceSelector
 {
     private static readonly SharedSelector Selector = new(

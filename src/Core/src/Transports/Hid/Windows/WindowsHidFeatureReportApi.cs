@@ -14,6 +14,11 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 /// The owner serializes Open, GET/SET and CloseOnce. No native call retains the borrowed report
 /// after return. Controlled tests cover borrowing and release classification; Windows native and
 /// hardware validation must exercise the actual imports and descriptor acquisition separately.
+/// Feature I/O uses HidD_GetFeature/HidD_SetFeature, not ReadFile/WriteFile, so open requests zero
+/// desired access without a read/write fallback. The collection, ACL, driver, process token and existing
+/// handles' sharing policies still govern open and transfer success. Metadata acquisition does not prove
+/// feature-I/O permission or successful transfer; elevation is not a universal prerequisite. FILE_SHARE.ALL
+/// neither overrides another handle's sharing restrictions nor acquires a grouped SDK claim.
 /// </remarks>
 internal sealed class WindowsHidFeatureReportApi : IWindowsHidFeatureReportApi
 {

@@ -28,8 +28,13 @@ public static class FingerprintModality
 }
 
 /// <summary>
-/// Fingerprint capture sample status codes per CTAP2.1 specification.
+/// Fingerprint capture feedback as currently modeled by the SDK.
 /// </summary>
+/// <remarks>
+/// Values 0x00-0x0A match CTAP 2.1 (2022-06-21 errata), Section 6.7.
+/// The final three member names do not match that standard table; consult their remarks
+/// rather than treating their names as standardized device feedback.
+/// </remarks>
 public enum FingerprintSampleStatus
 {
     /// <summary>
@@ -88,18 +93,21 @@ public enum FingerprintSampleStatus
     MergeFailure = 0x0A,
 
     /// <summary>
-    /// Data storage full (0x0B).
+    /// Local member for feedback value 0x0B.
     /// </summary>
+    /// <remarks>The standard means fingerprint already exists, not storage full.</remarks>
     StorageFull = 0x0B,
 
     /// <summary>
-    /// No user activity (timeout) (0x0C).
+    /// Local member for feedback value 0x0C.
     /// </summary>
+    /// <remarks>The cited standard leaves 0x0C unused; no-user-activity is 0x0D.</remarks>
     NoUserActivity = 0x0C,
 
     /// <summary>
-    /// No user presence detected (0x0D).
+    /// Local member for feedback value 0x0D.
     /// </summary>
+    /// <remarks>The standard means no touch/swipe activity. No finger-lift transition is 0x0E.</remarks>
     NoUserPresence = 0x0D
 }
 
@@ -107,7 +115,10 @@ public enum FingerprintSampleStatus
 /// Information about the fingerprint sensor capabilities.
 /// </summary>
 /// <remarks>
-/// Returned by authenticatorBioEnrollment getFingerprintSensorInfo sub-command.
+/// Models selected sensor response fields. CTAP 2.1 (2022-06-21 errata), Section 6.7.3,
+/// also supplies maxTemplateFriendlyName at key 8, which is available only through RawData
+/// here. The current helper's sensor request omits the required subcommand. A decoded
+/// object does not establish complete or valid standard sensor-info exchange.
 /// </remarks>
 public sealed class FingerprintSensorInfo
 {
@@ -117,7 +128,7 @@ public sealed class FingerprintSensorInfo
     public ReadOnlyMemory<byte> RawData { get; private init; }
 
     /// <summary>
-    /// Gets the fingerprint kind (touch or swipe).
+    /// Gets the decoded fingerprint kind, defaulting to Touch when key 2 is missing.
     /// </summary>
     public FingerprintKind FingerprintKind { get; private init; }
 
@@ -125,14 +136,17 @@ public sealed class FingerprintSensorInfo
     /// Gets the maximum number of samples required for enrollment.
     /// </summary>
     /// <remarks>
-    /// This is a hint to the platform about the expected number of captures.
-    /// Actual enrollment may complete with fewer samples.
+    /// This reports the maximum good samples, not a limit on total capture attempts:
+    /// rejected captures may not count. Missing key 3 currently defaults to zero, so zero
+    /// is not evidence that no samples are required. This decoder does not validate field presence.
     /// </remarks>
     public int MaxCaptureSamplesRequiredForEnroll { get; private init; }
 
     /// <summary>
-    /// Gets the maximum number of templates that can be stored.
+    /// Gets the optional integer this decoder interprets as maximum template count at key 4.
     /// </summary>
+    /// <remarks>CTAP 2.1 Section 6.7.3 does not define this sensor field. No original vendor
+    /// definition establishes its meaning or availability; it is not qualified capacity information.</remarks>
     public int? MaxTemplateCount { get; private init; }
 
     /// <summary>
@@ -165,7 +179,7 @@ public sealed class FingerprintSensorInfo
                     maxSamples = reader.ReadInt32();
                     break;
 
-                case 4: // maxTemplateCount (0x04) - vendor extension
+                case 4: // Locally modeled maxTemplateCount; not a defined standard sensor-info field.
                     maxTemplates = reader.ReadInt32();
                     break;
 
@@ -214,12 +228,14 @@ public sealed class EnrollmentSampleResult
     public ReadOnlyMemory<byte> RawData { get; private init; }
 
     /// <summary>
-    /// Gets the current template ID for this enrollment.
+    /// Gets the template ID decoded from key 4, or empty memory if it is absent.
     /// </summary>
+    /// <remarks>Retain the begin-response ID separately. CTAP 2.1 Section 6.7.4 does not
+    /// require next-sample responses to repeat it; this decoder does not preserve earlier IDs.</remarks>
     public ReadOnlyMemory<byte> TemplateId { get; internal init; }
 
     /// <summary>
-    /// Gets the status of the last sample capture.
+    /// Gets decoded sample feedback, defaulting to Good when key 5 is missing.
     /// </summary>
     public FingerprintSampleStatus LastSampleStatus { get; internal init; }
 
@@ -227,13 +243,16 @@ public sealed class EnrollmentSampleResult
     /// Gets the number of remaining samples needed to complete enrollment.
     /// </summary>
     /// <remarks>
-    /// A value of 0 indicates enrollment is complete.
+    /// In a valid sample response, zero reports completion. This decoder also defaults
+    /// missing key 6 to zero and does not validate operation-specific required fields.
+    /// The value is device feedback, not a verified persistence result or an SDK sample budget.
     /// </remarks>
     public int RemainingSamples { get; internal init; }
 
     /// <summary>
-    /// Gets whether the enrollment is complete.
+    /// Gets whether RemainingSamples equals zero, including its missing-field default.
     /// </summary>
+    /// <remarks>An empty map currently produces true; this property alone is not proof of successful enrollment.</remarks>
     public bool IsComplete => RemainingSamples == 0;
 
     /// <summary>
@@ -241,6 +260,11 @@ public sealed class EnrollmentSampleResult
     /// </summary>
     /// <param name="data">The CBOR-encoded response data.</param>
     /// <returns>The decoded enrollment result.</returns>
+    /// <remarks>
+    /// Copies the complete borrowed response and reads keys 4/5/6. Missing fields retain
+    /// empty ID, Good status and zero remaining count; required-field validation is absent.
+    /// These defaults must not be treated as valid standard operation responses.
+    /// </remarks>
     public static EnrollmentSampleResult Decode(ReadOnlyMemory<byte> data)
     {
         ReadOnlyMemory<byte> rawData = data.ToArray();
@@ -289,8 +313,13 @@ public sealed class EnrollmentSampleResult
 }
 
 /// <summary>
-/// Information about an enrolled fingerprint template.
+/// Metadata identifying and naming an enrolled fingerprint, not biometric template sample bytes.
 /// </summary>
+/// <remarks>
+/// The current decoder reads a flat map with ID/name at keys 4/7. CTAP 2.1 (2022-06-21 errata),
+/// Section 6.7, instead defines nested TemplateInfo with required ID key 1 and optional name
+/// key 2, inside the inventory's key-7 array. This decoder does not implement that schema.
+/// </remarks>
 public sealed class TemplateInfo
 {
     /// <summary>
@@ -304,10 +333,11 @@ public sealed class TemplateInfo
     public string? FriendlyName { get; internal init; }
 
     /// <summary>
-    /// Gets the number of samples captured for this template.
+    /// Gets the optional integer locally interpreted as a sample count at key 8.
     /// </summary>
     /// <remarks>
-    /// This is a vendor extension and may not be available on all authenticators.
+    /// No original vendor definition establishes this interpretation. Standard envelope
+    /// key 8 is maxTemplateFriendlyName, not sample count, and nested TemplateInfo has no such field.
     /// </remarks>
     public int? SampleCount { get; internal init; }
 
@@ -343,11 +373,11 @@ public sealed class TemplateInfo
                     templateId = reader.ReadByteString();
                     break;
 
-                case 7: // templateFriendlyName (0x07)
+                case 7: // Local flat-name field, not the standard nested TemplateInfo key 2.
                     friendlyName = reader.ReadTextString();
                     break;
 
-                case 8: // sampleCount (0x08) - vendor extension
+                case 8: // Local sampleCount interpretation; no established vendor definition.
                     sampleCount = reader.ReadInt32();
                     break;
 
@@ -383,9 +413,13 @@ public sealed class EnrollmentEnumerationResult
     /// </summary>
     /// <param name="data">The CBOR-encoded response data.</param>
     /// <returns>The decoded enumeration result containing the first template.</returns>
+    /// <remarks>
+    /// Wraps one flat decoded TemplateInfo. This does not parse the all-template array
+    /// required by CTAP 2.1 Section 6.7.6, and is not a complete standard inventory decoder.
+    /// </remarks>
     public static EnrollmentEnumerationResult Decode(ReadOnlyMemory<byte> data)
     {
-        // The response contains a single template info
+        // Current flat-template wrapper, not the standard key-7 array of nested TemplateInfo maps.
         var template = TemplateInfo.Decode(data);
 
         return new EnrollmentEnumerationResult

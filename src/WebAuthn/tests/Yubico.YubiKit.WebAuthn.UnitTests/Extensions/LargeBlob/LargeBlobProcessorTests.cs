@@ -27,7 +27,8 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.LargeBlob;
 
 /// <summary>
 ///     WebAuthn largeBlob (L3 §10.1.5) over CTAP largeBlobKey (§12.3) and authenticatorLargeBlobs (§6.10), through the
-///     extension sessions: the shape of python-fido2's LargeBlobExtension and yubikit-android's LargeBlobExtension.
+///     extension sessions. These mocked storage tests cover the SDK's supported route, not every
+///     WebAuthn input constraint or authenticator capability.
 /// </summary>
 public class LargeBlobProcessorTests
 {
@@ -54,9 +55,9 @@ public class LargeBlobProcessorTests
         return reader.ReadTextString() == "largeBlobKey" && reader.ReadBoolean();
     }
 
-    // ---- registration (#5) ----
+    // ---- registration ----
 
-    /// <summary>CTAP §12.3: without rk the authenticator answers INVALID_OPTION, so a non-discoverable registration asks for nothing and reports supported: false (L3 §10.1.5).</summary>
+    /// <summary>CTAP §12.3 requires rk:true for a key request; this Preferred non-discoverable fixture sends none and reports false.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1613")]
     public async Task Registration_PreferredWithoutResidentKey_SendsNothingAndReportsUnsupported()
@@ -90,7 +91,7 @@ public class LargeBlobProcessorTests
         Assert.Equal(keyReturned, result?.LargeBlob?.Supported);
     }
 
-    /// <summary>L3 §10.1.5: "If support is required and the authenticator does not support large blobs, return ... NotSupportedError".</summary>
+    /// <summary>The SDK rejects Required when this authenticator lacks its supported storage route; this does not cover every Required registration path.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1613")]
     public void Registration_RequiredOnUnsupportingAuthenticator_IsNotSupported()
@@ -135,7 +136,12 @@ public class LargeBlobProcessorTests
         Assert.Null(result?.LargeBlob?.Written);
     }
 
-    /// <summary>L3 §10.1.5 write: needs the LargeBlobWrite token permission (CTAP §6.10.2); written is true on success.</summary>
+    /// <summary>The SDK requests LargeBlobWrite for a write and reports true when mocked storage succeeds.</summary>
+    /// <remarks>
+    /// The null allow list exercises a current validation gap, not WebAuthn permission to write
+    /// without exactly one original allowed credential. CTAP itself also permits pinless writes in
+    /// unconfigured-device cases that the current SDK storage path does not support.
+    /// </remarks>
     [Fact]
     public async Task Authentication_Write_NeedsLargeBlobWritePermissionAndReportsWritten()
     {
@@ -156,7 +162,7 @@ public class LargeBlobProcessorTests
         Assert.True(result?.LargeBlob?.Written);
     }
 
-    /// <summary>L3 §10.1.5: "set written to true if the write succeeded and false otherwise" — a storage failure is reported, not thrown.</summary>
+    /// <summary>This CTAP storage-write failure becomes Written=false; the assertion does not cover read errors or cancellation.</summary>
     [Fact]
     public async Task Authentication_WriteFails_ReportsWrittenFalse()
     {
@@ -173,7 +179,7 @@ public class LargeBlobProcessorTests
         Assert.False(result?.LargeBlob?.Written);
     }
 
-    /// <summary>No largeBlobKey in the assertion (credential made without it): no storage access, no output.</summary>
+    /// <summary>No largeBlobKey in this assertion: no storage access and no output; the fixture does not establish why the key is absent.</summary>
     [Fact]
     public async Task Authentication_NoKeyInAssertion_ProducesNoOutput()
     {

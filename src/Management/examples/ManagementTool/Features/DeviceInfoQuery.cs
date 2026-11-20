@@ -23,7 +23,10 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Features;
 /// <para>
 /// This class provides examples for querying device metadata including
 /// serial number, firmware version, form factor, and enabled capabilities.
+/// Current Core FIPS masks have a bit-mapping issue and flagged form-factor values can miss named enum
+/// values; do not infer application approval or product eligibility from this display metadata.
 /// </para>
+/// <para>These wrappers convert operation exceptions, including cancellation, into failure results.</para>
 /// </remarks>
 public static class DeviceInfoQuery
 {
@@ -36,7 +39,7 @@ public static class DeviceInfoQuery
     /// <example>
     /// <code>
     /// await using var connection = await device.ConnectAsync&lt;ISmartCardConnection&gt;(ct);
-    /// await using var session = await ManagementSession.CreateAsync(connection, ct);
+    /// await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
     /// 
     /// var result = await DeviceInfoQuery.GetDeviceInfoAsync(session, ct);
     /// if (result.Success &amp;&amp; result.DeviceInfo.HasValue)

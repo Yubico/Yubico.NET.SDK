@@ -18,6 +18,13 @@ using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.Core.Devices;
 
+/// <summary>Device metadata observed by discovery or read through a device-information protocol.</summary>
+/// <remarks>
+///     Supported applications describe device capability; enabled applications describe configuration on each
+///     transport. These values describe an observation, not current presence or operation success. Decoding
+///     supplies defaults for absent optional fields, so false, zero, and empty values can also mean unreported.
+///     <see cref="ChallengeResponseTimeout"/> retains its source memory; copying this struct shares that memory.
+/// </remarks>
 public readonly record struct DeviceInfo
 {
     private const int TAG_USB_SUPPORTED = 0x01;
@@ -41,38 +48,74 @@ public readonly record struct DeviceInfo
     private const int TAG_FPS_VERSION = 0x20;
     private const int TAG_STM_VERSION = 0x21;
 
+    /// <summary>Whether the reported form-factor byte has the Security Key product flag (0x40).</summary>
     public required bool IsSky { get; init; }
+    /// <summary>Whether the reported form-factor byte has the FIPS product flag (0x80).</summary>
+    /// <remarks>This manufacturing flag is separate from application approval or operation-specific FIPS requirements.</remarks>
     public required bool IsFips { get; init; }
+    /// <summary>The reported form-factor byte, including any product flags and unnamed numeric values.</summary>
+    /// <remarks>For example, 0x81 remains an unnamed value rather than <see cref="FormFactor.UsbAKeychain"/>.</remarks>
     public required FormFactor FormFactor { get; init; }
+    /// <summary>The serial decoded from four big-endian bytes, or null when the response omits it.</summary>
     public int? SerialNumber { get; init; }
+    /// <summary>Whether the configuration-lock field equals 1; false when absent.</summary>
     public required bool IsLocked { get; init; }
+    /// <summary>The applications reported enabled over USB; <see cref="DeviceCapabilities.None"/> when absent.</summary>
     public required DeviceCapabilities UsbEnabled { get; init; }
+    /// <summary>The applications reported supported over USB; <see cref="DeviceCapabilities.None"/> when absent.</summary>
     public required DeviceCapabilities UsbSupported { get; init; }
+    /// <summary>The applications reported enabled over NFC; <see cref="DeviceCapabilities.None"/> when absent.</summary>
     public required DeviceCapabilities NfcEnabled { get; init; }
+    /// <summary>The applications reported supported over NFC; <see cref="DeviceCapabilities.None"/> when absent.</summary>
     public required DeviceCapabilities NfcSupported { get; init; }
+    /// <summary>The decoded reset-blocked application field; <see cref="DeviceCapabilities.None"/> when absent.</summary>
     public required DeviceCapabilities ResetBlocked { get; init; }
+    /// <summary>The decoded FIPS-capable application field; <see cref="DeviceCapabilities.None"/> when absent.</summary>
+    /// <remarks>Interpretation depends on the response encoding; this value alone establishes no profile conformance.</remarks>
     public required DeviceCapabilities FipsCapabilities { get; init; }
+    /// <summary>The decoded FIPS-approved application field; <see cref="DeviceCapabilities.None"/> when absent.</summary>
+    /// <remarks>Apply the application's device, configuration, and operation requirements separately.</remarks>
     public required DeviceCapabilities FipsApproved { get; init; }
+    /// <summary>Whether the PIN-complexity field equals 1; false when absent.</summary>
     public required bool HasPinComplexity { get; init; }
+    /// <summary>The UTF-8 part number, or null when absent, empty, or invalid UTF-8.</summary>
     public required string? PartNumber { get; init; }
+    /// <summary>Whether the NFC-restriction field equals 1; false when absent.</summary>
     public required bool IsNfcRestricted { get; init; }
+    /// <summary>The CCID inactivity timeout in seconds, decoded from two big-endian bytes; zero when absent.</summary>
+    /// <remarks>The timeout is meaningful with <see cref="DeviceFlags.TouchEject"/> enabled.</remarks>
     public required ushort AutoEjectTimeout { get; init; }
+    /// <summary>The OTP challenge-response timeout as one byte containing seconds, or empty memory when absent.</summary>
+    /// <remarks>
+    ///     Decoding retains a view of the input TLV's value. Keep that TLV storage alive and unchanged while
+    ///     using this value. Caller-supplied memory is likewise shared. The hardware default of 15 seconds
+    ///     is distinct from the decoder's empty-memory default for an omitted field.
+    /// </remarks>
     public required ReadOnlyMemory<byte> ChallengeResponseTimeout { get; init; }
+    /// <summary>The reported device-wide configuration flags, or <see cref="DeviceFlags.None"/> when absent.</summary>
     public required DeviceFlags DeviceFlags { get; init; }
+    /// <summary>The effective firmware version used for compatibility checks.</summary>
+    /// <remarks>A non-final qualifier supplies this version; otherwise the supplied default or reported firmware is used.</remarks>
     public required FirmwareVersion FirmwareVersion { get; init; }
+    /// <summary>The decoded release qualifier, or a final qualifier with iteration zero for the effective default version.</summary>
     public required VersionQualifier VersionQualifier { get; init; }
+    /// <summary>The reported FPS component version, or null when absent or 0.0.0.</summary>
     public FirmwareVersion? FpsVersion { get; init; }
+    /// <summary>The reported STM component version, or null when absent or 0.0.0.</summary>
     public FirmwareVersion? StmVersion { get; init; }
 
+    /// <summary>The firmware's three-part version for a final release, otherwise the qualifier's formatted version.</summary>
     public string VersionName => VersionQualifier.Type == VersionQualifierType.Final
         ? FirmwareVersion.ToString()
         : VersionQualifier.ToString();
 
     /// <summary>Compares every field by value, including the bytes of <see cref="ChallengeResponseTimeout"/>.</summary>
     /// <remarks>
-    ///     The compiler-generated record equality compares <see cref="ReadOnlyMemory{T}"/> by backing reference, so two
-    ///     snapshots decoded from separate response buffers would never be equal. Discovery relies on this comparison
+    ///     The compiler-generated record equality compares <see cref="ReadOnlyMemory{T}"/> by storage identity, so equal
+    ///     timeout bytes from separate response buffers would compare unequal. Discovery relies on this comparison
     ///     to publish <see cref="DeviceUpdated"/> only when metadata actually changed.
+    ///     Equality and hashing read the current timeout bytes; keep their backing storage unchanged while
+    ///     comparing values or using a value as a hash-collection key.
     /// </remarks>
     public bool Equals(DeviceInfo other) =>
         IsSky == other.IsSky &&
@@ -98,6 +141,7 @@ public readonly record struct DeviceInfo
         Equals(FpsVersion, other.FpsVersion) &&
         Equals(StmVersion, other.StmVersion);
 
+    /// <summary>Hashes every field, including the current contents of <see cref="ChallengeResponseTimeout"/>.</summary>
     public override int GetHashCode()
     {
         var hash = new HashCode();
@@ -128,9 +172,16 @@ public readonly record struct DeviceInfo
 
     /// <summary>Decodes device-information TLVs, ignoring unknown tags.</summary>
     /// <remarks>
-    ///     Absent optional fields use zero or null defaults. A supplied firmware version takes precedence
+    ///     Absent optional fields use false, zero, null, or empty-memory defaults. A supplied firmware version takes precedence
     ///     over tag 0x05, but a present firmware field must still have a valid encoding.
+    ///     A qualifier whose type differs from <see cref="VersionQualifierType.Final"/> supplies the effective
+    ///     firmware version, including an unnamed qualifier type. The returned timeout memory borrows its
+    ///     input TLV storage; keep that storage alive and unchanged while using the result.
     /// </remarks>
+    /// <param name="tlvs">Decoded device-information fields. Unknown tags are ignored; duplicate tags are rejected.</param>
+    /// <param name="defaultVersion">Version used in preference to tag 0x05, or null to use that tag.</param>
+    /// <returns>The decoded metadata, including a borrowed timeout value when present.</returns>
+    /// <exception cref="ArgumentException">The collection contains duplicate tags.</exception>
     /// <exception cref="BadResponseException">A known field is malformed or no firmware version is available.</exception>
     public static DeviceInfo CreateFromTlvs(IReadOnlyCollection<Tlv> tlvs, FirmwareVersion? defaultVersion)
     {
@@ -233,7 +284,7 @@ public readonly record struct DeviceInfo
     {
         if (!data.TryGetValue(tag, out var value))
             return DeviceCapabilities.None;
-        // Siblings accept variable-width capability integers; do not impose a two-byte maximum.
+        // Accept nonempty fields here; CapabilityMapper.FromApp determines which bytes are interpreted.
         if (value.IsEmpty)
             throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length 0; expected a capability value.");
         return CapabilityMapper.FromApp(value);
@@ -294,8 +345,7 @@ public readonly record struct DeviceInfo
         if (value.IsEmpty)
             throw new BadResponseException($"Invalid version qualifier tag 0x{tag:X2} length 0; expected an iteration value.");
 
-        // Python uses an integer, Rust fixtures also encode this in one byte. Accept leading-zero
-        // extensions while retaining VersionQualifier's existing unsigned 32-bit numeric range.
+        // Accept leading-zero extensions while retaining VersionQualifier's unsigned 32-bit numeric range.
         uint iteration = 0;
         foreach (var b in value)
         {

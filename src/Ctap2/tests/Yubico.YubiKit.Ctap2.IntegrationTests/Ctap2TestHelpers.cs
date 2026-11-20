@@ -22,15 +22,20 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// <summary>
 /// Helper methods for CTAP2 integration tests.
 /// </summary>
+/// <remarks>These are approved known-PIN device utilities, not production PIN collection or
+/// transaction-safe cleanup examples. PIN/token requests can mutate state or consume retries.</remarks>
 public static class Ctap2TestHelpers
 {
     /// <summary>
     /// Sets the PIN if not already configured, or validates the PIN is correct.
     /// </summary>
+    /// <remarks>Verification requests a token even if the known PIN already matches. The returned
+    /// helper owns its supplied protocol but borrows the session; dispose it when done. A failure
+    /// before return has no disposal guard here, and the discarded verification token is not cleared.</remarks>
     /// <param name="session">The CTAP2 session.</param>
     /// <param name="pin">The PIN as UTF-8 bytes to set or verify.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The ClientPin instance for further operations.</returns>
+    /// <returns>A caller-disposed ClientPin instance, which also disposes the selected protocol.</returns>
     public static async Task<ClientPin> SetOrVerifyPinAsync(
         ICtap2Session session,
         ReadOnlyMemory<byte> pin,
@@ -64,8 +69,12 @@ public static class Ctap2TestHelpers
     }
 
     /// <summary>
-    /// Gets a PIN/UV auth token with credential management permission.
+    /// Requests a credential-management token, or a legacy token according to the version-string heuristic.
     /// </summary>
+    /// <remarks>The heuristic recognizes FIDO_2_1/PRE, not every later version. ClientPin can also
+    /// fall back based on token capability. A legacy request carries no explicit CM permission, so
+    /// this tuple does not guarantee administrative authorization. The caller owns and must clear
+    /// the token; disposing ClientPin disposes its protocol, not the returned token or session.</remarks>
     /// <param name="session">The CTAP2 session.</param>
     /// <param name="pin">The PIN as UTF-8 bytes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -89,7 +98,7 @@ public static class Ctap2TestHelpers
         // Get token with credential management permission
         byte[] pinToken;
 
-        // Check if device supports CTAP 2.1 permissions
+        // Version-string heuristic only; actual token capability and authorization are separate.
         var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
                                    info.Versions.Contains("FIDO_2_1_PRE");
 
@@ -112,6 +121,9 @@ public static class Ctap2TestHelpers
     /// <summary>
     /// Deletes all credentials for the specified relying party.
     /// </summary>
+    /// <remarks>Deletes all enumerated credentials for the RP, not only a credential created by
+    /// this test. Earlier deletions are not rolled back on failure. The result and helpers are
+    /// disposed, but the acquired token is not cleared here. Only NoCredentials is ignored.</remarks>
     /// <param name="session">The CTAP2 session.</param>
     /// <param name="rpId">The relying party ID.</param>
     /// <param name="pin">The PIN.</param>
@@ -154,6 +166,8 @@ public static class Ctap2TestHelpers
     /// <summary>
     /// Computes PIN/UV auth param for MakeCredential.
     /// </summary>
+    /// <remarks>Authenticates the supplied hash bytes only; no RP scope or token permission is
+    /// verified locally. The returned auth-param array is caller-owned and must be cleared.</remarks>
     public static byte[] ComputeMakeCredentialAuthParam(
         IPinUvAuthProtocol protocol,
         byte[] pinToken,
@@ -165,6 +179,8 @@ public static class Ctap2TestHelpers
     /// <summary>
     /// Computes PIN/UV auth param for GetAssertion.
     /// </summary>
+    /// <remarks>Authenticates the supplied hash bytes only; no RP scope or token permission is
+    /// verified locally. The returned auth-param array is caller-owned and must be cleared.</remarks>
     public static byte[] ComputeGetAssertionAuthParam(
         IPinUvAuthProtocol protocol,
         byte[] pinToken,

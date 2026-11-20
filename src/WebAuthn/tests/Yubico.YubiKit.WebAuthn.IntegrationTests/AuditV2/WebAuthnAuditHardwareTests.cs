@@ -37,7 +37,7 @@ public class WebAuthnAuditHardwareTests
                 User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "audit-prf@example.com", "Audit PRF"),
                 PubKeyCredParams = [CoseAlgorithm.Es256],
                 ResidentKey = ResidentKeyPreference.Discouraged,
-                UserVerification = UserVerificationPreference.Preferred, // Preferred isolates PRF from #2 (Required fails with 0x2C)
+                UserVerification = UserVerificationPreference.Preferred, // KnownTestPin makes PIN verification available.
                 Extensions = new RegistrationExtensionInputs(Prf: new PrfInput())
             }, KnownTestPin);
             credentialId = registration.CredentialId.ToArray();
@@ -54,7 +54,7 @@ public class WebAuthnAuditHardwareTests
                 Challenge = RandomNumberGenerator.GetBytes(32),
                 RpId = TestRpId,
                 AllowCredentials = [new PublicKeyCredentialDescriptor(credentialId)],
-                UserVerification = UserVerificationPreference.Preferred, // Preferred isolates PRF from #2 (Required fails with 0x2C)
+                UserVerification = UserVerificationPreference.Preferred, // KnownTestPin makes PIN verification available.
                 Extensions = new AuthenticationExtensionInputs(Prf: new PrfInput { First = "same-prf-input"u8.ToArray() })
             }, KnownTestPin);
             Assert.NotEmpty(matches);

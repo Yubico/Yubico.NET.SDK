@@ -17,14 +17,24 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKit.Ctap2.Crypto;
 
 /// <summary>
-/// Decrypts encrypted credential metadata (encIdentifier, encCredStoreState) 
-/// using PPUAT-derived keys. Requires YubiKey 5.7+.
+/// Decrypts optional GetInfo device-identifier and credential-store-state fields using
+/// keys derived from a persistent PIN/UV auth token (PPUAT).
 /// </summary>
 /// <remarks>
 /// <para>
-/// YubiKey firmware 5.7+ can return encrypted metadata in credential management
-/// operations. These fields can be decrypted by the client using a key derived
-/// from the PPUAT (Persistent PIN/UV Auth Token) via HKDF.
+/// CTAP 2.3 §6.4 defines encIdentifier as a 128-bit device identifier and encCredStoreState as
+/// an opaque 128-bit credential-store state. Each output is a fresh 16-byte IV followed by
+/// 16 bytes of AES-128-CBC ciphertext. They are not per-credential identifiers. Use the matching
+/// persistent token, not an arbitrary ordinary PIN/UV token. These offline helpers do not check
+/// device capabilities, token permissions or the standard field lengths; they accept generic
+/// block-aligned ciphertext, including IV-only input.
+/// </para>
+/// <para>
+/// CBC without padding is not authenticated encryption: a wrong token can return plausible bytes.
+/// A null result is not reliable wrong-token detection. Inputs are borrowed for the call; returned
+/// plaintext and derived keys are caller-owned. Clear those arrays with
+/// CryptographicOperations.ZeroMemory when finished, including after later processing fails.
+/// Clearing the helper's stack key does not guarantee cleanup of all provider or failure-output copies.
 /// </para>
 /// <para>
 /// HKDF parameters:
@@ -45,12 +55,13 @@ public static class EncryptedMetadataDecryptor
     /// Decrypts the encIdentifier field using PPUAT-derived key.
     /// </summary>
     /// <param name="ppuat">The Persistent PIN/UV Auth Token.</param>
-    /// <param name="encIdentifier">The encrypted identifier bytes.</param>
-    /// <returns>The decrypted identifier, or null if decryption fails.</returns>
+    /// <param name="encIdentifier">Borrowed IV-prefixed encIdentifier bytes from GetInfo.</param>
+    /// <returns>Caller-owned plaintext, or null for empty/short input or a caught cryptographic failure.</returns>
     /// <remarks>
     /// <para>
-    /// The encIdentifier is a unique identifier for the credential that is
-    /// encrypted to prevent tracking across sessions. Available on YubiKey 5.7+.
+    /// The plaintext is a device identifier, not a credential ID. Randomized encryption changes the
+    /// ciphertext on each GetInfo output; it does not make the decrypted identifier session-specific.
+    /// No authenticity or correct-token check is performed. Clear the returned plaintext when done.
     /// </para>
     /// </remarks>
     public static byte[]? DecryptIdentifier(ReadOnlySpan<byte> ppuat, ReadOnlySpan<byte> encIdentifier)
@@ -62,12 +73,13 @@ public static class EncryptedMetadataDecryptor
     /// Decrypts the encCredStoreState field using PPUAT-derived key.
     /// </summary>
     /// <param name="ppuat">The Persistent PIN/UV Auth Token.</param>
-    /// <param name="encCredStoreState">The encrypted credential store state bytes.</param>
-    /// <returns>The decrypted state, or null if decryption fails.</returns>
+    /// <param name="encCredStoreState">Borrowed IV-prefixed encCredStoreState bytes from GetInfo.</param>
+    /// <returns>Caller-owned plaintext, or null for empty/short input or a caught cryptographic failure.</returns>
     /// <remarks>
     /// <para>
-    /// The encCredStoreState contains metadata about the credential's storage
-    /// state, encrypted to prevent tracking. Available on YubiKey 5.8+.
+    /// The plaintext describes opaque credential-store state, not an individual credential's metadata.
+    /// No integer or status interpretation, authenticity check or correct-token check is performed.
+    /// Clear the returned plaintext when done.
     /// </para>
     /// </remarks>
     public static byte[]? DecryptCredStoreState(ReadOnlySpan<byte> ppuat, ReadOnlySpan<byte> encCredStoreState)
@@ -80,7 +92,7 @@ public static class EncryptedMetadataDecryptor
     /// </summary>
     /// <param name="ppuat">The Persistent PIN/UV Auth Token.</param>
     /// <param name="info">The context info string (e.g., "encIdentifier").</param>
-    /// <returns>The derived 16-byte AES key.</returns>
+    /// <returns>A caller-owned 16-byte secret AES key; clear it when finished, including on later failure.</returns>
     /// <remarks>
     /// This can be used for custom decryption scenarios. For standard 
     /// encIdentifier/encCredStoreState, prefer the specific decrypt methods.
@@ -114,7 +126,7 @@ public static class EncryptedMetadataDecryptor
         }
 
         // Encrypted data format: [IV (16 bytes) | ciphertext]
-        // Minimum length is 16 bytes for IV (even if plaintext is empty)
+        // This generic helper accepts IV-only input; standard GetInfo fields also have 16 ciphertext bytes.
         if (encryptedData.Length < 16)
         {
             return null;
@@ -135,7 +147,7 @@ public static class EncryptedMetadataDecryptor
 
         try
         {
-            // Decrypt using AES-128-CBC (Java YubiKit format)
+            // AES-128-CBC without padding provides no authentication or wrong-token detection.
             using var aes = Aes.Create();
             aes.SetKey(key);
             aes.Mode = CipherMode.CBC;

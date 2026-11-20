@@ -20,6 +20,7 @@ namespace Yubico.YubiKit.YubiOtp.UnitTests;
 ///     Pins the ownership contract: YubiOTP backends borrow the protocol handed to them and own no
 ///     disposable state, so neither the abstraction nor its implementations advertise <see cref="IDisposable" />.
 ///     Disposal belongs to the session (protocol) and to whoever created the connection.
+///     These reflection assertions check advertised IDisposable shape, not an exercised teardown path.
 /// </summary>
 public class YubiOtpBackendLifecycleTests
 {

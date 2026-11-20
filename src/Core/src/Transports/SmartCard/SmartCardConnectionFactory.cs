@@ -65,11 +65,14 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     ///     Set it once at start-up, before constructing factories or using <see cref="Devices.YubiKeyManager" />
     ///     for discovery or monitoring. Existing factories and connections retain their selected policy.
     ///     Migration: applications that require the former fallback behavior must explicitly select
-    ///     <see cref="SmartCardSharing.ExclusiveWithSharedFallback" /> and accept shared card-wide security state.
+    ///     <see cref="SmartCardSharing.ExclusiveWithSharedFallback" /> and accept shared application security state.
     ///     <see cref="SmartCardSharing.Shared" /> is also an explicit coexistence opt-in, not an isolation policy.
     /// </remarks>
     /// <example>
     /// <code>
+    /// using Yubico.YubiKit.Core.Devices;
+    /// using Yubico.YubiKit.Core.Transports.SmartCard;
+    ///
     /// // Explicit compatibility opt-in, before any discovery or monitoring:
     /// SmartCardConnectionFactory.DefaultSharing = SmartCardSharing.ExclusiveWithSharedFallback;
     /// var devices = await YubiKeyManager.FindAllAsync();
@@ -101,10 +104,20 @@ public sealed class SmartCardConnectionFactory : ISmartCardConnectionFactory, IR
     /// <summary>Creates a factory that opens card handles with <paramref name="sharing"/>.</summary>
     /// <example>
     /// <code>
-    /// // Explicitly accept shared access for this factory only:
-    /// // Coordinate discovery/monitoring and all other connections to this key before opening directly.
-    /// var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);
-    /// await using var connection = await factory.CreateAsync(reader, cancellationToken);
+    /// using System.Threading;
+    /// using System.Threading.Tasks;
+    /// using Yubico.YubiKit.Core.Sessions;
+    /// using Yubico.YubiKit.Core.Transports.SmartCard;
+    ///
+    /// static async Task SelectPivSharedAsync(IPcscDevice reader, CancellationToken cancellationToken)
+    /// {
+    ///     // Coordinate discovery/monitoring and other connections before this direct open.
+    ///     var factory = new SmartCardConnectionFactory(SmartCardSharing.Shared);
+    ///     await using ISmartCardConnection connection = await factory.CreateAsync(reader, cancellationToken);
+    ///     await using RawSmartCardSession session =
+    ///         await RawSmartCardSession.CreateAsync(connection, cancellationToken);
+    ///     await session.SelectAsync(ApplicationIds.Piv, cancellationToken);
+    /// }
     /// </code>
     /// </example>
     public SmartCardConnectionFactory(SmartCardSharing sharing)

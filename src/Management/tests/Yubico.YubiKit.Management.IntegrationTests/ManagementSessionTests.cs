@@ -24,11 +24,11 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         These tests use xUnit's [Theory] with [WithYubiKey] data attribute which provides:
+///         These tests use [SkippableTheory] with the [WithYubiKey] data attribute, which provides:
 ///         - Automatic device discovery and allow list verification
 ///         - Declarative filtering via attribute properties
-///         - Runs on ALL devices matching the specified criteria
-///         - Support for multiple [WithYubiKey] attributes to test different configurations
+///         - One row per attribute, bound to the first matching authorized device
+///         - Independent binding for multiple attributes, potentially to different physical devices
 ///     </para>
 ///     <para>
 ///         IMPORTANT: Tests will only run on YubiKeys listed in appsettings.json.
@@ -60,11 +60,11 @@ public class ManagementSessionTests
     ///     Verify device has expected capabilities.
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey(MinFirmware = "4.1.0")] // Management requires 4.1.0+
+    [WithYubiKey(MinFirmware = "4.1.0")] // Supported read minimum; not a host-side read preflight assertion.
     public async Task DeviceCapabilities_HasManagementSupport(YubiKeyTestState state) =>
         await state.WithManagementAsync((mgmt, deviceInfo) =>
         {
-            // Verify device has USB support (all devices should have this)
+            // Check this row's cached USB-transport metadata.
             Assert.True(state.IsUsbTransport);
 
             // Verify firmware version is accessible
@@ -75,6 +75,10 @@ public class ManagementSessionTests
     /// <summary>
     ///     Verify form factor matches expected type.
     /// </summary>
+    /// <remarks>
+    ///     Selection and assertions use decoded metadata. They do not validate Core's handling of
+    ///     product flags in the wire form-factor byte; exact filters can miss flagged variants.
+    /// </remarks>
     [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
     [WithYubiKey(FormFactor = FormFactor.UsbCKeychain)]
     [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
@@ -98,17 +102,16 @@ public class ManagementSessionTests
         });
 
     /// <summary>
-    ///     Test filtered by form factor - only runs on Bio keys.
+    ///     Checks cached form-factor metadata for a row selected as a USB-A Bio key; no biometric operation is tested.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(FormFactor = FormFactor.UsbABiometricKeychain)]
     public async Task BiometricFeatures_RequiresBioKey(YubiKeyTestState state) =>
         await state.WithManagementAsync((mgmt, deviceInfo) =>
         {
-            // If we get here, we know we have a Bio key (filter guaranteed it)
+            // The filter and assertion both use the same cached decoded form factor.
             Assert.Equal(FormFactor.UsbABiometricKeychain, deviceInfo.FormFactor);
 
-            // Bio-specific tests would go here
         });
 
     /// <summary>
@@ -127,8 +130,9 @@ public class ManagementSessionTests
         });
 
     /// <summary>
-    ///     Test with multiple [WithYubiKey] attributes - demonstrates running test with different device configurations.
-    ///     This test will run once for each device matching ANY of the specified criteria.
+    ///     Supplies two independently bound rows. The first attribute's two-component firmware string
+    ///     is not parsed by the current harness, so its intended minimum is not applied. The assertion
+    ///     below can therefore fail on an older device that is not reported as a USB-A keychain.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0")]
@@ -136,12 +140,10 @@ public class ManagementSessionTests
     public async Task MultipleConfigurations_TestRunsOnMatchingDevices(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
-            // This test runs on:
-            // - All devices with firmware >= 5.0 (from first attribute)
-            // - All USB-A Keychain devices (from second attribute)
+            // One row has no effective firmware filter; the other requires the decoded USB-A keychain form factor.
             var info = await mgmt.GetDeviceInfoAsync();
 
-            // At least one of the conditions must be true
+            // Intended condition; not guaranteed for the first row while its firmware criterion is malformed.
             var hasModernFirmware = deviceInfo.FirmwareVersion.IsAtLeast(5, 0, 0);
             var isUsbAKeychain = deviceInfo.FormFactor == FormFactor.UsbAKeychain;
             Assert.True(hasModernFirmware || isUsbAKeychain);

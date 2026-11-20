@@ -16,7 +16,7 @@ namespace Yubico.YubiKit.Core.Protocols.Otp.Hid;
 
 /// <summary>
 /// Constants for OTP HID protocol (8-byte feature reports).
-/// Based on the YubiKey OTP slot protocol specification.
+/// Describes the Yubico slot/report layout used by this implementation.
 /// </summary>
 public static class OtpConstants
 {
@@ -66,7 +66,7 @@ public static class OtpConstants
     public const byte SequenceMask = 0x1F;
 
     /// <summary>
-    /// Offset of programming sequence in status byte.
+    /// Offset of the programming sequence byte in the eight-byte status report.
     /// </summary>
     public const int StatusOffsetProgSeq = 4;
 
@@ -81,12 +81,14 @@ public static class OtpConstants
     public const byte ConfigSlotsProgrammedMask = 0b00000011;
 
     /// <summary>
-    /// Offset of response length in the response frame (same as SlotDataSize).
+    /// Legacy assumed response-length offset. The current reader does not use this value;
+    /// inbound data length is command-specific rather than a universal field at byte 64.
     /// </summary>
     public const int ResponseLengthOffset = SlotDataSize;
 
     /// <summary>
-    /// Offset of CRC in the response frame.
+    /// Legacy assumed response-CRC offset. The current reader does not use this value;
+    /// callers validate CRC at the command's expected data length.
     /// </summary>
     public const int ResponseCrcOffset = ResponseLengthOffset + 1;
 

@@ -19,6 +19,10 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// <summary>
 /// Swaps the configurations of slot 1 and slot 2 (ykman otp swap).
 /// </summary>
+/// <remarks>
+/// Device permissions govern the swap; no access code is sent even if the global option was parsed.
+/// JSON mode bypasses confirmation. Both slots are affected and their original secrets are not recoverable.
+/// </remarks>
 public static class SwapCommand
 {
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)

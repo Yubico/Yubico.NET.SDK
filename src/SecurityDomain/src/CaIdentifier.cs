@@ -16,4 +16,7 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 namespace Yubico.YubiKit.SecurityDomain;
 
+/// <summary>A CA identifier and its associated Security Domain key reference.</summary>
+/// <param name="KeyReference">The key reference decoded from the response's reference value.</param>
+/// <param name="Identifier">CA identifier value bytes, without their TLV tag or length; not a certificate or trust proof.</param>
 public sealed record CaIdentifier(KeyReference KeyReference, ReadOnlyMemory<byte> Identifier);

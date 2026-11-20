@@ -392,7 +392,8 @@ internal static class KeyProtocol
     {
         Logger.LogDebug("PIV: Attesting key in slot 0x{Slot:X2}", (byte)slot);
 
-        // The formatter adds a trailing 00 byte for Case 1 commands (no data, no Le)
+        // This command has no data. Core's formatter appends Le, encoded as trailing 00 on the short path.
+        // Describe the emitted bytes separately from any ISO case/profile conformance claim.
         var command = new ApduCommand(Cla, InsAttest, (byte)slot, 0);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
         if (response.SW == SWConstants.InsNotSupported)

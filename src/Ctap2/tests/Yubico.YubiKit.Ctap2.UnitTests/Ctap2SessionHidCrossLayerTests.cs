@@ -5,10 +5,12 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid.MacOS;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
+/// <summary>Exercises framed HID sequencing and borrowed-connection lifetime through a fake macOS bridge.</summary>
+/// <remarks>Assertions cover the scripted cancellation/drain/reuse and pending-disposal cases, not
+/// live macOS I/O or universal recovery. Bound limits test waits, not the SDK's device-operation deadline.</remarks>
 public class Ctap2SessionHidCrossLayerTests
 {
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(5);
@@ -150,6 +152,7 @@ public class Ctap2SessionHidCrossLayerTests
 
     private static byte[] MinimalGetInfoResponse()
     {
+        // Versions-only fake probe; required AAGUID is deliberately absent from this parser fixture.
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(1);
         writer.WriteInt32(0x01);

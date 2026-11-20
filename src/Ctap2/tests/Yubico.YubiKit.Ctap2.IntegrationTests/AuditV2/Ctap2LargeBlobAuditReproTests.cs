@@ -13,6 +13,12 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Ctap2.IntegrationTests.AuditV2;
 
+/// <summary>Human-coordinated storage-format and manual cross-client fixtures on a dedicated test device.</summary>
+/// <remarks>
+/// Setup normalizes the PIN and cleanup deletes all credentials for this RP. The first fixture expects
+/// a small one-fragment array with three-field entries; it is not multichunk or arbitrary-foreign-entry
+/// coverage. Plaintext/key copies are not comprehensively cleared. No cross-client step runs automatically.
+/// </remarks>
 public class Ctap2LargeBlobAuditReproTests
 {
     [SkippableTheory]
@@ -99,7 +105,10 @@ public class Ctap2LargeBlobAuditReproTests
                         }
                         Assert.True(matched);
 
-                        // Cross-client step: hand the largeBlobKey to python-fido2 (LargeBlobs.get_blob) when asked.
+                        // Explicit opt-in secret export: a nonempty AUDIT_LARGE_BLOB_KEY_OUT makes this
+                        // fixture write the largeBlobKey as immutable hexadecimal text to that file.
+                        // Only use for human-authorized interop on a dedicated device with a protected
+                        // destination and planned file/environment cleanup; this is not safe key storage.
                         if (Environment.GetEnvironmentVariable("AUDIT_LARGE_BLOB_KEY_OUT") is { Length: > 0 } keyOut)
                         {
                             await File.WriteAllTextAsync(keyOut, Convert.ToHexString(response.LargeBlobKey.Value.Span));
@@ -119,8 +128,11 @@ public class Ctap2LargeBlobAuditReproTests
     public async Task YESDK1621_ReadsPythonFido2WrittenBlob(YubiKeyTestState state) =>
         await state.WithCtap2SessionAsync(async session =>
         {
-            // Run C-interop.py first with a credential's largeBlobKey from a separate,
-            // user-authorized getAssertion. Never print or persist that key in this test.
+            // Manual prerequisite: separately authorize a getAssertion/key acquisition and external
+            // python-fido2 write, then provide the same secret as AUDIT_LARGE_BLOB_KEY_HEX.
+            // This test decodes an immutable environment string and clears only its decoded key array,
+            // not the environment text or returned plaintext. The sibling opt-in fixture can export
+            // the key to disk; neither channel is production-safe secret handling.
             string? keyHex = Environment.GetEnvironmentVariable("AUDIT_LARGE_BLOB_KEY_HEX");
             Skip.If(string.IsNullOrEmpty(keyHex), "Run C-interop.py and provide AUDIT_LARGE_BLOB_KEY_HEX");
             byte[] key = Convert.FromHexString(keyHex ?? "");

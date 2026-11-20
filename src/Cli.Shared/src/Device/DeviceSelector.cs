@@ -25,7 +25,10 @@ public sealed class DeviceSelector
     private readonly Func<CancellationToken, Task<IReadOnlyList<IYubiKey>>> _findAll;
     private readonly Func<IYubiKey, CancellationToken, Task<DeviceInfo?>> _readInfo;
 
-    /// <param name="supportedTransports">Ordered concrete transports this endpoint supports.</param>
+    /// <param name="supportedTransports">
+    /// Ordered concrete transports this endpoint supports. PreferFirstTransport prefers a device
+    /// exposing the first entry; it does not select the transport of a later applet session.
+    /// </param>
     /// <param name="nonInteractiveSelection">Explicit policy for multiple devices without interaction.</param>
     /// <param name="serialNumber">Optional target serial number.</param>
     /// <param name="requestedTransport">Optional restriction, not a discovery scope or a trimmed device view.</param>

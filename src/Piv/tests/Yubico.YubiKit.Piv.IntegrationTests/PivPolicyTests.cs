@@ -80,6 +80,7 @@ public class PivPolicyTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.3.0")]
     public async Task GenerateKey_PinPolicyAlways_RequiresPinForEachSign(YubiKeyTestState state)
     {
+        // Checks Always metadata and one verified signature; a second-use rejection remains untested here.
         await using var session = await state.Device.CreatePivSessionAsync();
         await session.ResetAsync();
         await session.AuthenticateAsync(GetDefaultManagementKey(state.FirmwareVersion));

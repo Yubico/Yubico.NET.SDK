@@ -24,18 +24,16 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Vectors are classified per the plan's evidence rule (Owner decisions, item 3):
+///         Method names distinguish two kinds of source-defined expectations:
 ///     </para>
 ///     <list type="bullet">
 ///         <item>
-///             <b>REGRESSION vectors</b> (names containing <c>Regression</c>) were written RED against the
-///             pre-Phase-2 merger and went GREEN when the generalized guard and pigeonhole deduction
-///             landed. They are now regression pins: a failure here is a real defect, not the expected
-///             state. Each records the behavior it used to exhibit under "WAS", for history.
+///             <b>Regression vectors</b> (names containing <c>Regression</c>) guard the generalized
+///             completeness check and pigeonhole deduction against cross-key merges or avoidable fragments.
 ///         </item>
 ///         <item>
-///             <b>PIN vectors</b> (names containing <c>Pin</c>) assert current expected-conservative or
-///             documented-bound behavior. They MAY pass today; they pin contracts and are never fix evidence.
+///             <b>Pin vectors</b> (names containing <c>Pin</c>) assert conservative outcomes or the accepted
+///             partial-evidence bound. A passing pin alone establishes no defect repair or hardware result.
 ///         </item>
 ///     </list>
 /// </remarks>
@@ -147,19 +145,15 @@ public class CompositeDeviceMergerVectorTests
     }
 
     // ---------------------------------------------------------------------------------------------
-    // 1b. REGRESSION vectors — RED before Phase 2, GREEN since. A failure here is a real regression.
+    // 1b. Regression vectors for completeness checks and orphan attribution.
     // ---------------------------------------------------------------------------------------------
 
     [Fact]
     public void Merge_Regression_CrossKeyShapeB_TwoTripleKeysDisjointHidNoCcidNoSerials_MustStayStandalone()
     {
-        // Verified premise 4(b) of PLAN.md: two 0x0407 keys, key A's FIDO + key B's OTP enumerated, no
-        // CCID, no serials. observed (FIDO|OTP) != expected (triple), but hasSmartCard == false bypasses
-        // the bespoke triple guard in CanMergeByPidWithoutSerial — the merger fuses the two keys.
-        // REQUIRED (Phase 2 generalized guard, now implemented): PID-unique alone is insufficient when
-        // observed != expected; the descriptors fall back to the serial path and, with null serials, stay
-        // standalone.
-        // WAS: a composite spanning both keys existed. A failure here means that has returned.
+        // Key A's FIDO and key B's OTP share PID 0x0407, with no CCID or serial evidence. Their observed
+        // set differs from the expected triple, so the completeness guard refuses PID grouping and the
+        // serial path leaves both standalone.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("fido-keyA", ConnectionType.HidFido, 0x0407),
@@ -178,12 +172,11 @@ public class CompositeDeviceMergerVectorTests
     [Fact]
     public void Merge_Regression_TwoTripleKeysFiveOfSixSerialsKnown_OrphanIsAttributedByPigeonhole()
     {
-        // Pigeonhole deduction (Solution design tier 4): both 0x0407 keys fully enumerated; serials known
+        // Pigeonhole deduction: both 0x0407 keys fully enumerated; serials known
         // for 5 of 6 interfaces. The null-serial OTP orphan's connection type exactly fills the single
         // missing slot of exactly ONE incomplete same-PID composite (key B), and type-count closure holds
         // (2 OTP interfaces visible, 2 candidate keys).
-        // REQUIRED (Phase 2, now implemented): the orphan is attributed to key B; two complete physical keys.
-        // WAS: the merger left the orphan standalone (3 devices, not 2). A failure here means that has returned.
+        // Attribution to key B yields two complete connection sets instead of a separate orphan.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, serial: 111),
@@ -208,8 +201,7 @@ public class CompositeDeviceMergerVectorTests
         // 3 of 4. Key A is complete; key B is anchored by its serial-bearing OTP. The null-serial FIDO
         // orphan's type exactly fills key B's only missing slot; type-count closure holds (2 FIDO visible,
         // 2 candidate keys).
-        // REQUIRED (Phase 2, now implemented): orphan attributed to key B; two complete OTP+FIDO keys.
-        // WAS: the merger left the orphan standalone (3 devices, not 2). A failure here means that has returned.
+        // Attribution to key B yields two complete OTP+FIDO connection sets.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("otp-a", ConnectionType.HidOtp, 0x0403, serial: 111),
@@ -232,8 +224,7 @@ public class CompositeDeviceMergerVectorTests
     {
         // Deduction ambiguity (PIN): both 0x0407 keys anchored (CCID+FIDO by serial) but BOTH OTP
         // identity reads failed — two orphans of one type, two candidate composites. Any attribution
-        // would be a guess; the plan's tier-4 deduction requires exactly ONE candidate. Conservative
-        // split is the CURRENT behavior and must REMAIN the behavior after Phase 2.
+        // would be a guess; deduction requires exactly one candidate, so both OTP interfaces stay standalone.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, serial: 111),
@@ -256,24 +247,21 @@ public class CompositeDeviceMergerVectorTests
     }
 
     // ---------------------------------------------------------------------------------------------
-    // 1c. Epistemic-bound PINS (PLAN.md "Epistemic bound", Solution design).
+    // 1c. Accepted partial-evidence bound.
     // ---------------------------------------------------------------------------------------------
 
     [Fact]
     public void Merge_EpistemicBound_ComplementaryPartials_TwoDualKeysOneInterfaceEach_MergeIsRepresentable_Pin()
     {
-        // Epistemic bound (PIN — see PLAN.md, Solution design, "Epistemic bound"): two 0x0403 keys, each
+        // Partial-evidence bound: two 0x0403 keys, each
         // with only ONE complementary interface enumerated (key A's OTP, key B's FIDO), no serials. The
-        // two descriptors are byte-indistinguishable from ONE fully-visible 0x0403 key: PID count is 1
-        // and observed == expected, so the merger fuses them — and, because pidCount == 1, no serial
-        // reads even fire to contradict it. No merge logic can resolve this shape; only serial or
-        // topology evidence can, and neither exists in this window. This pin asserts the CURRENT (and
-        // plan-sanctioned) behavior: a cross-key composite is representable while complementary partial
-        // visibility persists, bounded to that window, and heals conditionally — on the first subsequent
-        // scan with complete same-PID visibility, serial evidence, or topology evidence.
-        // Disposition note: the Phase-1 PRD originally listed this shape as a defect vector; the audited
-        // PLAN's epistemic bound governs, and the orchestrator reclassified it to this pin (recorded in
-        // the Phase-1 evidence ledger). Not fix evidence.
+        // two descriptors present the same grouping evidence as one fully visible 0x0403 key: PID count is 1
+        // and observed == expected, so the merger takes the PID shortcut and groups across keys.
+        // That result can persist while the implemented tiers make the same grouping decision. Later
+        // regrouping requires evidence those tiers use to distinguish the members. Adding different
+        // serials alone can leave a complete PID-count-one group on the same shortcut, which checks
+        // connection completeness and cross-PID contested serials, not same-PID serial disagreement.
+        // The assertions pin that cross-key member set; this single-scan vector does not test convergence.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("otp-keyA", ConnectionType.HidOtp, 0x0403),
@@ -289,15 +277,14 @@ public class CompositeDeviceMergerVectorTests
     [Fact]
     public void Merge_ComplementaryPartialMasquerade_MisattributionIsRepresentableAndBounded_Pin()
     {
-        // Epistemic bound (PIN — see PLAN.md, Solution design, "Epistemic bound"): key A is anchored as
+        // Partial-evidence bound: key A is anchored as
         // {OTP, FIDO} (serial 111) while key B is visible ONLY as an unread CCID (null serial). The three
-        // descriptors are byte-indistinguishable from ONE fully-visible 0x0407 key: PID count is 1 and
-        // observed == expected, so the merger fuses them — attributing key B's CCID to key A. NO merge
-        // logic can resolve this shape; only serial or topology evidence can, and neither exists for the
-        // unread CCID. This pin asserts the CURRENT documented-bound behavior so the contract is pinned:
-        // the misattribution is representable, bounded to partial-visibility windows, and heals
-        // conditionally (first subsequent scan with complete same-PID visibility, serial, or topology
-        // evidence). This vector is NOT a defect vector and never counts as fix evidence.
+        // descriptors present the same grouping evidence as one fully visible 0x0407 key: PID count is 1 and
+        // observed == expected, so the merger takes the PID shortcut — attributing key B's CCID to key A.
+        // The misattribution can persist while the implemented tiers make the same grouping decision.
+        // Later regrouping requires evidence those tiers use to distinguish the members; a different
+        // serial on this same-PID CCID alone need not bypass the complete PID-count-one shortcut.
+        // The assertions pin the misattributed members in one scan, not a later healing scan.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("otp-keyA", ConnectionType.HidOtp, 0x0407, serial: 111),
@@ -312,7 +299,7 @@ public class CompositeDeviceMergerVectorTests
     }
 
     // ---------------------------------------------------------------------------------------------
-    // 1d. Serial-less same-PID pair (PINs) + Phase-3 topology TODO.
+    // 1d. Serial-less same-PID pairs without topology evidence.
     // ---------------------------------------------------------------------------------------------
 
     [Fact]
@@ -320,7 +307,7 @@ public class CompositeDeviceMergerVectorTests
     {
         // Serial-less pair (PIN): two 0x0407 keys fully visible, no serial evidence. PID count is 2, so
         // the merger routes to the serial path; null serials never collapse. Conservative split (6
-        // standalone) is the CURRENT and the target macOS/Linux behavior (platform bound, guarantee
+        // standalone) is the current macOS/Linux no-topology behavior (guarantee
         // matrix row "Serial-less multi-interface pair").
         var result = CompositeDeviceMerger.Merge(
         [
@@ -335,16 +322,8 @@ public class CompositeDeviceMergerVectorTests
         Assert.Equal(6, result.Count);
         Assert.All(result, d => Assert.Single(InterfaceIdsOf(d)));
 
-        // TODO(Phase 3 — A′ Windows topology): when the merger accepts optional topology evidence
-        // (Windows Container ID per interface), add the RED→GREEN vector:
-        //   Merge_TwoSamePidTripleKeysNoSerials_WithTopologyEvidence_GroupsByContainerId
-        //   Input: the same six descriptors, each carrying a topology key — container-1 for
-        //          {ccid-a, fido-a, otp-a}, container-2 for {ccid-b, fido-b, otp-b}.
-        //   Expected: exactly two composites grouped by container id (topology is evidence tier 1,
-        //             above serial and PID). RED against the Phase-2 (B-only) merger — it has no
-        //             topology input and conservatively splits — GREEN once the topology tier lands.
-        //   Per repo rule, no skipped placeholder test is added here; this pin asserts the current
-        //   conservative behavior, which remains the correct topology-ABSENT behavior on all platforms.
+        // Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys covers the keyed case.
+        // This vector retains the six-way split when those keys are absent on any platform.
     }
 
     [Fact]
@@ -369,10 +348,8 @@ public class CompositeDeviceMergerVectorTests
     [Fact]
     public void Merge_ReconfiguredKeyReenumeratedUnderNewPid_GroupsByCurrentPidTruth_Pin()
     {
-        // Transport reconfiguration (PLAN.md Scenario analyses): a 0x0407 key had CCID disabled via
-        // Management and re-enumerated as 0x0403. The merger sees only the new descriptor set (old
-        // interfaces absent — verified premise 2: reconfiguration changes reader names and HID paths,
-        // stale identities self-evict). Grouping follows the CURRENT PID truth: one 0x0403 composite.
+        // Model reconfiguration from 0x0407 to 0x0403 by supplying only the new descriptors. This vector
+        // checks grouping of that set; it does not exercise OS re-enumeration or finder cache eviction.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("otp-a-new", ConnectionType.HidOtp, 0x0403),
@@ -407,18 +384,15 @@ public class CompositeDeviceMergerVectorTests
     }
 
     // ---------------------------------------------------------------------------------------------
-    // Phase 3 — Tier 1 topology evidence (PLAN.md "Solution design", evidence hierarchy tier 1).
+    // Tier 1 topology evidence.
     // ---------------------------------------------------------------------------------------------
 
     [Fact]
     public void Merge_SeriallessPairWithDistinctTopologyKeys_GroupsIntoTwoCompleteKeys()
     {
-        // Phase-3 headline RED→GREEN (PLAN.md guarantee matrix, "Serial-less multi-interface pair"):
-        // two same-PID 0x0407 keys, NO serials, full visibility, each interface carrying its physical
-        // device's topology key (Windows Container ID). Tier 1 groups them into two complete keys with no
-        // serial read at all — the only complete answer for serial-less hardware.
-        // WAS (tier-2..5 only, i.e. no topology input): conservative six-way split. Tier 1 now resolves it;
-        // a six-way split here means topology attribution has regressed.
+        // Two same-PID 0x0407 keys have no serials, but each interface carries a scripted container key.
+        // Topology groups them into two complete keys. This checks supplied-key grouping, not Windows
+        // Container ID acquisition or native interoperability.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A"),
@@ -444,13 +418,8 @@ public class CompositeDeviceMergerVectorTests
     [Fact]
     public void Merge_ComplementaryPartialsWithTopologyKeys_SplitByTopology_NotMergedByPid()
     {
-        // Topology CLOSES the epistemic bound (PLAN.md: "on Windows this holds under partial visibility
-        // too whenever topology evidence is readable"). This is byte-identical to the shape-A
-        // epistemic-bound pin — two 0x0403 keys, one complementary interface each, no serials, observed
-        // == expected — which tiers 2..5 must merge. With topology evidence the two interfaces are known
-        // to belong to different physical devices and MUST stay split.
-        // WAS (tier-2..5 only): one cross-key composite ykphysical:pid:0403. Tier 1 now separates them;
-        // a cross-key composite here means topology attribution has regressed.
+        // Complementary partials have the same PID and no serials, but distinct supplied topology keys.
+        // Those keys distinguish the members that the no-topology vector groups across keys.
         var result = CompositeDeviceMerger.Merge(
         [
             Descriptor("otp-keyA", ConnectionType.HidOtp, 0x0403, topologyKey: "container-A"),
@@ -468,10 +437,9 @@ public class CompositeDeviceMergerVectorTests
     [Fact]
     public void Merge_TopologyAbsentForAllInterfaces_IsByteIdenticalToPreTopologyBehavior_Pin()
     {
-        // Degradation pin: with no topology evidence anywhere (macOS/Linux always; Windows on topology
-        // read failure), results must be byte-identical to the tier-2..5 behavior. Same inputs as the
-        // serial-less pair pin and the shape-A epistemic-bound pin, asserted against the same
-        // expectations. This is the pinned "degrades to exactly the macOS/Linux semantics" contract.
+        // With no topology keys, assert the six standalone members of a serial-less pair and the single
+        // PID-shaped result for complementary partials. These expected shapes check fallback behavior;
+        // the test does not serialize or compare a second merger implementation.
         var seriallessPair = CompositeDeviceMerger.Merge(
         [
             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407),
@@ -501,7 +469,7 @@ public class CompositeDeviceMergerVectorTests
         // Mixed/partial topology (the Windows "CCID resolves, HID doesn't" case): interfaces WITH keys
         // group by topology; interfaces WITHOUT keys must never be guessed into a topology group — they
         // fall through to the unchanged tiers. Here key A's CCID+FIDO carry a container id while its OTP
-        // does not; the OTP is the only 0x0403-PID... it is a 0x0407 interface whose PID group is now
+        // does not; the OTP is a 0x0407 interface whose PID group is now
         // topology-free and observed(OTP) != expected(triple), so it stands alone conservatively.
         var result = CompositeDeviceMerger.Merge(
         [
@@ -525,6 +493,7 @@ public class CompositeDeviceMergerVectorTests
         // that only serial evidence can separate (tier 2 — PID count is 2, so no PID merge), plus an NFC
         // interface standing alone. Conservation: every input interface appears exactly once across the
         // returned devices, and no interface is attributed twice.
+        // Only this input order is exercised; permutation invariance is outside these assertions.
         var descriptors = new[]
         {
             Descriptor("ccid-a", ConnectionType.SmartCard, 0x0407, topologyKey: "container-A"),
@@ -616,20 +585,19 @@ public class CompositeDeviceMergerVectorTests
     // mid-reconfiguration (serial is globally unique per key; PID changes with configuration). The
     // groups must NOT be merged into one published device: the flat shape has one slot per connection
     // type, and AvailableConnections' flags-union would hide a duplicate candidate.
-    // Instead, at most ONE group may carry the durable ykphysical:{serial} id — the group whose
+    // Instead, at most one group may carry the scan's ykphysical:{serial} id — the group whose
     // anchored census exactly matches its PID's expected interface set — and every other contested
     // group's interfaces publish standalone. Zero or multiple complete groups is ambiguity, and
     // ambiguity fragments conservatively rather than guessing.
     // ---------------------------------------------------------------------------------------------
 
     /// <summary>
-    ///     One complete group wins the durable id; the stale group's interfaces stand alone.
+    ///     One complete group wins the serial-shaped id; the other group's interfaces stand alone.
     /// </summary>
     /// <remarks>
-    ///     The 0x0403 group (otp+fido) exactly matches its PID's expected set, so it is the live
-    ///     enumeration; the 0x0407 group (ccid+otp, missing fido against the triple) is the stale one. The
-    ///     physical key keeps its durable <c>ykphysical:{serial}</c> identity across the transition, and no
-    ///     composite ever holds two members of one connection type.
+    ///     The 0x0403 group's anchored census matches its expected set; the 0x0407 group lacks FIDO.
+    ///     Completeness selects 0x0403 here as a heuristic, not proof of which enumeration is live.
+    ///     The assertions check the winner's members and the other group's standalone results.
     /// </remarks>
     [Fact]
     public void Merge_ContestedSerial_CompleteGroupWinsTheSerialId_StaleGroupStandsAlone()
@@ -655,7 +623,7 @@ public class CompositeDeviceMergerVectorTests
     /// <remarks>
     ///     Neither census matches its PID's expected set (ccid+otp is missing fido against 0x0407's
     ///     triple, and contains an unexpected ccid against 0x0403's otp+fido). Picking either group would
-    ///     be a guess, so neither gets the durable id and the next scan converges.
+    ///     be a guess, so neither gets the serial-shaped id. Later convergence requires changed evidence.
     /// </remarks>
     [Fact]
     public void Merge_ContestedSerial_NoCompleteGroup_AllInterfacesStandAlone()
@@ -703,7 +671,7 @@ public class CompositeDeviceMergerVectorTests
     /// <remarks>
     ///     Winner determination uses anchored (serial-bearing) members only. If attributed orphans could
     ///     complete a contested census, orphan attribution — a deduction — would decide which enumeration
-    ///     gets the durable identity, inverting the evidence hierarchy during the one window where the
+    ///     gets the serial-shaped identifier, inverting the evidence hierarchy during the one window where the
     ///     evidence is least trustworthy.
     /// </remarks>
     [Fact]
@@ -734,7 +702,7 @@ public class CompositeDeviceMergerVectorTests
     /// <remarks>
     ///     Deliberate conservatism, not a lost optimization. The type-count closure counts all of the
     ///     group's descriptors while candidacy is restricted to eligible keys, so deduction goes standalone
-    ///     during a contest and the next scan converges. Without the contested loser present, the same
+    ///     during a contest. Later convergence requires changed evidence. Without the contested loser present, the same
     ///     orphan attributes normally (covered by the pigeonhole vectors above).
     /// </remarks>
     [Fact]
@@ -767,7 +735,7 @@ public class CompositeDeviceMergerVectorTests
 
     /// <summary>
     ///     Output <c>DeviceId</c>s must be pairwise distinct. Two devices sharing an id would make the id
-    ///     useless as the durable key the discovery contract tells consumers to rely on.
+    ///     ambiguous within that scan. DeviceId is discovery-scoped; the serial supplies durable correlation.
     /// </summary>
     /// <remarks>
     ///     <para>

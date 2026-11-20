@@ -21,11 +21,14 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for GetInfo validation.
+/// Integration checks of selected GetInfo fields on a dedicated, approved test device.
 /// </summary>
 /// <remarks>
-/// These tests verify the authenticator info returned by GetInfo command.
-/// Based on Java yubikit-android Ctap2SessionTests.testCtap2GetInfo() patterns.
+/// The shared helper defaults to PIN normalization before the GetInfo action: it can set/change
+/// the PIN or consume a retry. These paths require approved PIN work and known device state,
+/// even though GetInfo itself needs no PIN or presence. Assertions inspect metadata, not feature
+/// execution, complete GetInfo validity or protocol conformance; optional-field checks can be bypassed
+/// by absence. A setup skip does not establish that no device mutation occurred.
 /// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2GetInfoTests
@@ -50,7 +53,7 @@ public class Ctap2GetInfoTests
         });
 
     /// <summary>
-    /// Tests that GetInfo returns a valid 16-byte AAGUID.
+    /// Checks length 16 and an additional nonzero-AAGUID test assumption, not authenticator identity verification.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -66,7 +69,7 @@ public class Ctap2GetInfoTests
         });
 
     /// <summary>
-    /// Tests that GetInfo returns expected options for YubiKey.
+    /// Requires clientPin key presence and checks plat/rk/up values only if supplied.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -133,7 +136,7 @@ public class Ctap2GetInfoTests
         });
 
     /// <summary>
-    /// Tests that GetInfo returns extensions list.
+    /// Checks a non-null extension list; the guarded disjunction does not establish hmac-secret support.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -153,7 +156,7 @@ public class Ctap2GetInfoTests
         });
 
     /// <summary>
-    /// Tests that GetInfo returns firmware version.
+    /// Checks reported firmware against the test's accepted values only when the field is present.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -172,7 +175,7 @@ public class Ctap2GetInfoTests
         });
 
     /// <summary>
-    /// Tests that GetInfo returns max message size.
+    /// Checks the reported message-size minimum only when the field is present.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]

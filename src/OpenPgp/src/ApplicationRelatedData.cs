@@ -29,6 +29,8 @@ namespace Yubico.YubiKit.OpenPgp;
 ///         <item>0x73 -- Discretionary Data Objects (algorithm attrs, PIN status, etc.)</item>
 ///     </list>
 ///     On older keys, discretionary data may be at the outer level instead of nested under 0x73.
+///     Required capability and ordinary-slot algorithm fields must parse successfully; optional unmodeled
+///     fields are omitted. Use session raw data access when a complete response is needed for inspection.
 /// </remarks>
 public sealed class ApplicationRelatedData
 {

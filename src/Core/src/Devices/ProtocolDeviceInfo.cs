@@ -32,10 +32,8 @@ internal static class ProtocolDeviceInfo
 {
     public static async Task<DeviceInfo> ReadAsync(IConnection connection, CancellationToken cancellationToken)
     {
-        // Borrows: the caller owns this connection and disposes it (see the type remarks). Upstream
-        // disposed it here on failure, which was correct only in a model where protocol disposal
-        // cascaded to the connection. This branch removed that cascade, so disposing here would be a
-        // premature dispose of a connection the caller still holds and will dispose itself.
+        // The caller owns the connection, including failure cleanup. This method owns only the protocol;
+        // its disposal leaves the borrowed connection available to its owner.
         var protocol = ProtocolFactory.Create(connection);
 
         try

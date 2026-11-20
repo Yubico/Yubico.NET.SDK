@@ -15,7 +15,6 @@
 using System.Text;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.Tests.Shared;
@@ -24,9 +23,13 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for FIDO2 PIN management operations including PIN change,
-/// and credential creation with user verification discouraged.
+/// Exercises a PIN change followed by token retrieval, and credential creation with token authorization.
 /// </summary>
+/// <remarks>
+/// Default session setup normalizes the known test PIN and can fail before either callback runs.
+/// Restoration and credential cleanup are callback-scoped, not guaranteed restoration of every
+/// setup side effect. Returned token/authentication-parameter arrays are not cleared by these tests.
+/// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2PinManagementTests
 {
@@ -35,10 +38,9 @@ public class Ctap2PinManagementTests
     private static readonly byte[] ChangedPinUtf8 = Encoding.UTF8.GetBytes(ChangedPin);
 
     /// <summary>
-    /// Tests that the PIN can be changed and the new PIN works for subsequent operations.
-    /// Sets the PIN, changes it to a new value, then verifies the new PIN by obtaining
-    /// a PIN token with it.
+    /// Changes the known test PIN and checks that token retrieval with the new PIN returns nonempty bytes.
     /// </summary>
+    /// <remarks>The test does not assert rejection of the old PIN or invalidation of old tokens. Restoration is best effort and can submit an incorrect PIN if the change did not complete.</remarks>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
@@ -50,8 +52,7 @@ public class Ctap2PinManagementTests
 
             try
             {
-                // NormalizePinAsync already set the PIN to KnownTestPin.
-                // Create a ClientPin to change it.
+                // Reaching this callback means default normalization completed with the known PIN.
                 IPinUvAuthProtocol protocol = protocolVersion == 2
                     ? new PinUvAuthProtocolV2()
                     : new PinUvAuthProtocolV1();
@@ -82,14 +83,14 @@ public class Ctap2PinManagementTests
             }
             catch (CtapException ex) when (ex.Status is CtapStatus.PinBlocked or CtapStatus.PinAuthBlocked)
             {
-                // PIN is blocked from accumulated failures across test runs.
-                // A CTAP2 reset (requires re-insertion within 10s of power-up) is needed.
+                // PIN_AUTH_BLOCKED is temporary and requires a power cycle; PIN_BLOCKED requires reset.
+                // The diagnostic below conflates them and does not establish a product reset window.
                 Skip.If(true,
                     "PIN is blocked — CTAP2 reset required (re-insert YubiKey and reset within 10s of power-up)");
             }
             finally
             {
-                // Restore known test PIN for other tests
+                // Attempt restoration only for this callback; failure does not prove the PIN state.
                 try
                 {
                     var restoreProtocol = protocolVersion == 2
@@ -106,11 +107,9 @@ public class Ctap2PinManagementTests
         });
 
     /// <summary>
-    /// Tests that a credential can be created with user verification set to false
-    /// (UV discouraged mode). The authenticator should still create the credential
-    /// since PIN/UV auth is provided, but the UV flag behavior depends on the
-    /// authenticator's policy.
+    /// Creates a nonresident credential with pinUvAuthParam and the uv option omitted.
     /// </summary>
+    /// <remarks>Assertions check response/authenticator-data presence and a nonempty credential ID, not the UV flag. Omitted uv with token authorization does not prove user verification was discouraged or absent.</remarks>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
@@ -126,6 +125,7 @@ public class Ctap2PinManagementTests
                 }
                 catch (CtapException ex) when (ex.Status is CtapStatus.PinBlocked or CtapStatus.PinAuthBlocked)
                 {
+                    // The diagnostic conflates temporary PIN_AUTH_BLOCKED with exhausted PIN_BLOCKED.
                     Skip.If(true,
                         "PIN is blocked — CTAP2 reset required (re-insert YubiKey and reset within 10s of power-up)");
                     return;
@@ -157,9 +157,8 @@ public class Ctap2PinManagementTests
                 var pinUvAuthParam = Ctap2TestHelpers.ComputeMakeCredentialAuthParam(
                     clientPin.Protocol, pinToken, challenge);
 
-                // Create credential with UV omitted (discouraged behavior).
-                // Per CTAP 2.0 spec, omitting "uv" from the options map is how the client
-                // signals UV-discouraged. Sending "uv": false is rejected by some authenticators.
+                // CTAP requires omission of the uv key alongside pinUvAuthParam, even uv:false.
+                // The assertions below do not inspect the returned UV flag.
                 var result = await session.MakeCredentialAsync(
                     clientDataHash: challenge,
                     rp: rp,
@@ -182,9 +181,7 @@ public class Ctap2PinManagementTests
                                                or CtapStatus.UnsupportedOption
                                                or CtapStatus.InvalidOption)
             {
-                // Some authenticators reject MakeCredential with UV discouraged when
-                // a PIN is set, returning CTAP1_ERR_INVALID_COMMAND or similar.
-                // This is authenticator-policy dependent, not a test bug.
+                // These statuses skip the test but do not identify a policy or wire-error cause.
                 Skip.If(true,
                     $"Authenticator does not support UV-discouraged MakeCredential (CTAP status: {ex.Status})");
             }

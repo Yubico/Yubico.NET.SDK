@@ -228,14 +228,39 @@ public static class YubiKeyConnectionExtensions
     ///     succeeds but <paramref name="createAsync" /> fails, the connection is disposed before the failure is
     ///     rethrown. If disposal also fails, that cleanup failure is logged and the original creation failure
     ///     still propagates unchanged.
+    ///     On success, the helper returns the result unchanged and leaves the connection open. The delegate
+    ///     must return a result that owns the connection, or exposes it so the caller can dispose it. Returning
+    ///     only a session that borrows the connection loses the hidden connection's disposal scope.
     /// </remarks>
     /// <param name="yubiKey">The physical device.</param>
     /// <param name="transport">The single concrete transport selected for the session.</param>
-    /// <param name="createAsync">Creates the result over the opened connection.</param>
+    /// <param name="createAsync">Creates a result that assumes or exposes ownership of the opened connection.</param>
     /// <param name="cancellationToken">A token to cancel connection opening or session creation.</param>
     /// <returns>The result created over the opened connection.</returns>
     /// <exception cref="ArgumentException"><paramref name="transport" /> is not one concrete transport.</exception>
     /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
+    /// <example>
+    /// <code>
+    /// using System.Threading;
+    /// using System.Threading.Tasks;
+    /// using Yubico.YubiKit.Core.Abstractions;
+    /// using Yubico.YubiKit.Core.Devices;
+    /// using Yubico.YubiKit.Core.Sessions;
+    /// using Yubico.YubiKit.Core.Transports.SmartCard;
+    ///
+    /// static async Task SelectPivAsync(IYubiKey device, CancellationToken cancellationToken)
+    /// {
+    ///     // Returning the connection itself exposes its ownership to the enclosing scope.
+    ///     await using IConnection connection = await device.CreateSessionOverTransportAsync(
+    ///         ConnectionType.SmartCard,
+    ///         (opened, token) => Task.FromResult(opened),
+    ///         cancellationToken);
+    ///     await using RawSmartCardSession session = await RawSmartCardSession.CreateAsync(
+    ///         (ISmartCardConnection)connection, cancellationToken);
+    ///     await session.SelectAsync(ApplicationIds.Piv, cancellationToken);
+    /// }
+    /// </code>
+    /// </example>
     public static Task<TResult> CreateSessionOverTransportAsync<TResult>(
         this IYubiKey yubiKey,
         ConnectionType transport,

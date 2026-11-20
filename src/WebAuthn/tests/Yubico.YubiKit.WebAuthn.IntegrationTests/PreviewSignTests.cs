@@ -73,6 +73,7 @@ public class PreviewSignTests
         Assert.NotNull(previewSignOutput);
 
         var generatedKey = previewSignOutput.GeneratedKey;
+        // This fixture expects a nonempty handle; draft v4 also permits empty generated handles.
         Assert.True(generatedKey.KeyHandle.Length > 0, "KeyHandle should not be empty");
         Assert.NotNull(generatedKey.PublicKey);
         Assert.True(generatedKey.Algorithm.IsKnown, $"Algorithm {generatedKey.Algorithm} should be known");
@@ -102,8 +103,8 @@ public class PreviewSignTests
         Skip.IfNot(await SupportsPreviewSignAsync(session1),
             "YubiKey does not advertise previewSign extension");
 
-        // Verified end-to-end on YK 5.8.0 after switching generic previewSign auth to raw
-        // additionalArgs and using the ARKG bridge to build the algorithm-specific payload.
+        // This test uses raw additionalArgs built by the experimental ARKG bridge and checks the
+        // resulting signature offline. Advertising previewSign alone does not guarantee ARKG support.
 
         await NormalizePinAsync(session1);
 
@@ -119,8 +120,7 @@ public class PreviewSignTests
             ResidentKey = ResidentKeyPreference.Required,
             UserVerification = UserVerificationPreference.Discouraged,
             // WARNING -- EXPERIMENTAL -- test only: ARKG-P256 (-65539) is the request signing algorithm for this ARKG path.
-            // -9 (Esp256) is the OUTPUT signature alg, not the request alg — sending -9 here
-            // is the bug class the ARKG additionalArgs bridge makes explicit.
+            // -9 (Esp256) is the output signature algorithm, not this path's request signing algorithm.
             Extensions = new RegistrationExtensionInputs(
                 PreviewSign: PreviewSignRegistrationInput.GenerateKey(
                     CoseAlgorithm.ArkgP256))
@@ -146,7 +146,7 @@ public class PreviewSignTests
         byte[] ikm = RandomNumberGenerator.GetBytes(32);
         byte[] ctx = Encoding.ASCII.GetBytes("integration-test-ctx");
 
-        // Convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey
+        // Convert WebAuthn GeneratedSigningKey to CTAP2 PreviewSignGeneratedKey.
         var fido2GeneratedKey = ConvertToCtap2GeneratedKey(keyHandle, arkgSeedKey);
 
         var derivedKey = fido2GeneratedKey.DerivePublicKey(ikm, ctx);
@@ -208,9 +208,11 @@ public class PreviewSignTests
     }
 
     /// <summary>
-    ///     26d on hardware: two previewSign credentials for one RP, an allow list naming both and a signByCredential
-    ///     entry for each. The client selects the credential the key answers for and sends that entry; the returned
-    ///     signature verifies against the derived key of the credential that was actually returned.
+    ///     Exercises two previewSign credentials for one RP, an allow list naming both and a signByCredential
+    ///     entry for each. The fixture verifies with the first derived key when the reported ID matches the
+    ///     first credential, and otherwise with the second. It does not separately assert that the reported
+    ///     ID belongs to the allow list.
+    ///     This uses the experimental ARKG bridge; previewSign advertisement alone does not establish ARKG support.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -287,15 +289,15 @@ public class PreviewSignTests
                 Fido2Extensions.CoseSignArgs.ArkgP256(credential.DerivedKey.ArkgKeyHandle, credential.DerivedKey.Context)));
 
     /// <summary>
-    /// Helper to convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey.
+    /// Converts WebAuthn GeneratedSigningKey to CTAP2 PreviewSignGeneratedKey for this test.
     /// </summary>
     /// <remarks>
     /// WARNING -- EXPERIMENTAL -- test only: this ARKG bridge exists for integration-test coverage and must not be
     /// treated as production cryptographic guidance.
     /// <para>
-    /// This bridges the WebAuthn layer (which exposes CoseKey directly) to the Fido2 layer
+    /// This bridges the WebAuthn layer (which exposes CoseKey directly) to the CTAP2 layer
     /// (which has the DerivePublicKey method). Uses reflection because PreviewSignGeneratedKey's
-    /// constructor is internal to the Fido2 assembly.
+    /// constructor is internal to the CTAP2 assembly.
     /// </para>
     /// </remarks>
     private static Ctap2.Extensions.PreviewSignGeneratedKey ConvertToCtap2GeneratedKey(

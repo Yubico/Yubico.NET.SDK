@@ -31,6 +31,10 @@ namespace Yubico.YubiKit.Piv.DataObjects;
 /// The salt is not secret; it is only used to derive a management key from a PIN and is safe to
 /// read and write like any other PIV data object field.
 /// </para>
+/// <para>Flags record software state, so inspect credential metadata when actual card state matters.
+/// Create borrows salt memory; decoding copies it. The timestamp uses trimmed little-endian Unix
+/// seconds, unlike Python YubiKey Manager's fixed four-byte big-endian field. Coordinate cross-tool
+/// timestamp handling before writing it. This is a Yubico software object rather than a NIST field.</para>
 /// </remarks>
 public readonly record struct AdminData
 {
@@ -59,7 +63,7 @@ public readonly record struct AdminData
     /// <summary>Gets whether this instance represents no data on the YubiKey.</summary>
     public bool IsEmpty => !_hasValue;
 
-    /// <summary>Gets whether the PUK has been blocked (expected when a PIN-only mode is set).</summary>
+    /// <summary>Gets the stored PUK-blocked flag (expected for PIN-only mode); query PUK metadata for current device state.</summary>
     public bool PukBlocked { get; }
 
     /// <summary>Gets whether the management key is PIN-protected (stored in the PRINTED object).</summary>
@@ -166,10 +170,8 @@ public readonly record struct AdminData
                 return false;
             }
 
-            // Iterate sequentially (rather than via TlvHelper.DecodeDictionary) so duplicate and
-            // unrecognized tags can be explicitly rejected, matching v1 AdminData.TryDecode's
-            // strictness (its elementsRead XOR check rejects repeats; its tag switch has a
-            // `_ => false` default for anything that isn't the bit field/salt/date elements).
+            // Sequential decoding rejects duplicate and unrecognized fields while keeping each
+            // disposable TLV alive only for this parse.
             using var children = TlvHelper.DecodeList(outer.Value.Span);
 
             bool sawBitField = false;

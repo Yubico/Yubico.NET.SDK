@@ -25,9 +25,10 @@ public sealed class YubiOtpAuditReproTests
     }
 
     /// <summary>
-    ///     The request bytes are what ykman sends: challenge.ljust(64, b"\1" if challenge.endswith(b"\0") else b"\0").
+    ///     The request bytes match yubikey-manager 5.8.0: challenge.ljust(64, b"\1" if challenge.endswith(b"\0") else b"\0").
     ///     A short challenge and its explicitly padded 64-byte form are the same request by design; in
-    ///     short-challenge mode the YubiKey reads the final byte as the end marker either way.
+    ///     short-challenge mode the final byte is the end marker either way. These assertions check host
+    ///     encoding, not device hashing or the minimum retained message length.
     /// </summary>
     [Theory]
     [InlineData(new byte[0], (byte)0x00)]

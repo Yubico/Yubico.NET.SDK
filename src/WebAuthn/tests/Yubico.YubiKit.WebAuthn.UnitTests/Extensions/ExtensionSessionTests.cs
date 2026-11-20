@@ -206,7 +206,7 @@ public class ExtensionSessionTests
         return WebAuthnAuthenticatorData.Decode(data.ToArray());
     }
 
-    /// <summary>WebAuthn L3 §9.4: output the client cannot process is ignored; only that extension is dropped.</summary>
+    /// <summary>The SDK suppresses this wrong-type parsing failure and drops only that processor's output.</summary>
     [Fact]
     public async Task PrepareOutputs_WrongTypedExtensionOutput_DropsOnlyThatExtension()
     {
@@ -243,8 +243,8 @@ public class ExtensionSessionTests
     }
 
     /// <summary>
-    ///     WebAuthn L3 §9.4 / python-fido2 is_supported: an extension GetInfo does not advertise produces no CTAP
-    ///     input and no output; the ones it does advertise are unaffected.
+    ///     The SDK omits this unadvertised credProtect request and its output, leaving the advertised
+    ///     credBlob request unaffected. This fixture does not test credProtect enforcement.
     /// </summary>
     [Fact]
     public async Task Create_UnsupportedExtension_ProducesNoInputAndNoOutput()
@@ -273,7 +273,7 @@ public class ExtensionSessionTests
         Assert.Null(result.CredProtect);
     }
 
-    /// <summary>largeBlob needs both the largeBlobKey extension and the largeBlobs option (python-fido2 LargeBlobExtension.is_supported).</summary>
+    /// <summary>The SDK's CTAP largeBlobKey route needs both largeBlobKey and largeBlobs:true (CTAP §12.3 / §6.10).</summary>
     [Theory]
     [InlineData(true, false, false)]
     [InlineData(false, true, false)]
@@ -289,7 +289,7 @@ public class ExtensionSessionTests
         Assert.Equal(expectInput, cbor is not null);
     }
 
-    /// <summary>Permissions are the union over processors; today no processor needs any (R3 wires them).</summary>
+    /// <summary>Permissions are the union over processors; this getCredBlob-only fixture needs no extra permissions.</summary>
     [Fact]
     public void Permissions_NoProcessorNeedsAny_IsNone()
     {

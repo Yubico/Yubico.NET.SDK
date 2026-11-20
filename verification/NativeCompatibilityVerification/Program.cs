@@ -2,7 +2,9 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.Json;
 
-// macOS arm64 export and smoke check. This does not load a historical managed Core assembly.
+// Check the fixed historical macOS arm64 1.18.0/async.8 assets, not stable 1.18.1 or Windows.
+// Export-name checks and one BN allocation/free exercise do not verify every import signature,
+// PC/SC string/PCI ABI or HID input lifecycle. No historical managed Core assembly is loaded here.
 if (args.Length != 3)
 {
     Console.Error.WriteLine("usage: NativeCompatibilityVerification <baseline-exports.json> <1.18.0 dylib> <async.8 dylib>");

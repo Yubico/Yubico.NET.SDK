@@ -109,10 +109,9 @@ public sealed partial class OpenPgpSession
 
         _logger.LogInformation("Deleting key from {Slot}", keyRef);
 
-        // Python canonical: delete key by changing algorithm attributes twice.
-        // First set to RSA 4096 (forces key deletion), then back to RSA 2048.
-        // Use PutDataAsync directly (bypassing SetAlgorithmAttributesAsync checks)
-        // to avoid RSA 4096 support verification.
+        // Attribute switching is destructive and can leave partial state between writes.
+        // NEO's vendor deletion path instead overwrites a key; this sequence needs separate
+        // old-family qualification. Certificate and host metadata management remain separate.
         var rsa4096 = RsaAttributes.Create(RsaSize.Rsa4096);
         var rsa2048 = RsaAttributes.Create(RsaSize.Rsa2048);
 
@@ -160,7 +159,9 @@ public sealed partial class OpenPgpSession
 
         // GET_ATTESTATION generates the attestation cert and writes it to the
         // certificate slot for the key. We then read it back with GetCertificateAsync.
-        // This matches ykman canonical: send_apdu → get_certificate(key_ref).
+        // The Python implementation uses the same send_apdu → get_certificate(key_ref) sequence.
+        // The outer notification helper resolves Completed after this callback returns its certificate.
+        // A resolution failure can abandon that disposable result; it has no local cleanup scope here.
         var command = new ApduCommand(0x80, (int)Ins.GetAttestation, (int)keyRef, 0x00);
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(KeyRef.Att, UserPresenceOperations.OpenPgp.AttestKey, cancellationToken).ConfigureAwait(false));

@@ -16,6 +16,12 @@ using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.Native.Desktop.SCard;
 
+/// <summary>Matches the published NativeShims 1.18.1 packed reader-state wrapper, not each platform's native struct.</summary>
+/// <remarks>
+///     ReaderName and UserData have pointer width; states and ATR length are 32-bit, with 36 bytes of ATR
+///     storage. Copies borrow the same reader-name allocation. Create uses StringToHGlobalAnsi (the Windows
+///     code page on Windows, UTF-8 on Unix); that choice is separate from UTF-8 reader-name decoding.
+/// </remarks>
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 internal unsafe struct SCARD_READER_STATE
 {

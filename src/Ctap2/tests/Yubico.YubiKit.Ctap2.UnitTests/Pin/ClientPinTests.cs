@@ -15,7 +15,6 @@
 using NSubstitute;
 using System.Formats.Cbor;
 using System.Text;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
@@ -25,7 +24,10 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
 /// </summary>
 /// <remarks>
 /// These tests use NSubstitute to mock the ICtap2Session.
-/// Tests that require protocol mocking use a concrete FakePinUvAuthProtocol.
+/// The concrete FakePinUvAuthProtocol copies encryption/decryption inputs and always accepts Verify.
+/// Send counts and non-null tokens do not establish cryptographic interoperability, RP binding,
+/// permission fallback or secret clearing. The canonical retry-request cases separately decode
+/// and assert the command, ordered keys, protocol version and subcommand.
 /// </remarks>
 public sealed class ClientPinTests : IDisposable
 {
@@ -67,7 +69,7 @@ public sealed class ClientPinTests : IDisposable
     {
         using var clientPin = CreateClientPin();
 
-        // Setup mock response: pinRetries = 5, powerCycleState = false
+        // powerCycleState is omitted: false below is the parser default, not explicit device state.
         var responseData = CreatePinRetriesResponse(5, false);
         SetupMockResponse(responseData);
 
@@ -97,6 +99,7 @@ public sealed class ClientPinTests : IDisposable
         using var clientPin = CreateClientPin();
 
         var responseData = CreateUvRetriesResponse(3, false);
+        // This fixture omits field 4; CTAP 2.1 defines no UV power-cycle signal.
         SetupMockResponse(responseData);
 
         var status = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
@@ -162,7 +165,7 @@ public sealed class ClientPinTests : IDisposable
 
         await clientPin.SetPinAsync(Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken);
 
-        // Verify two commands were sent (GetKeyAgreement and SetPin)
+        // Count two sends; this assertion does not decode the GetKeyAgreement/SetPin fields.
         await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
 
@@ -179,7 +182,7 @@ public sealed class ClientPinTests : IDisposable
 
         await clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("oldpin1234"), Encoding.UTF8.GetBytes("newpin5678"), TestContext.Current.CancellationToken);
 
-        // Verify two commands were sent (GetKeyAgreement and ChangePin)
+        // Count two sends; this assertion does not decode the GetKeyAgreement/ChangePin fields.
         await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
 
@@ -227,7 +230,7 @@ public sealed class ClientPinTests : IDisposable
 
         var token = await clientPin.GetPinTokenAsync(Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken);
 
-        // Token is decrypted by the fake protocol
+        // Fake Decrypt copies bytes; these assertions check only presence and length.
         Assert.NotNull(token);
         Assert.Equal(encryptedToken.Length, token.Length);
     }
@@ -343,7 +346,7 @@ public sealed class ClientPinTests : IDisposable
 
         await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
 
-        // Verify the request was sent
+        // Count one send only; the next test, not this assertion, checks the encoded version.
         await _mockSession.ReceivedWithAnyArgs(1).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
 
@@ -522,7 +525,7 @@ public sealed class ClientPinTests : IDisposable
 }
 
 /// <summary>
-/// Fake implementation of IPinUvAuthProtocol for unit testing.
+/// ClientPin test double with identity-copy encryption/decryption and no cryptographic verification.
 /// </summary>
 internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
 {

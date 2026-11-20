@@ -76,6 +76,11 @@ public sealed class WebAuthnAuthenticatorData
     /// </summary>
     /// <param name="rawAuthData">The raw authenticator data bytes.</param>
     /// <returns>The decoded authenticator data with parsed extensions.</returns>
+    /// <remarks>
+    /// The parser copies the input and materializes its fields in SDK-owned storage; the returned
+    /// object does not borrow <paramref name="rawAuthData"/>. Parsing does not verify a signature,
+    /// attestation trust, the expected RP ID hash, or the RP's UP/UV and account-binding policy.
+    /// </remarks>
     public static WebAuthnAuthenticatorData Decode(ReadOnlyMemory<byte> rawAuthData)
     {
         var inner = AuthenticatorData.Parse(rawAuthData);

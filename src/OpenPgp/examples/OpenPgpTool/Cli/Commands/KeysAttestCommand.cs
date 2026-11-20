@@ -12,6 +12,11 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 /// <summary>
 ///     Generates an attestation certificate for a key slot (openpgp keys attest).
 /// </summary>
+/// <remarks>
+///     The current command declares --pin but leaves it unused and calls attestation on a fresh session.
+///     Use the direct SDK to verify the User PIN first and dispose the returned certificate. Attestation
+///     replaces the target certificate; reading output alone establishes no trusted chain or key binding.
+/// </remarks>
 public sealed class KeysAttestCommand : OpenPgpCommand<KeysAttestCommand.Settings>
 {
     public sealed class Settings : CommandSettings

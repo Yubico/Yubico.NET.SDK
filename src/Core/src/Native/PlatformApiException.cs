@@ -16,6 +16,11 @@ using System.Diagnostics;
 
 namespace Yubico.YubiKit.Core.Native;
 
+/// <summary>Reports platform API context supplied by a native call site.</summary>
+/// <remarks>
+///     The source/error-code constructor includes the supplied source label and eight-digit hexadecimal
+///     32-bit pattern in Message. It does not normalize backend status codes or store that code in HResult.
+/// </remarks>
 public class PlatformApiException : Exception
 {
     public PlatformApiException() :

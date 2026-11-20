@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
@@ -28,9 +27,7 @@ public class HsmAuthSessionByteLevelTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             HsmAuthSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
-        // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // The direct factory borrows this connection. Initialization failure leaves disposal to its caller.
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -239,11 +236,10 @@ public class HsmAuthSessionByteLevelTests
     ///     Pins the CHANGE credential password APDU for the password-authenticated path.
     /// </summary>
     /// <remarks>
-    ///     The hardware test for this operation fails with SW=0x6D00 on applet builds that omit the
-    ///     instruction, and an SDK regression in the instruction byte would produce that identical
-    ///     status word. The two cannot be told apart on hardware, so the instruction byte, P1
-    ///     selector, and TLV order are pinned here: if these pass and the hardware test fails, the
-    ///     applet lacks the instruction; if these fail, the SDK is at fault.
+    ///     The recorder checks the instruction, selector, header and selected TLV tag order. These
+    ///     assertions help separate command-encoding regressions from device rejections. Diagnose a
+    ///     hardware status such as 0x6D00 using the actual command, applet version and device evidence;
+    ///     passing these checks alone does not establish why a device rejected a command.
     /// </remarks>
     [Fact]
     public async Task ChangeCredentialPasswordAsync_TransmitsChangeInstructionWithPasswordSelector()
@@ -276,8 +272,8 @@ public class HsmAuthSessionByteLevelTests
     }
 
     /// <summary>
-    ///     Pins the CHANGE credential password APDU for the management-key path, which differs only
-    ///     by its P1 selector and by carrying the management key instead of the current password.
+    ///     Checks the CHANGE instruction, management-key selector, initial label tag and following
+    ///     management-key tag for the administrator path.
     /// </summary>
     [Fact]
     public async Task ChangeCredentialPasswordAdminAsync_TransmitsChangeInstructionWithManagementKeySelector()
@@ -308,10 +304,8 @@ public class HsmAuthSessionByteLevelTests
     ///     A caller-supplied firmware override survives <c>ResetAsync</c>.
     /// </summary>
     /// <remarks>
-    ///     Reset re-SELECTs the applet to refresh cached state, and the SELECT response carries the
-    ///     applet's own version. Adopting that version would silently drop an override supplied through
-    ///     <c>SessionCreationOptions</c>, so feature gates evaluated after a reset would disagree with
-    ///     the ones evaluated before it. Reset refreshes applet state, not caller policy.
+    ///     Reset reselects the applet using the existing protocol. Retaining the resolved override
+    ///     keeps feature policy consistent across reset, even when SELECT reports a lower applet version.
     /// </remarks>
     [Fact]
     public async Task ResetAsync_PreservesCallerSuppliedFirmwareVersionOverride()

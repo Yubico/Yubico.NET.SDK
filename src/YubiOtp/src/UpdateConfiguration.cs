@@ -26,6 +26,10 @@ namespace Yubico.YubiKit.YubiOtp;
 /// Only flags in <see cref="ExtendedFlagMasks.UpdateMask"/>,
 /// <see cref="TicketFlagMasks.UpdateMask"/>, and <see cref="ConfigFlagMasks.UpdateMask"/>
 /// are transmitted.
+/// These are complete masked values, not a patch of the setters called. Defaults are SerialApiVisible
+/// and AllowUpdate with ticket/configuration flags clear; keyboard defaults such as AppendCr and
+/// FastTrigger are not inherited. Keep your intended settings and explicitly retain desired flags.
+/// Omitting a new access code in UpdateConfigurationAsync sends zeros rather than preserving protection.
 /// </remarks>
 public sealed class UpdateConfiguration : SlotConfiguration
 {
@@ -95,7 +99,7 @@ public sealed class UpdateConfiguration : SlotConfiguration
     }
 
     /// <summary>
-    /// Enables fast triggering (slot 2 only, reduced activation delay).
+    /// Enables reduced activation delay where applicable, not only for slot 2; firmware rules vary.
     /// </summary>
     public UpdateConfiguration FastTrigger(bool enable = true)
     {
@@ -113,7 +117,7 @@ public sealed class UpdateConfiguration : SlotConfiguration
     }
 
     /// <summary>
-    /// Adds a 20ms delay between each keystroke for slow USB hosts.
+    /// Selects 10 ms intra-character pacing (30 ms when combined with PacingChar20).
     /// </summary>
     public UpdateConfiguration PacingChar10(bool enable = true)
     {
@@ -122,7 +126,7 @@ public sealed class UpdateConfiguration : SlotConfiguration
     }
 
     /// <summary>
-    /// Adds a 40ms delay between each keystroke for very slow USB hosts.
+    /// Selects 20 ms intra-character pacing (30 ms when combined with PacingChar10).
     /// </summary>
     public UpdateConfiguration PacingChar20(bool enable = true)
     {

@@ -53,8 +53,9 @@ public class PivAuditHardwareReproTests
 
         // This handle has never supplied a PIN. Desired behaviour under an isolation/release policy
         // (not a PIV spec requirement; see docs/audit-v2/findings/22-*): the verifier's disposal must
-        // not leave PIN state usable by an unrelated handle. Today this signs successfully and
-        // produces a signature that verifies against the slot key.
+        // not leave PIN state usable by an unrelated handle. Earlier hardware recorded successful
+        // signing here; that historical outcome is not guaranteed by the current sharing/release path.
+        // These are sequential handles in one process, not concurrent clients or a two-process oracle.
         await using var unverified = await state.Device.CreatePivSessionAsync();
         ReadOnlyMemory<byte> signature = ReadOnlyMemory<byte>.Empty;
         Exception? rejection = await Record.ExceptionAsync(async () =>

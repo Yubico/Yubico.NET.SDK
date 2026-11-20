@@ -8,6 +8,11 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
 
+/// <summary>
+/// Keeps the fixed before/after async.8 cold-start comparison separate from CurrentProfile's
+/// per-source --profile mode. Package/deployed-file hashes do not observe the process-loaded native
+/// path or its producer. Compiling either mode supplies no macOS runtime or device result.
+/// </summary>
 internal static class Program
 {
     private const int Serial = 31683481;

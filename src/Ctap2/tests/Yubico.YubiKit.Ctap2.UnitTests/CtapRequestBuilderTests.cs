@@ -1,10 +1,12 @@
 using FluentAssertions;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Ctap2.Cbor;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
+/// <summary>Checks command prefixes and selected request-builder values.</summary>
+/// <remarks>Most With* cases assert only nonempty payload and command byte. They do not establish
+/// complete command schema, allocation behavior or canonical wire order from their method names.</remarks>
 public class CtapRequestBuilderTests
 {
     [Fact]
@@ -26,7 +28,7 @@ public class CtapRequestBuilderTests
             .WithInt(1, 42)
             .Build();
 
-        // Assert - command byte + CBOR map {1: 42}
+        // Assert payload presence and command byte only; the map/value is not decoded here.
         result.Should().HaveCountGreaterThan(1);
         result[0].Should().Be(CtapCommand.ClientPin);
     }
@@ -76,6 +78,7 @@ public class CtapRequestBuilderTests
     [Fact]
     public void WithValue_WritesParameterWithoutIntermediateCopy()
     {
+        // Decodes the key/value; no allocation measurement establishes the method name's copy claim.
         // Arrange & Act
         var result = CtapRequestBuilder.Create(CtapCommand.MakeCredential)
             .WithValue(1, writer => writer.WriteByteString([0xAA, 0xBB]))
@@ -100,10 +103,10 @@ public class CtapRequestBuilderTests
             .WithInt(2, 200)
             .Build();
 
-        // Assert - parameters should be sorted in canonical CBOR order
+        // Assert prefix/payload presence only; this test does not inspect the key order.
         result.Should().HaveCountGreaterThan(1);
         result[0].Should().Be(CtapCommand.MakeCredential);
-        // CBOR map with 3 entries, keys 1, 2, 3 in sorted order
+        // Exact encoded-key order needs a separate byte-level assertion, not this length check.
     }
 
     [Fact]

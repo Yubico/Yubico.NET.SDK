@@ -66,15 +66,13 @@ public static class TestStateExtensions
             }, cancellationToken);
 
         /// <summary>
-        ///     Restores the Security Domain to its factory state, reinstating the default SCP03 keys.
+        ///     Requests a destructive Security Domain reset through an unauthenticated session.
         /// </summary>
         /// <remarks>
-        ///     Tests that rotate or delete SCP03 keys must call this when they finish. Deleting the last
-        ///     key set leaves the device with no key matching <see cref="Scp03KeyParameters.Default" />, so
-        ///     every later consumer of the default keys fails secure-channel establishment with
-        ///     <c>SW=0x6A88</c> (referenced data not found). That failure surfaces in whichever suite runs
-        ///     next rather than in the test that caused it, so resetting here keeps the integration suites
-        ///     order-independent.
+        ///     Tests that mutate SD state use this cleanup so later tests can request factory SCP03 keys.
+        ///     First custom import replaces the factory set; deletion of the last SCP03 set is documented
+        ///     by Yubico as restoring defaults, not leaving no keys. ResetAsync itself does not verify
+        ///     factory contents, so successful cleanup is not proof of every device's restored state.
         /// </remarks>
         public Task ResetSecurityDomainAsync(CancellationToken cancellationToken = default) =>
             state.WithConnectionAsync(async connection =>

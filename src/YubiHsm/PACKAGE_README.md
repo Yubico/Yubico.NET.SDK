@@ -1,8 +1,8 @@
 # Yubico.YubiKit.YubiHsm
 
-YubiHSM Auth applet support for YubiKey devices. This is **not** a YubiHSM 2 client: the applet stores the
-credentials used to authenticate to a YubiHSM 2 and derives the session keys your own code then uses.
-This package never contacts the HSM itself.
+YubiHSM Auth applet support for YubiKey devices. The applet stores credentials used to authenticate to a
+YubiHSM 2 and derives session keys. Your application provisions the matching HSM authentication object
+and uses an HSM library to complete the handshake and exchange protected commands with the HSM.
 
 > ## Alpha - not for production
 >

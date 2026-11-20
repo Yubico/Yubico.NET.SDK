@@ -19,12 +19,13 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 /// <summary>
 ///     Announces an instruction to the operator of an attended (<see cref="TestCategories.RequiresUserPresence" />)
-///     test: always on the console, and spoken aloud where a platform speech engine exists.
+///     test: writes to Console and an optional echo sink, then attempts platform speech.
 /// </summary>
 /// <remarks>
-///     Speech is best-effort and never affects the test outcome. The operator usually cannot watch the
-///     runner's console while handling hardware, and test-host output is often captured rather than shown
-///     live, so a spoken cue is the only reliable real-time signal. Set <c>YUBIKEY_TEST_QUIET=1</c> to
+///     Speech startup and waiting errors are ignored; console and echo-sink exceptions can still propagate.
+///     A test host may capture console output, and speech may fail or exceed the wait, so coordinate
+///     attended actions with the operator rather than treating the cue as delivery confirmation.
+///     Set <c>YUBIKEY_TEST_QUIET=1</c> or <c>true</c> to
 ///     suppress speech. Engines: <c>say</c> on macOS, <c>System.Speech</c> through PowerShell on Windows,
 ///     <c>spd-say</c> or <c>espeak</c> on Linux.
 /// </remarks>
@@ -32,7 +33,10 @@ public static class OperatorCue
 {
     private static readonly bool Quiet = Environment.GetEnvironmentVariable("YUBIKEY_TEST_QUIET") is "1" or "true";
 
-    /// <summary>Prints <paramref name="instruction" /> and speaks it, returning once speech has finished.</summary>
+    /// <summary>
+    /// Prints <paramref name="instruction" /> and attempts speech, waiting at most 15 seconds for
+    /// the speech process. Return does not prove speech completion or child-process termination.
+    /// </summary>
     /// <param name="instruction">Plain text; keep it short enough to act on.</param>
     /// <param name="echo">Optional secondary sink, such as xUnit's <c>ITestOutputHelper.WriteLine</c>.</param>
     public static void Announce(string instruction, Action<string>? echo = null)
@@ -72,7 +76,7 @@ public static class OperatorCue
         }
         else
         {
-            // spd-say returns immediately; espeak blocks. Prefer the one that is installed.
+            // Request spd-say's wait mode when installed; otherwise try espeak.
             info.FileName = File.Exists("/usr/bin/spd-say") ? "spd-say" : "espeak";
             if (info.FileName == "spd-say")
                 info.ArgumentList.Add("--wait");

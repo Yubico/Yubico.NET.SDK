@@ -21,6 +21,9 @@ public class OpenPgpDecryptTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task Decrypt_RsaPkcs1_RecoverPlaintext(YubiKeyTestState state)
     {
+        // Current early return covers 4.2.0–4.3.5 inclusive with no setup/assertion.
+        // ROCA advisory YSA-2017-01 affects generated keys on 4.2.6–4.3.4 and recommends
+        // external import; this imported-key exclusion and corrected-4.3.5 boundary need review.
         if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
             state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
         {

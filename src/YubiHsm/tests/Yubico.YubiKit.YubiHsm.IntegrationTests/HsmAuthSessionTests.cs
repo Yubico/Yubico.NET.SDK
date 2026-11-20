@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System.Security.Cryptography;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -16,18 +15,15 @@ namespace Yubico.YubiKit.YubiHsm.IntegrationTests;
 /// </summary>
 public class HsmAuthSessionTests
 {
-    // Per-test CancellationToken — do not use a static CTS (shared state causes
-    // cancellation after cumulative timeout, breaking later tests in the suite).
+    // Each call creates an independent timeout so later operations start with their own deadline.
     private static CancellationToken NewToken(int timeoutSeconds = 30) =>
         new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds)).Token;
 
     // Default management key (all zeros after reset)
     private static ReadOnlyMemory<byte> DefaultManagementKey => new byte[16];
 
-    // A management key that passes complexity requirements on Enhanced PIN devices.
-    // Note: alpha/beta firmware has non-standard complexity checks — this specific
-    // value is known to pass on 5.8.0-alpha YubiKeys. On production firmware,
-    // any 16-byte non-zero key should work.
+    // Fixed test fixture for management-key rotation. Device acceptance is established by the
+    // operation in this test; firmware labels alone provide no key-complexity guarantee.
     private static ReadOnlyMemory<byte> ComplexManagementKey => new byte[]
     {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -125,8 +121,7 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
-                // Use ComplexManagementKey — random bytes may fail PIN complexity
-                // on Enhanced PIN devices that enforce entropy requirements.
+                // Use the fixed rotation fixture and verify that it authorizes the following PUT.
                 var newKey = ComplexManagementKey.ToArray();
                 try
                 {
@@ -185,7 +180,8 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
-                // Store a symmetric credential first
+                // Use synthetic context to exercise applet calculation and returned key lengths.
+                // A live authenticated HSM flow additionally supplies its challenge and cryptogram.
                 var keyEnc = RandomNumberGenerator.GetBytes(16);
                 var keyMac = RandomNumberGenerator.GetBytes(16);
                 var context = RandomNumberGenerator.GetBytes(16);
@@ -200,7 +196,7 @@ public class HsmAuthSessionTests
                         TestPassword,
                         cancellationToken: NewToken());
 
-                    // Calculate session keys
+                    // Omit the optional card cryptogram for this isolated applet calculation.
                     using var keys = await session.CalculateSessionKeysSymmetricAsync(
                         TestLabel,
                         context,
@@ -271,9 +267,9 @@ public class HsmAuthSessionTests
                         TestPassword,
                         cancellationToken: NewToken());
 
-                    // Change the password. Requires YubiHSM Auth applet 5.8.0+ (INS 0x0B). An
-                    // alpha/beta applet is assumed to have it; a device that answers SW=0x6D00 is
-                    // missing the instruction and should fail here rather than be worked around.
+                    // Device selection uses metadata; the operation also checks the session's
+                    // resolved 5.8.0 feature policy. Preserve an applet rejection for diagnosis
+                    // against the transmitted command and actual applet version.
                     ReadOnlyMemory<byte> newPassword = "new-password"u8.ToArray();
                     await session.ChangeCredentialPasswordAsync(
                         TestLabel,
@@ -281,7 +277,8 @@ public class HsmAuthSessionTests
                         newPassword,
                         NewToken());
 
-                    // Calculate session keys with the new password should succeed
+                    // Assert that calculation with the replacement password returns a 16-byte S-ENC.
+                    // The synthetic context and omitted cryptogram keep this an applet-only check.
                     using var keys = await session.CalculateSessionKeysSymmetricAsync(
                         TestLabel,
                         context,
@@ -301,6 +298,7 @@ public class HsmAuthSessionTests
             cancellationToken: NewToken());
 
     // ─── Touch-Required Tests ────────────────────────────────────────────────────
+    // This case reads the stored touch flag. Physical CALCULATE/touch enforcement needs a separate flow.
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]

@@ -176,7 +176,11 @@ Run log: artifacts/toolchain/runs/20261020-174154-059-test/run.log (result.json 
 - The first line of every run names its log (`▶ toolchain: test  (log: …/run.log)`), so a run cut short by a timeout can still be read. `dotnet toolchain.cs -- last` reprints the newest RESULT block without running anything.
 - `Next:` re-runs only the tests that failed.
 - `Warnings:` counts distinct compiler and MSBuild warnings, with a line per step giving the codes and the step log, e.g. `build-Management: 3 (CS1030 x2, CS0168)`. Warnings are not shown while running and never fail a run on their own. In this repository most compiler warnings are already errors (`TreatWarningsAsErrors`), so the count mainly catches NuGet/MSBuild warnings.
-- A project where nothing executed is reported as `○ NO-TESTS` and fails the `test` target. This covers a filter that matched nothing and a run where every test was skipped. For integration projects the reason asks whether a suitable YubiKey is connected.
+- A preflight no-match or a parsed all-skipped project is reported as `○ NO-TESTS`. The shared gate fails
+  when every selected project has that outcome, not when just one does. An exit-zero process whose
+  counts cannot be parsed, or whose parsed executed/skipped counts are both zero, can still be marked
+  passed. Inspect every project's counts and raw log before claiming the requested tests executed;
+  a green target alone does not establish that.
 - `--project` that matches nothing fails and lists the valid names.
 - Expected failures (failed tests or gates, usage errors, a failing command) print their message without a stack trace. A stack trace means a bug in the toolchain itself.
 
@@ -215,6 +219,11 @@ artifacts/toolchain/
 - While a run is active, `artifacts/toolchain/active-run.txt` names its process and log. A second run in the same checkout (parallel agents) prints `! WARN` because their builds can collide.
 - `artifacts/` is gitignored.
 
+Run logs retain the complete toolchain argument list in `run.log`, the RESULT text and `result.json`.
+That includes a supplied `--nuget-api-key`; process-command display masking does not redact these
+copies. Do not share logs containing credentials. Treat any real key already captured there as exposed
+and follow your credential-rotation policy. Gitignored output is not secret storage.
+
 ## Analyzers and Formatting
 
 - For routine development, run scoped `dotnet format` with `--include` so formatting fixes apply directly to staged files. For repository-wide rule changes and CI enforcement workflow, follow `docs/DEV-GUIDE.md`.
@@ -245,20 +254,26 @@ Use `dotnet toolchain.cs -- docs-list-active` to print the exact active document
 
 ## Project Discovery
 
-The build script automatically discovers projects using glob patterns:
+The build script recursively finds `.csproj` files and filters their paths:
 
-- **Packable projects**: All `Yubico.YubiKit.*/src/*.csproj` files
-- **Test projects**: All `Yubico.YubiKit.*.UnitTests/*.csproj` files under `tests/` directories
+- **Build/package candidates**: paths containing a `src` directory segment and `Yubico.YubiKit.`.
+  Libraries normally live at `src/<Module>/src/Yubico.YubiKit.<Module>.csproj`, but this is not a
+  strict-depth glob; tests and examples under the source tree can also match. Packaging excludes
+  projects explicitly declaring `IsPackable=false`.
+- **Test projects**: `src/<Module>/tests/Yubico.YubiKit.<Module>.UnitTests/*.csproj` and corresponding
+  `.IntegrationTests` projects. Tests select unit projects by default; `--integration` adds integration
+  projects to that selection rather than replacing unit projects.
 
 This means you don't need to manually update the build script when adding new projects that follow the standard structure. Run `dotnet toolchain.cs -- --help` to see the current list of discovered projects.
 
 ## Native AOT Publish Verification
 
-The all-module Native AOT publish is verified independently via
+The all-module Native AOT publish workflow is
 [`.github/workflows/native-aot.yml`](.github/workflows/native-aot.yml), which runs
 `dotnet publish -p:PublishAot=true` directly against
 [`verification/NativeAotVerification`](verification/NativeAotVerification), a minimal internal
-console host that references every in-scope SDK library. See
+console host that references every in-scope SDK library. Publishing checks reachable compilation and
+linking; it does not execute every public API or qualify native/device behavior on every platform. See
 [`docs/NATIVE-AOT.md`](docs/NATIVE-AOT.md) for the full support contract. To reproduce locally:
 
 ```bash
@@ -284,6 +299,20 @@ The target restores isolated JIT/AOT dependency trees, records inputs, publishes
 implicit restore, and seals the unchanged inputs and resulting artifacts. Keep that transaction
 intact: the capture rejects stale or unbound binaries. Publishing requires the Linux Native AOT
 toolchain; it does not run hardware scenarios.
+
+## Benchmark evidence
+
+The manual `benchmark` target forwards `--benchmark-args` to the performance project. Use a dedicated
+hardware rig: the ordinary hardware fixture picks the first view exposing the requested connection,
+without enforcing a serial allow list or firmware 5.8. Discovery can probe other attached devices
+before a benchmark selects its fixture. Record the actual key, firmware, transport and runtime with
+each result rather than treating the fixture's error message as a checked prerequisite.
+
+The async-boundary baseline separates invocation return from task-terminal timing. A watchdog-killed
+child is censored, not a measured native cleanup success. Native duration and report count are not
+observed. Its cached-package/deployed-file hash comparison also does not identify the process-loaded
+library or its producer. Synthetic self-tests classify samples; they do not execute device lifecycles
+or qualify every cancellation schedule. Keep these limits with any performance conclusion.
 
 ## Code Coverage
 
@@ -472,8 +501,15 @@ dotnet test Yubico.YubiKit.Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/Yubico.Yub
   ```
 - Filter syntax: `FullyQualifiedName~Substring`, `Method~Name`, `Category!=Slow`
 - The toolchain auto-translates VSTest filter expressions to xUnit v3 native options (`--filter-method`, `--filter-trait`, etc.)
+- The translator emits a separate native argument for each same-kind term; it does not combine two
+  method patterns into one wildcard for an AND expression. Do not assume compound same-kind filters
+  preserve VSTest boolean semantics. Check the selected test list and execution counts for the actual
+  runner/package before using such a filter as coverage evidence.
 - It also normalises `Method~` / `Name~` to `FullyQualifiedName~` for the xUnit v2 (VSTest) projects, which have no `Method` property. Without that, `Method~Sign` matches **zero** tests on every integration project while working fine on the unit projects. `FullyQualifiedName~` is the precise form if you want to be explicit
-- **A filter matching no tests is an error, not a pass.** The toolchain preflights both runners and fails with `No tests matched the specified filter`. Left unguarded, VSTest prints `No test matches the given testcase filter` and still exits `0`, which previously surfaced as `✓ All tests passed` from a run that never happened
+- **Inspect every project's filter outcome.** The toolchain preflights both runners and records
+  no-match projects as `NO-TESTS`; the shared gate rejects an all-`NO-TESTS` selection but can accept a
+  mixed selection. VSTest itself can exit zero after matching nothing. Runner count parsing and the
+  current gate limits above are why a target-level pass is not sufficient execution evidence.
 
 ### For AI Agents / Automation
 
@@ -484,7 +520,8 @@ When writing scripts or automation that runs tests:
 3. **Use `--project`** to filter to specific projects: `dotnet toolchain.cs -- test --project Fido2`
 4. **Combine `--project` with `--filter`** for targeted test runs: `dotnet toolchain.cs -- test --project Fido2 --filter "Method~Sign"`
 5. **Read the RESULT block and the exit code**, not runner lines. `RESULT: PASSED` (exit code 0)
-   means every target passed and every test project executed tests. See "Reading the Output" above.
+   means every recorded target passed its current gates. It does not prove every selected project
+   executed tests; inspect per-project counts and logs as described in "Reading the Output" above.
    After a timeout or in a later session, `dotnet toolchain.cs -- last` reprints the newest RESULT block.
 6. **Add `--smoke` to any unattended hardware run.** It skips `Slow` and `RequiresUserPresence`,
    so a missing human cannot leave a ceremony parked and wedge the key. Be aware it can thin

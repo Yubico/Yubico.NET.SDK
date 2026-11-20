@@ -20,8 +20,18 @@ namespace Yubico.YubiKit.Oath;
 ///     Represents a calculated OATH one-time password code.
 /// </summary>
 /// <param name="Value">The formatted OTP code string, zero-padded to the required digit count.</param>
-/// <param name="ValidFrom">Unix timestamp indicating when the code becomes valid.</param>
-/// <param name="ValidTo">Unix timestamp indicating when the code expires.</param>
+/// <param name="ValidFrom">
+///     Unix time in seconds: the inclusive start of the nominal TOTP generation window, or the
+///     requested/current calculation timestamp for HOTP.
+/// </param>
+/// <param name="ValidTo">
+///     Unix time in seconds: the exclusive end of the nominal TOTP generation window, or
+///     <see cref="long.MaxValue" /> for HOTP as a no-time-expiry sentinel, not a date to format.
+/// </param>
+/// <remarks>
+///     These bounds describe generation metadata, not a verifier's acceptance policy. TOTP acceptance
+///     depends on the verifier's time window and replay rules; HOTP acceptance depends on its counter state.
+/// </remarks>
 public sealed record Code(string Value, long ValidFrom, long ValidTo)
 {
     internal readonly record struct ParsedCode(int Digits, int Value);
@@ -30,12 +40,12 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
     ///     Formats a truncated OATH response into a <see cref="Code" />.
     /// </summary>
     /// <param name="credential">The credential that produced the response.</param>
-    /// <param name="timestamp">The Unix timestamp used for calculation.</param>
+    /// <param name="timestamp">The Unix time in seconds used for calculation.</param>
     /// <param name="truncated">
     ///     The truncated response bytes. The first byte is the digit count,
     ///     followed by the truncated HMAC value.
     /// </param>
-    /// <returns>A formatted <see cref="Code" /> with validity window.</returns>
+    /// <returns>A formatted <see cref="Code" /> with generation-time metadata.</returns>
     internal static Code FormatCode(Credential credential, long timestamp, ReadOnlySpan<byte> truncated)
     {
         ParsedCode parsedCode = ParseCode(credential, truncated);
@@ -46,6 +56,18 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
     ///     Validates and parses a truncated OATH response without creating the immutable code string.
     /// </summary>
     internal static ParsedCode ParseCode(Credential credential, ReadOnlySpan<byte> truncated)
+    {
+        ParsedCode parsedCode = ParseTruncatedResponse(truncated);
+        if (credential.OathType == OathType.Totp && credential.Period <= 0)
+        {
+            throw new BadResponseException("A TOTP credential must have a positive period.");
+        }
+
+        return parsedCode;
+    }
+
+    /// <summary>Parses the wire value independently of host-side credential naming.</summary>
+    internal static ParsedCode ParseTruncatedResponse(ReadOnlySpan<byte> truncated)
     {
         if (truncated.Length != 5)
         {
@@ -60,11 +82,6 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
                 $"Invalid OATH code digit count {digits}. Expected a value from 6 through 8.");
         }
 
-        if (credential.OathType == OathType.Totp && credential.Period <= 0)
-        {
-            throw new BadResponseException("A TOTP credential must have a positive period.");
-        }
-
         int rawCode = (truncated[1] << 24) | (truncated[2] << 16) | (truncated[3] << 8) | truncated[4];
         rawCode &= 0x7FFFFFFF;
 
@@ -74,6 +91,11 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
     /// <summary>Formats a validated response after successful user-presence resolution.</summary>
     internal static Code FormatCode(Credential credential, long timestamp, ParsedCode parsedCode)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(timestamp);
+        (long validFrom, long validTo) = credential.OathType == OathType.Totp
+            ? GetTotpWindow(timestamp, credential.Period)
+            : (timestamp, long.MaxValue);
+
         int modulus = parsedCode.Digits switch
         {
             6 => 1_000_000,
@@ -84,20 +106,19 @@ public sealed record Code(string Value, long ValidFrom, long ValidTo)
 
         string value = (parsedCode.Value % modulus).ToString().PadLeft(parsedCode.Digits, '0');
 
-        long validFrom;
-        long validTo;
-        if (credential.OathType == OathType.Totp)
-        {
-            long timeStep = timestamp / credential.Period;
-            validFrom = timeStep * credential.Period;
-            validTo = (timeStep + 1) * credential.Period;
-        }
-        else
-        {
-            validFrom = timestamp;
-            validTo = long.MaxValue;
-        }
-
         return new Code(value, validFrom, validTo);
+    }
+
+    /// <summary>Validates the supported time domain without overflowing the exclusive window end.</summary>
+    internal static (long From, long To) GetTotpWindow(long timestamp, int period)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(timestamp);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(period);
+        long from = timestamp - timestamp % period;
+        if (from > long.MaxValue - period)
+            throw new ArgumentOutOfRangeException(nameof(timestamp), timestamp,
+                "The TOTP generation window must fit in Int64 Unix seconds.");
+
+        return (from, from + period);
     }
 }

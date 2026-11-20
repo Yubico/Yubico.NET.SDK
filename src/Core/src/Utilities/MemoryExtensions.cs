@@ -14,16 +14,20 @@
 
 namespace Yubico.YubiKit.Core.Utilities;
 
+/// <summary>Looks up borrowed views of dictionary values without copying their storage.</summary>
 public static class MemoryExtensions
 {
+    /// <summary>Returns the stored memory view, or empty memory when the key is absent.</summary>
     public static ReadOnlyMemory<TValue> GetMemory<TKey, TValue>(
         this IDictionary<TKey, ReadOnlyMemory<TValue>> dictionary,
         TKey key) =>
         dictionary.TryGetValue(key, out var memory) ? memory : ReadOnlyMemory<TValue>.Empty;
 
+    /// <summary>Returns a span over the stored value. The dictionary indexer throws when the key is absent.</summary>
     public static ReadOnlySpan<TValue> GetSpan<TKey, TValue>(this IDictionary<TKey, ReadOnlyMemory<TValue>> dictionary,
         TKey key) => dictionary[key].Span;
 
+    /// <summary>Returns a stored span and true on a match, or an empty span and false when the key is absent.</summary>
     public static bool TryGetSpan<TKey, TValue>(this IDictionary<TKey, ReadOnlyMemory<TValue>> dictionary, TKey key,
         out ReadOnlySpan<TValue> span)
     {

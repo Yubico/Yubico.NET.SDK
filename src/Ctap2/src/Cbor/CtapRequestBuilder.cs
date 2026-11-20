@@ -25,6 +25,19 @@ namespace Yubico.YubiKit.Ctap2.Cbor;
 /// CTAP2 requires deterministic CBOR encoding per specification:
 /// https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#ctap2-canonical-cbor-encoding-form
 /// </para>
+/// <para>
+/// Reusing a key replaces its previous value. Byte-string and encoded-value methods immediately
+/// retain private copies; this builder has no disposal or clearing API, and replacing a value does
+/// not clear its old copy. Callbacks run on each Build, not when added, and must write one complete value.
+/// Keep captured storage valid until the last Build. For sensitive bytes, WithValue can write
+/// directly without the WithBytes input clone, but does not guarantee all writer storage is cleared.
+/// </para>
+/// <para>
+/// The Ctap2Canonical writer automatically sorts map key encodings when each map is completed.
+/// Parameter insertion here is numerically sorted, which is not generally canonical encoded-key
+/// order for mixed positive/negative keys. Writer canonicalization does not validate command schema,
+/// authorization, CTAP's nesting limit or the authenticator's maximum message size.
+/// </para>
 /// </remarks>
 public sealed class CtapRequestBuilder
 {
@@ -68,7 +81,7 @@ public sealed class CtapRequestBuilder
     }
 
     /// <summary>
-    /// Adds a byte array parameter.
+    /// Immediately copies and retains a byte-string parameter for subsequent builds.
     /// </summary>
     /// <param name="key">The CBOR map key.</param>
     /// <param name="value">The byte array value.</param>
@@ -81,7 +94,7 @@ public sealed class CtapRequestBuilder
     }
 
     /// <summary>
-    /// Adds a byte array parameter from Memory.
+    /// Immediately copies and retains a byte-string parameter from memory for subsequent builds.
     /// </summary>
     /// <param name="key">The CBOR map key.</param>
     /// <param name="value">The memory value.</param>
@@ -121,7 +134,7 @@ public sealed class CtapRequestBuilder
     /// Adds a parameter using a caller-provided CBOR writer callback.
     /// </summary>
     /// <param name="key">The CBOR map key.</param>
-    /// <param name="writeValue">Action that writes the complete CBOR value.</param>
+    /// <param name="writeValue">Action invoked on each Build to write one complete CBOR value.</param>
     /// <returns>This builder for chaining.</returns>
     public CtapRequestBuilder WithValue(int key, Action<CborWriter> writeValue)
     {
@@ -133,7 +146,7 @@ public sealed class CtapRequestBuilder
     /// Adds a CBOR map parameter.
     /// </summary>
     /// <param name="key">The CBOR map key.</param>
-    /// <param name="writeMap">Action that writes the map content.</param>
+    /// <param name="writeMap">Deferred action that writes the complete map, including start/end markers.</param>
     /// <returns>This builder for chaining.</returns>
     public CtapRequestBuilder WithMap(int key, Action<CborWriter> writeMap)
     {
@@ -144,7 +157,7 @@ public sealed class CtapRequestBuilder
     /// Adds a CBOR array parameter.
     /// </summary>
     /// <param name="key">The CBOR map key.</param>
-    /// <param name="writeArray">Action that writes the array content.</param>
+    /// <param name="writeArray">Deferred action that writes the complete array, including start/end markers.</param>
     /// <returns>This builder for chaining.</returns>
     public CtapRequestBuilder WithArray(int key, Action<CborWriter> writeArray)
     {
@@ -152,7 +165,7 @@ public sealed class CtapRequestBuilder
     }
 
     /// <summary>
-    /// Adds a pre-encoded CBOR value parameter.
+    /// Immediately copies and retains a pre-encoded CBOR value for subsequent builds.
     /// </summary>
     /// <param name="key">The CBOR map key.</param>
     /// <param name="encodedValue">The pre-encoded CBOR bytes.</param>
@@ -167,6 +180,9 @@ public sealed class CtapRequestBuilder
     /// <summary>
     /// Builds the CTAP request as a byte array.
     /// </summary>
+    /// <remarks>Each call returns a new caller-owned command-prefixed array. Clear it when it contains
+    /// secrets and is no longer needed. Only the Encode intermediate copy is cleared here, not
+    /// retained inputs, captured callback storage, the returned array or all writer-internal storage.</remarks>
     /// <returns>The serialized CTAP request (command byte + CBOR payload).</returns>
     public byte[] Build()
     {
@@ -178,7 +194,7 @@ public sealed class CtapRequestBuilder
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        // Write CBOR map with parameters sorted by key (canonical encoding)
+        // Insert in numeric order; Ctap2Canonical sorts encoded keys when the map is completed.
         writer.WriteStartMap(_parameters.Count);
 
         foreach (var (key, writeValue) in _parameters)
@@ -206,8 +222,10 @@ public sealed class CtapRequestBuilder
     }
 
     /// <summary>
-    /// Builds the CTAP request as a ReadOnlyMemory.
+    /// Builds a new CTAP request array and returns its read-only view.
     /// </summary>
+    /// <remarks>This is the same allocation/ownership as Build, not a borrowed-input view or a
+    /// disposable owner. Read-only access does not automatically clear secret bytes.</remarks>
     /// <returns>The serialized CTAP request.</returns>
     public ReadOnlyMemory<byte> BuildAsMemory() => Build();
 }

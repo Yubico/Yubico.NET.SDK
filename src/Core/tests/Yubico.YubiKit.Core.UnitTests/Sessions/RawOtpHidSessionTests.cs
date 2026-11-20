@@ -20,6 +20,10 @@ using Yubico.YubiKit.Core.Transports.Hid;
 
 namespace Yubico.YubiKit.Core.UnitTests.Sessions;
 
+/// <summary>
+///     Checks raw OTP framing and lifetime against a scripted connection. CRC recomputation uses the same
+///     ChecksumUtils helper as production, making it a consistency check rather than an independent known-answer vector.
+/// </summary>
 public class RawOtpHidSessionTests
 {
     [Fact]

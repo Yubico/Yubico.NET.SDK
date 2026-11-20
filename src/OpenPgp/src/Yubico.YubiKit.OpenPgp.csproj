@@ -6,7 +6,7 @@
     <AssemblyName>Yubico.YubiKit.OpenPgp</AssemblyName>
 
     <!-- Package Metadata -->
-    <Description>OpenPGP support for YubiKey devices including key management, encryption, decryption, signing, and authentication operations.</Description>
+    <Description>OpenPGP card support for YubiKey devices including key management, raw deciphering and key agreement, signing, authentication, certificates, and PIN administration.</Description>
     <PackageTags>yubikey;yubico;openpgp;pgp;gpg;encryption;signing;smartcard</PackageTags>
 
     <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->

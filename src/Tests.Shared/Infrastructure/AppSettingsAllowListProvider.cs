@@ -22,14 +22,19 @@ namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 /// <remarks>
 ///     <para>
 ///     Expected configuration structure:
-///     <code>
+///     <code language="json">
 ///     {
 ///       "YubiKeyTests": {
 ///         "AllowedSerialNumbers": [12345678, 87654321],
-///         "EnableHardFail": true
+///         "AllowUnknownSerials": false
 ///       }
 ///     }
 ///     </code>
+///     </para>
+///     <para>
+///         Only AllowedSerialNumbers and AllowUnknownSerials are read. Keep AllowUnknownSerials false
+///         unless every attached serial-less device is dedicated test hardware: enabling it allows
+///         the harness to authorize views with readable metadata but no readable serial number.
 ///     </para>
 /// </remarks>
 public sealed class AppSettingsAllowListProvider : IAllowListProvider

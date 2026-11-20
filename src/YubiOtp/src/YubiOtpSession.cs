@@ -113,6 +113,14 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     /// <summary>
     /// Creates and initializes a new YubiOTP session.
     /// </summary>
+    /// <param name="connection">An open SmartCard or OTP HID connection, borrowed and not disposed by this session.</param>
+    /// <param name="options">Optional firmware/protocol, presence-prompt and secure-channel settings. SCP is unsupported on OTP HID.</param>
+    /// <param name="cancellationToken">A token for session creation.</param>
+    /// <returns>A caller-owned session. Dispose it before disposing the caller-owned connection.</returns>
+    /// <remarks>
+    /// Initialization reads status; support for a transport does not guarantee every command on every
+    /// device/interface. Use the device extension when the session should own its hidden connection.
+    /// </remarks>
     public static Task<YubiOtpSession> CreateAsync(
         IConnection connection,
         SessionCreationOptions? options = null,
@@ -160,6 +168,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         _logger.LogDebug("YubiOTP session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
     }
 
+    /// <inheritdoc />
     public Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -183,12 +192,14 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return (span[0] << 24) | (span[1] << 16) | (span[2] << 8) | span[3];
     }
 
+    /// <inheritdoc />
     public ConfigState GetConfigState()
     {
         ThrowIfDisposed();
         return new ConfigState(_status.Span);
     }
 
+    /// <inheritdoc />
     public Task PutConfigurationAsync(
         Slot slot,
         SlotConfiguration config,
@@ -210,6 +221,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return WriteConfigAsync(configSlot, config, accessCode, currentAccessCode, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task UpdateConfigurationAsync(
         Slot slot,
         UpdateConfiguration config,
@@ -232,6 +244,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return WriteConfigAsync(configSlot, config, accessCode, currentAccessCode, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task SwapSlotsAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -244,6 +257,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task DeleteSlotAsync(
         Slot slot,
         ReadOnlyMemory<byte> currentAccessCode = default,
@@ -265,6 +279,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
     }
 
+    /// <inheritdoc />
     public async Task SetScanMapAsync(
         ReadOnlyMemory<byte> scanMap,
         ReadOnlyMemory<byte> currentAccessCode = default,
@@ -292,6 +307,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
     }
 
+    /// <inheritdoc />
     public async Task SetNdefConfigurationAsync(
         Slot slot,
         string? uri = null,
@@ -317,6 +333,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
     }
 
+    /// <inheritdoc />
     public Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
         Slot slot,
         ReadOnlyMemory<byte> challenge,
@@ -359,6 +376,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
     }
 
+    /// <inheritdoc />
     public Task<ReadOnlyMemory<byte>> CalculateYubicoOtpAsync(
         Slot slot,
         ReadOnlyMemory<byte> challenge,
@@ -422,7 +440,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
         if (content is null)
         {
-            // Disable NDEF: all zeros
+            // All-zero disable request; this differs from an empty URI/text configuration with its header.
             return payload;
         }
 
@@ -531,7 +549,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <summary>
-    /// Appends the current access code (6 bytes) to the payload data for SmartCard transmission.
+    /// Appends the current authentication code (6 bytes) to the payload used by either backend.
     /// </summary>
     private static byte[] BuildPayloadWithAccessCode(
         ReadOnlyMemory<byte> data,
@@ -587,6 +605,8 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             };
         }
 
+        // Cached keyboard-trigger status drives the current SmartCard notification heuristic. It is not
+        // a read-back of challenge-response RequireTouch policy, despite the emitted PolicyRequires basis.
         if (Protocol is not ISmartCardProtocol || !IsKnownTouchTriggered(slot))
         {
             return null;

@@ -46,8 +46,8 @@ internal static class DeviceInfoReader
     ///     A Core protocol over SmartCard, FIDO HID, or OTP HID. The reader does not own or dispose it.
     /// </param>
     /// <param name="defaultVersion">
-    ///     Optional fallback firmware version passed to <see cref="DeviceInfo.CreateFromTlvs" />. When
-    ///     <c>null</c>, the firmware version is derived from the device-info TLVs.
+    ///     Optional firmware version used in preference to the reported firmware tag. When null, that tag
+    ///     supplies the version. A non-final qualifier can replace either with its own effective version.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The parsed <see cref="DeviceInfo" />.</returns>

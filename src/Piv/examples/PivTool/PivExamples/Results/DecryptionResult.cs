@@ -25,7 +25,8 @@ public sealed record DecryptionResult
     public bool Success { get; init; }
 
     /// <summary>
-    /// Gets the decrypted data when successful.
+    /// Gets plaintext when successful. This sample's read-only view has no ordinary clearing API;
+    /// prefer direct SDK DecryptAsync for caller-owned mutable Memory and clear its Span after use.
     /// </summary>
     public ReadOnlyMemory<byte> DecryptedData { get; init; }
 

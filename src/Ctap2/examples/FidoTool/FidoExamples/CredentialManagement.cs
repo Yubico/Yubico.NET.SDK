@@ -16,15 +16,21 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Ctap2.CredentialManagement;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 
 /// <summary>
 /// Credential management operations: enumerate, delete, and update stored credentials.
-/// Requires firmware 5.2+ and the credentialMgmt authenticator option.
+/// Uses the standard credential-management command (credMgmt), not prototype fallback.
 /// </summary>
+/// <remarks>
+/// Actual support/authorization is separate from firmware metadata. Helpers select protocol 2 without
+/// negotiation, borrow PIN input and finally-clear tokens. CredentialManagement borrows the token and
+/// does not privately clone it; its Dispose currently does not prevent operations. General catches
+/// flatten cancellation/transport/decode provenance and do not establish rollback. Coordinate complete
+/// eager enumeration sequences without interleaving other authenticator operations.
+/// </remarks>
 public static class CredentialManagementExample
 {
     /// <summary>
@@ -112,7 +118,7 @@ public static class CredentialManagementExample
     }
 
     /// <summary>
-    /// Gets credential storage metadata (existing count and remaining slots).
+    /// Gets credential storage metadata (existing count and estimated remaining capacity).
     /// </summary>
     public static async Task<MetadataResult> GetMetadataAsync(
         IYubiKey yubiKey,
@@ -158,7 +164,7 @@ public static class CredentialManagementExample
     }
 
     /// <summary>
-    /// Enumerates all relying parties with stored credentials, and all credentials per RP.
+    /// Enumerates relying parties with stored credentials; it does not enumerate their credentials.
     /// </summary>
     public static async Task<EnumerateRpsResult> EnumerateRelyingPartiesAsync(
         IYubiKey yubiKey,
@@ -206,6 +212,11 @@ public static class CredentialManagementExample
     /// <summary>
     /// Enumerates all credentials for a specific relying party.
     /// </summary>
+    /// <remarks>
+    /// Pass the returned RpIdHash unchanged, not a hash of potentially truncated RP display text.
+    /// Dispose the successful result to clear owned secret-bearing credential envelopes; independent
+    /// decoded fields and the underlying response buffers are not all cleared by that disposal.
+    /// </remarks>
     public static async Task<EnumerateCredentialsResult> EnumerateCredentialsAsync(
         IYubiKey yubiKey,
         ReadOnlyMemory<byte> pin,
@@ -259,6 +270,7 @@ public static class CredentialManagementExample
     /// <summary>
     /// Deletes a credential by its ID.
     /// </summary>
+    /// <remarks>No undo or automatic associated-large-blob cleanup is performed.</remarks>
     public static async Task<CredMgmtResult> DeleteCredentialAsync(
         IYubiKey yubiKey,
         ReadOnlyMemory<byte> pin,
@@ -307,6 +319,10 @@ public static class CredentialManagementExample
     /// <summary>
     /// Updates user information on an existing credential.
     /// </summary>
+    /// <remarks>
+    /// Supply its existing userId; names change, not credential/account binding or the RP database.
+    /// The canonical writer automatically sorts encoded user-map keys when the map is completed.
+    /// </remarks>
     public static async Task<CredMgmtResult> UpdateUserInfoAsync(
         IYubiKey yubiKey,
         ReadOnlyMemory<byte> pin,
@@ -357,7 +373,7 @@ public static class CredentialManagementExample
     }
 
     /// <summary>
-    /// Checks if the authenticator supports credential management.
+    /// Returns the credMgmt boolean from a successful query, or false for any caught failure/cancellation.
     /// </summary>
     public static async Task<bool> IsSupported(
         IYubiKey yubiKey,

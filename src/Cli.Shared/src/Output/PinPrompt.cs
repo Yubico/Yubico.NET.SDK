@@ -38,8 +38,8 @@ public static class PinPrompt
     /// user declined the prompt.
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// No command-line value was supplied and the prompted credential contains invalid Unicode
-    /// text, or its UTF-8 encoding exceeds the prompt limit.
+    /// No command-line value was supplied and interactive input contains invalid Unicode text,
+    /// or the prompted UTF-8 encoding or redirected raw input exceeds the byte limit.
     /// </exception>
     /// <exception cref="ArgumentException">
     /// No command-line value was supplied and <paramref name="label"/> is <see langword="null"/>,
@@ -65,8 +65,8 @@ public static class PinPrompt
     /// empty entry, or supplied an empty redirected line or end-of-input.
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// The entered credential contains invalid Unicode text, or its UTF-8 encoding exceeds the
-    /// prompt limit.
+    /// Interactive input contains invalid Unicode text, or the prompted UTF-8 encoding or
+    /// redirected raw input exceeds the byte limit.
     /// </exception>
     /// <exception cref="ArgumentException">
     /// <paramref name="label"/> is <see langword="null"/>, empty, or consists only of white-space characters.
@@ -74,6 +74,9 @@ public static class PinPrompt
     /// <remarks>
     /// Interactive text is encoded as UTF-8. Redirected standard input is treated as raw bytes
     /// after line endings are removed.
+    /// The default limit is 128 bytes, not 128 characters. Neither path normalizes text or enforces
+    /// an applet PIN profile; redirected bytes are not validated as UTF-8. Reads are synchronous
+    /// and do not accept a cancellation token.
     /// </remarks>
     public static IMemoryOwner<byte>? PromptForCredential(string label = "PIN") =>
         SecureCredential.Prompt(label);

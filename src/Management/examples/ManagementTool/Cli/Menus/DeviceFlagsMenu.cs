@@ -45,7 +45,7 @@ public static class DeviceFlagsMenu
         // TouchEject additionally needs CCID-only mode (OTP/U2F/FIDO2 disabled); the display omits that condition.
         AnsiConsole.MarkupLine("[grey]Flag descriptions:[/]");
         AnsiConsole.MarkupLine("[grey]  • Remote Wakeup: USB remote wakeup is enabled[/]");
-        AnsiConsole.MarkupLine("[grey]  • Touch Eject: CCID touch-eject feature (smart card ejected by default, touch to insert)[/]");
+        AnsiConsole.MarkupLine("[grey]  • Touch Eject: CCID-only mode (OTP, U2F and FIDO2 disabled); card ejected by default, touch to insert[/]");
         AnsiConsole.WriteLine();
 
         // Build available flags

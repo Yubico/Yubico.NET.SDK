@@ -126,11 +126,9 @@ The menu's broader erasure/default-PIN wording must not be used as a product-sup
 
 ## Metadata display limits
 
-The current UI labels the manufacturing `IsFips` indicator as “FIPS Mode”; it is not an active operating
-mode. Core also currently decodes FIPS capability/approval tags with the wrong bit mapping, so displayed
-masks and derived filters cannot establish application approval. Product flag bits can remain in
-`FormFactor`, so base-enum equality and formatting may miss flagged devices. These limitations are about
-metadata interpretation, not a claim about a device's certification status.
+The UI labels `IsFips` as the FIPS manufacturing indicator, not an active operating mode. Reported
+capability and approval metadata is not proof of approved operation. The displayed form factor is
+the base form factor; callers can inspect `DeviceInfo.RawFormFactor` for the original byte.
 
 ## Supported Transports
 

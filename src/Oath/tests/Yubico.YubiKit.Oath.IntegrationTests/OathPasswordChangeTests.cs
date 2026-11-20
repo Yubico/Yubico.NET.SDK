@@ -169,31 +169,59 @@ public class OathPasswordChangeTests
         const string password = "temporary-password-789";
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         var token = timeout.Token;
+        bool keyInstalled = false;
+        Exception? primaryFailure = null;
 
-        // Reset the applet and set a password.
-        await state.WithOathSessionAsync(
-            session => WithDerivedKeyAsync(session, password,
-                key => session.SetKeyAsync(key, token)),
-            cancellationToken: token);
-
-        // Fresh session: the lock is visible, and removing the password requires unlocking first —
-        // the session that set the key is gone, so its authenticated state went with it.
-        await WithFreshSessionAsync(state, token, async session =>
+        try
         {
-            Assert.True(session.IsLocked);
+            // Track confirmed installation before fixture disposal can fail.
+            await state.WithOathSessionAsync(
+                session => WithDerivedKeyAsync(session, password, async key =>
+                {
+                    await session.SetKeyAsync(key, token);
+                    keyInstalled = true;
+                }),
+                cancellationToken: token);
 
-            await WithDerivedKeyAsync(session, password, async key =>
+            // Confirm the lock independently, then remove the password.
+            await WithFreshSessionAsync(state, token, async session =>
             {
-                await session.ValidateAsync(key, token);
-                await session.UnsetKeyAsync(token);
+                Assert.True(session.IsLocked);
+                await WithDerivedKeyAsync(session, password, async key =>
+                {
+                    await session.ValidateAsync(key, token);
+                    await session.UnsetKeyAsync(token);
+                    keyInstalled = false;
+                });
             });
-        });
 
-        // Fresh session: no lock remains.
-        await WithFreshSessionAsync(state, token, session =>
+            await WithFreshSessionAsync(state, token, session =>
+            {
+                Assert.False(session.IsLocked);
+                return Task.CompletedTask;
+            });
+        }
+        catch (Exception exception)
         {
-            Assert.False(session.IsLocked);
-            return Task.CompletedTask;
-        });
+            primaryFailure = exception;
+            throw;
+        }
+        finally
+        {
+            if (keyInstalled)
+            {
+                using var cleanup = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+                try
+                {
+                    await WithFreshSessionAsync(state, cleanup.Token, async session =>
+                    {
+                        if (session.IsLocked)
+                            await WithDerivedKeyAsync(session, password, key => session.ValidateAsync(key, cleanup.Token));
+                        await session.UnsetKeyAsync(cleanup.Token);
+                    });
+                }
+                catch when (primaryFailure is not null) { }
+            }
+        }
     }
 }

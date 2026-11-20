@@ -9,8 +9,9 @@ ManagementTool demonstrates device-information queries and persistent configurat
 `config` commands below. These commands still prompt for device selection; this is not an unattended
 or serial-selectable command-line client.
 
-The active selector currently lists only SmartCard-capable devices. The SDK itself also supports
-device-info/configuration operations over HID FIDO and HID OTP. Reset remains SmartCard-only.
+The tool selects SmartCard (CCID) devices only because its combined reset menu requires SmartCard.
+HID-only keys are not offered, even though the SDK supports device-information and configuration
+operations over FIDO HID and OTP HID.
 
 ## Features
 

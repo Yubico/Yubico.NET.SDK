@@ -12,39 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Win32.SafeHandles;
 using System.Runtime.InteropServices;
 
 namespace Yubico.YubiKit.Core.Native.Windows.HidD;
 
 internal static partial class NativeMethods
 {
+    // HidD returns a one-byte BOOLEAN, unlike Kernel32's four-byte BOOL.
     // Synchronous feature calls borrow the pinned array; the caller retains the handle explicitly.
     [LibraryImport(Libraries.Hid, EntryPoint = "HidD_GetFeature", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial byte GetHidFeature(nint handle, byte[] report, uint reportLength);
 
     [LibraryImport(Libraries.Hid, EntryPoint = "HidD_SetFeature", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial byte SetHidFeature(nint handle, byte[] report, uint reportLength);
 
-    // HID BOOLEAN is one byte (unlike Kernel32 BOOL). The caller retains the handle explicitly.
     [LibraryImport(Libraries.Hid, EntryPoint = "HidD_GetPreparsedData", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial byte GetHidPreparsedData(nint handle, out nint preparsedData);
 
     [LibraryImport(Libraries.Hid, EntryPoint = "HidD_FreePreparsedData", SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial byte FreeHidPreparsedData(nint preparsedData);
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct HIDD_ATTRIBUTES
-    {
-        public int Size;
-        public short VendorId;
-        public short ProductId;
-        public short VersionNumber;
-    }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal unsafe struct HIDP_CAPS
@@ -72,70 +62,10 @@ internal static partial class NativeMethods
 
     internal const int HidpStatusSuccess = 0x00110000;
 
-    [LibraryImport(Libraries.Hid, SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool HidD_FreePreparsedData(
-        IntPtr PreparsedData
-    );
-
-    [LibraryImport(Libraries.Hid, SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool HidD_GetAttributes(
-        SafeFileHandle HidDeviceObject,
-        ref HIDD_ATTRIBUTES Attributes
-    );
-
-    [LibraryImport(Libraries.Hid, SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool HidD_GetFeature(
-        SafeFileHandle HidDeviceObject,
-        byte[] ReportBuffer,
-        int ReportBufferLength
-    );
-
-    [LibraryImport(Libraries.Hid, SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool HidD_GetManufacturerString(
-        SafeFileHandle HidDeviceObject,
-        byte[] Buffer,
-        int BufferLength
-    );
-
-    [LibraryImport(Libraries.Hid, SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool HidD_GetPreparsedData(
-        SafeFileHandle HidDeviceObject,
-        out IntPtr PreparsedData
-    );
-
-    [LibraryImport(Libraries.Hid, SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool HidD_GetProductString(
-        SafeFileHandle HidDeviceObject,
-        byte[] Buffer,
-        int BufferLength
-    );
-
-    [LibraryImport(Libraries.Hid, SetLastError = true)]
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool HidD_SetFeature(
-        SafeFileHandle HidDeviceObject,
-        byte[] Buffer,
-        int BufferLength
-    );
-
-    [LibraryImport(Libraries.Hid, SetLastError = true)]
+    [LibraryImport(Libraries.Hid)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial int HidP_GetCaps(
         IntPtr PreparsedData,
         ref HIDP_CAPS Capabilities
     );
-
 }

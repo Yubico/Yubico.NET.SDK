@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Native.Windows.Cfgmgr32;
 using Yubico.YubiKit.Core.Transports.Hid.Windows;
@@ -49,5 +50,61 @@ public class CfgMgr32InteropTests
         }
 
         Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
+    }
+
+    // CM_Get_Device_Interface_List(_Size)W take the class GUID as LPGUID. Passing it by value happens to
+    // work on x64 (16-byte structs go by hidden pointer) but shifts every argument on Arm64, where the
+    // call then fails with CR_INVALID_DEVNODE. Only an Arm64 run can turn this test red.
+    [Fact]
+    public void GetDevicePaths_HidInterfaceClass_ReturnsOnlyHidInterfacePaths()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Skip("Windows-only");
+        }
+
+        var paths = CmDevice.GetDevicePaths(CmInterfaceGuid.Hid, null);
+
+        var hidClass = CmInterfaceGuid.Hid.ToString("B");
+        Assert.All(paths, path => Assert.Contains(hidClass, path, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Theory]
+    [InlineData("CM_Get_Device_Interface_PropertyW")]
+    [InlineData("CM_Get_DevNode_PropertyW")]
+    public void PropertyImports_TakeBufferSizeAsAnUnsigned32BitReference(string entryPoint)
+    {
+        var method = Assert.Single(typeof(NativeMethods).GetMethods(BindingFlags.Static | BindingFlags.NonPublic),
+            method => method.GetCustomAttribute<LibraryImportAttribute>()?.EntryPoint == entryPoint);
+
+        Assert.Equal(typeof(uint).MakeByRefType(), method.GetParameters()[4].ParameterType);
+    }
+
+    [Fact]
+    public void ReadProperties_DiskInterfaceAndDevNodeReturnTheSameInstanceId()
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            Assert.Skip("Windows-only");
+        }
+
+        // GUID_DEVINTERFACE_DISK gives this test a real interface without requiring a YubiKey.
+        var diskInterfaceClass = new Guid("53F56307-B6BF-11D0-94F2-00A0C91EFB8B");
+        var paths = CmDevice.GetDevicePaths(diskInterfaceClass, null);
+        Assert.NotEmpty(paths);
+
+        var key = NativeMethods.DEVPKEY_Device_InstanceId;
+        var interfaceId = Assert.IsType<string>(CmPropertyAccessHelper.TryGetProperty(
+            NativeMethods.CM_Get_Device_Interface_Property, paths[0], key));
+        Assert.NotEmpty(interfaceId.TrimEnd('\0'));
+
+        var result = NativeMethods.CM_Locate_DevNode(out var instance, interfaceId, NativeMethods.CM_LOCATE_DEVNODE.NORMAL);
+        Assert.Equal(NativeMethods.CmErrorCode.CR_SUCCESS, result);
+
+        var devNodeId = Assert.IsType<string>(CmPropertyAccessHelper.TryGetProperty(
+            NativeMethods.CM_Get_DevNode_Property, instance, key));
+        Assert.Equal(interfaceId, devNodeId, StringComparer.OrdinalIgnoreCase);
+        Assert.NotEqual(Guid.Empty, Assert.IsType<Guid>(CmPropertyAccessHelper.TryGetProperty(
+            NativeMethods.CM_Get_DevNode_Property, instance, NativeMethods.DEVPKEY_Device_ClassGuid)));
     }
 }

@@ -77,9 +77,9 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 
 **Native Interop — `LibraryImport`, never `DllImport`:**
 - ✅ ALWAYS declare new native entry points with `[LibraryImport]` on an `internal static partial` method in a `partial` class
-- ✅ ALWAYS pair it with `[DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]`
-- ✅ ALWAYS marshal explicitly — `StringMarshalling`/`StringMarshallingCustomType`, `[MarshalAs(UnmanagedType.U1)]` on `bool`, `SetLastError = true` only where the caller actually reads `errno`/`GetLastError`
-- ✅ ALWAYS use `delegate* unmanaged[Cdecl]<...>` + `[UnmanagedCallersOnly]` for native callbacks — the source-generated marshaller does **not** marshal C# delegate types
+- ✅ ALWAYS set `[DefaultDllImportSearchPaths]`: `System32` for direct imports from Windows operating-system DLLs; `SafeDirectories` for packaged shims and existing non-Windows imports
+- ✅ ALWAYS match native types explicitly — `StringMarshalling`/`StringMarshallingCustomType` for strings, `byte` or `[MarshalAs(UnmanagedType.U1)]` for Windows `BOOLEAN`, `int` or `[MarshalAs(UnmanagedType.Bool)]` for Windows `BOOL`, and `uint` for Windows `ULONG`. Use `SetLastError = true` only where the caller actually reads `errno`/`GetLastError`.
+- ✅ Prefer `delegate* unmanaged<...>` + `[UnmanagedCallersOnly]` for new native callbacks, matching the native calling convention. Preserve verified existing delegate marshalling and its lifetime ownership.
 - ❌ NEVER write `[DllImport]` / `extern` in new interop. It emits a runtime-generated IL stub: not trim- or AOT-friendly, invisible to the marshalling source generator, and it silently accepts non-blittable signatures that then fail at runtime. **`DllImport` = wrong.**
 - ⚠️ The `SYSLIB1054` analyzer that flags this is a *suggestion*, not an error — it will not stop you. Don't rely on the build to catch it.
 - 🔁 There is no legacy exception left — the repo has **zero** `[DllImport]`/`static extern` sites. `grep -rn "\[DllImport(\|static extern" --include="*.cs" src/ benchmarks/ verification/` must come back empty; a hit is a regression to fix, not debt to defer.

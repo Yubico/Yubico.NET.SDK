@@ -198,7 +198,7 @@ public class CmDevice
     {
         var errorCode = NativeMethods.CM_Get_Device_Interface_List_Size(
             out var bufferLength,
-            classGuid,
+            in classGuid,
             deviceInstanceId,
             NativeMethods.CM_GET_DEVICE_LIST.PRESENT
         );
@@ -213,7 +213,7 @@ public class CmDevice
         // Multiple by two as size is in (wide) character count, but we're passing a byte array.
         var buffer = new byte[bufferLength * 2];
         errorCode = NativeMethods.CM_Get_Device_Interface_List(
-            classGuid,
+            in classGuid,
             deviceInstanceId,
             buffer,
             bufferLength,

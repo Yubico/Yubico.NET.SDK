@@ -86,7 +86,7 @@ public interface IOathSession : IApplicationSession
     Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Adds a credential or replaces an existing credential with the same raw credential ID.
+    ///     Adds a credential or overwrites the existing credential with the same raw credential ID.
     /// </summary>
     /// <remarks>
     ///     <para>

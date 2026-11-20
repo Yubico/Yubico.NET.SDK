@@ -70,7 +70,8 @@ the same way, after the previous session/connection scope has ended. The one-sho
 ### Add a TOTP credential from an otpauth URI
 
 `ParseUri` returns a `CredentialData` that owns its decoded secret bytes. Dispose it after use.
-`PutCredentialAsync` adds the credential or replaces one with the same raw credential ID, produced by `GetId()`.
+`PutCredentialAsync` adds the credential or overwrites the existing credential with the same raw credential ID,
+produced by `GetId()`. Use a different ID if you want to keep both.
 Set `requireTouch: true` to require touch for individual calculations (firmware 4.2.4+). Bulk calculations return
 `null` for these entries, as described below.
 
@@ -236,7 +237,8 @@ The context uses application `OATH`, basis `PolicyRequires`, and the public `iss
 `CalculateAllAsync` is silent. Cancelling the token before the calculation's SmartCard exchange is admitted
 resolves a requested notification as cancelled; once admitted, the exchange runs to completion and cancellation
 does not interrupt the device or necessarily change the notification outcome.
-Await the complete public task before disposal or clearing inputs. `CalculateAllAsync` can issue followup
+Await the complete public task before starting another operation on the session, disposing it, or clearing inputs.
+`CalculateAllAsync` can issue followup
 calculations; `AuthenticateAndRetryAsync` includes password acquisition, VALIDATE and retry; presence
 callbacks can run after an exchange. Keep prompt/provider resources alive until the workflow finishes,
 and avoid reentering or disposing the session from a callback.
@@ -301,7 +303,7 @@ does not reset Security Domain keys, so reinitialization uses the original param
 
 ## Example
 
-The interactive OathTool sample lives at src/Oath/examples/OathTool/.
+The interactive OathTool sample lives at src/Oath/examples/OathTool/. It is for demonstration only, not for production.
 
 ```bash
 dotnet run --project src/Oath/examples/OathTool/OathTool.csproj

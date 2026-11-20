@@ -442,6 +442,46 @@ public sealed class ClientPinTests : IDisposable
         Assert.NotNull(token);
     }
 
+    [Theory]
+    [InlineData(1, false)]
+    [InlineData(2, false)]
+    [InlineData(1, true)]
+    [InlineData(2, true)]
+    public async Task TokenRequests_SelectPermissionCommandByGetInfoNotProtocol(int version, bool permissionSupport)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _fakeProtocol.Version = version;
+        _mockSession.GetInfoAsync(ct).Returns(new AuthenticatorInfo
+        {
+            Options = new Dictionary<string, bool> { ["pinUvAuthToken"] = permissionSupport }
+        });
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateKeyAgreementResponse(CreateMockCoseKey()), CreatePinTokenResponse(new byte[32]));
+        using var clientPin = CreateClientPin();
+
+        await clientPin.GetPinUvAuthTokenUsingPinAsync("1234"u8.ToArray(), PinUvAuthTokenPermissions.MakeCredential, "example.com", ct);
+
+        var request = (ReadOnlyMemory<byte>)_mockSession.ReceivedCalls().Last().GetArguments()[0]!;
+        var reader = new CborReader(request[1..], CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(permissionSupport ? 6 : 4, reader.ReadStartMap());
+        Assert.Equal(1, reader.ReadInt32());
+        Assert.Equal(version, reader.ReadInt32());
+        Assert.Equal(2, reader.ReadInt32());
+        Assert.Equal(permissionSupport ? 0x09 : 0x05, reader.ReadInt32());
+        Assert.Equal(3, reader.ReadInt32());
+        reader.SkipValue();
+        Assert.Equal(6, reader.ReadInt32());
+        reader.SkipValue();
+        if (permissionSupport)
+        {
+            Assert.Equal(9, reader.ReadInt32());
+            Assert.Equal((int)PinUvAuthTokenPermissions.MakeCredential, reader.ReadInt32());
+            Assert.Equal(10, reader.ReadInt32());
+            Assert.Equal("example.com", reader.ReadTextString());
+        }
+        reader.ReadEndMap();
+    }
+
     [Fact]
     public async Task GetPinUvAuthTokenUsingUvAsync_WithNoPermissions_ThrowsArgumentException()
     {

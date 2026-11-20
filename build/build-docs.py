@@ -41,8 +41,6 @@ def generate(args):
         raise RuntimeError(f'V2 checkout missing at {v2}. See contributordocs/documentation-system/building-docs-and-running.md.')
     v1_dotnet, v1_env = sdk_environment(args.dotnet)
     v2_dotnet, v2_env = sdk_environment(args.v2_dotnet or args.dotnet)
-    # DocFX also invokes restore internally, outside metadata MSBuild properties.
-    v1_env['NuGetLockFilePath'] = 'obj/docfx.packages.lock.json'
     # Check SDK availability before clearing previously generated output.
     run([v1_dotnet, '--version'], env=v1_env)
     run([v2_dotnet, '--version'], cwd=v2, env=v2_env)
@@ -77,8 +75,10 @@ def generate(args):
     if site.exists():
         shutil.rmtree(site)
 
+    # Restore all V1 frameworks to preserve the shared multi-framework lockfile.
+    # docfx.json still selects netstandard2.0 for API metadata generation.
     for project in ['Yubico.Core/src/Yubico.Core.csproj', 'Yubico.YubiKey/src/Yubico.YubiKey.csproj']:
-        run([v1_dotnet, 'restore', project, '-p:TargetFramework=netstandard2.0', '-p:NuGetLockFilePath=obj/docfx.packages.lock.json'], env=v1_env)
+        run([v1_dotnet, 'restore', project], env=v1_env)
     for project in projects:
         run([v2_dotnet, 'restore', project, '-p:TargetFramework=net10.0'], cwd=v2, env=v2_env)
 

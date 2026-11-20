@@ -17,8 +17,7 @@
       "filter": "./docs/filterConfig.yml",
       "output": "./.docbuild/metadata/core-api",
       "properties": {
-        "TargetFramework": "netstandard2.0",
-        "NuGetLockFilePath": "obj/docfx.packages.lock.json"
+        "TargetFramework": "netstandard2.0"
       }
     },
     {
@@ -37,8 +36,7 @@
       "filter": "./docs/filterConfig.yml",
       "output": "./.docbuild/metadata/yubikey-api",
       "properties": {
-        "TargetFramework": "netstandard2.0",
-        "NuGetLockFilePath": "obj/docfx.packages.lock.json"
+        "TargetFramework": "netstandard2.0"
       }
     }
   ],

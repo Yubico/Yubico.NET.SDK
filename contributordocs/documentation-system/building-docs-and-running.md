@@ -44,6 +44,11 @@ V2 restores using its own `nuget.config`. If the selected source requires privat
 Yubico packages, configure the corresponding feed credentials locally; never put
 tokens in a tracked file. CI uses its existing package-read token.
 
+V1 restores all project target frameworks using the normal project lockfile;
+DocFX selects `netstandard2.0` when generating API metadata. There is no separate
+documentation lockfile. As with a normal SDK restore, changes to dependencies,
+target frameworks, or the restore environment may update the project lockfile.
+
 ## Generation and configuration
 
 - `docfx.json` defines V1 metadata and the combined site.

@@ -109,40 +109,33 @@ public static class LockCodePrompt
             return null;
         }
 
-        AnsiConsole.WriteLine();
-        var confirmInput = AnsiConsole.Prompt(
-            new TextPrompt<string>("[blue]Confirm lock code:[/]")
-                .Secret()
-                .AllowEmpty());
-
-        if (string.IsNullOrWhiteSpace(confirmInput))
-        {
-            CryptographicOperations.ZeroMemory(lockCode);
-            AnsiConsole.MarkupLine("[yellow]Operation cancelled.[/]");
-            return null;
-        }
-
-        if (!TryParseHex(confirmInput, out var confirmCode))
-        {
-            CryptographicOperations.ZeroMemory(lockCode);
-            AnsiConsole.MarkupLine($"[red]Invalid confirmation. Must be exactly {LockCodeHexLength} hexadecimal characters.[/]");
-            return null;
-        }
-
+        bool transferred = false;
         try
         {
-            if (!CryptographicOperations.FixedTimeEquals(lockCode, confirmCode))
-            {
-                CryptographicOperations.ZeroMemory(lockCode);
-                AnsiConsole.MarkupLine("[red]Lock codes do not match.[/]");
+            var confirmCode = PromptForLockCode("Confirm lock code");
+            if (confirmCode is null)
                 return null;
-            }
 
-            return lockCode;
+            try
+            {
+                if (!CryptographicOperations.FixedTimeEquals(lockCode, confirmCode))
+                {
+                    AnsiConsole.MarkupLine("[red]Lock codes do not match.[/]");
+                    return null;
+                }
+
+                transferred = true;
+                return lockCode;
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(confirmCode);
+            }
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(confirmCode);
+            if (!transferred)
+                CryptographicOperations.ZeroMemory(lockCode);
         }
     }
 

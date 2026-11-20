@@ -151,9 +151,11 @@ provenance of the effective firmware version. Raw HID sessions currently retain 
 major-zero feature checks are optimistic policy. Shared `IsSupported` queries do not guarantee runtime
 command success, and protected `EnsureSupports` remains derived-session enforcement machinery.
 
-Core guards logical exchanges, not complete multi-exchange public workflows. Callers await and
-serialize those workflows before disposal; a prompt callback must return without disposing its own
-session. Exchange drain supplies no lease for later parsing, cache updates, or callbacks.
+Built-in applet entry points hold Core's operation admission through all exchanges, awaited callbacks
+and cleanup. Nested SDK calls use private implementations without entering the guard again. Callers
+serialize workflows composed of separate operations and await them before disposal. The protocol's
+disposal drain still covers a logical exchange, not later parsing, cache updates, or callbacks. A
+prompt callback must return without starting another operation or disposing its session.
 
 Pass creation-only SCP parameters directly to the initializer; retain them only when a later operation needs
 them, as Security Domain reinitialization does. `ApplicationSession.Protocol` owns protocol lifetime; avoid

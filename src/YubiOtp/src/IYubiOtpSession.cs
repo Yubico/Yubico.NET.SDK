@@ -30,8 +30,8 @@ namespace Yubico.YubiKit.YubiOtp;
 /// exclusive and accept zero after any predecessor. Short fallback status can escape rejection. These
 /// limitations mean successful return is not exhaustive malformed-status or write-acceptance validation.
 /// Await the complete public task before starting another operation or disposing the session. A write
-/// can require a second status exchange, and CRC checking, cached-state updates and prompt callbacks
-/// extend beyond Core's per-exchange guard. Keep configurations and prompt services alive through that work.
+/// can require a second status exchange. Session admission includes CRC checking, cached-state updates and
+/// awaited prompt callbacks. Keep configurations and prompt services alive through that work.
 /// Returned response views do not provide cleanup control over all incoming report, APDU or SCP copies.
 /// </remarks>
 public interface IYubiOtpSession : IApplicationSession

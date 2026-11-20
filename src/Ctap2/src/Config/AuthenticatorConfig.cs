@@ -98,6 +98,7 @@ public sealed class AuthenticatorConfig
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
     public async Task EnableEnterpriseAttestationAsync(CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildCommandPayload(ConfigSubCommand.EnableEnterpriseAttestation);
         await SendConfigCommandAsync(payload, cancellationToken).ConfigureAwait(false);
     }
@@ -124,6 +125,7 @@ public sealed class AuthenticatorConfig
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
     public async Task ToggleAlwaysUvAsync(CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildCommandPayload(ConfigSubCommand.ToggleAlwaysUv);
         await SendConfigCommandAsync(payload, cancellationToken).ConfigureAwait(false);
     }
@@ -173,6 +175,7 @@ public sealed class AuthenticatorConfig
         bool forceChangePin = false,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         if (newMinPinLength < 4)
         {
             throw new ArgumentOutOfRangeException(
@@ -202,7 +205,7 @@ public sealed class AuthenticatorConfig
         request[0] = CtapCommand.Config;
         payload.CopyTo(request.AsMemory(1));
 
-        await _session.SendCborRequestAsync(request, cancellationToken)
+        await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
             .ConfigureAwait(false);
     }
 

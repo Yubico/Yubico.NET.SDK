@@ -178,9 +178,9 @@ validates the truncated response before successful resolution; `CalculateAsync` 
 tag, a digit header, and a nonempty HMAC payload. This is structural validation, not verification of a
 particular digest length. It returns an independent copy of the HMAC only, without the digit header,
 after the callback succeeds. The caller owns and clears that returned storage; caller inputs remain unchanged.
-Await the whole public workflow before teardown: CalculateAll followups, password-provider/VALIDATE/retry
-and notification callbacks extend beyond one guarded exchange. Keep borrowed inputs/services alive and
-do not dispose reentrantly. A completed exchange is not completion of detached application callback work.
+Session admission spans CalculateAll followups and awaited presence callbacks. Both AuthenticateAndRetryAsync
+overloads compose separate operations without reserving the session while invoking caller delegates. Serialize
+that workflow and await it before teardown. Keep borrowed inputs and services alive and do not dispose reentrantly.
 Raw VALIDATE and calculation response buffers are cleared in `finally`, and decoded TLV copies are disposed.
 The immutable `Code.Value` string is not formatted until the individual-calculation callback succeeds.
 

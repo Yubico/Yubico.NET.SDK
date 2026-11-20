@@ -23,6 +23,62 @@ namespace Yubico.YubiKit.Piv.UnitTests;
 
 public class TouchNotificationTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SignOrDecryptAsync_RejectsOverlapUntilResolutionCompletes(bool cancelBeforeCrypto)
+    {
+        CancellationToken testToken = TestContext.Current.CancellationToken;
+        using var operationCancellation = CancellationTokenSource.CreateLinkedTokenSource(testToken);
+        var resolutionReached = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseResolution = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        byte[] nextMetadata = SlotMetadataResponse(KeyType.P256, TouchPolicy.Never);
+        var connection = cancelBeforeCrypto
+            ? CreateInitializedConnection(SlotMetadataResponse(KeyType.P256, TouchPolicy.Always), nextMetadata)
+            : CreateInitializedConnection(SlotMetadataResponse(KeyType.P256, TouchPolicy.Always), CryptoResponse(0xAA), nextMetadata);
+        var prompt = new RecordingUserPresencePrompt
+        {
+            Requested = cancelBeforeCrypto ? operationCancellation.Cancel : null,
+            Resolving = async () =>
+            {
+                resolutionReached.SetResult();
+                await releaseResolution.Task.WaitAsync(TimeSpan.FromSeconds(10), testToken);
+            }
+        };
+        await using var session = await CreateSessionAsync(connection, prompt);
+
+        var operation = session.SignOrDecryptAsync(Slot.Authentication, new byte[32], operationCancellation.Token);
+        try
+        {
+            await resolutionReached.Task.WaitAsync(TimeSpan.FromSeconds(10), testToken);
+            int commandCount = cancelBeforeCrypto ? 4 : 5;
+            Assert.Equal(commandCount, connection.TransmittedCommands.Count);
+            Assert.False(operation.IsCompleted);
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => session.GetSlotMetadataAsync(Slot.Authentication, testToken));
+            Assert.Equal(commandCount, connection.TransmittedCommands.Count);
+        }
+        finally
+        {
+            releaseResolution.TrySetResult();
+            // Drain the original operation, even if the overlap assertion fails or the test token is canceled.
+            using var drainTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            if (cancelBeforeCrypto)
+            {
+                var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(
+                    () => operation.WaitAsync(drainTimeout.Token));
+                Assert.Equal(operationCancellation.Token, exception.CancellationToken);
+                Assert.True(operation.IsCanceled);
+            }
+            else
+            {
+                Assert.Equal([0xAA], (await operation.WaitAsync(drainTimeout.Token)).ToArray());
+            }
+        }
+
+        Assert.NotNull(await session.GetSlotMetadataAsync(Slot.Authentication, testToken));
+    }
+
     [Fact]
     public async Task SignOrDecryptAsync_WhenTouchPolicyAlways_RequestsBeforeApduAndResolvesCompleted()
     {
@@ -396,6 +452,7 @@ public class TouchNotificationTests
         public int? CommandCountAtRequest { get; private set; }
         public int? CommandCountAtResolution { get; private set; }
         public Action? Requested { get; init; }
+        public Func<ValueTask>? Resolving { get; init; }
         public Exception? RequestException { get; init; }
         public Exception? ResolutionException { get; init; }
 
@@ -420,7 +477,7 @@ public class TouchNotificationTests
             Resolutions.Add((context, outcome, cancellationToken));
             CommandCountAtResolution = getCommandCount?.Invoke();
             return ResolutionException is null
-                ? default
+                ? Resolving?.Invoke() ?? default
                 : ValueTask.FromException(ResolutionException);
         }
     }

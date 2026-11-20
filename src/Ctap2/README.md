@@ -324,10 +324,10 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
   factories and other processes need separate coordination. Each connection admits one live session.
 - Sessions from `device.CreateCtap2SessionAsync()` own the connection they opened; `Ctap2Session.CreateAsync`
   borrows yours and you dispose it. Use `await using` for both; there is no finalizer backstop.
-- Serialize and fully await complete operations and helper workflows before disposing the session,
-  protocol, token or borrowed connection. Core drains an admitted exchange, not a whole PIN-token,
-  begin/next, blob read-modify-write or post-exchange decoding/notification workflow. Callbacks must
-  not dispose or reenter the session whose operation is awaiting them.
+- The built-in session refuses overlapping operations, including a helper's PIN-token acquisition,
+  credential enumeration or blob update. Serialize workflows made of separate calls yourself, and
+  await them before disposal. Disposal drains an admitted exchange, not the operation. Callbacks must
+  not dispose or reenter the session awaiting them.
 - SmartCard SCP setup follows plain FIDO selection/GetInfo, then rebinds the backend without another
   SELECT or a protected CTAP probe. Setup success and `IsAuthenticated` do not establish device-side
   authentication phase completion, applet-selection survival, FIDO-over-SCP product qualification or

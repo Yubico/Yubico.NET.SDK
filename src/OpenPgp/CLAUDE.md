@@ -63,8 +63,8 @@ split into reset-code and prior-administrator-authentication methods so no input
 5. Cache `ApplicationRelatedData` for algorithms/UIF; F9/KDF remains lazy. Publish readiness only after initialization
    completes. Failed initialization disposes/detaches the session; the device helper cleans up its hidden connection.
 
-Core guards each logical exchange, not whole certificate, key, credential or reset workflows. Await the complete public
-task before another operation or disposal, including parsing and presence callbacks. Keep borrowed inputs/keys and the
+Session admission spans the whole operation, including multi-exchange certificate, key, credential or reset calls.
+Await the complete public task before another operation or disposal. Keep borrowed inputs/keys and the
 caller-owned prompt alive through that task. Synchronous session disposal clears the current KDF before base protocol
 drain; asynchronous disposal awaits Core teardown and then invokes derived KDF cleanup in finally, even on failure.
 Neither ordering supplies a whole-workflow lease. F9 response/encoding/parser copies retain separate cleanup gaps.

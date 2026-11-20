@@ -23,9 +23,9 @@ namespace Yubico.YubiKit.Oath;
 ///     Inherited IsAuthenticated records Core SCP setup, not OATH password validation or ongoing channel
 ///     health. IsLocked and IsPasswordProtected describe this session's observed applet state. Cached
 ///     metadata getters can retain historical values after disposal; operations refuse a terminal session.
-///     Await complete public tasks before disposal or input cleanup. Aggregate followups, authentication
-///     retry and user-presence callbacks extend beyond Core's individual guarded exchanges. Keep borrowed
-///     inputs and callback/prompt resources alive until those tasks finish, without reentrant disposal.
+///     Each operation refuses overlap through follow-up exchanges and awaited presence callbacks.
+///     AuthenticateAndRetryAsync composes separate operations; serialize that workflow yourself. Await
+///     complete tasks before disposal or input cleanup, and do not dispose from a callback.
 /// </remarks>
 public interface IOathSession : IApplicationSession
 {
@@ -345,8 +345,10 @@ public interface IOathSession : IApplicationSession
     /// <returns>The result of the (possibly retried) <paramref name="operation" /> call.</returns>
     /// <remarks>
     ///     Authentication uses this session's outstanding challenge, as required by <see cref="ValidateAsync" />.
-    ///     Await this entire workflow, including the provider and retried operation, before disposing
-    ///     resources. A completed exchange does not mean the password provider or retry has finished.
+    ///     Each device operation on <see cref="OathSession" /> refuses overlap, but this helper does not
+    ///     hold exclusive admission while invoking the operation or password provider. The attempt,
+    ///     validation, and retry are not atomic. Serialize this entire workflow against other work on
+    ///     the session and await it through completion before disposing resources.
     /// </remarks>
     /// <exception cref="OathException">
     ///     The device rejected access-key validation, or the wrapped operation reported an OATH failure.
@@ -368,7 +370,13 @@ public interface IOathSession : IApplicationSession
     ///     collects a password via <paramref name="passwordProvider" />, validates it, and retries
     ///     <paramref name="operation" /> exactly once.
     /// </summary>
-    /// <remarks>See the generic overload for full parameter and exception documentation.</remarks>
+    /// <remarks>
+    ///     Each device operation on <see cref="OathSession" /> refuses overlap, but this helper does not
+    ///     hold exclusive admission while invoking the operation or password provider. The attempt,
+    ///     validation, and retry are not atomic. Serialize and await the entire workflow before using
+    ///     the session for other work or disposing it. See the generic overload for parameter and
+    ///     exception documentation.
+    /// </remarks>
     Task AuthenticateAndRetryAsync(
         Func<CancellationToken, Task> operation,
         Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider,

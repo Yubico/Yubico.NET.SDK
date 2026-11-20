@@ -204,8 +204,9 @@ Decrypted large/credential blobs can also be sensitive.
 Clearing an application copy does not clear the SDK's original allocations.
 
 Await and serialize the complete ceremony before disposing its client or borrowed connection. The
-Core guard/drain covers a logical exchange, while probes, PIN/token acquisition, GetNext, extension
-outputs, and blob workflows can span several exchanges. Presence `Completed` classifies the CTAP
+CTAP2 admission covers individual operations, not the complete ceremony; protocol disposal drains a logical
+exchange. Probes, PIN/token acquisition, GetNext, extension outputs, and blob operations can span several
+separate calls. Presence `Completed` classifies the CTAP
 exchange before typed decoding and extension/RP processing; it is not whole-ceremony or RP acceptance.
 Keep prompt services alive through actual callback completion and schedule disposal outside callbacks.
 

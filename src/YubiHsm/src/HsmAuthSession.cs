@@ -255,6 +255,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task<IReadOnlyList<HsmAuthCredential>> ListCredentialsAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
+        return await ListCredentialsCoreAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<IReadOnlyList<HsmAuthCredential>> ListCredentialsCoreAsync(
+        CancellationToken cancellationToken)
+    {
         ThrowIfDisposed();
 
         var command = new ApduCommand { Ins = InsList };
@@ -302,6 +309,20 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
+    {
+        using var operation = EnterOperation();
+        await PutCredentialSymmetricCoreAsync(managementKey, label, keyEnc, keyMac, credentialPassword, touchRequired, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task PutCredentialSymmetricCoreAsync(
+        ReadOnlyMemory<byte> managementKey,
+        string label,
+        ReadOnlyMemory<byte> keyEnc,
+        ReadOnlyMemory<byte> keyMac,
+        ReadOnlyMemory<byte> credentialPassword,
+        bool touchRequired,
+        CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
         ValidateManagementKey(managementKey.Span);
@@ -354,7 +375,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         if (derivationPassword.IsEmpty)
             throw new ArgumentException(
                 "Derivation password must not be empty.",
@@ -365,7 +386,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         {
             derivedKey = DeriveKeys(derivationPassword);
 
-            await PutCredentialSymmetricAsync(
+            await PutCredentialSymmetricCoreAsync(
                     managementKey,
                     label,
                     derivedKey.AsMemory(0, 16),
@@ -388,7 +409,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
 
@@ -418,7 +439,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte>? cardCryptogram = null,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ValidateContextLength(context, SymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
 
@@ -464,7 +485,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <inheritdoc />
     public async Task<int> GetManagementKeyRetriesAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         var command = new ApduCommand { Ins = InsGetManagementKeyRetries };
         var response = await _backend.SendAsync(command, cancellationToken: cancellationToken)
@@ -486,7 +507,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> newManagementKey,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ValidateManagementKey(currentManagementKey.Span);
         ValidateManagementKey(newManagementKey.Span);
 
@@ -511,7 +532,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         var command = new ApduCommand { Ins = InsReset, P1 = ResetP1, P2 = ResetP2 };
         await _backend.SendAsync(command, cancellationToken: cancellationToken)
@@ -534,7 +555,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> cardCryptogram,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureAsymmetric);
         ValidateContextLength(context, AsymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
@@ -590,7 +611,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte>? credentialPassword = null,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureGetChallenge);
         var labelBytes = ValidateAndEncodeLabel(label);
 
@@ -634,7 +655,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureAsymmetric);
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
@@ -679,7 +700,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureAsymmetric);
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
@@ -717,7 +738,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureAsymmetric);
         var labelBytes = ValidateAndEncodeLabel(label);
 
@@ -743,7 +764,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> newPassword,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeaturePasswordChange);
         var labelBytes = ValidateAndEncodeLabel(label);
 
@@ -782,7 +803,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> newPassword,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeaturePasswordChange);
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
@@ -867,7 +888,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         IReadOnlyList<HsmAuthCredential> credentials;
         try
         {
-            credentials = await ListCredentialsAsync(cancellationToken).ConfigureAwait(false);
+            credentials = await ListCredentialsCoreAsync(cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {

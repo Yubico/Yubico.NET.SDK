@@ -709,8 +709,9 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
 - Whoever creates a connection disposes it; use `await using`. A session from a `device.Create...` factory
   owns the hidden connection it opened. Built-in SmartCard connections request safe shutdown from their
   finalizer, but finalization is nondeterministic and is not a substitute for disposal.
-- Protocols refuse overlapping logical exchanges, not complete multi-exchange applet workflows. Await
-  each public operation before starting another or disposing the session. Caller cancellation does not interrupt constituent I/O
+- Applet sessions refuse overlapping operations through their final awaited callbacks and cleanup.
+  Serialize workflows composed of separate operations and await completion before disposal. Raw sessions
+  still guard logical exchanges. Caller cancellation does not interrupt constituent I/O
   after admission; FIDO keep-alive or OTP touch-wait cancellation can still end an exchange after
   protocol-specific cancel or reset handling. A failed partial exchange may require reopening the
   connection. Native work may not have a bounded completion time.

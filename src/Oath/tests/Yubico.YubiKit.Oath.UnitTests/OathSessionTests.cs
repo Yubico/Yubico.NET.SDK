@@ -236,6 +236,50 @@ public class OathSessionTests
     }
 
     [Fact]
+    public async Task AuthenticateAndRetryAsync_GuardsDelegateOperationThroughFailedResolution()
+    {
+        CancellationToken testToken = TestContext.Current.CancellationToken;
+        var connection = new RecordingSmartCardConnection(SelectResponse(), TruncatedResponse(), [0x90, 0x00]);
+        var resolving = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var expected = new ArgumentException("Resolution failed.");
+        var prompt = new RecordingUserPresencePrompt(connection)
+        {
+            ResolveAsync = async () =>
+            {
+                resolving.SetResult();
+                await release.Task.WaitAsync(TimeSpan.FromSeconds(10), testToken);
+                throw expected;
+            }
+        };
+        await using var session = await OathSession.CreateAsync(connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt }, testToken);
+        var credential = CreateCredential(touchRequired: true);
+        var workflow = session.AuthenticateAndRetryAsync(
+            token => session.CalculateCodeAsync(credential, timestamp: 1_704_067_200, token),
+            _ => throw new InvalidOperationException("Unexpected password request."), testToken);
+
+        try
+        {
+            await resolving.Task.WaitAsync(TimeSpan.FromSeconds(10), testToken);
+            Assert.False(workflow.IsCompleted);
+            int commandCount = connection.TransmittedCommands.Count;
+            await Assert.ThrowsAsync<InvalidOperationException>(() => session.ListCredentialsAsync(testToken));
+            Assert.Equal(commandCount, connection.TransmittedCommands.Count);
+        }
+        finally
+        {
+            release.TrySetResult();
+            // Drain the original workflow even when the overlap assertion fails or the test token is canceled.
+            using var drainTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var actual = await Assert.ThrowsAsync<ArgumentException>(() => workflow.WaitAsync(drainTimeout.Token));
+            Assert.Same(expected, actual);
+        }
+
+        Assert.Empty(await session.ListCredentialsAsync(testToken));
+    }
+
+    [Fact]
     public async Task CalculateCodeAsync_WhenTouchIsRequired_NotifiesAroundCalculateCommand()
     {
         var connection = new RecordingSmartCardConnection(SelectResponse(), TruncatedResponse());
@@ -680,6 +724,7 @@ public class OathSessionTests
         Exception? resolutionException = null) : IUserPresencePrompt
     {
         public List<(UserPresenceContext Context, int CommandCount)> Requested { get; } = [];
+        public Func<ValueTask>? ResolveAsync { get; init; }
 
         public List<(
             UserPresenceContext Context,
@@ -705,7 +750,7 @@ public class OathSessionTests
         {
             Resolved.Add((context, outcome, cancellationToken, connection.TransmittedCommands.Count));
             return resolutionException is null
-                ? ValueTask.CompletedTask
+                ? ResolveAsync?.Invoke() ?? ValueTask.CompletedTask
                 : ValueTask.FromException(resolutionException);
         }
     }

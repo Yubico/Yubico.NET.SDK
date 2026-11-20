@@ -222,8 +222,8 @@ invoked or disposed by this module.
 
 Pass a `cancellationToken` to request cancellation; an admitted SmartCard
 exchange drains before returning, and cancellation does not roll back configuration already sent. HID wait
-cancellation has transport-specific behavior. Await operations sequentially: overlapping exchanges are
-refused, not queued. A multi-page read contains separate exchanges; it is not one atomic public operation.
+cancellation has transport-specific behavior. The session refuses overlapping operations, including during a
+multi-page read. This prevents interleaved calls on the session; it does not make the read an atomic snapshot.
 Await the complete public task before disposal or input cleanup. On the current Windows HID path, report
 calls run synchronously and a blocked native call must return before protocol cancellation can advance.
 Disposing a connection concurrently with I/O is not a way to prove native completion or release.

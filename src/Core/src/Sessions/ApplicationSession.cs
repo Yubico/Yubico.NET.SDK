@@ -37,10 +37,11 @@ namespace Yubico.YubiKit.Core.Sessions;
 ///         inject or replace Core protocol implementations; compose over a public raw session for low-level work.
 ///     </para>
 ///     <para>
-///         Protocol guards admit individual logical exchanges, not an entire multi-exchange applet workflow.
-///         Await each complete public operation, including parsing and callbacks, before disposing the session
-///         or starting a competing workflow. Disposal drains the admitted exchange, not every public task or
-///         detached callback task. Keep disposal outside the operation and its user-presence callbacks.
+///         Built-in applet sessions refuse a second operation with <see cref="InvalidOperationException" />
+///         until the first completes, including its awaited callbacks and cleanup. Raw sessions retain their
+///         protocol exchange guards. Serialize workflows made up of separate operations yourself. Await the
+///         complete operation or workflow before disposal: disposal drains an admitted protocol exchange,
+///         not the whole operation. Do not dispose or start another operation from a user-presence callback.
 ///     </para>
 /// </remarks>
 public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
@@ -49,6 +50,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     // Guards reject calls that begin after disposal starts. Operations already in flight have no lifetime
     // admission lease and may complete, fail at a later guard, or race teardown.
     private int _disposalStarted;
+    private int _operationActive;
     private bool _isInitialized;
     private bool _isAuthenticated;
     private bool _disposed;
@@ -440,6 +442,26 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
     protected void ThrowIfDisposed()
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposalStarted) != 0, this);
+    }
+
+    // Applet entry points hold this scope through their last await and local cleanup.
+    // This is admission only: disposal still drains the protocol exchange, not the public task.
+    internal OperationScope EnterOperation()
+    {
+        ThrowIfDisposed();
+        if (Interlocked.CompareExchange(ref _operationActive, 1, 0) != 0)
+            throw new InvalidOperationException("Another operation is already in progress on this session.");
+
+        return new OperationScope(this);
+    }
+
+    internal readonly struct OperationScope(ApplicationSession? session) : IDisposable
+    {
+        public void Dispose()
+        {
+            if (session is not null)
+                Volatile.Write(ref session._operationActive, 0);
+        }
     }
 
     /// <summary>Closes session admission, drains an admitted protocol exchange, and releases session resources.</summary>

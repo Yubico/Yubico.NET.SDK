@@ -21,11 +21,11 @@ namespace Yubico.YubiKit.Management;
 ///     Reads device information and changes device-level configuration over a Management connection.
 /// </summary>
 /// <remarks>
-///     Await each operation before starting the next. Overlapping exchanges are refused rather than queued.
+///     Await each operation before starting the next. Overlapping operations are refused rather than queued.
 ///     A device-information read can span several exchanges; it is not an atomic snapshot, and concurrent
 ///     disposal does not guarantee completion of the whole read.
 ///     Await the complete public task before disposing the session or clearing borrowed inputs; the
-///     Core guard drains an admitted exchange, not every page or post-exchange step in a workflow.
+///     disposal drain covers an admitted exchange, not every page or post-exchange step in an operation.
 ///     Cancellation is transport-specific: SmartCard checks cancellation before admitting an exchange,
 ///     then drains the admitted exchange without interrupting it. HID protocols have their own cancellation
 ///     signaling during device waits. Cancellation never rolls back configuration already sent to the device.
@@ -48,7 +48,7 @@ public interface IManagementSession : IApplicationSession
     /// <param name="cancellationToken">A token requesting cancellation, subject to the transport's exchange boundaries.</param>
     /// <returns>The device information reported by the key.</returns>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
-    /// <exception cref="InvalidOperationException">The session is not initialized, or another exchange is in progress.</exception>
+    /// <exception cref="InvalidOperationException">The session is not initialized, or another operation is in progress.</exception>
     /// <exception cref="OperationCanceledException">Cancellation is observed at a transport-supported boundary.</exception>
     Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default);
 
@@ -87,7 +87,7 @@ public interface IManagementSession : IApplicationSession
     /// <exception cref="ArgumentException">A supplied lock code is not 16 bytes.</exception>
     /// <exception cref="NotSupportedException">The effective session firmware does not support configuration writes.</exception>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
-    /// <exception cref="InvalidOperationException">The USB mask is explicitly None, or another exchange is in progress.</exception>
+    /// <exception cref="InvalidOperationException">The USB mask is explicitly None, or another operation is in progress.</exception>
     /// <exception cref="OperationCanceledException">Cancellation is observed; configuration already sent is not rolled back.</exception>
     Task SetDeviceConfigAsync(
         DeviceConfig config,
@@ -118,7 +118,7 @@ public interface IManagementSession : IApplicationSession
     ///     The device rejects the reset command, including when whole-device reset is not implemented.
     /// </exception>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
-    /// <exception cref="InvalidOperationException">Another exchange is in progress.</exception>
+    /// <exception cref="InvalidOperationException">Another operation is in progress.</exception>
     /// <exception cref="OperationCanceledException">Cancellation is observed before the reset exchange is admitted.</exception>
     /// <example>
     ///     For a discovered Bio MPE <see cref="IYubiKey" /> named <c>device</c> and a

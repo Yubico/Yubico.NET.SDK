@@ -28,11 +28,11 @@ namespace Yubico.YubiKit.Ctap2;
 /// CTAP2.1 reference: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html
 /// </para>
 /// <para>
-/// Await each call before starting another exchange. The session refuses overlapping exchanges,
-/// rather than queuing them, and does not reserve the authenticator across a multi-command sequence.
+/// A built-in session refuses overlapping operations, including operations on its SDK helpers.
+/// Serialize sequences of separate calls (such as GetAssertion and GetNextAssertion) yourself.
 /// Serialize and fully await complete operations and helper workflows before disposing the session
-/// or its borrowed dependencies. Exchange drain does not join begin/next, PIN-token or blob workflows,
-/// post-exchange decoding, or notification callbacks. Keep caller-owned prompts usable through their
+/// or its borrowed dependencies. Disposal drains an exchange, not the complete operation.
+/// Keep caller-owned prompts usable through their
 /// last callback; callbacks must not reenter or dispose the session awaiting them.
 /// A pre-canceled exchange is refused before wire admission.
 /// Cancellation is cooperative: admitted SmartCard exchanges complete, while HID cancellation is

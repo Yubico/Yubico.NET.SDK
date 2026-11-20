@@ -214,6 +214,16 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         int expectedResponseLength = 0,
         CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
+        return await GetDataCoreAsync(dataObject, requestData, cancellationToken, expectedResponseLength).ConfigureAwait(false);
+    }
+
+    private async Task<ReadOnlyMemory<byte>> GetDataCoreAsync(
+        int dataObject,
+        ReadOnlyMemory<byte> requestData = default,
+        CancellationToken cancellationToken = default,
+        int expectedResponseLength = 0)
+    {
         ThrowIfDisposed();
 
         if (expectedResponseLength < 0)
@@ -251,7 +261,15 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task<IReadOnlyList<KeyInfo>> ListKeyInformationAsync(
         CancellationToken cancellationToken = default)
     {
-        var response = await GetDataAsync(TagKeyInformationTemplate, cancellationToken: cancellationToken)
+        using var operation = EnterOperation();
+        return await ListKeyInformationCoreAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<IReadOnlyList<KeyInfo>> ListKeyInformationCoreAsync(
+        CancellationToken cancellationToken)
+    {
+        ThrowIfDisposed();
+        var response = await GetDataCoreAsync(TagKeyInformationTemplate, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         if (response.IsEmpty)
@@ -289,11 +307,11 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task<ReadOnlyMemory<byte>> GetCardRecognitionDataAsync(
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Getting card recognition data");
 
-        var response = await GetDataAsync(TagCardData, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var response = await GetDataCoreAsync(TagCardData, cancellationToken: cancellationToken).ConfigureAwait(false);
         var cardRecognitionData = TlvHelper.GetValue(TagCardRecognitionData, response.Span);
 
         if (cardRecognitionData.IsEmpty)
@@ -307,7 +325,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         KeyReference keyReference,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Getting certificates for Key Reference: {KeyReference}", keyReference);
         using var kidKvnTlv = new Tlv(TagKidKvn, keyReference.AsSpan());
@@ -315,7 +333,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         var nestedTlv = nestedTlvObj.AsMemory();
 
         var certificateTlvData =
-            await GetDataAsync(TagCertificateStore, nestedTlv, cancellationToken: cancellationToken)
+            await GetDataCoreAsync(TagCertificateStore, nestedTlv, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
         _logger.LogDebug("Certificates retrieved (KeyReference: {KeyReference})", keyReference);
@@ -347,7 +365,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         CaIdentifierType identifierTypes,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         const CaIdentifierType supportedTypes = CaIdentifierType.Kloc | CaIdentifierType.Klcc;
         if (identifierTypes == CaIdentifierType.None || (identifierTypes & ~supportedTypes) != 0)
@@ -359,7 +377,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         if (identifierTypes.HasFlag(CaIdentifierType.Kloc))
             try
             {
-                var kloc = await GetDataAsync(TagCaKlocIdentifiers, cancellationToken: cancellationToken)
+                var kloc = await GetDataCoreAsync(TagCaKlocIdentifiers, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
                 arrayBufferWriter.Write(kloc.Span);
             }
@@ -370,7 +388,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         if (identifierTypes.HasFlag(CaIdentifierType.Klcc))
             try
             {
-                var klcc = await GetDataAsync(TagCaKlccIdentifiers, cancellationToken: cancellationToken)
+                var klcc = await GetDataCoreAsync(TagCaKlccIdentifiers, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
                 arrayBufferWriter.Write(klcc.Span);
             }
@@ -403,7 +421,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         IReadOnlyList<X509Certificate2> certificates,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Storing certificate bundle (KeyReference: {KeyReference})", keyReference);
 
@@ -431,7 +449,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             using var certStoreTlv = new Tlv(TagCertificateStore, buffer.WrittenSpan);
             var storeData = TlvHelper.EncodeList([controlRefTlv, certStoreTlv]);
 
-            await StoreDataAsync(storeData, cancellationToken).ConfigureAwait(false);
+            await StoreDataCoreAsync(storeData, cancellationToken).ConfigureAwait(false);
 
             _logger.LogInformation("Certificate bundle stored (KeyReference: {KeyReference})", keyReference);
         }
@@ -450,7 +468,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(staticKeys);
 
         if (keyReference.Kid != 0x01)
@@ -498,12 +516,12 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 #pragma warning restore RS0026
 
     /// <inheritdoc />
-    public Task DeleteKeyAsync(
+    public async Task DeleteKeyAsync(
         KeyReference keyReference,
         bool deleteLast = false,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         var (kid, kvn) = SecurityDomainTlvEncoding.NormalizeDeletePolicy(keyReference);
         var payload = SecurityDomainTlvEncoding.EncodeDeleteFilter(kid, kvn);
@@ -519,7 +537,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         _logger.LogDebug("Deleting keys matching {KeyRef}{Suffix}",
             keyReference, deleteLast ? " (allow delete last)" : string.Empty);
 
-        return TransmitAndGetResponseDataAsync(command, cancellationToken);
+        await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -528,7 +546,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         byte replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         if (_hasExplicitFirmwareVersion)
             EnsureSupports(FeatureScp11);
@@ -586,7 +604,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task PutKeyAsync(KeyReference keyReference, ECPublicKey publicKey, int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         var pkParams = publicKey.Parameters;
         if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
@@ -606,7 +624,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         int replaceKvn = 0,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         var parameters = privateKey.Parameters;
         if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
@@ -682,7 +700,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task StoreAllowListAsync(KeyReference keyReference, IReadOnlyCollection<string> serials,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(serials);
         if (serials.Count == 0)
             throw new ArgumentException(
@@ -703,7 +721,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         using var serialsListTlv = new Tlv(TagSerialsAllowList, buffer.WrittenSpan);
         var serialsDataTl = TlvHelper.EncodeList([controlRefTlv, serialsListTlv]);
 
-        await StoreDataAsync(serialsDataTl, cancellationToken).ConfigureAwait(false);
+        await StoreDataCoreAsync(serialsDataTl, cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("Allow list stored (KeyReference: {KeyReference})", keyReference);
     }
@@ -711,7 +729,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <inheritdoc />
     public async Task ClearAllowListAsync(KeyReference keyReference, CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Clearing allow list (KeyReference: {KeyReference})", keyReference);
 
@@ -721,13 +739,19 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         using var emptyListTlv = new Tlv(TagSerialsAllowList, []);
         var data = TlvHelper.EncodeList([controlRefTlv, emptyListTlv]);
 
-        await StoreDataAsync(data, cancellationToken).ConfigureAwait(false);
+        await StoreDataCoreAsync(data, cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("Allow list cleared (KeyReference: {KeyReference})", keyReference);
     }
 
     /// <inheritdoc />
     public async Task StoreDataAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    {
+        using var operation = EnterOperation();
+        await StoreDataCoreAsync(data, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task StoreDataCoreAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
 
@@ -741,7 +765,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task StoreCaIssuerAsync(KeyReference keyReference, ReadOnlyMemory<byte> ski,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Storing CA issuer SKI (KeyReference: {KeyReference})", keyReference);
 
@@ -759,7 +783,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         using var caIssuerData = new Tlv(TagControlReference, encodedList.Span);
 
         // Send store data command
-        await StoreDataAsync(caIssuerData.AsMemory(), cancellationToken).ConfigureAwait(false);
+        await StoreDataCoreAsync(caIssuerData.AsMemory(), cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("CA issuer SKI stored (KeyReference: {KeyReference})", keyReference);
     }
@@ -767,10 +791,11 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
         await InitializeSessionAsync(token => InitializeAsync(cancellationToken: token), cancellationToken)
             .ConfigureAwait(false);
 
-        var keyInfo = await ListKeyInformationAsync(cancellationToken).ConfigureAwait(false);
+        var keyInfo = await ListKeyInformationCoreAsync(cancellationToken).ConfigureAwait(false);
         if (keyInfo.Count == 0)
         {
             _logger.LogInformation("Security Domain reset skipped: no keys reported");

@@ -28,9 +28,9 @@ namespace Yubico.YubiKit.OpenPgp;
 ///     Use a SmartCard session and await each operation before starting the next. Administrative writes
 ///     generally require prior Admin PIN verification; the card enforces access conditions and advertised
 ///     capabilities. PIN inputs are borrowed UTF-8 bytes. Keep them valid until the awaited call completes,
-///     then clear caller-owned buffers. Core guards one logical exchange, including APDU chaining and SCP,
-///     rather than the whole public method. Certificate occurrence selection, key/cache updates and PIN/KDF
-///     workflows span separate exchanges. Await the complete public task before another call or disposal,
+///     then clear caller-owned buffers. The session refuses overlap across all exchanges of an operation,
+///     from certificate occurrence selection to the associated read or write, for example. Await the complete
+///     public task before another call or disposal,
 ///     and keep borrowed keys, input memory and prompt services alive through their last use.
 ///     Cancellation is checked before each exchange is admitted; an admitted SmartCard exchange runs with
 ///     CancellationToken.None. Ending an outer wait does not complete that task or permit input cleanup.

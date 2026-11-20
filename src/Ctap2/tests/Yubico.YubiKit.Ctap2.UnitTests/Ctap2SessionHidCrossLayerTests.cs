@@ -115,7 +115,7 @@ public class Ctap2SessionHidCrossLayerTests
                 Assert.Empty(prompt.Resolved);
                 InvalidOperationException overlap = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                     session.GetInfoAsync(TestContext.Current.CancellationToken));
-                Assert.Contains("already has an exchange in flight", overlap.Message, StringComparison.Ordinal);
+                Assert.Contains("Another operation is already in progress", overlap.Message, StringComparison.Ordinal);
             }
             finally
             {

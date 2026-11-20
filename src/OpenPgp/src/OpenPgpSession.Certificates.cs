@@ -26,6 +26,14 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
+        return await GetCertificateCoreAsync(keyRef, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<X509Certificate2?> GetCertificateCoreAsync(
+        KeyRef keyRef,
+        CancellationToken cancellationToken)
+    {
         ThrowIfDisposed();
 
         _logger.LogDebug("Getting certificate for {Slot}", keyRef);
@@ -63,14 +71,14 @@ public sealed partial class OpenPgpSession
         X509Certificate2 certificate,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(certificate);
 
         _logger.LogInformation("Storing certificate for {Slot}", keyRef);
 
         if (keyRef == KeyRef.Att)
         {
-            await PutDataAsync(DataObject.AttCertificate, certificate.RawData, cancellationToken)
+            await PutDataCoreAsync(DataObject.AttCertificate, certificate.RawData, cancellationToken)
                 .ConfigureAwait(false);
             return;
         }
@@ -79,7 +87,7 @@ public sealed partial class OpenPgpSession
 
         await SelectCertificateSlotAsync(keyRef, cancellationToken).ConfigureAwait(false);
 
-        await PutDataAsync(DataObject.CardholderCertificate, certificate.RawData, cancellationToken)
+        await PutDataCoreAsync(DataObject.CardholderCertificate, certificate.RawData, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -88,13 +96,13 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogInformation("Deleting certificate for {Slot}", keyRef);
 
         if (keyRef == KeyRef.Att)
         {
-            await PutDataAsync(DataObject.AttCertificate, ReadOnlyMemory<byte>.Empty, cancellationToken)
+            await PutDataCoreAsync(DataObject.AttCertificate, ReadOnlyMemory<byte>.Empty, cancellationToken)
                 .ConfigureAwait(false);
             return;
         }
@@ -103,7 +111,7 @@ public sealed partial class OpenPgpSession
 
         await SelectCertificateSlotAsync(keyRef, cancellationToken).ConfigureAwait(false);
 
-        await PutDataAsync(DataObject.CardholderCertificate, ReadOnlyMemory<byte>.Empty, cancellationToken)
+        await PutDataCoreAsync(DataObject.CardholderCertificate, ReadOnlyMemory<byte>.Empty, cancellationToken)
             .ConfigureAwait(false);
     }
 

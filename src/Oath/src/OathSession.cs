@@ -201,7 +201,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <inheritdoc />
     public async Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         var command = new ApduCommand(0x00, OathConstants.InsList, 0x00, 0x00);
         var response = await SendAsync(command, cancellationToken).ConfigureAwait(false);
@@ -247,7 +247,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         CredentialData credentialData,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(credentialData);
 
         credentialData.ValidateRequest();
@@ -345,7 +345,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         Credential credential,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(credential);
         ThrowIfFromAnotherDevice(credential);
 
@@ -361,7 +361,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         string newName,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(credential);
         ThrowIfFromAnotherDevice(credential);
         EnsureSupports(FeatureRenameCredential);
@@ -399,7 +399,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(credential);
         ThrowIfFromAnotherDevice(credential);
 
@@ -456,6 +456,15 @@ public sealed class OathSession : ApplicationSession, IOathSession
         Credential credential,
         long? timestamp = null,
         CancellationToken cancellationToken = default)
+    {
+        using var operation = EnterOperation();
+        return await CalculateCodeCoreAsync(credential, timestamp, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<Code> CalculateCodeCoreAsync(
+        Credential credential,
+        long? timestamp,
+        CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(credential);
@@ -578,7 +587,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
         long? timestamp = null,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         long ts = timestamp ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         _ = Code.GetTotpWindow(ts, OathConstants.DefaultPeriod);
@@ -623,7 +632,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
                 if (parsedCode is { } parsed)
                 {
                     code = credential.Period != OathConstants.DefaultPeriod
-                        ? await CalculateCodeAsync(credential, ts, cancellationToken).ConfigureAwait(false)
+                        ? await CalculateCodeCoreAsync(credential, ts, cancellationToken).ConfigureAwait(false)
                         : Code.FormatCode(credential, ts, parsed);
                 }
 
@@ -669,7 +678,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         var command = new ApduCommand(0x00, OathConstants.InsReset, 0xDE, 0xAD);
         await SendAsync(command, cancellationToken).ConfigureAwait(false);
@@ -698,7 +707,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <inheritdoc />
     public async Task ValidateAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         if (key.Length == 0)
             throw new ArgumentException("Key must not be empty.", nameof(key));
@@ -781,7 +790,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <inheritdoc />
     public async Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         if (key.Length == 0)
             throw new ArgumentException("Key must not be empty.", nameof(key));
@@ -829,7 +838,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     /// <inheritdoc />
     public async Task UnsetKeyAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         // Send SET CODE with empty key TLV to clear the access key
         using var keyTlv = new Tlv(OathConstants.TagKey, ReadOnlySpan<byte>.Empty);

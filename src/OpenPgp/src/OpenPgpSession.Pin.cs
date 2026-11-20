@@ -26,7 +26,7 @@ public sealed partial class OpenPgpSession
         bool extended = false,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         // Card §7.2.2 uses P2=81/82 for two access states of the same User PIN.
         // Current extended handling also selects Reset identity for KDF/retry lookup;
@@ -43,7 +43,7 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Verifying Admin PIN");
         await VerifyPwAsync(Pw.Admin, (byte)Pw.Admin, pin, cancellationToken)
@@ -54,7 +54,7 @@ public sealed partial class OpenPgpSession
     public async Task UnverifyPinAsync(
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         EnsureSupports(FeatureUnverify);
 
@@ -75,7 +75,7 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Changing User PIN");
         await ChangePwAsync(Pw.User, currentPin, newPin, cancellationToken)
@@ -88,7 +88,7 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Changing Admin PIN");
         await ChangePwAsync(Pw.Admin, currentPin, newPin, cancellationToken)
@@ -100,7 +100,7 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> resetCode,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Setting Reset Code");
 
@@ -110,7 +110,7 @@ public sealed partial class OpenPgpSession
             var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
             derivedBytes = kdf.Process(Pw.Reset, resetCode.Span);
 
-            await PutDataAsync(DataObject.ResettingCode, derivedBytes, cancellationToken)
+            await PutDataCoreAsync(DataObject.ResettingCode, derivedBytes, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -128,6 +128,7 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
         await ResetPinCoreAsync(resetCode, newPin, useAdmin: false, cancellationToken)
             .ConfigureAwait(false);
     }
@@ -137,6 +138,7 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
         await ResetPinCoreAsync(ReadOnlyMemory<byte>.Empty, newPin, useAdmin: true, cancellationToken)
             .ConfigureAwait(false);
     }
@@ -199,7 +201,7 @@ public sealed partial class OpenPgpSession
         int adminAttempts,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(userAttempts);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(resetAttempts);
@@ -227,12 +229,12 @@ public sealed partial class OpenPgpSession
         PinPolicy policy,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Setting signature PIN policy to {Policy}", policy);
 
         // PW Status Bytes (DO C4): only byte 0 (policy) is writable via PUT DATA
-        await PutDataAsync(DataObject.PwStatusBytes, new byte[] { (byte)policy }, cancellationToken)
+        await PutDataCoreAsync(DataObject.PwStatusBytes, new byte[] { (byte)policy }, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -301,7 +303,7 @@ public sealed partial class OpenPgpSession
             // C4 provides counters, though the extended-mode caller currently selects Reset's counter.
             try
             {
-                var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
+                var status = await GetPinStatusCoreAsync(cancellationToken).ConfigureAwait(false);
                 remaining = pw switch
                 {
                     Pw.User => status.AttemptsUser,

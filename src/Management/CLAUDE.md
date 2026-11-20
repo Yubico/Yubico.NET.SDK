@@ -854,7 +854,7 @@ Device information uses TLV (Tag-Length-Value) encoding. The current reader is
 2. Decode each page and reject duplicate more-data tags (0x10) within that page. A nonempty tag's final
    byte supplies the remaining-page count, not a boolean `hasMore` flag.
 3. Accumulate non-pagination TLVs, request subsequent pages, and reject more data beyond the byte-sized
-   page index (256 pages). Each page is its own guarded exchange; callers must sequence public operations.
+   page index (256 pages). Each page is its own exchange; session admission spans the full read and parse.
 4. Parse the accumulated metadata through `DeviceInfo.CreateFromTlvs`, with discovered firmware as the
    session's fallback. Do not route reads through a nonexistent backend `ReadConfigAsync` method.
 

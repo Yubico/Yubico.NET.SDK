@@ -169,12 +169,12 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
+    public async Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureSerial);
 
-        return GetSerialCoreAsync(cancellationToken);
+        return await GetSerialCoreAsync(cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<int> GetSerialCoreAsync(CancellationToken cancellationToken)
@@ -200,14 +200,14 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public Task PutConfigurationAsync(
+    public async Task PutConfigurationAsync(
         Slot slot,
         SlotConfiguration config,
         ReadOnlyMemory<byte> accessCode = default,
         ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(config);
 
         if (!config.IsSupportedBy(FirmwareVersion))
@@ -218,18 +218,18 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
 
         var configSlot = slot.Map(SlotOperation.Configure);
-        return WriteConfigAsync(configSlot, config, accessCode, currentAccessCode, cancellationToken);
+        await WriteConfigAsync(configSlot, config, accessCode, currentAccessCode, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
-    public Task UpdateConfigurationAsync(
+    public async Task UpdateConfigurationAsync(
         Slot slot,
         UpdateConfiguration config,
         ReadOnlyMemory<byte> accessCode = default,
         ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(config);
         EnsureSupports(FeatureUpdate);
 
@@ -241,13 +241,13 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
 
         var configSlot = slot.Map(SlotOperation.Update);
-        return WriteConfigAsync(configSlot, config, accessCode, currentAccessCode, cancellationToken);
+        await WriteConfigAsync(configSlot, config, accessCode, currentAccessCode, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task SwapSlotsAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureSwap);
 
         _status = await _backend.WriteUpdateAsync(
@@ -263,7 +263,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         var configSlot = slot.Map(SlotOperation.Configure);
         var data = BuildPayloadWithAccessCode(new byte[YubiOtpConstants.ConfigSize], currentAccessCode);
@@ -285,7 +285,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         if (scanMap.Length != YubiOtpConstants.ScanCodesSize)
         {
@@ -315,7 +315,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         NdefType ndefType = NdefType.Uri,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureNdef);
 
         var configSlot = slot.Map(SlotOperation.Ndef);
@@ -334,12 +334,12 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
+    public async Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
         Slot slot,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureHmacSha1);
 
         if (challenge.Length > YubiOtpConstants.HmacChallengeSize)
@@ -350,7 +350,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
 
         var configSlot = slot.Map(SlotOperation.ChallengeHmac);
-        return CalculateHmacSha1CoreAsync(configSlot, challenge, cancellationToken);
+        return await CalculateHmacSha1CoreAsync(configSlot, challenge, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<ReadOnlyMemory<byte>> CalculateHmacSha1CoreAsync(
@@ -377,12 +377,12 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public Task<ReadOnlyMemory<byte>> CalculateYubicoOtpAsync(
+    public async Task<ReadOnlyMemory<byte>> CalculateYubicoOtpAsync(
         Slot slot,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureYubicoOtpChallengeResponse);
 
         if (challenge.Length != YubiOtpConstants.YubicoOtpChallengeSize)
@@ -393,7 +393,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
 
         var configSlot = slot.Map(SlotOperation.ChallengeYubicoOtp);
-        return CalculateYubicoOtpCoreAsync(configSlot, challenge, cancellationToken);
+        return await CalculateYubicoOtpCoreAsync(configSlot, challenge, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<ReadOnlyMemory<byte>> CalculateYubicoOtpCoreAsync(

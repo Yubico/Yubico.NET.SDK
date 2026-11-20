@@ -138,8 +138,8 @@ LIST cancellation propagates. A session without a prompt skips this notification
 prompt and non-reentrant. After cancellation is requested, await the operation's terminal result and
 cleanup; an admitted SmartCard exchange can drain until a device response and end with an APDU failure.
 Follow that outcome for recovery rather than promising native device interruption.
-Await the entire public workflow before disposal or another call. LIST policy lookup and CALCULATE are
-separate exchanges; parsing, callbacks and finally cleanup are outside Core's per-exchange guard. Keep
+Await the entire public operation before disposal. Session admission covers the separate LIST policy lookup
+and CALCULATE exchanges, parsing, awaited callbacks and finally cleanup. Keep
 borrowed inputs/prompt resources alive through actual completion, not an outer cancelled wait.
 
 The symmetric context is `hostChallenge[8] || hsmChallenge[8]`; the HSM challenge and optional

@@ -82,10 +82,9 @@ disposes the OCE private key and certificates, not the SD public key. Record cop
 Keep one explicit cleanup owner and avoid disposing an alias during creation. See the [Core guide](../Core/README.md)
 for configuration; setup flags and generic version gates do not establish full PIV SCP/profile interoperability.
 
-Await and serialize complete public tasks before another operation or disposal. Core excludes overlapping logical
-APDU exchanges, including chaining/SCP, but management authentication uses two exchanges and PIN-only/reset workflows
-span several. Parsing, prompt callbacks and local RSA unpadding can continue after an exchange leaves the guard.
-Keep borrowed credentials, keys, peer objects and prompt services alive through that whole task.
+Each PIV operation refuses overlap with another operation on the same session, including between its APDUs and
+during parsing, awaited prompt callbacks, and cleanup. Serialize sequences of separate calls yourself. Await the
+complete task before disposing the session or releasing borrowed credentials, keys, peer objects, or prompt services.
 
 ## Common operations
 

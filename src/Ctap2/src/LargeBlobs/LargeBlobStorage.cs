@@ -126,7 +126,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
     private async Task LoadLimitsAsync(CancellationToken cancellationToken)
     {
-        var info = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+        var info = await Ctap2Session.GetInfoWithinOperationAsync(_session, cancellationToken).ConfigureAwait(false);
         _maxFragmentLength = (info?.MaxMsgSize ?? DefaultMaxMsgSize) - FragmentOverhead;
         _maxSerializedLargeBlobArray = info?.MaxSerializedLargeBlobArray;
     }
@@ -143,6 +143,12 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// </remarks>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
     public async Task<LargeBlobArray> ReadLargeBlobArrayAsync(CancellationToken cancellationToken = default)
+    {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
+        return await ReadLargeBlobArrayCoreAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<LargeBlobArray> ReadLargeBlobArrayCoreAsync(CancellationToken cancellationToken)
     {
         var data = await ReadRawBlobAsync(cancellationToken).ConfigureAwait(false);
 
@@ -172,6 +178,12 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     public async Task WriteLargeBlobArrayAsync(
         LargeBlobArray array,
         CancellationToken cancellationToken = default)
+    {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
+        await WriteLargeBlobArrayCoreAsync(array, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task WriteLargeBlobArrayCoreAsync(LargeBlobArray array, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(array);
 
@@ -213,12 +225,13 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         ReadOnlyMemory<byte> largeBlobKey,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         if (largeBlobKey.Length != 32)
         {
             throw new ArgumentException("Large blob key must be 32 bytes.", nameof(largeBlobKey));
         }
 
-        var array = await ReadLargeBlobArrayAsync(cancellationToken).ConfigureAwait(false);
+        var array = await ReadLargeBlobArrayCoreAsync(cancellationToken).ConfigureAwait(false);
         return array.FindAndDecrypt(largeBlobKey.Span);
     }
 
@@ -247,13 +260,14 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         if (largeBlobKey.Length != 32)
         {
             throw new ArgumentException("Large blob key must be 32 bytes.", nameof(largeBlobKey));
         }
 
         // Read current array
-        var array = await ReadLargeBlobArrayAsync(cancellationToken).ConfigureAwait(false);
+        var array = await ReadLargeBlobArrayCoreAsync(cancellationToken).ConfigureAwait(false);
 
         // Remove existing entry for this key (if any)
         var newEntries = new List<LargeBlobEntry>();
@@ -272,7 +286,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
         // Write back
         var newArray = new LargeBlobArray { Entries = newEntries };
-        await WriteLargeBlobArrayAsync(newArray, cancellationToken).ConfigureAwait(false);
+        await WriteLargeBlobArrayCoreAsync(newArray, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -294,13 +308,14 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         ReadOnlyMemory<byte> largeBlobKey,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         if (largeBlobKey.Length != 32)
         {
             throw new ArgumentException("Large blob key must be 32 bytes.", nameof(largeBlobKey));
         }
 
         // Read current array
-        var array = await ReadLargeBlobArrayAsync(cancellationToken).ConfigureAwait(false);
+        var array = await ReadLargeBlobArrayCoreAsync(cancellationToken).ConfigureAwait(false);
 
         // Find and remove entry for this key
         var newEntries = new List<LargeBlobEntry>();
@@ -326,7 +341,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
         // Write back
         var newArray = new LargeBlobArray { Entries = newEntries };
-        await WriteLargeBlobArrayAsync(newArray, cancellationToken).ConfigureAwait(false);
+        await WriteLargeBlobArrayCoreAsync(newArray, cancellationToken).ConfigureAwait(false);
         return true;
     }
 
@@ -389,7 +404,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         request[0] = CtapCommand.LargeBlobs;
         payload.CopyTo(request.AsMemory(1));
 
-        var response = await _session.SendCborRequestAsync(
+        var response = await Ctap2Session.SendCborWithinOperationAsync(_session,
             request,
             cancellationToken).ConfigureAwait(false);
 
@@ -486,7 +501,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         request[0] = CtapCommand.LargeBlobs;
         payload.CopyTo(request.AsMemory(1));
 
-        await _session.SendCborRequestAsync(
+        await Ctap2Session.SendCborWithinOperationAsync(_session,
             request,
             cancellationToken).ConfigureAwait(false);
     }

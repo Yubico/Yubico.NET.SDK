@@ -84,9 +84,9 @@ readiness. The backend borrows the protocol. Keep caller-owned SCP parameters/co
 completion and the caller-owned prompt through all callbacks. Failed direct setup detaches without closing the
 borrowed connection; the convenience helper cleans up its failed hidden connection.
 
-Core guards logical exchanges, not complete authentication, metadata-plus-crypto, PIN-only or reset workflows.
-Await and serialize whole public tasks before other calls or disposal. PIV callbacks and RSA unpadding are outside
-the exchange guard and can outlive its drain; this is not OTP's callback-inside-guard self-wait path. Each exchange
+Each operation holds admission through all exchanges, awaited callbacks and RSA unpadding. Use private helpers
+for SDK-owned nested steps. Disposal still drains only the exchange; await the complete task before disposal.
+Each exchange
 checks cancellation before admission, then uses None for constituent traffic. An outer canceled wait does not
 complete the underlying task or permit borrowed-input cleanup; admitted work may still succeed.
 

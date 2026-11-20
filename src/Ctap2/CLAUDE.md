@@ -137,9 +137,9 @@ scope outside the session's. Do not append the direct factory or a one-shot GetI
 connection-owning session is live on the same key. SCP03 requires an authorized SmartCard key configured
 with the supplied keys; own/dispose `Scp03KeyParameters` outside the secure session scope.
 
-Serialize and fully await complete operations and helper workflows before disposal. The Core guard
-drains one admitted exchange; it does not join ClientPin's multiple exchanges, begin/next enumeration,
-blob read-modify-write, or post-exchange parsing and callbacks. Keep borrowed inputs, protocols, tokens
+Public SDK helper operations share the concrete session's admission across their exchanges, parsing and
+cleanup; custom ICtap2Session implementations retain their own policy. Serialize and fully await workflows
+composed of separate calls before disposal. Disposal drains one admitted exchange. Keep borrowed inputs, protocols, tokens
 and caller-owned prompts usable through their last continuation. A callback must not reenter or dispose
 the session awaiting it. Prefer async disposal, but do not treat it as a whole-workflow completion join.
 

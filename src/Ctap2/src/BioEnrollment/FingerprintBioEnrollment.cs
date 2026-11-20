@@ -109,6 +109,7 @@ public sealed class FingerprintBioEnrollment
     public async Task<FingerprintSensorInfo> GetFingerprintSensorInfoAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildGetSensorInfoPayload();
         var response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -144,6 +145,7 @@ public sealed class FingerprintBioEnrollment
         int? timeout = null,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildEnrollBeginPayload(timeout);
         var response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -178,6 +180,7 @@ public sealed class FingerprintBioEnrollment
         int? timeout = null,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildEnrollCaptureNextPayload(templateId, timeout);
         var response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -197,6 +200,7 @@ public sealed class FingerprintBioEnrollment
     /// </remarks>
     public async Task EnrollCancelAsync(CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildEnrollCancelPayload();
         await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -217,6 +221,7 @@ public sealed class FingerprintBioEnrollment
     public async Task<IReadOnlyList<TemplateInfo>> EnumerateEnrollmentsAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildEnumerateEnrollmentsPayload();
         ReadOnlyMemory<byte> response;
 
@@ -287,6 +292,7 @@ public sealed class FingerprintBioEnrollment
         string friendlyName,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         ArgumentException.ThrowIfNullOrWhiteSpace(friendlyName);
 
         var payload = BuildSetFriendlyNamePayload(templateId, friendlyName);
@@ -309,6 +315,7 @@ public sealed class FingerprintBioEnrollment
         ReadOnlyMemory<byte> templateId,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildRemoveEnrollmentPayload(templateId);
         await SendBioEnrollmentCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -323,7 +330,7 @@ public sealed class FingerprintBioEnrollment
         request[0] = _command;
         payload.CopyTo(request.AsMemory(1));
 
-        return await _session.SendCborRequestAsync(request, cancellationToken)
+        return await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
             .ConfigureAwait(false);
     }
 

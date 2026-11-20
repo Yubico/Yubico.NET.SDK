@@ -152,8 +152,8 @@ guarantee; prefer 1–63 bytes in short mode and verify empty/64-byte boundaries
 
 ## Current implementation constraints
 
-Await complete workflows before disposal: write/status fallback, CRC/sequence checks, cached publication
-and terminal callbacks extend beyond guarded exchanges. Borrowed configurations/services remain alive
+Await complete operations before disposal: session admission covers write/status fallback, CRC/sequence
+checks, cached publication and awaited terminal callbacks. Borrowed configurations/services remain alive
 through actual completion, not an outer cancelled wait. Grouped connection exclusion is process-local
 and limited to overlapping known member IDs.
 

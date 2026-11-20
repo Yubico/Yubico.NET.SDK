@@ -48,7 +48,7 @@ public class ManagementSessionExchangeOverlapTests
             Assert.True(await connection.WaitForArrivalsAsync(1, ObservationWindow, ct));
 
             var refusal = await Assert.ThrowsAsync<InvalidOperationException>(() => session.GetDeviceInfoAsync(ct));
-            Assert.Contains("one operation at a time", refusal.Message, StringComparison.Ordinal);
+            Assert.Contains("Another operation is already in progress", refusal.Message, StringComparison.Ordinal);
             Assert.False(await connection.WaitForArrivalsAsync(2, ObservationWindow, ct));
 
             connection.ReleaseTransmits();

@@ -176,12 +176,12 @@ command and response chaining, one CTAP HID request with its keep-alives, or one
 Sequential awaited calls are unchanged. If an exchange starts while another exchange on the same protocol is
 admitted, it throws `InvalidOperationException` immediately rather than queueing.
 
-The guard does not make a public operation atomic. Operations such as `GetDeviceInfoAsync`, which reads
-one page per exchange, release the guard between their exchanges. An overlapping call to such an
-operation may be refused, or it may run its own exchanges in a gap and complete. It can also cause the
-first operation's next exchange to be refused. Each admitted exchange stays intact on the wire, but no
-ordering or all-or-nothing guarantee spans exchanges. Callers must await each public operation before
-starting the next one on the same session.
+Applet sessions separately refuse a second operation until the first completes. For example,
+`GetDeviceInfoAsync` retains admission across every page read and the final parse, even though each page
+is a separate exchange. Awaited callbacks and cleanup are also inside admission. A canceled token or
+an abandoned wait does not release admission; the original operation must finish. The guard prevents
+interleaving on that session, not partial device changes. It does not reserve the session across separate
+operations, such as a caller's authentication followed by a write.
 
 Session disposal drains the admitted exchange, not every remaining step of that public workflow.
 Post-exchange parsing, cache updates, later exchanges, and application callback work need the caller's

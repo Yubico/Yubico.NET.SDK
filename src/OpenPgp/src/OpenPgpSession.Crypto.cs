@@ -30,7 +30,7 @@ public sealed partial class OpenPgpSession
         HashAlgorithmName hashAlgorithm,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Signing with {Hash}", hashAlgorithm.Name);
 
@@ -68,7 +68,7 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> ciphertext,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Decrypting ({Length} bytes)", ciphertext.Length);
 
@@ -112,7 +112,7 @@ public sealed partial class OpenPgpSession
         HashAlgorithmName hashAlgorithm,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Authenticating with {Hash}", hashAlgorithm.Name);
 

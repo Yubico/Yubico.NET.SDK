@@ -8,6 +8,10 @@ Dropping a tier removes SDK guarantees; it does not merely make the API more ver
 Applet sessions are the supported golden path. They select the application, interpret applet semantics,
 validate inputs, enforce firmware and feature gates, and manage protocol state.
 
+An applet session refuses a concurrent operation with `InvalidOperationException` instead of queueing it.
+The first operation retains admission through all its exchanges, awaited callbacks, and cleanup, including
+on cancellation. Serialize workflows made up of separate operations yourself and await them before disposal.
+
 ```csharp
 await using PivSession piv = await yubiKey.CreatePivSessionAsync(
     cancellationToken: cancellationToken);

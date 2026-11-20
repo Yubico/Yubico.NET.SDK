@@ -43,7 +43,7 @@ namespace Yubico.YubiKit.Ctap2.CredentialManagement;
 /// </para>
 /// <para>
 /// Await operations without interleaving other authenticator commands during enumeration.
-/// The session guards individual exchanges, not the complete begin/next sequence. Under
+/// With a built-in session, each enumeration holds admission through its begin/next sequence. Under
 /// CTAP 2.1 (2022-06-21 errata), Section 6, devices may require globally adjacent stateful
 /// commands with no more than 30 seconds between them; token expiry discards sequence state.
 /// Cancellation, transport failure or a decode error does not roll back device operations.
@@ -97,6 +97,7 @@ public sealed class CredentialManagement : IDisposable
     public async Task<CredentialMetadata> GetCredentialsMetadataAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildCommandPayload(CredManagementSubCommand.GetCredsMetadata);
         var response = await SendCredentialManagementCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -121,6 +122,7 @@ public sealed class CredentialManagement : IDisposable
     public async Task<RelyingPartyEnumerationResult> EnumerateRelyingPartiesAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var results = new List<RelyingPartyInfo>();
 
         // Begin enumeration
@@ -181,6 +183,7 @@ public sealed class CredentialManagement : IDisposable
         ReadOnlyMemory<byte> rpIdHash,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var results = new List<StoredCredentialInfo>();
 
         // Begin enumeration
@@ -246,6 +249,7 @@ public sealed class CredentialManagement : IDisposable
         PublicKeyCredentialDescriptor credentialId,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildDeleteCredentialPayload(credentialId);
         await SendCredentialManagementCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -271,6 +275,7 @@ public sealed class CredentialManagement : IDisposable
         PublicKeyCredentialUserEntity user,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         var payload = BuildUpdateUserPayload(credentialId, user);
         await SendCredentialManagementCommandAsync(payload, cancellationToken)
             .ConfigureAwait(false);
@@ -306,7 +311,7 @@ public sealed class CredentialManagement : IDisposable
 
         try
         {
-            return await _session.SendCborRequestAsync(request, cancellationToken)
+            return await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally

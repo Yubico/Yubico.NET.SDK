@@ -29,7 +29,7 @@ public sealed partial class OpenPgpSession
         AlgorithmAttributes attributes,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(attributes);
 
         if (attributes is EcAttributes)
@@ -39,7 +39,7 @@ public sealed partial class OpenPgpSession
             "Generating {AlgorithmType} key for {Slot}",
             attributes.GetType().Name,
             keyRef);
-        await SetAlgorithmAttributesAsync(keyRef, attributes, cancellationToken)
+        await SetAlgorithmAttributesCoreAsync(keyRef, attributes, cancellationToken)
             .ConfigureAwait(false);
 
         await GenerateKeyPairAsync(keyRef, cancellationToken).ConfigureAwait(false);
@@ -51,7 +51,7 @@ public sealed partial class OpenPgpSession
         IPrivateKey privateKey,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(privateKey);
 
         _logger.LogInformation("Importing {KeyType} key into {Slot}", privateKey.KeyType, keyRef);
@@ -62,7 +62,7 @@ public sealed partial class OpenPgpSession
 
         if (_appData.Discretionary.ExtendedCapabilities.Flags.HasFlag(ExtendedCapabilityFlags.AlgorithmAttributesChangeable))
         {
-            await SetAlgorithmAttributesAsync(keyRef, import.Attributes, cancellationToken)
+            await SetAlgorithmAttributesCoreAsync(keyRef, import.Attributes, cancellationToken)
                 .ConfigureAwait(false);
         }
         else if (import.Attributes is not RsaAttributes { NLen: (int)RsaSize.Rsa2048 })
@@ -105,7 +105,7 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogInformation("Deleting key from {Slot}", keyRef);
 
@@ -115,10 +115,10 @@ public sealed partial class OpenPgpSession
         var rsa4096 = RsaAttributes.Create(RsaSize.Rsa4096);
         var rsa2048 = RsaAttributes.Create(RsaSize.Rsa2048);
 
-        await PutDataAsync(keyRef.AlgorithmAttributesDo(), rsa4096.ToBytes(), cancellationToken)
+        await PutDataCoreAsync(keyRef.AlgorithmAttributesDo(), rsa4096.ToBytes(), cancellationToken)
             .ConfigureAwait(false);
 
-        await SetAlgorithmAttributesAsync(keyRef, rsa2048, cancellationToken)
+        await SetAlgorithmAttributesCoreAsync(keyRef, rsa2048, cancellationToken)
             .ConfigureAwait(false);
 
         // Refresh cached app data
@@ -132,7 +132,7 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Reading public key from {Slot}", keyRef);
 
@@ -151,7 +151,7 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         EnsureSupports(FeatureAttestation);
 
@@ -171,7 +171,7 @@ public sealed partial class OpenPgpSession
                 {
                     await TransmitAsync(command, token).ConfigureAwait(false);
 
-                    var cert = await GetCertificateAsync(keyRef, token).ConfigureAwait(false);
+                    var cert = await GetCertificateCoreAsync(keyRef, token).ConfigureAwait(false);
                     if (cert is null)
                     {
                         throw new InvalidOperationException(
@@ -188,10 +188,10 @@ public sealed partial class OpenPgpSession
     public async Task<KeyInformation> ListKeyInformationAsync(
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         // Key information is in the discretionary data objects
-        var appData = await GetApplicationRelatedDataAsync(cancellationToken)
+        var appData = await RefreshApplicationRelatedDataAsync(cancellationToken)
             .ConfigureAwait(false);
         return appData.Discretionary.KeyInformation;
     }
@@ -200,9 +200,9 @@ public sealed partial class OpenPgpSession
     public async Task<KeyFingerprints> GetKeyFingerprintsAsync(
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
-        var appData = await GetApplicationRelatedDataAsync(cancellationToken)
+        var appData = await RefreshApplicationRelatedDataAsync(cancellationToken)
             .ConfigureAwait(false);
         return appData.Discretionary.KeyFingerprints;
     }
@@ -211,9 +211,9 @@ public sealed partial class OpenPgpSession
     public async Task<GenerationTimes> GetGenerationTimesAsync(
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
-        var appData = await GetApplicationRelatedDataAsync(cancellationToken)
+        var appData = await RefreshApplicationRelatedDataAsync(cancellationToken)
             .ConfigureAwait(false);
         return appData.Discretionary.GenerationTimes;
     }
@@ -224,7 +224,7 @@ public sealed partial class OpenPgpSession
         ReadOnlyMemory<byte> fingerprint,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         if (fingerprint.Length != 20)
         {
@@ -232,7 +232,7 @@ public sealed partial class OpenPgpSession
         }
 
         _logger.LogDebug("Setting fingerprint for {Slot}", keyRef);
-        await PutDataAsync(keyRef.KeyFingerprintDo(), fingerprint, cancellationToken)
+        await PutDataCoreAsync(keyRef.KeyFingerprintDo(), fingerprint, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -242,7 +242,7 @@ public sealed partial class OpenPgpSession
         int timestamp,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Setting generation time for {Slot} to {Timestamp}", keyRef, timestamp);
 
@@ -252,7 +252,7 @@ public sealed partial class OpenPgpSession
         data[2] = (byte)(timestamp >> 8);
         data[3] = (byte)timestamp;
 
-        await PutDataAsync(keyRef.GenerationTimeDo(), data, cancellationToken)
+        await PutDataCoreAsync(keyRef.GenerationTimeDo(), data, cancellationToken)
             .ConfigureAwait(false);
     }
 

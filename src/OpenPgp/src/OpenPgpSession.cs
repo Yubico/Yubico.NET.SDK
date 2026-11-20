@@ -165,6 +165,13 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     public async Task<ApplicationRelatedData> GetApplicationRelatedDataAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
+        return await RefreshApplicationRelatedDataAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<ApplicationRelatedData> RefreshApplicationRelatedDataAsync(
+        CancellationToken cancellationToken)
+    {
         ThrowIfDisposed();
 
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
@@ -182,12 +189,12 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     }
 
     /// <inheritdoc />
-    public Task<ReadOnlyMemory<byte>> GetDataAsync(
+    public async Task<ReadOnlyMemory<byte>> GetDataAsync(
         DataObject dataObject,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
-        return GetDataCoreAsync(dataObject, cancellationToken);
+        using var operation = EnterOperation();
+        return await GetDataCoreAsync(dataObject, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -195,6 +202,15 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         DataObject dataObject,
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
+    {
+        using var operation = EnterOperation();
+        await PutDataCoreAsync(dataObject, data, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task PutDataCoreAsync(
+        DataObject dataObject,
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
 
@@ -217,7 +233,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         int length,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
 
@@ -240,7 +256,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     public async Task<int> GetSignatureCounterAsync(
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         var data = await GetDataCoreAsync(DataObject.SecuritySupportTemplate, cancellationToken)
             .ConfigureAwait(false);
@@ -251,6 +267,13 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     /// <inheritdoc />
     public async Task<PwStatus> GetPinStatusAsync(
         CancellationToken cancellationToken = default)
+    {
+        using var operation = EnterOperation();
+        return await GetPinStatusCoreAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<PwStatus> GetPinStatusCoreAsync(
+        CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
 
@@ -345,7 +368,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
                     KeyRef.Att => _appData.Discretionary.UifAtt,
                     _ => null
                 };
-            Uif uif = cachedUif ?? await GetUifAsync(keyRef, cancellationToken).ConfigureAwait(false);
+            Uif uif = cachedUif ?? await GetUifCoreAsync(keyRef, cancellationToken).ConfigureAwait(false);
             if (uif == Uif.Off)
                 return null;
 

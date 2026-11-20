@@ -188,15 +188,16 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     }
 
     /// <inheritdoc />
-    public Task<AuthenticatorInfo> GetInfoAsync(CancellationToken cancellationToken = default)
+    public async Task<AuthenticatorInfo> GetInfoAsync(CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        return GetInfoCoreAsync(_backend, cancellationToken);
+        using var operation = EnterOperation();
+        return await GetInfoWithinOperationAsync(this, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task SelectionAsync(CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
         EnsureInitialized();
         await SendCborAsync(
                 CtapCommand.Selection,
@@ -215,6 +216,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
         EnsureInitialized();
         await SendCborAsync(
                 CtapCommand.Reset,
@@ -240,7 +242,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         MakeCredentialOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         ArgumentNullException.ThrowIfNull(rp);
         ArgumentNullException.ThrowIfNull(user);
@@ -321,7 +323,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         GetAssertionOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         ArgumentException.ThrowIfNullOrEmpty(rpId);
 
@@ -379,6 +381,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     public async Task<GetAssertionResponse> GetNextAssertionAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
         EnsureInitialized();
 
         // The caller preserves device sequence adjacency and tracks the first response's count.
@@ -430,9 +433,33 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         ReadOnlyMemory<byte> request,
         CancellationToken cancellationToken = default)
     {
-        EnsureInitialized();
-        return await _backend.SendCborAsync(request, UserPresenceNotification.None, cancellationToken)
-            .ConfigureAwait(false);
+        using var operation = EnterOperation();
+        return await SendCborWithinOperationAsync(this, request, cancellationToken).ConfigureAwait(false);
+    }
+
+    // SDK helpers accepting ICtap2Session share admission with concrete sessions. Custom session
+    // implementations retain their own concurrency policy and continue to receive public calls.
+    internal static OperationScope EnterHelperOperation(ICtap2Session session) =>
+        session is Ctap2Session concrete ? concrete.EnterOperation() : default;
+
+    internal static Task<ReadOnlyMemory<byte>> SendCborWithinOperationAsync(
+        ICtap2Session session, ReadOnlyMemory<byte> request, CancellationToken cancellationToken)
+    {
+        if (session is not Ctap2Session concrete)
+            return session.SendCborRequestAsync(request, cancellationToken);
+
+        concrete.EnsureInitialized();
+        return concrete._backend.SendCborAsync(request, UserPresenceNotification.None, cancellationToken);
+    }
+
+    internal static Task<AuthenticatorInfo> GetInfoWithinOperationAsync(
+        ICtap2Session session, CancellationToken cancellationToken)
+    {
+        if (session is not Ctap2Session concrete)
+            return session.GetInfoAsync(cancellationToken);
+
+        concrete.EnsureInitialized();
+        return GetInfoCoreAsync(concrete._backend, cancellationToken);
     }
 
     private static async Task<AuthenticatorInfo> GetInfoCoreAsync(

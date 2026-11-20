@@ -24,14 +24,14 @@ public sealed partial class OpenPgpSession
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         EnsureSupports(FeatureReset);
 
         _logger.LogInformation("Starting OpenPGP factory reset");
 
         // Step 1: Get current PIN attempts
-        var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
+        var status = await GetPinStatusCoreAsync(cancellationToken).ConfigureAwait(false);
 
         // Step 2: Block User PIN (P2=0x81)
         await BlockPinAsync((byte)Pw.User, status.AttemptsUser, cancellationToken)

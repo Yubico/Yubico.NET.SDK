@@ -342,8 +342,8 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
 - Override the transport with `new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp }`; one
   transport is selected and a connection failure propagates instead of falling back.
 - Await the entire public task before another operation or disposal, keeping configurations, borrowed
-  memory and prompt resources alive. Write/status fallback, CRC validation and notification callbacks
-  extend beyond Core's individual guarded exchanges.
+  memory and prompt resources alive. Session admission covers write/status fallback, CRC validation and
+  awaited notification callbacks.
 - `PutConfigurationAsync`, `UpdateConfigurationAsync`, `SwapSlotsAsync`, `DeleteSlotAsync`, `SetScanMapAsync`, and
   `SetNdefConfigurationAsync` overwrite device state irreversibly. Access codes are exactly 6 bytes.
 - Firmware-gated operations throw `NotSupportedException`; `ConfigState` accessors throw `InvalidOperationException`.

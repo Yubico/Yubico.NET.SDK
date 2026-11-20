@@ -31,8 +31,8 @@ namespace Yubico.YubiKit.SecurityDomain;
 ///     Cancellation does not roll back persistent changes already accepted by the device.
 ///     IsAuthenticated records Core channel setup, not ongoing channel health or administrative authority.
 ///     The same Public Review draft, §4.3, includes the first correct-MAC APDU after setup in a/c host
-///     authentication. Await entire public tasks before disposal; individual guarded exchanges do not
-///     serialize a complete reset or multi-query workflow.
+///     authentication. Session admission covers an entire operation, including reset and multi-query reads.
+///     Await the complete operation before disposal; disposal drains the admitted exchange only.
 /// </remarks>
 public interface ISecurityDomainSession : IApplicationSession
 {

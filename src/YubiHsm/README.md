@@ -285,9 +285,9 @@ the cancellation request as a device-interruption guarantee.
   admits one session. Disjoint scoped views remain uncoordinated. Whoever creates a connection disposes
   it with `await using`; a session from `CreateHsmAuthSessionAsync` owns the one it opened.
   See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
-- Await the entire public workflow before another operation or disposal. Optional LIST policy lookup,
-  CALCULATE, parsing and callbacks are separate phases; Core drains an admitted exchange, not all later
-  application work. Keep borrowed inputs/prompt resources alive until the task is terminal.
+- Session admission covers the optional LIST policy lookup, CALCULATE, parsing and awaited callbacks.
+  Disposal drains an admitted exchange, not all later application work. Await the entire operation and
+  keep borrowed inputs and prompt resources alive until then.
 - `ResetAsync` (no undo), `DeleteCredentialAsync`, and `PutManagementKeyAsync` change persistent applet state.
   Reset reuses its protocol without a fresh SCP handshake. With SCP, RESET is protected but re-SELECT
   passes through unprotected; old host state and public readiness/authentication flags remain. End the

@@ -74,9 +74,9 @@ foreach (var entry in await session.ListKeyInformationAsync())
 
 The device extension owns the connection it opens. `OpenPgpSession.CreateAsync(connection, ...)` uses an existing
 SmartCard connection; keep that connection alive through session disposal and dispose it afterward. Await operations
-sequentially on a session, and await each complete public task before disposal. Core excludes overlapping logical
-exchanges, including chaining and SCP processing, but a public method can span several exchanges plus parsing,
-cache changes and callbacks. For example, certificate occurrence selection and its read/write are separate exchanges.
+sequentially on a session, and await each complete public task before disposal. The session refuses overlap across
+all exchanges, parsing, cache changes and awaited callbacks of one operation. For example, certificate occurrence
+selection and its read/write are separate exchanges in the same operation.
 Keep borrowed keys, input buffers and prompt services alive through the complete task, not just its last transmit.
 
 Creation binds the session before device I/O, selects the applet and reads its version, then configures framing and

@@ -33,6 +33,14 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
+        return await GetUifCoreAsync(keyRef, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<Uif> GetUifCoreAsync(
+        KeyRef keyRef,
+        CancellationToken cancellationToken)
+    {
         ThrowIfDisposed();
 
         EnsureSupports(FeatureUif);
@@ -50,13 +58,13 @@ public sealed partial class OpenPgpSession
         Uif uif,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         EnsureSupports(FeatureUif);
 
         _logger.LogInformation("Setting UIF for {Slot} to {Uif}", keyRef, uif);
 
-        await PutDataAsync(keyRef.UifDo(), uif.ToBytes(), cancellationToken)
+        await PutDataCoreAsync(keyRef.UifDo(), uif.ToBytes(), cancellationToken)
             .ConfigureAwait(false);
         _updatedUifs[keyRef] = uif;
     }
@@ -66,14 +74,14 @@ public sealed partial class OpenPgpSession
         KeyRef keyRef,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Getting algorithm attributes for {Slot}", keyRef);
 
         // Per Python canonical: read from ApplicationRelatedData (DO 0x6E), not from
         // individual algorithm attribute DOs (0xC1/0xC2/0xC3) directly. Direct GET_DATA
         // for those DOs is not supported on all OpenPGP implementations.
-        var appData = await GetApplicationRelatedDataAsync(cancellationToken).ConfigureAwait(false);
+        var appData = await RefreshApplicationRelatedDataAsync(cancellationToken).ConfigureAwait(false);
         return keyRef switch
         {
             KeyRef.Sig => appData.Discretionary.AlgorithmAttributesSig,
@@ -91,12 +99,21 @@ public sealed partial class OpenPgpSession
         AlgorithmAttributes attributes,
         CancellationToken cancellationToken = default)
     {
+        using var operation = EnterOperation();
+        await SetAlgorithmAttributesCoreAsync(keyRef, attributes, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task SetAlgorithmAttributesCoreAsync(
+        KeyRef keyRef,
+        AlgorithmAttributes attributes,
+        CancellationToken cancellationToken)
+    {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(attributes);
 
         _logger.LogInformation("Setting algorithm attributes for {Slot}", keyRef);
 
-        await PutDataAsync(keyRef.AlgorithmAttributesDo(), attributes.ToBytes(), cancellationToken)
+        await PutDataCoreAsync(keyRef.AlgorithmAttributesDo(), attributes.ToBytes(), cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -104,7 +121,7 @@ public sealed partial class OpenPgpSession
     public async Task<IReadOnlyList<SupportedAlgorithm>>
         GetSupportedAlgorithmsAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         EnsureSupports(FeatureAlgorithmInfo);
 
@@ -179,7 +196,7 @@ public sealed partial class OpenPgpSession
     public async Task<Kdf> GetKdfAsync(
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
 
         _logger.LogDebug("Getting KDF configuration");
 
@@ -191,14 +208,14 @@ public sealed partial class OpenPgpSession
         Kdf kdf,
         CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         ArgumentNullException.ThrowIfNull(kdf);
 
         _logger.LogInformation("Setting KDF configuration");
 
         // ToBytes creates a separate encoding that may contain initial PIN hashes. This call currently
         // retains no owner to clear that payload; disposing the KDF clears only its own backing arrays.
-        await PutDataAsync(DataObject.Kdf, kdf.ToBytes(), cancellationToken)
+        await PutDataCoreAsync(DataObject.Kdf, kdf.ToBytes(), cancellationToken)
             .ConfigureAwait(false);
 
         // Retain the supplied instance: later PIN operations derive with this same object.

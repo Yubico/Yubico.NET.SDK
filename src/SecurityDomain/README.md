@@ -218,8 +218,8 @@ supply through `SessionCreationOptions.ScpKeyParameters`, so this module does no
 `SessionCreationOptions.UserPresencePrompt`. Pass a `CancellationToken` to session calls to request cancellation.
 Cancellation is not rollback: a device may already have accepted a persistent change. Reset can take noticeably
 longer than other operations because it makes repeated authentication attempts.
-Await complete public workflows before disposal or input cleanup. Core guards individual exchanges,
-not the entire reset, multi-query retrieval or application callback. The reset attempt limit is not a
+The session refuses overlapping operations, including during reset and multi-query retrieval.
+Await complete operations before disposal or input cleanup. The reset attempt limit is not a
 wall-clock deadline or a native interruption guarantee.
 
 ## Constraints

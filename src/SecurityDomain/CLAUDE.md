@@ -92,7 +92,8 @@ mixed-key/firmware guarantee. Retained SCP parameters can fail reauthentication.
 omits the original configuration/version and clears the explicit-version indicator; a fresh session with
 the required options is the workaround, not a claim that losing them is intended policy.
 SCP11 can fail Core's local 5.7.2 gate during reinitialization because the omitted override becomes 5.3.0.
-Raw attempts bypass the guard and can mutate state before flags clear. Await the entire reset, then
+Raw attempts bypass the protocol exchange guard but remain inside session admission and can mutate state
+before flags clear. Await the entire reset, then
 dispose/reopen after uncertainty; old readiness/authentication values are not recovery evidence.
 
 #### Writing Tests

@@ -230,10 +230,10 @@ The context uses application `OATH`, basis `PolicyRequires`, and the public `iss
 `CalculateAllAsync` is silent. Cancelling the token before the calculation's SmartCard exchange is admitted
 resolves a requested notification as cancelled; once admitted, the exchange runs to completion and cancellation
 does not interrupt the device or necessarily change the notification outcome.
-Await the complete public task before disposal or clearing inputs. `CalculateAllAsync` can issue followup
-calculations; `AuthenticateAndRetryAsync` includes password acquisition, VALIDATE and retry; presence
-callbacks can run after an exchange. Keep prompt/provider resources alive until the workflow finishes,
-and avoid reentering or disposing the session from a callback.
+An OATH operation retains admission through any follow-up exchanges and awaited presence callbacks.
+`AuthenticateAndRetryAsync` does not reserve the session across its operation, password provider, validation,
+and retry. Serialize that whole sequence yourself and await it before disposal or clearing inputs. Do not start
+another operation or dispose the session from a presence callback.
 
 ## Constraints
 

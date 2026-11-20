@@ -16,6 +16,14 @@ using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.Abstractions;
 
+/// <summary>Exposes session lifetime, transport and firmware information.</summary>
+/// <remarks>
+///     Built-in applet sessions admit one operation at a time. An overlapping operation fails with
+///     <see cref="InvalidOperationException" /> instead of waiting. Admission lasts through awaited
+///     callbacks and cleanup, including after a cancellation request. The caller still serializes
+///     workflows composed of separate operations and awaits them before disposing the session.
+///     Disposal drains an admitted protocol exchange, not the whole operation.
+/// </remarks>
 public interface IApplicationSession : IDisposable, IAsyncDisposable
 {
     /// <summary>

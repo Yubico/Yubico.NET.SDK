@@ -34,10 +34,9 @@ namespace Yubico.YubiKit.Piv;
 /// checks do not imply ASCII-only, digit-only, or UTF-8-validity checks. Returned mutable memory is
 /// transferred to the caller, who must clear plaintext, shared secrets, and temporary PINs after use.</para>
 /// <para>
-/// Await and serialize complete public tasks before another operation or disposal. Core guards one logical
-/// APDU exchange, including chaining/SCP, rather than a complete management-authentication, PIN-only or reset
-/// workflow. Parsing, presence callbacks and local RSA unpadding can continue after that exchange leaves the
-/// guard. Keep borrowed inputs, keys and prompt services alive through actual public-task completion.
+/// A PIV operation holds session admission through all exchanges, parsing, awaited presence callbacks and
+/// local RSA unpadding. A concurrent operation fails rather than interleaving. Await the complete operation
+/// before disposal, and keep borrowed inputs, keys and prompt services alive until then.
 /// Cancellation is checked before each exchange is admitted; admitted constituent traffic uses
 /// CancellationToken.None and may succeed after the caller cancels. An outer canceled wait is not operation
 /// completion or permission to clear inputs. Await actual completion/teardown before inspecting or retrying

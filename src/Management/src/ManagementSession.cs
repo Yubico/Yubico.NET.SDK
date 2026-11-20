@@ -151,24 +151,22 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     }
 
     /// <inheritdoc cref="IManagementSession.GetDeviceInfoAsync" />
-    public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
+    public async Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         var protocol = Protocol ?? throw new InvalidOperationException("Management session is not initialized.");
         // Query current fields while retaining initialization's firmware default; non-final qualifier
         // precedence belongs to DeviceInfo.CreateFromTlvs. This read does not publish discovery metadata.
-        return DeviceInfoReader.ReadAsync(protocol, _version, cancellationToken);
+        return await DeviceInfoReader.ReadAsync(protocol, _version, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc cref="IManagementSession.SetDeviceConfigAsync" />
-    public Task SetDeviceConfigAsync(
+    public async Task SetDeviceConfigAsync(
         DeviceConfig config,
         SetDeviceConfigOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        // Before the feature gate: a disposed session should say so, not report the firmware verdict of a
-        // session that no longer exists.
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureSetConfig);
         ArgumentNullException.ThrowIfNull(config);
 
@@ -184,7 +182,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             throw new ArgumentException("options.NewLockCode must be 16 bytes", nameof(options));
 
         var configBytes = config.GetBytes(options);
-        return WriteConfigAndZeroAsync(_backend, configBytes, cancellationToken);
+        await WriteConfigAndZeroAsync(_backend, configBytes, cancellationToken).ConfigureAwait(false);
 
         static async Task WriteConfigAndZeroAsync(
             IManagementBackend backend,
@@ -204,15 +202,15 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     }
 
     /// <inheritdoc cref="IManagementSession.ResetDeviceAsync" />
-    public Task ResetDeviceAsync(CancellationToken cancellationToken = default)
+    public async Task ResetDeviceAsync(CancellationToken cancellationToken = default)
     {
-        ThrowIfDisposed();
+        using var operation = EnterOperation();
         EnsureSupports(FeatureDeviceReset);
-        return _backend switch
+        await (_backend switch
         {
             SmartCardBackend smartCard => smartCard.DeviceResetAsync(cancellationToken).AsTask(),
             _ => throw new NotSupportedException("Device reset is only available over SmartCard (CCID) connections.")
-        };
+        }).ConfigureAwait(false);
     }
 
     private async Task<FirmwareVersion> ResolveFirmwareVersionAsync(

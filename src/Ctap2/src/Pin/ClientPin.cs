@@ -114,6 +114,7 @@ public sealed class ClientPin : IDisposable
     public async Task<PinRetryStatus> GetPinRetriesAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         EnsureNotDisposed();
 
         var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
@@ -121,7 +122,7 @@ public sealed class ClientPin : IDisposable
             .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetRetries)
             .Build();
 
-        var response = await _session.SendCborRequestAsync(request, cancellationToken)
+        var response = await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
             .ConfigureAwait(false);
 
         var (retriesRemaining, powerCycleRequired) = ParsePinRetriesResponse(response);
@@ -142,6 +143,7 @@ public sealed class ClientPin : IDisposable
     public async Task<UserVerificationRetryStatus> GetUvRetriesAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         EnsureNotDisposed();
 
         var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
@@ -149,7 +151,7 @@ public sealed class ClientPin : IDisposable
             .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetUvRetries)
             .Build();
 
-        var response = await _session.SendCborRequestAsync(request, cancellationToken)
+        var response = await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
             .ConfigureAwait(false);
 
         var (retriesRemaining, powerCycleRequired) = ParseUvRetriesResponse(response);
@@ -170,11 +172,12 @@ public sealed class ClientPin : IDisposable
     /// <remarks>The PIN must not end in 0x00. This method right-zero-pads it to exactly 64 bytes before encryption; AES adds no padding.</remarks>
     public async Task SetPinAsync(ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         EnsureNotDisposed();
         ValidatePin(newPin, nameof(newPin));
 
         // Get authenticator's key agreement key
-        var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
+        var authenticatorKey = await GetKeyAgreementCoreAsync(cancellationToken)
             .ConfigureAwait(false);
 
         // Perform ECDH key agreement
@@ -200,7 +203,7 @@ public sealed class ClientPin : IDisposable
                 .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
                 .Build();
 
-            await _session.SendCborRequestAsync(request, cancellationToken)
+            await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -237,12 +240,13 @@ public sealed class ClientPin : IDisposable
         ReadOnlyMemory<byte> newPin,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         EnsureNotDisposed();
         ValidatePin(currentPin, nameof(currentPin));
         ValidatePin(newPin, nameof(newPin));
 
         // Get authenticator's key agreement key
-        var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
+        var authenticatorKey = await GetKeyAgreementCoreAsync(cancellationToken)
             .ConfigureAwait(false);
 
         // Perform ECDH key agreement
@@ -280,7 +284,7 @@ public sealed class ClientPin : IDisposable
                 .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
                 .Build();
 
-            await _session.SendCborRequestAsync(request, cancellationToken)
+            await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -318,11 +322,17 @@ public sealed class ClientPin : IDisposable
         ReadOnlyMemory<byte> pin,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
+        return await GetPinTokenCoreAsync(pin, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<byte[]> GetPinTokenCoreAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken)
+    {
         EnsureNotDisposed();
         ValidatePin(pin, nameof(pin));
 
         // Get authenticator's key agreement key
-        var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
+        var authenticatorKey = await GetKeyAgreementCoreAsync(cancellationToken)
             .ConfigureAwait(false);
 
         // Perform ECDH key agreement
@@ -343,7 +353,7 @@ public sealed class ClientPin : IDisposable
                 .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc)
                 .Build();
 
-            var response = await _session.SendCborRequestAsync(request, cancellationToken)
+            var response = await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
                 .ConfigureAwait(false);
 
             var encryptedToken = ParsePinTokenResponse(response);
@@ -397,6 +407,7 @@ public sealed class ClientPin : IDisposable
         string? rpId = null,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         EnsureNotDisposed();
         ValidatePin(pin, nameof(pin));
 
@@ -407,16 +418,16 @@ public sealed class ClientPin : IDisposable
 
         // Choose the subcommand from GetInfo, not the protocol version. Concrete Ctap2Session
         // queries fresh info; absent/false pinUvAuthToken drops permissions and RP on legacy 0x05.
-        var info = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+        var info = await Ctap2Session.GetInfoWithinOperationAsync(_session, cancellationToken).ConfigureAwait(false);
         bool supportsTokenWithPermissions = info.Options.TryGetValue("pinUvAuthToken", out var supported) && supported;
 
         if (!supportsTokenWithPermissions)
         {
-            return await GetPinTokenAsync(pin, cancellationToken).ConfigureAwait(false);
+            return await GetPinTokenCoreAsync(pin, cancellationToken).ConfigureAwait(false);
         }
 
         // Get authenticator's key agreement key
-        var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
+        var authenticatorKey = await GetKeyAgreementCoreAsync(cancellationToken)
             .ConfigureAwait(false);
 
         // Perform ECDH key agreement
@@ -443,7 +454,7 @@ public sealed class ClientPin : IDisposable
             }
 
             var request = builder.Build();
-            var response = await _session.SendCborRequestAsync(request, cancellationToken)
+            var response = await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
                 .ConfigureAwait(false);
 
             var encryptedToken = ParsePinTokenResponse(response);
@@ -492,6 +503,7 @@ public sealed class ClientPin : IDisposable
         string? rpId = null,
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
         EnsureNotDisposed();
 
         if (permissions == PinUvAuthTokenPermissions.None)
@@ -500,7 +512,7 @@ public sealed class ClientPin : IDisposable
         }
 
         // Get authenticator's key agreement key
-        var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
+        var authenticatorKey = await GetKeyAgreementCoreAsync(cancellationToken)
             .ConfigureAwait(false);
 
         // Perform ECDH key agreement
@@ -520,7 +532,7 @@ public sealed class ClientPin : IDisposable
             }
 
             var request = builder.Build();
-            var response = await _session.SendCborRequestAsync(request, cancellationToken)
+            var response = await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
                 .ConfigureAwait(false);
 
             var encryptedToken = ParsePinTokenResponse(response);
@@ -540,6 +552,12 @@ public sealed class ClientPin : IDisposable
     internal async Task<Dictionary<int, object?>> GetKeyAgreementAsync(
         CancellationToken cancellationToken = default)
     {
+        using var operation = Ctap2Session.EnterHelperOperation(_session);
+        return await GetKeyAgreementCoreAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<Dictionary<int, object?>> GetKeyAgreementCoreAsync(CancellationToken cancellationToken)
+    {
         EnsureNotDisposed();
 
         var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
@@ -547,7 +565,7 @@ public sealed class ClientPin : IDisposable
             .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetKeyAgreement)
             .Build();
 
-        var response = await _session.SendCborRequestAsync(request, cancellationToken)
+        var response = await Ctap2Session.SendCborWithinOperationAsync(_session, request, cancellationToken)
             .ConfigureAwait(false);
 
         return ParseKeyAgreementResponse(response);

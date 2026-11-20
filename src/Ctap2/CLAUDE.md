@@ -591,8 +591,9 @@ if (!Ctap2Session.FeatureBioEnrollment.IsSupportedByFirmware(firmwareVersion))
 1. **CBOR Key Order**: CTAP2 canonical keys sort by encoded type/length/bytes, not numeric value.
    Use `CborConformanceMode.Ctap2Canonical`; the current writer sorts completed maps automatically.
 
-2. **PIN Padding**: ClientPin right-zero-pads a new PIN to 64 bytes before encryption. AES uses no padding,
-   not PKCS#7. Caller input must meet UTF-8/NFC/code-point/device-policy requirements; byte count alone is insufficient.
+2. **PIN Padding**: ClientPin normalizes a new UTF-8 PIN to NFC, validates code-point and byte limits,
+   and right-zero-pads to 64 bytes before encryption. Non-ASCII requires a working normalization backend;
+   device-specific PIN policy still applies. AES uses no padding, not PKCS#7.
 
 3. **Protocol Reuse**: PIN/UV auth protocols are stateless with respect to the authenticator; token requests perform key agreement internally. Dispose the protocol when done.
 

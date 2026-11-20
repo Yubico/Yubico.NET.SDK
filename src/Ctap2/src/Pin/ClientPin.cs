@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using System.Formats.Cbor;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Unicode;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Ctap2.Cbor;
@@ -40,10 +43,10 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 /// Each PIN set/change or token request performs fresh key agreement.
 /// </para>
 /// <para>
-/// Supply PINs as NFC-normalized UTF-8, with at least four Unicode characters and no final 0x00
-/// byte. For a new PIN, also meet the authenticator's current minimum in Unicode code points and
-/// any additional device policy. An existing PIN must be valid UTF-8 and is hashed exactly as
-/// supplied without applying new-PIN rules. Do not append padding to a PIN argument.
+/// Supply unpadded UTF-8 PINs. New PINs are normalized to NFC and must then contain at least four
+/// Unicode code points, fit in 63 UTF-8 bytes, and not end in 0x00. Non-ASCII new PINs require
+/// functioning .NET globalization support for NFC. The authenticator applies its configured policy.
+/// An existing PIN must be valid UTF-8 and is hashed exactly as supplied without applying new-PIN rules.
 /// </para>
 /// <para>
 /// If GetInfo reports forcePINChange=true, change the PIN before requesting a PIN token.
@@ -73,6 +76,7 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 public sealed class ClientPin : IDisposable
 {
     private const int PinMinLength = 4;
+    private static readonly bool SupportsNfc = CheckNfcSupport();
     private const int PinMaxLength = 63;
     private const int PinBlockSize = 64;
 
@@ -161,33 +165,27 @@ public sealed class ClientPin : IDisposable
     /// Sets a new PIN on the authenticator (first-time setup).
     /// </summary>
     /// <param name="newPin">
-    ///     The borrowed, unpadded NFC UTF-8 new PIN, 4–63 bytes. Meet the current device minimum
-    ///     in code points and additional policy; the SDK checks byte length only. Keep the buffer
+    ///     The borrowed, unpadded UTF-8 new PIN, normalized to NFC by the SDK. Meet the current device
+    ///     minimum in code points and additional policy. Keep the buffer
     ///     unchanged through task completion and clear it after its last use, including on failure.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <exception cref="ArgumentException">If the PIN byte length is invalid.</exception>
+    /// <exception cref="ArgumentException">The PIN is malformed UTF-8 or violates the normalized PIN constraints.</exception>
+    /// <exception cref="NotSupportedException">The runtime cannot normalize a non-ASCII new PIN.</exception>
     /// <exception cref="CtapException">If the authenticator rejects setup, for example because a PIN is already set or device PIN policy is not met.</exception>
     /// <remarks>The PIN must not end in 0x00. This method right-zero-pads it to exactly 64 bytes before encryption; AES adds no padding.</remarks>
     public async Task SetPinAsync(ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(newPin, nameof(newPin));
-
-        // Get authenticator's key agreement key
-        var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        // Perform ECDH key agreement
-        var (platformKey, sharedSecret) = _protocol.Encapsulate(authenticatorKey);
-
-        byte[]? pinBytes = null;
+        byte[] pinBytes = NormalizeAndPadNewPin(newPin.Span, nameof(newPin));
+        byte[]? sharedSecret = null;
         byte[]? newPinEnc = null;
         byte[]? pinUvAuthParam = null;
         try
         {
-            // Right-zero-pad the unpadded PIN to 64 bytes; AES itself uses no padding.
-            pinBytes = PadPin(newPin.Span);
+            var authenticatorKey = await GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
+            var (platformKey, secret) = _protocol.Encapsulate(authenticatorKey);
+            sharedSecret = secret;
             newPinEnc = _protocol.Encrypt(sharedSecret, pinBytes);
 
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc)
@@ -206,8 +204,8 @@ public sealed class ClientPin : IDisposable
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(sharedSecret);
-            if (pinBytes is not null) CryptographicOperations.ZeroMemory(pinBytes);
+            if (sharedSecret is not null) CryptographicOperations.ZeroMemory(sharedSecret);
+            CryptographicOperations.ZeroMemory(pinBytes);
             if (newPinEnc is not null) CryptographicOperations.ZeroMemory(newPinEnc);
             if (pinUvAuthParam is not null) CryptographicOperations.ZeroMemory(pinUvAuthParam);
         }
@@ -221,12 +219,13 @@ public sealed class ClientPin : IDisposable
     ///     Keep it unchanged through task completion and clear it after its last use, including on failure.
     /// </param>
     /// <param name="newPin">
-    ///     The borrowed, unpadded NFC UTF-8 new PIN, 4–63 bytes, with no final 0x00. Meet the
-    ///     current device minimum in code points and additional policy; the SDK checks byte length
-    ///     only. Keep it unchanged through task completion and clear it after its last use.
+    ///     The borrowed, unpadded UTF-8 new PIN, normalized to NFC by the SDK. Meet the current
+    ///     device minimum in code points and additional policy. Keep it unchanged through task
+    ///     completion and clear it after its last use.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <exception cref="ArgumentException">If the current PIN is not valid UTF-8 or the new PIN byte length is invalid.</exception>
+    /// <exception cref="ArgumentException">Either PIN is malformed UTF-8 or the normalized new PIN violates its constraints.</exception>
+    /// <exception cref="NotSupportedException">The runtime cannot normalize a non-ASCII new PIN.</exception>
     /// <exception cref="CtapException">If the authenticator rejects the change, including an incorrect/blocked current PIN or a new PIN that violates policy.</exception>
     /// <remarks>
     /// A successful change invalidates existing authenticator tokens. This helper does not retain
@@ -240,29 +239,22 @@ public sealed class ClientPin : IDisposable
     {
         EnsureNotDisposed();
         ValidateExistingPin(currentPin.Span, nameof(currentPin));
-        ValidatePin(newPin, nameof(newPin));
-
-        // Get authenticator's key agreement key
-        var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        // Perform ECDH key agreement
-        var (platformKey, sharedSecret) = _protocol.Encapsulate(authenticatorKey);
-
+        byte[] newPinBytes = NormalizeAndPadNewPin(newPin.Span, nameof(newPin));
+        byte[]? sharedSecret = null;
         byte[]? pinHashEnc = null;
-        byte[]? newPinBytes = null;
         byte[]? newPinEnc = null;
         byte[]? message = null;
         byte[]? currentPinHash = null;
         byte[]? pinUvAuthParam = null;
         try
         {
+            var authenticatorKey = await GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
+            var (platformKey, secret) = _protocol.Encapsulate(authenticatorKey);
+            sharedSecret = secret;
             // Compute PIN hash for current PIN: LEFT(SHA-256(currentPin), 16)
             currentPinHash = ComputePinHash(currentPin.Span);
             pinHashEnc = _protocol.Encrypt(sharedSecret, currentPinHash);
 
-            // Right-zero-pad the new PIN to 64 bytes before no-padding AES encryption.
-            newPinBytes = PadPin(newPin.Span);
             newPinEnc = _protocol.Encrypt(sharedSecret, newPinBytes);
 
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc || pinHashEnc)
@@ -286,12 +278,12 @@ public sealed class ClientPin : IDisposable
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(sharedSecret);
+            if (sharedSecret is not null) CryptographicOperations.ZeroMemory(sharedSecret);
             if (currentPinHash is not null) CryptographicOperations.ZeroMemory(currentPinHash);
             if (pinHashEnc is not null) CryptographicOperations.ZeroMemory(pinHashEnc);
             if (newPinEnc is not null) CryptographicOperations.ZeroMemory(newPinEnc);
             if (message is not null) CryptographicOperations.ZeroMemory(message);
-            if (newPinBytes is not null) CryptographicOperations.ZeroMemory(newPinBytes);
+            CryptographicOperations.ZeroMemory(newPinBytes);
             if (pinUvAuthParam is not null) CryptographicOperations.ZeroMemory(pinUvAuthParam);
         }
     }
@@ -560,42 +552,75 @@ public sealed class ClientPin : IDisposable
             throw new ArgumentException("PIN must be valid UTF-8.", paramName);
     }
 
-    /// <summary>
-    ///     Checks only the PIN argument's byte length, not its Unicode encoding or device policy.
-    /// </summary>
-    /// <param name="pin">The supplied, unpadded PIN bytes.</param>
-    /// <param name="paramName">
-    ///     The name of the public parameter <paramref name="pin" /> was supplied through. The
-    ///     public surface spells this parameter three different ways — <c>pin</c>,
-    ///     <c>currentPin</c> and <c>newPin</c> — so the caller has to name its own, otherwise
-    ///     <see cref="ArgumentException.ParamName" /> would report this helper's local name,
-    ///     which matches nothing a caller can filter on.
-    /// </param>
-    /// <exception cref="ArgumentException">
-    ///     Thrown when the supplied data is shorter than <see cref="PinMinLength" /> bytes or
-    ///     longer than <see cref="PinMaxLength" /> bytes.
-    /// </exception>
-    private static void ValidatePin(ReadOnlyMemory<byte> pin, string paramName)
+    private static bool CheckNfcSupport()
     {
-        if (pin.Length < PinMinLength)
+        // Invariant mode accepts the operation but leaves decomposed text unchanged.
+        Span<char> probe = stackalloc char[2];
+        try
         {
-            throw new ArgumentException(
-                $"PIN must be at least {PinMinLength} bytes.", paramName);
+            return "e\u0301".AsSpan().TryNormalize(probe, out int written) && written == 1 && probe[0] == '\u00E9';
         }
-
-        if (pin.Length > PinMaxLength)
+        catch (PlatformNotSupportedException)
         {
-            throw new ArgumentException(
-                $"PIN must not exceed {PinMaxLength} bytes.", paramName);
+            return false;
         }
     }
 
-    private static byte[] PadPin(ReadOnlySpan<byte> pin)
+    private static byte[] NormalizeAndPadNewPin(ReadOnlySpan<byte> pin, string paramName)
     {
-        // Zero-initialized tail supplies CTAP's right padding, not PKCS#7.
-        var padded = new byte[PinBlockSize];
-        pin.CopyTo(padded);
-        return padded;
+        ValidateExistingPin(pin, paramName);
+        if (Ascii.IsValid(pin))
+        {
+            ValidateNewPin(pin.Length, pin.Length, !pin.IsEmpty && pin[^1] == 0, paramName);
+            byte[] padded = new byte[PinBlockSize];
+            pin.CopyTo(padded);
+            return padded;
+        }
+
+        if (!SupportsNfc)
+            throw new NotSupportedException("Non-ASCII CTAP PINs require .NET globalization support for NFC normalization.");
+
+        return NormalizeNonAsciiPin(pin, paramName);
+    }
+
+    private static byte[] NormalizeNonAsciiPin(ReadOnlySpan<byte> pin, string paramName)
+    {
+        int charCount = Encoding.UTF8.GetCharCount(pin);
+        char[]? rented = null;
+        Span<char> decoded = charCount <= 192 ? stackalloc char[charCount] : (rented = ArrayPool<char>.Shared.Rent(charCount)).AsSpan(0, charCount);
+        // For well-formed text UTF-8 length is always at least the UTF-16 length.
+        Span<char> normalized = stackalloc char[PinMaxLength];
+        Span<byte> padded = stackalloc byte[PinBlockSize];
+        padded.Clear();
+        try
+        {
+            Encoding.UTF8.GetChars(pin, decoded);
+            if (!((ReadOnlySpan<char>)decoded).TryNormalize(normalized, out int written))
+                throw new ArgumentException("The normalized PIN must not exceed 63 UTF-8 bytes.", paramName);
+
+            var text = normalized[..written];
+            int runeCount = 0;
+            foreach (var _ in text.EnumerateRunes())
+                runeCount++;
+
+            ValidateNewPin(runeCount, Encoding.UTF8.GetByteCount(text), !text.IsEmpty && text[^1] == '\0', paramName);
+            Encoding.UTF8.GetBytes(text, padded);
+            return padded.ToArray();
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(decoded));
+            if (rented is not null)
+                ArrayPool<char>.Shared.Return(rented);
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(normalized));
+            CryptographicOperations.ZeroMemory(padded);
+        }
+    }
+
+    private static void ValidateNewPin(int codePoints, int bytes, bool endsInNull, string paramName)
+    {
+        if (codePoints < PinMinLength || bytes > PinMaxLength || endsInNull)
+            throw new ArgumentException("The normalized PIN must have at least four Unicode code points, at most 63 UTF-8 bytes, and no trailing NUL.", paramName);
     }
 
     private static byte[] ComputePinHash(ReadOnlySpan<byte> pin)

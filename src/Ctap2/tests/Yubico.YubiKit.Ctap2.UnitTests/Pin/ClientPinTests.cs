@@ -200,6 +200,78 @@ public sealed class ClientPinTests : IDisposable
         await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
 
+    [Theory]
+    [InlineData("e\u0301abc", "éabc", 1)]
+    [InlineData("e\u0301", "é", 31)] // 93 input bytes, 62 normalized bytes.
+    [InlineData("😀abc", "😀abc", 1)]
+    public async Task SetPinAsync_EncryptsPaddedNfcUtf8WithoutChangingCallerBytes(string input, string nfc, int repeats)
+    {
+        byte[] source = Encoding.UTF8.GetBytes(string.Concat(Enumerable.Repeat(input, repeats)));
+        byte[] original = source.ToArray();
+        byte[] expected = new byte[64];
+        Encoding.UTF8.GetBytes(string.Concat(Enumerable.Repeat(nfc, repeats)), expected);
+        var ct = TestContext.Current.CancellationToken;
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateKeyAgreementResponse(CreateMockCoseKey()), CreateEmptyResponse());
+        using var clientPin = CreateClientPin();
+
+        await clientPin.SetPinAsync(source, ct);
+
+        Assert.Equal(expected, _fakeProtocol.LastEncryptionInput);
+        Assert.Equal(original, source);
+    }
+
+    [Theory]
+    [InlineData("😀ab")]
+    [InlineData("e\u0301ab")]
+    [InlineData("abcd\0")]
+    public async Task SetPinAsync_RejectsInvalidNormalizedContentBeforeAnyWireCall(string pin)
+    {
+        using var clientPin = CreateClientPin();
+
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(Encoding.UTF8.GetBytes(pin), TestContext.Current.CancellationToken));
+
+        Assert.Empty(_mockSession.ReceivedCalls());
+    }
+
+    [Fact]
+    public async Task SetPinAsync_RejectsMalformedUtf8BeforeAnyWireCall()
+    {
+        using var clientPin = CreateClientPin();
+        byte[] invalidUtf8 = [0x61, 0x62, 0x63, 0xC0, 0x80];
+
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(invalidUtf8, TestContext.Current.CancellationToken));
+
+        Assert.Empty(_mockSession.ReceivedCalls());
+    }
+
+    [Fact]
+    public async Task SetPinAsync_NonAsciiRequiresGlobalizationButAsciiDoesNot()
+    {
+        // Also run this test in an isolated unit-test process with DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1.
+        bool invariant = Environment.GetEnvironmentVariable("DOTNET_SYSTEM_GLOBALIZATION_INVARIANT") == "1";
+        var ct = TestContext.Current.CancellationToken;
+        var keyAgreement = CreateKeyAgreementResponse(CreateMockCoseKey());
+        var success = CreateEmptyResponse();
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(keyAgreement, success, keyAgreement, success);
+        using var clientPin = CreateClientPin();
+        byte[] nonAscii = "e\u0301abc"u8.ToArray();
+
+        if (invariant)
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => clientPin.SetPinAsync(nonAscii, ct));
+            Assert.Empty(_mockSession.ReceivedCalls());
+        }
+        else
+        {
+            await clientPin.SetPinAsync(nonAscii, ct);
+            Assert.Equal("éabc"u8.ToArray(), _fakeProtocol.LastEncryptionInput?[..5]);
+        }
+
+        await clientPin.SetPinAsync("1234"u8.ToArray(), ct);
+        Assert.Equal("1234"u8.ToArray(), _fakeProtocol.LastEncryptionInput?[..4]);
+    }
+
     [Fact]
     public async Task ChangePinAsync_WithValidPins_SendsCommand()
     {
@@ -623,6 +695,7 @@ internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
 {
     public int Version { get; set; } = 2;
     public byte[]? DecryptedOutput { get; set; }
+    public byte[]? LastEncryptionInput { get; private set; }
     public int AuthenticationTagLength => 32;
     public bool IsDisposed { get; private set; }
     public int DisposeCount { get; private set; }
@@ -645,7 +718,10 @@ internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
     public byte[] Kdf(ReadOnlySpan<byte> z) => new byte[64];
 
     public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
-        => plaintext.ToArray();
+    {
+        LastEncryptionInput = plaintext.ToArray();
+        return plaintext.ToArray();
+    }
 
     public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
         => DecryptedOutput ?? ciphertext.ToArray();

@@ -181,8 +181,10 @@ and RP scope. This is not protocol-1 negotiation or a guarantee of administrativ
 use `is true` to act on an affirmative indication; `null` means the authenticator did not report it.
 CTAP defines no such UV power-cycle field. Stop on blocked states rather than blindly retrying: temporary `PinAuthBlocked`
 differs from exhausted `PinBlocked`. `ClientPin` also exposes PIN set/change operations. PIN bytes must
-represent NFC-normalized UTF-8, satisfy the current code-point minimum and byte limit, and not end in NUL;
-the SDK's 4–63-byte check alone does not establish these requirements.
+be unpadded UTF-8. The SDK normalizes new PINs to NFC, then checks at least four Unicode code points,
+at most 63 UTF-8 bytes, and no trailing NUL. For non-ASCII new PINs, enable .NET globalization support
+for NFC; invariant mode cannot normalize them. The authenticator can apply stricter policy. Existing PIN
+bytes are validated as UTF-8 and hashed unchanged.
 
 ```csharp
 byte[] pin = Encoding.UTF8.GetBytes("123456");

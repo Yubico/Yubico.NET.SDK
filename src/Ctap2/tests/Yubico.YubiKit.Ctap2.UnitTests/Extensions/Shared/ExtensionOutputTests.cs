@@ -167,6 +167,23 @@ public class ExtensionOutputTests
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void HmacSecretRegistration_PreservesBooleanWithoutTreatingItAsCiphertext(bool enabled)
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(1);
+        writer.WriteTextString("hmac-secret");
+        writer.WriteBoolean(enabled);
+        writer.WriteEndMap();
+        var output = ExtensionOutput.Decode(writer.Encode());
+
+        Assert.True(output.TryGetHmacSecretRegistration(out bool value));
+        Assert.Equal(enabled, value);
+        Assert.False(output.TryGetHmacSecret(out _));
+    }
+
+    [Theory]
     [InlineData("C1F93C00")] // Tagged half-precision float.
     [InlineData("1BFFFFFFFFFFFFFFFF")]
     [InlineData("A16178F7")] // Nested simple value.

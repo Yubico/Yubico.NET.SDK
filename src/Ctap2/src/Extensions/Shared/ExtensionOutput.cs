@@ -142,21 +142,38 @@ public sealed class ExtensionOutput
     /// </summary>
     /// <param name="output">The encrypted hmac-secret output.</param>
     /// <remarks>
-    /// Not a registration-support accessor: hmac-secret's registration boolean causes a decoding error.
+    /// Registration emits a Boolean instead; use <see cref="TryGetHmacSecretRegistration"/> for that result.
     /// For hmac-secret-mc, use TryGetRawExtension with its identifier and HmacSecretOutput.Decode.
-    /// Decode the registration boolean explicitly from its raw value instead.
     /// </remarks>
-    /// <returns>True if the extension was present.</returns>
+    /// <returns>True if the assertion output was present as a byte string.</returns>
     public bool TryGetHmacSecret(out HmacSecretOutput? output)
     {
         output = null;
 
-        if (!_extensions.TryGetValue(ExtensionIdentifiers.HmacSecret, out var data))
+        if (!_extensions.TryGetValue(ExtensionIdentifiers.HmacSecret, out var data)
+            || new CborReader(data, CborConformanceMode.Strict).PeekState() != CborReaderState.ByteString)
         {
             return false;
         }
 
         output = HmacSecretOutput.Decode(data);
+        return true;
+    }
+
+    /// <summary>Reads the makeCredential hmac-secret enablement result.</summary>
+    /// <param name="enabled">The reported enablement when the Boolean result is present.</param>
+    /// <returns>True if the registration result was present as a Boolean.</returns>
+    public bool TryGetHmacSecretRegistration(out bool enabled)
+    {
+        enabled = false;
+        if (!_extensions.TryGetValue(ExtensionIdentifiers.HmacSecret, out var data))
+            return false;
+
+        var reader = new CborReader(data, CborConformanceMode.Strict);
+        if (reader.PeekState() != CborReaderState.Boolean)
+            return false;
+
+        enabled = reader.ReadBoolean();
         return true;
     }
 

@@ -469,6 +469,7 @@ Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetCredBlob(out System.ReadOn
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetCredBlobStored(out bool stored) -> bool
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetCredProtect(out Yubico.YubiKit.Ctap2.Extensions.CredProtectPolicy policy) -> bool
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetHmacSecret(out Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput? output) -> bool
+Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetHmacSecretRegistration(out bool enabled) -> bool
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetLargeBlob(out Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput? output) -> bool
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetLargeBlobKey(out System.ReadOnlyMemory<byte> key) -> bool
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetMinPinLength(out int minLength) -> bool

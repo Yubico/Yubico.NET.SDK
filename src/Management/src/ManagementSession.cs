@@ -157,6 +157,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     public Task<DeviceInfo> GetDeviceInfoAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        EnsureSupports(FeatureDeviceInfo);
         var protocol = Protocol ?? throw new InvalidOperationException("Management session is not initialized.");
         // Query current fields while retaining initialization's firmware default; non-final qualifier
         // precedence belongs to DeviceInfo.CreateFromTlvs. This read does not publish discovery metadata.

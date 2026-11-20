@@ -28,8 +28,8 @@ rejected without sending a reset command.
 | Write device configuration | 5.0.0 | SmartCard, HID FIDO, HID OTP |
 | Bio Multi-protocol Edition combined reset (`ResetDeviceAsync`) | 5.6.0 SDK gate | SmartCard (CCID) only |
 
-The read minimum is a support requirement, not a host-side preflight check: the SDK can send a read to an
-older key and propagate a device or parsing error. Writes and reset check the effective session firmware;
+Public reads check the 4.1 firmware minimum before sending a command; the factory's best-effort metadata
+probe does not use this gate. Reads, writes and reset check the effective session firmware;
 passing those generic checks does not establish support for every field or device family. In particular,
 NFC restriction needs NFC-capable hardware with firmware 5.7 or later.
 

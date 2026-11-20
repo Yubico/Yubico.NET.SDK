@@ -366,6 +366,63 @@ public class ManagementSessionTests
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
+    [Theory]
+    [InlineData(4, 0, false, false)]
+    [InlineData(4, 1, false, true)]
+    [InlineData(4, 1, true, false)]
+    [InlineData(0, 0, false, true)]
+    public async Task GetDeviceInfoAsync_AppliesEffectiveFirmwareFloorOnlyToPublicReads(
+        int major, int minor, bool useOverride, bool supported)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection((byte)major, (byte)minor);
+        var options = new SessionCreationOptions { FirmwareVersionOverride = useOverride ? new FirmwareVersion(4, 0, 9) : null };
+        await using var session = await ManagementSession.CreateAsync(connection, options, cancellationToken);
+
+        Assert.Equal(1, connection.Reads);
+        if (supported)
+        {
+            var info = await session.GetDeviceInfoAsync(cancellationToken);
+            Assert.Equal(new FirmwareVersion(major, minor, 0), info.FirmwareVersion);
+            Assert.Equal(2, connection.Reads);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.GetDeviceInfoAsync(cancellationToken));
+            Assert.Equal(1, connection.Reads);
+        }
+    }
+
+    private sealed class VersionedSmartCardConnection(byte major, byte minor) : ISmartCardConnection
+    {
+        public int Reads { get; private set; }
+        public Transport Transport => Transport.Usb;
+        public ConnectionType Type => ConnectionType.SmartCard;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            byte[] response = command.Span[1] switch
+            {
+                0xA4 => [.. System.Text.Encoding.UTF8.GetBytes($"{major}.{minor}.0"), 0x90, 0],
+                0x1D => ReadInfo(),
+                _ => throw new InvalidOperationException("Unexpected Management command."),
+            };
+            return Task.FromResult<ReadOnlyMemory<byte>>(response);
+        }
+
+        private byte[] ReadInfo()
+        {
+            Reads++;
+            return (major, minor) == (4, 0) ? [0x6D, 0] : [5, 0x05, 3, major, minor, 0, 0x90, 0];
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken) => throw new NotSupportedException();
+        public bool SupportsExtendedApdu() => false;
+        public void Dispose() { }
+        public ValueTask DisposeAsync() => default;
+    }
+
     private sealed class ProbeSession(IConnection connection) : ApplicationSession(connection);
 
     private sealed class RecordingSmartCardProtocol : ISmartCardProtocol

@@ -735,9 +735,8 @@ Operations call inherited `EnsureSupports(FeatureSetConfig)` (5.0.0) or
 the inherited check uses effective `FirmwareVersion`, including overrides and major-zero development
 version policy. Alpha/Beta display qualifiers are not that major-zero bypass.
 
-`FeatureDeviceInfo` declares the supported 4.1.0 read minimum, but current read/factory paths do not
-enforce it. Do not promise `NotSupportedException` before an unsupported read. Likewise the generic
-write check does not enforce device-supported masks. A separate 5.7 feature gate applies to
+`FeatureDeviceInfo` enforces the 4.1.0 minimum before public reads, not during the factory's best-effort
+probe. The generic write check does not enforce device-supported masks. A separate 5.7 feature gate applies to
 `NfcRestricted = true` only; do not infer NFC hardware support or add a read before a write.
 Reset's firmware check is not a family check: the documented operation resets Bio MPE's FIDO/PIV
 applications and shared PIN, retaining the F9 attestation slot. It does not establish Management lock

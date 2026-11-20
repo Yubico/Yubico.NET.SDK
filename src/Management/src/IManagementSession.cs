@@ -35,9 +35,8 @@ public interface IManagementSession : IApplicationSession
     /// <summary>Queries the device's current metadata, capabilities, and configuration.</summary>
     /// <remarks>
     ///     Each call queries the device rather than returning cached session metadata. Fields such as the
-    ///     serial number are optional and depend on the device and transport. Firmware 4.1.0 or later is
-    ///     supported; this method does not enforce that minimum before sending the request. Unsupported
-    ///     devices can instead fail during communication or response parsing.
+    ///     serial number are optional and depend on the device and transport. Public reads require
+    ///     effective firmware 4.1.0 or later, with the usual optimistic check for development firmware.
     ///     Later reads use the firmware captured during initialization as the decoder's default, which
     ///     takes precedence over the ordinary firmware tag; a non-final version qualifier can replace it.
     ///     A firmware override controls session policy, not this returned value. Neither this read nor a
@@ -47,6 +46,7 @@ public interface IManagementSession : IApplicationSession
     /// </remarks>
     /// <param name="cancellationToken">A token requesting cancellation, subject to the transport's exchange boundaries.</param>
     /// <returns>The device information reported by the key.</returns>
+    /// <exception cref="NotSupportedException">The effective firmware is below the public read minimum.</exception>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
     /// <exception cref="InvalidOperationException">The session is not initialized, or another exchange is in progress.</exception>
     /// <exception cref="OperationCanceledException">Cancellation is observed at a transport-supported boundary.</exception>

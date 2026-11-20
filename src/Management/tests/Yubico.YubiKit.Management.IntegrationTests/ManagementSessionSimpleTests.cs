@@ -137,57 +137,60 @@ public class ManagementSessionSimpleTests
 
     /// <summary>
     ///     Verify SetDeviceConfigAsync works via ManagementSession.
-    ///     Reads back a changed AutoEjectTimeout, then sends a restoration write without readback.
-    ///     The starting value is cached test-state metadata; restoration is not in finally and is skipped
-    ///     if the change, read, or assertion fails.
+    ///     Reads, changes and restores the timeout on a single Management session.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task SetDeviceConfigAsync_WithManagementSession_AppliesAndRestoresConfig(YubiKeyTestState state)
     {
-        await state.WithManagementAsync(async (mgmt, deviceInfo) =>
-        {
-            var originalAutoEject = deviceInfo.AutoEjectTimeout;
-            var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
-
-            var newConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = newAutoEject };
-
-            await mgmt.SetDeviceConfigAsync(newConfig);
-
-            var updatedInfo = await mgmt.GetDeviceInfoAsync();
-            Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
-
-            // Send the cached starting value after a successful assertion; restoration is not verified.
-            var restoreConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = originalAutoEject };
-
-            await mgmt.SetDeviceConfigAsync(restoreConfig);
-        });
+        await state.WithManagementAsync((mgmt, _) => VerifyTimeoutWriteAsync(
+            () => mgmt.GetDeviceInfoAsync(), config => mgmt.SetDeviceConfigAsync(config)),
+            preferredConnection: ConnectionType.SmartCard);
     }
 
     /// <summary>
-    ///     Reads back a timeout changed through the one-shot extension, then sends an unverified restoration.
-    ///     Restoration is not in finally and is skipped if the change, read, or assertion fails.
+    ///     Reads, changes and restores the timeout through one-shot extension calls.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task SetDeviceConfigAsync_WithExtensionMethod_AppliesAndRestoresConfig(YubiKeyTestState state)
     {
         var device = state.Device;
-        var originalInfo = await device.GetDeviceInfoAsync();
+        var options = new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard };
+        await VerifyTimeoutWriteAsync(
+            () => device.GetDeviceInfoAsync(options), config => device.SetDeviceConfigAsync(config, sessionOptions: options));
+    }
+
+    private static async Task VerifyTimeoutWriteAsync(Func<Task<DeviceInfo>> read, Func<DeviceConfig, Task> write)
+    {
+        var originalInfo = await read();
+        Skip.If(originalInfo.IsLocked, "The test requires an unlocked configuration.");
         var originalAutoEject = originalInfo.AutoEjectTimeout;
+        Assert.InRange(originalAutoEject, (ushort)0, (ushort)3600);
         var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
-
-        var newConfig = new DeviceConfig { UsbEnabled = originalInfo.UsbEnabled, AutoEjectTimeout = newAutoEject };
-
-        await device.SetDeviceConfigAsync(newConfig);
-
-        var updatedInfo = await device.GetDeviceInfoAsync();
-        Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
-
-        // Send the freshly queried starting value after a successful assertion; no restoration readback follows.
-        var restoreConfig = new DeviceConfig { UsbEnabled = originalInfo.UsbEnabled, AutoEjectTimeout = originalAutoEject };
-
-        await device.SetDeviceConfigAsync(restoreConfig);
+        Exception? primary = null;
+        try
+        {
+            await write(new DeviceConfig { AutoEjectTimeout = newAutoEject });
+            Assert.Equal(newAutoEject, (await read()).AutoEjectTimeout);
+        }
+        catch (Exception exception)
+        {
+            primary = exception;
+            throw;
+        }
+        finally
+        {
+            try
+            {
+                await write(new DeviceConfig { AutoEjectTimeout = originalAutoEject });
+                Assert.Equal(originalAutoEject, (await read()).AutoEjectTimeout);
+            }
+            catch (Exception cleanup) when (primary is not null)
+            {
+                throw new AggregateException("Management fixture operation and restoration both failed.", primary, cleanup);
+            }
+        }
     }
 
 

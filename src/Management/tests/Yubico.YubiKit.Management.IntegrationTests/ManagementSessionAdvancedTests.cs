@@ -70,11 +70,12 @@ public class ManagementSessionAdvancedTests
         // This test only runs on devices with firmware 5.3.0 or newer
         Assert.True(state.FirmwareVersion.IsAtLeast(5, 3, 0));
 
+        using var scpKeyParams = Scp03KeyParameters.Default;
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
             var info = await mgmt.GetDeviceInfoAsync();
             Assert.True(info.FirmwareVersion.IsAtLeast(5, 0, 0));
-        }, scpKeyParams: Scp03KeyParameters.Default);
+        }, scpKeyParams: scpKeyParams);
     }
 
     /// <summary>

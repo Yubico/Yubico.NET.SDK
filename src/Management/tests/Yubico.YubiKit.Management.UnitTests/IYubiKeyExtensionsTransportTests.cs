@@ -179,9 +179,10 @@ public class IYubiKeyExtensionsTransportTests
             .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."))
             .Returns(ConnectionType.HidFido, new FailingFidoConnection());
 
+        using var scpKeyParams = Scp03KeyParameters.Default;
         _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
             device.CreateManagementSessionAsync(
-                new SessionCreationOptions { ScpKeyParameters = Scp03KeyParameters.Default }, Ct));
+                new SessionCreationOptions { ScpKeyParameters = scpKeyParams }, Ct));
 
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }

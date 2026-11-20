@@ -359,6 +359,9 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
 - Registration responses require attested credential data. When the ED flag is set, the signed
   suffix must contain exactly one CBOR map. Assertion credential counts use the unsigned wire
   width (`uint?`); decoding still does not verify a ceremony or reserve an assertion sequence.
+- The legacy `TryGetLargeBlobSupport` reads a registration support boolean, not a write result.
+  The synthetic large-blob DTO and key accessor are removed; use `LargeBlobKey` on the credential
+  response for the implemented storage route.
 - `GetAssertionResponse.User` is native account-picker data, not a browser-filtered result. The application
   decides what to disclose to the relying party. Use the opaque user ID for account binding and do not
   forward display names or other identifying device metadata indiscriminately.

@@ -99,23 +99,23 @@ public class ExtensionOutputTests
         Assert.Equal(6, minLength);
     }
 
-    [Fact]
-    public void Decode_WithLargeBlobKey_ParsesCorrectly()
+    [Theory]
+    [InlineData("F5", true, true)]
+    [InlineData("F4", true, false)]
+    [InlineData("A1677772697474656EF5", false, false)]
+    public void Decode_LargeBlobSupport_OnlyReadsLegacyRegistrationBoolean(string encoded, bool found, bool supported)
     {
-        // Synthetic convenience map only. Standard CTAP keys are outside authData extensions.
-        var key = new byte[32];
-        Random.Shared.NextBytes(key);
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(1);
-        writer.WriteTextString("largeBlobKey");
-        writer.WriteByteString(key);
+        writer.WriteTextString("largeBlob");
+        writer.WriteEncodedValue(Convert.FromHexString(encoded));
         writer.WriteEndMap();
         var data = writer.Encode();
 
         var output = ExtensionOutput.DecodeWithRawData(data);
 
-        Assert.True(output.TryGetLargeBlobKey(out var result));
-        Assert.Equal(key, result.ToArray());
+        Assert.Equal(found, output.TryGetLargeBlobSupport(out bool result));
+        Assert.Equal(supported, result);
     }
 
     [Fact]

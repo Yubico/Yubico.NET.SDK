@@ -470,8 +470,7 @@ Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetCredBlobStored(out bool st
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetCredProtect(out Yubico.YubiKit.Ctap2.Extensions.CredProtectPolicy policy) -> bool
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetHmacSecret(out Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput? output) -> bool
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetHmacSecretRegistration(out bool enabled) -> bool
-Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetLargeBlob(out Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput? output) -> bool
-Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetLargeBlobKey(out System.ReadOnlyMemory<byte> key) -> bool
+Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetLargeBlobSupport(out bool supported) -> bool
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetMinPinLength(out int minLength) -> bool
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.TryGetRawExtension(string! extensionId, out System.ReadOnlyMemory<byte> data) -> bool
 Yubico.YubiKit.Ctap2.Extensions.HmacSecretInput
@@ -490,14 +489,6 @@ Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput
 Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput.HmacSecretOutput() -> void
 Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput.Output.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput.Output.init -> void
-Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput
-Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput.Blob.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput.Blob.init -> void
-Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput.LargeBlobKey.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput.LargeBlobKey.init -> void
-Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput.LargeBlobOutput() -> void
-Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput.Written.get -> bool?
-Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput.Written.init -> void
 Yubico.YubiKit.Ctap2.Extensions.MinPinLengthInput
 Yubico.YubiKit.Ctap2.Extensions.MinPinLengthInput.Encode() -> byte[]!
 Yubico.YubiKit.Ctap2.Extensions.MinPinLengthInput.Encode(System.Formats.Cbor.CborWriter! writer) -> void
@@ -877,7 +868,6 @@ static Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.Decode(System.ReadOnlyMem
 static Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.DecodeWithRawData(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput!
 static Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput!
 static Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput!
-static Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Ctap2.Extensions.LargeBlobOutput!
 static Yubico.YubiKit.Ctap2.Extensions.MinPinLengthOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Ctap2.Extensions.MinPinLengthOutput!
 static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeAuthenticationOutput(System.ReadOnlyMemory<byte> cbor) -> System.ReadOnlyMemory<byte>
 static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(System.Formats.Cbor.CborReader! reader) -> (int Algorithm, int? Flags)

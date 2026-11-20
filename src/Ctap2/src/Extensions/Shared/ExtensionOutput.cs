@@ -178,18 +178,17 @@ public sealed class ExtensionOutput
     }
 
     /// <summary>
-    /// Decodes the legacy convenience largeBlob value, not standard direct CTAP output.
+    /// Reads the legacy largeBlob registration support boolean.
     /// </summary>
-    /// <param name="output">The largeBlob output.</param>
+    /// <param name="supported">Whether the legacy value reports support.</param>
     /// <remarks>
-    /// A boolean is mapped to Written; a map is passed to LargeBlobOutput.Decode. Neither establishes
-    /// standard registration support or a completed storage write. CTAP direct largeBlob outputs are
-    /// unsigned and require different modeling; the implemented key/storage route uses envelope keys.
+    /// Not a storage write result or a decoder for standard direct unsigned CTAP largeBlob outputs.
+    /// For the key/storage route, inspect the credential response's LargeBlobKey instead.
     /// </remarks>
-    /// <returns>True if the extension was present.</returns>
-    public bool TryGetLargeBlob(out LargeBlobOutput? output)
+    /// <returns>True if the legacy boolean was present.</returns>
+    public bool TryGetLargeBlobSupport(out bool supported)
     {
-        output = null;
+        supported = false;
 
         if (!_extensions.TryGetValue(ExtensionIdentifiers.LargeBlob, out var data))
         {
@@ -198,45 +197,11 @@ public sealed class ExtensionOutput
 
         var reader = new CborReader(data, CborConformanceMode.Lax);
 
-        // Legacy convenience mapping, not the standard unsigned {supported: true} registration output.
-        if (reader.PeekState() == CborReaderState.Boolean)
+        if (reader.PeekState() is not CborReaderState.Boolean)
         {
-            var supported = reader.ReadBoolean();
-            output = new LargeBlobOutput { Written = supported };
-            return true;
-        }
-
-        // Decode the legacy combined map; this is not a direct CTAP read-output decoder.
-        output = LargeBlobOutput.Decode(reader);
-        return true;
-    }
-
-    /// <summary>
-    /// Looks for a largeBlobKey in legacy convenience extension data.
-    /// </summary>
-    /// <param name="key">The large blob key.</param>
-    /// <remarks>
-    /// Standard CTAP largeBlobKey has no authData extension output. Use MakeCredentialResponse.LargeBlobKey
-    /// or GetAssertionResponse.LargeBlobKey instead. This method's copied secret has no cleanup owner.
-    /// </remarks>
-    /// <returns>True if the extension was present and contained the key.</returns>
-    public bool TryGetLargeBlobKey(out ReadOnlyMemory<byte> key)
-    {
-        key = default;
-
-        if (!_extensions.TryGetValue(ExtensionIdentifiers.LargeBlobKey, out var data))
-        {
-            // Also check in largeBlob output
-            if (TryGetLargeBlob(out var output) && output?.LargeBlobKey is { } blobKey)
-            {
-                key = blobKey;
-                return true;
-            }
             return false;
         }
-
-        var reader = new CborReader(data, CborConformanceMode.Lax);
-        key = reader.ReadByteString();
+        supported = reader.ReadBoolean();
         return true;
     }
 

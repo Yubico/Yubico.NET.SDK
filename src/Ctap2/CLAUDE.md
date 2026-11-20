@@ -97,7 +97,6 @@ Yubico.YubiKit.Ctap2/
 │   │   ├── CredProtect/            # credProtect policy
 │   │   ├── CredBlob/               # credBlob inputs and outputs
 │   │   ├── HmacSecret/             # hmac-secret inputs and outputs
-│   │   ├── LargeBlob/              # Legacy largeBlob convenience output decoder
 │   │   ├── MinPinLength/           # minPinLength inputs and outputs
 │   │   └── PreviewSign/            # previewSign types and canonical CBOR encoder
 │   ├── BioEnrollment/              # Fingerprint APIs; known standard wire/schema limitations
@@ -300,6 +299,7 @@ docs/architecture/webauthn-extension-processing.md ("Where code belongs").
 The current WebAuthn adapter does not enforce PRF's required verified-variant UV override, and result/
 intermediate copies lack an owned cleanup guarantee; retain these limitations when linking the transform.
 For large blobs, the SDK uses largeBlobKey/storage rather than the standard direct largeBlob extension.
+`ExtensionOutput.TryGetLargeBlobSupport` reads only a legacy registration boolean, never a storage write or key.
 The direct route does define makeCredential support input; its absence here is an SDK-route limitation,
 not a claim that CTAP forbids it or that every current YubiKey lacks it.
 

@@ -266,6 +266,47 @@ public sealed class ClientPinTests : IDisposable
         Assert.Equal(encryptedToken.Length, token.Length);
     }
 
+    [Theory]
+    [InlineData(0, 1, 16, true)]
+    [InlineData(1, 1, 32, true)]
+    [InlineData(2, 2, 32, true)]
+    [InlineData(0, 1, 24, false)]
+    [InlineData(1, 2, 16, false)]
+    [InlineData(2, 2, 48, false)]
+    public async Task TokenAcquisition_ValidatesDecryptedWidthAndClearsRejectedPlaintext(int route, int version, int width, bool accepted)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _fakeProtocol.Version = version;
+        byte[] plaintext = Enumerable.Repeat((byte)0x42, width).ToArray();
+        _fakeProtocol.DecryptedOutput = plaintext;
+        _mockSession.GetInfoAsync(ct).Returns(new AuthenticatorInfo
+        {
+            Options = new Dictionary<string, bool> { ["pinUvAuthToken"] = true }
+        });
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateKeyAgreementResponse(CreateMockCoseKey()), CreatePinTokenResponse(new byte[64]));
+        using var clientPin = CreateClientPin();
+        byte[] pin = "1234"u8.ToArray();
+
+        Task<byte[]> AcquireToken() => route switch
+        {
+            0 => clientPin.GetPinTokenAsync(pin, ct),
+            1 => clientPin.GetPinUvAuthTokenUsingPinAsync(pin, PinUvAuthTokenPermissions.MakeCredential, "example.com", ct),
+            _ => clientPin.GetPinUvAuthTokenUsingUvAsync(PinUvAuthTokenPermissions.BioEnrollment, cancellationToken: ct)
+        };
+
+        if (accepted)
+        {
+            Assert.Same(plaintext, await AcquireToken());
+            Assert.All(plaintext, value => Assert.Equal(0x42, value));
+        }
+        else
+        {
+            await Assert.ThrowsAsync<BadResponseException>(AcquireToken);
+            Assert.All(plaintext, value => Assert.Equal(0, value));
+        }
+    }
+
     [Fact]
     public async Task GetPinUvAuthTokenUsingPinAsync_WithNoPermissions_ThrowsArgumentException()
     {
@@ -560,7 +601,8 @@ public sealed class ClientPinTests : IDisposable
 /// </summary>
 internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
 {
-    public int Version => 2;
+    public int Version { get; set; } = 2;
+    public byte[]? DecryptedOutput { get; set; }
     public int AuthenticationTagLength => 32;
     public bool IsDisposed { get; private set; }
     public int DisposeCount { get; private set; }
@@ -586,7 +628,7 @@ internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
         => plaintext.ToArray();
 
     public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
-        => ciphertext.ToArray();
+        => DecryptedOutput ?? ciphertext.ToArray();
 
     public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
         => new byte[32];

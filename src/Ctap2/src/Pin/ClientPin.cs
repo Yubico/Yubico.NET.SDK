@@ -304,7 +304,8 @@ public sealed class ClientPin : IDisposable
     ///     byte length only. Keep it unchanged through task completion and clear it after its last use.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including if a subsequent operation fails. CTAP V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes. This helper does not validate the decrypted token length.</returns>
+    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including if a subsequent operation fails. V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes.</returns>
+    /// <exception cref="BadResponseException">The token is missing or has an invalid decrypted length for protocol 1 or 2.</exception>
     /// <exception cref="ArgumentException">If the PIN byte length is outside 4–63 bytes.</exception>
     /// <exception cref="CtapException">If the PIN is incorrect.</exception>
     /// <remarks>
@@ -347,8 +348,7 @@ public sealed class ClientPin : IDisposable
             var response = await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
 
-            var encryptedToken = ParsePinTokenResponse(response);
-            return _protocol.Decrypt(sharedSecret, encryptedToken);
+            return DecodePinToken(response, sharedSecret);
         }
         finally
         {
@@ -368,7 +368,8 @@ public sealed class ClientPin : IDisposable
     /// <param name="permissions">The nonzero permissions to request. The caller must choose a valid combination supported by the authenticator; only None is locally rejected.</param>
     /// <param name="rpId">Required for MakeCredential/GetAssertion permissions; optional to restrict CredentialManagement to one RP; ignored for BioEnrollment, LargeBlobWrite, AuthenticatorConfig and CredentialManagementRO. Null or empty omits the field.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. CTAP V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes; decrypted length is not checked here. The array carries no permission, RP, expiry or persistence metadata.</returns>
+    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes. The array carries no permission, RP, expiry or persistence metadata.</returns>
+    /// <exception cref="BadResponseException">The token is missing or has an invalid decrypted length for protocol 1 or 2.</exception>
     /// <exception cref="ArgumentException">If the PIN byte length is outside 4–63 bytes or permissions is None.</exception>
     /// <exception cref="CtapException">If the PIN is incorrect or permissions are invalid.</exception>
     /// <remarks>
@@ -447,8 +448,7 @@ public sealed class ClientPin : IDisposable
             var response = await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
 
-            var encryptedToken = ParsePinTokenResponse(response);
-            return _protocol.Decrypt(sharedSecret, encryptedToken);
+            return DecodePinToken(response, sharedSecret);
         }
         finally
         {
@@ -464,7 +464,8 @@ public sealed class ClientPin : IDisposable
     /// <param name="permissions">The nonzero permissions to request. Choose a valid, supported combination; CredentialManagementRO must be requested alone.</param>
     /// <param name="rpId">Required for MakeCredential/GetAssertion; optional to scope CredentialManagement; ignored for BioEnrollment, LargeBlobWrite, AuthenticatorConfig and CredentialManagementRO. Null or empty omits the field.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. CTAP V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes; decrypted length is not checked here. No scope or persistence metadata accompanies the array.</returns>
+    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes. No scope or persistence metadata accompanies the array.</returns>
+    /// <exception cref="BadResponseException">The token is missing or has an invalid decrypted length for protocol 1 or 2.</exception>
     /// <exception cref="ArgumentException">If permissions is None.</exception>
     /// <exception cref="CtapException">If UV fails or permissions are invalid.</exception>
     /// <remarks>
@@ -524,8 +525,7 @@ public sealed class ClientPin : IDisposable
             var response = await _session.SendCborRequestAsync(request, cancellationToken)
                 .ConfigureAwait(false);
 
-            var encryptedToken = ParsePinTokenResponse(response);
-            return _protocol.Decrypt(sharedSecret, encryptedToken);
+            return DecodePinToken(response, sharedSecret);
         }
         finally
         {
@@ -672,13 +672,39 @@ public sealed class ClientPin : IDisposable
             "Response missing required keyAgreement field.");
     }
 
+    private byte[] DecodePinToken(ReadOnlyMemory<byte> data, ReadOnlySpan<byte> sharedSecret)
+    {
+        byte[] encryptedToken = ParsePinTokenResponse(data);
+        byte[]? token = null;
+        try
+        {
+            token = _protocol.Decrypt(sharedSecret, encryptedToken);
+            bool validLength = _protocol.Version switch
+            {
+                1 => token.Length is 16 or 32,
+                2 => token.Length == 32,
+                _ => true // This SDK does not define the token shape for other protocol versions.
+            };
+            if (!validLength)
+                throw new BadResponseException("The decrypted PIN/UV token has an invalid length for its protocol.");
+
+            byte[] result = token;
+            token = null;
+            return result;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(encryptedToken);
+            if (token is not null)
+                CryptographicOperations.ZeroMemory(token);
+        }
+    }
+
     private static byte[] ParsePinTokenResponse(ReadOnlyMemory<byte> data)
     {
-        // This encrypted-token copy is not cleared here; the caller receives separate plaintext.
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
         var mapLength = reader.ReadStartMap();
-
-        byte[]? pinToken = null;
+        ReadOnlyMemory<byte> encodedToken = default;
 
         for (var i = 0; i < mapLength; i++)
         {
@@ -686,7 +712,7 @@ public sealed class ClientPin : IDisposable
 
             if (key == ClientPinResponse.PinUvAuthToken)
             {
-                pinToken = reader.ReadByteString();
+                encodedToken = reader.ReadEncodedValue();
             }
             else
             {
@@ -696,8 +722,10 @@ public sealed class ClientPin : IDisposable
 
         reader.ReadEndMap();
 
-        return pinToken ?? throw new InvalidOperationException(
-            "Response missing required pinUvAuthToken field.");
+        if (reader.BytesRemaining != 0 || encodedToken.IsEmpty)
+            throw new BadResponseException("The ClientPIN token response must contain pinUvAuthToken in one complete map.");
+
+        return new CborReader(encodedToken, CborConformanceMode.Ctap2Canonical).ReadByteString();
     }
 
     private static Dictionary<int, object?> ParseCoseKey(CborReader reader)

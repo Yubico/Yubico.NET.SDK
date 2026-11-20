@@ -148,6 +148,8 @@ public static class EncryptedMetadataDecryptor
             salt: ZeroSalt,
             info: info);
 
+        byte[]? plaintext = null;
+        bool transferred = false;
         try
         {
             // AES-128-CBC without padding provides no authentication or wrong-token detection.
@@ -156,9 +158,10 @@ public static class EncryptedMetadataDecryptor
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
 
-            var plaintext = new byte[ciphertext.Length];
+            plaintext = new byte[ciphertext.Length];
             aes.DecryptCbc(ciphertext, iv, plaintext, PaddingMode.None);
 
+            transferred = true;
             return plaintext;
         }
         catch (CryptographicException)
@@ -169,6 +172,10 @@ public static class EncryptedMetadataDecryptor
         {
             // Clear the key from stack
             CryptographicOperations.ZeroMemory(key);
+            if (!transferred)
+            {
+                CryptographicOperations.ZeroMemory(plaintext);
+            }
         }
     }
 }

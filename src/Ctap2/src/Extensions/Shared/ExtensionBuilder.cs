@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Extensions;
@@ -223,19 +224,30 @@ public sealed class ExtensionBuilder
             saltData = salt1.ToArray();
         }
 
-        // Encrypt salts
-        var saltEnc = protocol.Encrypt(sharedSecret, saltData);
-
-        // Compute auth tag
-        var saltAuth = protocol.Authenticate(sharedSecret, saltEnc);
-
-        return new HmacSecretInput
+        byte[]? saltEnc = null;
+        byte[]? saltAuth = null;
+        try
         {
-            KeyAgreement = keyAgreement,
-            SaltEnc = saltEnc,
-            SaltAuth = saltAuth,
-            PinUvAuthProtocol = protocol.Version
-        };
+            saltEnc = protocol.Encrypt(sharedSecret, saltData);
+            saltAuth = protocol.Authenticate(sharedSecret, saltEnc);
+            return new HmacSecretInput
+            {
+                KeyAgreement = keyAgreement,
+                SaltEnc = saltEnc,
+                SaltAuth = saltAuth,
+                PinUvAuthProtocol = protocol.Version
+            };
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(saltEnc);
+            CryptographicOperations.ZeroMemory(saltAuth);
+            throw;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(saltData);
+        }
     }
 
     /// <summary>

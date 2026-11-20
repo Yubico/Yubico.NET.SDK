@@ -282,12 +282,21 @@ public sealed class LargeBlobEntry
     private static byte[] Deflate(ReadOnlySpan<byte> data)
     {
         using var output = new MemoryStream();
-        using (var deflate = new DeflateStream(output, CompressionLevel.Optimal, leaveOpen: true))
+        try
         {
-            deflate.Write(data);
+            using (var deflate = new DeflateStream(output, CompressionLevel.Optimal, leaveOpen: true))
+            {
+                deflate.Write(data);
+            }
+            return output.ToArray();
         }
-
-        return output.ToArray();
+        finally
+        {
+            if (output.TryGetBuffer(out ArraySegment<byte> buffer))
+            {
+                CryptographicOperations.ZeroMemory(buffer.AsSpan());
+            }
+        }
     }
 
     /// <summary>

@@ -259,7 +259,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         var newEntries = new List<LargeBlobEntry>();
         foreach (var entry in array.Entries)
         {
-            if (entry.TryDecrypt(largeBlobKey.Span) is null)
+            if (!BelongsToCredential(entry, largeBlobKey.Span))
             {
                 // Keep entries that don't decrypt with this key
                 newEntries.Add(entry);
@@ -308,7 +308,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
         foreach (var entry in array.Entries)
         {
-            if (entry.TryDecrypt(largeBlobKey.Span) is not null)
+            if (BelongsToCredential(entry, largeBlobKey.Span))
             {
                 found = true;
                 // Skip this entry (delete it)
@@ -333,6 +333,13 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// <summary>
     /// Reads raw blob data from the authenticator (for advanced use).
     /// </summary>
+    private static bool BelongsToCredential(LargeBlobEntry entry, ReadOnlySpan<byte> key)
+    {
+        byte[]? plaintext = entry.TryDecrypt(key);
+        CryptographicOperations.ZeroMemory(plaintext);
+        return plaintext is not null;
+    }
+
     private async Task<byte[]> ReadRawBlobAsync(CancellationToken cancellationToken)
     {
         var maxFragmentLength = await GetMaxFragmentLengthAsync(cancellationToken).ConfigureAwait(false);

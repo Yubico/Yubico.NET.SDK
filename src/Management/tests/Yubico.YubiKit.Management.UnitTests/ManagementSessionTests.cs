@@ -233,6 +233,32 @@ public class ManagementSessionTests
     }
 
     [Theory]
+    [InlineData(5, 6, true, false)]
+    [InlineData(5, 6, false, true)]
+    [InlineData(5, 6, null, true)]
+    [InlineData(5, 7, true, true)]
+    [InlineData(0, 0, true, true)]
+    public async Task SetDeviceConfigAsync_NfcRestriction_PreflightsOnlyTrue(
+        int major, int minor, bool? request, bool reachesBackend)
+    {
+        var protocol = new RecordingSmartCardProtocol();
+        var session = CreateSessionForBackend(new SmartCardBackend(protocol), new FirmwareVersion(major, minor, 0));
+        var config = new DeviceConfig { NfcRestricted = request };
+        var cancellationToken = TestContext.Current.CancellationToken;
+        if (!reachesBackend)
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.SetDeviceConfigAsync(config, cancellationToken: cancellationToken));
+            Assert.Empty(protocol.Commands);
+            return;
+        }
+
+        await session.SetDeviceConfigAsync(config, cancellationToken: cancellationToken);
+        Assert.Equal(0x1C, Assert.Single(protocol.Commands).Ins);
+        byte[] expected = request is { } restriction ? [3, 0x17, 1, restriction ? (byte)1 : (byte)0] : [0];
+        Assert.Equal(expected, protocol.CommandData);
+    }
+
+    [Theory]
     [InlineData(false, false)]
     [InlineData(false, true)]
     [InlineData(true, false)]
@@ -345,6 +371,7 @@ public class ManagementSessionTests
     private sealed class RecordingSmartCardProtocol : ISmartCardProtocol
     {
         public List<ApduCommand> Commands { get; } = [];
+        public byte[] CommandData { get; private set; } = [];
 
         public Task<ApduResponse> TransmitAndReceiveAsync(
             ApduCommand command,
@@ -352,6 +379,7 @@ public class ManagementSessionTests
             CancellationToken cancellationToken = default)
         {
             Commands.Add(command);
+            CommandData = command.Data.ToArray();
             return Task.FromResult(new ApduResponse([], unchecked((short)0x9000)));
         }
 

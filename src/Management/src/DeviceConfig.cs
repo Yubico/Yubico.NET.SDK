@@ -140,7 +140,8 @@ public sealed record DeviceConfig
     ///     <para>
     ///         A <see langword="null" /> value omits the restriction setting. A <see langword="false" />
     ///         value sends an explicit zero byte for the setting. Use USB power to remove the restriction.
-    ///         The SDK does not check this property's firmware or NFC-support requirements before sending it.
+    ///         The SDK checks the 5.7 firmware minimum for <see langword="true" /> only. The device
+    ///         determines whether the hardware supports restriction.
     ///     </para>
     /// </remarks>
     public bool? NfcRestricted { get; init; }

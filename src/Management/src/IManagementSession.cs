@@ -58,7 +58,8 @@ public interface IManagementSession : IApplicationSession
     ///     Null configuration properties are omitted. Non-null application masks and flags replace their
     ///     respective sets, rather than adding bits. Preserve at least one supported USB application.
     ///     The SDK rejects an explicit USB mask of None, but does not check the mask against this device's
-    ///     supported applications or enforce each field's firmware requirements.
+    ///     supported applications. Masks must fit sixteen bits and flags must fit eight bits. Enabling NFC
+    ///     restriction requires effective firmware 5.7.0; the device determines hardware support.
     ///     The effective session firmware must be at least 5.0.0; major-zero development versions bypass
     ///     this check, and the session's firmware override applies. Passing the check does not guarantee
     ///     that the device supports every requested setting.
@@ -85,7 +86,8 @@ public interface IManagementSession : IApplicationSession
     /// <returns>A task representing the configuration write.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="config" /> is null.</exception>
     /// <exception cref="ArgumentException">A supplied lock code is not 16 bytes.</exception>
-    /// <exception cref="NotSupportedException">The effective session firmware does not support configuration writes.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A mask or flags value exceeds its wire width.</exception>
+    /// <exception cref="NotSupportedException">The effective firmware does not support configuration writes or enabling NFC restriction.</exception>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
     /// <exception cref="InvalidOperationException">The USB mask is explicitly None, or another exchange is in progress.</exception>
     /// <exception cref="OperationCanceledException">Cancellation is observed; configuration already sent is not rolled back.</exception>

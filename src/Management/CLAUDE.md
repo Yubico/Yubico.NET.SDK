@@ -737,7 +737,8 @@ version policy. Alpha/Beta display qualifiers are not that major-zero bypass.
 
 `FeatureDeviceInfo` declares the supported 4.1.0 read minimum, but current read/factory paths do not
 enforce it. Do not promise `NotSupportedException` before an unsupported read. Likewise the generic
-write check does not enforce NFC restriction's 5.7/NFC-hardware conditions or device-supported masks.
+write check does not enforce device-supported masks. A separate 5.7 feature gate applies to
+`NfcRestricted = true` only; do not infer NFC hardware support or add a read before a write.
 Reset's firmware check is not a family check: the documented operation resets Bio MPE's FIDO/PIV
 applications and shared PIN, retaining the F9 attestation slot. It does not establish Management lock
 recovery. Do not add a family policy or reset-success lifecycle policy as a documentation-only change.

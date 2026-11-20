@@ -140,7 +140,7 @@ NFC restriction. The configured NDEF URL remains readable. To remove the restric
 three seconds; a charger is sufficient, with no touch or authenticated USB operation required. This differs
 from changing `NfcEnabled`. `null` omits the restriction field; `false` encodes a zero-valued request, but
 must not be relied on as a verified recovery procedure. Use the documented USB-power procedure. The SDK
-does not preflight the field's firmware or NFC-hardware requirements.
+checks the 5.7 firmware minimum for `true` only; it leaves NFC hardware support to the device.
 
 ### Lock the configuration
 

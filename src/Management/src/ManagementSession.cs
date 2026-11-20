@@ -42,6 +42,9 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     private static readonly Feature FeatureSetConfig =
         new("Set Config", 5, 0, 0);
 
+    private static readonly Feature FeatureNfcRestriction =
+        new("NFC Restriction", 5, 7, 0);
+
     private static readonly Feature FeatureDeviceReset =
         new("Device Reset", 5, 6, 0);
 
@@ -171,6 +174,8 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         ThrowIfDisposed();
         EnsureSupports(FeatureSetConfig);
         ArgumentNullException.ThrowIfNull(config);
+        if (config.NfcRestricted == true)
+            EnsureSupports(FeatureNfcRestriction);
 
         bool reboot = options?.Reboot ?? false;
         ReadOnlyMemory<byte>? currentLockCode = options?.CurrentLockCode;
@@ -197,8 +202,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             }
             finally
             {
-                if (!configBytes.IsEmpty)
-                    CryptographicOperations.ZeroMemory(configBytes.Span);
+                CryptographicOperations.ZeroMemory(configBytes.Span);
             }
         }
     }

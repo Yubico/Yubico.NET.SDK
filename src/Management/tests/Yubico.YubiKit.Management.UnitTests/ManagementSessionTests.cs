@@ -16,6 +16,7 @@ namespace Yubico.YubiKit.Management.UnitTests;
 
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
@@ -229,6 +230,75 @@ public class ManagementSessionTests
         public ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task SetDeviceConfigAsync_HeldWrite_ClearsOnlyItsEncodingAfterTermination(bool cancel, bool replacement)
+    {
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var backend = new HoldingBackend();
+        var session = CreateSessionForBackend(backend);
+        byte[] code = [0xA5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        try
+        {
+            await VerifyHeldWriteAsync(session, backend, code, replacement, cancel, cancellation);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(code);
+        }
+    }
+
+    private static async Task VerifyHeldWriteAsync(
+        ManagementSession session, HoldingBackend backend, byte[] code, bool replacement, bool cancel,
+        CancellationTokenSource cancellation)
+    {
+        var options = replacement
+            ? new SetDeviceConfigOptions { NewLockCode = code }
+            : new SetDeviceConfigOptions { CurrentLockCode = code };
+
+        var write = session.SetDeviceConfigAsync(new DeviceConfig(), options, cancellation.Token);
+        try
+        {
+            Assert.False(write.IsCompleted);
+            Assert.Equal(code, backend.Encoding.Span[3..]);
+        }
+        finally
+        {
+            if (cancel)
+                cancellation.Cancel();
+            else
+                backend.Fail();
+
+            if (cancel)
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => write);
+            else
+                Assert.Same(backend.Failure, await Assert.ThrowsAsync<InvalidOperationException>(() => write));
+        }
+
+        Assert.False(backend.Encoding.Span.ContainsAnyExcept((byte)0));
+        Assert.Equal(new byte[] { 0xA5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }, code);
+    }
+
+    private sealed class HoldingBackend : IManagementBackend
+    {
+        private readonly TaskCompletionSource _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public InvalidOperationException Failure { get; } = new("Scripted backend failure.");
+        public ReadOnlyMemory<byte> Encoding { get; private set; }
+
+        public ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
+        {
+            Encoding = config;
+            return new ValueTask(_completion.Task.WaitAsync(cancellationToken));
+        }
+
+        public void Fail() => _completion.SetException(Failure);
+
+        public ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class InertHidProtocol : IFidoHidProtocol, IOtpHidProtocol

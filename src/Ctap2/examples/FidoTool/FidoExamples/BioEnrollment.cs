@@ -401,9 +401,10 @@ public static class BioEnrollmentExample
             FingerprintSampleStatus.TooSkewed => "Finger too skewed",
             FingerprintSampleStatus.TooShort => "Touch too short",
             FingerprintSampleStatus.MergeFailure => "Merge failure",
-            FingerprintSampleStatus.StorageFull => "Fingerprint storage full",
-            FingerprintSampleStatus.NoUserActivity => "No finger detected (timeout)",
-            FingerprintSampleStatus.NoUserPresence => "No user presence",
+            FingerprintSampleStatus.Exists => "Fingerprint already enrolled",
+            FingerprintSampleStatus.DatabaseFull => "Fingerprint storage full",
+            FingerprintSampleStatus.NoUserActivity => "No touch or swipe detected",
+            FingerprintSampleStatus.NoUpTransition => "Lift your finger and try again",
             _ => $"Unknown status: {status}"
         };
 

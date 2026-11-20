@@ -23,8 +23,8 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.BioEnrollment;
 /// <remarks>
 /// Synthetic fixtures check decoded values and selected raw-copy behavior, not sensor
 /// enrollment. Flat template maps below reflect the current decoder, not CTAP 2.1's
-/// key-7 template array with nested keys 1/2. Status-value assertions preserve current
-/// enum mappings, including 0x0B-0x0D names that differ from the standard table. No test
+/// key-7 template array with nested keys 1/2. Status-value assertions pin the wire
+/// mappings, including the python-fido2 status at 0x0C. No test
 /// here establishes rejection of missing sample fields or independent enrollment completion.
 /// </remarks>
 public class BioEnrollmentModelsTests
@@ -48,7 +48,6 @@ public class BioEnrollmentModelsTests
         // Assert
         Assert.Equal(FingerprintKind.Touch, info.FingerprintKind);
         Assert.Equal(5, info.MaxCaptureSamplesRequiredForEnroll);
-        Assert.Null(info.MaxTemplateCount);
     }
 
     [Fact]
@@ -73,17 +72,17 @@ public class BioEnrollmentModelsTests
     }
 
     [Fact]
-    public void FingerprintSensorInfo_Decode_ParsesMaxTemplateCount()
+    public void FingerprintSensorInfo_Decode_PreservesUnmodeledKeyFourWithoutInterpretingIt()
     {
-        // Arrange - locally interpreted key 4; no original vendor definition establishes this sensor field.
+        // Key 4 is not a sensor-info field; it must not be interpreted as an integer capacity.
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
         writer.WriteInt32(2); // fingerprintKind key
         writer.WriteInt32(1); // Touch
         writer.WriteInt32(3); // maxCaptureSamplesRequiredForEnroll key
         writer.WriteInt32(5);
-        writer.WriteInt32(4); // Local maxTemplateCount interpretation, not standard sensor-info schema.
-        writer.WriteInt32(3);
+        writer.WriteInt32(4);
+        writer.WriteTextString("unmodeled");
         writer.WriteEndMap();
         var cbor = writer.Encode();
 
@@ -93,7 +92,7 @@ public class BioEnrollmentModelsTests
         // Assert
         Assert.Equal(FingerprintKind.Touch, info.FingerprintKind);
         Assert.Equal(5, info.MaxCaptureSamplesRequiredForEnroll);
-        Assert.Equal(3, info.MaxTemplateCount);
+        Assert.Equal(cbor, info.RawData.ToArray());
     }
 
     [Fact]
@@ -216,9 +215,10 @@ public class BioEnrollmentModelsTests
     [InlineData(FingerprintSampleStatus.TooSkewed, 8)]
     [InlineData(FingerprintSampleStatus.TooShort, 9)]
     [InlineData(FingerprintSampleStatus.MergeFailure, 10)]
-    [InlineData(FingerprintSampleStatus.StorageFull, 11)]
-    [InlineData(FingerprintSampleStatus.NoUserActivity, 12)]
-    [InlineData(FingerprintSampleStatus.NoUserPresence, 13)]
+    [InlineData(FingerprintSampleStatus.Exists, 11)]
+    [InlineData(FingerprintSampleStatus.DatabaseFull, 12)]
+    [InlineData(FingerprintSampleStatus.NoUserActivity, 13)]
+    [InlineData(FingerprintSampleStatus.NoUpTransition, 14)]
     public void EnrollmentSampleResult_Decode_ParsesAllStatusCodes(
         FingerprintSampleStatus expectedStatus,
         int cborValue)

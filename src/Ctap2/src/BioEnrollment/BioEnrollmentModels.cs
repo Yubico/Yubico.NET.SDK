@@ -28,12 +28,10 @@ public static class FingerprintModality
 }
 
 /// <summary>
-/// Fingerprint capture feedback as currently modeled by the SDK.
+/// Fingerprint capture feedback.
 /// </summary>
 /// <remarks>
-/// Values 0x00-0x0A match CTAP 2.1 (2022-06-21 errata), Section 6.7.
-/// The final three member names do not match that standard table; consult their remarks
-/// rather than treating their names as standardized device feedback.
+/// The values follow CTAP 2.1 (2022-06-21 errata), Section 6.7, except for DatabaseFull.
 /// </remarks>
 public enum FingerprintSampleStatus
 {
@@ -93,22 +91,25 @@ public enum FingerprintSampleStatus
     MergeFailure = 0x0A,
 
     /// <summary>
-    /// Local member for feedback value 0x0B.
+    /// Fingerprint already exists (0x0B).
     /// </summary>
-    /// <remarks>The standard means fingerprint already exists, not storage full.</remarks>
-    StorageFull = 0x0B,
+    Exists = 0x0B,
 
     /// <summary>
-    /// Local member for feedback value 0x0C.
+    /// Fingerprint database full (0x0C).
     /// </summary>
-    /// <remarks>The cited standard leaves 0x0C unused; no-user-activity is 0x0D.</remarks>
-    NoUserActivity = 0x0C,
+    /// <remarks>Matches python-fido2 FP_DATABASE_FULL; CTAP 2.1 leaves 0x0C unused.</remarks>
+    DatabaseFull = 0x0C,
 
     /// <summary>
-    /// Local member for feedback value 0x0D.
+    /// No touch or swipe activity (0x0D).
     /// </summary>
-    /// <remarks>The standard means no touch/swipe activity. No finger-lift transition is 0x0E.</remarks>
-    NoUserPresence = 0x0D
+    NoUserActivity = 0x0D,
+
+    /// <summary>
+    /// No user-presence transition, such as lifting the finger (0x0E).
+    /// </summary>
+    NoUpTransition = 0x0E
 }
 
 /// <summary>
@@ -143,13 +144,6 @@ public sealed class FingerprintSensorInfo
     public int MaxCaptureSamplesRequiredForEnroll { get; private init; }
 
     /// <summary>
-    /// Gets the optional integer this decoder interprets as maximum template count at key 4.
-    /// </summary>
-    /// <remarks>CTAP 2.1 Section 6.7.3 does not define this sensor field. No original vendor
-    /// definition establishes its meaning or availability; it is not qualified capacity information.</remarks>
-    public int? MaxTemplateCount { get; private init; }
-
-    /// <summary>
     /// Decodes a FingerprintSensorInfo from a CBOR response.
     /// </summary>
     /// <param name="data">The CBOR-encoded response data.</param>
@@ -161,7 +155,6 @@ public sealed class FingerprintSensorInfo
 
         var fingerprintKind = FingerprintKind.Touch;
         var maxSamples = 0;
-        int? maxTemplates = null;
 
         var mapCount = reader.ReadStartMap() ?? 0;
 
@@ -179,10 +172,6 @@ public sealed class FingerprintSensorInfo
                     maxSamples = reader.ReadInt32();
                     break;
 
-                case 4: // Locally modeled maxTemplateCount; not a defined standard sensor-info field.
-                    maxTemplates = reader.ReadInt32();
-                    break;
-
                 default:
                     reader.SkipValue();
                     break;
@@ -195,8 +184,7 @@ public sealed class FingerprintSensorInfo
         {
             RawData = rawData,
             FingerprintKind = fingerprintKind,
-            MaxCaptureSamplesRequiredForEnroll = maxSamples,
-            MaxTemplateCount = maxTemplates
+            MaxCaptureSamplesRequiredForEnroll = maxSamples
         };
     }
 }

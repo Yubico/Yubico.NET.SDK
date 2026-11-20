@@ -122,10 +122,6 @@ public static class FingerprintsMenu
         OutputHelpers.WriteKeyValue("Max samples for enrollment",
             info.MaxCaptureSamplesRequiredForEnroll.ToString());
 
-        if (info.MaxTemplateCount.HasValue)
-        {
-            OutputHelpers.WriteKeyValue("Max templates", info.MaxTemplateCount.ToString());
-        }
     }
 
     private static async Task RunAddAsync(IYubiKey device, CancellationToken cancellationToken)

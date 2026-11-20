@@ -88,12 +88,13 @@ Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintKind.Swipe = 2 -> Yubico.YubiKit.C
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintKind.Touch = 1 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintKind
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintModality
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.DatabaseFull = 12 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.Exists = 11 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.Good = 0 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.MergeFailure = 10 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
-Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.NoUserActivity = 12 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
-Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.NoUserPresence = 13 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.NoUpTransition = 14 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
+Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.NoUserActivity = 13 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.PoorQuality = 7 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
-Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.StorageFull = 11 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.TooFast = 5 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.TooHigh = 1 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus.TooLeft = 3 -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
@@ -106,7 +107,6 @@ Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSensorInfo
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSensorInfo.FingerprintKind.get -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintKind
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSensorInfo.FingerprintSensorInfo() -> void
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSensorInfo.MaxCaptureSamplesRequiredForEnroll.get -> int
-Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSensorInfo.MaxTemplateCount.get -> int?
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSensorInfo.RawData.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.BioEnrollment.TemplateInfo
 Yubico.YubiKit.Ctap2.BioEnrollment.TemplateInfo.FriendlyName.get -> string?

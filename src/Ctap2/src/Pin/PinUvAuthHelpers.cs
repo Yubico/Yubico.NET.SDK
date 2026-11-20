@@ -48,6 +48,8 @@ internal static class PinUvAuthHelpers
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="peerCoseKey"/> is null.</exception>
     /// <remarks>
+    /// Unknown labels are ignored and are not echoed in the platform key. CTAP's getPublicKey
+    /// profile does not define extra parameters; accepting them does not relax any required label.
     /// Import forces P-256 and delegates point validation to the
     /// provider. The ephemeral crypto objects are disposed, but allocation of the public dictionary
     /// after derivation is not protected by a Z-clearing guard.

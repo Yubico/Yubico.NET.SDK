@@ -39,8 +39,10 @@ public sealed class PinUvAuthProtocolV1Tests
         Assert.Equal(16, protocol.AuthenticationTagLength);
     }
 
-    [Fact]
-    public void Encapsulate_ValidPeerKey_ReturnsKeyAgreementAndSecret()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Encapsulate_ValidPeerKey_ReturnsKeyAgreementAndSecret(bool includeUnknownLabel)
     {
         using var protocol = new PinUvAuthProtocolV1();
 
@@ -55,6 +57,8 @@ public sealed class PinUvAuthProtocolV1Tests
             { -2, peerParams.Q.X },
             { -3, peerParams.Q.Y }
         };
+        if (includeUnknownLabel)
+            peerCoseKey[1000] = 1;
 
         var (keyAgreement, sharedSecret) = protocol.Encapsulate(peerCoseKey);
 
@@ -64,6 +68,7 @@ public sealed class PinUvAuthProtocolV1Tests
         Assert.Equal(2, keyAgreement[1]);
         Assert.Equal(-25, keyAgreement[3]);
         Assert.Equal(1, keyAgreement[-1]);
+        Assert.False(keyAgreement.ContainsKey(1000));
     }
 
     [Theory]

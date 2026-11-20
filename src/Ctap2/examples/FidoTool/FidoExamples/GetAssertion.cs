@@ -41,11 +41,11 @@ public static class GetAssertion
         public bool Success { get; init; }
         public string? ErrorMessage { get; init; }
         public GetAssertionResponse? Assertion { get; init; }
-        public int TotalCredentials { get; init; }
+        public uint TotalCredentials { get; init; }
 
         public static GetAssertionResult Succeeded(
             GetAssertionResponse assertion,
-            int totalCredentials) =>
+            uint totalCredentials) =>
             new()
             {
                 Success = true,

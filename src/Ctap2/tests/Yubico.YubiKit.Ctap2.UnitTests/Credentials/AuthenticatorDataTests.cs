@@ -128,15 +128,18 @@ public class AuthenticatorDataTests
         Assert.True(flags.HasFlag(AuthenticatorDataFlags.AttestedCredentialData));
     }
 
-    [Fact]
-    public void Parse_ExtensionDataFlag_ReturnsTrue()
+    [Theory]
+    [InlineData(true, "")]
+    [InlineData(true, "80")]
+    [InlineData(true, "A16178")]
+    [InlineData(true, "A0F5")]
+    [InlineData(false, "A0")]
+    public void Parse_RejectsInvalidExtensionSuffix(bool ed, string suffixHex)
     {
-        // Enum-bit inspection only; this test does not call Parse or validate an ED extension map.
-        var data = MinimalAuthData.ToArray();
-        data[32] = 0x81; // UP + ED flag
+        byte[] data = [.. MinimalAuthData, .. Convert.FromHexString(suffixHex)];
+        data[32] = ed ? (byte)0x81 : (byte)0x01;
 
-        var flags = (AuthenticatorDataFlags)data[32];
-        Assert.True(flags.HasFlag(AuthenticatorDataFlags.ExtensionData));
+        Assert.Throws<System.Formats.Cbor.CborContentException>(() => AuthenticatorData.Parse(data));
     }
 
     [Fact]

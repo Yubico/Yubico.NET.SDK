@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
+using System.Formats.Cbor;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Ctap2.Credentials;
@@ -80,7 +81,7 @@ public sealed class AuthenticatorData
     /// <summary>
     /// Gets the CBOR-encoded extensions data, if present (when ED flag is set).
     /// </summary>
-    /// <remarks>Aliases the remaining suffix in RawData; does not validate it as a complete CBOR map.</remarks>
+    /// <remarks>Aliases the complete encoded extension map in RawData.</remarks>
     public Memory<byte>? Extensions { get; }
 
     /// <summary>
@@ -141,11 +142,11 @@ public sealed class AuthenticatorData
     /// <returns>The parsed AuthenticatorData.</returns>
     /// <remarks>
     /// Checks the 37-byte prefix and parses attested data when AT is set. With ED set, the remaining
-    /// bytes are copied without extension-map validation; with ED unset, trailing bytes are retained
-    /// in RawData but otherwise ignored. It does not enforce all flag relationships or ceremony rules.
+    /// bytes must encode exactly one CBOR map; otherwise no suffix is allowed. It does not enforce
+    /// request-specific flag relationships or ceremony rules.
     /// </remarks>
     /// <exception cref="ArgumentException">The fixed prefix or declared attested fields are too short.</exception>
-    /// <exception cref="System.Formats.Cbor.CborContentException">An extracted attested CBOR value cannot be read.</exception>
+    /// <exception cref="CborContentException">An attested value or the extension-map suffix is malformed.</exception>
     public static AuthenticatorData Parse(ReadOnlySpan<byte> data)
     {
         byte[] owned = data.ToArray();
@@ -192,21 +193,35 @@ public sealed class AuthenticatorData
             offset += bytesRead;
         }
 
-        // Parse extensions if present
-        Memory<byte>? extensions = null;
-        if (flags.HasFlag(AuthenticatorDataFlags.ExtensionData))
-        {
-            // Preserve the ED suffix; this extraction does not validate its CBOR map or full consumption.
-            extensions = rawData[offset..];
-        }
-
         return new AuthenticatorData(
             rawData,
             rpIdHash,
             flags,
             signCount,
             attestedCredentialData,
-            extensions);
+            ParseExtensions(rawData[offset..], flags.HasFlag(AuthenticatorDataFlags.ExtensionData)));
+    }
+
+    private static Memory<byte>? ParseExtensions(Memory<byte> suffix, bool hasExtensions)
+    {
+        if (!hasExtensions)
+        {
+            return suffix.IsEmpty
+                ? (Memory<byte>?)null
+                : throw new CborContentException("Unexpected bytes after authenticator data without the ED flag.");
+        }
+
+        var reader = new CborReader(suffix, CborConformanceMode.Lax);
+        if (reader.PeekState() is not CborReaderState.StartMap)
+        {
+            throw new CborContentException("Authenticator extensions must be a CBOR map.");
+        }
+        reader.SkipValue();
+        if (reader.BytesRemaining != 0)
+        {
+            throw new CborContentException("Unexpected bytes after the authenticator extension map.");
+        }
+        return suffix;
     }
 
     /// <summary>

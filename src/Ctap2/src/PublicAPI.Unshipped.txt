@@ -293,7 +293,7 @@ Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.ExtensionOutputs.get -> Sy
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.GetCredentialId() -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.GetUserHandle() -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.LargeBlobKey.get -> System.Memory<byte>?
-Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.NumberOfCredentials.get -> int?
+Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.NumberOfCredentials.get -> uint?
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.Signature.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.User.get -> Yubico.YubiKit.Ctap2.Credentials.PublicKeyCredentialUserEntity?
 Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse.UserSelected.get -> bool?

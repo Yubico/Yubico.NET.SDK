@@ -61,13 +61,13 @@ internal sealed class CredentialMatcher
         results.Add((firstCredId, firstResponse.User, firstResponse));
 
         // Check if there are more credentials to enumerate
-        int? numberOfCredentials = firstResponse.NumberOfCredentials;
+        uint? numberOfCredentials = firstResponse.NumberOfCredentials;
         if (numberOfCredentials.HasValue && numberOfCredentials.Value > 1)
         {
             // Enumerate remaining credentials via GetNextAssertion
-            int remaining = numberOfCredentials.Value - 1;
+            uint remaining = numberOfCredentials.Value - 1;
 
-            for (int i = 0; i < remaining; i++)
+            for (uint i = 0; i < remaining; i++)
             {
                 var nextResponse = await backend.GetNextAssertionAsync(cancellationToken);
                 var nextCredId = nextResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;

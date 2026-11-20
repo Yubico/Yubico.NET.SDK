@@ -356,6 +356,9 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
   `Memory<byte>` buffers. Use them unchanged for verification, then zero their spans when finished.
   `ExtensionOutputs` aliases `AuthenticatorDataRaw`, so clearing the latter also clears signed outputs.
   Disposing a session does not clear returned buffers or copies made by downstream decoders.
+- Registration responses require attested credential data. When the ED flag is set, the signed
+  suffix must contain exactly one CBOR map. Assertion credential counts use the unsigned wire
+  width (`uint?`); decoding still does not verify a ceremony or reserve an assertion sequence.
 - `GetAssertionResponse.User` is native account-picker data, not a browser-filtered result. The application
   decides what to disclose to the relying party. Use the opaque user ID for account binding and do not
   forward display names or other identifying device metadata indiscriminately.

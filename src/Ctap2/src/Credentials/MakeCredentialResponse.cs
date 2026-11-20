@@ -59,7 +59,7 @@ public sealed class MakeCredentialResponse
     public string Format { get; }
 
     /// <summary>
-    /// Gets the parsed authenticator data; the decoder does not require the AT bit or new credential data.
+    /// Gets the parsed authenticator data, including the required attested credential data.
     /// </summary>
     public AuthenticatorData AuthenticatorData { get; }
 
@@ -225,11 +225,21 @@ public sealed class MakeCredentialResponse
 
         return new MakeCredentialResponse(
             format,
-            AuthenticatorData.ParseOwned(authDataRaw),
+            ParseCredentialData(authDataRaw),
             AttestationStatement.Decode(ParseAttestationFormat(format), attestation),
             epAtt,
             largeBlobKey is null ? (Memory<byte>?)null : largeBlobKey.AsMemory(),
             unsigned?.AsReadOnly());
+    }
+
+    private static AuthenticatorData ParseCredentialData(Memory<byte> data)
+    {
+        AuthenticatorData parsed = AuthenticatorData.ParseOwned(data);
+        if (!parsed.HasAttestedCredentialData)
+        {
+            throw new CborContentException("MakeCredential authenticator data must include attested credential data (AT flag).");
+        }
+        return parsed;
     }
 
     private static void ReadUnsigned(CborReader reader, Dictionary<string, Memory<byte>> outputs)

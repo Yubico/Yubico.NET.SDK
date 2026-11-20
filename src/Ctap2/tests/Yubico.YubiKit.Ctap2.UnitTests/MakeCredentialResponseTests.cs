@@ -20,17 +20,33 @@ namespace Yubico.YubiKit.Ctap2.UnitTests;
 
 public class MakeCredentialResponseTests
 {
+    [Fact]
+    public void GetAssertion_Decode_PreservesFullUnsignedCredentialCount()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+        writer.WriteInt32(2);
+        writer.WriteByteString(new byte[37]);
+        writer.WriteInt32(3);
+        writer.WriteByteString([0x01]);
+        writer.WriteInt32(5);
+        writer.WriteUInt32(uint.MaxValue);
+        writer.WriteEndMap();
+
+        Assert.Equal(uint.MaxValue, GetAssertionResponse.Decode(writer.Encode()).NumberOfCredentials);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public void Decode_TransfersWritableSecretBuffersWithoutChangingInput(bool makeCredential)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        byte[] authData = new byte[41];
-        authData[32] = 0x80;
+        byte[] authData = makeCredential ? [.. BuildAttestedData(), 0, 0, 0, 0] : new byte[41];
+        authData[32] |= 0x80;
         // ED suffix: {"x": true}.
         byte[] extension = [0xA1, 0x61, 0x78, 0xF5];
-        extension.CopyTo(authData.AsSpan(37));
+        extension.CopyTo(authData.AsSpan(^4));
         writer.WriteStartMap(makeCredential ? 5 : 3);
         if (makeCredential)
         {
@@ -71,8 +87,8 @@ public class MakeCredentialResponseTests
 
         CryptographicOperations.ZeroMemory(signedOutputs.Span);
         CryptographicOperations.ZeroMemory(largeBlobKey.Span);
-        Assert.Equal(new byte[4], signed[37..].ToArray());
-        Assert.Equal(new byte[4], parsed.RawData[37..].ToArray());
+        Assert.Equal(new byte[4], signed[^4..].ToArray());
+        Assert.Equal(new byte[4], parsed.RawData[^4..].ToArray());
         Assert.Equal(original, input);
     }
 
@@ -118,7 +134,23 @@ public class MakeCredentialResponseTests
         Assert.Null(response.LargeBlobKey);
     }
 
-    private static byte[] BuildMakeCredentialResponseCbor(int unsignedExtensionOutputsKey)
+    [Fact]
+    public void Decode_RejectsMakeCredentialWithoutAttestedCredentialData()
+    {
+        byte[] cbor = BuildMakeCredentialResponseCbor(6, includeAttestedData: false);
+
+        Assert.Throws<CborContentException>(() => MakeCredentialResponse.Decode(cbor));
+    }
+
+    private static byte[] BuildAttestedData()
+    {
+        // UP + AT, zero AAGUID, a one-byte credential ID, then a synthetic one-pair COSE map.
+        byte[] data = [.. new byte[54], 1, 0xAA, 0xA1, 3, 0x26];
+        data[32] = 0x41;
+        return data;
+    }
+
+    private static byte[] BuildMakeCredentialResponseCbor(int unsignedExtensionOutputsKey, bool includeAttestedData = true)
     {
         var writer = new CborWriter(CborConformanceMode.Lax);
         writer.WriteStartMap(4);
@@ -127,8 +159,7 @@ public class MakeCredentialResponseTests
         writer.WriteTextString("none");
 
         writer.WriteInt32(2);
-        var authData = new byte[37];
-        authData[32] = 0x01;
+        byte[] authData = includeAttestedData ? BuildAttestedData() : new byte[37];
         writer.WriteByteString(authData);
 
         writer.WriteInt32(3);

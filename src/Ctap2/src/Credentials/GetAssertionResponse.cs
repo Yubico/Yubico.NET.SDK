@@ -95,10 +95,10 @@ public sealed class GetAssertionResponse
     /// CTAP defaults an absent count to one; authenticator account selection can omit it even when
     /// multiple accounts exist. When a valid first-response count N exceeds one, collect N−1 next
     /// assertions promptly, without unrelated authenticator operations between calls. The SDK does
-    /// not reserve the sequence or validate this uint32-to-int conversion against Int32.MaxValue.
+    /// not reserve the sequence. The wire count is an unsigned 32-bit value.
     /// Next-assertion responses omit the count.
     /// </remarks>
-    public int? NumberOfCredentials { get; }
+    public uint? NumberOfCredentials { get; }
 
     /// <summary>
     /// Gets whether the user explicitly selected this credential.
@@ -123,7 +123,7 @@ public sealed class GetAssertionResponse
         AuthenticatorData authenticatorData,
         ReadOnlyMemory<byte> signature,
         PublicKeyCredentialUserEntity? user,
-        int? numberOfCredentials,
+        uint? numberOfCredentials,
         bool? userSelected,
         Memory<byte>? largeBlobKey)
     {
@@ -183,7 +183,7 @@ public sealed class GetAssertionResponse
         PublicKeyCredentialDescriptor? credential = null;
         byte[]? signature = null;
         PublicKeyCredentialUserEntity? user = null;
-        int? numberOfCredentials = null;
+        uint? numberOfCredentials = null;
         bool? userSelected = null;
 
         for (var i = 0; i < mapLength; i++)
@@ -205,7 +205,7 @@ public sealed class GetAssertionResponse
                     user = PublicKeyCredentialUserEntity.Parse(reader);
                     break;
                 case 5: // numberOfCredentials
-                    numberOfCredentials = (int)reader.ReadUInt32();
+                    numberOfCredentials = reader.ReadUInt32();
                     break;
                 case 6: // userSelected
                     userSelected = reader.ReadBoolean();

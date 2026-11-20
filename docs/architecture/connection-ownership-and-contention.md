@@ -180,13 +180,14 @@ The guard does not make a public operation atomic. Operations such as `GetDevice
 one page per exchange, release the guard between their exchanges. An overlapping call to such an
 operation may be refused, or it may run its own exchanges in a gap and complete. It can also cause the
 first operation's next exchange to be refused. Each admitted exchange stays intact on the wire, but no
-ordering or all-or-nothing guarantee spans exchanges. Callers must await each public operation before
-starting the next one on the same session.
+ordering or all-or-nothing guarantee spans exchanges. Callers must use each session one operation at a
+time, awaiting the complete public operation (including all exchanges, parsing, and callbacks) before
+starting another operation on that session or disposing it. Concurrent use of the same session is unsupported.
 
 Session disposal drains the admitted exchange, not every remaining step of that public workflow.
 Post-exchange parsing, cache updates, later exchanges, and application callback work need the caller's
-complete awaited scope. Finish the operation before disposal. A callback must neither dispose its own
-session nor wait for a disposal that needs the callback to return.
+complete awaited scope. A callback must neither dispose its own session nor wait for a disposal that
+needs the callback to return.
 
 A token already canceled at entry throws before the guard is claimed. Once claimed, the logical
 exchange receives `CancellationToken.None` for constituent transmits so caller cancellation cannot

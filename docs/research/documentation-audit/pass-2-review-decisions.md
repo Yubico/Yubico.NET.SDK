@@ -43,6 +43,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-26](#ag-26-ctap-imp-027-ownership) | 2026-11-20 | Dennis explicitly approved applying X3/R1 to CTAP-IMP-027, superseding the earlier A5 disposable-response proposal. | Ownership approved; exact raw-envelope API open |
 | [AG-27](#ag-27-r1-clear-scope) | 2026-11-20 | Dennis clarified R1: no new public `Clear()` convenience methods on applet result types. Existing public `ApduResponse.Clear()` remains supported; the SDK must still clear sensitive buffers it owns. | Approved |
 | [AG-28](#ag-28-delivery-commit-scope) | 2026-11-20 | Dennis approved reconciliation #3: one commit per unsplit card or per approved, independently scoped facet of a split card. | Interpretation only; no implementation authorized |
+| [AG-29](#ag-29-c1-caller-serialization) | 2026-11-20 | Dennis withdraws SDK-wide fail-fast operation admission (C1/X4). Callers serialize operations per session; the existing logical-exchange guard is unchanged. | Approved; documentation only |
 
 ### AG-8 classification run
 
@@ -594,6 +595,19 @@ buffers it owns.
   For a genuinely indivisible change spanning multiple cards, confirm attribution case by case; do not invent a
   trailer convention.
 
+### AG-29 C1 caller serialization
+
+Dennis's later approval of option 1 supersedes AG-21's fail-fast C1 decision. Do not add the SDK-wide
+`EnterOperation` guard. Callers use a session one operation at a time and await the complete operation before
+starting another on that session or disposing it. Concurrent use is unsupported. The existing logical protocol
+exchange guard is unchanged; it does not imply thread safety, an atomic workflow, device-wide exclusion, or
+draining the rest of an applet workflow during disposal.
+
+**PIVCORE-002** is documentation only: the [general Core session contract](../../architecture/connection-ownership-and-contention.md#protocol-exchange-overlap)
+and PIV-specific guidance in the PIV PR. This disposition does not presume or authorize new bug fixes. Fix a
+verified concurrency or state defect only within existing narrow approval; escalate new findings for a scope
+decision rather than creating new cards under C1.
+
 ### AG-14 firmware rule detail
 
 - Dennis, 2026-11-17: "If the applet's version read comes up as 000, or if it equals the static firmware version
@@ -728,6 +742,9 @@ The original rule is retained below; [AG-28](#ag-28-delivery-commit-scope) clari
 - Android: no client-level timeout; the caller cancels through CommandState.
 
 ## Next steps
+
+After [AG-29](#ag-29-c1-caller-serialization), the withdrawn guard is not a shared prerequisite. Start with OATH;
+future fix PRs target `yubikit-pass2-base`, one PR per applet.
 
 Status 2026-11-20 21:30: AG-25 logged. Review complete: every card decided, every cross-applet decision settled,
 veto pass done with no new vetoes. Record committed on `yubikit-docs-audit`. Next: delegate per AG-5, cross-cutting

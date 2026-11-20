@@ -88,6 +88,9 @@ with writable fields; `IDisposable` only for secret holders) in `Inbox/YubiKit p
 Status 2026-11-20 21:30: **X3 settled** (AG-25, R1). All 13 cross-applet decisions are settled and the veto pass is
 done (no vetoes). Final per-card calls: `pass-2-review-ledger.md`, which supersedes the queues below.
 
+**Current X4/C1:** [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) supersedes AG-21's
+fail-fast Core guard. Sessions are caller-serialized; the logical protocol exchange guard stays unchanged.
+
 ## Interview queue: High (25)
 
 | Applet | Cards |

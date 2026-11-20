@@ -35,7 +35,7 @@ Interpretation used: a card with no gate hit and no matching auto rule goes to t
 | PIVIMP-008 | Medium | Interview (T2; split) | Failure-path drain is no-brainer; release expectations and fixture floors are open. |
 | PIVIMP-009 | Medium | Interview (G5) | Only Python encodes the date (big-endian); no sibling confluence; migration risk. |
 | PIVIMP-010 | Medium | Auto (A4) | Android masks IDs to 24 bits; Python and Rust do not alias; reject out-of-range IDs before transmit. |
-| PIVCORE-002 | High | Interview (G1; T2) | Whole-workflow admission: caller serialization versus a Core lease. |
+| PIVCORE-002 | High | Interview (G1; T2; historical proposal) | Whole-workflow admission proposal superseded by [AG-29](../pass-2-review-decisions.md#ag-29-c1-caller-serialization): documentation only. |
 | PIV-QUAL | Qualification | T1 | Physical, process and restoration lane; needs authorized devices. |
 
 ## Interview queue (sorted High, then Medium, then Low)
@@ -93,6 +93,10 @@ Interpretation used: a card with no gate hit and no matching auto rule goes to t
 - T2 tag: result ownership and disposal (the master links this to OpenPGP PGP-CORE-002).
 
 ### PIVCORE-002: Whole-workflow lifetime and terminal recovery
+
+**Historical proposal, superseded by [AG-29](../pass-2-review-decisions.md#ag-29-c1-caller-serialization).**
+The proposed session-level refusal is withdrawn; use the documented caller-serialization contract.
+
 - Gate(s) and why: G1 (High). Core-owned: admission and drain are CORE-B5-C006, shared with the WebAuthn whole-ceremony card.
 - Severity / certainty: High / source boundary confirmed; product intent unselected.
 - The decision Dennis must make: Should multi-step PIV workflows be serialized by the caller as whole tasks, or covered by a shared whole-operation admission lease in Core?

@@ -26,7 +26,7 @@ pins, options and pseudocode. Agreement numbers (AG-n) point into `pass-2-review
 | X1 | A failed login never ends the session; it clears only that credential's earlier success; a failed SCP handshake ends it | AG-23 |
 | X2 | Sessions continue after a confirmed reset in every applet: reselect, clear cached and authenticated state, re-read, re-run SCP; Security Domain re-authenticates with the default SCP03 keys (Q12 a). Flips PGP-IMP-005 and MGMT-IMP-010 | AG-22, AG-23 |
 | X3 | Secret results are caller-owned writable `Memory<byte>` (single and composite, R1); `IDisposable` only for secret holders (`CredentialPassword`, `SessionKeys`). No new public `Clear()` convenience methods on applet result types. Existing public `ApduResponse.Clear()` remains supported; the SDK must still clear sensitive buffers it owns. Samples follow S1 | AG-21, AG-24, AG-25, [AG-27](pass-2-review-decisions.md#ag-27-r1-clear-scope) |
-| X4 | Rule C1: one operation at a time per session, simple Core guard; no workflow lease | AG-21 |
+| X4 | Rule C1: callers serialize one complete operation at a time per session and await it before another operation or disposal. Concurrent use is unsupported; the existing logical protocol exchange guard is unchanged. No whole-operation admission guard or workflow lease. | [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization), supersedes AG-21 |
 | X5, X6 | Cancellation and error mapping settled through their cards | AG-20, AG-21 |
 | X7 | Rule M1: strict parsing per the repo doctrine (`CLAUDE.md`), unknown well-formed values preserved | AG-19 |
 | X8 | Firmware: cached device info first, then the applet's own read; 0.x or a failed read is alpha/beta and admits every gate | AG-14, AG-21 (Q6) |
@@ -37,12 +37,12 @@ pins, options and pseudocode. Agreement numbers (AG-n) point into `pass-2-review
 | X13 | Conservative ROCA range [4.2.0, 4.3.5) | AG-20 |
 | S1 | Sample apps: readability first, no added secret clearing, demo-only warning | AG-21 |
 | D1 | Every PR labels each divergence from the sibling SDKs with its reason | AG-21 |
-| C1 | See X4 | AG-21 |
+| C1 | See X4 | [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) |
 
 Delivery (AG-5, AG-6, AG-7, [AG-28](pass-2-review-decisions.md#ag-28-delivery-commit-scope)): one commit per unsplit
 card or per approved, independently scoped facet of a split card, with `Audit-Card` and `Triage-Rule` trailers.
-One draft PR per applet against `--base yubikit-docs-audit`, foundational cross-cutting PRs first, then the Copilot
-review-fix loop.
+One draft PR per applet against `--base yubikit-pass2-base`, starting with OATH, with the Copilot review-fix loop.
+The withdrawn C1 guard is not a shared prerequisite.
 
 ## Cards
 
@@ -77,7 +77,7 @@ review-fix loop.
 | WA-IMP-019 | WebAuthn | Low | A2 | Auto | python, Android and Rust accept empty generated handles. .NET rejects them in the constructor. TBS rule unchanged. Veto pass: no veto | AG-25; see also AG-11 |
 | WA-IMP-020 | WebAuthn | Low | A1 | Auto | Mechanical test fixture change from the card. Keep the extra-field case. Veto pass: no veto | AG-25; see also AG-11 |
 | WA-IMP-021 | WebAuthn | Low | A1 | Auto | Mechanical test assertion: returned credential ID must belong to the allow list. Veto pass: no veto | AG-25 |
-| WA-WHOLE-CEREMONY (Whole-ceremony lifetime) | WebAuthn | Medium (conditional) | Interview (unmatched; T2 a) | Dennis | A: ceremonies stay caller-serialized and fully awaited, documented; X4 settled by C1 (AG-21): Core's one-operation-at-a-time guard per session | AG-12 |
+| WA-WHOLE-CEREMONY (Whole-ceremony lifetime) | WebAuthn | Medium (conditional) | Interview (unmatched; T2 a) | Dennis | A: ceremonies stay caller-serialized and fully awaited, documented; see X4/C1 | AG-12; [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) |
 | Ceremony/platform qualification | WebAuthn | no severity | T1 | T1 hardware | No code decision; device qualification | classification only |
 | MGMT-IMP-001 | Management | Low | Interview (gated: G3; T2) | Dennis | (a): keep the NFC-restriction firmware preflight with the 5.7 boundary | AG-22 |
 | MGMT-IMP-002 | Management | No assigned defect severity | T1 | T1 hardware | No code decision; device qualification | AG-19 |
@@ -225,5 +225,5 @@ review-fix loop.
 | PIVIMP-008 | PIV | Medium | Interview (T2; split) | Dennis | A (2026-11-17, chat) / A: fix the failure-path drain now; defer release expectations and fixture floors (AG-15, Q1) | AG-12 |
 | PIVIMP-009 | PIV | Medium | Interview (G5) | Dennis | A by rule: stay V1-codec-compatible (little-endian trimmed timestamp, as V1 and V2 already do) | AG-20; amended in AG-21 |
 | PIVIMP-010 | PIV | Medium | Auto (A4) | Auto | Android masks IDs to 24 bits; Python and Rust do not alias; reject out-of-range IDs before transmit. Veto pass: no veto | AG-25 |
-| PIVCORE-002 | PIV | High | Interview (G1; T2) | Dennis | A, all applets (C1) / Document one operation at a time per session; the session refuses a second concurrent operation instead of interleaving. Core-level, all applet sessions. No lease | AG-21 |
+| PIVCORE-002 | PIV | High | Interview (G1; T2) | Dennis | Documentation only: general Core caller-serialization contract and PIV-specific guidance in the PIV PR. No new runtime guard or bug fix is implied. | AG-21; superseded by [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) |
 | PIV-QUAL | PIV | Qualification | T1 | T1 hardware | No code decision; device qualification | classification only |

@@ -545,10 +545,44 @@ public class Ctap2SessionTests
         }
     }
 
-    private static byte[] MinimalGetInfoResponse(int? maxMsgSize = null, uint? firmwareVersion = null)
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(64, true)]
+    [InlineData(65, false)]
+    public async Task MakeCredentialChecksCredBlobAgainstAdvertisedCapacity(int length, bool sends)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(maxCredBlobLength: 64), 0x90, 0x00],
+            [(byte)CtapStatus.OperationDenied, 0x90, 0x00]);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+        int before = connection.TransmittedCommands.Count;
+        var options = new MakeCredentialOptions
+        {
+            Extensions = new Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder().WithCredBlob(new byte[length]).Build()
+        };
+
+        Task<MakeCredentialResponse> Send() => session.MakeCredentialAsync(new byte[32],
+            new PublicKeyCredentialRpEntity("example.com"),
+            new PublicKeyCredentialUserEntity(new byte[] { 1 }, "demo", "Demo"),
+            [PublicKeyCredentialParameters.CreateES256()], options, ct);
+
+        if (sends)
+        {
+            Assert.Equal(CtapStatus.OperationDenied, (await Assert.ThrowsAsync<CtapException>(Send)).Status);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<ArgumentException>("options", Send);
+        }
+        Assert.Equal(before + (sends ? 1 : 0), connection.TransmittedCommands.Count);
+    }
+
+    private static byte[] MinimalGetInfoResponse(int? maxMsgSize = null, uint? firmwareVersion = null, int? maxCredBlobLength = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2 + (maxMsgSize.HasValue ? 1 : 0) + (firmwareVersion.HasValue ? 1 : 0));
+        writer.WriteStartMap(2 + (maxMsgSize.HasValue ? 1 : 0) + (firmwareVersion.HasValue ? 1 : 0) +
+            (maxCredBlobLength.HasValue ? 1 : 0));
         writer.WriteInt32(0x01);
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_0");
@@ -564,6 +598,11 @@ public class Ctap2SessionTests
         {
             writer.WriteInt32(0x0E);
             writer.WriteUInt32(wireVersion);
+        }
+        if (maxCredBlobLength is int blobLimit)
+        {
+            writer.WriteInt32(0x0F);
+            writer.WriteInt32(blobLimit);
         }
         writer.WriteEndMap();
         return writer.Encode();

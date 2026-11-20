@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Formats.Cbor;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
@@ -49,6 +50,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 {
     private const int DefaultMaxMessageSize = 1024;
     private int _maxMessageSize = DefaultMaxMessageSize;
+    private int? _maxCredBlobLength;
     /// <summary>
     /// Nominal firmware threshold for FIDO2 (5.0+), not a per-device capability or authorization check.
     /// </summary>
@@ -193,6 +195,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 
         _backend = backend;
         _maxMessageSize = info.MaxMsgSize ?? DefaultMaxMessageSize;
+        _maxCredBlobLength = info.MaxCredBlobLength;
 
         _logger.LogDebug(
             "FIDO session initialized. Firmware: {Version}, Versions: [{Versions}]",
@@ -284,6 +287,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         Ctap2SessionRequestEncoding.ThrowIfDuplicateCredentialParameters(pubKeyCredParams, nameof(pubKeyCredParams));
 
         EnsureInitialized();
+        ValidateCredBlob(options);
 
         byte[]? request = null;
         ReadOnlyMemory<byte> response;
@@ -391,6 +395,40 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             .ConfigureAwait(false);
 
         return DecodeCredentialResponse(response, GetAssertionResponse.Decode);
+    }
+
+    private void ValidateCredBlob(MakeCredentialOptions? options)
+    {
+        if (options?.Extensions is not { Length: > 0 } extensions)
+        {
+            return;
+        }
+
+        var reader = new CborReader(extensions, CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap();
+        while (reader.PeekState() is not CborReaderState.EndMap)
+        {
+            if (reader.ReadTextString() != Extensions.ExtensionIdentifiers.CredBlob)
+            {
+                reader.SkipValue();
+                continue;
+            }
+
+            int length = reader.ReadDefiniteLengthByteString().Length;
+            if (length == 0)
+            {
+                throw new ArgumentException("credBlob must not be empty.", nameof(options));
+            }
+            if (_maxCredBlobLength is not int limit)
+            {
+                throw new NotSupportedException("The authenticator did not advertise a credBlob capacity.");
+            }
+            if (length > limit)
+            {
+                throw new ArgumentException($"credBlob exceeds the authenticator's {limit}-byte capacity.", nameof(options));
+            }
+        }
+        reader.ReadEndMap();
     }
 
     private static T DecodeCredentialResponse<T>(ReadOnlyMemory<byte> response, Func<ReadOnlyMemory<byte>, T> decode)

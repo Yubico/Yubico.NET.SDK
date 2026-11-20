@@ -362,6 +362,8 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
 - The legacy `TryGetLargeBlobSupport` reads a registration support boolean, not a write result.
   The synthetic large-blob DTO and key accessor are removed; use `LargeBlobKey` on the credential
   response for the implemented storage route.
+- Typed `MakeCredentialAsync` rejects empty `credBlob` inputs and values beyond the device's
+  GetInfo-advertised capacity before sending; raw requests remain the caller's responsibility.
 - `GetAssertionResponse.User` is native account-picker data, not a browser-filtered result. The application
   decides what to disclose to the relying party. Use the opaque user ID for account binding and do not
   forward display names or other identifying device metadata indiscriminately.

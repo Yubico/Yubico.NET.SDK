@@ -356,6 +356,9 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
   `Memory<byte>` buffers. Use them unchanged for verification, then zero their spans when finished.
   `ExtensionOutputs` aliases `AuthenticatorDataRaw`, so clearing the latter also clears signed outputs.
   Disposing a session does not clear returned buffers or copies made by downstream decoders.
+- `GetAssertionResponse.User` is native account-picker data, not a browser-filtered result. The application
+  decides what to disclose to the relying party. Use the opaque user ID for account binding and do not
+  forward display names or other identifying device metadata indiscriminately.
 - hmac-secret derives from credential-scoped random secrets, with distinct verified/unverified modes.
   WebAuthn PRF adds client-side input hashing and requires the verified variant; the current WebAuthn
   adapter's UV-override and result-cleanup limitations remain disclosed in its guide.

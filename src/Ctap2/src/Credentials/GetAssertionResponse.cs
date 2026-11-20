@@ -83,6 +83,8 @@ public sealed class GetAssertionResponse
     /// NOT return identifying name/displayName/icon fields without UV; this decoder passes modeled
     /// name/displayName through rather than enforcing that privacy rule, and skips icon. Use the ID,
     /// not display fields, for RP account binding and authorization. Names can be absent even with UV.
+    /// Treat the returned entity as native application account-picker data, not a browser-equivalent
+    /// result to forward wholesale to the RP. Your application owns which fields it discloses.
     /// </remarks>
     public PublicKeyCredentialUserEntity? User { get; }
 

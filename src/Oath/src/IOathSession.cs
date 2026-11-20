@@ -23,7 +23,8 @@ namespace Yubico.YubiKit.Oath;
 ///     Inherited IsAuthenticated records Core SCP setup, not OATH password validation or ongoing channel
 ///     health. IsLocked and IsPasswordProtected describe this session's observed applet state. Cached
 ///     metadata getters can retain historical values after disposal; operations refuse a terminal session.
-///     Await complete public tasks before disposal or input cleanup. Aggregate followups, authentication
+///     Serialize calls: await each complete public operation before starting another or disposing the session.
+///     Aggregate followups, authentication
 ///     retry and user-presence callbacks extend beyond Core's individual guarded exchanges. Keep borrowed
 ///     inputs and callback/prompt resources alive until those tasks finish, without reentrant disposal.
 /// </remarks>
@@ -31,7 +32,7 @@ public interface IOathSession : IApplicationSession
 {
     /// <summary>
     ///     Gets this session's device identifier, computed as <c>Base64(SHA256(salt)[:16])</c> with padding stripped.
-    ///     A fresh session after factory reset reads the new salt and identifier; this cached value is not refreshed.
+    ///     Successful <see cref="ResetAsync" /> refreshes this identifier using the new salt.
     /// </summary>
     string DeviceId { get; }
 
@@ -39,9 +40,8 @@ public interface IOathSession : IApplicationSession
     ///     Gets the raw salt bytes from the OATH applet SELECT response.
     /// </summary>
     /// <remarks>
-    ///     Borrows session-owned storage until disposal, which clears existing views. Copy only when
-    ///     independent storage is needed. Successful RESET ends the session; create a fresh session for
-    ///     the new salt and identity rather than reading historical cached state from this one.
+    ///     Borrows session-owned storage. A confirmed reset or session disposal clears existing views.
+    ///     Read this property again after a successful reset to obtain the new salt.
     /// </remarks>
     ReadOnlyMemory<byte> Salt { get; }
 
@@ -229,20 +229,20 @@ public interface IOathSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Resets the OATH application, removing all credentials and the access key, and ends this session.
+    ///     Resets the OATH application, removing all credentials and the access key.
     /// </summary>
     /// <remarks>
-    ///     Confirmed RESET success is terminal for both plain and secure-channel sessions. This method
-    ///     awaits asynchronous disposal of the protocol, derived secure-channel state and applet secrets;
-    ///     it does not SELECT, refresh metadata or re-establish SCP. Later caller cancellation does not
-    ///     interrupt that disposal. Further operations on this session throw <see cref="ObjectDisposedException" />.
-    ///     Dispose and reopen the connection, then create a new session to inspect or use the reset applet.
-    ///     A borrowed connection remains caller-owned and is not closed by this method; a connection opened
-    ///     by the convenience session factory is owned by the session and disposed normally.
-    ///     A disposal failure propagates even though RESET has already succeeded; the session remains terminal.
-    ///     Cancellation or overlap refusal before exchange admission leaves the session intact. A transport
-    ///     failure or device error is not confirmed RESET success and does not prove that no data changed.
+    ///     After confirmed RESET, the session discards old applet and secure-channel state, reselects,
+    ///     refreshes applet metadata and, if configured, establishes SCP again using the original caller-owned
+    ///     key parameters. OATH reset does not reset Security Domain keys. Keep the parameters alive and
+    ///     unchanged until the session is disposed. The session continues on the same connection on success.
+    ///     Cancellation after the successful RESET exchange does not interrupt reinitialization. Cancellation
+    ///     before the exchange leaves the session intact. A transport failure or device error does not
+    ///     confirm RESET success or prove that no data changed.
     /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    ///     RESET succeeded but reinitialization failed. The session has ended; the inner exception gives the cause.
+    /// </exception>
     Task ResetAsync(CancellationToken cancellationToken = default);
 
     /// <summary>

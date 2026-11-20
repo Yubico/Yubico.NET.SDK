@@ -33,7 +33,7 @@ public sealed class OathLifecycleTimeTests(ITestOutputHelper output)
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.3")]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, CustomFilter = typeof(OathProtocolResponseTests.Before563))]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
-    public async Task Timestamps_ExactRfcVectorsAndTerminalReset(YubiKeyTestState state)
+    public async Task Timestamps_ExactRfcVectorsAndContinuedReset(YubiKeyTestState state)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         await WithCleanupAsync(state, () => state.WithOathSessionAsync(async session =>
@@ -71,17 +71,11 @@ public sealed class OathLifecycleTimeTests(ITestOutputHelper output)
                 await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.CalculateAllAsync(long.MaxValue, timeout.Token));
                 string before = session.DeviceId;
                 await session.ResetAsync(timeout.Token);
-                Assert.False(session.IsInitialized);
-                await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListCredentialsAsync(timeout.Token));
-                // This convenience-created session closed its owned connection during RESET.
-                var reopened = await state.Device.CreateOathSessionAsync(cancellationToken: timeout.Token);
-                await WithDisposedSessionAsync(reopened, async () =>
-                {
-                    Assert.NotEqual(before, reopened.DeviceId);
-                    Assert.False(reopened.IsPasswordProtected);
-                    Assert.Empty(await reopened.ListCredentialsAsync(timeout.Token));
-                });
-                output.WriteLine("Epoch, step boundaries, future RFC vector, aggregate equality and LIST on a fresh connection/session passed.");
+                Assert.True(session.IsInitialized);
+                Assert.NotEqual(before, session.DeviceId);
+                Assert.False(session.IsPasswordProtected);
+                Assert.Empty(await session.ListCredentialsAsync(timeout.Token));
+                output.WriteLine("Epoch, step boundaries, future RFC vector, aggregate equality and post-reset LIST passed.");
             }
             finally { CryptographicOperations.ZeroMemory(seed); }
         }, cancellationToken: timeout.Token));
@@ -90,7 +84,7 @@ public sealed class OathLifecycleTimeTests(ITestOutputHelper output)
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.6.3")]
     [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
-    public async Task ResetWithScp03_DefaultKeys_EndsSessionAndRequiresExplicitReopen(YubiKeyTestState state)
+    public async Task ResetWithScp03_DefaultKeys_ReauthenticatesAndContinues(YubiKeyTestState state)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(45));
         using var parameters = Scp03KeyParameters.Default;
@@ -116,19 +110,10 @@ public sealed class OathLifecycleTimeTests(ITestOutputHelper output)
             await session.ListCredentialsAsync(timeout.Token);
             output.WriteLine("Default SCP03 establishment and initial protected LIST passed.");
             await session.ResetAsync(timeout.Token);
-            Assert.False(session.IsInitialized);
-            Assert.False(session.IsAuthenticated);
-            await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListCredentialsAsync(timeout.Token));
-            // RESET disposed this convenience-owned connection. Explicit creation opens a new one,
-            // borrowing still-live parameters only for the new handshake, not from the old session.
-            var reopened = await state.Device.CreateOathSessionAsync(
-                new SessionCreationOptions { ScpKeyParameters = parameters }, timeout.Token);
-            await WithDisposedSessionAsync(reopened, async () =>
-            {
-                Assert.True(reopened.IsAuthenticated);
-                Assert.Empty(await reopened.ListCredentialsAsync(timeout.Token));
-            });
-            output.WriteLine("SCP03 RESET ended the old session; explicit reopen/handshake and protected LIST passed.");
+            Assert.True(session.IsInitialized);
+            Assert.True(session.IsAuthenticated);
+            Assert.Empty(await session.ListCredentialsAsync(timeout.Token));
+            output.WriteLine("SCP03 RESET, same-session handshake and protected LIST passed.");
         });
     }
 
@@ -222,7 +207,7 @@ public sealed class OathLifecycleTimeTests(ITestOutputHelper output)
             Assert.Empty(await session.ListCredentialsAsync());
         });
 
-        Assert.Equal(2, reset.Inner.TransmittedCommands.Count);
+        Assert.Equal(3, reset.Inner.TransmittedCommands.Count);
         Assert.Equal(1, reset.ResetCount);
         Assert.Equal(1, reset.Inner.DisposeCount);
         Assert.Equal(1, body.Inner.DisposeCount);
@@ -235,7 +220,7 @@ public sealed class OathLifecycleTimeTests(ITestOutputHelper output)
     {
         var sendFailure = new InvalidOperationException("RESET transport failed; mutation unknown.");
         var disposalFailure = new InvalidOperationException("RESET connection teardown failed.");
-        var reset = new LifecycleConnection(SelectResponse(), [0x90, 0])
+        var reset = new LifecycleConnection(SelectResponse(), [0x90, 0], SelectResponse())
         {
             ResetFailure = sendFails ? sendFailure : null,
             DisposeFailure = disposalFailure

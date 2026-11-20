@@ -28,51 +28,50 @@ public sealed class OathResetTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task ResetAsync_Success_IsTerminalAndLeavesBorrowedConnectionToCaller(bool cancel)
+    public async Task ResetAsync_Success_RefreshesStateOnBorrowedConnection(bool cancel)
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        var connection = new ResetConnection(Select(), [0x90, 0]);
+        await using var connection = new ResetConnection(
+            [.. Select()[..^2], 0x74, 8, 1, 2, 3, 4, 5, 6, 7, 8, 0x90, 0],
+            [0x90, 0], [0x79, 3, 5, 7, 1, 0x71, 1, 2, 0x90, 0], [0x90, 0]);
         await using var session = await OathSession.CreateAsync(connection, cancellationToken: cancellation.Token);
         ReadOnlyMemory<byte> oldSalt = session.Salt;
+        string oldId = session.DeviceId;
+        Assert.True(session.IsLocked);
+        Assert.True(session.IsPasswordProtected);
         if (cancel)
             connection.AfterReset = cancellation.Cancel;
 
         await session.ResetAsync(cancellation.Token);
 
-        int commandCount = connection.Inner.TransmittedCommands.Count;
-        Assert.False(session.IsInitialized);
+        Assert.True(session.IsInitialized);
         Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsLocked);
+        Assert.False(session.IsPasswordProtected);
+        Assert.NotEqual(oldId, session.DeviceId);
+        Assert.Equal(new byte[] { 2 }, session.Salt.ToArray());
+        Assert.Equal(new FirmwareVersion(5, 7, 1), session.FirmwareVersion);
         Assert.All(oldSalt.ToArray(), value => Assert.Equal(0, value));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListCredentialsAsync(TestContext.Current.CancellationToken));
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
-        Assert.Throws<ObjectDisposedException>(() => session.DeriveKey(new byte[1]));
-        Assert.Equal(commandCount, connection.Inner.TransmittedCommands.Count);
         Assert.Equal(0, connection.Inner.DisposeCount);
-
-        Assert.Equal(2, commandCount);
+        Assert.Empty(await session.ListCredentialsAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(new byte[] { 0xA4, 0x04, 0xA4, 0xA1 }, connection.Inner.TransmittedCommands.Select(command => command[1]));
         Assert.Equal(new byte[] { 0, 4, 0xDE, 0xAD, 0 }, connection.Inner.TransmittedCommands[1]);
-        // The SDK detached the session, but the caller must close/reopen its borrowed connection.
-        await connection.DisposeAsync();
-        Assert.Equal(1, connection.Inner.DisposeCount);
-        await using var reopened = new RecordingSmartCardConnection(Select(2));
-        await using var replacement = await OathSession.CreateAsync(reopened, cancellationToken: TestContext.Current.CancellationToken);
-        Assert.True(replacement.IsInitialized);
-        Assert.Equal(new byte[] { 2 }, replacement.Salt.ToArray());
     }
 
     [Fact]
-    public async Task ResetAsync_Success_DisposesOwnedConnectionOnceWithoutRefresh()
+    public async Task ResetAsync_Success_KeepsOwnedConnectionAndFirmwareOverride()
     {
-        var connection = new ResetConnection(Select(), [0x90, 0]);
+        var connection = new ResetConnection(Select(), [0x90, 0], Select(2));
         var device = new ResetDevice(connection);
-        var session = await device.CreateOathSessionAsync(
+        await using var session = await device.CreateOathSessionAsync(
             new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) }, TestContext.Current.CancellationToken);
         await session.ResetAsync(TestContext.Current.CancellationToken);
         Assert.Equal(new FirmwareVersion(5, 8, 0), session.FirmwareVersion);
-        Assert.False(session.IsInitialized);
+        Assert.True(session.IsInitialized);
         Assert.False(session.IsAuthenticated);
-        Assert.Equal(2, connection.Inner.TransmittedCommands.Count);
-        Assert.Equal(1, connection.Inner.DisposeCount);
+        Assert.Equal(new byte[] { 2 }, session.Salt.ToArray());
+        Assert.Equal(3, connection.Inner.TransmittedCommands.Count);
+        Assert.Equal(0, connection.Inner.DisposeCount);
         await session.DisposeAsync();
         Assert.Equal(1, connection.Inner.DisposeCount);
     }
@@ -124,22 +123,23 @@ public sealed class OathResetTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task ResetAsync_SuccessButOwnedDisposalFails_PropagatesDisposalFailureAndRemainsTerminal(bool cancel)
+    public async Task ResetAsync_ReselectFailureEndsSessionAndIsNotMaskedByDisposalFailure(bool cancel)
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         var cleanupFailure = new InvalidOperationException("Owned connection teardown failed.");
-        var connection = new ResetConnection(Select(), [0x90, 0]) { DisposeFailure = cleanupFailure };
+        var connection = new ResetConnection(Select(), [0x90, 0], [0x6A, 0x82]) { DisposeFailure = cleanupFailure };
         var device = new ResetDevice(connection);
         var session = await device.CreateOathSessionAsync(cancellationToken: cancellation.Token);
         if (cancel)
             connection.AfterReset = cancellation.Cancel;
 
         var failure = await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetAsync(cancellation.Token));
-        Assert.Same(cleanupFailure, failure);
+        Assert.Contains("reset succeeded", failure.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.IsType<Core.Protocols.SmartCard.Apdu.ApduException>(failure.InnerException);
 
         Assert.False(session.IsInitialized);
         Assert.False(session.IsAuthenticated);
-        Assert.Equal(2, connection.Inner.TransmittedCommands.Count);
+        Assert.Equal(3, connection.Inner.TransmittedCommands.Count);
         Assert.Equal(1, connection.Inner.DisposeCount);
         Assert.Same(cleanupFailure, Assert.Throws<InvalidOperationException>(session.Dispose));
         Assert.Equal(1, connection.Inner.DisposeCount);
@@ -166,12 +166,12 @@ public sealed class OathResetTests
     }
 
     [Fact]
-    public async Task ResetAsync_Success_AwaitsAsyncDisposalAndRefusesOperationsWhileTeardownDrains()
+    public async Task ResetAsync_ReselectFailureAwaitsAsyncDisposal()
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-        var connection = new ResetConnection(Select(), [0x90, 0])
+        var connection = new ResetConnection(Select(), [0x90, 0], [0x6A, 0x82])
         {
             BeforeAsyncDispose = async () =>
             {
@@ -189,14 +189,14 @@ public sealed class OathResetTests
             Assert.False(session.IsInitialized);
             Assert.False(session.IsAuthenticated);
             await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListCredentialsAsync(TestContext.Current.CancellationToken));
-            Assert.Equal(2, connection.Inner.TransmittedCommands.Count);
+            Assert.Equal(3, connection.Inner.TransmittedCommands.Count);
             Assert.Equal(0, connection.Inner.DisposeCount);
         }
         finally
         {
             release.TrySetResult();
             // Teardown owns the fake connection until it drains, even if the operation token expired.
-            await reset.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => reset.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None));
         }
         Assert.Equal(1, connection.Inner.DisposeCount);
     }

@@ -620,16 +620,12 @@ when the response identifies the credential's period.
 A failed device-HMAC verification now throws `BadResponseException`. An access-key rejection reported by the
 device retains its `OathException` and raw status; that rejection does not by itself prove a mistyped password.
 
-#### Reset ends the session (v2 alpha breaking change)
+#### Reset refreshes the session
 
-Successful `ResetAsync` now ends the OATH session, with or without SCP. Replace reset-then-reuse sequences with
-reset, close/reopen, and creation of a fresh session. A convenience-created session closes its owned connection;
-if you supplied the connection, you still own and must close it. Query the new identity and state through the
-fresh session, and supply live SCP parameters when creating that session if needed.
-
-Reset does not retain creation keys or re-establish SCP. Teardown can fail after the device has already reset;
-the error propagates and the session remains terminal. See [reset caller migration](../../src/Oath/README.md#migrating-reset-callers)
-for the reopening pattern. This OATH contract does not change reset behavior in other application modules.
+Successful `ResetAsync` reselects and refreshes the same OATH session. Read the new identity and salt from that
+session, and discard pre-reset credential objects. If SCP was configured, the session establishes it again
+with the original caller-owned parameters; keep them alive and unchanged through disposal. If reinitialization
+fails after confirmed reset, the session ends. See [reset caller migration](../../src/Oath/README.md#migrating-reset-callers).
 
 ### YubiOTP: HMAC-SHA1 Challenge-Response
 

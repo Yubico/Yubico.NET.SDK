@@ -48,7 +48,7 @@ public static class OathTestStateExtensions
         {
             if (resetBeforeUse)
             {
-                // RESET ends its session and owned connection. The test body must open afresh.
+                // Keep fixture setup separate: dispose the reset session before opening the test body.
                 var resetSession = await state.Device.CreateOathSessionAsync(
                     new SessionCreationOptions { ScpKeyParameters = scpKeyParams, ProtocolConfiguration = configuration },
                     cancellationToken).ConfigureAwait(false);
@@ -80,8 +80,7 @@ public static class OathTestStateExtensions
         }
         finally
         {
-            // RESET already disposes after success. Also close after a send/body failure,
-            // without a second implicit owner replaying teardown over the original failure.
+            // Close after setup or body completion without masking the original failure.
             try { await session.DisposeAsync().ConfigureAwait(false); }
             catch when (primaryFailure is not null) { }
         }

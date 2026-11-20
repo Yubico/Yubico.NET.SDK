@@ -250,44 +250,37 @@ and avoid reentering or disposing the session from a callback.
 - A session from `device.CreateOathSessionAsync(...)` owns the connection it opened; `OathSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
 - `ResetAsync` erases every credential and the access key. `DeleteCredentialAsync` erases the selected credential.
   `SetKeyAsync` sets or changes password protection; `UnsetKeyAsync` removes it. Neither changes stored credentials.
-  Successful RESET **ends the session**, both with and without SCP: it asynchronously disposes protocol/derived
-  keys and applet secrets, without SELECT, metadata refresh or a new handshake. Further operations are refused.
-  Close/reopen your connection and create a new session to query the new identity and state. A borrowed connection
-  remains yours to close; a convenience-created session disposes its owned connection. No creation keys are retained.
-  Teardown can fail after the device has already reset; that error propagates, but the session stays terminal.
-  Cancellation after the successful exchange does not cancel teardown. Cancellation/overlap refusal before
-  admission leaves the session intact; a transport/device error does not prove that no mutation occurred.
+  After confirmed RESET, the SDK discards old applet and secure-channel state, reselects, reads fresh applet
+  metadata, and re-establishes SCP if configured. If reinitialization fails, the session ends and the error
+  distinguishes that failure from a failed RESET. Cancellation after confirmed RESET does not interrupt
+  reinitialization; a transport/device error during RESET does not prove that no mutation occurred.
 - `RenameCredentialAsync` throws `NotSupportedException` through `EnsureSupports` below effective version 5.3.1,
   as does passing any non-null `ScpKeyParameters` below 5.6.3. Core additionally requires 5.7.2+ for SCP11.
   While the applet is locked, protected operations fail with an `OathException`
   whose `Reason` is `OathFailureReason.Locked` until `ValidateAsync` succeeds.
 - `IsAuthenticated` records SCP setup, not OATH unlock or ongoing channel health. Cached applet properties
   describe this session's observations and can remain readable after disposal. `Salt` borrows session-owned
-  storage that disposal clears. Use a fresh session after RESET to obtain the new salt and identity.
-- Synthetic secure-reset tests establish terminal state, key-array cleanup and command order, not outbound
+  storage that reset or disposal clears. Read `Salt` and `DeviceId` again after reset.
+- Synthetic secure-reset tests exercise key-array cleanup, reinitialization and command order, not outbound
   encryption/MAC correctness or live SCP reset. Empty LIST/RESET and protected continuations also depend
   on Core's APDU/SCP profile; passing the synthetic cleanup test is not wire-conformance qualification.
 
 ### Migrating reset callers
 
-Do not call LIST, derive a key, or inspect a refreshed identity on the old session after `ResetAsync`.
-With the convenience factory, successful reset closes the hidden owned connection; explicitly open a new session:
+After `ResetAsync` returns successfully, continue using the same session and connection. Treat `Credential`
+objects read before reset as stale. Only reset a device whose OATH credentials and access key you intend to erase.
 
 This composable fragment assumes the selected `IYubiKey device` above and a caller-supplied
-`CancellationToken ct`. Both scopes own their connections; no earlier session remains open.
+`CancellationToken ct`. No earlier session remains open.
 
 ```csharp
-await using (var reset = await device.CreateOathSessionAsync(cancellationToken: ct))
-{
-    await reset.ResetAsync(ct);
-}
-await using var fresh = await device.CreateOathSessionAsync(cancellationToken: ct);
-var credentials = await fresh.ListCredentialsAsync(ct);
+await using var session = await device.CreateOathSessionAsync(cancellationToken: ct);
+await session.ResetAsync(ct);
+var credentials = await session.ListCredentialsAsync(ct);
 ```
 
-When using `OathSession.CreateAsync(connection, ...)`, also dispose your borrowed connection and open a new one
-before creating `fresh`. For SCP, supply live key parameters to the new factory call; reset never reuses or
-retains the original creation parameters. This terminal contract replaces same-session refresh/recovery.
+For SCP, keep the caller-owned key parameters alive and unchanged through session disposal. OATH reset
+does not reset Security Domain keys, so reinitialization uses the original parameters, not default keys.
 
 ## Security notes
 

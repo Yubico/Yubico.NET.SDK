@@ -44,6 +44,8 @@ public static class IYubiKeyExtensions
         ///     merely because they refer to the same physical key.
         ///     To use a connection you already own, call <see cref="OathSession.CreateAsync" /> instead;
         ///     that factory borrows the connection and leaves its disposal to you.
+        ///     If SCP is configured, keep the caller-owned key parameters alive and unchanged through
+        ///     session disposal so <see cref="IOathSession.ResetAsync" /> can re-establish the channel.
         /// </remarks>
         public async Task<OathSession> CreateOathSessionAsync(
             SessionCreationOptions? options = null,

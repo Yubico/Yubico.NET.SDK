@@ -56,7 +56,7 @@ public class Ctap2HmacSecretTests
             {
                 Skip.If(true, "YubiKey does not support hmac-secret extension");
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]

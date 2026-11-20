@@ -69,7 +69,7 @@ public class Ctap2SessionSimpleTests
             var info = await session.GetInfoAsync();
             Assert.NotNull(info);
             Assert.True(info.Versions.Count > 0, "AuthenticatorInfo.Versions should not be empty");
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -80,7 +80,7 @@ public class Ctap2SessionSimpleTests
 
             // Require this advertised version string; do not infer execution of all CTAP2 features.
             Assert.Contains("FIDO_2_0", info.Versions);
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -92,7 +92,7 @@ public class Ctap2SessionSimpleTests
             // Length is the protocol requirement; rejecting all-zero bytes is an additional test assumption.
             Assert.Equal(16, info.Aaguid.Length);
             Assert.False(info.Aaguid.Span.SequenceEqual(new byte[16]), "AAGUID should not be all zeros");
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -108,7 +108,7 @@ public class Ctap2SessionSimpleTests
                 Assert.True(hasHmacSecret || info.Extensions.Count > 0,
                     "YubiKey should support at least one extension");
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -124,7 +124,7 @@ public class Ctap2SessionSimpleTests
                     a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
                 Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -140,7 +140,7 @@ public class Ctap2SessionSimpleTests
                 Assert.True(hasRk || info.Options.Count > 0,
                     "YubiKey should have at least one option");
             }
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Tests that the IYubiKey extension method for creating CTAP2 sessions works.
@@ -188,7 +188,7 @@ public class Ctap2SessionSimpleTests
         await state.WithCtap2SessionAsync(async session =>
         {
             await session.SelectionAsync();
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Expects some CtapException from reset, without checking its status or whether state changed.

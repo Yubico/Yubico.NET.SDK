@@ -130,5 +130,5 @@ public class Ctap2MinPinLengthTests
             {
                 Skip.If(true, "YubiKey does not support minPinLength extension");
             }
-        });
+        }, normalizePin: false);
 }

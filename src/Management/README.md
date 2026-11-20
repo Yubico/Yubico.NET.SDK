@@ -209,9 +209,11 @@ If SmartCard is not exposed, session creation throws `NotSupportedException`. On
 Passing the check does not guarantee that the device implements whole-device reset; a device rejection
 propagates as `ApduException` rather than `NotSupportedException`.
 
-The current reset path does not invalidate managed readiness, refresh metadata, or perform a fresh SCP
-handshake. After reset or an uncertain outcome, end old scopes and rediscover/reopen the intended key;
-unchanged readiness/authentication flags do not establish device or channel recovery.
+After confirmed reset, the same session reselects Management, refreshes metadata and, if configured,
+establishes a new SCP channel with the original caller-owned parameters. Keep those parameters alive
+through any reset. If refresh fails, the session ends and reports that reset was confirmed while
+preserving the refresh error. If the exchange outcome itself is uncertain, close the old scopes and
+rediscover the intended key before further use; an exchange failure does not establish completion.
 
 ## User interaction
 
@@ -297,7 +299,7 @@ This standalone tool accepts SmartCard devices only, including for its reset men
 [shared CLI selection flow](../../docs/usage/device-discovery.md#selection-in-the-cli-examples);
 multiple devices require an interactive choice, so a noninteractive invocation returns no selection.
 The SDK and unified `yk management` also support HID FIDO and HID OTP. Selection labels are last-known
-metadata; info/config output and reset prerequisites still use explicit live Management reads.
+metadata; the standalone info/config output and reset prompt use explicit live Management reads.
 
 ## Related
 

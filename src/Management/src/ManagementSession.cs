@@ -53,14 +53,20 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     private IManagementBackend _backend = null!;
 
     private FirmwareVersion? _version;
+    private readonly ProtocolConfiguration? _configuration;
+    private readonly FirmwareVersion? _firmwareVersionOverride;
+    private readonly ScpKeyParameters? _scpKeyParameters;
+    private bool _endingAfterRefreshFailure;
 
-    private ManagementSession(IConnection connection)
+    private ManagementSession(IConnection connection, SessionCreationOptions? options)
         : base(EnsureSupportedConnection(connection))
     {
         ArgumentNullException.ThrowIfNull(connection);
 
         _logger = Logger;
-
+        _configuration = options?.ProtocolConfiguration;
+        _firmwareVersionOverride = options?.FirmwareVersionOverride;
+        _scpKeyParameters = options?.ScpKeyParameters;
     }
 
     private static IConnection EnsureSupportedConnection(IConnection connection)
@@ -85,7 +91,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     ///     A firmware override configures the protocol and feature checks; it neither skips discovery
     ///     nor replaces the hardware metadata returned by later reads.
     ///     Creation settings are not retained as an options object. SCP parameters remain caller-owned
-    ///     and borrowed through initialization. Management does not retain, invoke, or dispose the optional
+    ///     and borrowed for initialization and any post-reset refresh. Management does not retain, invoke, or dispose the optional
     ///     user-presence prompt. Communication, SCP, and response errors propagate from their layers.
     ///     Successful SCP setup sets IsAuthenticated but performs no subsequent protected Management
     ///     command during creation. That flag is setup history, not channel-health or configuration-lock
@@ -112,21 +118,16 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         ConstructInitializedAsync(
             connection,
             options,
-            () => new ManagementSession(connection),
-            (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+            () => new ManagementSession(connection, options),
+            (session, token) => session.InitializeAsync(token),
             cancellationToken);
 
-    private async Task InitializeAsync(
-        ProtocolConfiguration? configuration,
-        FirmwareVersion? firmwareVersionOverride,
-        ScpKeyParameters? scpKeyParams,
-        CancellationToken cancellationToken = default)
+    private async Task InitializeAsync(CancellationToken cancellationToken, bool afterReset = false)
     {
         if (IsInitialized)
             return;
 
-        var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
+        var protocol = await PrepareProtocolAsync(_scpKeyParameters, cancellationToken).ConfigureAwait(false);
         var fallbackVersion = protocol switch
         {
             ISmartCardProtocol smartCard =>
@@ -137,14 +138,16 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             _ => throw new NotSupportedException("Unsupported Management protocol.")
         };
 
-        _version = await ResolveFirmwareVersionAsync(protocol, fallbackVersion, cancellationToken).ConfigureAwait(false);
-        var effectiveFirmwareVersion = firmwareVersionOverride ?? _version;
+        _version = afterReset
+            ? (await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false)).FirmwareVersion
+            : await ResolveFirmwareVersionAsync(protocol, fallbackVersion, cancellationToken).ConfigureAwait(false);
+        var effectiveFirmwareVersion = _firmwareVersionOverride ?? _version;
 
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
                 effectiveFirmwareVersion,
-                configuration,
-                scpKeyParams,
+                _configuration,
+                _scpKeyParameters,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -209,15 +212,51 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
     }
 
     /// <inheritdoc cref="IManagementSession.ResetDeviceAsync" />
-    public Task ResetDeviceAsync(CancellationToken cancellationToken = default)
+    public async Task ResetDeviceAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         EnsureSupports(FeatureDeviceReset);
-        return _backend switch
+        if (_backend is not SmartCardBackend smartCard)
+            throw new NotSupportedException("Device reset is only available over SmartCard (CCID) connections.");
+
+        await smartCard.DeviceResetAsync(cancellationToken).ConfigureAwait(false);
+
+        IsInitialized = false;
+        IsAuthenticated = false;
+        FirmwareVersion = new FirmwareVersion();
+        _version = null;
+
+        try
         {
-            SmartCardBackend smartCard => smartCard.DeviceResetAsync(cancellationToken).AsTask(),
-            _ => throw new NotSupportedException("Device reset is only available over SmartCard (CCID) connections.")
-        };
+            var oldProtocol = Protocol;
+            Protocol = null;
+            if (oldProtocol is IAsyncDisposable asyncProtocol)
+                await asyncProtocol.DisposeAsync().ConfigureAwait(false);
+            else
+                oldProtocol?.Dispose();
+
+            // After confirmation, caller cancellation cannot undo the reset or strand the refresh.
+            await InitializeSessionAsync(token => InitializeAsync(token, afterReset: true), CancellationToken.None)
+                .ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            _endingAfterRefreshFailure = true;
+            await DisposeAsync().ConfigureAwait(false);
+            throw new InvalidOperationException("Management reset was confirmed, but session refresh failed and the session ended.", exception);
+        }
+    }
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        catch (Exception exception) when (_endingAfterRefreshFailure)
+        {
+            _logger.LogDebug(exception, "Management cleanup after a failed reset refresh also failed.");
+        }
     }
 
     private async Task<FirmwareVersion> ResolveFirmwareVersionAsync(

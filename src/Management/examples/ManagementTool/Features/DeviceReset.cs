@@ -46,7 +46,7 @@ public static class DeviceReset
     /// <returns>True if the supplied firmware is at least the helper's minimum; no family or transport check.</returns>
     public static bool IsResetSupported(FirmwareVersion firmwareVersion)
     {
-        return firmwareVersion >= MinimumResetVersion;
+        return firmwareVersion.IsAtLeast(5, 6, 0);
     }
 
     /// <summary>
@@ -103,7 +103,7 @@ public static class DeviceReset
         ArgumentNullException.ThrowIfNull(session);
 
         // Firmware-only helper preflight; this does not establish product or transport eligibility.
-        if (!IsResetSupported(deviceInfo.FirmwareVersion))
+        if (!IsResetSupported(session.FirmwareVersion))
         {
             return ResetResult.Failed(
                 $"Factory reset requires firmware 5.6.0 or later. " +
@@ -115,9 +115,9 @@ public static class DeviceReset
             await session.ResetDeviceAsync(cancellationToken);
             return ResetResult.Succeeded();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            return ResetResult.Failed($"Failed to reset device: {ex.Message}");
+            return ResetResult.Failed($"Reset workflow did not complete: {ex.Message}");
         }
     }
 }

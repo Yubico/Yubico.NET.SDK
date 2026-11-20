@@ -108,8 +108,10 @@ public interface IManagementSession : IApplicationSession
     ///     <see cref="Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride" /> applies.
     ///     The SDK does not check the product family; passing the firmware check does not establish support.
     ///     HID FIDO and HID OTP sessions are rejected without sending a reset command.
-    ///     Success does not refresh metadata, invalidate the managed session, or establish a new secure
-    ///     channel. End the old session/connection scopes and rediscover the intended key before further use.
+    ///     After confirmed success, this session reselects Management, refreshes metadata and, if configured,
+    ///     establishes a fresh secure channel using the original caller-owned parameters. Renewed setup
+    ///     failure ends the session and preserves its cause. An exchange failure before confirmation is not
+    ///     evidence that reset completed; if its outcome is uncertain, rediscover before further use.
     /// </remarks>
     /// <param name="cancellationToken">A token checked before exchange admission; it does not interrupt an admitted SmartCard reset or undo it.</param>
     /// <returns>A task representing the asynchronous reset operation.</returns>
@@ -120,7 +122,7 @@ public interface IManagementSession : IApplicationSession
     ///     The device rejects the reset command, including when whole-device reset is not implemented.
     /// </exception>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
-    /// <exception cref="InvalidOperationException">Another exchange is in progress.</exception>
+    /// <exception cref="InvalidOperationException">Another exchange is in progress, or confirmed reset was followed by a failed session refresh.</exception>
     /// <exception cref="OperationCanceledException">Cancellation is observed before the reset exchange is admitted.</exception>
     /// <example>
     ///     For a discovered Bio MPE <see cref="IYubiKey" /> named <c>device</c> and a

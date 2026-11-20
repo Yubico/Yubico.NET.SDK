@@ -39,7 +39,7 @@ The active standalone `examples/ManagementTool/Cli/Prompts/DeviceSelector.cs` is
 concrete selector in `Cli.Shared`, configured with SmartCard and `RequireChoice`. Do not widen it to HID
 because the SDK supports HID: this preserves the actual tool's eligibility, including its reset menu.
 Full All discovery already groups composite views; the old three-entries-per-key rationale is obsolete.
-Unified `YkCommandBase` reuses selection metadata for its context/banner, while Management info/config/reset
+Unified `YkCommandBase` reuses selection metadata for its context/banner, while Management info/config
 explicitly call `ReadLiveInfoAsync`, carrying `SessionOptions` and never substituting stale context info on failure.
 See [CLI selection policies](../../docs/usage/device-discovery.md#selection-in-the-cli-examples).
 
@@ -739,7 +739,8 @@ probe. The generic write check does not enforce device-supported masks. A separa
 `NfcRestricted = true` only; do not infer NFC hardware support or add a read before a write.
 Reset's firmware check is not a family check: the documented operation resets Bio MPE's FIDO/PIV
 applications and shared PIN, retaining the F9 attestation slot. It does not establish Management lock
-recovery. Do not add a family policy or reset-success lifecycle policy as a documentation-only change.
+recovery. After a confirmed response retire the old protocol, clear ready/authenticated state, reselect,
+read fresh metadata and re-establish optional SCP on the same connection. A failed refresh ends the session.
 
 ## Session Initialization Pattern
 
@@ -753,9 +754,8 @@ public static Task<ManagementSession> CreateAsync(
     ConstructInitializedAsync(
         connection,
         options,
-        () => new ManagementSession(connection),
-        (session, token) => session.InitializeAsync(
-            options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+    () => new ManagementSession(connection, options),
+    (session, token) => session.InitializeAsync(token),
         cancellationToken);
 ```
 
@@ -764,7 +764,8 @@ The applet callback calls `PrepareProtocolAsync`, then explicitly dispatches dis
 reads firmware from the prepared protocol. These static probes do not require an operational backend.
 Firmware resolution prefers DeviceInfo and falls back to the discovered version. After `ConfigureProtocolAsync`,
 the session constructs its backend with the effective protocol. The shared factory marks the session ready only
-after this callback completes. SCP parameters are callback inputs, not session fields.
+after this callback completes. The session snapshots settings needed for a refresh, including the borrowed
+SCP parameters. The owner must keep those parameters alive through any later reset.
 
 The metadata probe occurs before optional SCP establishment; an SCP-authenticated return does not imply
 that every initialization exchange used SCP. A firmware override does not skip probes. It configures

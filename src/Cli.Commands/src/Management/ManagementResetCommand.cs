@@ -21,40 +21,21 @@ public sealed class ManagementResetSettings : GlobalSettings
 
 /// <summary>
 ///     Requests Bio Multi-protocol Edition combined FIDO/PIV reset, retaining the F9 attestation slot.
-///     Checks firmware 5.6.0, not product eligibility; reset itself requires SmartCard. An advertised HID
-///     preference reaches SDK rejection rather than a reset. Prompts twice unless --force is used.
+///     Uses SmartCard only. The session checks firmware 5.6.0; the device determines product eligibility.
 ///     Does not establish Management configuration-lock recovery.
 /// </summary>
 public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettings>
 {
-    private static readonly FirmwareVersion MinimumResetVersion = new(5, 6, 0);
-
     protected override ConnectionType[] AppletTransports =>
-        [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
+        [ConnectionType.SmartCard];
 
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, ManagementResetSettings settings, YkDeviceContext deviceContext)
     {
-        var info = await deviceContext.ReadLiveInfoAsync();
-        if (info is null)
-        {
-            OutputHelpers.WriteError("Could not retrieve device information.");
-            return ExitCode.GenericError;
-        }
-
-        var deviceInfo = info.Value;
-
-        if (deviceInfo.FirmwareVersion < MinimumResetVersion)
-        {
-            OutputHelpers.WriteError(
-                $"Factory reset requires firmware 5.6.0 or later. Device firmware is {deviceInfo.VersionName}.");
-            return ExitCode.FeatureUnsupported;
-        }
-
         if (!settings.Force)
         {
             if (!ConfirmationPrompts.ConfirmDestructive(
-                    "factory reset this YubiKey, erasing ALL credentials, keys, and configuration"))
+                    "reset Bio MPE FIDO and PIV data and the shared PIN, retaining the F9 attestation slot"))
             {
                 OutputHelpers.WriteInfo("Reset cancelled.");
                 return ExitCode.UserCancelled;
@@ -65,7 +46,7 @@ public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettin
             deviceContext.SessionOptions);
         await session.ResetDeviceAsync();
 
-        OutputHelpers.WriteSuccess("Device has been factory reset.");
+        OutputHelpers.WriteSuccess("Combined FIDO/PIV reset confirmed.");
         return ExitCode.Success;
     }
 }

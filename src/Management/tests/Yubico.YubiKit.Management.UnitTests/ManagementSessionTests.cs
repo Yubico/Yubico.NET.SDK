@@ -110,19 +110,6 @@ public class ManagementSessionTests
         Assert.True(backend.CapturedConfig.Span.ToArray().All(static b => b == 0));
     }
 
-    [Fact]
-    public async Task ResetDeviceAsync_SmartCard_SendsDeviceResetApdu()
-    {
-        var protocol = new RecordingSmartCardProtocol();
-        var backend = new SmartCardBackend(protocol);
-        var session = CreateSessionForBackend(backend, new FirmwareVersion(5, 6, 0));
-
-        await session.ResetDeviceAsync(TestContext.Current.CancellationToken);
-
-        var command = Assert.Single(protocol.Commands);
-        Assert.Equal(0x1F, command.Ins);
-    }
-
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -188,7 +175,7 @@ public class ManagementSessionTests
             typeof(ManagementSession),
             BindingFlags.Instance | BindingFlags.NonPublic,
             binder: null,
-            [new InertSmartCardConnection()],
+            [new InertSmartCardConnection(), null],
             culture: null)!;
 
         typeof(ApplicationSession)
@@ -419,6 +406,10 @@ public class ManagementSessionTests
     private sealed class VersionedSmartCardConnection(byte major, byte minor) : ISmartCardConnection
     {
         public int Reads { get; private set; }
+        public int Selects { get; private set; }
+        public byte[] ResetCommand { get; private set; } = [];
+        public bool RejectReset { get; init; }
+        public bool FailReselect { get; init; }
         public Transport Transport => Transport.Usb;
         public ConnectionType Type => ConnectionType.SmartCard;
 
@@ -427,23 +418,80 @@ public class ManagementSessionTests
             cancellationToken.ThrowIfCancellationRequested();
             byte[] response = command.Span[1] switch
             {
-                0xA4 => [.. System.Text.Encoding.UTF8.GetBytes($"{major}.{minor}.0"), 0x90, 0],
+                0xA4 => Select(),
                 0x1D => ReadInfo(),
+                0x1F => Reset(command),
                 _ => throw new InvalidOperationException("Unexpected Management command."),
             };
             return Task.FromResult<ReadOnlyMemory<byte>>(response);
         }
 
+        private byte[] Select()
+        {
+            Selects++;
+            return FailReselect && Selects > 1
+                ? [0x6A, 0x82]
+                : [.. System.Text.Encoding.UTF8.GetBytes($"{major}.{minor}.0"), 0x90, 0];
+        }
+
+        private byte[] Reset(ReadOnlyMemory<byte> command)
+        {
+            ResetCommand = command.ToArray();
+            return RejectReset ? [0x69, 0x85] : [0x90, 0];
+        }
+
         private byte[] ReadInfo()
         {
             Reads++;
-            return (major, minor) == (4, 0) ? [0x6D, 0] : [5, 0x05, 3, major, minor, 0, 0x90, 0];
+            return (major, minor) == (4, 0) ? [0x6D, 0] : [5, 0x05, 3, major, minor, (byte)(Selects - 1), 0x90, 0];
         }
 
         public IDisposable BeginTransaction(CancellationToken cancellationToken) => throw new NotSupportedException();
         public bool SupportsExtendedApdu() => false;
         public void Dispose() { }
         public ValueTask DisposeAsync() => default;
+    }
+
+    [Fact]
+    public async Task ResetDeviceAsync_ConfirmedReset_ReselectsAndContinuesOnSameSession()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(5, 6);
+        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+
+        await session.ResetDeviceAsync(ct);
+
+        Assert.Equal(new byte[] { 0, 0x1F, 0, 0, 0 }, connection.ResetCommand);
+        Assert.Equal(2, connection.Selects);
+        Assert.Equal(2, connection.Reads);
+        var info = await session.GetDeviceInfoAsync(ct);
+        Assert.Equal(new FirmwareVersion(5, 6, 1), info.FirmwareVersion);
+    }
+
+    [Fact]
+    public async Task ResetDeviceAsync_RejectedReset_PreservesStatusAndDoesNotRefresh()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(5, 6) { RejectReset = true };
+        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+        _ = await Assert.ThrowsAsync<ApduException>(() => session.ResetDeviceAsync(ct));
+        Assert.Single(connection.ResetCommand, b => b == 0x1F);
+        Assert.Equal(1, connection.Selects);
+        Assert.Equal(new FirmwareVersion(5, 6, 0), (await session.GetDeviceInfoAsync(ct)).FirmwareVersion);
+    }
+
+    [Fact]
+    public async Task ResetDeviceAsync_ConfirmedResetWithFailedReselect_EndsSessionAndPreservesCause()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(5, 6) { FailReselect = true };
+        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+
+        var failure = await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetDeviceAsync(ct));
+        _ = Assert.IsType<ApduException>(failure.InnerException);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetDeviceInfoAsync(ct));
     }
 
     private sealed class ProbeSession(IConnection connection) : ApplicationSession(connection);

@@ -78,6 +78,8 @@ Set `requireTouch: true` to require touch for individual calculations (firmware 
 `Int32.MaxValue`. A missing HOTP counter defaults to zero. HOTP ignores the period; TOTP ignores the counter.
 In a URI, a query-string issuer takes precedence over the label issuer. Numeric query values must still parse
 as `Int32`, including fields the selected OATH type ignores.
+These are SDK input policies, not strict Google Authenticator Key URI Format validation: the SDK accepts
+seven digits and an omitted HOTP counter, and does not require the two issuer fields to agree.
 
 Base32 secrets accept ASCII upper/lower case and literal spaces, with either no padding or complete trailing
 padding. Invalid characters, impossible terminal lengths, and incomplete or embedded padding are rejected;

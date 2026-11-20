@@ -274,6 +274,9 @@ public interface IOathSession : IApplicationSession
     ///         Requires an outstanding challenge from the OATH applet SELECT response. Call this method
     ///         only while <see cref="IsLocked" /> is <see langword="true" />, not for an already unlocked
     ///         or unprotected session. Successful validation consumes the challenge and unlocks the session.
+    ///         Failed validation does not end the session or unlock OATH. After device-HMAC verification fails,
+    ///         the original device challenge is retained, and you can retry in the same session with the same
+    ///         access key. The retry sends a fresh host challenge.
     ///     </para>
     ///     <para>
     ///         Pass the access key, not raw password bytes. The caller retains ownership of <paramref name="key" />;

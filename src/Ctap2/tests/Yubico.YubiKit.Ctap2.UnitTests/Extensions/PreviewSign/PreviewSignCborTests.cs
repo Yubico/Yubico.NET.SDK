@@ -29,6 +29,28 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 /// </remarks>
 public class PreviewSignCborTests
 {
+    [Theory]
+    [InlineData("")]
+    [InlineData("80")]
+    [InlineData("A000")]
+    [InlineData("A101")]
+    [InlineData("A201020103")]
+    public void SigningParams_RejectAdditionalArgsThatAreNotExactlyOneMap(string hex)
+    {
+        byte[] additionalArgs = Convert.FromHexString(hex);
+        Assert.Throws<ArgumentException>(() => new PreviewSignSigningParams(new byte[] { 1 }, new byte[] { 2 }, additionalArgs));
+        Assert.Throws<ArgumentException>(() => new PreviewSignSigningParams(new byte[] { 1 }, new byte[] { 2 }) { AdditionalArgs = additionalArgs });
+    }
+
+    [Fact]
+    public void SigningParams_InitCannotReplaceCheckedInputsWithEmptyBytes()
+    {
+        byte[] keyHandle = [1];
+        byte[] tbs = [2];
+        Assert.Throws<ArgumentException>(() => new PreviewSignSigningParams(keyHandle, tbs) { KeyHandle = default });
+        Assert.Throws<ArgumentException>(() => new PreviewSignSigningParams(keyHandle, tbs) { Tbs = default });
+    }
+
     [Fact]
     public void EncodeAuthenticationInput_SingleCredential_NoArgs_MatchesRustByteStructure()
     {

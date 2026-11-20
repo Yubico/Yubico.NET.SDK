@@ -77,10 +77,8 @@ public sealed class PreviewSignRegistrationOutput
     /// </para>
     /// <para>
     /// This is syntactic extraction, not attestation verification. The raw PublicKey remains available.
-    /// Currently this accessor propagates the seed-key marker (-65700) into DerivedKeyAlgorithm,
-    /// unlike PreviewSignCbor.TryExtractGeneratedKey, which propagates the derived algorithm (-9 in
-    /// the P-256 profile). Do not treat those algorithm properties as interchangeable or validated
-    /// negotiation. The signing-operation identifier (-65539) has a third, distinct role.
+    /// The generated key uses the reported registration algorithm, not the seed-key marker (-65700)
+    /// or signing-operation identifier (-65539). This is not validated negotiation.
     /// </para>
     /// </remarks>
     /// <returns>
@@ -99,7 +97,7 @@ public sealed class PreviewSignRegistrationOutput
                     KeyHandle,
                     arkgKey.BlPublicKey,
                     arkgKey.KemPublicKey,
-                    arkgKey.Algorithm);
+                    new Cose.CoseAlgorithm(Algorithm));
             }
 
             return null;

@@ -64,8 +64,8 @@ public sealed class PreviewSignGeneratedKey
     /// Gets the algorithm identifier for the derived key.
     /// </summary>
     /// <remarks>
-    /// Extraction paths currently disagree: TryGetGeneratedKey supplies seed marker -65700, while
-    /// PreviewSignCbor.TryExtractGeneratedKey supplies the seed's derived algorithm (typically -9).
+    /// Registration extraction reports the signed previewSign output algorithm (typically -9),
+    /// not the seed marker (-65700). Extraction does not verify its agreement with the seed key.
     /// DerivePublicKey does not dispatch on this property; its verifier is fixed to P-256/SHA-256.
     /// </remarks>
     public CoseAlgorithm DerivedKeyAlgorithm { get; init; }

@@ -26,6 +26,19 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Cose;
 /// </remarks>
 public class CoseArkgP256SeedKeyTests
 {
+    [Fact]
+    public void RegistrationOutput_ExtractsReportedAlgorithmInsteadOfSeedMarker()
+    {
+        byte[] point = [0x04, .. TestKemX, .. TestKemY];
+        var seed = new CoseArkgP256SeedKey(new CoseAlgorithm(-65700), new CoseAlgorithm(-9), point, point);
+        var output = new Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput(new byte[] { 1 }, seed.Encode(), -9);
+
+        var generated = output.TryGetGeneratedKey();
+
+        Assert.NotNull(generated);
+        Assert.Equal(-9, generated.DerivedKeyAlgorithm.Value);
+    }
+
     // Synthetic 32-byte coordinate patterns for nested maps; not validated P-256 points.
     private static readonly byte[] TestKemX = new byte[32];
     private static readonly byte[] TestKemY = new byte[32];

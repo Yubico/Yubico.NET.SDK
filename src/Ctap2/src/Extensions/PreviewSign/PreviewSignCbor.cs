@@ -466,8 +466,8 @@ public static class PreviewSignCbor
     /// <para>
     /// Returns false for absent output/attested data, another key carrier, or caught CborContentException
     /// and InvalidOperationException. Other malformed-authData failures, such as ArgumentException,
-    /// can propagate. The returned convenience object has no disposal owner and uses the seed's derived
-    /// algorithm, unlike PreviewSignRegistrationOutput.TryGetGeneratedKey's current seed-marker propagation.
+    /// can propagate. Extraction also requires a reported algorithm in the signed previewSign output;
+    /// it is returned as metadata, not verified here.
     /// </para>
     /// </remarks>
     public static bool TryExtractGeneratedKey(
@@ -482,6 +482,14 @@ public static class PreviewSignCbor
             {
                 return false;
             }
+
+            if (response.ExtensionOutputs is not { } signedOutputs ||
+                !ExtensionOutput.Decode(signedOutputs).TryGetRawExtension("previewSign", out var signedPreviewSign))
+            {
+                return false;
+            }
+            var signedReader = new CborReader(signedPreviewSign, CborConformanceMode.Ctap2Canonical);
+            (int algorithm, _) = DecodeRegistrationOutput(signedReader);
 
             var previewSignCbor = response.UnsignedExtensionOutputs["previewSign"];
             var innerAttestation = DecodeUnsignedRegistrationOutput(previewSignCbor);
@@ -502,7 +510,7 @@ public static class PreviewSignCbor
                 authData.AttestedCredentialData.CredentialId,
                 arkgSeedKey.BlPublicKey,
                 arkgSeedKey.KemPublicKey,
-                arkgSeedKey.DerivedKeyAlgorithm);  // -9 (Esp256), NOT -65700 (seed-key alg)
+                new Cose.CoseAlgorithm(algorithm));
 
             return true;
         }

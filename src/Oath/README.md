@@ -160,11 +160,11 @@ Code hotpCode = await session.CalculateCodeAsync(hotp);
 Console.WriteLine($"HOTP code {hotpCode.Value}");
 ```
 
-For a full HMAC rather than a formatted OTP, use `CalculateAsync` with your challenge. It returns independent
-caller-owned storage containing only the HMAC, without the protocol's digit-count header. The SDK borrows the
+For a full HMAC rather than a formatted OTP, use `CalculateAsync` with your challenge. It returns fresh,
+writable, caller-owned `Memory<byte>` containing only the HMAC, without the protocol's digit-count header. The SDK borrows the
 credential and challenge without modifying them; keep the challenge unchanged until the call completes.
 Clear a returned result named `hmac` in a `finally` block with
-`CryptographicOperations.ZeroMemory(System.Runtime.InteropServices.MemoryMarshal.AsMemory(hmac).Span)`.
+`CryptographicOperations.ZeroMemory(hmac.Span)`.
 You also remain responsible for clearing your challenge storage when appropriate, after the call completes.
 
 After TLV decoding, known responses must contain the structure required by the operation. Missing full-response

@@ -471,7 +471,7 @@ public class OathToolCancellationTests
         public Task ResetAsync(CancellationToken cancellationToken = default) => Operate(cancellationToken);
         public Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default) => Operate(cancellationToken);
         public Task UnsetKeyAsync(CancellationToken cancellationToken = default) => Operate(cancellationToken);
-        public Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<Memory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<T> AuthenticateAndRetryAsync<T>(Func<CancellationToken, Task<T>> operation, Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task AuthenticateAndRetryAsync(Func<CancellationToken, Task> operation, Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider, CancellationToken cancellationToken = default) => throw new NotSupportedException();
     }

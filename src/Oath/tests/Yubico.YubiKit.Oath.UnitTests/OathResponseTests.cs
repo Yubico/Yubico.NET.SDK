@@ -72,16 +72,22 @@ public sealed class OathResponseTests
         await using var session = await CreateAsync(backend);
         var credential = CredentialFor(session);
         byte[] challenge = [1, 2, 3];
-        ReadOnlyMemory<byte> result = await session.CalculateAsync(credential, challenge, TestContext.Current.CancellationToken);
+        IOathSession consumer = session;
+        Memory<byte> result = await consumer.CalculateAsync(credential, challenge, TestContext.Current.CancellationToken);
+        Memory<byte> second = default;
         try
         {
             Assert.True(CryptographicOperations.FixedTimeEquals(hmac, result.Span));
+            second = await consumer.CalculateAsync(credential, challenge, TestContext.Current.CancellationToken);
+            CryptographicOperations.ZeroMemory(result.Span);
+            Assert.True(CryptographicOperations.FixedTimeEquals(hmac, second.Span));
             Assert.Equal(new byte[] { 1, 2, 3 }, challenge);
             AssertCleared(backend.LastResponse);
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(System.Runtime.InteropServices.MemoryMarshal.AsMemory(result).Span);
+            CryptographicOperations.ZeroMemory(result.Span);
+            CryptographicOperations.ZeroMemory(second.Span);
             CryptographicOperations.ZeroMemory(hmac);
         }
     }

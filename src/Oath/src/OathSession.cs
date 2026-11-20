@@ -391,7 +391,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <inheritdoc />
-    public async Task<ReadOnlyMemory<byte>> CalculateAsync(
+    public async Task<Memory<byte>> CalculateAsync(
         Credential credential,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default)

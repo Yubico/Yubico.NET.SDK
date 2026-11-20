@@ -159,7 +159,7 @@ public sealed class OathHelpersTests
         public Task PutCredentialAsync(CredentialData credentialData, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task DeleteCredentialAsync(Credential credential, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<Credential> RenameCredentialAsync(Credential credential, string? newIssuer, string newName, CancellationToken cancellationToken = default) => throw new NotSupportedException();
-        public Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<Memory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<Code> CalculateCodeAsync(Credential credential, long? timestamp = null, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<IReadOnlyDictionary<Credential, Code?>> CalculateAllAsync(long? timestamp = null, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task ResetAsync(CancellationToken cancellationToken = default) => throw new NotSupportedException();

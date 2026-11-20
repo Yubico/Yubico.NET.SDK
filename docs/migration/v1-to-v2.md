@@ -617,6 +617,9 @@ the exclusive end; the SDK does not impose a calendar-year limit. HOTP uses the 
 Invalid known timestamps are rejected before individual CALCULATE; aggregate custom-period bounds are checked
 when the response identifies the credential's period.
 
+`CalculateAsync` returns `Task<Memory<byte>>` for the raw HMAC. Consumers own the writable bytes and can clear
+them directly with `CryptographicOperations.ZeroMemory(hmac.Span)`. The SDK does not clear caller inputs.
+
 A failed device-HMAC verification now throws `BadResponseException`. An access-key rejection reported by the
 device retains its `OathException` and raw status; that rejection does not by itself prove a mistyped password.
 

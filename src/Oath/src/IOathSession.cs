@@ -150,7 +150,7 @@ public interface IOathSession : IApplicationSession
     /// </param>
     /// <param name="cancellationToken">The cancellation token for the operation.</param>
     /// <returns>
-    ///     Independent, caller-owned HMAC storage, excluding the protocol's leading digit-count byte.
+    ///     Fresh, writable, caller-owned HMAC storage, excluding the protocol's leading digit-count byte.
     ///     The returned memory remains valid after session disposal.
     /// </returns>
     /// <remarks>
@@ -158,9 +158,8 @@ public interface IOathSession : IApplicationSession
     ///     contains a digit header and a nonempty HMAC payload before reporting successful user presence;
     ///     this structural check does not verify a particular digest length. Clear the returned bytes
     ///     when no longer needed, including when later processing fails. For a result named <c>hmac</c>,
-    ///     use <c>CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(hmac).Span)</c> in a
-    ///     <c>finally</c> block. These types are in <c>System.Security.Cryptography</c> and
-    ///     <c>System.Runtime.InteropServices</c>, respectively. The caller also remains responsible
+    ///     use <c>CryptographicOperations.ZeroMemory(hmac.Span)</c> in a <c>finally</c> block.
+    ///     The caller also remains responsible
     ///     for clearing its challenge storage when appropriate, after the operation completes.
     /// </remarks>
     /// <exception cref="ArgumentException">
@@ -170,7 +169,7 @@ public interface IOathSession : IApplicationSession
     /// <exception cref="Core.BadResponseException">
     ///     The required full-response tag is missing, or its value lacks the digit header or HMAC payload.
     /// </exception>
-    Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge,
+    Task<Memory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default);
 
     /// <summary>

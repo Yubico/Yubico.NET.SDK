@@ -173,7 +173,7 @@ Successful, cancelled, and failed operations resolve as `Completed`, `Cancelled`
 words do not currently provide verified evidence for mapping a failure to `TimedOut`. `CalculateCodeAsync`
 validates the truncated response before successful resolution; `CalculateAsync` requires the full-response
 tag, a digit header, and a nonempty HMAC payload. This is structural validation, not verification of a
-particular digest length. It returns an independent copy of the HMAC only, without the digit header,
+particular digest length. It returns a fresh, writable `Memory<byte>` copy of the HMAC only, without the digit header,
 after the callback succeeds. The caller owns and clears that returned storage; caller inputs remain unchanged.
 Await the whole public workflow before teardown: CalculateAll followups, password-provider/VALIDATE/retry
 and notification callbacks extend beyond one guarded exchange. Keep borrowed inputs/services alive and

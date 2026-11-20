@@ -22,16 +22,11 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <remarks>
 /// <para>
 /// This convenience parser expects a definite-length authData extensions map, not the complete CTAP response or
-/// unsigned extension outputs. The memory overload reconstructs supported values into new CBOR arrays;
-/// it does not preserve byte-exact original encoding or every valid unknown CBOR value. Supported
-/// values are signed-range integers, byte/text strings, booleans, null, arrays and maps of those values.
-/// Tags, floats and other simple values can be lost or cause reconstruction failure; large unsigned
-/// integers can fail. Duplicate identifiers overwrite earlier values. Retain the source parent raw
-/// response/authenticator-data bytes when exact or unknown data is needed; their guarantees are separate.
+/// unsigned extension outputs. Values are retained as exact encoded slices, including unknown values.
+/// Duplicate identifiers are rejected. Keep the borrowed source bytes unchanged while using the result.
 /// </para>
 /// <para>
-/// Reconstructed values and byte-string getters allocate independent copies with no disposal/zeroing
-/// boundary. Session disposal or clearing the source does not clear those copies. Typed Try methods
+/// Some typed getters allocate independent copies; clearing the source does not clear those copies. Typed Try methods
 /// are shape-specific, may reject present values, and can throw for malformed/wrong-shape input.
 /// </para>
 /// <para>
@@ -251,7 +246,7 @@ public sealed class ExtensionOutput
     /// Attempts to get raw extension data by identifier.
     /// </summary>
     /// <param name="extensionId">The extension identifier.</param>
-    /// <param name="data">Reconstructed CBOR, or empty data from the identifiers-only reader overload; not an original encoded slice.</param>
+    /// <param name="data">A borrowed slice containing the original encoded CBOR value.</param>
     /// <returns>True if the extension was present.</returns>
     public bool TryGetRawExtension(string extensionId, out ReadOnlyMemory<byte> data)
     {
@@ -259,10 +254,10 @@ public sealed class ExtensionOutput
     }
 
     /// <summary>
-    /// Reconstructs supported extension values from CBOR bytes into independent encoded copies.
+    /// Decodes one extensions map, borrowing its encoded values.
     /// </summary>
     /// <param name="data">The CBOR-encoded extensions map.</param>
-    /// <returns>The convenience output, subject to the reconstruction and ownership limits in the class remarks.</returns>
+    /// <returns>The extension output with borrowed encoded values.</returns>
     public static ExtensionOutput Decode(ReadOnlyMemory<byte> data) =>
         DecodeWithRawData(data);
 
@@ -272,9 +267,8 @@ public sealed class ExtensionOutput
     /// <param name="reader">The CBOR reader positioned at the extensions map.</param>
     /// <returns>The decoded extension output.</returns>
     /// <remarks>
-    /// This overload retains identifiers only and stores empty data after skipping each value.
-    /// HasExtensions/ExtensionIds remain usable, but typed value accessors are not usable on its output.
-    /// Use the memory overload for limited value reconstruction, or retain source raw bytes for exact data.
+    /// Borrows encoded values from the reader's input and respects its conformance mode.
+    /// Only the current map is consumed; the enclosing reader remains positioned after that map.
     /// </remarks>
     public static ExtensionOutput Decode(CborReader reader)
     {
@@ -282,13 +276,13 @@ public sealed class ExtensionOutput
 
         var extensions = new Dictionary<string, ReadOnlyMemory<byte>>();
 
-        var mapCount = reader.ReadStartMap() ?? 0;
+        var mapCount = reader.ReadStartMap()
+            ?? throw new CborContentException("The extensions map must have a definite length.");
         for (var i = 0; i < mapCount; i++)
         {
             var key = reader.ReadTextString();
-            // This overload intentionally retains only the identifier, not a decodable value.
-            reader.SkipValue();
-            extensions[key] = ReadOnlyMemory<byte>.Empty;
+            if (!extensions.TryAdd(key, reader.ReadEncodedValue()))
+                throw new CborContentException("Duplicate extension identifier.");
         }
         reader.ReadEndMap();
 
@@ -296,10 +290,10 @@ public sealed class ExtensionOutput
     }
 
     /// <summary>
-    /// Reconstructs supported extension values from CBOR bytes; the name does not imply byte-exact preservation.
+    /// Decodes one extensions map, borrowing its exact encoded values.
     /// </summary>
     /// <param name="data">The CBOR-encoded extensions map.</param>
-    /// <returns>Independent reconstructed values with the class-level unknown-data/cleanup limitations.</returns>
+    /// <returns>The extension output with borrowed encoded values.</returns>
     public static ExtensionOutput DecodeWithRawData(ReadOnlyMemory<byte> data)
     {
         if (data.IsEmpty)
@@ -307,69 +301,11 @@ public sealed class ExtensionOutput
             return new ExtensionOutput(new Dictionary<string, ReadOnlyMemory<byte>>());
         }
 
-        var reader = new CborReader(data, CborConformanceMode.Lax);
-        var extensions = new Dictionary<string, ReadOnlyMemory<byte>>();
+        var reader = new CborReader(data, CborConformanceMode.Strict);
+        var result = Decode(reader);
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Unexpected bytes after the extensions map.");
 
-        var mapCount = reader.ReadStartMap() ?? 0;
-        for (var i = 0; i < mapCount; i++)
-        {
-            var key = reader.ReadTextString();
-
-            // Re-encode supported values, rather than retaining a slice of the original encoding.
-            var valueWriter = new CborWriter(CborConformanceMode.Lax);
-            CopyCborValue(reader, valueWriter);
-            extensions[key] = valueWriter.Encode();
-        }
-        reader.ReadEndMap();
-
-        return new ExtensionOutput(extensions);
-    }
-
-    private static void CopyCborValue(CborReader reader, CborWriter writer)
-    {
-        switch (reader.PeekState())
-        {
-            case CborReaderState.UnsignedInteger:
-            case CborReaderState.NegativeInteger:
-                writer.WriteInt64(reader.ReadInt64());
-                break;
-            case CborReaderState.ByteString:
-                writer.WriteByteString(reader.ReadByteString());
-                break;
-            case CborReaderState.TextString:
-                writer.WriteTextString(reader.ReadTextString());
-                break;
-            case CborReaderState.Boolean:
-                writer.WriteBoolean(reader.ReadBoolean());
-                break;
-            case CborReaderState.Null:
-                reader.ReadNull();
-                writer.WriteNull();
-                break;
-            case CborReaderState.StartArray:
-                var arrayLength = reader.ReadStartArray();
-                writer.WriteStartArray(arrayLength);
-                while (reader.PeekState() != CborReaderState.EndArray)
-                {
-                    CopyCborValue(reader, writer);
-                }
-                reader.ReadEndArray();
-                writer.WriteEndArray();
-                break;
-            case CborReaderState.StartMap:
-                var mapLength = reader.ReadStartMap();
-                writer.WriteStartMap(mapLength);
-                while (reader.PeekState() != CborReaderState.EndMap)
-                {
-                    CopyCborValue(reader, writer); // key
-                    CopyCborValue(reader, writer); // value
-                }
-                reader.ReadEndMap();
-                writer.WriteEndMap();
-                break;
-            default:
-                reader.SkipValue();
-                break;
-        }
+        return result;
     }
 }

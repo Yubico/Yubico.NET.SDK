@@ -404,8 +404,8 @@ Valid authenticator response data that is not yet modeled must remain usable wit
 - `RawData` on response owners such as `AuthenticatorInfo`, credential metadata, relying-party information, `StoredCredentialInfo`, `FingerprintSensorInfo`, and `EnrollmentSampleResult` preserves the complete response envelope. Dispose `StoredCredentialInfo` directly, or its owning `CredentialEnumerationResult`, because its envelope can contain secret fields.
 - `AttestedCredentialData.CredentialPublicKey`, with `CoseOtherKey.RawCbor` when an unmodeled key type is not claimed by a modeled algorithm. COSE keys must still report an algorithm.
 - AuthenticatorData raw extension bytes and `WebAuthnAuthenticatorData.ParsedExtensions` expose encoded
-  extension data. `ExtensionOutput.TryGetRawExtension` is a limited reconstruction, not byte-exact
-  preservation of every CBOR type; its reader overload stores identifiers with empty values only.
+  extension data. Both `ExtensionOutput.Decode` overloads preserve exact encoded values as borrowed
+  slices; keep the input unchanged while using those views.
 - `ICtap2Session.SendCborRequestAsync` for explicitly constructed raw CTAP CBOR requests and responses.
 
 PIN/UV key agreement is a separate security-critical boundary: do not relax required P-256 key type,

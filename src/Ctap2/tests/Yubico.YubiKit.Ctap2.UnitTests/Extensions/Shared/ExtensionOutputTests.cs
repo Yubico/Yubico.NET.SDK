@@ -166,6 +166,39 @@ public class ExtensionOutputTests
         Assert.False(result);
     }
 
+    [Theory]
+    [InlineData("C1F93C00")] // Tagged half-precision float.
+    [InlineData("1BFFFFFFFFFFFFFFFF")]
+    [InlineData("A16178F7")] // Nested simple value.
+    public void Decode_PreservesUnknownValuesFromEitherOverload(string valueHex)
+    {
+        byte[] value = Convert.FromHexString(valueHex);
+        byte[] encoded = [0xA1, 0x61, 0x78, .. value];
+
+        foreach (var output in new[]
+        {
+            ExtensionOutput.Decode(encoded),
+            ExtensionOutput.Decode(new CborReader(encoded, CborConformanceMode.Strict))
+        })
+        {
+            Assert.True(output.TryGetRawExtension("x", out var raw));
+            Assert.Equal(value, raw.ToArray());
+            Assert.True(System.Runtime.InteropServices.MemoryMarshal.TryGetArray(raw, out var slice));
+            Assert.Same(encoded, slice.Array);
+            Assert.Equal(3, slice.Offset);
+        }
+    }
+
+    [Theory]
+    [InlineData("A26178F46178F5")]
+    [InlineData("A161784201")]
+    public void Decode_RejectsDuplicateOrMalformedValues(string mapHex)
+    {
+        byte[] encoded = Convert.FromHexString(mapHex);
+        Assert.Throws<CborContentException>(() => ExtensionOutput.Decode(encoded));
+        Assert.Throws<CborContentException>(() => ExtensionOutput.Decode(new CborReader(encoded, CborConformanceMode.Lax)));
+    }
+
     [Fact]
     public void Decode_WithMultipleExtensions_ParsesAll()
     {

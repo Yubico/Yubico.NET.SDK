@@ -925,11 +925,11 @@ virtual Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.PrintMembers(System.Text.St
 ~override Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.ToString() -> string
 
 Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithHmacSecret() -> Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder!
-Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.LargeBlobEntry(System.ReadOnlyMemory<byte> ciphertext, System.ReadOnlyMemory<byte> nonce, long originalSize) -> void
+Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.LargeBlobEntry(System.ReadOnlyMemory<byte> ciphertext, System.ReadOnlyMemory<byte> nonce, ulong originalSize) -> void
 Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.Ciphertext.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.Nonce.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.OriginalSize.get -> long
-const Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.MaxOriginalSize = 1048576 -> long
+Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.OriginalSize.get -> ulong
+const Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.MaxOriginalSize = 1048576 -> ulong
 static Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobArray.HasValidHash(System.ReadOnlyMemory<byte> data) -> bool
 Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobStorage.LargeBlobStorage(Yubico.YubiKit.Ctap2.ICtap2Session! session) -> void
 Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobStorage.LargeBlobStorage(Yubico.YubiKit.Ctap2.ICtap2Session! session, Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlyMemory<byte> pinUvAuthToken) -> void

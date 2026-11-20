@@ -106,7 +106,7 @@ public class LargeBlobSpecFormatTests
         var entry = LargeBlobEntry.Encrypt(KeyA, BlobA);
 
         Assert.Equal(NonceSize, entry.Nonce.Length);
-        Assert.Equal(BlobA.Length, entry.OriginalSize);
+        Assert.Equal((ulong)BlobA.Length, entry.OriginalSize);
         Assert.True(entry.Ciphertext.Length > TagSize);
         Assert.Equal(BlobA, entry.TryDecrypt(KeyA));
         Assert.Null(entry.TryDecrypt(KeyB));
@@ -175,6 +175,43 @@ public class LargeBlobSpecFormatTests
         var huge = new LargeBlobEntry(genuine.Ciphertext, genuine.Nonce, LargeBlobEntry.MaxOriginalSize + 1);
 
         Assert.Null(huge.TryDecrypt(KeyA));
+    }
+
+    [Fact]
+    public void Array_PreservesFullWidthOriginalSizeAndUnknownKey()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartArray(1);
+        writer.WriteStartMap(4);
+        writer.WriteInt32(1);
+        writer.WriteByteString(new byte[16]);
+        writer.WriteInt32(2);
+        writer.WriteByteString(new byte[12]);
+        writer.WriteInt32(3);
+        writer.WriteUInt64(ulong.MaxValue);
+        writer.WriteUInt64(ulong.MaxValue);
+        writer.WriteBoolean(true);
+        writer.WriteEndMap();
+        writer.WriteEndArray();
+        byte[] serialized = Finish(writer);
+
+        var array = LargeBlobArray.Deserialize(serialized);
+
+        Assert.Equal(ulong.MaxValue, Assert.Single(array.Entries).OriginalSize);
+        Assert.Null(array.FindAndDecrypt(KeyA));
+        Assert.Equal(serialized, array.Serialize());
+    }
+
+    [Fact]
+    public void Entry_EncryptAndDecryptShareOneMiBLimit()
+    {
+        var data = new byte[(int)LargeBlobEntry.MaxOriginalSize + 1];
+
+        Assert.Throws<ArgumentOutOfRangeException>("data", () => LargeBlobEntry.Encrypt(KeyA, data));
+        var atLimit = data.AsSpan()[..^1];
+        var decrypted = LargeBlobEntry.Encrypt(KeyA, atLimit).TryDecrypt(KeyA);
+        Assert.NotNull(decrypted);
+        Assert.True(atLimit.SequenceEqual(decrypted));
     }
 
     // First-fragment length and reported write-capacity fixtures.

@@ -113,7 +113,12 @@ public static class FingerprintsMenu
         var info = result.SensorInfo!;
         OutputHelpers.WriteSuccess("Fingerprint sensor info retrieved.");
         OutputHelpers.WriteKeyValue("Sensor type",
-            info.FingerprintKind == FingerprintKind.Touch ? "Touch" : "Swipe");
+            info.FingerprintKind switch
+            {
+                FingerprintKind.Touch => "Touch",
+                FingerprintKind.Swipe => "Swipe",
+                _ => $"Unknown ({(int)info.FingerprintKind})"
+            });
         OutputHelpers.WriteKeyValue("Max samples for enrollment",
             info.MaxCaptureSamplesRequiredForEnroll.ToString());
 

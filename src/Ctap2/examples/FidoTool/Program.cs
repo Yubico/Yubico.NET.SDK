@@ -56,13 +56,29 @@ return exitCode;
 
 // ---------------------------------------------------------------------------
 // CLI verb routing — a small ykman-like grouping, not command/parser compatibility or the full SDK API.
-// Help/parser/cancellation defects remain executable follow-up work; see the sample README.
 // ---------------------------------------------------------------------------
 static async Task<int> RunVerbAsync(string[] args, CancellationToken cancellationToken)
 {
     try
     {
-        return args[0].ToLowerInvariant() switch
+        string verb = args[0].ToLowerInvariant();
+        string? subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : null;
+        if (HasFlag(args, "--help") || HasFlag(args, "-h") || subVerb == "help")
+            return ShowHelp();
+
+        if (verb is "access" or "config" or "credentials" or "fingerprints")
+        {
+            if (subVerb is null)
+                return ShowHelp();
+            if (!IsKnownSubcommand(verb, subVerb))
+                return ShowUnknownCommand($"{verb} {subVerb}");
+        }
+
+        // Check value flags before any discovery, prompts, or device operation.
+        _ = ParseOption(args, "--pin");
+        _ = ParseOption(args, "--new-pin");
+
+        return verb switch
         {
             "info" => await RunInfoVerbAsync(cancellationToken),
             "reset" => await RunResetVerbAsync(args, cancellationToken),
@@ -675,17 +691,29 @@ static async Task<int> RunFingerprintsVerbAsync(string[] args, CancellationToken
 // ---------------------------------------------------------------------------
 // Argument parsing helpers
 // ---------------------------------------------------------------------------
+static bool IsKnownSubcommand(string verb, string subVerb) => verb switch
+{
+    "access" => subVerb is "set-pin" or "change-pin" or "verify-pin",
+    "config" => subVerb is "toggle-always-uv" or "enable-ep-attestation",
+    "credentials" => subVerb is "list" or "delete",
+    "fingerprints" => subVerb is "list" or "add" or "delete" or "rename",
+    _ => false
+};
+
 static string? ParseOption(string[] args, string flag)
 {
-    for (int i = 0; i < args.Length - 1; i++)
+    string? value = null;
+    for (int i = 0; i < args.Length; i++)
     {
         if (string.Equals(args[i], flag, StringComparison.OrdinalIgnoreCase))
         {
-            return args[i + 1];
+            if (i + 1 == args.Length || args[i + 1].Length == 0 || args[i + 1].StartsWith('-'))
+                throw new ArgumentException($"Missing value for {flag}.");
+            value ??= args[i + 1];
         }
     }
 
-    return null;
+    return value;
 }
 
 static bool HasFlag(string[] args, string flag) =>
@@ -701,7 +729,7 @@ static int ShowHelp()
     AnsiConsole.MarkupLine("[bold]Commands:[/]");
     AnsiConsole.MarkupLine("  [green]info[/]            Display general status of the FIDO application");
     AnsiConsole.MarkupLine("  [green]reset[/]           Reset all FIDO applications [[-f]]");
-    AnsiConsole.MarkupLine("  [green]access[/]          Manage PIN (change-pin, verify-pin)");
+    AnsiConsole.MarkupLine("  [green]access[/]          Manage PIN (set-pin, change-pin, verify-pin)");
     AnsiConsole.MarkupLine("  [green]config[/]          Configure authenticator settings (toggle-always-uv, enable-ep-attestation)");
     AnsiConsole.MarkupLine("  [green]credentials[/]     Manage discoverable credentials (list, delete)");
     AnsiConsole.MarkupLine("  [green]fingerprints[/]    Manage fingerprint enrollments (list, add, delete, rename)");
@@ -711,6 +739,7 @@ static int ShowHelp()
     AnsiConsole.WriteLine();
     AnsiConsole.MarkupLine("[bold]Options:[/]");
     AnsiConsole.MarkupLine("  [green]--pin PIN[/]       Provide PIN (prompted if omitted in interactive mode)");
+    AnsiConsole.MarkupLine("  [green]--new-pin PIN[/]   Provide the new PIN for set-pin or change-pin");
     AnsiConsole.MarkupLine("  [green]-f, --force[/]     Skip confirmation prompts");
     return 0;
 }

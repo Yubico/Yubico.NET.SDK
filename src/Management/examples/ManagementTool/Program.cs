@@ -21,6 +21,21 @@ return await RunInteractiveAsync();
 static async Task<int> DispatchCliAsync(string[] args)
 {
     var command = args[0].ToLowerInvariant();
+    if (args.Length != 1)
+    {
+        if (args.Length == 2 && IsHelp(args[1]) && command is "info" or "config")
+        {
+            Console.WriteLine($"Usage: managementtool {command}");
+            Console.WriteLine(command == "info"
+                ? "Select a SmartCard YubiKey and display its device information."
+                : "Select a SmartCard YubiKey and display its current configuration.");
+            return 0;
+        }
+
+        Console.Error.WriteLine("Invalid arguments.");
+        PrintUsage();
+        return 1;
+    }
 
     return command switch
     {
@@ -30,6 +45,8 @@ static async Task<int> DispatchCliAsync(string[] args)
         _ => PrintUnknownCommand(command)
     };
 }
+
+static bool IsHelp(string argument) => argument is "-h" or "--help";
 
 // --- Interactive mode ---
 
@@ -61,7 +78,7 @@ static async Task<int> RunInteractiveAsync()
 
 static void PrintUsage()
 {
-    Console.Error.WriteLine("Usage: managementtool <command> [[options]]");
+    Console.Error.WriteLine("Usage: managementtool <command> [--help]");
     Console.Error.WriteLine();
     Console.Error.WriteLine("Commands:");
     Console.Error.WriteLine("  info        Display device information (firmware, serial, capabilities)");

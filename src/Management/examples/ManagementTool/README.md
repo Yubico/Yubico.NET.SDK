@@ -75,10 +75,9 @@ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.cspro
 dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj -- config
 ```
 
-The data commands are `info` and `config`. Top-level `-h`, `--help` and `help` print usage. Dispatch uses
-only the first token and ignores extra command arguments, so do not rely on the printed `command --help`
-suggestion: `info --help` can query a device instead of displaying command-specific help. Use the menu
-for configuration changes. Selection uses fresh one-shot discovery; top-level help returns before discovery.
+The data commands are `info` and `config`. Top-level `-h`, `--help` and `help` print usage. Use
+`info --help` or `config --help` for command-specific help. Help and invalid arguments return before
+device discovery. Use the interactive menu for configuration changes.
 
 ## Configuration tasks and recovery
 

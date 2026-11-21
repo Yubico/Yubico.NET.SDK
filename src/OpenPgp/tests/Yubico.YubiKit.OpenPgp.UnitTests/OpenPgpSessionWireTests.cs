@@ -99,6 +99,27 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal([0x00, 0xDA, 0x00, 0xD3, 0x00], LastCommand(connection));
     }
 
+    [Fact]
+    public async Task SetResetCode_EmptyAndKdfActive_WritesResetSaltDigest()
+    {
+        var token = TestContext.Current.CancellationToken;
+        // SHA-256 S2K, 32 input octets, with distinct User, Reset and Admin salts.
+        byte[] f9 = Convert.FromHexString("81010382010883040000002084080102030405060708" +
+            "85081112131415161718860821222324252627289000");
+        using var connection = CreateInitializedConnection(f9, OkResponse());
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        int before = connection.TransmittedCommands.Count;
+
+        await session.SetResetCodeAsync(ReadOnlyMemory<byte>.Empty, token);
+
+        var commands = connection.TransmittedCommands.Skip(before).ToArray();
+        Assert.Equal(2, commands.Length);
+        Assert.Equal([0x00, 0xCA, 0x00, 0xF9, 0x00], commands[0]);
+        // Known answer: hashlib.sha256(bytes.fromhex("1112131415161718") * 4).
+        Assert.Equal("00DA00D3205A46361778970AD85966A8839A6D0B0B97AB54C74C3177B51BFE88930DB793CC00",
+            Convert.ToHexString(commands[1]));
+    }
+
     [Theory]
     [InlineData("0100069000", false)]
     [InlineData("0100079000", true)]

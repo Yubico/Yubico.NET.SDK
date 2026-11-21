@@ -14,9 +14,11 @@
 
 using System.Reflection;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.YubiHsm.Backend;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
@@ -437,7 +439,7 @@ public class HsmAuthSessionByteLevelTests
     ///     A caller-supplied firmware override survives <c>ResetAsync</c>.
     /// </summary>
     /// <remarks>
-    ///     Reset reselects the applet using the existing protocol. Retaining the resolved override
+    ///     Reset reselects using a fresh protocol. Retaining the explicit override
     ///     keeps feature policy consistent across reset, even when SELECT reports a lower applet version.
     /// </remarks>
     [Fact]
@@ -458,6 +460,63 @@ public class HsmAuthSessionByteLevelTests
 
         Assert.Equal(new FirmwareVersion(5, 8, 0), session.FirmwareVersion);
         Assert.True(session.IsSupported(HsmAuthSession.FeaturePasswordChange));
+    }
+
+    [Fact]
+    public async Task ResetAsync_RefreshesPolicyAndUsesSameSessionForNextCommand()
+    {
+        using var connection = new RecordingSmartCardConnection(
+            [0x79, 3, 5, 4, 3, 0x90, 0], OkResponse(), [0x79, 3, 5, 8, 0, 0x90, 0], [8, 0x90, 0]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await HsmAuthSession.CreateAsync(connection, cancellationToken: token);
+        Assert.False(session.IsSupported(HsmAuthSession.FeaturePasswordChange));
+
+        await session.ResetAsync(token);
+
+        Assert.True(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        Assert.True(session.IsSupported(HsmAuthSession.FeaturePasswordChange));
+        Assert.Equal(8, await session.GetManagementKeyRetriesAsync(token));
+        Assert.Equal(new byte[] { 0xA4, 0x06, 0xA4, 0x09 }, connection.TransmittedCommands.Select(c => c[1]));
+        Assert.Equal(0, connection.DisposeCount);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ResetAsync_DistinguishesRejectedResetFromFailedReselect(bool resetConfirmed)
+    {
+        byte[][] responses = resetConfirmed ? [OkResponse(), [0x6A, 0x82]] : [[0x69, 0x85], [8, 0x90, 0]];
+        using var connection = CreateInitializedConnection(responses);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await HsmAuthSession.CreateAsync(connection, cancellationToken: token);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(token));
+
+        Assert.Equal(resetConfirmed ? 0x6A82 : 0x6985, (ushort)error.SW.GetValueOrDefault());
+        Assert.Equal(!resetConfirmed, session.IsInitialized);
+        if (resetConfirmed)
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetManagementKeyRetriesAsync(token));
+        else
+            Assert.Equal(8, await session.GetManagementKeyRetriesAsync(token));
+        Assert.Equal(0, connection.DisposeCount);
+    }
+
+    [Fact]
+    public async Task ResetAsync_RefreshErrorSurvivesFailedOwnedConnectionDisposal()
+    {
+        var connection = new ExtendedCardConnection(OkResponse(), OkResponse(), [0x6A, 0x82]) { FailDisposal = true };
+        var device = new CardDevice(connection);
+        var token = TestContext.Current.CancellationToken;
+
+        var error = await Assert.ThrowsAsync<ApduException>(async () =>
+        {
+            await using var session = await device.CreateHsmAuthSessionAsync(cancellationToken: token);
+            await session.ResetAsync(token);
+        });
+
+        Assert.Equal(0x6A82, (ushort)error.SW.GetValueOrDefault());
+        Assert.Equal(1, connection.DisposeCalls);
     }
 
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
@@ -498,6 +557,41 @@ public class HsmAuthSessionByteLevelTests
         {
             Assert.Equal(0x03, command.Ins);
             return Task.FromResult(response);
+        }
+    }
+
+    private sealed class CardDevice(ISmartCardConnection connection) : IYubiKey
+    {
+        public string DeviceId => "scripted-hsmauth";
+        public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+        public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken) where TConnection : class, IConnection =>
+            Task.FromResult(Assert.IsAssignableFrom<TConnection>(connection));
+    }
+
+    private sealed class ExtendedCardConnection(params byte[][] responses) : ISmartCardConnection
+    {
+        public RecordingSmartCardConnection Recorder { get; } = new(responses);
+        public bool FailDisposal { get; init; }
+        public int DisposeCalls { get; private set; }
+        public Transport Transport => Transport.Usb;
+        public ConnectionType Type => ConnectionType.SmartCard;
+        public bool SupportsExtendedApdu() => true;
+        public IDisposable BeginTransaction(CancellationToken cancellationToken) => Recorder.BeginTransaction(cancellationToken);
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken) =>
+            Recorder.TransmitAndReceiveAsync(command, cancellationToken);
+
+        public void Dispose()
+        {
+            DisposeCalls++;
+            if (FailDisposal)
+                throw new InvalidOperationException("Scripted cleanup failure");
+            Recorder.Dispose();
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            Dispose();
+            return ValueTask.CompletedTask;
         }
     }
 }

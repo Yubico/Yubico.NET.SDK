@@ -103,14 +103,21 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal const int Pbkdf2DerivedKeyLength = 32;
 
     private IHsmAuthBackend _backend = null!;
+    private readonly ProtocolConfiguration? _configuration;
+    private readonly FirmwareVersion? _firmwareOverride;
+    private readonly ScpKeyParameters? _scpKeyParameters;
+    private bool _endingAfterRefreshFailure;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
     private HsmAuthSession(
         ISmartCardConnection connection,
-        IUserPresencePrompt? userPresencePrompt = null)
-        : base(connection, userPresencePrompt)
+        SessionCreationOptions? options)
+        : base(connection, options?.UserPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
+        _configuration = options?.ProtocolConfiguration;
+        _firmwareOverride = options?.FirmwareVersionOverride;
+        _scpKeyParameters = options?.ScpKeyParameters;
     }
 
     /// <summary>
@@ -126,7 +133,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <returns>An initialized <see cref="HsmAuthSession" />.</returns>
     /// <remarks>
     ///     An override does not skip SELECT; malformed response framing can still fail before version
-    ///     fallback. Keep borrowed inputs and prompt services alive through complete public tasks,
+    ///     fallback. Keep SCP parameters and their key/certificate owners alive through session disposal:
+    ///     a confirmed reset uses them again to establish a new channel. Keep other borrowed inputs and
+    ///     prompt services alive through complete public tasks,
     ///     including policy lookup, CALCULATE and callbacks, before disposing the session.
     /// </remarks>
     public static Task<HsmAuthSession> CreateAsync(
@@ -136,32 +145,27 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ConstructInitializedAsync(
             connection,
             options,
-            () => new HsmAuthSession(connection, options?.UserPresencePrompt),
-            (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+            () => new HsmAuthSession(connection, options),
+            (session, token) => session.InitializeAsync(token),
             cancellationToken);
 
-    private async Task InitializeAsync(
-        ProtocolConfiguration? configuration,
-        FirmwareVersion? firmwareVersion,
-        ScpKeyParameters? scpKeyParams,
-        CancellationToken cancellationToken)
+    private async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(_scpKeyParameters, cancellationToken)
             .ConfigureAwait(false);
         IHsmAuthBackend backend = new HsmAuthBackend(protocol);
 
         var initializationFirmwareVersion = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
-        var resolvedFirmwareVersion = firmwareVersion ?? initializationFirmwareVersion;
+        var resolvedFirmwareVersion = _firmwareOverride ?? initializationFirmwareVersion;
 
         var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
                 resolvedFirmwareVersion,
-                configuration,
-                scpKeyParams,
+                _configuration,
+                _scpKeyParameters,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -475,12 +479,51 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        // Reuse the protocol; this path owns no PC/SC transaction and starts no fresh SCP handshake.
-        // Under SCP the re-SELECT passes through unprotected, retaining old host state and public flags;
-        // it does not establish that the next protected operation will succeed.
-        // Reselect after reset while retaining the resolved feature-version policy. Discarding the
-        // returned version keeps caller overrides and later feature gates consistent within this session.
-        _ = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+        // The applet reset does not reset Security Domain keys. Retire the old protocol graph and
+        // reselect/re-handshake on the same connection using the caller's original SCP parameters.
+        var previousProtocol = Protocol;
+        Protocol = null;
+        _backend = null!; // Published only after successful reinitialization.
+        IsInitialized = false;
+        IsAuthenticated = false;
+        FirmwareVersion = new FirmwareVersion();
+        try
+        {
+            previousProtocol?.Dispose();
+            await InitializeSessionAsync(InitializeAsync, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            _endingAfterRefreshFailure = true;
+            await DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        catch when (_endingAfterRefreshFailure)
+        {
+            // Do not cache a cleanup failure in the disposal gate or mask the refresh error.
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            base.Dispose(disposing);
+        }
+        catch when (_endingAfterRefreshFailure)
+        {
+            // The refresh exception is the primary error, including for implicit disposal.
+        }
     }
 
     /// <inheritdoc />

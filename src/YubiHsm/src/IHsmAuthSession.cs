@@ -191,12 +191,11 @@ public interface IHsmAuthSession : IApplicationSession
     /// </summary>
     /// <remarks>
     ///     Reset permanently erases all credentials, restores the 16-zero-byte management key and resets
-    ///     retry counters. The session reselects the applet over its existing protocol and retains its
-    ///     resolved feature-version policy, including any caller-supplied firmware override.
-    ///     It retains no SCP parameters and performs no fresh handshake. With SCP, RESET uses the secure
-    ///     graph but re-SELECT passes through unprotected, retaining old host state and readiness/auth flags.
-    ///     These values do not prove a usable post-reset channel. After reset or uncertainty, dispose the
-    ///     session/connection and create fresh scopes with required options rather than assuming recovery.
+    ///     retry counters. After confirmed RESET, the same session clears its old protocol and authentication
+    ///     state, reselects, refreshes feature policy and reestablishes SCP if originally requested. The
+    ///     applet reset does not replace Security Domain keys; keep the caller's original SCP parameters
+    ///     and their owners alive. If refresh fails or is cancelled, the applet reset has already completed:
+    ///     the refresh error propagates and the session closes. Do not retry RESET to recover that session.
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task ResetAsync(CancellationToken cancellationToken = default);

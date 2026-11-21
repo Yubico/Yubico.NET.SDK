@@ -280,10 +280,10 @@ the cancellation request as a device-interruption guarantee.
   CALCULATE, parsing and callbacks are separate phases; Core drains an admitted exchange, not all later
   application work. Keep borrowed inputs/prompt resources alive until the task is terminal.
 - `ResetAsync` (no undo), `DeleteCredentialAsync`, and `PutManagementKeyAsync` change persistent applet state.
-  Reset reuses its protocol without a fresh SCP handshake. With SCP, RESET is protected but re-SELECT
-  passes through unprotected; old host state and public readiness/authentication flags remain. End the
-  session/connection scopes and create fresh ones after reset or uncertainty rather than relying on
-  those flags as post-reset channel-health evidence.
+  A confirmed reset refreshes the same session: it reselects the applet on a fresh protocol and runs a new
+  SCP handshake with the caller's original parameters if SCP was requested. Keep those parameters and key
+  owners alive through session disposal. If refresh fails, the applet is already reset and the session ends;
+  open a new session to recover rather than repeating the destructive command.
 - Unsupported feature gates throw `NotSupportedException`; on versions 5.6.0–5.7.0 `GetChallengeAsync`
   omits a supplied password.
 - Enrollment, deletion, management-key changes, both CALCULATE methods and both password-change methods

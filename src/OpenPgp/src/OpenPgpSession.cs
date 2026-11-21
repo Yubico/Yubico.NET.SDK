@@ -78,7 +78,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     private FirmwareVersion? _firmwareVersionOverride;
     private readonly Func<DeviceInfo?>? _readCachedDeviceInfo;
     private FirmwareVersion? _numericVersion;
-    private FirmwareVersion? _pinAttemptsVersion;
+    private FirmwareVersion _appletGateVersion = FirmwareVersion.Default;
     private bool _endingAfterResetFailure;
 
     // ── Constructor (private — use CreateAsync) ───────────────────────
@@ -193,8 +193,9 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         // Unknown framing uses the legacy profile, not a synthesized zero-major protocol version.
         var featureVersion = cachedInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta
             ? new FirmwareVersion() : features ?? new FirmwareVersion();
-        // The NEO retry command was introduced in applet 1.0.7, not physical firmware 4.3.1.
-        _pinAttemptsVersion = cachedNeo && !featureVersion.IsAlphaOrBeta ? appletVersion : featureVersion;
+        // NEO reset and retry command floors are applet versions, not physical firmware versions.
+        _appletGateVersion = cachedNeo && !featureVersion.IsAlphaOrBeta
+            ? appletVersion ?? FirmwareVersion.Default : featureVersion;
         // A present, non-final qualifier (including unnamed values) is not production evidence.
         // cachedInfo is intentionally absent when the caller supplied an override.
         var scpEligibility = featureVersion.IsAlphaOrBeta ||

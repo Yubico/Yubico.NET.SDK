@@ -69,11 +69,12 @@ public sealed class ApplicationRelatedData
     public static ApplicationRelatedData Parse(ReadOnlySpan<byte> encoded)
     {
         // Unwrap the outer 0x6E tag
-        using var outerTlv = Tlv.Create(encoded);
-        if (outerTlv.Tag != (int)DataObject.ApplicationRelatedData || outerTlv.TotalLength != encoded.Length)
+        var remainder = encoded;
+        var (tag, _, outerBytes) = Tlv.ParseData(ref remainder);
+        if (tag != (int)DataObject.ApplicationRelatedData || !remainder.IsEmpty)
             throw new ArgumentException("Expected exactly one application-related data TLV.", nameof(encoded));
 
-        var outerValue = outerTlv.Value.Span;
+        ReadOnlySpan<byte> outerValue = outerBytes;
 
         var data = TlvHelper.DecodeDictionary(outerValue);
 

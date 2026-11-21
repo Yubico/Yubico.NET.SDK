@@ -41,6 +41,65 @@ public sealed class GlobalLoggingCollection;
 public sealed class OpenPgpSessionWireTests
 {
     [Theory]
+    [InlineData(5, false)]
+    [InlineData(6, true)]
+    public async Task Reset_CachedNeo_ChecksAppletFloorBeforeReadingOrBlockingPins(byte patch, bool supported)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection(OkResponse(), [1, 0, patch, 0x90, 0],
+            ApplicationRelatedDataResponse(), [0x6A, 0x88]);
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection, null,
+            () => default(DeviceInfo) with { FirmwareVersion = new FirmwareVersion(3, 4, 0) }, token);
+        if (supported)
+        {
+            var error = await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(token));
+            Assert.Equal((short)0x6A88, error.SW);
+            Assert.Equal(0xC4, LastCommand(connection)[3]);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.ResetAsync(token));
+            Assert.Equal(3, connection.TransmittedCommands.Count);
+        }
+        Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0x20);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Initialize_ApplicationDataAcceptsLongFormBerButRejectsTrailingData(bool trailing)
+    {
+        var token = TestContext.Current.CancellationToken;
+        var canonical = ApplicationRelatedDataResponse();
+        Assert.Equal(0x81, canonical[1]);
+        // BER permits a redundant leading zero in the definite length.
+        byte[] wire = [0x6E, 0x82, 0, .. canonical.AsSpan(2, canonical.Length - 4),
+            .. (trailing ? new byte[] { 0 } : []), 0x90, 0x00];
+        using var connection = new RecordingSmartCardConnection(OkResponse(), VersionResponse(), wire, wire);
+        if (trailing)
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => OpenPgpSession.CreateAsync(connection, cancellationToken: token));
+        }
+        else
+        {
+            await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+            Assert.Equal(wire[..^2], (await session.GetApplicationRelatedDataAsync(token)).Raw.ToArray());
+        }
+    }
+
+    [Fact]
+    public async Task SetResetCode_EmptyAndKdfDisabled_SendsZeroLengthResetCodeWrite()
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnection([0x81, 0x01, 0x00, 0x90, 0x00], OkResponse());
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.SetResetCodeAsync(ReadOnlyMemory<byte>.Empty, token);
+
+        Assert.Equal([0x00, 0xDA, 0x00, 0xD3, 0x00], LastCommand(connection));
+    }
+
+    [Theory]
     [InlineData("0100069000", false)]
     [InlineData("0100079000", true)]
     [InlineData("6985", true)] // Advisory version failure: Q6 admits the local gate.

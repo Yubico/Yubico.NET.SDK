@@ -26,7 +26,8 @@ public sealed partial class OpenPgpSession
     {
         ThrowIfDisposed();
 
-        EnsureSupports(FeatureReset);
+        if (!FeatureReset.IsSupportedByFirmware(_appletGateVersion))
+            throw new NotSupportedException("OpenPGP reset is not supported on this applet version.");
 
         _logger.LogInformation("Starting OpenPGP factory reset");
 

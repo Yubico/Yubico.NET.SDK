@@ -105,7 +105,9 @@ public sealed partial class OpenPgpSession
         try
         {
             using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
-            derivedBytes = EncodeCredential(kdf, Pw.Reset, resetCode, nameof(resetCode));
+            // Empty PUT DATA removes the Reset Code when KDF is disabled; it is not a credential.
+            derivedBytes = resetCode.IsEmpty && kdf is KdfNone
+                ? [] : EncodeCredential(kdf, Pw.Reset, resetCode, nameof(resetCode));
 
             await PutDataAsync(DataObject.ResettingCode, derivedBytes, cancellationToken)
                 .ConfigureAwait(false);
@@ -208,7 +210,7 @@ public sealed partial class OpenPgpSession
         ArgumentOutOfRangeException.ThrowIfGreaterThan(resetAttempts, 255);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(adminAttempts, 255);
 
-        if (_pinAttemptsVersion is { IsAlphaOrBeta: false } version &&
+        if (_appletGateVersion is { IsAlphaOrBeta: false } version &&
             (version.Major == 1 ? version.IsLessThan(1, 0, 7) : version.IsLessThan(4, 3, 1)))
             throw new NotSupportedException("Changing OpenPGP PIN attempts is not supported on this firmware.");
 

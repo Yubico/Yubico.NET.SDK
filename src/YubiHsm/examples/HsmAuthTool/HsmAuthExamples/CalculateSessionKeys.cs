@@ -14,23 +14,21 @@ public static class CalculateSessionKeys
         HsmAuthSession session,
         CancellationToken cancellationToken = default)
     {
-        // The chooser lists every algorithm, but this operation always calls symmetric CALCULATE.
-        // Select a symmetric credential; asymmetric handshake dispatch requires separate application code.
         var credentials = await session.ListCredentialsAsync(cancellationToken);
-        if (credentials.Count == 0)
-        {
-            OutputHelpers.WriteInfo("No credentials available for session key calculation.");
-            return;
-        }
-
         var labels = credentials
+            .Where(c => c.Algorithm == HsmAuthAlgorithm.Aes128YubicoAuthentication)
             .OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase)
             .Select(c => c.Label)
             .ToList();
+        if (labels.Count == 0)
+        {
+            OutputHelpers.WriteInfo("No symmetric credentials available for session key calculation.");
+            return;
+        }
 
         var label = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-                .Title("Select credential for session key calculation:")
+                .Title("Select a symmetric credential for session key calculation:")
                 .AddChoices(labels));
 
         using var credentialPassword = SecureCredential.Prompt("Credential password");
@@ -71,8 +69,6 @@ public static class CalculateSessionKeys
             // Use the host value sent to the HSM followed by its actual returned challenge.
             // Omitting the optional cryptogram skips applet verification; the external HSM library
             // remains responsible for peer verification, host authentication and protected commands.
-            // Supplied symmetric cryptograms can yield 56 response bytes; the SDK currently requires
-            // 48 and rejects that shape. Verify the complete target-app handshake before relying on it.
             hostChallenge.CopyTo(context, 0);
             hsmChallenge.CopyTo(context, 8);
             ReadOnlyMemory<byte>? cardCryptogramMemory = cardCryptogram is null

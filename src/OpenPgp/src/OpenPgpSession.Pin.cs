@@ -29,13 +29,10 @@ public sealed partial class OpenPgpSession
         ThrowIfDisposed();
 
         // Card §7.2.2 uses P2=81/82 for two access states of the same User PIN.
-        // Current extended handling also selects Reset identity for KDF/retry lookup;
-        // distinct User/Reset salts expose that mismatch. Reset Code is a separate credential.
-        var p2 = extended ? (byte)Pw.Reset : (byte)Pw.User;
-        var pw = extended ? Pw.Reset : Pw.User;
+        byte p2 = extended ? (byte)0x82 : (byte)Pw.User;
 
         _logger.LogDebug("Verifying User PIN (P2=0x{P2:X2})", p2);
-        await VerifyPwAsync(pw, p2, pin, cancellationToken).ConfigureAwait(false);
+        await VerifyPwAsync(Pw.User, p2, pin, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -298,7 +295,7 @@ public sealed partial class OpenPgpSession
         if (remaining < 0 && response.SW == SWConstants.SecurityStatusNotSatisfied)
         {
             // 6982 can cover wrong/unverified PW or secure-messaging failure (Card §7.9).
-            // C4 provides counters, though the extended-mode caller currently selects Reset's counter.
+            // C4 provides counters by credential, independent of the verification reference.
             try
             {
                 var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);

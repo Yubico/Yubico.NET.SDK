@@ -138,11 +138,9 @@ public sealed class OpenPgpInvalidPinExceptionTests
     }
 
     [Fact]
-    public async Task VerifyPinAsync_ExtendedWhenSecurityStatusNotSatisfied_FallsBackToResetAttemptsFromPinStatusQuery()
+    public async Task VerifyPinAsync_ExtendedWhenSecurityStatusNotSatisfied_FallsBackToUserAttemptsFromPinStatusQuery()
     {
-        // Records the current extended-mode defect: VERIFY P2=82 still addresses User PIN,
-        // but the implementation queries AttemptsReset through Pw.Reset identity. This assertion
-        // preserves observed behavior for a later fix; the correct logical counter is AttemptsUser.
+        // P2=82 selects the other-operation state for PW1, not the Reset Code credential.
         var connection = CreateInitializedConnection(
             KdfNotFoundResponse(),
             [0x69, 0x82],
@@ -156,7 +154,7 @@ public sealed class OpenPgpInvalidPinExceptionTests
             extended: true,
             cancellationToken: TestContext.Current.CancellationToken));
 
-        Assert.Equal(6, exception.RetriesRemaining);
+        Assert.Equal(5, exception.RetriesRemaining);
         Assert.Equal(unchecked((short)0x6982), exception.SW);
     }
 

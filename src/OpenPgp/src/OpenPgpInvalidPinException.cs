@@ -31,10 +31,7 @@ namespace Yubico.YubiKit.OpenPgp;
 ///     <para>
 ///         <see cref="RetriesRemaining" /> carries the count from 63Cx, zero from 6983, or the result
 ///         of a fallback status query for 6982. It is null when the count is unavailable.
-///         Current extended User verification selects Reset Code identity for that
-///         query, so its count can describe the Reset Code rather than the User PIN. Query fresh
-///         <see cref="IOpenPgpSession.GetPinStatusAsync" /> and inspect <see cref="PwStatus.AttemptsUser" />
-///         after an extended-mode failure; typed zero alone is insufficient to establish User blocking.
+///         In either User PIN verification mode, the query reads the User PIN counter.
 ///         Diagnose uncertainty before retrying. User recovery remains available through Reset Code/Admin.
 ///     </para>
 ///     <para>
@@ -49,9 +46,6 @@ public sealed class OpenPgpInvalidPinException : ApduException
     ///     Gets the available reported retry count, or <c>null</c> when unavailable.
     /// </summary>
     /// <remarks>
-    ///     Extended-mode 6982 fallback currently selects Reset Code attempts. Query fresh
-    ///     <see cref="IOpenPgpSession.GetPinStatusAsync" /> and inspect <see cref="PwStatus.AttemptsUser" />
-    ///     before deciding User PIN recovery; a reported zero alone does not establish User blocking.
     ///     Diagnose the cause before another verification attempt.
     /// </remarks>
     public int? RetriesRemaining { get; }

@@ -813,6 +813,27 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
+    public async Task VerifyPinAsync_ExtendedWithDistinctKdfSalts_SendsUserHashToReference82()
+    {
+        using var kdf = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256,
+            IterationCount = 32,
+            SaltUser = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 },
+            SaltReset = new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 },
+        };
+        var connection = CreateInitializedConnection([.. kdf.ToBytes(), 0x90, 0x00], OkResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.VerifyPinAsync("123456"u8.ToArray(), extended: true, cancellationToken: token);
+
+        byte[] command = LastCommand(connection);
+        Assert.Equal([0x00, 0x20, 0x00, 0x82], command[..4]);
+        Assert.Equal(kdf.Process(Pw.User, "123456"u8), CommandData(command).ToArray());
+    }
+
+    [Fact]
     public async Task DisposeAsync_ZeroesCachedKdfSalt()
     {
         using var configuredKdf = new KdfIterSaltedS2k

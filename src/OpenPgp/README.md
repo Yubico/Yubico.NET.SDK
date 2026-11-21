@@ -112,12 +112,8 @@ Avoid creating immutable strings for production secrets, and clear owned credent
 distinct from card byte limits. The byte-taking PIN methods add no general credential-format/length validation.
 
 The same User PIN (PW1) authorizes two separate card states: `extended: false` selects signature mode (VERIFY P2=81),
-and `extended: true` selects decryption/authentication mode (P2=82). Both share the User retry counter. The Reset Code
+and `extended: true` selects decryption/authentication mode (P2=82). Both use the User KDF salt and retry counter. The Reset Code
 is a separate recovery credential, even though its `Pw.Reset` enum value also happens to be 82.
-
-**Current KDF limitation:** extended verification uses the Reset Code salt and, on status 6982, its retry counter.
-Distinct User/Reset salts can therefore reject a correct User PIN and consume a User retry. Use a qualified
-configuration for extended operations and treat that fallback count as uncertain until the implementation is corrected.
 
 Change a known PIN without prior verification; the command checks the current value. The following method also
 installs a recovery code under the new Admin PIN. All five credential inputs are borrowed buffers that the caller clears.
@@ -187,9 +183,8 @@ before deployment; a successful same-PIN change alone establishes little about t
 This provisioning fragment configures distinct salts and initial default-PIN hashes on an authorized, empty,
 KDF-capable YubiKey. Supply the currently valid Admin PIN and the UTF-8 default User/Admin buffers (`123456` and
 `12345678`). It closes the provisioning session before fresh-session verification. Change default credentials and
-install a new Reset Code afterward, then provision keys. **Extended verification remains affected by the distinct-salt
-defect**, so this sequence establishes ordinary User/Admin access only; choose a qualified configuration before
-using decryption/authentication. A state-dependent refusal requires inspection rather than an automatic reset/retry.
+install a new Reset Code afterward, then provision keys. This sequence checks ordinary User/Admin access only.
+A state-dependent refusal requires inspection rather than an automatic reset/retry.
 
 ```csharp
 static async Task ConfigureInitialKdfAsync(
@@ -389,7 +384,6 @@ static async Task<bool> SignAndVerifyP256Async(
 `PinPolicy.Always` requires User PIN verification for each signature; `Once` retains authorization until the card
 access state ends. `UnverifyPinAsync` clears both User modes using the SDK's 5.6.0 check. For `AuthenticateAsync`,
 verify with `extended: true`, then pass your challenge and verify the result with the Authentication public key.
-Apply the current distinct-salt KDF limitation described above to that route.
 
 ## Decipher an RSA block or derive an ECDH secret
 

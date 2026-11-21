@@ -81,8 +81,7 @@ Supports SHA256 (0x08) and SHA512 (0x0A).
 Card §4.3.2 assigns credential/F9 alignment to terminal software. YubiKey's vendor transition uses initial
 User/Admin hashes and invalidates the Reset Code. Configure before ordinary keys; a state-dependent F9 refusal
 needs inspection rather than an invented universal firmware rule. Change methods derive both old/new inputs
-with the current KDF. Current extended User VERIFY selects Reset identity for salt/6982 retry fallback even
-though P2=81 and 82 both verify PW1. Distinct salts can reject a correct PIN; preserve this defect qualification.
+with the current KDF. Both User VERIFY references (P2=81 and 82) use PW1 for derivation and retry lookup.
 
 ### Factory Reset Sequence
 1. Get PIN status (remaining attempts)

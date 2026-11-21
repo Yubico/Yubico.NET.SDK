@@ -116,13 +116,8 @@ public interface IOpenPgpSession : IApplicationSession
     /// </summary>
     /// <remarks>
     ///     Both modes verify the same User PIN (PW1), with separate signature (P2=81) and other-operation
-    ///     (P2=82) access states. The Reset Code is a separate recovery credential. The current extended-mode
-    ///     implementation incorrectly selects Reset Code KDF salt and, on SW 6982, its retry counter.
-    ///     With distinct User/Reset salts this can reject a correct PIN and consume a User retry; avoid
-    ///     extended-mode use with that configuration until corrected. Treat its 6982 retry count as uncertain.
-    ///     After an extended-mode failure, query fresh <see cref="GetPinStatusAsync" /> and inspect
-    ///     <see cref="PwStatus.AttemptsUser" />; a typed zero can describe Reset Code attempts instead of a
-    ///     blocked User PIN. Diagnose the cause before another verification attempt.
+    ///     (P2=82) access states. Both use the User PIN KDF salt and retry counter. The Reset Code is a
+    ///     separate recovery credential.
     /// </remarks>
     /// <param name="pin">
     ///     The borrowed UTF-8 encoded User PIN. The caller owns the buffer and must clear it after use.
@@ -135,10 +130,7 @@ public interface IOpenPgpSession : IApplicationSession
     /// <exception cref="OpenPgpInvalidPinException">
     ///     Thrown for every unsuccessful VERIFY response, including failures unrelated to a wrong PIN.
     ///     <see cref="OpenPgpInvalidPinException.RetriesRemaining" /> reports the available extracted or
-    ///     queried count, or <c>null</c> when unavailable. Extended-mode 6982 fallback currently selects
-    ///     Reset Code attempts; query fresh <see cref="GetPinStatusAsync" /> and inspect
-    ///     <see cref="PwStatus.AttemptsUser" /> before deciding whether User PIN recovery is needed.
-    ///     Diagnose the failure before retrying; a reported zero alone does not establish User blocking.
+    ///     queried User PIN count, or <c>null</c> when unavailable. Diagnose the failure before retrying.
     /// </exception>
     Task VerifyPinAsync(
         ReadOnlyMemory<byte> pin,
@@ -635,7 +627,7 @@ public interface IOpenPgpSession : IApplicationSession
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>Caller-owned plaintext for RSA, or raw shared-secret material for ECDH; clear it after use.</returns>
     /// <remarks>
-    ///     Verify the User PIN in extended mode first, subject to that method's current distinct-salt KDF defect.
+    ///     Verify the User PIN in extended mode first.
     ///     The host handles OpenPGP packets, content encryption/decryption, ECDH KDF and protocol validation.
     ///     A complete .gpg file or OAEP block is outside this input contract. For X25519 supply the raw
     ///     32-byte peer public key; the SDK adds the same EC wrapper as for NIST curves. The method uses
@@ -649,7 +641,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Performs internal authentication using the Authentication key.
     /// </summary>
     /// <remarks>
-    ///     Verify the User PIN in extended mode first, subject to its distinct-salt KDF defect. RSA/ECDSA hash
+    ///     Verify the User PIN in extended mode first. RSA/ECDSA hash
     ///     the borrowed input; RSA uses PKCS#1 v1.5 DigestInfo. EdDSA sends the raw input and ignores the hash
     ///     parameter. Results are raw modulus-sized RSA, DER ECDSA (r,s), or raw 64-byte Ed25519 signatures.
     ///     The caller owns and clears the returned storage. RSA/EdDSA transfer response backing storage;

@@ -180,7 +180,8 @@ The origin and client options are required; `RpIdValidator` is required within t
 while `CredentialPrompt` remains optional. The earlier standalone public-suffix checker and overload ending
 in `scpKeyParams`, `configuration`, and `cancellationToken` were removed during the coordinated 2.0 breaking window.
 
-Serialize and fully await whole ceremonies before client disposal. Core drains individual exchanges,
+Use the client one ceremony at a time; fully await the entire ceremony before starting the next one
+or disposing the client. Concurrent use is unsupported. Core drains individual exchanges,
 not the complete probing, PIN-token, assertion or extension-output workflow; the client has no
 whole-ceremony disposal join. Keep borrowed inputs and caller-owned prompts usable through their last
 actual continuation, including late PIN-prompt completion after cancellation. Callbacks must not

@@ -460,7 +460,8 @@ does not change the origin in client data or make an assertion acceptable to the
 ## Constraints
 
 - After successful construction, the client owns the `ICtap2Session` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself. Rejected construction does not transfer a caller-supplied session. A session that borrowed a connection still leaves connection disposal with its original caller.
-- Serialize and fully await complete ceremonies before client disposal. Disposal drains individual
+- Use the client one ceremony at a time and fully await it before starting another or disposing the
+  client. Concurrent use is unsupported. Disposal drains individual
   exchanges, not the complete probing, token, assertion and extension-output workflow. Keep borrowed
   inputs and caller-owned prompt resources usable through actual remaining work, including a PIN prompt
   returning late after cancellation. Callbacks must not reenter or dispose the client awaiting them.

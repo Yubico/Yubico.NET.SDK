@@ -33,7 +33,8 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// Disposing the client does not clear returned response or extension-result buffers.
 /// </para>
 /// <para>
-/// Serialize and fully await complete ceremonies before disposing this client or its dependencies.
+/// Use this client one ceremony at a time. Fully await it before starting another ceremony or
+/// disposing the client or its dependencies. Concurrent use is unsupported.
 /// Client disposal does not join an in-flight ceremony: Core drains individual exchanges, not the
 /// complete capability/probe/token/assertion/extension-output workflow. Keep borrowed inputs and
 /// caller-owned prompt resources usable through actual remaining work, including a credential prompt

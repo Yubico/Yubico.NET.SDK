@@ -188,7 +188,7 @@ those compatibility qualifications. On-card RSA generation is refused before wri
 - RSA/ECDSA hash input; EdDSA sends raw messages and ignores the hash parameter. RSA signatures are raw,
   ECDSA output is DER and Ed25519 output is 64 bytes. RSA/EdDSA transfer successful response storage;
   ECDSA clears raw storage after conversion. Decipher copies successful output and clears its raw response.
-- Current X25519 decipher omits the EC cipher DO wrapper; import/public-key tests establish no agreement result.
+- X25519 decipher wraps the raw 32-byte peer public key in the EC cipher DO; import/public-key tests establish no agreement result.
 - Use `CryptographicOperations.FixedTimeEquals()` for comparisons
 - NEVER log PINs, keys, or credentials — only slot names, algorithm types, lengths
 

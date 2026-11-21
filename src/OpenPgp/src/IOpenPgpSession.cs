@@ -637,9 +637,9 @@ public interface IOpenPgpSession : IApplicationSession
     /// <remarks>
     ///     Verify the User PIN in extended mode first, subject to that method's current distinct-salt KDF defect.
     ///     The host handles OpenPGP packets, content encryption/decryption, ECDH KDF and protocol validation.
-    ///     A complete .gpg file or OAEP block is outside this input contract. Current X25519 formatting omits
-    ///     the required EC wrapper; use a qualified NIST-curve/RSA path until corrected. The method uses cached
-    ///     algorithm attributes, copies the successful result for the caller and clears the raw response.
+    ///     A complete .gpg file or OAEP block is outside this input contract. For X25519 supply the raw
+    ///     32-byte peer public key; the SDK adds the same EC wrapper as for NIST curves. The method uses
+    ///     cached algorithm attributes, copies the successful result for the caller and clears the raw response.
     /// </remarks>
     Task<ReadOnlyMemory<byte>> DecryptAsync(
         ReadOnlyMemory<byte> ciphertext,

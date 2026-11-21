@@ -719,6 +719,27 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
+    public async Task DecryptAsync_X25519_WrapsRfc7748PeerPointInCipherDo()
+    {
+        // RFC 7748 §6.1 Bob public key and shared secret. The fake supplies the response;
+        // the assertion qualifies SDK framing and response transfer, not device agreement.
+        byte[] point = Convert.FromHexString("DE9EDB7D7B7DC1B4D35B61C2ECE435373F8343C85B78674DADFC7E146F882B4F");
+        byte[] secret = Convert.FromHexString("4A5D9D5BA4CE2DE1728E3BF480350F25E07E21C947D19E3376F09B3C1E161742");
+        var connection = new RecordingSmartCardConnection(
+            [OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(dec: Uif.Off,
+                decipherAttributes: EcAttributes.Create(KeyRef.Dec, KeyType.X25519)), [.. secret, 0x90, 0x00]]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var result = await session.DecryptAsync(point, token);
+
+        byte[] command = Assert.Single(connection.TransmittedCommands.Skip(3));
+        Assert.Equal([0x00, 0x2A, 0x80, 0x86], command[..4]);
+        Assert.Equal([0xA6, 0x25, 0x7F, 0x49, 0x22, 0x86, 0x20, .. point], CommandData(command).ToArray());
+        Assert.Equal(secret, result.ToArray());
+    }
+
+    [Fact]
     public async Task DecryptAsync_WhenResolutionFailsAfterSuccess_PropagatesResolutionException()
     {
         var expected = new InvalidOperationException("resolution failed");
@@ -1027,10 +1048,12 @@ public sealed class OpenPgpSessionWireTests
         Uif? sig = null,
         Uif? dec = null,
         Uif? aut = null,
-        Uif? att = null) =>
-        [.. BuildApplicationRelatedData(sig, dec, aut, att), 0x90, 0x00];
+        Uif? att = null,
+        AlgorithmAttributes? decipherAttributes = null) =>
+        [.. BuildApplicationRelatedData(sig, dec, aut, att, decipherAttributes), 0x90, 0x00];
 
-    private static byte[] BuildApplicationRelatedData(Uif? sig, Uif? dec, Uif? aut, Uif? att)
+    private static byte[] BuildApplicationRelatedData(Uif? sig, Uif? dec, Uif? aut, Uif? att,
+        AlgorithmAttributes? decipherAttributes = null)
     {
         // AID: D276000124010304000612345678 (OpenPGP v3.4, Yubico, serial 12345678).
         byte[] aid = [0xD2, 0x76, 0x00, 0x01, 0x24, 0x01, 0x03, 0x04, 0x00, 0x06, 0x12, 0x34, 0x56, 0x78];
@@ -1046,7 +1069,7 @@ public sealed class OpenPgpSessionWireTests
         {
             new(0xC0, extendedCapabilities),
             new(0xC1, rsa2048Attributes),
-            new(0xC2, rsa2048Attributes),
+            new(0xC2, decipherAttributes?.ToBytes() ?? rsa2048Attributes),
             new(0xC3, rsa2048Attributes),
             new(0xC4, pwStatus),
             new(0xC5, fingerprints),

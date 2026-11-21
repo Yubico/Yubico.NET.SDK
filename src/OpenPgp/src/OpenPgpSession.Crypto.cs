@@ -252,12 +252,10 @@ public sealed partial class OpenPgpSession
         AlgorithmAttributes attrs,
         ReadOnlySpan<byte> ciphertext)
     {
-        // The current X25519 branch sends input directly, omitting the EC cipher DO wrapper.
-        // Card §7.2.11 defines A6 { 7F49 { 86 point } }; public-key import tests leave agreement untested.
+        // Card §7.2.11: wrap the peer public point in A6 { 7F49 { 86 point } }.
         return attrs switch
         {
             RsaAttributes => FormatRsaDecryptPayload(ciphertext),
-            EcAttributes { KeyType: KeyType.X25519 } => ciphertext.ToArray(),
             EcAttributes => FormatEcDecryptPayload(ciphertext),
             _ => throw new NotSupportedException($"Unsupported algorithm: {attrs.AlgorithmId}"),
         };

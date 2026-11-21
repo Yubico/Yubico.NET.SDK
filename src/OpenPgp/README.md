@@ -397,8 +397,8 @@ Apply the current distinct-salt KDF limitation described above to that route.
 ciphertext block; the card checks/removes padding and returns plaintext. For NIST-curve ECDH, supply the sender's
 uncompressed point `04 || X || Y`; the SDK adds `A6 { 7F49 { 86 point } }` and returns raw shared-secret material.
 The host performs shared-secret KDF, packet processing and content decryption. A complete `.gpg` file and an RSA OAEP
-block are outside this contract. The current X25519 branch omits the required EC wrapper; use a qualified RSA/NIST
-path until that implementation is corrected.
+block are outside this contract. For X25519, supply the raw 32-byte peer public key; the SDK adds the same
+EC wrapper. Wire tests establish encoding, not device agreement or firmware qualification.
 
 This composable raw-operation method accepts an application callback that consumes the result before cleanup.
 The callback must finish using the memory before returning; any retained secret copy needs its own clearing scope.

@@ -284,6 +284,26 @@ public class HsmAuthSessionByteLevelTests
         backend.SetValue(session, new CalculateBackend(response));
     }
 
+    [Fact]
+    public async Task RejectedCredentialPassword_DoesNotEndSessionOrBlockIndependentManagementCommand()
+    {
+        using var connection = CreateInitializedConnection([0x63, 0xC7], OkResponse(), SessionKeyResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await HsmAuthSession.CreateAsync(connection, cancellationToken: token);
+        using var rejected = CredentialPassword.FromUtf8("wrong"u8);
+        using var accepted = CredentialPassword.FromUtf8("right"u8);
+
+        var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.CalculateSessionKeysSymmetricAsync(
+            "cred", new byte[16], rejected, cancellationToken: token));
+
+        Assert.Equal(7, exception.RetriesRemaining);
+        Assert.True(session.IsInitialized);
+        await session.PutManagementKeyAsync(new byte[16], Sequence(0x10, 16), token);
+        using var keys = await session.CalculateSessionKeysSymmetricAsync("cred", new byte[16], accepted, cancellationToken: token);
+        Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
+        Assert.Equal(new byte[] { 0xA4, 0x03, 0x08, 0x03 }, connection.TransmittedCommands.Select(c => c[1]));
+    }
+
     [Theory]
     [InlineData(15)]
     [InlineData(17)]

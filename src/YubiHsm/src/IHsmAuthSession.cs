@@ -25,6 +25,10 @@ namespace Yubico.YubiKit.YubiHsm;
 ///     ongoing channel health, or completion of the external HSM handshake. Await complete public tasks
 ///     before another operation or disposal, keeping borrowed inputs and prompt resources alive. LIST
 ///     policy lookup, CALCULATE, parsing and callbacks extend beyond individual guarded exchanges.
+///     A rejected applet password or management key does not end the session or invalidate a separately
+///     established SCP channel. The SDK tracks no cached applet login; each credential-gated command
+///     presents its own authorization. Follow the device's remaining retry count. A failed SCP handshake
+///     ends the session.
 /// </remarks>
 public interface IHsmAuthSession : IApplicationSession
 {

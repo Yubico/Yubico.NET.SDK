@@ -26,9 +26,9 @@ the transport name.
   CTAP2 SDK's 5.8.0+ gate. NFC capability metadata alone does not establish the current transport.
 - The supported origin representation is HTTPS, or HTTP on `localhost` / `*.localhost`; this parser is not
   a complete browser Secure Contexts evaluation. Native/opaque/custom-scheme origins are not supported.
-- PIN/UV token acquisition and PRF key agreement currently use PIN/UV protocol 2, without protocol-1
-  negotiation. This restriction applies to those operations, not every PINless ceremony. Built-in UV
-  token acquisition also depends on the authenticator's token capabilities.
+- PIN/UV tokens and PRF key agreement prefer advertised protocol 2, then 1. Ceremonies that need
+  neither can proceed without a mutual protocol. Built-in UV uses a token only with `pinUvAuthToken`;
+  ordinary commands can otherwise request internal UV directly. See [CTAP2 PIN guidance](../Ctap2/README.md).
 
 ## Installation
 
@@ -169,8 +169,15 @@ The demo reads `transportNames` from the original registration. Use
 
 ### Choose an authentication response
 
-With a nonempty allow list, `GetAssertionAsync` probes in device-sized batches and narrows the real
-request to one recognized descriptor; it does not enumerate every allowed credential on the key.
+With a nonempty allow list, `GetAssertionAsync` probes in device-sized batches and keeps the first
+recognized descriptor. If built-in user verification is already selected without a token, a silent
+miss is not conclusive: verified assertions check the eligible entries using the ceremony hash.
+The client does not enumerate every allowed credential. If the selected credential needs a deferred
+extension input, only the follow-up assertion for that credential is returned. A second verified
+command can require another gesture and advance the counter again; the SDK does not cache gestures.
+When a caller supplies a custom `ICtap2Session`, this verified fallback can use a valid assertion,
+but it stops on thrown statuses rather than guessing that they came from the current exchange.
+The ordinary assertion and silent probe behavior for custom sessions is unchanged.
 With no allow list, it can enumerate discoverable assertions for the RP, subject to authenticator
 selection behavior. Handle zero matches before indexing. For one match, retrieve its response with
 `SelectAsync`; for several, show your application's account picker and select the chosen match.
@@ -180,11 +187,14 @@ Assertions and extension outputs are computed **before** `GetAssertionAsync` ret
 retrieves a cached response, is idempotent and supports cancellation while waiting; it performs no
 further device I/O. Cancelling a picker does not undo an assertion or an extension write.
 
-The current client can expose an empty ID if the final response omits its credential descriptor.
-CTAP2.0 §5.2 permits omission for a singleton allow list; CTAP2.1/2.3 §6.2.2 require the descriptor.
-This is a client recovery limitation, not a usable empty credential ID. Only an **original single-entry**
-request gives the application an unambiguous requested ID to retain for its RP protocol. Never guess
-from the first entry of a multi-entry list, and always require RP verification and account binding.
+For CTAP2.0 singleton omission compatibility, the client recovers an omitted ID only from the
+single real descriptor sent in the final request. It rejects missing IDs without that
+association and IDs that contradict selection. This does not replace RP verification or account binding.
+
+For registration with built-in verification and no token, a fitting exclude list is checked by
+`MakeCredentialAsync` on the authenticator. A larger list can require separate verified checks before
+the single creation command. An exclusion hidden from an unverified probe is not ignored.
+The same custom-session limitation applies to these interactive exclusion checks.
 
 `RegistrationExtensionOutputs` and `AuthenticationExtensionOutputs` are non-positional records. Their init
 properties are optional and default to null; construct them with named object initializers.
@@ -250,28 +260,32 @@ Resolution uses an uncancelled token and can delay return after cancellation; a 
 receives no resolution callback. Keep prompt resources usable until their actual callbacks finish.
 
 User verification is separate from presence. `UserVerification` expresses a preference; authenticator
-policy and extension permissions also affect the SDK's PIN/UV-token decision:
+policy and extension permissions also affect whether and how the SDK requests verification:
 
 | Preference | Behavior |
 |---|---|
-| `Required` | Requires a token; fails with `NotAllowed` when no available PIN or built-in UV method can satisfy it. Lower-level acquisition failures can also propagate. |
-| `Preferred` (default) | Tries configured, available verification; can proceed without a token if no method can be supplied. |
-| `Discouraged` | Normally avoids a token. Configured verification can still be required by `alwaysUv`, older makeCredential policy, or privileged extension permissions such as `LargeBlobWrite`. |
+| `Required` | Requires verification, not necessarily a token. Fails with `NotAllowed` when no method is available; lower-level failures can also propagate. |
+| `Preferred` (default) | Tries configured, available verification; can proceed without verification if no method is available. |
+| `Discouraged` | Normally skips verification. `alwaysUv`, older makeCredential policy, or privileged extension permissions can still require it. |
 
-Extension permissions are combined with ceremony permissions before this decision. The client can
-escalate once to Required after `PUAT_REQUIRED`. A configured PIN is not an obtainable PIN unless the
-caller supplies it or a prompt can acquire it. PRF has a separate UV limitation described below.
+For an ordinary ceremony, configured built-in UV can satisfy Required with `uv: true` when the
+authenticator does not support permission tokens and no usable PIN route is selected. Extra
+permissions, such as `LargeBlobWrite`, require a permission-scoped token. The client can escalate
+once to Required after `PUAT_REQUIRED` from an eligible credential command. A configured PIN is not
+obtainable unless the caller supplies it or a prompt can acquire it. PRF has a separate UV policy
+described below.
 
-Registration checks nonempty `ExcludeCredentials` lists in device-sized batches, even when verification is
-discouraged and no PIN token is used. The final registration retains required user presence before reporting that a
-credential is excluded.
+Without tokenless built-in UV, registration probes nonempty `ExcludeCredentials` lists in device-sized
+batches, even when verification is discouraged and no token is used. With tokenless built-in UV, the
+authenticator checks a fitting list during creation. The final registration retains required user
+presence before reporting that a credential is excluded.
 
 ### Cancellation and failures
 
 Pass the ceremony's third argument by name when omitting the PIN:
 `client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken)`.
-`Timeout` on either options record has no SDK default or clamping and must be positive and within the
-framework-supported delay range. It starts after local validation and the RP callback, and signals
+`Timeout` on either options record has no SDK default. A supplied value must be positive, and only
+values above 600,000 ms are clamped. It starts after local validation and the RP callback, and signals
 cooperative cancellation, not a hard completion deadline. HID can send `CTAPHID_CANCEL` during a
 keep-alive and drain a terminal response; admitted SmartCard exchanges finish before returning.
 A completed success can win the cancellation race. Cancellation does not roll back credential creation
@@ -280,7 +294,8 @@ or extension writes.
 An empty match list is normal. Excluded registration credentials map to `InvalidState`; unavailable
 required verification and an observed ceremony timeout map to `NotAllowed`. Caller-token cancellation
 propagates `OperationCanceledException`, not the client's `Cancelled` error code. Authenticator timeout
-statuses instead map to `Constraint`. Capability reads, token acquisition, transport/setup, and extension
+statuses instead map to `Constraint`. GetInfo and token acquisition use general CTAP status mappings
+without triggering command escalation. Transport/setup and extension
 output processing can propagate lower-level exceptions: not every failure is `WebAuthnClientError`.
 A failure does not trigger a retry on another transport. See
 [`WebAuthnClientError`](src/WebAuthnClientError.cs) for the error vocabulary.
@@ -323,46 +338,51 @@ IDs and whose nonempty map requires an allow list. Registration does not accept 
 processor runs; registration-time evaluation additionally needs advertised `hmac-secret-mc` support.
 Check enablement and evaluation results separately.
 
-**Current limitation:** [WebAuthn L3 §10.1.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension)
-requires the hmac-secret-backed PRF to use the verified variant, overriding the UV preference if needed.
-This client does not enforce that override. Request `UserVerification = UserVerificationPreference.Required`
-for evaluation; otherwise actual UV changes can change the output for the same credential and input.
-Selecting Required alone does **not** establish full PRF conformance or solve result cleanup.
+[WebAuthn L3 §10.1.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension)
+requires the hmac-secret-backed PRF to use the verified variant. Supported evaluation overrides the
+ceremony's UV preference to Required; registration enablement alone does not. The client omits the
+evaluation output if the authenticator did not report verification.
 
-PRF outputs are derived secrets: never log them. SDK-produced results expose read-only memory without
-a disposal/zeroing guarantee for returned arrays or intermediate copies; disposing the client does not
-clear them. Clearing a copy you made does not clear the SDK's originals. Treat PRF inputs according to
-their application sensitivity as well. This lifetime limitation matters when evaluating suitability
-for secret-handling applications; there is no writable-result-span API to use for guaranteed cleanup.
+PRF outputs are derived secrets: never log them. `First` and an optional `Second` are writable,
+caller-owned `Memory<byte>` buffers. Clear each with `CryptographicOperations.ZeroMemory(value.Span)`
+after its last use. Disposing the client does not clear returned buffers. Record copies alias those
+buffers; direct constructors retain the memory you supply.
 
 ### Request protection and blob storage
 
-`CredProtect` forwards the requested policy and reports the returned policy, but
-`EnforceCredentialProtectionPolicy` is **not currently enforced** by this client. Do not rely on that
-flag to prevent unprotected creation. Checking the result can detect an unacceptable policy only
-after a credential has been created; it is not equivalent to pre-creation enforcement. CTAP2.3 §12.1
-places enforcement at the platform and says it SHOULD NOT create without the requested protection
-for policies 2/3 when enforcement is requested.
+`CredProtect` forwards the requested policy and reports the returned policy. With
+`EnforceCredentialProtectionPolicy`, registration refuses to create a credential when GetInfo does
+not advertise `credProtect`. Optional requests remain omittable. This checks advertised capability,
+not independent proof of policy enforcement by the authenticator (CTAP 2.3 §12.1).
 
 Large-blob support uses `largeBlobKey` plus `authenticatorLargeBlobs`, not the alternative direct CTAP
 `largeBlob` extension. Request a discoverable credential (`ResidentKey = Required` when essential)
-and inspect registration's `LargeBlob.Supported`. The current `LargeBlobSupport.Required` does not
-guarantee failure in every case where the created credential lacks blob support.
+and inspect registration's `LargeBlob.Supported`. `LargeBlobSupport.Required` with `ResidentKey = Discouraged`
+fails before any CTAP request. If `ResidentKey = Preferred`, the authenticator must support discoverable
+credentials. A successful response without a storage key still reports `Supported = false`.
 
-For writes, supply exactly **one entry in the original** `AllowCredentials` list; the client currently
-does not enforce this WebAuthn input constraint. The SDK requires a PIN/UV token for writes and adds
-`LargeBlobWrite` to the ceremony permissions, even though CTAP has an unconfigured-authenticator
-exception. Storage work runs after the assertion, before `GetAssertionAsync` returns. Read/storage
-errors can therefore propagate after a successful assertion; an absent result or nullable `Blob` alone
-does not reliably distinguish missing data, unsupported capability, and failure. Valid empty data is
-a separate state. Decrypted blob and credential-blob outputs may contain sensitive application data
-and share the lack of an SDK-owned cleanup contract described above.
+Writes require a nonempty original `AllowCredentials` list before device I/O. The SDK deliberately
+accepts multiple entries, diverging from WebAuthn L3 §10.1.5's exact-one requirement. It writes with
+the storage key returned by the final assertion for the selected credential. The SDK requires a
+PIN/UV token for a storage write and adds `LargeBlobWrite` to the ceremony permissions. The legacy token
+cannot carry that permission. The SDK
+does not implement CTAP's unconfigured-authenticator write exception. After a successful assertion,
+a requested write reports `Written = false` if the storage route is unsupported or the returned key
+is missing or invalid. `false` does not prove that no write was applied. A present empty payload is a
+valid write. Storage work runs after the assertion, before `GetAssertionAsync` returns.
+A requested read returns `LargeBlob` with `Blob = null`
+if the storage route is unsupported, the data or key is unavailable, or storage I/O or decoding fails.
+A stored empty blob returns a present, zero-length value. Cancellation still propagates.
+The returned writable `LargeBlob.Blob` is caller-owned; clear its span after last use if it contains
+sensitive data. This does not change `credBlob` or the authenticator data needed for RP verification.
 
 `MinPinLength` reports the existing policy in Unicode code points only when the RP is authorized on
-the authenticator; it does not set a PIN policy. A current input-handling limitation means any nonnull
-input requests it, even with `Requested = false`; use null to omit it.
+the authenticator; it does not set a PIN policy. Null and `Requested = false` both omit the request.
 
 ### Evaluate experimental signing
+
+The previewSign-specific types and properties are marked experimental (`YKEXP001`). Opt in only at
+the call sites that use them. Ordinary registration and authentication do not require this opt-in.
 
 `previewSign` implements the [Yubico WebAuthn sign-extension draft v4](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension),
 not a CTAP version or an adopted W3C signing standard. Registration generates a **separate signing
@@ -374,10 +394,12 @@ public dictionary is sufficient; the input normalizes credential-ID comparison b
 Unsupported previewSign requests are omitted, so inspect the optional result before treating signing
 as performed. Some explicit output errors propagate while CBOR/invalid-operation parsing failures
 can omit the result. Supply the selected algorithm's TBS representation (including prehashing if
-required), and encode present `additionalArgs` as its CBOR `COSE_Sign_Args` map; pass-through does not
-validate algorithm semantics. Verify generated-key attestation under your RP policy before trusting
-it. The selected signing algorithm can differ from the public key's algorithm identifier. The draft
-permits empty generated handles, but the current signing-params constructor rejects them. ARKG helper
+required). TBS must be nonempty, and present `additionalArgs` must encode one complete CBOR
+`COSE_Sign_Args` map; pass-through does not validate algorithm semantics. Verify generated-key
+attestation under your RP policy before trusting
+it. The selected signing algorithm can differ from the public key's algorithm identifier. The required
+handle is sent as a byte string under CTAP key 2, even when empty. An empty generated handle relies on
+the selected credential and authenticator-held state; it does not select a global default key. ARKG helper
 conveniences are experimental and not production cryptographic guidance or the generic signing contract.
 
 ## RP authorization belongs to the application
@@ -461,7 +483,8 @@ does not change the origin in client data or make an assertion acceptable to the
 ## Constraints
 
 - After successful construction, the client owns the `ICtap2Session` in both paths: the one `CreateWebAuthnClientAsync` opens and one handed to the `WebAuthnClient` constructor. Use `await using` on the client and do not dispose that session yourself. Rejected construction does not transfer a caller-supplied session. A session that borrowed a connection still leaves connection disposal with its original caller.
-- Serialize and fully await complete ceremonies before client disposal. Disposal drains individual
+- Use the client one ceremony at a time and fully await it before starting another or disposing the
+  client. Concurrent use is unsupported. Disposal drains individual
   exchanges, not the complete probing, token, assertion and extension-output workflow. Keep borrowed
   inputs and caller-owned prompt resources usable through actual remaining work, including a PIN prompt
   returning late after cancellation. Callbacks must not reenter or dispose the client awaiting them.
@@ -472,8 +495,9 @@ does not change the origin in client data or make an assertion acceptable to the
 - RP validity and origin/RP authorization are mandatory application policy through `WebAuthnClientOptions.RpIdValidator`; there is no built-in domain/URI syntax gate, domain-suffix policy, or enterprise bypass.
 - The client asks for nothing but a PIN, supplied as `pinBytes` or by the prompt. A ceremony that needs one and has neither fails with `NotAllowed` rather than prompting.
 - `ResidentKeyPreference.Required` consumes persistent credential slots. This facade exposes no credential administration or deletion; use the CTAP2 credential-management APIs separately, after disposing the client. Firmware gates live in CTAP2.
-- Default attestation is `None`: non-self statements become `fmt: none` with an empty statement; packed self attestation with zero AAGUID and no certificate is retained, and this policy does not zero the returned AAGUID. Other preferences pass through returned statements. `Indirect` performs no anonymization service; `Enterprise` does not currently send a CTAP enterprise-attestation request.
-- Client-data construction is not a blanket claim of exact browser serialization conformance: the low-level builder currently uses short JSON escapes for some controls rather than the exact CCDToString form. See [`WebAuthnClientData`](src/Client/WebAuthnClientData.cs). For a manually created AAGUID, use an explicit constructor; `default(Aaguid)` has known empty-span/nonreflexive-equality defects, not normal 16-byte value semantics.
+- Default attestation is `None`: non-self statements become `fmt: none` with an empty statement; packed self attestation with zero AAGUID and no certificate is retained, and this policy does not zero the returned AAGUID. Other preferences pass through returned statements. `Indirect` performs no anonymization. `Enterprise` requests CTAP vendor-facilitated mode (1) only when GetInfo reports `ep: true`; the authenticator decides whether to supply enterprise attestation for the RP.
+- [`WebAuthnClientData`](src/Client/WebAuthnClientData.cs) uses CCDToString escapes and hashes the exact UTF-8 bytes it emits. The low-level builder does not enforce the ceremony's input rules.
+- `default(Aaguid)` represents the 16-byte all-zero AAGUID, equal to one constructed from `Guid.Empty`.
 
 ## Security notes
 

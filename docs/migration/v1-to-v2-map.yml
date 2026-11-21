@@ -271,7 +271,13 @@ mappings:
       - yubikit:src/YubiOtp/src/IYubiKeyExtensions.cs
       - yubikit:src/Management/src/IYubiKeyExtensions.cs
       - yubikit:src/Piv/CLAUDE.md
-    notes: Every applet package exposes a Create{Applet}SessionAsync(...) extension method as the standard construction entry point, superseding manual ConnectAsync<TConnection>() plus direct session-constructor call sites shown in earlier session-pattern diffs. Underlying transport defaults, SCP key parameter handling, and connection disposal semantics still require manual review at each v1 call site. PivSession was the last applet session with a public constructor; `refactor(piv)!: make the PivSession constructor internal` closed that gap, so every applet package now has this extension method as its only public construction entry point (BREAKING for any v1-to-v2 code calling `new PivSession(connection, scpKeyParams)` directly).
+    notes: >-
+      Every applet package exposes a Create{Applet}SessionAsync(...) extension method as the standard construction entry point,
+      superseding manual ConnectAsync<TConnection>() plus direct session-constructor call sites shown in earlier session-pattern diffs.
+      Underlying transport defaults, SCP key parameter handling, and connection disposal semantics still require manual review at each v1 call site.
+      PivSession was the last applet session with a public constructor; `refactor(piv)!: make the PivSession constructor internal` closed that gap,
+      so every applet package now has this extension method as its only public construction entry point (BREAKING for any v1-to-v2 code calling
+      `new PivSession(connection, scpKeyParams)` directly).
     last_reviewed_commit: 9347ee29bb628d0904a968d70c9e06572d34a0d2
   - id: scp-protocol-construction
     status: assisted
@@ -286,7 +292,14 @@ mappings:
       - yubikit:src/Core/src/Protocols/ProtocolFactory.cs
       - yubikit:src/Core/src/Devices/YubiKeyConnectionExtensions.cs
       - yubikit:src/Core/src/Sessions/RawSmartCardSession.cs
-    notes: Superseded by `refactor(core): internalize protocol machinery`. ISmartCardProtocol, ProtocolFactory, and PcscProtocolScp are now all internal implementation machinery; PcscProtocolScp is no longer a public type and ISmartCardProtocol.WithScpAsync(...) is no longer a caller-facing extension method. The supported advanced-caller path is the public RawSmartCardSession, constructed via the IYubiKey.CreateRawSmartCardSessionAsync(scpKeyParameters, firmwareVersion, protocolConfiguration, cancellationToken) extension method, which reuses Core's SCP processor and exchange guard so plain and encrypted traffic cannot interleave on the wire. Applet sessions still normally reach SCP through key parameters passed to Create{Applet}SessionAsync(...) rather than any protocol- or raw-session-level API. See Raw Access Tiers (docs/architecture/raw-access-tiers.md), which already documents this in v1-to-v2.md.
+    notes: >-
+      Superseded by `refactor(core): internalize protocol machinery`. ISmartCardProtocol, ProtocolFactory, and PcscProtocolScp are now all
+      internal implementation machinery; PcscProtocolScp is no longer a public type and ISmartCardProtocol.WithScpAsync(...) is no longer
+      a caller-facing extension method. The supported advanced-caller path is the public RawSmartCardSession, constructed via the
+      IYubiKey.CreateRawSmartCardSessionAsync(scpKeyParameters, firmwareVersion, protocolConfiguration, cancellationToken) extension method,
+      which reuses Core's SCP processor and exchange guard so plain and encrypted traffic cannot interleave on the wire. Applet sessions
+      still normally reach SCP through key parameters passed to Create{Applet}SessionAsync(...) rather than any protocol- or raw-session-level
+      API. See Raw Access Tiers (docs/architecture/raw-access-tiers.md), which already documents this in v1-to-v2.md.
     last_reviewed_commit: 9347ee29bb628d0904a968d70c9e06572d34a0d2
   - id: recipe-device-discovery-find-by-transport
     status: assisted
@@ -503,7 +516,13 @@ mappings:
     evidence:
       - yubikit:src/SecurityDomain/src/SecureChannelException.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: With SCP parameters supplied, SecurityDomainSession.CreateAsync and post-reset reinitialization wrap ApduException, BadResponseException, or NotSupportedException from secure-channel configuration in SecureChannelException. The original failure is preserved as InnerException; StatusWord is copied only from an immediate ApduException, not a nested exception. Protocol preparation and application selection occur before this catch, cancellation is rethrown unchanged, and later per-operation failures retain their original exception types.
+    notes: >-
+      Session creation with supplied SCP parameters and post-reset setup with the SDK's default SCP03
+      parameters wrap ApduException, BadResponseException, or NotSupportedException from secure-channel
+      configuration in SecureChannelException. The original failure is preserved as InnerException;
+      StatusWord comes from the first ApduException in that chain, even if nested, or is null if there is none.
+      Protocol preparation and application selection occur before this catch, cancellation is rethrown unchanged,
+      and later per-operation failures retain their original exception types.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: openpgp-exception
     status: assisted
@@ -575,7 +594,21 @@ mappings:
       - yubikit:src/WebAuthn/src/Client/WebAuthnClientOptions.cs
       - yubikit:src/WebAuthn/src/IYubiKeyExtensions.cs
       - yubikit:src/WebAuthn/CLAUDE.md
-    notes: V2-internal evolution of the alpha-only Yubico.YubiKit.WebAuthn surface, recorded because it changes shapes documented earlier in this guide. `refactor(webauthn)!: internalize the backend seam and rename it WebAuthnBackend` (a4091ebf) and `feat(webauthn)!: add WebAuthnClientOptions and forward it from the factory` (9920b301) replaced the constructors' positional `enterpriseRpIds`/`prompt` parameters with a single `WebAuthnClientOptions` record; `MaxPromptAttempts` (default 3) is now caller-configurable instead of fixed. The checker subsequently moved from a standalone constructor/factory parameter to required, non-null `WebAuthnClientOptions.PublicSuffixChecker`; the options argument is now mandatory, while `CredentialPrompt` remains nullable and optional. The `IWebAuthnBackend`-accepting constructor overload became internal along with `IWebAuthnBackend` itself. Separately, `refactor(webauthn)!: remove the ceremony status streams` (485330e0) removed `WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync` and the public `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed` types outright, with no shim; only the plain async `MakeCredentialAsync`/`GetAssertionAsync` remain. Anyone who adopted the streaming ceremony-status API from an earlier v2 alpha must switch to the plain async methods; there is no v1 comparison point for either change because the package itself postdates v1. `refactor(webauthn)!: name the factory's two options clientOptions and sessionOptions` (95b83655) renamed `IYubiKeyExtensions.CreateWebAuthnClientAsync`'s `WebAuthnClientOptions` parameter from `options` to `clientOptions`, so the name would not collide with the `SessionCreationOptions` convention (`options`) used elsewhere; the `WebAuthnClient` constructor's own `options` parameter is unchanged.
+    notes: >-
+      V2-internal evolution of the alpha-only Yubico.YubiKit.WebAuthn surface, recorded because it changes shapes documented earlier in this guide.
+      `refactor(webauthn)!: internalize the backend seam and rename it WebAuthnBackend` (a4091ebf) and `feat(webauthn)!: add WebAuthnClientOptions and forward it from the factory`
+      (9920b301) replaced the constructors' positional `enterpriseRpIds`/`prompt` parameters with a single `WebAuthnClientOptions` record;
+      `MaxPromptAttempts` (default 3) is now caller-configurable instead of fixed. The checker subsequently moved from a standalone
+      constructor/factory parameter to required, non-null `WebAuthnClientOptions.PublicSuffixChecker`; the options argument is now mandatory,
+      while `CredentialPrompt` remains nullable and optional. The `IWebAuthnBackend`-accepting constructor overload became internal along with
+      `IWebAuthnBackend` itself. Separately, `refactor(webauthn)!: remove the ceremony status streams` (485330e0) removed
+      `WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync` and the public
+      `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed` types outright, with no shim; only the plain async
+      `MakeCredentialAsync`/`GetAssertionAsync` remain. Anyone who adopted the streaming ceremony-status API from an earlier v2 alpha must switch to
+      the plain async methods; there is no v1 comparison point for either change because the package itself postdates v1.
+      `refactor(webauthn)!: name the factory's two options clientOptions and sessionOptions` (95b83655) renamed
+      `IYubiKeyExtensions.CreateWebAuthnClientAsync`'s `WebAuthnClientOptions` parameter from `options` to `clientOptions`, so the name would not
+      collide with the `SessionCreationOptions` convention (`options`) used elsewhere; the `WebAuthnClient` constructor's own `options` parameter is unchanged.
     last_reviewed_commit: a05f96552f504a031823fd8c315df4e37656abff
   - id: webauthn-application-rp-authorization
     status: assisted
@@ -600,7 +633,14 @@ mappings:
       - yubikit:src/Ctap2/src/BioEnrollment/BioEnrollmentModels.cs
       - yubikit:src/Ctap2/src/CredentialManagement/CredentialManagementModels.cs
       - yubikit:src/Ctap2/CLAUDE.md
-    notes: Implements the SDK's forward-compatibility doctrine (see the root CLAUDE.md and the "Forward compatibility and escape hatches" section in src/Ctap2/CLAUDE.md) - typed properties still model only known fields, but callers who need a field this SDK version does not yet expose can parse RawData themselves instead of being blocked. Populated only by the Decode(ReadOnlyMemory<byte>) path; empty on caller-constructed instances. Not a v1-to-v2 API mapping (v1 had no raw-response escape hatch here at all), but relevant to anyone porting v1 code that reached into ad hoc CBOR parsing to read fields the typed model omitted. Related, lower-confidence behavior note: the same range's COSE key decoding refactor (`48d49523`, `01eff955`) made CoseKey.Decode tolerant of unexpected CBOR value types for unmodeled parameters/labels (previously an InvalidOperationException) instead of throwing; code that relied on that exception to detect malformed-shaped keys will no longer see it.
+    notes: >-
+      Implements the SDK's forward-compatibility doctrine (see the root CLAUDE.md and the "Forward compatibility and escape hatches" section in
+      src/Ctap2/CLAUDE.md) - typed properties still model only known fields, but callers who need a field this SDK version does not yet expose can
+      parse RawData themselves instead of being blocked. Populated only by the Decode(ReadOnlyMemory<byte>) path; empty on caller-constructed
+      instances. Not a v1-to-v2 API mapping (v1 had no raw-response escape hatch here at all), but relevant to anyone porting v1 code that reached
+      into ad hoc CBOR parsing to read fields the typed model omitted. Related, lower-confidence behavior note: the same range's COSE key decoding
+      refactor (`48d49523`, `01eff955`) made CoseKey.Decode tolerant of unexpected CBOR value types for unmodeled parameters/labels (previously an
+      InvalidOperationException) instead of throwing; code that relied on that exception to detect malformed-shaped keys will no longer see it.
     last_reviewed_commit: 277920d9de48d4aedad7ecc5d00201a015b5a297
   - id: core-find-first-discovery-helpers
     status: assisted

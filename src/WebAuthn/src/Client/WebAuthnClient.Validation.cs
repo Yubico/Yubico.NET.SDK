@@ -93,8 +93,7 @@ public sealed partial class WebAuthnClient
 
         if (options.Timeout is { } timeout && timeout <= TimeSpan.Zero)
         {
-            // WebAuthn L3 §5.1.3 corrects an out-of-range timeout; this client does not clamp, so a
-            // value that could never be waited for is a malformed request (null means no deadline).
+            // A nonpositive timeout is malformed. Only oversized positive values are clamped.
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,
                 "Timeout must be positive, or null for no deadline");
@@ -124,6 +123,14 @@ public sealed partial class WebAuthnClient
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,
                 "RP ID cannot be null or empty");
+        }
+
+        // L3 §10.1.5 requires exactly one original entry. The SDK permits additional entries,
+        // but never a discoverable write: the silent probe must bind storage to one credential.
+        if (options.Extensions?.LargeBlob?.Write is not null && options.AllowCredentials is not { Count: > 0 })
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "A largeBlob write requires a nonempty allow list (WebAuthn L3 §10.1.5).");
         }
 
         if (options.TopOrigin is not null && options.CrossOrigin != true)
@@ -157,8 +164,8 @@ public sealed partial class WebAuthnClient
 
     /// <summary>
     /// Maps a caught <see cref="CtapException"/> to a typed <see cref="WebAuthnClientError"/>, retaining
-    /// the original exception as its cause. This mapper does not cover the whole ceremony: discovery,
-    /// token acquisition, and extension output processing can propagate lower-level failures.
+    /// the original exception as its cause. GetInfo and token failures use this general mapper;
+    /// probe, credential-command and extension-output handling have separate contracts.
     /// During ceremonies, MapCeremonyCtapException handles CredentialExcluded and previewSign-specific
     /// mapping before delegating here.
     /// </summary>

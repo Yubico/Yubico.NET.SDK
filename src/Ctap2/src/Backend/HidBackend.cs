@@ -46,7 +46,17 @@ internal sealed class HidBackend : ICtap2Backend
         ReadOnlyMemory<byte> request,
         UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default,
-        Action? onSuccess = null)
+        Action? onSuccess = null) =>
+        (await SendCborCoreAsync(request, userPresenceNotification, cancellationToken, onSuccess, reportSelectionStatus: false)
+            .ConfigureAwait(false)).Data;
+
+    public Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendAssertionForSelectionAsync(
+        ReadOnlyMemory<byte> request, UserPresenceNotification notification, CancellationToken cancellationToken) =>
+        SendCborCoreAsync(request, notification, cancellationToken, onSuccess: null, reportSelectionStatus: true);
+
+    private async Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendCborCoreAsync(
+        ReadOnlyMemory<byte> request, UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken, Action? onSuccess, bool reportSelectionStatus)
     {
         ArgumentNullException.ThrowIfNull(userPresenceNotification);
 
@@ -91,6 +101,13 @@ internal sealed class HidBackend : ICtap2Backend
                 CtapStatus.UserActionTimeout => UserPresenceOutcome.TimedOut,
                 _ => UserPresenceOutcome.Failed
             };
+            if (reportSelectionStatus && status is CtapStatus.NoCredentials or CtapStatus.RequestTooLarge)
+            {
+                if (response.Length != 1)
+                    throw new BadResponseException("A CTAP error response must contain only the status byte.");
+                await userPresenceNotification.ResolveAsync(outcome).ConfigureAwait(false);
+                return (status, default); // The finally clears the untransferred response.
+            }
             CtapException.ThrowIfError(status);
 
             _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
@@ -100,7 +117,7 @@ internal sealed class HidBackend : ICtap2Backend
 
             // Transfer the status-stripped view after notification resolution; typed decode follows later.
             responseTransferred = true;
-            return response[1..];
+            return (status, response[1..]);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested && outcome != UserPresenceOutcome.Completed)
         {

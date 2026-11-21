@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Extensions;
 using Yubico.YubiKit.Ctap2.Pin;
@@ -38,7 +39,7 @@ internal sealed class AuthenticationExtensionSession : IDisposable
     /// <summary>
     /// Creates the session for the extensions the relying party asked for and the authenticator
     /// advertises; see <see cref="RegistrationExtensionSession.Create"/>.
-    /// LargeBlob writes currently lack the WebAuthn check that the original allow list has exactly one entry.
+    /// The client requires a nonempty original allow list for writes but deliberately accepts more than one entry.
     /// </summary>
     /// <param name="inputs">The relying party's extension inputs, or null.</param>
     /// <param name="allowCredentials">The relying party's allow list; per-credential inputs are validated against it.</param>
@@ -68,31 +69,64 @@ internal sealed class AuthenticationExtensionSession : IDisposable
         _processors.Aggregate(PinUvAuthTokenPermissions.None, (acc, p) => acc | p.Permissions);
 
     /// <summary>Runs every processor's authenticator-dependent preparation (key agreement etc.).</summary>
-    public async ValueTask PrepareAsync(CancellationToken cancellationToken)
+    public async ValueTask PrepareAsync(CancellationToken cancellationToken, PublicKeyCredentialDescriptor? selected = null,
+        bool deferPrf = false)
     {
-        foreach (var processor in _processors)
+        try
         {
-            await processor.PrepareAsync(cancellationToken).ConfigureAwait(false);
+            foreach (var processor in _processors)
+            {
+                if (deferPrf && processor is PrfProcessor)
+                    continue;
+                await processor.PrepareAsync(selected, cancellationToken).ConfigureAwait(false);
+            }
+        }
+        catch (CtapException ex)
+        {
+            throw WebAuthnClient.MapCtapStatusToWebAuthnError(ex);
         }
     }
 
     /// <summary>Builds the CTAP2 extensions map, or null when no processor adds an input.</summary>
-    public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token)
+    public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token) =>
+        PrepareInputs(selected, token, out _);
+
+    public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token,
+        out bool hasPreviewSign, bool deferPrf = false, bool deferPreviewSign = false)
     {
         var builder = new ExtensionBuilder();
         foreach (var processor in _processors)
         {
-            processor.PrepareInputs(builder, selected, token);
+            if (processor is PrfProcessor prf && deferPrf)
+                prf.PrepareAssertionInputs(builder, selected, omit: true);
+            else if (!(deferPreviewSign && IsPreviewSign(processor)))
+                processor.PrepareInputs(builder, selected, token);
         }
 
+        hasPreviewSign = builder.HasPreviewSign;
         return builder.Build();
     }
+
+    internal bool PrfInputsDiffer(IReadOnlyList<PublicKeyCredentialDescriptor> chunk) =>
+        _processors.OfType<PrfProcessor>().Any(p => p.InputsDiffer(chunk));
+
+    internal bool HasPrfInput(PublicKeyCredentialDescriptor selected) =>
+        _processors.OfType<PrfProcessor>().Any(p => p.HasInput(selected));
+
+    // The previewSign processor validates that each allow-list entry has signing parameters.
+    internal bool HasPreviewSign => _processors.Any(IsPreviewSign);
+
+#pragma warning disable YKEXP001 // Only processors created for an explicitly requested previewSign input.
+    private static bool IsPreviewSign(IAuthenticationExtensionProcessor processor) => processor is PreviewSignProcessor;
+#pragma warning restore YKEXP001
 
     /// <summary>
     /// Derives the client extension outputs for one assertion, or null when the relying party requested
     /// no extensions. CborContentException or InvalidOperationException from a processor omits that
-    /// processor's output. Other errors, including CTAP read-storage errors and cancellation, propagate
-    /// even when the assertion itself succeeded.
+    /// processor's output. A requested largeBlob read keeps its output present with a null Blob when
+    /// the storage route is unsupported, the key or data is unavailable, or a known storage or inflation
+    /// failure prevents the read. Cancellation and other unhandled errors propagate even when the
+    /// assertion itself succeeded.
     /// </summary>
     public async ValueTask<AuthenticationExtensionOutputs?> PrepareOutputsAsync(
         GetAssertionResponse response,
@@ -106,22 +140,29 @@ internal sealed class AuthenticationExtensionSession : IDisposable
         }
 
         var outputs = new AuthenticationExtensionOutputsBuilder();
-        foreach (var processor in _processors)
+        try
         {
-            try
+            foreach (var processor in _processors)
             {
-                await processor.PrepareOutputsAsync(response, authData, token, outputs, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await processor.PrepareOutputsAsync(response, authData, token, outputs, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
+                {
+                    // SDK policy: omit malformed optional processor output, not cancellation or explicit client errors.
+                }
             }
-            catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
-            {
-                // SDK isolation policy: omit this processor's output for these exception categories.
-                // This covers malformed CBOR and wrong types, but can also catch storage failures
-                // expressed as InvalidOperationException. WebAuthn §9.4 does not prescribe this policy;
-                // CTAP storage errors, explicit client errors, and cancellation are not caught here.
-            }
+            return outputs.Build();
         }
-
-        return outputs.Build();
+        catch
+        {
+            Util.SensitiveMemory.Zero(outputs.CredBlob?.Blob);
+            Util.SensitiveMemory.ZeroPrf(outputs.Prf?.Results);
+            if (outputs.LargeBlob?.Blob is { } blob)
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(blob.Span);
+            throw;
+        }
     }
 
     /// <summary>Releases per-attempt secrets held by processors (shared secrets).</summary>

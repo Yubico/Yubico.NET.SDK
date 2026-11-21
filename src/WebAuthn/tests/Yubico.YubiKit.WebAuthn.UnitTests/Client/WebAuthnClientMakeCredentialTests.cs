@@ -19,6 +19,7 @@ using System.Text;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Extensions;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -31,6 +32,105 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
 public class WebAuthnClientMakeCredentialTests
 {
+    [Theory]
+    [InlineData(null, true, false)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    [InlineData(true, true, true)]
+    public async Task MakeCredential_MinPinLength_OnlySendsRequestedAndSupportedExtension(bool? requested, bool supported, bool sent)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
+            extensions: supported ? ["minPinLength"] : []));
+        BackendMakeCredentialRequest? captured = null;
+        _mockBackend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(request => captured = request with
+        { Extensions = request.Extensions is { } encoded ? new ReadOnlyMemory<byte>(encoded.ToArray()) : (ReadOnlyMemory<byte>?)null }), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
+        var result = await _client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
+        {
+            Challenge = new byte[32],
+            Rp = new("example.com", "Example"),
+            User = new(new byte[16], "example", "Example"),
+            PubKeyCredParams = [CoseAlgorithm.Es256],
+            Extensions = new RegistrationExtensionInputs(MinPinLength: requested is { } value ? new() { Requested = value } : null)
+        }, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(captured);
+        Assert.Equal(sent, captured.Extensions.HasValue);
+        if (captured.Extensions is { } cbor)
+        {
+            var reader = new System.Formats.Cbor.CborReader(cbor);
+            Assert.Equal(1, reader.ReadStartMap());
+            Assert.Equal("minPinLength", reader.ReadTextString());
+            Assert.True(reader.ReadBoolean());
+        }
+        Assert.Null(result.ClientExtensionResults?.MinPinLength);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public async Task MakeCredential_CredProtectEnforcement_RejectsUnsupportedBeforeCreation(bool supported, bool enforce)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
+            extensions: supported ? ["credProtect"] : []));
+        var options = new PublicKeyCredentialCreationOptions
+        {
+            Challenge = new byte[32],
+            Rp = new("example.com", "Example"),
+            User = new(new byte[16], "example", "Example"),
+            PubKeyCredParams = [CoseAlgorithm.Es256],
+            Extensions = new RegistrationExtensionInputs(CredProtect: new(CredProtectPolicy.UserVerificationRequired, enforce))
+        };
+        _mockBackend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
+        var ct = TestContext.Current.CancellationToken;
+
+        if (enforce && !supported)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.MakeCredentialAsync(options, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+            await _mockBackend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+        }
+        else
+        {
+            await _client.MakeCredentialAsync(options, cancellationToken: ct);
+            await _mockBackend.Received(1).MakeCredentialAsync(
+                Arg.Is<BackendMakeCredentialRequest>(request => request.Extensions.HasValue == supported), Arg.Any<CancellationToken>());
+        }
+    }
+
+    [Theory]
+    [InlineData(LargeBlobSupport.Required)]
+    [InlineData(LargeBlobSupport.Preferred)]
+    public async Task MakeCredential_NondiscoverableLargeBlob_RejectsOnlyRequiredBeforeTraffic(LargeBlobSupport support)
+    {
+        var options = new PublicKeyCredentialCreationOptions
+        {
+            Challenge = new byte[32],
+            Rp = new("example.com", "Example"),
+            User = new(new byte[16], "example", "Example"),
+            PubKeyCredParams = [CoseAlgorithm.Es256],
+            ResidentKey = ResidentKeyPreference.Discouraged,
+            Extensions = new RegistrationExtensionInputs(LargeBlob: new LargeBlobInput { Support = support })
+        };
+        _mockBackend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
+        var ct = TestContext.Current.CancellationToken;
+
+        if (support == LargeBlobSupport.Required)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.MakeCredentialAsync(options, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+            await _mockBackend.DidNotReceive().GetCachedInfoAsync(Arg.Any<CancellationToken>());
+        }
+        else
+        {
+            var result = await _client.MakeCredentialAsync(options, cancellationToken: ct);
+            Assert.False(result.ClientExtensionResults?.LargeBlob?.Supported);
+        }
+    }
+
     private readonly IWebAuthnBackend _mockBackend;
     private readonly WebAuthnOrigin _origin;
     private readonly WebAuthnClient _client;

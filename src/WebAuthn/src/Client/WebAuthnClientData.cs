@@ -33,6 +33,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </remarks>
 public sealed class WebAuthnClientData
 {
+    private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
     /// <summary>
     /// Gets the raw client data JSON bytes.
     /// </summary>
@@ -74,10 +75,11 @@ public sealed class WebAuthnClientData
     /// <remarks>
     /// This is a low-level builder, not ceremony validation: it accepts any nonblank type and does not
     /// enforce the relationship between crossOrigin and topOrigin. The client's ceremony methods
-    /// validate their options separately. Manual JSON escaping currently uses short escapes for some
-    /// controls, rather than the four-digit Unicode escapes required by L3 §5.8.1.1's CCDToString;
-    /// it should not be treated as an exact implementation of that serialization algorithm for all inputs.
+    /// validate their options separately. String escaping follows CCDToString (L3 §5.8.1.1):
+    /// quotes and backslashes are escaped, and U+0000 through U+001F use four lowercase hex digits.
+    /// Unicode is not normalized or replaced.
     /// </remarks>
+    /// <exception cref="EncoderFallbackException">A string contains an unpaired UTF-16 surrogate.</exception>
     public static WebAuthnClientData Create(
         string type,
         ReadOnlyMemory<byte> challenge,
@@ -89,7 +91,7 @@ public sealed class WebAuthnClientData
         ArgumentNullException.ThrowIfNull(origin);
 
         var json = BuildJson(type, challenge.Span, origin.StringValue, crossOrigin, topOrigin);
-        var jsonBytes = Encoding.UTF8.GetBytes(json);
+        var jsonBytes = StrictUtf8.GetBytes(json);
 
         Span<byte> hash = stackalloc byte[32];
         SHA256.HashData(jsonBytes, hash);
@@ -102,7 +104,6 @@ public sealed class WebAuthnClientData
     /// </summary>
     /// <remarks>
     /// Always writes type, challenge, origin, and crossOrigin; appends topOrigin when supplied.
-    /// Escaping is manual and uses short JSON control escapes, not exact CCDToString control encoding.
     /// </remarks>
     private static string BuildJson(
         string type,
@@ -149,43 +150,19 @@ public sealed class WebAuthnClientData
     {
         sb.Append('"');
 
-        // Escape special characters per JSON spec
         foreach (var c in value)
         {
-            switch (c)
+            if (c is '"' or '\\')
             {
-                case '"':
-                    sb.Append("\\\"");
-                    break;
-                case '\\':
-                    sb.Append("\\\\");
-                    break;
-                case '\b':
-                    sb.Append("\\b");
-                    break;
-                case '\f':
-                    sb.Append("\\f");
-                    break;
-                case '\n':
-                    sb.Append("\\n");
-                    break;
-                case '\r':
-                    sb.Append("\\r");
-                    break;
-                case '\t':
-                    sb.Append("\\t");
-                    break;
-                default:
-                    if (char.IsControl(c))
-                    {
-                        // Unicode escape for control characters
-                        sb.Append($"\\u{(int)c:x4}");
-                    }
-                    else
-                    {
-                        sb.Append(c);
-                    }
-                    break;
+                sb.Append('\\').Append(c);
+            }
+            else if (c <= '\u001f')
+            {
+                sb.Append($"\\u{(int)c:x4}");
+            }
+            else
+            {
+                sb.Append(c);
             }
         }
 

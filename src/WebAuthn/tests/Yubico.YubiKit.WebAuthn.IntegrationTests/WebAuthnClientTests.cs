@@ -217,8 +217,7 @@ public class WebAuthnClientTests
     /// <remarks>
     /// <para>
     /// This expectation requires makeCredUvNotRqd enabled and alwaysUv disabled. Discouraged does not
-    /// override mandatory authenticator verification policy. The test currently lacks capability guards
-    /// for those prerequisites, so its assertion is not portable to every PIN-configured authenticator.
+    /// override mandatory authenticator verification policy. Check these capabilities before mutating PIN state.
     /// </para>
     /// <para>
     /// The flag assertions are the point of the test: user presence and user verification are
@@ -236,7 +235,12 @@ public class WebAuthnClientTests
         await using var session = await state.Device
             .CreateCtap2SessionAsync();
 
-        // Deliberately set a PIN; the expected no-UV result depends on the capabilities described above.
+        var info = await session.GetInfoAsync();
+        Skip.If(info.Options.TryGetValue("alwaysUv", out bool alwaysUv) && alwaysUv,
+            "The no-UV lane does not apply when alwaysUv is enabled.");
+        Skip.IfNot(info.Options.TryGetValue("makeCredUvNotRqd", out bool noUvRequired) && noUvRequired,
+            "This lane configures a PIN and requires makeCredUvNotRqd to permit unverified creation.");
+
         await NormalizePinAsync(session);
 
         await using var client = CreateClient(session);
@@ -253,6 +257,6 @@ public class WebAuthnClientTests
             "User presence must be set: makeCredential always requires touch, independent of UV.");
         Assert.False(
             response.AuthenticatorData.UserVerified,
-            "User verification must be clear: the relying party asked for UV=Discouraged.");
+            "User verification must be clear in the no-UV lane with UV=Discouraged.");
     }
 }

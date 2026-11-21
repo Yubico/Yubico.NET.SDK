@@ -176,7 +176,7 @@ public class CredentialFilterTests
         var info = new AuthenticatorInfo { MaxCredentialCountInList = 8 };
         BackendGetAssertionRequest? sent = null;
         backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => sent = r), Arg.Any<CancellationToken>())
-            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse([0x01]));
 
         var result = await CredentialFilter.SelectAsync(
             backend, "example.com", [new PublicKeyCredentialDescriptor(new byte[] { 0x01 })], info, token: null,
@@ -208,7 +208,7 @@ public class CredentialFilterTests
                 }
 
                 return allowList[0].Id.Span[0] == 3
-                    ? MockCtap2Responses.CreateMockGetAssertionResponse()
+                    ? MockCtap2Responses.CreateMockGetAssertionResponse([3])
                     : throw new CtapException(CtapStatus.NoCredentials);
             });
 
@@ -245,7 +245,7 @@ public class CredentialFilterTests
         var fits = new PublicKeyCredentialDescriptor(new byte[] { 0xAA, 0xBB });
         BackendGetAssertionRequest? sent = null;
         backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => sent = r), Arg.Any<CancellationToken>())
-            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse([0xAA, 0xBB]));
 
         var result = await CredentialFilter.SelectAsync(
             backend, "example.com", [tooLong, fits], info, CreateToken(), TestContext.Current.CancellationToken);

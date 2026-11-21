@@ -35,8 +35,9 @@ SmartCard-only (`ISmartCardConnection`), over USB CCID or NFC. Applet SELECT and
 
 ### Shared Session State
 - `IOpenPgpBackend? _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
-- Inherited `ApplicationSession.FirmwareVersion` — effective version for protocol configuration and feature gating;
-  initialization chooses the override or detected applet version. The detected version is logged, not retained in a `_version` field.
+- Inherited `ApplicationSession.FirmwareVersion` — effective feature policy, not the numeric framing
+  version (`_numericVersion`) or a raw applet version. On cached NEO, `_appletGateVersion` uses the
+  applet version for reset and PIN-attempt floors while framing retains the physical firmware profile.
 - `ApplicationRelatedData _appData` — cached card state (refreshable)
 - `GetKdfAsync` reads F9 when advertised and returns a caller-owned configuration. `SetKdfAsync`
   borrows its input while writing F9. Each credential operation reads and disposes its own configuration.
@@ -154,7 +155,7 @@ qualification. Vendor commercial-version wording and development-source gates ha
 
 | Feature | SDK threshold | Gating |
 |---------|-------------|--------|
-| Factory reset | 1.0.6 | `EnsureSupports` |
+| Factory reset | 1.0.6 | `_appletGateVersion` |
 | UIF (touch policy) | 4.2.0 | `EnsureSupports` |
 | EC key support | 5.2.0 | `EnsureSupports` |
 | Certificates | 5.2.0 | `EnsureSupports` |

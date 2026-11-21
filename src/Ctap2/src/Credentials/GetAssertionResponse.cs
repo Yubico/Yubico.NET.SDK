@@ -95,7 +95,9 @@ public sealed class GetAssertionResponse
     /// CTAP defaults an absent count to one; authenticator account selection can omit it even when
     /// multiple accounts exist. When a valid first-response count N exceeds one, collect N−1 next
     /// assertions promptly, without unrelated authenticator operations between calls. The SDK does
-    /// not reserve the sequence. The wire count is an unsigned 32-bit value.
+    /// not reserve the sequence. CTAP 2.0 §5.2 and CTAP 2.1–2.3 §6.2.2 define the wire field as an
+    /// Integer. This SDK represents the optional count as <c>uint?</c>; the WebAuthn client's
+    /// 1024-assertion collection limit is an SDK resource policy, not a CTAP protocol maximum.
     /// Next-assertion responses omit the count.
     /// </remarks>
     public uint? NumberOfCredentials { get; }

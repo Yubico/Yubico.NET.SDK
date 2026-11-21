@@ -4,9 +4,9 @@ This document defines how the WebAuthn client turns relying-party extension inpu
 extension requests and turns authenticator extension outputs into client extension results:
 
 > Extension inputs are prepared **per ceremony attempt**, after the authenticator is known, after the
-> PIN/UV decision and any required acquisition, and (for allow-list assertions) after a credential
-> has been selected. Outputs are prepared before any acquired token is disposed. Each extension
-> owns its own per-attempt state.
+> UV decision and any required token acquisition. Defer credential-specific inputs until the
+> credential is known unless the same input applies to every candidate in the request. Outputs are
+> prepared before any acquired token is disposed. Each extension owns its own per-attempt state.
 
 The processors and sessions are internal implementation components, not a public plugin interface.
 The model separates client policy from wire encoding; it does not establish cross-SDK parity or full
@@ -113,13 +113,13 @@ Rules:
   ceremony, and fills the typed output record through a small internal builder. Outputs are typed
   records, not dictionaries. Per-processor `CborContentException` and `InvalidOperationException`
   omit that processor's result. This is SDK exception-isolation policy, not a rule quoted from
-  WebAuthn §9.4. Other exceptions, including CTAP storage failures and explicit previewSign errors,
+  WebAuthn §9.4. Other exceptions, including explicit previewSign errors,
   can propagate after the main authenticator operation succeeded.
 - Processors are **single-use**. A PUAT retry creates a fresh extension session; fresh per-attempt key
   agreement and encrypted salts are prepared after token reacquisition, not derived from the token bytes.
 - `ExtensionContext.Protocol` is available without a token; hmac-secret key agreement need not have
-  a PUAT. The current backend nevertheless uses protocol 2, without protocol-1 negotiation, for this
-  exchange and PIN/UV token acquisition. Do not infer universal CTAP2.0 compatibility from token absence.
+  a PUAT. The backend prefers protocol 2, then protocol 1, from GetInfo for this exchange and for token
+  acquisition. A ceremony that needs neither does not require a mutual protocol.
 
 [WebAuthn L3 REC §9 and §9.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#sctn-extensions)
 describe extension optionality and client input/output transformation, including no output for ignored
@@ -134,13 +134,19 @@ Explicit false enablement/support/write results remain different states.
 1. Validate options; build client data; `GetInfo` (cached).
 2. Resolve `requireResidentKey` against GetInfo.
 3. Create the extension session with inputs, creation options, effective RK and context.
-4. Decide UV using `MakeCredential | session.Permissions`; acquire a token if required/available.
-5. Run `PrepareAsync`, then exclude-list pre-flight through `CredentialFilter` with `up:false`.
-   A match is carried into the final makeCredential exclude list, not rejected directly from the
-   silent probe. Without a token, probes omit PIN-auth fields. With one, probes authenticate a zero
-   client-data hash; registration re-mints the token afterward for the final command.
-6. `session.PrepareInputs` → extensions CBOR → `authenticatorMakeCredential`, with the matched
-   descriptor or empty exclude list and normal required-UP policy. Exclusion maps to `InvalidState`.
+4. Decide UV using the ceremony and extension permissions; include `GetAssertion` for a nonempty
+   exclude list. Acquire a token when the chosen method uses one. Required means verification:
+   ordinary ceremonies can use configured built-in `uv:true` without a token. Extra permissions
+   still require a permission-scoped token.
+5. Run `PrepareAsync`. With tokenless built-in UV, carry the eligible exclude list into creation
+   if the full request fits the count and message-size limits. Otherwise use a positive silent
+   selection already obtained or check eligible entries with verified assertions. A silent miss
+   is not proof of absence. On the ordinary path, probe with `up:false` and re-mint any token used
+   to authenticate the probe before sending the final command.
+6. Send `authenticatorMakeCredential` with the prepared extension inputs and required-UP policy.
+   If a probe was needed, carry the matched descriptor or an empty list into this command; do not
+   reject directly from the probe or replay tokenless creation with a smaller list after a device error.
+   Exclusion maps to `InvalidState`.
 7. `session.PrepareOutputsAsync(response, token)` → `RegistrationExtensionOutputs`.
 8. Dispose the token.
 
@@ -148,19 +154,21 @@ Explicit false enablement/support/write results remain different states.
 
 1. Validate options; build client data; `GetInfo` (cached).
 2. Create the extension session with inputs, original allow list and context.
-3. Decide UV using `GetAssertion | session.Permissions`; acquire a token if required/available, then
-   run `PrepareAsync`.
-4. **Selection.** If `allowCredentials` is non-empty, `CredentialFilter.SelectAsync` probes it in
-   chunks of `maxCredentialCountInList` with `up: false` and returns the first credential the
-   authenticator recognises, or null. This can take multiple round trips; probes request no user
-   presence. A chunk's internal credential choice follows the authenticator response, not a promise
-   of deterministic ordering among all matching descriptors.
-5. `session.PrepareInputs(builder, selected, token)` → extensions CBOR.
-6. `authenticatorGetAssertion` with `allowList = [selected]`. If nothing matched, a **dummy descriptor**
-   (`id = 0x00`, the first entry's type) is sent so user presence is still requested; the
-   main `NO_CREDENTIALS`/`INVALID_CREDENTIAL` responses produce an empty match list. The dummy request
-   avoids returning the silent miss directly; it does not prove equal timings/prompts or that absence
-   cannot be inferred. With no allow list, `GetNextAssertion` can enumerate discoverable assertions.
+3. Decide UV using `GetAssertion | session.Permissions`. Acquire a token when the chosen method uses one.
+4. With a nonempty allow list, probe eligible entries in chunks with `up:false` and keep the first
+   associated match. The authenticator chooses within each chunk. If built-in UV was selected without
+   a token and the silent probe misses, check eligible chunks with the ceremony hash, `uv:true` and
+   requested UP. Require both flags in a successful response and associate its ID with the sent chunk.
+5. Prepare extension inputs for the selected credential. In verified fallback, send PRF in the first
+   assertion only if the effective input is common to the chunk; defer differing per-ID inputs and
+   previewSign when the credential is not yet known. If the selected credential needs a deferred input,
+   discard the provisional assertion and send one more verified assertion for that credential. It can
+   require another gesture and advance the counter again; the SDK does not cache gestures.
+6. On the ordinary path, send `authenticatorGetAssertion` with the selected singleton. An ordinary
+   miss instead sends a **dummy descriptor** (`id = 0x00`, the first entry's type) to request presence
+   before returning no match. This does not prove equal timing or prompts. On verified fallback,
+   return only the final associated assertion, or no match if the eligible entries are exhausted.
+   With no allow list, `GetNextAssertion` can enumerate discoverable assertions.
 7. For every returned assertion, `session.PrepareOutputsAsync(response, token)` runs **eagerly** while
    the token is live; the results are captured in `MatchedCredential`, whose `SelectAsync` performs
    no further authenticator work.
@@ -168,10 +176,9 @@ Explicit false enablement/support/write results remain different states.
 
 ### `CredentialFilter`
 
-Final descriptor omission currently loses the selected ID during response construction. CTAP2.0
-§5.2 permits omission for a singleton allow list; CTAP2.1/2.3 §6.2.2 require the descriptor. Probe
-singleton recovery does not repair that final-response gap. Only an original single-entry request
-gives the application an unambiguous requested ID; guessing the first of multiple entries is unsafe.
+For CTAP2.0 omission compatibility, the client can recover a missing descriptor only from the
+single real descriptor sent on the wire. It copies that ID into the returned result. It never uses
+a dummy or guesses from the original list. A present ID must agree with the selected credential.
 RP verification remains mandatory.
 
 The shared probe implementation:
@@ -181,6 +188,10 @@ The shared probe implementation:
 - probes chunks with `up:false` and, when there is a token, `pinUvAuthParam` over a 32-byte zero client-data hash; without a token, PIN-auth fields are omitted;
 - on `CTAP2_ERR_REQUEST_TOO_LARGE` with a chunk larger than one, shrinks the chunk and retries;
 - on `CTAP2_ERR_NO_CREDENTIALS` advances to the next chunk; any other status propagates.
+
+Verified checks also respect the encoded message-size limit and refine or advance only on the
+concrete CTAP session's current-exchange outcome. A thrown status from a custom `ICtap2Session`
+does not establish that outcome: the verified fallback stops rather than trying another chunk.
 
 ## Flow invariants
 
@@ -219,29 +230,28 @@ settle the WebAuthn actor, serializer, or result-disclosure policy.
 
 The PRF salt mapping belongs in WebAuthn, but correct domain separation alone does not establish
 conformance. [L3 REC §10.1.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension)
-requires the verified-use hmac-secret PRF and a UV override when necessary. The current processor
-preserves caller UV instead. Required is recommended for evaluation, not a complete conformance or
-cleanup remedy.
+requires the verified-use hmac-secret PRF. A supported evaluation forces Required UV and omits results
+if the authenticator did not report verification; registration enablement alone does not force UV.
 
-credProtect currently forwards/parses policy without implementing enforcement. CTAP2.3 §12.1 assigns
-the platform a SHOULD NOT for creating without requested policies 2/3 when enforcement is true;
-checking a returned policy after creation is not equivalent to prevention. LargeBlob Required also
-does not guarantee rejection for every unusable created credential. The original-singleton-allow-list
-write check is missing, and SDK writes always require a token even though CTAP has an
-unconfigured-authenticator exception. Storage errors can propagate after successful assertion;
-nullable Blob is not a unique absence/support/error discriminator. When storage returns a null byte
-array, the current conversion produces a present value of length zero. Nullable presence and length
-therefore do not distinguish missing data from a stored empty blob.
+Enforced credProtect refuses creation when GetInfo does not advertise support. Required largeBlob
+support refuses nondiscoverable creation. A requested read reports a null Blob when the storage route
+is unsupported or the blob cannot be read; an empty stored blob is present with zero length. Writes
+require a nonempty original allow list and use the selected assertion's key with a permission-scoped
+token. Multi-entry allow lists for writes are an intentional divergence
+from WebAuthn L3 §10.1.5. Callers own and clear the writable PRF and largeBlob plaintext results.
 
 The previewSign processor follows the [vendor draft v4 §10.2.1](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension),
 including multi-credential map coverage and selected-credential lookup. Its generated key is separate
 from the credential key; inner attestation parsing is not trust verification. Explicit missing-output
-client errors can propagate, while decoder CBOR/invalid-operation failures may omit results. The draft's
-permitted empty handles cannot currently pass the signing-params constructor. MinPinLength also has
-an input-handling limitation: presence requests it regardless of Requested=false.
+client errors can propagate, while decoder CBOR/invalid-operation failures may omit results. The
+experimental signing API requires the handle argument and sends it as a byte string under CTAP key 2,
+including when empty. An empty handle relies on the selected credential and authenticator-held state,
+not a global default key. Nonempty TBS and one complete CBOR `COSE_Sign_Args` map when args are present
+are still required. MinPinLength requests disclosure only with Requested=true on an authenticator
+that advertises it.
 
-GetInfo/token acquisition and extension output preparation are not all inside the main command's
-mapping catch. Outputs deliberately run outside UV escalation so a failed read/parse cannot trigger
+GetInfo and token CTAP statuses use the general mapper, separately from the main command's retry
+and previewSign policy. Outputs deliberately run outside UV escalation so a failed read/parse cannot trigger
 another credential creation. Keep these boundaries explicit when revisiting error policy. The
 ceremony timer signals cooperative cancellation; successful device completion can win the race.
 

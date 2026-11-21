@@ -28,4 +28,5 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <param name="GeneratedKey">
 /// The generated signing key.
 /// </param>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class PreviewSignRegistrationOutput(GeneratedSigningKey GeneratedKey);

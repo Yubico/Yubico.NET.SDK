@@ -69,7 +69,7 @@ using Yubico.YubiKit.OpenPgp;
 IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreateOpenPgpSessionAsync();
 ApplicationRelatedData data = await session.GetApplicationRelatedDataAsync();
-Console.WriteLine($"Card {data.Aid.Version}, applet {session.FirmwareVersion}");
+Console.WriteLine($"Card spec {data.Aid.Version}, effective firmware policy {session.FirmwareVersion}");
 foreach (var entry in await session.ListKeyInformationAsync())
 {
     Console.WriteLine($"{entry.Key}: {entry.Value}");
@@ -85,10 +85,12 @@ Keep borrowed keys, input buffers and prompt services alive through the complete
 
 Creation binds the session before device I/O, selects the applet and resolves firmware, then configures framing and
 optional SCP before parsing application data. A failed factory disposes/detaches the session; a direct factory leaves
-your connection open, while the device extension cleans up its hidden connection. `FirmwareVersionOverride` chooses
-the effective framing/feature version and bypasses cached metadata. Cached NEO firmware retains its physical framing
-profile but uses the applet version for the PIN-attempt command. Device metadata, the detected applet version,
-the effective session version and the AID's Card specification version are separate diagnostic values.
+your connection open, while the device extension cleans up its hidden connection. `FirmwareVersionOverride` sets
+the effective feature policy and bypasses cached metadata. A numeric production override also sets framing;
+a major-zero override can use an observed numeric applet version for framing. Cached NEO firmware retains its physical framing
+profile but uses the applet version for reset and PIN-attempt checks. `session.FirmwareVersion` reports
+the effective feature policy, not the detected applet version or the numeric framing version. The AID
+reports the Card specification version, not physical-device firmware.
 
 For SCP, supply `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile. Keep those parameters and
 their contained resources alive through session disposal, including reset reauthentication. The session does not

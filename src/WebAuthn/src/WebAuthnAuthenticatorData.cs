@@ -81,14 +81,12 @@ public sealed class WebAuthnAuthenticatorData
     /// object does not borrow <paramref name="rawAuthData"/>. Parsing does not verify a signature,
     /// attestation trust, the expected RP ID hash, or the RP's UP/UV and account-binding policy.
     /// </remarks>
-    public static WebAuthnAuthenticatorData Decode(ReadOnlyMemory<byte> rawAuthData)
-    {
-        var inner = AuthenticatorData.Parse(rawAuthData);
+    public static WebAuthnAuthenticatorData Decode(ReadOnlyMemory<byte> rawAuthData) =>
+        FromOwned(AuthenticatorData.Parse(rawAuthData));
 
-        var parsedExtensions = ParseExtensions(inner.Extensions);
-
-        return new WebAuthnAuthenticatorData(inner, parsedExtensions);
-    }
+    // The ceremony already owns the CTAP parser's storage; keep the extension slices on that same buffer.
+    internal static WebAuthnAuthenticatorData FromOwned(AuthenticatorData inner) =>
+        new(inner, ParseExtensions(inner.Extensions));
 
     /// <summary>
     /// Parses the extensions CBOR map into identifier → raw CBOR slice pairs.

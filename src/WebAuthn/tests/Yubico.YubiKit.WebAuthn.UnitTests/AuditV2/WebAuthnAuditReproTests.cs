@@ -52,7 +52,7 @@ public class WebAuthnAuditReproTests
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
-                clientPinSupported: !builtInUv, uvSupported: builtInUv));
+                clientPinSupported: !builtInUv, uvSupported: builtInUv, pinUvAuthToken: builtInUv));
         backend.GetPinUvTokenAsync(Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(),
                 Arg.Any<string>(), Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
@@ -83,7 +83,7 @@ public class WebAuthnAuditReproTests
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
-                clientPinSupported: !builtInUv, uvSupported: builtInUv));
+                clientPinSupported: !builtInUv, uvSupported: builtInUv, pinUvAuthToken: builtInUv));
         backend.GetPinUvTokenAsync(Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(),
                 Arg.Any<string>(), Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
@@ -387,6 +387,33 @@ public class WebAuthnAuditReproTests
     private static readonly TimeSpan DeadlineThatExpires = TimeSpan.FromMilliseconds(50);
     private static readonly TimeSpan DeadlineThatDoesNotExpire = TimeSpan.FromSeconds(30);
     private static readonly TimeSpan TestGuard = TimeSpan.FromSeconds(1);
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task OversizeDeadline_AllowsCeremonyToReachAuthenticator(bool registration)
+    {
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
+        backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
+        backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
+        await using var client = CreateClient(backend);
+        var ct = TestContext.Current.CancellationToken;
+
+        if (registration)
+        {
+            var response = await client.MakeCredentialAsync(Registration() with { Timeout = TimeSpan.MaxValue }, cancellationToken: ct);
+            Assert.False(response.CredentialId.IsEmpty);
+        }
+        else
+        {
+            var matches = await client.GetAssertionAsync(Authentication() with { Timeout = TimeSpan.MaxValue }, cancellationToken: ct);
+            var response = await Assert.Single(matches).SelectAsync(ct);
+            Assert.False(response.CredentialId.IsEmpty);
+        }
+    }
 
     private sealed class HangingPrompt : ICredentialPrompt
     {

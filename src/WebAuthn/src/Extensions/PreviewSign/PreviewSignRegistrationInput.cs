@@ -28,6 +28,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// request unattended signing. Unsupported previewSign requests can be omitted; inspect the result.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class PreviewSignRegistrationInput
 {
     /// <summary>

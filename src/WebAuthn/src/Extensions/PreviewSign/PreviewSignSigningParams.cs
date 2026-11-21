@@ -24,9 +24,8 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <c>AuthenticationExtensionsSignSignInputs</c> dictionary. The <see cref="Tbs"/> and
 /// <see cref="AdditionalArgs"/> values are algorithm-specific signing inputs and are passed
 /// through unchanged.
-/// Pass <c>null</c> to omit <c>additionalArgs</c>. Passing an empty memory value emits key 7 with
-/// an empty byte string, but pass-through does not make that value valid under the draft. When
-/// present, <c>additionalArgs</c> must encode a CBOR map containing the algorithm's COSE_Sign_Args
+/// Pass <c>null</c> to omit <c>additionalArgs</c>. When present, including when supplied as empty
+/// memory, <c>additionalArgs</c> must encode a complete CBOR map containing the algorithm's COSE_Sign_Args
 /// object. Supply the selected algorithm's required TBS representation, including prehashing when
 /// required; generic previewSign does not mandate a 32-byte digest or ARKG.
 /// </para>
@@ -38,10 +37,12 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <para>
 /// The constructor retains supplied memory without copying or taking ownership. Keep backing buffers
 /// unchanged until the ceremony completes, then clear any sensitive buffers you own when no longer
-/// needed. The current constructor rejects empty handles even though draft v4 permits them; it also
-/// requires nonempty TBS locally. Algorithms can impose additional requirements that this type does not validate.
+/// needed. Draft v4 permits an empty generated handle when the selected credential and authenticator-held
+/// state suffice. The handle is still sent, and is not a request for a global default signing key.
+/// This SDK requires nonempty TBS. Algorithms can impose additional requirements that this type does not validate.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class PreviewSignSigningParams
 {
     /// <summary>
@@ -67,7 +68,6 @@ public sealed record class PreviewSignSigningParams
     /// <param name="additionalArgs">Optional CBOR-encoded COSE_Sign_Args map, passed through without semantic validation.</param>
     /// <exception cref="WebAuthnClientError">
     /// Thrown when:
-    /// - KeyHandle is empty (InvalidRequest)
     /// - Tbs is empty (InvalidRequest)
     /// </exception>
     public PreviewSignSigningParams(
@@ -75,13 +75,6 @@ public sealed record class PreviewSignSigningParams
         ReadOnlyMemory<byte> tbs,
         ReadOnlyMemory<byte>? additionalArgs = null)
     {
-        if (keyHandle.Length == 0)
-        {
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.InvalidRequest,
-                "previewSign KeyHandle must not be empty");
-        }
-
         if (tbs.Length == 0)
         {
             throw new WebAuthnClientError(

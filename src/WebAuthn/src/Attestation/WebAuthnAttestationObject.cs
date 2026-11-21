@@ -39,7 +39,8 @@ public sealed class WebAuthnAttestationObject
     public WebAuthnAuthenticatorData AuthenticatorData { get; }
 
     /// <summary>
-    /// Gets the attestation statement.
+    /// Gets the attestation statement. After <see cref="Decode"/>, its raw CBOR borrows the input
+    /// and must not outlive the caller's unchanged input storage.
     /// </summary>
     public AttestationStatement Statement { get; }
 
@@ -152,7 +153,8 @@ public sealed class WebAuthnAttestationObject
     /// <remarks>
     /// Returns a new encoding of the modeled fmt, attStmt, and authData components, not the original
     /// <see cref="RawCbor"/> buffer. Unknown outer fields and the original map order or encoding need
-    /// not be preserved.
+    /// not be preserved. Encoding reads the retained statement CBOR, so the input to <see cref="Decode"/>
+    /// must still be unchanged.
     /// </remarks>
     public byte[] Encode()
     {

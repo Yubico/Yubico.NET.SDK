@@ -58,6 +58,7 @@ public sealed class ExtensionBuilder
 #pragma warning disable YKEXP001 // Only WithPreviewSign can populate these fields.
     private PreviewSignRegistrationInput? _previewSignRegistration;
     private PreviewSignSigningParams? _previewSignAuthentication;
+    internal bool HasPreviewSign => _previewSignRegistration is not null || _previewSignAuthentication is not null;
 #pragma warning restore YKEXP001
 
     /// <summary>

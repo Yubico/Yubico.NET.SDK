@@ -59,6 +59,28 @@ public class AuthenticatorInfoTests
         info.Versions.Should().Contain("U2F_V2");
         Assert.Null(info.EncIdentifier);
         Assert.Null(info.EncCredStoreState);
+        Assert.Empty(info.VendorPrototypeConfigCommands);
+    }
+
+    [Theory]
+    [InlineData("00", 0UL)]
+    [InlineData("1B4E5A15AA89D2B8B6", 0x4e5a15aa89d2b8b6UL)]
+    [InlineData("1BFFFFFFFFFFFFFFFF", ulong.MaxValue)]
+    public void Decode_PreservesVendorPrototypeConfigCommandWidth(string encodedId, ulong expected)
+    {
+        var wire = Convert.FromHexString("A30181684649444F5F325F310350000000000000000000000000000000001581" + encodedId);
+        var info = AuthenticatorInfo.Decode(wire);
+        Assert.Equal(expected, Assert.Single(info.VendorPrototypeConfigCommands));
+    }
+
+    [Theory]
+    [InlineData("20", typeof(OverflowException))] // negative integer
+    [InlineData("6131", typeof(InvalidOperationException))] // text, not an unsigned integer
+    [InlineData("C249010000000000000000", typeof(InvalidOperationException))] // tagged bignum above UInt64.MaxValue
+    public void Decode_RejectsInvalidVendorPrototypeConfigCommand(string encodedId, Type exceptionType)
+    {
+        var wire = Convert.FromHexString("A30181684649444F5F325F310350000000000000000000000000000000001581" + encodedId);
+        Assert.Throws(exceptionType, () => AuthenticatorInfo.Decode(wire));
     }
 
     [Theory]

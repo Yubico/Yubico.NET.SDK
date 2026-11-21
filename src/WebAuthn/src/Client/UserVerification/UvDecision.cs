@@ -85,10 +85,16 @@ internal static class UvDecisionLogic
             Method: null,
             Permissions: requestedPermissions);
 
-        if (!ShouldUseUv(info, preference, requestedPermissions, uvConfigured))
+        bool requiresPermissions = (requestedPermissions & ~CeremonyPermissions) != 0;
+        if (!requiresPermissions && !ShouldUseUv(info, preference, requestedPermissions, uvConfigured))
         {
             return noUv;
         }
+
+        bool permissionTokens = IsOptionEnabled(info, "pinUvAuthToken");
+        if (requiresPermissions && !permissionTokens)
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "The authenticator cannot issue a token with the requested permissions.");
 
         // User verification is wanted. Pick a method: PIN first, then built-in UV. Either way the
         // pinUvAuthToken carries the verification, so the "uv" option key stays absent: CTAP 2.1-2.3
@@ -106,8 +112,9 @@ internal static class UvDecisionLogic
 
         if (builtInUvConfigured)
         {
-            // Known gap: this checks uv but not pinUvAuthToken. CTAP2.3 §6.5.5.7 requires both
-            // for a built-in-UV permission token; backend failures can therefore still escape here.
+            if (!permissionTokens)
+                return noUv with { UseUv = true, UvOption = true };
+
             return new UvDecision(
                 UseToken: true,
                 UseUv: true,
@@ -117,7 +124,7 @@ internal static class UvDecisionLogic
         }
 
         // Wanted, but nothing can satisfy it.
-        if (preference == UserVerificationPreference.Required)
+        if (preference == UserVerificationPreference.Required || requiresPermissions)
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.NotAllowed,

@@ -23,7 +23,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 /// <summary>minPinLength (CTAP 2.1 §12.4; CTAP 2.2–2.3 §12.5): registration only.</summary>
 /// <remarks>
 /// Reports the minimum in Unicode code points when the RP ID is authorized; it does not change PIN
-/// policy. The current WebAuthn path ignores Requested=false and invokes this processor on presence.
+/// policy. The registration session activates this processor only for a supported, requested input.
 /// </remarks>
 internal sealed class MinPinLengthProcessor : IRegistrationExtensionProcessor
 {

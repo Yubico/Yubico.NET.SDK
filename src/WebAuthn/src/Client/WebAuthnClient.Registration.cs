@@ -68,6 +68,13 @@ public sealed partial class WebAuthnClient
         ValidateRegistrationOptions(options);
         EnsureRpIdAuthorized(options.Rp.Id);
 
+        if (options.ResidentKey == Preferences.ResidentKeyPreference.Discouraged
+            && options.Extensions?.LargeBlob?.Support == Extensions.Inputs.LargeBlobSupport.Required)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "Required largeBlob storage needs a discoverable credential.");
+        }
+
         using var deadline = CeremonyDeadline.Start(options.Timeout, cancellationToken);
         try
         {

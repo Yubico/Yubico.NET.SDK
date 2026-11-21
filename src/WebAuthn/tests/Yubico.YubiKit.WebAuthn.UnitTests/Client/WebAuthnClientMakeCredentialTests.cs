@@ -31,6 +31,37 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
 public class WebAuthnClientMakeCredentialTests
 {
+    [Theory]
+    [InlineData(LargeBlobSupport.Required)]
+    [InlineData(LargeBlobSupport.Preferred)]
+    public async Task MakeCredential_NondiscoverableLargeBlob_RejectsOnlyRequiredBeforeTraffic(LargeBlobSupport support)
+    {
+        var options = new PublicKeyCredentialCreationOptions
+        {
+            Challenge = new byte[32],
+            Rp = new("example.com", "Example"),
+            User = new(new byte[16], "example", "Example"),
+            PubKeyCredParams = [CoseAlgorithm.Es256],
+            ResidentKey = ResidentKeyPreference.Discouraged,
+            Extensions = new RegistrationExtensionInputs(LargeBlob: new LargeBlobInput { Support = support })
+        };
+        _mockBackend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
+        var ct = TestContext.Current.CancellationToken;
+
+        if (support == LargeBlobSupport.Required)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.MakeCredentialAsync(options, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+            await _mockBackend.DidNotReceive().GetCachedInfoAsync(Arg.Any<CancellationToken>());
+        }
+        else
+        {
+            var result = await _client.MakeCredentialAsync(options, cancellationToken: ct);
+            Assert.False(result.ClientExtensionResults?.LargeBlob?.Supported);
+        }
+    }
+
     private readonly IWebAuthnBackend _mockBackend;
     private readonly WebAuthnOrigin _origin;
     private readonly WebAuthnClient _client;

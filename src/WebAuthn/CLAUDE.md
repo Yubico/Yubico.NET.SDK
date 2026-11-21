@@ -437,8 +437,9 @@ Keep these conditions attached to public guidance when changing extension flow:
   assigns the platform a SHOULD NOT for creating without requested policies 2/3 when enforcement is
   true; forwarding the integer or inspecting output after creation is not enforcement.
 - LargeBlob uses largeBlobKey/storage-array operations, not the alternative direct extension.
-  Required support can still yield an unsupported created credential; effective RK and response-key
-  validation need an implementation fix. Writes require exactly one original allowed credential under
+  Required support needs discoverable creation: a discouraged resident key is rejected before GetInfo;
+  a preferred resident key needs advertised `rk` support. A missing returned key reports unsupported.
+  Writes require exactly one original allowed credential under
   WebAuthn, but the client currently does not check this. Reads can fail response construction after a
   successful assertion. Do not equate nullable Blob with one proven absence/support/error state; the
   nullable-array conversion turns missing data into a present empty memory value; nullable presence and

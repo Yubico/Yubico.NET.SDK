@@ -52,8 +52,8 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
     /// <summary>
     /// Rejects registration read/write inputs and rejects Required when this authenticator lacks the
     /// supported storage route. The key is requested only for a discoverable credential (CTAP §12.3
-    /// rk rule). Current limitation: Required does not reject a non-discoverable registration or a
-    /// successful response without the requested key; those paths report supported as false.
+    /// rk rule). Required rejects creation when the effective credential is not discoverable.
+    /// A successful response without the requested key reports supported as false.
     /// </summary>
     public static LargeBlobProcessor? ForRegistration(LargeBlobInput input, bool requireResidentKey, ExtensionContext context)
     {
@@ -65,6 +65,11 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
         }
 
         bool supported = IsSupported(context);
+        if (input.Support == LargeBlobSupport.Required && !requireResidentKey)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "Required largeBlob storage needs a discoverable credential.");
+        }
         if (input.Support == LargeBlobSupport.Required && !supported)
         {
             throw new WebAuthnClientError(

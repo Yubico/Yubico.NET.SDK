@@ -346,8 +346,9 @@ for policies 2/3 when enforcement is requested.
 
 Large-blob support uses `largeBlobKey` plus `authenticatorLargeBlobs`, not the alternative direct CTAP
 `largeBlob` extension. Request a discoverable credential (`ResidentKey = Required` when essential)
-and inspect registration's `LargeBlob.Supported`. The current `LargeBlobSupport.Required` does not
-guarantee failure in every case where the created credential lacks blob support.
+and inspect registration's `LargeBlob.Supported`. `LargeBlobSupport.Required` with `ResidentKey = Discouraged`
+fails before any CTAP request. If `ResidentKey = Preferred`, the authenticator must support discoverable
+credentials. A successful response without a storage key still reports `Supported = false`.
 
 For writes, supply exactly **one entry in the original** `AllowCredentials` list; the client currently
 does not enforce this WebAuthn input constraint. The SDK requires a PIN/UV token for writes and adds

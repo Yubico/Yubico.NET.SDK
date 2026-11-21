@@ -13,15 +13,19 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Buffers.Binary;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -29,6 +33,174 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests;
 
 public sealed class OpenPgpSessionWireTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Reset_WithScp03_ReauthenticatesUsingOriginalKeysOrEndsSession(bool rejectRehandshake)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var card = new ResetScp03Card(rejectRehandshake);
+        using var keys = card.CreateKeyParameters();
+        await using var session = await OpenPgpSession.CreateAsync(card, new SessionCreationOptions
+        {
+            FirmwareVersionOverride = new FirmwareVersion(5, 8, 0),
+            ScpKeyParameters = keys,
+        }, token);
+
+        if (rejectRehandshake)
+        {
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetAsync(token));
+            Assert.Contains("session ended", error.Message);
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetPinStatusAsync(token));
+            Assert.Equal(11, card.Exchanges);
+        }
+        else
+        {
+            await session.ResetAsync(token);
+            Assert.Equal(3, (await session.GetPinStatusAsync(token)).AttemptsUser);
+            Assert.Equal(14, card.Exchanges);
+        }
+    }
+
+    // Card-side fixture scoped to this flow. Derives challenge-bound keys independently of ScpState
+    // and checks C-MACs (including EXTERNAL AUTHENTICATE), then produces encrypted R-MACed replies.
+    private sealed class ResetScp03Card(bool rejectRehandshake) : ISmartCardConnection
+    {
+        private readonly byte[] _enc = Convert.FromHexString("112233445566778899AABBCCDDEEFF00");
+        private readonly byte[] _mac = Convert.FromHexString("0FFEEDDCCBBAA9988776655443322110");
+        private byte[] _chain = new byte[16];
+        private byte[] _senc = [], _smac = [], _srmac = [], _hostCryptogram = [];
+        private int _counter;
+
+        public int Exchanges { get; private set; }
+        public Transport Transport => Transport.Usb;
+        public ConnectionType Type => ConnectionType.SmartCard;
+        public bool SupportsExtendedApdu() => false;
+        public Scp03KeyParameters CreateKeyParameters() => new(new KeyReference(0, 0x21), new StaticKeys(_enc, _mac, _enc));
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var wire = command.Span;
+            var step = Exchanges++;
+            byte[] response = (step, wire[1]) switch
+            {
+                (0 or 9, 0xA4) when wire[0] == 0 => OkResponse(),
+                (1, 0x50) => Initialize(wire, 0x10),
+                (10, 0x50) => rejectRehandshake ? [0x69, 0x85] : Initialize(wire, 0x20),
+                (2 or 11, 0x82) => Authenticate(wire),
+                (3 or 12, 0xCA) when wire[3] == 0x6E => Protect(wire, ApplicationRelatedDataResponse()[..^2]),
+                (4, 0xCA) when wire[3] == 0xC4 => Protect(wire, [0, 127, 127, 127, 1, 0, 1]),
+                (5 or 6, 0x20) => Protect(wire, [], 0x69, 0x83),
+                (7, 0xE6) => Protect(wire, []),
+                (8, 0x44) => Protect(wire, []),
+                (13, 0xCA) when wire[3] == 0xC4 => Protect(wire, [0, 127, 127, 127, 3, 0, 3]),
+                _ => throw new InvalidOperationException($"Unexpected reset step {step}, INS {wire[1]:X2}."),
+            };
+            return Task.FromResult<ReadOnlyMemory<byte>>(response);
+        }
+
+        private byte[] Initialize(ReadOnlySpan<byte> wire, byte challengeStart)
+        {
+            Assert.Equal(0x21, wire[2]);
+            Assert.Equal(8, wire[4]);
+            byte[] challenge = [challengeStart, 1, 2, 3, 4, 5, 6, 7];
+            byte[] context = [.. wire.Slice(5, 8), .. challenge];
+            _senc = Derive(_enc, 4, 16, context);
+            _smac = Derive(_mac, 6, 16, context);
+            _srmac = Derive(_mac, 7, 16, context);
+            _hostCryptogram = Derive(_smac, 1, 8, context);
+            var cardCryptogram = Derive(_smac, 0, 8, context);
+            _counter = 1;
+            Array.Clear(_chain);
+            return [.. new byte[10], 0x21, 0x02, 0x00, .. challenge, .. cardCryptogram, 0x90, 0x00];
+        }
+
+        private byte[] Authenticate(ReadOnlySpan<byte> wire)
+        {
+            Assert.Equal(0x84, wire[0]);
+            Assert.Equal(0x33, wire[2]);
+            Assert.True(CryptographicOperations.FixedTimeEquals(_hostCryptogram, wire.Slice(5, 8)));
+            VerifyCommandMac(wire);
+            return OkResponse();
+        }
+
+        private byte[] Protect(ReadOnlySpan<byte> wire, ReadOnlySpan<byte> plaintext, byte sw1 = 0x90, byte sw2 = 0x00)
+        {
+            Assert.Equal(0x04, wire[0]);
+            VerifyCommandMac(wire);
+            int counter = _counter++;
+            byte[] encrypted = [];
+            if (!plaintext.IsEmpty)
+            {
+                using var aes = Aes.Create();
+                aes.Key = _senc;
+                Span<byte> ivInput = stackalloc byte[16];
+                ivInput.Clear();
+                ivInput[0] = 0x80;
+                BinaryPrimitives.WriteInt32BigEndian(ivInput[12..], counter);
+                var iv = aes.EncryptEcb(ivInput, PaddingMode.None);
+                byte[] padded = new byte[(plaintext.Length / 16 + 1) * 16];
+                plaintext.CopyTo(padded);
+                padded[plaintext.Length] = 0x80;
+                encrypted = aes.EncryptCbc(padded, iv, PaddingMode.None);
+            }
+            var rmac = Mac(_srmac, [.. _chain, .. encrypted, sw1, sw2]);
+            return [.. encrypted, .. rmac.AsSpan(0, 8), sw1, sw2];
+        }
+
+        private void VerifyCommandMac(ReadOnlySpan<byte> wire)
+        {
+            int macOffset = 5 + wire[4] - 8;
+            _chain = Mac(_smac, [.. _chain, .. wire[..macOffset]]);
+            Assert.True(CryptographicOperations.FixedTimeEquals(_chain.AsSpan(0, 8), wire.Slice(macOffset, 8)));
+        }
+
+        private static byte[] Derive(byte[] key, byte type, int length, ReadOnlySpan<byte> context)
+        {
+            Span<byte> input = stackalloc byte[32];
+            input.Clear();
+            input[11] = type;
+            input[14] = (byte)(length * 8);
+            input[15] = 1;
+            context.CopyTo(input[16..]);
+            return Mac(key, input)[..length];
+        }
+
+        private static byte[] Mac(byte[] key, ReadOnlySpan<byte> input)
+        {
+            // Same RFC 4493 construction as the Security Domain handshake fake; no SDK SCP helpers.
+            using var aes = Aes.Create();
+            aes.Key = key;
+            var subkey = aes.EncryptEcb(new byte[16], PaddingMode.None);
+            DoubleCmacSubkey(subkey);
+            var lastLength = (input.Length - 1) % 16 + 1;
+            byte[] blocks = new byte[input.Length - lastLength + 16];
+            input.CopyTo(blocks);
+            if (lastLength != 16)
+            {
+                blocks[input.Length] = 0x80;
+                DoubleCmacSubkey(subkey);
+            }
+            for (int i = 0; i < 16; i++)
+                blocks[blocks.Length - 16 + i] ^= subkey[i];
+
+            return aes.EncryptCbc(blocks, new byte[16], PaddingMode.None)[^16..];
+        }
+
+        private static void DoubleCmacSubkey(Span<byte> block)
+        {
+            var highBit = (block[0] & 0x80) != 0;
+            for (int i = 0; i < 15; i++)
+                block[i] = (byte)((block[i] << 1) | (block[i + 1] >> 7));
+            block[15] = (byte)((block[15] << 1) ^ (highBit ? 0x87 : 0));
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public void Dispose() { }
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
     [Theory]
     [InlineData("ééé", 6, true)]
     [InlineData("éééé", 7, false)]

@@ -308,9 +308,7 @@ public abstract class SlotConfiguration : IDisposable
     /// The raw HMAC key. Must be exactly <see cref="YubiOtpConstants.HmacKeySize"/> (20) bytes.
     /// </param>
     /// <param name="initialMovingFactor">
-    /// The raw two-byte HOTP counter field, or zero for HMAC challenge-response. The vendor encoding uses
-    /// counter / 16; HotpSlotConfiguration currently divides by 0x10000 instead. Use its default zero
-    /// until that nonzero-counter limitation is corrected.
+    /// The raw two-byte HOTP counter field (counter divided by 16), or zero for HMAC challenge-response.
     /// </param>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="hmacKey"/> is not exactly

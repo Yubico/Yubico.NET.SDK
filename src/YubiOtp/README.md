@@ -94,7 +94,7 @@ Choose a configuration for the output you need:
 | Configuration | Purpose and input |
 |---|---|
 | `YubiOtpSlotConfiguration` | Keyboard Yubico OTP: raw public-ID bytes (up to 16), 6-byte private ID and 16-byte AES key. The key emits two modhex characters per public-ID byte; do not pass modhex text bytes. Your service verifies the OTP. |
-| `HotpSlotConfiguration` | Keyboard HOTP: exact 20-byte key; synchronize the verifier's counter. Use the default `imf: 0`: nonzero IMF encoding is currently incorrect (see Constraints). |
+| `HotpSlotConfiguration` | Keyboard HOTP: exact 20-byte key; sync the verifier to the initial moving factor (default 0, or up to 1,048,560 in steps of 16). |
 | `StaticPasswordSlotConfiguration` | A string plus keyboard layout, or already translated raw scan codes; not UTF-8 bytes. |
 | `StaticTicketSlotConfiguration` | A fixed Yubico-format ticket, not a changing one-time password. |
 | `HmacSha1SlotConfiguration` | Host-supplied challenge, 20-byte HMAC-SHA1 result. |
@@ -347,8 +347,8 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
 - `PutConfigurationAsync`, `UpdateConfigurationAsync`, `SwapSlotsAsync`, `DeleteSlotAsync`, `SetScanMapAsync`, and
   `SetNdefConfigurationAsync` overwrite device state irreversibly. Access codes are exactly 6 bytes.
 - Firmware-gated operations throw `NotSupportedException`; `ConfigState` accessors throw `InvalidOperationException`.
-- Nonzero HOTP `imf` is currently encoded with a divisor of 65,536 instead of the vendor protocol's 16.
-  Do not use it to provision a desired nonzero initial counter. Keep `imf: 0` and synchronize your verifier.
+- Nonzero HOTP `imf` presets require firmware 2.2 or later. Wire encoding is tested; keyboard output
+  and counter synchronization at those presets still require device qualification.
 - `SetScanMapAsync` currently requires 38 bytes, whereas the tagged vendor personalization tool specifies
   a 45-entry map for firmware 3+. This is an implementation limitation, not a supported full-map recipe;
   do not truncate a vendor map to make it fit.

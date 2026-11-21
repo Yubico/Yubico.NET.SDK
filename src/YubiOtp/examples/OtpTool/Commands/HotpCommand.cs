@@ -21,8 +21,8 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// Programs HOTP (event-based OTP) on a slot (ykman otp hotp SLOT).
 /// </summary>
 /// <remarks>
-/// Keep IMF zero: the current SDK's nonzero encoding uses the wrong scale. The verifier owns counter
-/// synchronization; successful programming is not proof of generated digits. Human output intentionally
+/// Synchronize the preset counter with the verifier; successful programming is not proof of generated
+/// digits. Human output intentionally
 /// displays generated keys. Current-code authentication alone does not retain slot write protection.
 /// </remarks>
 public static class HotpCommand

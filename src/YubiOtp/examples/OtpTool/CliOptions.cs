@@ -79,7 +79,7 @@ public sealed record CliOptions
     public int? Digits { get; init; }
 
     /// <summary>
-    /// Initial moving factor (--imf VALUE). Use zero: the SDK's current nonzero scaling is incorrect.
+    /// Initial moving factor (--imf VALUE), in steps of 16 from 0 through 1,048,560.
     /// </summary>
     public int? Imf { get; init; }
 
@@ -477,7 +477,7 @@ public sealed record CliOptions
                   --key HEX                 20-byte HMAC key (hex)
                   --generate                Generate random key
                   --digits 6|8              OTP digit count (default: 6)
-                  --imf VALUE               Initial moving factor
+                  --imf VALUE               Initial moving factor: 0–1048560 in steps of 16 (default: 0)
                   --access-code HEX         Current access code
                 """,
 

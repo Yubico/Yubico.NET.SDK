@@ -159,7 +159,7 @@ and limited to overlapping known member IDs.
 
 - Updates send complete masked values, not patches. Defaults are SerialApiVisible/AllowUpdate, other update
   flags clear. New code omission sends zeros; repeat current code in both code arguments to retain protection.
-- HOTP nonzero IMF divides by 65,536 instead of the vendor 16; recommend zero, not the erroneous accepted range.
+- HOTP stores `imf / 16` as a big-endian `ushort`. Nonzero preset output still needs physical qualification.
 - Scan-map API enforces 38 bytes versus the vendor 45-entry map; do not recommend truncation/full-map programming.
 - Type/operation minimums do not validate every legacy flag, password length, preset counter, or hardware feature.
 - SmartCard write sequence checks bypass 5.0.0 <= effective version < 5.5.0, accept any returned zero, and

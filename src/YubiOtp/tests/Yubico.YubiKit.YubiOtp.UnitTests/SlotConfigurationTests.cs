@@ -420,63 +420,33 @@ public class SlotConfigurationTests
         Assert.Equal(hmacKey[16..20], result[UidOffset..(UidOffset + 4)]);
     }
 
-    [Fact]
-    public void Hotp_WithImf_StoresInUid()
+    [Theory]
+    [InlineData(0, 0x00, 0x00)]
+    [InlineData(16, 0x00, 0x01)]
+    [InlineData(0x30000, 0x30, 0x00)]
+    [InlineData(0xFFFF0, 0xFF, 0xFF)]
+    public void Hotp_WithImf_StoresCounterUnitsInUid(int imf, byte high, byte low)
     {
         byte[] hmacKey = new byte[20];
-        int imf = 0x30000; // 3 * 0x10000
 
         using var config = new HotpSlotConfiguration(hmacKey, imf);
         var result = config.GetConfig();
 
-        // Pins the current SDK encoding, not correct device-counter scaling: vendor IMF / 16 would
-        // encode 0x3000. The current 0003 field represents counter 48, not the requested 0x30000.
-        Assert.Equal(0x00, result[UidOffset + 4]);
-        Assert.Equal(0x03, result[UidOffset + 5]);
+        Assert.Equal(high, result[UidOffset + 4]);
+        Assert.Equal(low, result[UidOffset + 5]);
         AssertValidCrc(result);
     }
 
-    [Fact]
-    public void Hotp_WithLargeImf_StoresCorrectly()
-    {
-        byte[] hmacKey = new byte[20];
-        int imf = 0xFF0000; // 0xFF * 0x10000
-
-        using var config = new HotpSlotConfiguration(hmacKey, imf);
-        var result = config.GetConfig();
-
-        // Pins the current erroneous divisor (0x10000), not a vendor counter known-answer result.
-        Assert.Equal(0x00, result[UidOffset + 4]);
-        Assert.Equal(0xFF, result[UidOffset + 5]);
-    }
-
-    [Fact]
-    public void Hotp_ZeroImf_NoDataInUid45()
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(8)]
+    [InlineData(100)]
+    [InlineData(0x100000)]
+    public void Hotp_UnrepresentableImf_Throws(int imf)
     {
         byte[] hmacKey = new byte[20];
 
-        using var config = new HotpSlotConfiguration(hmacKey, imf: 0);
-        var result = config.GetConfig();
-
-        Assert.Equal(0, result[UidOffset + 4]);
-        Assert.Equal(0, result[UidOffset + 5]);
-    }
-
-    [Fact]
-    public void Hotp_InvalidImf_Throws()
-    {
-        byte[] hmacKey = new byte[20];
-
-        // Not a multiple of 0x10000
-        Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(hmacKey, imf: 100));
-    }
-
-    [Fact]
-    public void Hotp_NegativeImf_Throws()
-    {
-        byte[] hmacKey = new byte[20];
-
-        Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(hmacKey, imf: -1));
+        Assert.Throws<ArgumentException>("imf", () => new HotpSlotConfiguration(hmacKey, imf));
     }
 
     [Fact]
@@ -508,8 +478,7 @@ public class SlotConfigurationTests
     [Fact]
     public void Hotp_InvalidImfAndInvalidKeyLength_ThrowsForImfFirst()
     {
-        // IMF validation currently precedes SetHmacKey's key-length check. This assertion pins that
-        // ordering, not correctness of the accepted nonzero IMF range or scale.
+        // Validate the counter before copying the key into the configuration.
         byte[] shortKey = [0x01, 0x02, 0x03];
 
         var ex = Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(shortKey, imf: 100));

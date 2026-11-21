@@ -876,7 +876,8 @@ status, not a verified read-back of challenge-response `RequireTouch`; unknown/n
 silent. Static-password strings have the usual immutable-string cleanup tradeoff; the raw overload needs
 translated scan codes, not UTF-8. OtpTool's static command currently makes that encoding mistake and ignores
 layout, and its `--totp` flag does not generate TOTP codes. Use the public SDK recipes, not those sample
-options, as migration guidance. Nonzero HOTP IMF and full scan-map programming also have current limitations;
+options, as migration guidance. HOTP accepts initial counters from 0 through 1,048,560 in steps of 16;
+nonzero presets require firmware 2.2 or later. Full scan-map programming has current limitations;
 see the [YubiOTP guide](../../src/YubiOtp/README.md#constraints).
 
 ### OpenPGP

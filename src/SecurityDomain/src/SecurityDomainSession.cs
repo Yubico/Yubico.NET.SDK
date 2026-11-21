@@ -474,6 +474,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(staticKeys);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)replaceKvn, (uint)byte.MaxValue, nameof(replaceKvn));
 
         if (keyReference.Kid != 0x01)
             throw new ArgumentException("SCP03 keys must use KID 0x01", nameof(keyReference));
@@ -496,7 +497,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
             // Build and send PUT KEY command
             // P2: 0x80 | KID (0x80 flag required by GlobalPlatform)
-            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn,
+            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, replaceKvn,
                 (byte)(0x80 | keyReference.Kid),
                 buffer.WrittenMemory);
             EnsureInitializedBackend();
@@ -619,6 +620,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)replaceKvn, (uint)byte.MaxValue, nameof(replaceKvn));
 
         var pkParams = publicKey.Parameters;
         if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
@@ -639,6 +641,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)replaceKvn, (uint)byte.MaxValue, nameof(replaceKvn));
 
         var parameters = privateKey.Parameters;
         if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
@@ -687,7 +690,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             buffer.Write((ReadOnlySpan<byte>)[0]);
 
             // Create and send the command
-            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn, keyReference.Kid,
+            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, replaceKvn, keyReference.Kid,
                 buffer.WrittenMemory);
             var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
 

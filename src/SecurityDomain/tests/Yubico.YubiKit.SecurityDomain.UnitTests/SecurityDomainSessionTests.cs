@@ -854,6 +854,23 @@ public class SecurityDomainSessionTests
 
     private static byte[] OkResponse() => [0x90, 0x00];
 
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(256)]
+    public async Task PutScp03KeyAsync_RejectsOutOfRangeReplacementBeforeUsingChannel(int replaceKvn)
+    {
+        using var keys = StaticKeys.GetDefaultKeys();
+        var connection = new RecordingSmartCardConnection(OkResponse());
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var failure = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.PutKeyAsync(
+            new KeyReference(0x01, 0x09), keys, replaceKvn, TestContext.Current.CancellationToken));
+
+        Assert.Equal(nameof(replaceKvn), failure.ParamName);
+        Assert.Single(connection.TransmittedCommands);
+    }
+
     [Fact]
     public async Task ResetAsync_FailedRefreshAndTeardown_PreservesRefreshErrorThroughAwaitUsing()
     {

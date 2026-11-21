@@ -125,7 +125,8 @@ KVN 0. `deleteLast: true` permits last-key deletion on the device; it is not a h
 check. Yubico documents deletion of the last SCP03 set as restoring factory defaults, not leaving the
 device protected without keys.
 
-The SDK does not enforce every device range: integer `replaceKvn` values are currently cast to one byte.
+The SDK rejects integer `replaceKvn` values outside the wire byte range before transmission. It does not
+enforce every device-specific version restriction.
 
 ### Set up SCP11b
 

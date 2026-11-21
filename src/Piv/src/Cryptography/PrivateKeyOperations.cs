@@ -428,16 +428,16 @@ internal static class PrivateKeyOperations
     {
         // Parse outer TLV (0x7C - Dynamic Auth Template)
         using var outer = Tlv.Create(data.Span);
-        if (outer.Tag != TagDynamicAuth)
+        if (outer.Tag != TagDynamicAuth || outer.TotalLength != data.Length)
         {
             throw new ApduException("Invalid crypto response format");
         }
 
         // Parse inner TLV (0x82 - Response data)
         using var inner = Tlv.Create(outer.Value.Span);
-        if (inner.Tag != TagResponse)
+        if (inner.Tag != TagResponse || inner.TotalLength != outer.Length)
         {
-            throw new ApduException("Invalid crypto response - expected TAG 0x82");
+            throw new ApduException("Invalid crypto response - expected exactly one TAG 0x82");
         }
 
         // Copy the value before the Tlv objects are disposed. The caller owns this buffer until transfer.

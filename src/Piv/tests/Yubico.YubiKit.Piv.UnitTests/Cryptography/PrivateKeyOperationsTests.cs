@@ -102,6 +102,21 @@ public class PrivateKeyOperationsTests
             b => Assert.Equal(0, b));
     }
 
+    [Theory]
+    [InlineData("7C0A820830060201010201025300")]
+    [InlineData("7C0C820830060201010201025300")]
+    public async Task SignOrDecryptAsync_RejectsSuffixAndClearsRawOwner(string encoded)
+    {
+        var backend = new CryptoCapturingBackend(Convert.FromHexString(encoded));
+        await Assert.ThrowsAsync<ApduException>(() => PrivateKeyOperations.SignOrDecryptAsync(
+            backend, Slot.Authentication, KeyType.P256, new byte[32], UserPresenceNotification.None,
+            TestContext.Current.CancellationToken));
+
+        Assert.NotNull(backend.CapturedRawDataArray);
+        Assert.All(backend.CapturedRawDataArray.AsSpan(backend.CapturedOffset, backend.CapturedCount).ToArray(),
+            value => Assert.Equal(0, value));
+    }
+
     [Fact]
     public async Task SignOrDecryptAsync_WhenResolutionThrows_ZeroesCommandAndResponseBuffers()
     {

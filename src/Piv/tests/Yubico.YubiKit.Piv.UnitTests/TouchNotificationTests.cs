@@ -287,12 +287,15 @@ public class TouchNotificationTests
         Assert.Same(expected, actual);
     }
 
-    [Fact]
-    public async Task SignOrDecryptAsync_WhenSuccessResponseIsMalformed_ResolvesFailedAndPreservesParseError()
+    [Theory]
+    [InlineData("7D009000", "Invalid crypto response format")]
+    [InlineData("7C0A8208300602010102010253009000", "Invalid crypto response format")]
+    [InlineData("7C0C8208300602010102010253009000", "Invalid crypto response - expected exactly one TAG 0x82")]
+    public async Task SignOrDecryptAsync_WhenSuccessResponseIsMalformed_ResolvesFailedAndPreservesParseError(string response, string error)
     {
         var connection = CreateInitializedConnection(
             SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
-            [0x7D, 0x00, 0x90, 0x00]);
+            Convert.FromHexString(response));
         var prompt = new RecordingUserPresencePrompt
         {
             ResolutionException = new InvalidOperationException("resolution failed")
@@ -305,7 +308,7 @@ public class TouchNotificationTests
             new byte[32],
             TestContext.Current.CancellationToken));
 
-        Assert.Equal("Invalid crypto response format", actual.Message);
+        Assert.Equal(error, actual.Message);
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyRequires,

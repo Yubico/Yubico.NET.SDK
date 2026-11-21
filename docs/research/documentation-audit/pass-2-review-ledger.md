@@ -60,6 +60,8 @@ the CORE-OATH-X005 fixture changes were compiled but not exercised on hardware.
 
 YubiOTP delivery: [draft PR #793](https://github.com/Yubico/Yubico.NET.SDK/pull/793). Hardware qualification remains pending.
 
+YubiHSM Auth delivery: [draft PR #794](https://github.com/Yubico/Yubico.NET.SDK/pull/794). Hardware qualification remains pending.
+
 ## Cards
 
 | Card | Applet | Severity | Classified as | Status | Final call | Recorded in |

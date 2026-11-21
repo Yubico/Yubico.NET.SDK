@@ -135,6 +135,7 @@ internal sealed class AuthenticationExtensionSession : IDisposable
         }
         catch
         {
+            Util.SensitiveMemory.Zero(outputs.CredBlob?.Blob);
             Util.SensitiveMemory.ZeroPrf(outputs.Prf?.Results);
             if (outputs.LargeBlob?.Blob is { } blob)
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(blob.Span);

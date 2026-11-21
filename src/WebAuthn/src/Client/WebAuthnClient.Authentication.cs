@@ -240,6 +240,7 @@ public sealed partial class WebAuthnClient
             return;
         foreach (var response in prepared)
         {
+            Util.SensitiveMemory.Zero(response.ClientExtensionResults?.CredBlob?.Blob);
             Util.SensitiveMemory.ZeroPrf(response.ClientExtensionResults?.Prf?.Results);
             if (response.ClientExtensionResults?.LargeBlob?.Blob is { } blob)
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(blob.Span);

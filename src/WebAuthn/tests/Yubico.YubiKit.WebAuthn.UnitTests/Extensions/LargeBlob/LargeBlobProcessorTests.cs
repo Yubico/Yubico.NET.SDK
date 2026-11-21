@@ -100,7 +100,7 @@ public class LargeBlobProcessorTests
         _backend.CreateLargeBlobStorage(Arg.Any<PinUvAuthTokenSession?>()).Returns(_storage);
         return new ExtensionContext(
             MockCtap2Responses.CreateMockAuthenticatorInfo(
-                extensions: largeBlobsSupported ? ["largeBlobKey"] : [], largeBlobsSupported: largeBlobsSupported),
+                extensions: largeBlobsSupported ? ["largeBlobKey", "credBlob"] : [], largeBlobsSupported: largeBlobsSupported),
             new TestPinUvAuthProtocol(), _backend);
     }
 
@@ -327,12 +327,15 @@ public class LargeBlobProcessorTests
         return LargeBlobArray.CreateEmpty().WithEntry(new LargeBlobEntry(ciphertext, nonce, (ulong)declaredSize)).Serialize();
     }
 
-    [Fact]
-    public async Task Authentication_ReadTransfersWritablePlaintextWithoutClearingVerificationBytes()
+    [Theory]
+    [InlineData("A16863726564426C6F62416B", true)]
+    [InlineData("A16863726564426C6F625F416BFF", false)]
+    public async Task Authentication_ReadTransfersPlaintextWithoutClearingVerificationBytes(string signedExtensions, bool definite)
     {
         var info = Context().Info;
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
-        var assertion = MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
+        var assertion = MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey,
+            authDataExtensionsCbor: Convert.FromHexString(signedExtensions));
         byte[] raw = assertion.AuthenticatorDataRaw.ToArray();
         byte[] plaintext = [0x6B];
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(assertion);
@@ -341,22 +344,26 @@ public class LargeBlobProcessorTests
         var ct = TestContext.Current.CancellationToken;
         var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
         LargeBlobAuthenticationOutput output;
+        ReadOnlyMemory<byte> credentialBlob;
         await using (client)
         {
             var matches = await client.GetAssertionAsync(new()
             {
                 Challenge = new byte[32],
                 RpId = "example.com",
-                Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
+                Extensions = new AuthenticationExtensionInputs(GetCredBlob: true, LargeBlob: new LargeBlobInput { Read = true })
             }, cancellationToken: ct);
             var response = await Assert.Single(matches).SelectAsync(ct);
             output = Assert.IsType<LargeBlobAuthenticationOutput>(response.ClientExtensionResults?.LargeBlob);
+            credentialBlob = Assert.IsType<Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput>(response.ClientExtensionResults?.CredBlob).Blob;
+            Assert.Equal(definite, credentialBlob.Equals(response.AuthenticatorData.ParsedExtensions["credBlob"][1..]));
             Assert.Equal(raw, response.RawAuthenticatorData.Span);
             Assert.True(assertion.AuthenticatorData.RawData.Equals(response.AuthenticatorData.Raw));
             Assert.False(assertion.LargeBlobKey.GetValueOrDefault().Span.ContainsAnyExcept((byte)0));
         }
 
         var copy = output with { };
+        Assert.Equal(new byte[] { 0x6B }, credentialBlob.ToArray());
         Memory<byte> actual = Assert.IsType<Memory<byte>>(output.Blob);
         Assert.Equal(0x6B, actual.Span[0]);
         System.Security.Cryptography.CryptographicOperations.ZeroMemory(actual.Span);
@@ -364,25 +371,35 @@ public class LargeBlobProcessorTests
         Assert.Equal(0, plaintext[0]);
     }
 
-    [Fact]
-    public async Task Authentication_LaterReadCancellationClearsEarlierUnreturnedPlaintext()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Authentication_ReadCancellationClearsUnreturnedPlaintext(bool laterAssertion)
     {
         var info = Context().Info;
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
         // A signed raw extension slice must share the same owned backing that the ceremony clears.
-        var first = MockCtap2Responses.CreateMockGetAssertionResponse(numberOfCredentials: 2, largeBlobKey: LargeBlobKey,
+        var first = MockCtap2Responses.CreateMockGetAssertionResponse(numberOfCredentials: laterAssertion ? 2u : 1u, largeBlobKey: LargeBlobKey,
             authDataExtensionsCbor: Convert.FromHexString("A16863726564426C6F62416B")); // {credBlob: h'6B'}
         var parsed = WebAuthnAuthenticatorData.FromOwned(first.AuthenticatorData);
         var extensionSlice = parsed.ParsedExtensions["credBlob"];
         Assert.Equal(new byte[] { 0x41, 0x6B }, extensionSlice.ToArray());
+        var credentialBlob = Assert.IsType<Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput>(
+            WebAuthn.Extensions.Codec.CredBlobCodec.ParseAuthenticationOutput(parsed.ParsedExtensions));
+        Assert.True(credentialBlob.Blob.Equals(extensionSlice[1..]));
         var second = MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(first);
         _backend.GetNextAssertionAsync(Arg.Any<CancellationToken>()).Returns(second);
         byte[] plaintext = [0x6B];
         using var caller = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        _storage.GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()).Returns(
-            _ => Task.FromResult<byte[]?>(plaintext),
-            _ => { caller.Cancel(); return Task.FromCanceled<byte[]?>(caller.Token); });
+        int reads = 0;
+        _storage.GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()).Returns(_ =>
+        {
+            if (++reads == 1 && laterAssertion)
+                return Task.FromResult<byte[]?>(plaintext);
+            caller.Cancel();
+            return Task.FromCanceled<byte[]?>(caller.Token);
+        });
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
 
@@ -390,14 +407,19 @@ public class LargeBlobProcessorTests
         {
             Challenge = new byte[32],
             RpId = "example.com",
-            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
+            Extensions = new AuthenticationExtensionInputs(GetCredBlob: true, LargeBlob: new LargeBlobInput { Read = true })
         }, cancellationToken: caller.Token));
 
-        Assert.Equal(0, plaintext[0]);
+        Assert.Equal(laterAssertion ? 2 : 1, reads);
+        if (laterAssertion)
+        {
+            Assert.Equal(0, plaintext[0]);
+            Assert.False(second.AuthenticatorDataRaw.Span.ContainsAnyExcept((byte)0));
+        }
         Assert.False(first.AuthenticatorDataRaw.Span.ContainsAnyExcept((byte)0));
         Assert.False(parsed.Raw.Span.ContainsAnyExcept((byte)0));
         Assert.False(extensionSlice.Span.ContainsAnyExcept((byte)0));
-        Assert.False(second.AuthenticatorDataRaw.Span.ContainsAnyExcept((byte)0));
+        Assert.Equal(0, credentialBlob.Blob.Span[0]);
     }
 
     /// <summary>L3 §10.1.5 authentication: "If support is present, or if both read and write are present, return ... NotSupportedError".</summary>

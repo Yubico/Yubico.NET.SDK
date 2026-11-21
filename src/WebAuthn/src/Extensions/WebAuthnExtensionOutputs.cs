@@ -66,6 +66,7 @@ public sealed record class RegistrationExtensionOutputs
 public sealed record class AuthenticationExtensionOutputs
 {
     /// <summary>Gets retrieved credential blob data; an empty blob is distinct from an absent result.</summary>
+    /// <remarks>The returned bytes may share storage with the signed authenticator data; do not modify them.</remarks>
     public CredBlobAssertionOutput? CredBlob { get; init; }
     /// <summary>Gets the large blob operation result.</summary>
     public Outputs.LargeBlobAuthenticationOutput? LargeBlob { get; init; }

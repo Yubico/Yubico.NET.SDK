@@ -60,7 +60,7 @@ Yubico.YubiKit.Ctap2.AuthenticatorInfo.UvCountSinceLastPinEntry.get -> int?
 Yubico.YubiKit.Ctap2.AuthenticatorInfo.UvCountSinceLastPinEntry.init -> void
 Yubico.YubiKit.Ctap2.AuthenticatorInfo.UvModality.get -> int?
 Yubico.YubiKit.Ctap2.AuthenticatorInfo.UvModality.init -> void
-Yubico.YubiKit.Ctap2.AuthenticatorInfo.VendorPrototypeConfigCommands.get -> System.Collections.Generic.IReadOnlyList<int>!
+Yubico.YubiKit.Ctap2.AuthenticatorInfo.VendorPrototypeConfigCommands.get -> System.Collections.Generic.IReadOnlyList<ulong>!
 Yubico.YubiKit.Ctap2.AuthenticatorInfo.VendorPrototypeConfigCommands.init -> void
 Yubico.YubiKit.Ctap2.AuthenticatorInfo.Versions.get -> System.Collections.Generic.IReadOnlyList<string!>!
 Yubico.YubiKit.Ctap2.AuthenticatorInfo.Versions.init -> void

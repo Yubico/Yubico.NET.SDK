@@ -854,6 +854,10 @@ Touch notification uses `SessionCreationOptions.UserPresencePrompt`. FIDO HID ca
 
 Typed response models now preserve the original CBOR envelope for fields this SDK version does not yet model: `AuthenticatorInfo.RawData`, `FingerprintSensorInfo.RawData`, `EnrollmentSampleResult.RawData`, `CredentialMetadata.RawData`, and `RelyingPartyInfo.RawData`. This does not change any typed member; it is a forward-compatibility escape hatch for code that previously had to reach for ad hoc CBOR parsing to read a field the typed model omitted. See `fido2-forward-compat-raw-data` in `v1-to-v2-map.yml`.
 
+When moving from an earlier v2 preview, change consumers of `AuthenticatorInfo.VendorPrototypeConfigCommands`
+from `IReadOnlyList<int>` to `IReadOnlyList<ulong>`. CTAP GetInfo key `0x15` contains unsigned 64-bit IDs;
+do not narrow them to `int` or `uint`.
+
 ### WebAuthn
 
 Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new package built on top of `Yubico.YubiKit.Ctap2` (`ICtap2Session`); v1 had no equivalent package. `WebAuthnClient` accepts an optional `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) that supplies a PIN on demand instead of requiring `pinBytes` up front, and owns a bounded retry loop instead of v1 FIDO2 code's global, unbounded `KeyCollector` pattern; see `webauthn-credential-prompt` in `v1-to-v2-map.yml`.

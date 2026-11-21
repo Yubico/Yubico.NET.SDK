@@ -296,8 +296,8 @@ public interface IYubiOtpSession : IApplicationSession
     /// The minimum-one-byte interpretation is expected by the supplied known-answer vectors, not a
     /// universal firmware guarantee from request-encoding tests. Prefer 1–63 bytes in short mode and
     /// verify empty/64-byte boundaries on your target firmware. For USB challenge-response, explicitly
-    /// selecting OTP HID avoids assuming SmartCard command parity. Notifications depend on transport;
-    /// cached keyboard-trigger status is not a read-back of RequireTouch.
+    /// selecting OTP HID avoids assuming SmartCard command parity. Only OTP HID reports touch waits;
+    /// SmartCard cannot infer RequireTouch from cached keyboard-trigger status.
     /// </para>
     /// </remarks>
     /// <param name="slot">The slot configured for HMAC-SHA1.</param>

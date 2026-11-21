@@ -38,8 +38,8 @@ programming-sequence validation starts from the value returned by OTP selection,
 On OTP HID, Core reads a first report for protocol firmware, performs the NEO refresh when needed, then
 reads a second report for cached status. SmartCard probes Management on both USB CCID and NFC, then
 selects OTP; when OTP's major version is three it uses the higher Management/OTP version. A caller override
-is applied afterward to session policy. Cached `ConfigState` still uses raw OTP status, so its gates and
-the SmartCard touch heuristic can differ from effective session feature checks. Major-zero acceptance
+is applied afterward to session policy. Cached `ConfigState` still uses raw OTP status, so its gates
+can differ from effective session feature checks. Major-zero acceptance
 is optimistic SDK policy, not proof of device/command support.
 
 ## Installation
@@ -320,9 +320,8 @@ sealed class TouchPrompt : IUserPresencePrompt
 ```
 
 The context carries application `YubiOTP` and the slot name as its scope. Over OTP HID it fires once the device reports
-it is waiting. SmartCard emits `PolicyRequires` up front only when cached status marks the slot touch-triggered.
-That keyboard-trigger indicator is not a reliable read-back of challenge-response `RequireTouch`; this is
-the current notification heuristic, not verified policy certainty. Unknown/non-triggered state stays silent. Cancelling the
+it is waiting. SmartCard does not notify: the keyboard-trigger indicator is not a reliable read-back of
+challenge-response `RequireTouch`. Cancelling the
 operation's token during an OTP HID touch wait requests a dummy-report reset before the
 notification resolves as cancelled. The reset is not a rollback of commands already sent; if it
 fails, dispose the session and connection rather than reusing them. SmartCard operations already

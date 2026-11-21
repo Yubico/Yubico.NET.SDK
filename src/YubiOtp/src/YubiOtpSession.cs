@@ -604,7 +604,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
     private UserPresenceContext? CreateUserPresenceContext(ConfigSlot configSlot, string operation)
     {
-        if (!IsUserPresenceNotificationEnabled)
+        if (!IsUserPresenceNotificationEnabled || Protocol is not IOtpHidProtocol)
         {
             return null;
         }
@@ -613,42 +613,13 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             ? Slot.One
             : Slot.Two;
 
-        if (Protocol is IOtpHidProtocol)
-        {
-            return new UserPresenceContext
-            {
-                Basis = UserPresenceBasis.DeviceWaiting,
-                Application = UserPresenceApplications.YubiOtp,
-                Operation = operation,
-                Scope = slot.ToString()
-            };
-        }
-
-        // Cached keyboard-trigger status drives the current SmartCard notification heuristic. It is not
-        // a read-back of challenge-response RequireTouch policy, despite the emitted PolicyRequires basis.
-        if (Protocol is not ISmartCardProtocol || !IsKnownTouchTriggered(slot))
-        {
-            return null;
-        }
-
         return new UserPresenceContext
         {
-            Basis = UserPresenceBasis.PolicyRequires,
+            Basis = UserPresenceBasis.DeviceWaiting,
             Application = UserPresenceApplications.YubiOtp,
             Operation = operation,
             Scope = slot.ToString()
         };
-    }
-
-    private bool IsKnownTouchTriggered(Slot slot)
-    {
-        if (_status.Length < YubiOtpConstants.StatusBytesLength)
-        {
-            return false;
-        }
-
-        var state = new ConfigState(_status.Span);
-        return state.FirmwareVersion.IsAtLeast(3, 0, 0) && state.IsTouchTriggered(slot);
     }
 
     private static IYubiOtpBackend CreateBackend(

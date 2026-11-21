@@ -877,9 +877,8 @@ for the all-zero disable request; an empty string is a configuration with an emp
 A keyboard-layout-aware `StaticPasswordSlotConfiguration(string, KeyboardLayout)` constructor and Yubico-OTP-algorithm challenge-response (`YubicoOtpChallengeResponseSlotConfiguration`/`CalculateYubicoOtpAsync`) were restored after an initial v2 gap; see `yubiotp-static-password-keyboard` and `yubiotp-yubico-otp-challenge-response` in `v1-to-v2-map.yml`. HMAC-SHA1 and Yubico OTP key inputs of invalid length now fail before any device I/O instead of being silently hashed or padded.
 
 Migrate v1 `UseTouchNotifier` to `SessionCreationOptions.UserPresencePrompt`. OTP HID reports a live
-`DeviceWaiting` signal. The smart-card implementation emits `PolicyRequires` from cached keyboard-trigger
-status, not a verified read-back of challenge-response `RequireTouch`; unknown/non-triggered status stays
-silent. Static-password strings have the usual immutable-string cleanup tradeoff; the raw overload needs
+`DeviceWaiting` signal. SmartCard has no authoritative wait signal and does not notify; the cached keyboard
+trigger is not challenge-response `RequireTouch`. Static-password strings have the usual immutable-string cleanup tradeoff; the raw overload needs
 translated scan codes, not UTF-8. OtpTool's static command currently makes that encoding mistake and ignores
 layout, and its `--totp` flag does not generate TOTP codes. Use the public SDK recipes, not those sample
 options, as migration guidance. HOTP accepts initial counters from 0 through 1,048,560 in steps of 16;

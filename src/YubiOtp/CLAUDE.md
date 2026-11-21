@@ -55,7 +55,7 @@ OTP HID path:
 3. `ConfigureProtocolAsync` → configure protocol
 4. Construct the HID backend with the effective protocol
 
-The override is applied after discovery. ConfigState gates and the SmartCard touch heuristic still use
+The override is applied after discovery. ConfigState gates still use
 raw status. Core's local readiness/touch windows are checked between awaited native calls, not hard
 call-duration bounds. Custom IOtpHidConnection providers must supply eight-byte reports; built-in length
 checks do not establish central defensive handling for malformed custom input. Keep Core report/NEO
@@ -66,16 +66,13 @@ failure classification and polling policy separate from applet sequence/CRC inte
 When `SessionCreationOptions.UserPresencePrompt` is supplied, only HMAC-SHA1 and Yubico OTP
 challenge-response operations can notify it. OTP HID waits until the device reports the touch-wait flag,
 then the Core protocol requests the operation's shared handle once with `DeviceWaiting`; `HidBackend` owns
-terminal resolution after response-length and CRC validation. SmartCard has no in-flight wait signal, so
-`SmartCardBackend` owns both the `PolicyRequires` request and terminal resolution when cached OTP status
-identifies the selected slot as touch-triggered. Unknown and non-touch SmartCard slot state remains silent.
+terminal resolution after response-length and CRC validation. SmartCard has no in-flight wait signal and
+never notifies; cached OTP status identifies the keyboard trigger, not challenge-response policy.
 Only expiration of an OTP HID wait after the device reports the touch-wait flag resolves as `TimedOut`;
-transport and readiness timeouts, including all SmartCard timeouts, resolve as `Failed`. Challenge-response
+other HID transport and readiness timeouts resolve as `Failed`. Challenge-response
 output remains backend-owned until successful resolution and is cleared if the callback prevents transfer.
 Notification context uses application `YubiOTP` and the slot enum name as its scope; configuration and status
-operations never notify. The cached trigger indicator describes keyboard activation, not a read-back of
-challenge-response RequireTouch. Treat SmartCard's PolicyRequires as the current implementation heuristic,
-not proven policy certainty; unknown/non-triggered state remains silent. Prefer explicit OTP HID for USB
+operations never notify. Prefer explicit OTP HID for USB
 challenge recipes instead of assuming SmartCard command parity across devices/interfaces.
 
 ## Slot Configuration Model

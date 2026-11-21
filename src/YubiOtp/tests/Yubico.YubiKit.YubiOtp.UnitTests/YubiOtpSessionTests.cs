@@ -109,7 +109,7 @@ public class YubiOtpSessionTests
     }
 
     [Fact]
-    public async Task CalculateHmacSha1Async_TouchConfiguredSmartCard_NotifiesPolicyRequires()
+    public async Task CalculateHmacSha1Async_TouchConfiguredSmartCard_DoesNotNotify()
     {
         var prompt = new RecordingUserPresencePrompt();
         var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
@@ -122,19 +122,12 @@ public class YubiOtpSessionTests
             new byte[] { 0x01 },
             TestContext.Current.CancellationToken);
 
-        UserPresenceContext requested = Assert.Single(prompt.Requested);
-        Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Basis);
-        Assert.Equal("YubiOTP", requested.Application);
-        Assert.Equal(UserPresenceOperations.YubiOtp.CalculateHmacSha1, requested.Operation);
-        Assert.Equal(Slot.One.ToString(), requested.Scope);
-        var resolved = Assert.Single(prompt.Resolved);
-        Assert.Same(requested, resolved.Context);
-        Assert.Equal(UserPresenceOutcome.Completed, resolved.Outcome);
-        Assert.Equal(CancellationToken.None, resolved.CancellationToken);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     [Fact]
-    public async Task CalculateYubicoOtpAsync_TouchConfiguredSmartCard_ReportsOperation()
+    public async Task CalculateYubicoOtpAsync_TouchConfiguredSmartCard_DoesNotNotify()
     {
         var prompt = new RecordingUserPresencePrompt();
         var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
@@ -145,8 +138,8 @@ public class YubiOtpSessionTests
         _ = await session.CalculateYubicoOtpAsync(
             Slot.One, new byte[6], TestContext.Current.CancellationToken);
 
-        Assert.Equal(UserPresenceOperations.YubiOtp.CalculateYubicoOtp, Assert.Single(prompt.Requested).Operation);
-        Assert.Same(prompt.Requested[0], Assert.Single(prompt.Resolved).Context);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     [Fact]
@@ -188,7 +181,7 @@ public class YubiOtpSessionTests
     }
 
     [Fact]
-    public async Task CalculateHmacSha1Async_SmartCardTransportTimeout_ResolvesFailed()
+    public async Task CalculateHmacSha1Async_SmartCardTransportTimeout_PropagatesWithoutNotification()
     {
         var prompt = new RecordingUserPresencePrompt();
         var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
@@ -201,27 +194,35 @@ public class YubiOtpSessionTests
             new byte[] { 0x01 },
             TestContext.Current.CancellationToken));
 
-        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     [Fact]
-    public async Task CalculateHmacSha1Async_CallerCancellation_ResolvesCancelled()
+    public async Task CalculateHmacSha1Async_SmartCardCallerCancellation_PropagatesWithoutNotification()
     {
-        using var cancellation = new CancellationTokenSource();
-        var prompt = new RecordingUserPresencePrompt(() => cancellation.Cancel());
-        var (_, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var prompt = new RecordingUserPresencePrompt();
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
         using var _ = session;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                cancellation.Cancel();
+                return Task.FromCanceled<ReadOnlyMemory<byte>>(cancellation.Token);
+            });
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.CalculateHmacSha1Async(
             Slot.One,
             new byte[] { 0x01 },
             cancellation.Token));
 
-        Assert.Equal(UserPresenceOutcome.Cancelled, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     [Fact]
-    public async Task CalculateHmacSha1Async_ResponseFailure_ResolvesFailed()
+    public async Task CalculateHmacSha1Async_SmartCardResponseFailure_PropagatesWithoutNotification()
     {
         var prompt = new RecordingUserPresencePrompt();
         var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
@@ -234,7 +235,8 @@ public class YubiOtpSessionTests
             new byte[] { 0x01 },
             TestContext.Current.CancellationToken));
 
-        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     /// <summary>

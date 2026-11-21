@@ -546,6 +546,8 @@ public class PivSessionTests
     [InlineData("6982", typeof(ApduException))]
     [InlineData("6A82", typeof(ApduException))]
     [InlineData("0601050701010701009000", typeof(ApduException))]
+    [InlineData("0601059F810104AA0500000701019000", typeof(ApduException))]
+    [InlineData("0601059F2101AA0701019000", typeof(InvalidOperationException))]
     public async Task ResetAsync_WhenBioPreflightRefusesOrFails_DoesNotConsumeRetries(string response, Type error)
     {
         var connection = CreateInitializedConnection(Convert.FromHexString(response));

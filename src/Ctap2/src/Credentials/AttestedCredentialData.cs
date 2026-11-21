@@ -126,7 +126,7 @@ public sealed class AttestedCredentialData
         var credentialId = data.Slice(offset, credentialIdLength);
         offset += credentialIdLength;
 
-        // Extract one CBOR value for the public key; COSE structure and algorithm policy are separate checks.
+        // Preserve the encoded COSE key map without applying algorithm or trust policy here.
         var coseKeyBytes = data[offset..];
         var coseKeyLength = GetCborLength(coseKeyBytes);
         var credentialPublicKey = coseKeyBytes[..coseKeyLength];
@@ -144,8 +144,10 @@ public sealed class AttestedCredentialData
 
     private static int GetCborLength(ReadOnlyMemory<byte> data)
     {
-        // Use CborReader to determine the length of the CBOR value
         var reader = new CborReader(data, CborConformanceMode.Lax);
+        if (reader.PeekState() != CborReaderState.StartMap)
+            throw new CborContentException("The attested credential public key must be a CBOR map.");
+
         reader.SkipValue();
         return data.Length - reader.BytesRemaining;
     }

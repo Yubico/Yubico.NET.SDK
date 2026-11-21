@@ -48,8 +48,9 @@ public sealed class SessionCreationOptions
     public ConnectionType? PreferredConnectionType { get; init; }
 
     /// <summary>
-    ///     Gets an explicit override for the effective firmware version used to configure the protocol and
-    ///     evaluate feature support after required applet initialization exchanges complete. Security Domain
+    ///     Gets an explicit firmware version override for applet compatibility checks and protocol configuration,
+    ///     according to the applet's rules. Required initialization still runs. Numeric framing can use a separate
+    ///     observed version, for example when OpenPGP receives a major-zero development override. Security Domain
     ///     has no version probe of its own. Without an override, its device factory uses cached device
     ///     firmware when available. Without either source, the session uses 5.3.0 framing and admits
     ///     firmware-gated attempts without assuming support.

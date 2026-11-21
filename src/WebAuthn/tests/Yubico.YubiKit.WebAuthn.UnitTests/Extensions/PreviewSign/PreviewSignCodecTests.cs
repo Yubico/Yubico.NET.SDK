@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using NSubstitute;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Extensions;
+using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Codec;
 using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 using WebAuthnPreviewSign = Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
@@ -170,14 +175,17 @@ public class PreviewSignCodecTests
             Assert.Throws<CborContentException>(() => ExtractWebAuthn());
     }
 
-    [Fact(Timeout = 5000)]
-    public void PreviewSign_Registration_OutputPopulatedFromUnsignedAttObj()
+    [Theory(Timeout = 5000)]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task PreviewSign_GeneratedHandleReachesSelectedCredentialsAssertion(bool includeExtraInnerAlgorithm)
     {
         // Arrange - mock authenticator data with previewSign extension containing algorithm + flags in authData
         // and the inner generated-key attestation object in unsignedExtensionOutputs.
-        var innerCredentialId = RandomNumberGenerator.GetBytes(32);
+        byte[] innerCredentialId = includeExtraInnerAlgorithm ? [0xA1, 0xA2] : [];
         var publicKeyBytes = BuildCoseEc2PublicKey(CoseAlgorithm.Es256);
-        var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, innerCredentialId);
+        var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification,
+            innerCredentialId, includeExtraInnerAlgorithm);
 
         // Build authData.extensions["previewSign"] = {3: alg, 4: flags}
         var authDataExtension = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -218,6 +226,61 @@ public class PreviewSignCodecTests
         Assert.Equal(innerCredentialId, output.GeneratedKey.KeyHandle.ToArray());
         Assert.NotNull(output.GeneratedKey.AttestationObject);
         Assert.Equal(innerCredentialId, output.GeneratedKey.AttestationObject.AuthenticatorData.AttestedCredentialData!.CredentialId.ToArray());
+        var inner = new CborReader(output.GeneratedKey.AttestationObject.AuthenticatorData.ParsedExtensions["previewSign"]);
+        Assert.Equal(includeExtraInnerAlgorithm ? 2 : 1, inner.ReadStartMap());
+        if (includeExtraInnerAlgorithm)
+        {
+            Assert.Equal(3, inner.ReadInt32());
+            Assert.Equal(-7, inner.ReadInt32());
+        }
+        Assert.Equal(4, inner.ReadInt32());
+        Assert.Equal((byte)WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, inner.ReadInt32());
+        inner.ReadEndMap();
+
+        var absent = new PublicKeyCredentialDescriptor(new byte[] { 0x10 });
+        var selected = new PublicKeyCredentialDescriptor(new byte[] { 0x20 });
+        byte[] tbs = [0xB1, 0xB2];
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: ["previewSign"]));
+        backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            if (request.Options?.GetValueOrDefault("up") == false)
+            {
+                if (request.AllowList?.Any(d => d.Id.Span.SequenceEqual(selected.Id.Span)) != true)
+                    throw new Yubico.YubiKit.Ctap2.CtapException(Yubico.YubiKit.Ctap2.CtapStatus.NoCredentials);
+            }
+            else
+            {
+                Assert.Equal(selected.Id.ToArray(), Assert.Single(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(request.AllowList)).Id.ToArray());
+                var encoded = Assert.IsType<ReadOnlyMemory<byte>>(request.Extensions);
+                // {"previewSign": {2: h'...' (40 if empty), 6: h'B1B2'}}; key 7 is absent.
+                string handleEncoding = includeExtraInnerAlgorithm ? "42A1A2" : "40";
+                Assert.Equal(Convert.FromHexString($"A16B707265766965775369676EA202{handleEncoding}0642B1B2"), encoded.ToArray());
+            }
+            return MockCtap2Responses.CreateMockGetAssertionResponse(selected.Id.ToArray());
+        });
+
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = new byte[32],
+            RpId = "example.com",
+            AllowCredentials = [absent, selected],
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new AuthenticationExtensionInputs(PreviewSign: new WebAuthnPreviewSign.PreviewSignAuthenticationInput(
+                new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>
+                {
+                    [absent.Id] = new(new byte[] { 0xF1 }, new byte[] { 0xF2 }),
+                    [selected.Id] = new(output.GeneratedKey.KeyHandle, tbs)
+                }))
+        };
+        var ct = TestContext.Current.CancellationToken;
+        var match = Assert.Single(await client.GetAssertionAsync(options, cancellationToken: ct));
+        Assert.Equal(selected.Id.ToArray(), (await match.SelectAsync(ct)).CredentialId.ToArray());
     }
 
     [Fact(Timeout = 5000)]
@@ -282,7 +345,73 @@ public class PreviewSignCodecTests
     private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags) =>
         BuildAttestationObject(publicKey, flags, RandomNumberGenerator.GetBytes(32));
 
-    private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags, byte[] credId)
+    [Theory]
+    [InlineData("published")]
+    [InlineData("omitted")]
+    [InlineData("error")]
+    public async Task Registration_ClearsOwnedUnsignedValuesWithoutClearingPublishedAuthenticatorData(string outcome)
+    {
+        byte[] handle = [0xD1, 0xD2];
+        var signed = Convert.FromHexString("A16B707265766965775369676EA10326"); // {previewSign: {3: -7}}
+        byte[] authData = [.. MockCtap2Responses.BuildAuthDataWithAttestedCredential(Guid.Empty), .. signed];
+        authData[32] |= 0x80;
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(1);
+        writer.WriteTextString(outcome == "error" ? "unrecognized" : "previewSign");
+        writer.WriteStartMap(1);
+        writer.WriteInt32(outcome == "omitted" ? 8 : 7);
+        writer.WriteByteString(BuildAttestationObject(BuildCoseEc2PublicKey(CoseAlgorithm.Es256),
+            WebAuthnPreviewSign.PreviewSignFlags.RequireUserPresence, handle));
+        writer.WriteEndMap();
+        writer.WriteEndMap();
+
+        var ctap = MakeCredentialResponse.Decode(MockCtap2Responses.BuildMakeCredentialResponseCbor(authData,
+            "none", unsignedExtensions: writer.Encode()));
+        var owned = Assert.Single(Assert.IsAssignableFrom<IReadOnlyDictionary<string, Memory<byte>>>(ctap.UnsignedExtensionOutputs)).Value;
+        var parsed = WebAuthnAuthenticatorData.FromOwned(ctap.AuthenticatorData);
+        var parsedExtension = parsed.ParsedExtensions["previewSign"];
+        Assert.True(owned.Span.ContainsAnyExcept((byte)0));
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: ["previewSign"]));
+        backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>()).Returns(ctap);
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var options = ExtensionSessionTests.CreateMockOptions() with
+        {
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new RegistrationExtensionInputs(PreviewSign: new([CoseAlgorithm.Es256]))
+        };
+
+        var ct = TestContext.Current.CancellationToken;
+        if (outcome == "error")
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(options, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+            Assert.False(parsed.Raw.Span.ContainsAnyExcept((byte)0));
+            Assert.False(parsedExtension.Span.ContainsAnyExcept((byte)0));
+        }
+        else
+        {
+            var result = await client.MakeCredentialAsync(options, cancellationToken: ct);
+            Assert.True(parsed.Raw.Equals(result.AuthenticatorData.Raw));
+            Assert.True(parsedExtension.Equals(result.AuthenticatorData.ParsedExtensions["previewSign"]));
+            Assert.Equal(authData, result.RawAuthenticatorData.ToArray());
+            if (outcome == "omitted")
+                Assert.Null(result.ClientExtensionResults?.PreviewSign);
+            else
+            {
+                var generated = Assert.IsType<WebAuthnPreviewSign.PreviewSignRegistrationOutput>(result.ClientExtensionResults?.PreviewSign).GeneratedKey;
+                Assert.Equal(handle, generated.KeyHandle.ToArray());
+                Assert.Equal(handle, WebAuthn.Attestation.WebAuthnAttestationObject.Decode(generated.AttestationObject.Encode())
+                    .AuthenticatorData.AttestedCredentialData?.CredentialId.ToArray());
+            }
+        }
+        Assert.False(owned.Span.ContainsAnyExcept((byte)0));
+    }
+
+    private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags, byte[] credId,
+        bool includeExtraInnerAlgorithm = true)
     {
         // Build an inner attestation fixture with the previewSign extension in authData, in the
         // on-the-wire shape: the previewSign unsigned-extension-output wraps an attestation object whose
@@ -314,17 +443,17 @@ public class PreviewSignCodecTests
         // publicKey (COSE_Key)
         authDataList.AddRange(publicKey);
 
-        // This inner fixture contains flags and an extra algorithm field. Draft v4 describes flags
-        // here and the algorithm in the outer registration output; both are not required here by the
-        // decoder. A minimal flags-only inner fixture remains a separate test-coverage gap.
+        // Draft v4 puts policy flags here and the selected algorithm in the outer registration output.
         var extensionWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
         extensionWriter.WriteStartMap(1);
         extensionWriter.WriteTextString("previewSign");
 
-        // Write algorithm (key 3) + flags (key 4)
-        extensionWriter.WriteStartMap(2);
-        extensionWriter.WriteInt32(3);  // alg
-        extensionWriter.WriteInt32(-7);  // ES256
+        extensionWriter.WriteStartMap(includeExtraInnerAlgorithm ? 2 : 1);
+        if (includeExtraInnerAlgorithm)
+        {
+            extensionWriter.WriteInt32(3);
+            extensionWriter.WriteInt32(-7);
+        }
         extensionWriter.WriteInt32(4);   // flags
         extensionWriter.WriteInt32((byte)flags);
         extensionWriter.WriteEndMap();

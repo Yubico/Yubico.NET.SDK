@@ -142,16 +142,13 @@ public class WebAuthnAuditHardwareTests
     }
 
     /// <summary>
-    ///     The same PRF input evaluated with and without user verification gives different outputs: the key keeps
-    ///     CTAP §12.7's CredRandomWithUV and CredRandomWithoutUV apart. The client does not apply the WebAuthn L3
-    ///     §10.1.4 UV override, so relying parties must send userVerification: required for stable PRF output on a
-    ///     PIN-protected key. Pins that behaviour so a future UV override is a deliberate change.
+    ///     WebAuthn L3 §10.1.4: both preferences use the verified PRF for the same credential and input.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait("Audit", "YESDK-1609")]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
-    public async Task Prf_WithAndWithoutUserVerification_YieldsDifferentOutputs(YubiKeyTestState state)
+    public async Task Prf_WithDiscouragedAndPreferredVerification_YieldsTheSameVerifiedOutput(YubiKeyTestState state)
     {
         await using var session = await state.Device.CreateCtap2SessionAsync();
         var info = await session.GetInfoAsync();
@@ -182,12 +179,12 @@ public class WebAuthnAuditHardwareTests
             return (response.ClientExtensionResults!.Prf!.Results.First.ToArray(), response.AuthenticatorData.UserVerified);
         }
 
-        var withUv = await AssertAsync(UserVerificationPreference.Preferred, KnownTestPin);
-        var withoutUv = await AssertAsync(UserVerificationPreference.Discouraged, pin: null);
+        var preferred = await AssertAsync(UserVerificationPreference.Preferred, KnownTestPin);
+        var discouraged = await AssertAsync(UserVerificationPreference.Discouraged, KnownTestPin);
 
-        Assert.True(withUv.UvFlag, "the verified assertion must carry uv=1");
-        Assert.False(withoutUv.UvFlag, "the discouraged assertion without a PIN must carry uv=0");
-        Assert.NotEqual(withUv.Result, withoutUv.Result); // CredRandomWithUV ≠ CredRandomWithoutUV on this key
+        Assert.True(preferred.UvFlag);
+        Assert.True(discouraged.UvFlag);
+        Assert.Equal(preferred.Result, discouraged.Result);
     }
 
     /// <summary>

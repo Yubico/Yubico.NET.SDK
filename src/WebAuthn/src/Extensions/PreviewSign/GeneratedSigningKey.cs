@@ -37,8 +37,10 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <param name="KeyHandle">
 /// The key handle used to request signatures from this generated signing key. This is copied from
 /// the credential ID in the embedded attestation object's attested credential data and can be empty.
-/// The current <see cref="PreviewSignSigningParams"/> constructor rejects empty handles despite the
-/// draft permitting them, so such a generated key cannot currently be used through that constructor.
+/// Pass it as the required handle to <see cref="PreviewSignSigningParams"/> even when empty. The SDK
+/// sends it as a byte string under CTAP key 2 for the selected credential. An empty handle relies on
+/// authenticator-held state; it does not select a global default key. Signing still requires nonempty
+/// TBS and, if supplied, a complete CBOR <c>COSE_Sign_Args</c> map.
 /// </param>
 /// <param name="PublicKey">
 /// The COSE public key for the generated signing key. This is the
@@ -55,6 +57,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// (v4 §10.2.1) makes it a required member, and <see cref="KeyHandle"/> and <see cref="PublicKey"/>
 /// are taken from its attested credential data.
 /// </param>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class GeneratedSigningKey(
     ReadOnlyMemory<byte> KeyHandle,
     CoseKey PublicKey,

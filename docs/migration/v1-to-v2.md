@@ -854,6 +854,10 @@ Touch notification uses `SessionCreationOptions.UserPresencePrompt`. FIDO HID ca
 
 Typed response models now preserve the original CBOR envelope for fields this SDK version does not yet model: `AuthenticatorInfo.RawData`, `FingerprintSensorInfo.RawData`, `EnrollmentSampleResult.RawData`, `CredentialMetadata.RawData`, and `RelyingPartyInfo.RawData`. This does not change any typed member; it is a forward-compatibility escape hatch for code that previously had to reach for ad hoc CBOR parsing to read a field the typed model omitted. See `fido2-forward-compat-raw-data` in `v1-to-v2-map.yml`.
 
+When moving from an earlier v2 preview, change consumers of `AuthenticatorInfo.VendorPrototypeConfigCommands`
+from `IReadOnlyList<int>` to `IReadOnlyList<ulong>`. CTAP GetInfo key `0x15` contains unsigned 64-bit IDs;
+do not narrow them to `int` or `uint`.
+
 ### WebAuthn
 
 Use `Yubico.YubiKit.WebAuthn` for the higher-level W3C WebAuthn API. It is a new package built on top of `Yubico.YubiKit.Ctap2` (`ICtap2Session`); v1 had no equivalent package. `WebAuthnClient` accepts an optional `ICredentialPrompt` (`Yubico.YubiKit.Core.Credentials`) that supplies a PIN on demand instead of requiring `pinBytes` up front, and owns a bounded retry loop instead of v1 FIDO2 code's global, unbounded `KeyCollector` pattern; see `webauthn-credential-prompt` in `v1-to-v2-map.yml`.
@@ -864,6 +868,13 @@ WebAuthn touch notification is the separate `IUserPresencePrompt` supplied in th
 Client configuration uses a required `WebAuthnClientOptions` record (`RpIdValidator`, `MaxPromptAttempts`, `CredentialPrompt`) passed to `WebAuthnClient`'s constructor or `IYubiKeyExtensions.CreateWebAuthnClientAsync`. YESDK-1623 / audit 15 removes the earlier `PublicSuffixChecker`, `EnterpriseRpIds`, and `WebAuthnOrigin.IsRpIdValid` APIs outright. Supply one synchronous `RpIdValidator(WebAuthnOrigin origin, string rpId)` delegate owning RP validity (including domain/URI syntax) AND the application's complete caller/RP authorization policy, not just the old public-suffix predicate. Both ceremonies present wire-valid RP text unchanged to it before device I/O; false or non-cancellation exceptions fail with `Security`, and callback cancellation propagates. The SDK rejects only null/empty RP IDs and invalid UTF-16 that cannot be encoded faithfully as UTF-8 with `InvalidRequest`; it does not parse domain/URI syntax, perform IDNA conversion, or impose browser syntax/binding policy. A callback from an earlier development build that checked only authorization must now also own RP validity; the former independent syntax gate was removed. Passing the callback is an application decision, not a blanket browser-conformance claim. Carry forward optional `CredentialPrompt` and `MaxPromptAttempts`. See [WebAuthn RP authorization](../../src/WebAuthn/README.md#rp-authorization-belongs-to-the-application) for exact-RP, allowlist, application-service examples, RP-server checks, and the unchanged HTTPS/HTTP-localhost origin representation limit.
 
 Earlier v2 alphas also exposed a streaming ceremony-status API (`WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync`, returning `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed`); it was removed outright with no shim, leaving the plain async `MakeCredentialAsync`/`GetAssertionAsync` as the only ceremony entry points. See `webauthn-client-construction-and-streams` in `v1-to-v2-map.yml`.
+
+For callers migrating from earlier WebAuthn v2 previews, three extension result fields now expose
+writable memory: `PrfEvaluationResults.First` changes from `ReadOnlyMemory<byte>` to `Memory<byte>`,
+`PrfEvaluationResults.Second` from `ReadOnlyMemory<byte>?` to `Memory<byte>?`, and
+`LargeBlobAuthenticationOutput.Blob` from `ReadOnlyMemory<byte>?` to `Memory<byte>?`.
+The caller owns successful plaintext and should clear it when finished. Record copies alias the same
+storage; do not clear one while another consumer still needs it. Absence and an empty blob remain distinct.
 
 ### OATH
 

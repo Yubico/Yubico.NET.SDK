@@ -48,6 +48,11 @@ card or per approved, independently scoped facet of a split card, with `Audit-Ca
 One draft PR per applet against `--base yubikit-pass2-base`, starting with OATH, with the Copilot review-fix loop.
 The withdrawn C1 guard is not a shared prerequisite.
 
+WebAuthn delivery: [draft PR #798](https://github.com/Yubico/Yubico.NET.SDK/pull/798). WA-IMP-019 signing
+follows [AG-32](pass-2-review-decisions.md#ag-32-previewsign-empty-generated-handle): empty but present
+handles are accepted as input; this amends only the nonempty-handle facet of CTAP-IMP-040/AG-11.
+Attended ceremonies and hardware/platform qualification remain pending.
+
 Security Domain delivery: [draft PR #792](https://github.com/Yubico/Yubico.NET.SDK/pull/792). Hardware qualification remains pending.
 
 Management software and documentation are in draft [PR #791](https://github.com/Yubico/Yubico.NET.SDK/pull/791),
@@ -160,7 +165,7 @@ YubiHSM Auth delivery: [draft PR #794](https://github.com/Yubico/Yubico.NET.SDK/
 | CTAP-IMP-037 | CTAP2 | Medium | Interview (no rule) | Dennis | Follow Python and Rust; no write-more-than-read / Lean (a): 64-bit original size, symmetric 1 MiB cap | AG-12 |
 | CTAP-IMP-038 | CTAP2 | Medium | Interview (no rule) | Dennis | Most forward-compatible; Rust / (a): keep Try contract, return null with a distinct diagnostic (Rust warns and omits, `sign.rs:421–437`) / Same as lean | AG-12 |
 | CTAP-IMP-039 | CTAP2 | Medium | A2 | Auto | Python-fido2, Rust and Android take the derived algorithm from device output. No sibling uses the seed marker. Veto pass: no veto | AG-25; see also AG-11 |
-| CTAP-IMP-040 | CTAP2 | Medium | Interview (G3) | Dennis | (a): validate COSE_Sign_Args as one map, reject empty TBS and key handle; surface behind `[Experimental]` | AG-11 |
+| CTAP-IMP-040 | CTAP2 | Medium | Interview (G3) | Dennis | Require a present key handle, which may be empty; CTAP key 2 is always a byte string. Require nonempty TBS and one complete CBOR COSE_Sign_Args map when additional args are present; keep `[Experimental]`. | AG-11 ([#790](https://github.com/Yubico/Yubico.NET.SDK/pull/790), original scope); [AG-32](pass-2-review-decisions.md#ag-32-previewsign-empty-generated-handle) ([#798](https://github.com/Yubico/Yubico.NET.SDK/pull/798), handle-length amendment only) |
 | CTAP-IMP-041 | CTAP2 | Medium | Interview (no rule) | Dennis | Keep if internal; if public it must be correct / (a): strict DER plus documented P-256/SHA-256 raw-message limit / Verified: `PreviewSignDerivedKey` and `VerifySignature` are **public** (`PreviewSignDerivedKey.cs:48, 121`), so Dennis's "must be correct" branch applies | AG-12 |
 | CTAP-IMP-042 | CTAP2 | Medium | Interview (no rule) | Dennis | Low value; open to a same-or-better suggestion / Remove the env-var export (AG-15, Q4 yes) / Sia's suggestion: remove the export; the test already decrypts the blob in-process (`Ctap2LargeBlobAuditReproTests.cs:~90–106`), which is the guarantee | AG-12 |
 | CTAP-IMP-043 | CTAP2 | Medium | Interview (G3) | Auto (AG-19) | M1 | AG-19 |
@@ -250,6 +255,13 @@ YubiHSM Auth delivery: [draft PR #794](https://github.com/Yubico/Yubico.NET.SDK/
 | PIVCORE-002 | PIV | High | Interview (G1; T2) | Dennis | Documentation only: general Core caller-serialization contract and PIV-specific guidance in the PIV PR. No new runtime guard or bug fix is implied. | AG-21; superseded by [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) |
 | PIV-QUAL | PIV | Qualification | T1 | T1 hardware | No code decision; device qualification | classification only |
 
-PIV software delivery is tracked in [draft PR #795](https://github.com/Yubico/Yubico.NET.SDK/pull/795).
-PIVIMP-002 software is in the draft for independent review. Q10 is compilation-only and physical qualification
-is pending. The AG-31 ROCA range policy is a software gate, not physical qualification.
+PIV software was delivered in [PR #795](https://github.com/Yubico/Yubico.NET.SDK/pull/795).
+The AG-31 ROCA range policy is a software gate, not physical qualification.
+
+PR #795 records the metadata exceptions: PIVIMP-002 is attributed in the bodies of
+[`fd982b1d1`](https://github.com/Yubico/Yubico.NET.SDK/commit/fd982b1d1d3b1dd651af03d96b4bfafad02b1abf),
+[`ee159fede`](https://github.com/Yubico/Yubico.NET.SDK/commit/ee159fedeb7c5ee7e8aeca1108db88b3f4b2ac8b), and
+[`bb7f6ecf0`](https://github.com/Yubico/Yubico.NET.SDK/commit/bb7f6ecf0ed1bce36c8c8c389552d6e039f7648a),
+which lack the AG-28 trailer pair. Follow-ups for PIVIMP-001, PIVIMP-006d, and PIVIMP-007a lack a standard
+`Triage-Rule` trailer; their primary commits are traceable in the PR table. Q10 was compiled only;
+physical qualification remains pending.

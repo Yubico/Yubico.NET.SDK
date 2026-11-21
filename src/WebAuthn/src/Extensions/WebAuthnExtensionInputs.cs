@@ -16,6 +16,8 @@ using Yubico.YubiKit.Ctap2.Extensions;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions;
 
+#pragma warning disable YKEXP001 // Stable aggregate carriers allow null experimental inputs.
+
 /// <summary>
 /// Extension inputs for WebAuthn registration (MakeCredential).
 /// </summary>
@@ -29,8 +31,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions;
 /// <param name="MinPinLength">
 /// Requests the current minimum PIN length in Unicode code points, not a policy change. The
 /// authenticator returns it only for an RP ID authorized in its minimum-PIN-length RP list.
-/// As a current input-handling limitation, any nonnull object requests the extension even if its
-/// <c>Requested</c> property is false. Use null to omit it.
+/// Null or <c>Requested = false</c> omits the extension.
 /// </param>
 /// <param name="LargeBlob">Large blob support request.</param>
 /// <param name="Prf">Pseudo-random function extension.</param>
@@ -43,7 +44,7 @@ public sealed record class RegistrationExtensionInputs(
     Inputs.LargeBlobInput? LargeBlob = null,
     Inputs.PrfInput? Prf = null,
     Inputs.CredPropsInput? CredProps = null,
-    PreviewSign.PreviewSignRegistrationInput? PreviewSign = null);
+    [property: System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")] PreviewSign.PreviewSignRegistrationInput? PreviewSign = null);
 
 /// <summary>
 /// Extension inputs for WebAuthn authentication (GetAssertion).
@@ -65,5 +66,5 @@ public sealed record class RegistrationExtensionInputs(
 public sealed record class AuthenticationExtensionInputs(
     Inputs.LargeBlobInput? LargeBlob = null,
     Inputs.PrfInput? Prf = null,
-    PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null,
+    [property: System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")] PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null,
     bool GetCredBlob = false);

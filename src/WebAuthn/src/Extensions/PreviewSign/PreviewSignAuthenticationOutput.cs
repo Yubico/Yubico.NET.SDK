@@ -29,4 +29,5 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <param name="Signature">
 /// Algorithm-specific signature bytes.
 /// </param>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class PreviewSignAuthenticationOutput(ReadOnlyMemory<byte> Signature);

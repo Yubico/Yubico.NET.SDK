@@ -35,14 +35,14 @@ internal interface IWebAuthnBackend : IAsyncDisposable
 
     /// <summary>
     /// The PIN/UV auth protocol this backend speaks with the authenticator. Available before and without
-    /// a token: extensions such as hmac-secret need it for key agreement even when no PIN is involved.
+    /// a token after GetInfo: extensions such as hmac-secret use it for key agreement. An unsupported
+    /// protocol is reported only when this property is used.
     /// </summary>
     IPinUvAuthProtocol Protocol { get; }
 
     /// <summary>
     /// Performs CTAP2.3 §6.5.5.4 getKeyAgreement and protocol-specific encapsulation, returning the
-    /// platform key plus shared secret. The concrete backend uses protocol 2 (§6.5.7), without protocol
-    /// negotiation. The caller owns the result and disposes it to zero the secret.
+    /// platform key plus shared secret. The caller owns the result and disposes it to zero the secret.
     /// </summary>
     Task<PinUvSharedSecret> EncapsulateAsync(CancellationToken cancellationToken);
 
@@ -121,6 +121,8 @@ internal enum PinUvAuthMethod
 /// </summary>
 internal sealed record class BackendMakeCredentialRequest
 {
+    public int? EnterpriseAttestation { get; init; }
+
     /// <summary>
     /// Hash of the client data JSON.
     /// </summary>

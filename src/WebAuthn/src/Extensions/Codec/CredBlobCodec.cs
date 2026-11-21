@@ -57,6 +57,10 @@ internal static class CredBlobCodec
         }
 
         var reader = new CborReader(rawValue, CborConformanceMode.Lax);
-        return CredBlobAssertionOutput.Decode(reader);
+        // Keep ordinary outputs on the already owned authenticator-data backing. Preserve the lax
+        // decoder's indefinite-length compatibility; that case allocates and needs explicit cleanup.
+        return reader.PeekState() == CborReaderState.ByteString
+            ? new CredBlobAssertionOutput { Blob = reader.ReadDefiniteLengthByteString() }
+            : CredBlobAssertionOutput.Decode(reader);
     }
 }

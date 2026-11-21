@@ -49,7 +49,7 @@ namespace Yubico.YubiKit.Ctap2;
 /// </remarks>
 public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 {
-    private const int DefaultMaxMessageSize = 1024;
+    internal const int DefaultMaxMessageSize = 1024;
     private int _maxMessageSize = DefaultMaxMessageSize;
     private int? _maxCredBlobLength;
     /// <summary>
@@ -417,7 +417,17 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         string rpId,
         ReadOnlyMemory<byte> clientDataHash,
         GetAssertionOptions? options = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        (await GetAssertionCoreAsync(rpId, clientDataHash, options, reportSelectionStatus: false, cancellationToken)
+            .ConfigureAwait(false)).Response ?? throw new InvalidOperationException("The assertion response is missing.");
+
+    internal Task<(CtapStatus Status, GetAssertionResponse? Response)> GetAssertionForSelectionAsync(
+        string rpId, ReadOnlyMemory<byte> clientDataHash, GetAssertionOptions options, CancellationToken cancellationToken) =>
+        GetAssertionCoreAsync(rpId, clientDataHash, options, reportSelectionStatus: true, cancellationToken);
+
+    private async Task<(CtapStatus Status, GetAssertionResponse? Response)> GetAssertionCoreAsync(
+        string rpId, ReadOnlyMemory<byte> clientDataHash, GetAssertionOptions? options, bool reportSelectionStatus,
+        CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
 
@@ -451,8 +461,17 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
                         Scope = rpId
                     });
 
-            response = await SendWithinMessageLimitAsync(request, userPresenceNotification, cancellationToken)
-                .ConfigureAwait(false);
+            CheckMessageLimit(request);
+            if (reportSelectionStatus)
+            {
+                var (status, data) = await _backend.SendAssertionForSelectionAsync(request, userPresenceNotification, cancellationToken)
+                    .ConfigureAwait(false);
+                if (status != CtapStatus.Success)
+                    return (status, null);
+                response = data;
+            }
+            else
+                response = await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -464,7 +483,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         }
 
         // Parsing is not relying-party verification and can fail after a successful device exchange.
-        return DecodeCredentialResponse(response, GetAssertionResponse.Decode);
+        return (CtapStatus.Success, DecodeCredentialResponse(response, GetAssertionResponse.Decode));
     }
 
     /// <inheritdoc />
@@ -595,10 +614,14 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         UserPresenceNotification notification,
         CancellationToken cancellationToken)
     {
+        CheckMessageLimit(request);
+        return _backend.SendCborAsync(request, notification, cancellationToken);
+    }
+
+    private void CheckMessageLimit(ReadOnlyMemory<byte> request)
+    {
         if (request.Length > _maxMessageSize)
             throw new ArgumentException($"The CTAP request exceeds the authenticator's {_maxMessageSize}-byte message limit.", nameof(request));
-
-        return _backend.SendCborAsync(request, notification, cancellationToken);
     }
 
     private static async Task<AuthenticatorInfo> GetInfoCoreAsync(

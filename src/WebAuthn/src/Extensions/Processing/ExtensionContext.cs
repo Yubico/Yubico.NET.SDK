@@ -23,15 +23,13 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing;
 /// support), the backend's PIN/UV protocol (available without a token)
 /// and the backend for follow-up authenticator calls (key agreement, large-blob storage).
 /// </summary>
-/// <remarks>
-/// The current WebAuthn backend hardcodes protocol 2; it does not negotiate protocol 1 for older
-/// authenticators. Availability here is not a guarantee of CTAP 2.0 hmac-secret interoperability.
-/// </remarks>
 internal sealed record ExtensionContext(
     AuthenticatorInfo Info,
-    IPinUvAuthProtocol Protocol,
+    IPinUvAuthProtocol? ProtocolOverride,
     IWebAuthnBackend Backend)
 {
+    public IPinUvAuthProtocol Protocol => ProtocolOverride ?? Backend.Protocol;
+
     /// <summary>True when GetInfo advertises <paramref name="extension"/> (CTAP §6.4 "extensions").</summary>
     public bool Supports(string extension) => Info.Extensions.Contains(extension, StringComparer.Ordinal);
 

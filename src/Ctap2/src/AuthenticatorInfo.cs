@@ -202,9 +202,9 @@ public sealed class AuthenticatorInfo
     public int? RemainingDiscoverableCredentials { get; init; }
 
     /// <summary>
-    /// Gets the vendor prototype config commands supported.
+    /// Gets the supported vendor prototype configuration command IDs (CTAP §6.4 and §6.11.3).
     /// </summary>
-    public IReadOnlyList<int> VendorPrototypeConfigCommands { get; init; } = [];
+    public IReadOnlyList<ulong> VendorPrototypeConfigCommands { get; init; } = [];
 
     /// <summary>
     /// Gets the attestation formats supported.
@@ -360,7 +360,7 @@ public sealed class AuthenticatorInfo
         int? uvModality = null;
         Dictionary<string, int>? certifications = null;
         int? remainingDiscoverableCredentials = null;
-        List<int>? vendorPrototypeConfigCommands = null;
+        List<ulong>? vendorPrototypeConfigCommands = null;
         List<string>? attestationFormats = null;
         int? uvCountSinceLastPinEntry = null;
         bool? longTouchForReset = null;
@@ -460,7 +460,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyVendorPrototypeConfigCommands:
-                    vendorPrototypeConfigCommands = ReadIntArray(reader);
+                    vendorPrototypeConfigCommands = ReadUInt64Array(reader);
                     break;
 
                 case KeyAttestationFormats:
@@ -585,6 +585,18 @@ public sealed class AuthenticatorInfo
             result.Add(reader.ReadInt32());
         }
 
+        reader.ReadEndArray();
+        return result;
+    }
+
+    private static List<ulong> ReadUInt64Array(CborReader reader)
+    {
+        var length = reader.ReadStartArray() ?? 0;
+        var result = new List<ulong>(length);
+        for (var i = 0; i < length; i++)
+        {
+            result.Add(reader.ReadUInt64());
+        }
         reader.ReadEndArray();
         return result;
     }

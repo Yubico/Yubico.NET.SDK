@@ -43,8 +43,9 @@ public enum AttestationPreference
     /// Prefer enterprise attestation under an RP's enterprise policy.
     /// </summary>
     /// <remarks>
-    /// This client currently passes the returned statement through but does not send the CTAP
-    /// enterprise-attestation parameter. Selecting this value does not request enterprise attestation.
+    /// Requests CTAP vendor-facilitated mode (1) only when GetInfo reports enabled enterprise attestation.
+    /// The authenticator decides whether it can supply enterprise attestation for the RP. The client
+    /// passes through the returned statement; it does not configure or use platform-managed mode.
     /// </remarks>
     Enterprise
 }

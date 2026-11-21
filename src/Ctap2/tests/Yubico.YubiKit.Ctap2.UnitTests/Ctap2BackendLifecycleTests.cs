@@ -295,6 +295,58 @@ public class Ctap2BackendLifecycleTests
         return new byte[] { (byte)status };
     }
 
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    public async Task SelectionStatus_RequiresCompletedResolutionAndClearsUntransferredResponse(bool useHid, bool failResolution)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] hidResponse = [(byte)CtapStatus.NoCredentials];
+        var cardResponse = new ApduResponse(new byte[] { (byte)CtapStatus.NoCredentials, 0x90, 0x00 });
+        var hid = Substitute.For<IFidoHidProtocol>();
+        hid.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(call => RequestAndReturnResponseAsync(call.ArgAt<UserPresenceNotification>(2), hidResponse, ct));
+        var card = Substitute.For<ISmartCardProtocol>();
+        card.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), cancellationToken: ct).Returns(cardResponse);
+        ICtap2Backend backend = useHid ? new HidBackend(hid) : new SmartCardBackend(card);
+        var callbackFailure = new CtapException(CtapStatus.RequestTooLarge);
+        var prompt = new RecordingUserPresencePrompt(failResolution ? callbackFailure : null);
+        var notification = CreateNotification(prompt);
+
+        if (failResolution)
+            Assert.Same(callbackFailure, await Assert.ThrowsAsync<CtapException>(() => SendAsync()));
+        else
+        {
+            var result = await SendAsync();
+            Assert.Equal(CtapStatus.NoCredentials, result.Status);
+            Assert.True(result.Data.IsEmpty);
+        }
+
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Outcomes));
+        Assert.Equal(0, useHid ? hidResponse[0] : cardResponse.Data.Span[0]);
+
+        Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendAsync() =>
+            backend.SendAssertionForSelectionAsync(new byte[] { CtapCommand.GetAssertion }, notification, ct);
+    }
+
+    [Fact]
+    public async Task HidSelection_PropagatesRequestCallbackFailureBeforeResponseHandoff()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var failure = new CtapException(CtapStatus.NoCredentials);
+        var protocol = Substitute.For<IFidoHidProtocol>();
+        // The FIDO protocol throws a captured request-callback failure after draining, instead of
+        // handing bytes to the backend. Model that failure at its handoff boundary.
+        protocol.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(Task.FromException<ReadOnlyMemory<byte>>(failure));
+        var backend = new HidBackend(protocol);
+        var exception = await Assert.ThrowsAsync<CtapException>(() => backend.SendAssertionForSelectionAsync(
+            new byte[] { CtapCommand.GetAssertion }, CreateNotification(new RecordingUserPresencePrompt()), ct));
+        Assert.Same(failure, exception);
+    }
+
     private static async Task<ReadOnlyMemory<byte>> RequestAndReturnResponseAsync(
         UserPresenceNotification notification,
         ReadOnlyMemory<byte> response,

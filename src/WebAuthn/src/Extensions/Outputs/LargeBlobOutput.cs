@@ -29,18 +29,14 @@ public sealed record class LargeBlobRegistrationOutput(bool Supported);
 /// </summary>
 /// <remarks>
 /// <para>
-/// A missing largeBlob output, missing read data, a valid empty blob, and a failed read are distinct
-/// conditions. Do not use a null value alone to infer support, absence of stored data, or failure.
-/// Current read handling can omit the output on an InvalidOperationException or propagate storage
-/// errors after the assertion succeeds. When storage returns no blob, the current array-to-memory
-/// conversion produces a present value of length zero. <c>Blob.HasValue</c> and the blob's length
-/// therefore do not distinguish that result from a stored empty blob.
+/// A supported read keeps the output present even when there is no key, no stored data, or a CTAP,
+/// CBOR, or invalid-operation storage failure. In those cases Blob is null; a stored empty blob
+/// is present with length zero. Cancellation is not treated as a read result.
 /// </para>
 /// <para>
-/// Retrieved data is decrypted application plaintext and may be sensitive. SDK-produced results have
-/// no disposal or zeroing guarantee; disposing the client or clearing a caller-created copy does not
-/// clear the SDK-created array. Directly constructed results may wrap caller-owned memory, whose
-/// lifetime and cleanup remain the caller's responsibility. Do not log sensitive blob contents.
+/// Retrieved data is decrypted application plaintext. The client transfers the fresh writable buffer
+/// to the caller, who must zero sensitive data after last use. Disposing the client does not clear it.
+/// Record copies share the buffer; direct construction retains supplied memory without copying.
 /// </para>
 /// </remarks>
 /// <param name="Blob">Read data when supplied. Null is not a reliable diagnostic of why data is unavailable.</param>
@@ -49,5 +45,5 @@ public sealed record class LargeBlobRegistrationOutput(bool Supported);
 /// when no write result was produced. Cancellation propagates rather than becoming false.
 /// </param>
 public sealed record class LargeBlobAuthenticationOutput(
-    ReadOnlyMemory<byte>? Blob = null,
+    Memory<byte>? Blob = null,
     bool? Written = null);

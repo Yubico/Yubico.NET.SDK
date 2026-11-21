@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Formats.Cbor;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Extensions;
@@ -52,8 +53,8 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
     /// <summary>
     /// Rejects registration read/write inputs and rejects Required when this authenticator lacks the
     /// supported storage route. The key is requested only for a discoverable credential (CTAP §12.3
-    /// rk rule). Current limitation: Required does not reject a non-discoverable registration or a
-    /// successful response without the requested key; those paths report supported as false.
+    /// rk rule). Required rejects creation when the effective credential is not discoverable.
+    /// A successful response without the requested key reports supported as false.
     /// </summary>
     public static LargeBlobProcessor? ForRegistration(LargeBlobInput input, bool requireResidentKey, ExtensionContext context)
     {
@@ -65,6 +66,11 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
         }
 
         bool supported = IsSupported(context);
+        if (input.Support == LargeBlobSupport.Required && !requireResidentKey)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "Required largeBlob storage needs a discoverable credential.");
+        }
         if (input.Support == LargeBlobSupport.Required && !supported)
         {
             throw new WebAuthnClientError(
@@ -77,9 +83,10 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
 
     /// <summary>
     /// L3 §10.1.5 authentication: "If support is present, or if both read and write are present, return
-    /// ... NotSupportedError". An authenticator without the supported storage route is skipped.
-    /// The original allow list is not available here, so the required single-entry check for writes
-    /// is currently missing; narrowing the final assertion request is not equivalent validation.
+    /// ... NotSupportedError". An unsupported read or write still initializes the client result,
+    /// without requesting a key or attempting storage I/O.
+    /// The SDK deliberately accepts multi-entry allow lists for writes; it uses the final assertion's
+    /// credential-bound key. This is a divergence from the L3 exact-one requirement, not validation.
     /// </summary>
     public static LargeBlobProcessor? ForAuthentication(LargeBlobInput input, ExtensionContext context)
     {
@@ -90,7 +97,9 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
                 "largeBlob authentication takes either read or write, never support (WebAuthn L3 §10.1.5)");
         }
 
-        return IsSupported(context) ? new LargeBlobProcessor(input, context, requestKey: true) : null;
+        bool supported = IsSupported(context);
+        return supported || input.Read || input.Write.HasValue
+            ? new LargeBlobProcessor(input, context, requestKey: supported) : null;
     }
 
     public string Name => ExtensionIdentifiers.LargeBlobKey;
@@ -101,7 +110,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
     /// alwaysUv is not enabled; this SDK path does not.
     /// </remarks>
     public PinUvAuthTokenPermissions Permissions =>
-        _input.Write is not null ? PinUvAuthTokenPermissions.LargeBlobWrite : PinUvAuthTokenPermissions.None;
+        _requestKey && _input.Write.HasValue ? PinUvAuthTokenPermissions.LargeBlobWrite : PinUvAuthTokenPermissions.None;
 
     public void PrepareInputs(ExtensionBuilder builder, PinUvAuthTokenSession? token)
     {
@@ -112,7 +121,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
     }
 
     public void PrepareInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token) =>
-        builder.WithLargeBlobKey();
+        PrepareInputs(builder, token);
 
     // Report whether this credential returned the requested key, not merely device capability.
     // CTAP §12.3 places it in top-level response key 0x05, not authData.extensions. A missing key
@@ -135,24 +144,20 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
         AuthenticationExtensionOutputsBuilder outputs,
         CancellationToken cancellationToken)
     {
-        if (response.LargeBlobKey is not { } largeBlobKey)
-        {
-            return; // No response key: omit the operation result; the cause is not diagnosed here.
-        }
-
         if (_input.Read)
         {
-            // Read errors are not normalized here: CTAP errors propagate; the session suppresses
-            // InvalidOperationException. A null storage result converts to present empty memory below,
-            // so nullable presence and length do not distinguish absent data from a stored empty blob.
-            var storage = _context.Backend.CreateLargeBlobStorage(token: null);
-            var blob = await storage.GetBlobAsync(largeBlobKey, cancellationToken).ConfigureAwait(false);
-            outputs.LargeBlob = new LargeBlobAuthenticationOutput(Blob: blob);
+            outputs.LargeBlob = new LargeBlobAuthenticationOutput(Blob: await ReadBlobAsync(response, cancellationToken)
+                .ConfigureAwait(false));
+            return;
         }
-        else if (_input.Write is { } data)
+
+        if (_input.Write is not { } data)
+            return;
+
+        // L3 §10.1.5: "set written to true if the write succeeded and false otherwise".
+        bool written = false;
+        if (_requestKey && response.LargeBlobKey is { Length: 32 } largeBlobKey)
         {
-            // L3 §10.1.5: "set written to true if the write succeeded and false otherwise".
-            bool written;
             try
             {
                 var storage = _context.Backend.CreateLargeBlobStorage(token);
@@ -163,8 +168,24 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
             {
                 written = false;
             }
+        }
+        outputs.LargeBlob = new LargeBlobAuthenticationOutput(Written: written);
+    }
 
-            outputs.LargeBlob = new LargeBlobAuthenticationOutput(Written: written);
+    private async Task<Memory<byte>?> ReadBlobAsync(GetAssertionResponse response, CancellationToken cancellationToken)
+    {
+        if (!_requestKey || response.LargeBlobKey is not { Length: 32 } key)
+            return null;
+
+        try
+        {
+            var storage = _context.Backend.CreateLargeBlobStorage(token: null);
+            var blob = await storage.GetBlobAsync(key, cancellationToken).ConfigureAwait(false);
+            return blob is null ? (Memory<byte>?)null : blob.AsMemory();
+        }
+        catch (Exception ex) when (ex is CtapException or CborContentException or InvalidOperationException or InvalidDataException or IOException)
+        {
+            return null;
         }
     }
 }

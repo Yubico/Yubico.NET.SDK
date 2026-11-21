@@ -17,9 +17,11 @@ using System.Formats.Cbor;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
+using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.Prf;
@@ -60,6 +62,175 @@ public class PrfProcessorTests
             MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: extensions), _protocol, _backend);
     }
 
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task AssertionRequestsVerifiedPrfOnlyForApplicableSelectedCredential(bool applicable, bool verified)
+    {
+        _ = Context("hmac-secret");
+        _backend.Protocol.Returns(_protocol);
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(uvSupported: applicable, extensions: ["hmac-secret"]));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        var chosen = applicable ? a : b;
+        var outputs = new CborWriter();
+        outputs.WriteStartMap(1);
+        outputs.WriteTextString("hmac-secret");
+        outputs.WriteByteString(OutputEncV2Two);
+        outputs.WriteEndMap();
+
+        int probes = 0, assertions = 0;
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            var allowList = Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(request.AllowList);
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+            {
+                probes++;
+                Assert.Null(request.Extensions);
+                Assert.Null(request.PinUvAuthParam);
+                if (!allowList.Any(d => d.Id.Span.SequenceEqual(chosen.Id.Span)))
+                    throw new Ctap2.CtapException(Ctap2.CtapStatus.NoCredentials);
+                return MockCtap2Responses.CreateMockGetAssertionResponse(chosen.Id.ToArray(), userVerified: false);
+            }
+
+            assertions++;
+            Assert.Equal(chosen.Id.ToArray(), Assert.Single(allowList).Id.ToArray());
+            Assert.Equal(applicable, request.Options?.GetValueOrDefault("uv") == true);
+            Assert.Equal(applicable, request.Extensions.HasValue);
+            if (applicable)
+                Assert.NotEmpty(ReadHmacSecretInput(request.Extensions.GetValueOrDefault()));
+            return MockCtap2Responses.CreateMockGetAssertionResponse(chosen.Id.ToArray(),
+                authDataExtensionsCbor: outputs.Encode(), userVerified: verified);
+        });
+
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var requestOptions = new PublicKeyCredentialRequestOptions
+        {
+            RpId = "example.com",
+            Challenge = new byte[32],
+            AllowCredentials = [a, b],
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new AuthenticationExtensionInputs(Prf: new PrfInput
+            {
+                EvalByCredential = new Dictionary<string, PrfInputValues>
+                { ["AQ"] = new() { First = PrfEvalFirst, Second = PrfEvalSecond } }
+            })
+        };
+        var ct = TestContext.Current.CancellationToken;
+        if (applicable && !verified)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(requestOptions, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+            Assert.Equal(1, assertions);
+            Assert.Equal(1, probes);
+            await _backend.Received(1).EncapsulateAsync(Arg.Any<CancellationToken>());
+            return;
+        }
+        var match = Assert.Single(await client.GetAssertionAsync(requestOptions, cancellationToken: ct));
+        var response = await match.SelectAsync(ct);
+        Assert.Equal(chosen.Id.ToArray(), response.CredentialId.ToArray());
+        Assert.Equal(verified, response.AuthenticatorData.UserVerified);
+        var result = response.ClientExtensionResults?.Prf?.Results;
+        if (verified)
+        {
+            Assert.NotNull(result);
+            Assert.Equal(Output1, result.First.ToArray());
+            Assert.Equal(Output2, result.Second?.ToArray());
+            System.Security.Cryptography.CryptographicOperations.ZeroMemory(result.First.Span);
+            System.Security.Cryptography.CryptographicOperations.ZeroMemory(result.Second.GetValueOrDefault().Span);
+        }
+        else
+            Assert.Null(result);
+        Assert.Equal(1, assertions);
+        Assert.Equal(applicable ? 1 : 2, probes);
+        await _backend.Received(applicable ? 1 : 0).EncapsulateAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public async Task Assertion_ReprobesHiddenCredentialOnlyWhenAllCandidatesEvaluatePrf(bool fallback, bool cancelAfterMiss)
+    {
+        _ = Context("hmac-secret");
+        _backend.Protocol.Returns(_protocol);
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true, extensions: ["hmac-secret"]));
+        _backend.GetPinUvTokenAsync(PinUvAuthMethod.Pin, PinUvAuthTokenPermissions.GetAssertion, "example.com",
+                Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(_protocol, new byte[32]));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        using var caller = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        int silent = 0, verifiedSilent = 0, final = 0;
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            var sent = Assert.Single(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(request.AllowList));
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+            {
+                Assert.Null(request.Extensions);
+                if (!request.PinUvAuthParam.HasValue)
+                {
+                    if (++silent == 2 && cancelAfterMiss)
+                        caller.Cancel(); // Last reply is still NoCredentials; no PIN attempt may follow cancellation.
+                    throw new Ctap2.CtapException(Ctap2.CtapStatus.NoCredentials);
+                }
+                verifiedSilent++;
+                Assert.Equal(a.Id.ToArray(), sent.Id.ToArray());
+                return MockCtap2Responses.CreateMockGetAssertionResponse(a.Id.ToArray());
+            }
+            final++;
+            if (!fallback)
+            {
+                Assert.Equal(new byte[] { 0 }, sent.Id.ToArray());
+                Assert.Null(request.Extensions);
+                Assert.Null(request.PinUvAuthParam);
+                throw new Ctap2.CtapException(Ctap2.CtapStatus.NoCredentials);
+            }
+            Assert.Equal(a.Id.ToArray(), sent.Id.ToArray());
+            Assert.NotNull(request.PinUvAuthParam);
+            Assert.NotEmpty(ReadHmacSecretInput(Assert.IsType<ReadOnlyMemory<byte>>(request.Extensions)));
+            return MockCtap2Responses.CreateMockGetAssertionResponse(a.Id.ToArray());
+        });
+
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            RpId = "example.com",
+            Challenge = new byte[32],
+            AllowCredentials = [a, b],
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new AuthenticationExtensionInputs(Prf: new PrfInput
+            {
+                First = fallback ? PrfEvalFirst.AsMemory() : (ReadOnlyMemory<byte>?)null,
+                EvalByCredential = new Dictionary<string, PrfInputValues> { ["AQ"] = new() { First = PrfEvalFirst } }
+            })
+        };
+        bool reprobed = fallback && !cancelAfterMiss;
+        if (cancelAfterMiss)
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.GetAssertionAsync(options, "123456"u8.ToArray(), caller.Token));
+        else
+        {
+            var matches = await client.GetAssertionAsync(options, "123456"u8.ToArray(), caller.Token);
+            if (fallback)
+                Assert.Equal(a.Id.ToArray(), (await Assert.Single(matches).SelectAsync(caller.Token)).CredentialId.ToArray());
+            else
+                Assert.Empty(matches);
+        }
+        Assert.Equal(2, silent);
+        Assert.Equal(reprobed ? 1 : 0, verifiedSilent);
+        Assert.Equal(cancelAfterMiss ? 0 : 1, final);
+        await _backend.Received(reprobed ? 1 : 0).GetPinUvTokenAsync(PinUvAuthMethod.Pin, PinUvAuthTokenPermissions.GetAssertion,
+            "example.com", Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
+        await _backend.Received(reprobed ? 1 : 0).EncapsulateAsync(Arg.Any<CancellationToken>());
+    }
+
     private static Dictionary<int, object?> ReadHmacSecretInput(ReadOnlyMemory<byte> extensionsCbor)
     {
         var reader = new CborReader(extensionsCbor, CborConformanceMode.Ctap2Canonical);
@@ -79,6 +250,109 @@ public class PrfProcessorTests
             };
         }
         return map;
+    }
+
+    [Theory]
+    [InlineData("common", false, false)]
+    [InlineData("identical override", false, false)]
+    [InlineData("override", false, false)]
+    [InlineData("only A", true, false)]
+    [InlineData("only A", false, true)]
+    [InlineData("silent B", true, false)]
+    public async Task TokenlessUv_PrfsAreBoundToActualSelection(string inputs, bool chooseB, bool cancelAfterSelection)
+    {
+        _ = Context("hmac-secret");
+        _backend.Protocol.Returns(_protocol);
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(uvSupported: true, extensions: ["hmac-secret", "credBlob"], maxCredentialCountInList: 2));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        var chosen = chooseB ? b : a;
+        bool common = inputs is "common" or "identical override";
+        bool silentHit = inputs == "silent B";
+        byte[]? credBlobOutput = chooseB ? Convert.FromHexString("A16863726564426C6F62412A") : null; // {"credBlob": h'2A'}
+        var firstResponse = MockCtap2Responses.CreateMockGetAssertionResponse(chosen.Id.ToArray(), signature: [1],
+            largeBlobKey: [9], authDataExtensionsCbor: credBlobOutput);
+        var secondResponse = MockCtap2Responses.CreateMockGetAssertionResponse(chosen.Id.ToArray(), omitCredential: true, signature: [2]);
+        using var caller = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        int silent = 0;
+        var real = new List<BackendGetAssertionRequest>();
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+            {
+                silent++;
+                Assert.Null(request.Extensions);
+                if (silentHit)
+                    return MockCtap2Responses.CreateMockGetAssertionResponse(b.Id.ToArray(), userVerified: false, userPresent: false);
+                throw new Ctap2.CtapException(Ctap2.CtapStatus.NoCredentials);
+            }
+
+            real.Add(request);
+            bool first = real.Count == 1;
+            Assert.True(request.Options?.GetValueOrDefault("uv"));
+            Assert.NotEqual(false, request.Options?.GetValueOrDefault("up", true));
+            Assert.Null(request.PinUvAuthParam);
+            Assert.Null(request.PinUvAuthProtocol);
+            Assert.Equal(silentHit ? [b] : first ? [a, b] : new[] { a }, request.AllowList);
+            if (!first || common)
+            {
+                var encoded = ReadHmacSecretInput(Assert.IsType<ReadOnlyMemory<byte>>(request.Extensions));
+                Assert.Equal(Salt1, _protocol.Decrypt(SharedSecretV2, Assert.IsType<byte[]>(encoded[SaltEncKey])));
+            }
+            else if (chooseB)
+                Assert.Equal(Convert.FromHexString("A16863726564426C6F62F5"), request.Extensions?.ToArray());
+            else
+                Assert.Null(request.Extensions);
+
+            if (first && cancelAfterSelection)
+                caller.Cancel();
+            return first ? firstResponse : secondResponse;
+        });
+
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            RpId = "example.com",
+            Challenge = new byte[32],
+            AllowCredentials = [a, b],
+            UserVerification = UserVerificationPreference.Required,
+            Extensions = new AuthenticationExtensionInputs(GetCredBlob: chooseB, Prf: new PrfInput
+            {
+                First = inputs switch
+                {
+                    "override" => PrfEvalSecond,
+                    "only A" or "silent B" => (ReadOnlyMemory<byte>?)null,
+                    _ => PrfEvalFirst
+                },
+                EvalByCredential = inputs == "common" ? null : new Dictionary<string, PrfInputValues> { ["AQ"] = new() { First = PrfEvalFirst } }
+            })
+        };
+
+        bool needsSecond = !common && !chooseB && !cancelAfterSelection;
+        if (cancelAfterSelection)
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.GetAssertionAsync(options, cancellationToken: caller.Token));
+        else
+        {
+            var matches = await client.GetAssertionAsync(options, cancellationToken: caller.Token);
+            var response = await Assert.Single(matches).SelectAsync(caller.Token);
+            Assert.Equal(chosen.Id.ToArray(), response.CredentialId.ToArray());
+            Assert.Equal(new byte[] { needsSecond ? (byte)2 : (byte)1 }, response.Signature.ToArray());
+            if (chooseB)
+                Assert.Equal(new byte[] { 0x2a }, response.ClientExtensionResults?.CredBlob?.Blob.ToArray());
+            Assert.All(real, request => Assert.Equal(response.ClientData.Hash.ToArray(), request.ClientDataHash.ToArray()));
+            Assert.Contains(response.ClientData.Hash.ToArray(), value => value != 0);
+        }
+        Assert.Equal(1, silent);
+        Assert.Equal(needsSecond ? 2 : 1, real.Count);
+        Assert.Equal(needsSecond || cancelAfterSelection, firstResponse.AuthenticatorDataRaw.Span.IndexOfAnyExcept((byte)0) < 0);
+        Assert.Equal(new byte[1], firstResponse.LargeBlobKey?.ToArray());
+        Assert.Equal(new byte[] { needsSecond || cancelAfterSelection ? (byte)0 : (byte)1 }, firstResponse.Signature.ToArray());
+        Assert.Equal(new byte[] { 1 }, a.Id.ToArray());
+        Assert.Equal(new byte[] { 2 }, b.Id.ToArray());
+        await _backend.Received(common || needsSecond ? 1 : 0).EncapsulateAsync(Arg.Any<CancellationToken>());
     }
 
     private static Dictionary<int, object?> ReadCoseKey(CborReader reader)
@@ -199,7 +473,7 @@ public class PrfProcessorTests
         var session = AuthenticationExtensionSession.Create(
             new AuthenticationExtensionInputs(Prf: input), [other, selected], context);
 
-        await session.PrepareAsync(TestContext.Current.CancellationToken);
+        await session.PrepareAsync(TestContext.Current.CancellationToken, selected);
         var cbor = session.PrepareInputs(selected, token: null);
 
         var saltEnc = (byte[])ReadHmacSecretInput(cbor!.Value)[SaltEncKey]!;

@@ -93,11 +93,12 @@ public class PreviewSignCborTests
     }
 
     [Fact]
-    public void SigningParams_InitCannotReplaceCheckedInputsWithEmptyBytes()
+    public void SigningParams_InitAcceptsEmptyHandleButNotEmptyTbs()
     {
         byte[] keyHandle = [1];
         byte[] tbs = [2];
-        Assert.Throws<ArgumentException>(() => new PreviewSignSigningParams(keyHandle, tbs) { KeyHandle = default });
+        var emptyHandle = new PreviewSignSigningParams(keyHandle, tbs) { KeyHandle = default };
+        Assert.Equal(Convert.FromHexString("A20240064102"), PreviewSignCbor.EncodeAuthenticationInput(emptyHandle));
         Assert.Throws<ArgumentException>(() => new PreviewSignSigningParams(keyHandle, tbs) { Tbs = default });
     }
 

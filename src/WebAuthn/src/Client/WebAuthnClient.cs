@@ -33,7 +33,8 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// Disposing the client does not clear returned response or extension-result buffers.
 /// </para>
 /// <para>
-/// Serialize and fully await complete ceremonies before disposing this client or its dependencies.
+/// Use this client one ceremony at a time. Fully await it before starting another ceremony or
+/// disposing the client or its dependencies. Concurrent use is unsupported.
 /// Client disposal does not join an in-flight ceremony: Core drains individual exchanges, not the
 /// complete capability/probe/token/assertion/extension-output workflow. Keep borrowed inputs and
 /// caller-owned prompt resources usable through actual remaining work, including a credential prompt
@@ -41,10 +42,9 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// Adopting a session does not acquire ownership of a connection that session already borrowed.
 /// </para>
 /// <para>
-/// The concrete backend uses PIN/UV auth protocol 2 without negotiating protocol 1. PIN/UV token
-/// acquisition and extensions that use key agreement therefore need compatible authenticator support;
-/// ceremonies that need neither may still work without it. Built-in UV token support also depends on
-/// authenticator capabilities and is not fully checked before token acquisition.
+/// The backend negotiates PIN/UV protocol 2, then 1, from GetInfo. A supported protocol is needed
+/// only for token acquisition or extension key agreement. Built-in UV token acquisition also needs
+/// advertised permission-token support; ordinary ceremonies can use the internal UV option instead.
 /// </para>
 /// <para>
 /// The relying party server must verify returned responses, including the challenge, operation type,

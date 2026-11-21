@@ -146,8 +146,8 @@ Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.GetCredBlob.get
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.GetCredBlob.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.LargeBlob.get -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput?
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.LargeBlob.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput?
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.PreviewSign.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput?
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.PreviewSign.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Prf.get -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput?
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionInputs.Prf.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs
@@ -158,8 +158,8 @@ Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.CredBlob.init 
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.Equals(Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs? other) -> bool
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.LargeBlob.get -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput?
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.LargeBlob.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput?
-Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.PreviewSign.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput?
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.PreviewSign.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.Prf.get -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfAuthenticationOutput?
 Yubico.YubiKit.WebAuthn.Extensions.AuthenticationExtensionOutputs.Prf.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredPropsInput
@@ -191,11 +191,11 @@ Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredProtectOutput.Policy.get -> Yubic
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredProtectOutput.Policy.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput!
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Blob.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Blob.get -> System.Memory<byte>?
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Blob.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Deconstruct(out System.ReadOnlyMemory<byte>? Blob, out bool? Written) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Deconstruct(out System.Memory<byte>? Blob, out bool? Written) -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Equals(Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.LargeBlobAuthenticationOutput(System.ReadOnlyMemory<byte>? Blob = null, bool? Written = null) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.LargeBlobAuthenticationOutput(System.Memory<byte>? Blob = null, bool? Written = null) -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Written.get -> bool?
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Written.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobRegistrationOutput
@@ -214,12 +214,12 @@ Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfAuthenticationOutput.Results.get -
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfAuthenticationOutput.Results.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults!
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Deconstruct(out System.ReadOnlyMemory<byte> First, out System.ReadOnlyMemory<byte>? Second) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Deconstruct(out System.Memory<byte> First, out System.Memory<byte>? Second) -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Equals(Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.First.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.First.get -> System.Memory<byte>
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.First.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.PrfEvaluationResults(System.ReadOnlyMemory<byte> First, System.ReadOnlyMemory<byte>? Second = null) -> void
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Second.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.PrfEvaluationResults(System.Memory<byte> First, System.Memory<byte>? Second = null) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Second.get -> System.Memory<byte>?
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Second.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput!
@@ -230,54 +230,54 @@ Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Equals(Yubico.Y
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.PrfRegistrationOutput(bool Enabled, Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults? Results = null) -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Results.get -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults?
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Results.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Algorithm.get -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Algorithm.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.AttestationObject.get -> Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.AttestationObject.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Deconstruct(out System.ReadOnlyMemory<byte> KeyHandle, out Yubico.YubiKit.Ctap2.Cose.CoseKey! PublicKey, out Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm Algorithm, out Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject! AttestationObject) -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.GeneratedSigningKey(System.ReadOnlyMemory<byte> KeyHandle, Yubico.YubiKit.Ctap2.Cose.CoseKey! PublicKey, Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm Algorithm, Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject! AttestationObject) -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.KeyHandle.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.KeyHandle.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.PublicKey.get -> Yubico.YubiKit.Ctap2.Cose.CoseKey!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.PublicKey.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.PreviewSignAuthenticationInput(System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams!>! signByCredential) -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.SignByCredential.get -> System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams!>!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Deconstruct(out System.ReadOnlyMemory<byte> Signature) -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.PreviewSignAuthenticationOutput(System.ReadOnlyMemory<byte> Signature) -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Signature.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Signature.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags.RequireUserPresence = 1 -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags.RequireUserVerification = 5 -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags.Unattended = 0 -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.Algorithms.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm>!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.PreviewSignRegistrationInput(System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm>! algorithms) -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.Deconstruct(out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey! GeneratedKey) -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.GeneratedKey.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.GeneratedKey.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.PreviewSignRegistrationOutput(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey! GeneratedKey) -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams!
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.AdditionalArgs.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.KeyHandle.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.PreviewSignSigningParams(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> tbs, System.ReadOnlyMemory<byte>? additionalArgs = null) -> void
-Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.Tbs.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Algorithm.get -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Algorithm.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.AttestationObject.get -> Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.AttestationObject.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Deconstruct(out System.ReadOnlyMemory<byte> KeyHandle, out Yubico.YubiKit.Ctap2.Cose.CoseKey! PublicKey, out Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm Algorithm, out Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject! AttestationObject) -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? other) -> bool
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.GeneratedSigningKey(System.ReadOnlyMemory<byte> KeyHandle, Yubico.YubiKit.Ctap2.Cose.CoseKey! PublicKey, Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm Algorithm, Yubico.YubiKit.WebAuthn.Attestation.WebAuthnAttestationObject! AttestationObject) -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.KeyHandle.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.KeyHandle.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.PublicKey.get -> Yubico.YubiKit.Ctap2.Cose.CoseKey!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.PublicKey.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? other) -> bool
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.PreviewSignAuthenticationInput(System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams!>! signByCredential) -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.SignByCredential.get -> System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams!>!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Deconstruct(out System.ReadOnlyMemory<byte> Signature) -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? other) -> bool
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.PreviewSignAuthenticationOutput(System.ReadOnlyMemory<byte> Signature) -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Signature.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Signature.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags.RequireUserPresence = 1 -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags.RequireUserVerification = 5 -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags.Unattended = 0 -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignFlags
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.Algorithms.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm>!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? other) -> bool
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.PreviewSignRegistrationInput(System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm>! algorithms) -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.Deconstruct(out Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey! GeneratedKey) -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? other) -> bool
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.GeneratedKey.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.GeneratedKey.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.PreviewSignRegistrationOutput(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey! GeneratedKey) -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams!
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.AdditionalArgs.get -> System.ReadOnlyMemory<byte>?
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.Equals(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? other) -> bool
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.KeyHandle.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.PreviewSignSigningParams(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> tbs, System.ReadOnlyMemory<byte>? additionalArgs = null) -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.Tbs.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs!
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.CredBlob.get -> Yubico.YubiKit.Ctap2.Extensions.CredBlobInput?
@@ -292,8 +292,8 @@ Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.LargeBlob.get -> 
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.LargeBlob.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.MinPinLength.get -> Yubico.YubiKit.Ctap2.Extensions.MinPinLengthInput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.MinPinLength.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput?
-Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.PreviewSign.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput?
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.PreviewSign.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.Prf.get -> Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.Prf.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.RegistrationExtensionInputs(Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredProtectInput? CredProtect = null, Yubico.YubiKit.Ctap2.Extensions.CredBlobInput? CredBlob = null, Yubico.YubiKit.Ctap2.Extensions.MinPinLengthInput? MinPinLength = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.LargeBlobInput? LargeBlob = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput? Prf = null, Yubico.YubiKit.WebAuthn.Extensions.Inputs.CredPropsInput? CredProps = null, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? PreviewSign = null) -> void
@@ -310,8 +310,8 @@ Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.LargeBlob.get ->
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.LargeBlob.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.MinPinLength.get -> Yubico.YubiKit.Ctap2.Extensions.MinPinLengthOutput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.MinPinLength.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput?
-Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.PreviewSign.init -> void
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.PreviewSign.get -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput?
+[YKEXP001]Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.PreviewSign.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.Prf.get -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput?
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.Prf.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.RegistrationExtensionOutputs() -> void
@@ -411,24 +411,24 @@ override Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.ToStrin
 override Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.Equals(object? obj) -> bool
 override Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.GetHashCode() -> int
 override Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.ToString() -> string!
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.Equals(object? obj) -> bool
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.GetHashCode() -> int
-override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.ToString() -> string!
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.Equals(object? obj) -> bool
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.ToString() -> string!
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.Equals(object? obj) -> bool
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.ToString() -> string!
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.Equals(object? obj) -> bool
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.ToString() -> string!
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.Equals(object? obj) -> bool
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.ToString() -> string!
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.Equals(object? obj) -> bool
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.ToString() -> string!
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.Equals(object? obj) -> bool
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.ToString() -> string!
 override Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.Equals(object? obj) -> bool
 override Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.GetHashCode() -> int
 override Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.ToString() -> string!
@@ -477,20 +477,20 @@ static Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.operator 
 static Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.operator ==(Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults? left, Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults? right) -> bool
 static Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput? right) -> bool
 static Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.CreateSignByCredential(System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams!>! signByCredential) -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput!
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.GenerateKey(params Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm[]! algorithms) -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput!
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? right) -> bool
-static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.GeneratedSigningKey? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.CreateSignByCredential(System.Collections.Generic.IReadOnlyDictionary<System.ReadOnlyMemory<byte>, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams!>! signByCredential) -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput!
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationOutput? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.GenerateKey(params Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm[]! algorithms) -> Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput!
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationInput? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignRegistrationOutput? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.operator !=(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? right) -> bool
+[YKEXP001]static Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams.operator ==(Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? left, Yubico.YubiKit.WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams? right) -> bool
 static Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.operator !=(Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs? left, Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs? right) -> bool
 static Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs.operator ==(Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs? left, Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionInputs? right) -> bool
 static Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs.operator !=(Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs? left, Yubico.YubiKit.WebAuthn.Extensions.RegistrationExtensionOutputs? right) -> bool

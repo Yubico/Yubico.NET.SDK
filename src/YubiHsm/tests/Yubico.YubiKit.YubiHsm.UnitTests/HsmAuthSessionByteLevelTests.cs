@@ -123,13 +123,13 @@ public class HsmAuthSessionByteLevelTests
     [Theory]
     [InlineData(VersionQualifierType.Final)]
     [InlineData(null)] // A missing qualifier must not make a known numeric version optimistic.
-    public async Task CreateAsync_KnownUnsupportedFirmwareStopsBeforeScp11(VersionQualifierType? qualifier)
+    public async Task CreateAsync_KnownUnsupportedCachedVersionWinsOverAppletVersionForScp11(VersionQualifierType? qualifier)
     {
         var version = new FirmwareVersion(5, 6, 0);
         var cached = default(DeviceInfo) with { FirmwareVersion = version };
         if (qualifier is { } type)
             cached = cached with { VersionQualifier = new VersionQualifier(version, type, 0) };
-        using var connection = new ExtendedCardConnection(OkResponse());
+        using var connection = new ExtendedCardConnection([0x79, 3, 5, 8, 0, 0x90, 0]);
         using var scp = CreateScp11Parameters();
 
         await Assert.ThrowsAsync<NotSupportedException>(() => HsmAuthSession.CreateAsync(connection,

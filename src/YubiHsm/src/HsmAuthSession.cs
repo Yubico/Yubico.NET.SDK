@@ -175,7 +175,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 _configuration,
                 _scpKeyParameters,
                 cancellationToken,
-                admitUnverifiedScpFirmware: featureVersion.IsAlphaOrBeta)
+                scpEligibilityFirmwareVersion: featureVersion)
             .ConfigureAwait(false);
 
         if (!ReferenceEquals(protocol, effectiveProtocol))

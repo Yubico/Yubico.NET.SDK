@@ -134,50 +134,26 @@ public readonly record struct KeyHistory
         try
         {
             using var list = TlvHelper.DecodeList(encodedData.Span);
-            if (list.Count is not (3 or 4))
-            {
+            if (list.Count is not (3 or 4)
+                || !HasField(list[0], OnCardTag, 1)
+                || !HasField(list[1], OffCardTag, 1)
+                || !HasField(list[^1], UnusedTag, 0))
                 return false;
-            }
 
-            if (list[0].Tag != OnCardTag || list[0].Length != 1)
-            {
-                return false;
-            }
-
-            if (list[1].Tag != OffCardTag || list[1].Length != 1)
-            {
-                return false;
-            }
-
-            bool hasUrl = list.Count == 4;
-            if (hasUrl && (list[2].Tag != UrlTag || list[2].Length is 0 or > MaximumUrlLength))
-            {
-                return false;
-            }
-
-            if (list[^1].Tag != UnusedTag || list[^1].Length != 0)
-            {
-                return false;
-            }
-
-            byte onCard = list[0].Value.Span[0];
-            byte offCard = list[1].Value.Span[0];
-            Uri? url = hasUrl
-                ? new Uri(Encoding.UTF8.GetString(list[2].Value.Span))
-                : null;
-
-            value = Create(onCard, offCard, url);
+            value = Create(list[0].Value.Span[0], list[1].Value.Span[0], list.Count == 4 ? DecodeUrl(list[2]) : null);
             return true;
         }
-        catch (Exception ex) when (ex is ArgumentException or IndexOutOfRangeException)
+        catch (Exception ex) when (ex is ArgumentException or IndexOutOfRangeException or UriFormatException)
         {
             // Truncated/malformed TLV data can throw IndexOutOfRangeException from the
             // underlying Tlv parser rather than ArgumentException; treat both as decode failure.
             return false;
         }
-        catch (UriFormatException)
-        {
-            return false;
-        }
     }
+
+    private static bool HasField(Tlv field, int tag, int length) => field.Tag == tag && field.Length == length;
+
+    private static Uri DecodeUrl(Tlv field) => field.Tag == UrlTag && field.Length is > 0 and <= MaximumUrlLength
+        ? new Uri(Encoding.UTF8.GetString(field.Value.Span))
+        : throw new ArgumentException("Invalid Key History F3 field.");
 }

@@ -178,7 +178,7 @@ internal static partial class NativeMethods
     */
     [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static partial IntPtr IOHIDDeviceCreate(IntPtr allocator, int service); /* OS >= 10.5 */
+    internal static partial IntPtr IOHIDDeviceCreate(IntPtr allocator, uint service); /* OS >= 10.5 */
 
     /*!
         @function   IOHIDDeviceOpen

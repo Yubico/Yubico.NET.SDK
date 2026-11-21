@@ -13,12 +13,12 @@ internal static class MacOSHidDeviceLookup
         nint CreateMatchingDictionary(ulong entryId);
 
         // Consumes the dictionary once native code is entered, even on a failed status.
-        int GetMatchingServices(nint dictionary, out int iterator);
+        int GetMatchingServices(nint dictionary, out uint iterator);
 
-        int NextService(int iterator);
-        bool IsIteratorValid(int iterator);
-        nint CreateHidDevice(int service);
-        void ReleaseIoObject(int handle);
+        uint NextService(uint iterator);
+        bool IsIteratorValid(uint iterator);
+        nint CreateHidDevice(uint service);
+        void ReleaseIoObject(uint handle);
         void ReleaseCFObject(nint handle);
     }
 
@@ -29,7 +29,7 @@ internal static class MacOSHidDeviceLookup
             throw new PlatformApiException("IORegistryEntryIDMatching failed to create a matching dictionary.");
 
         int status;
-        int iterator;
+        uint iterator;
         try
         {
             status = native.GetMatchingServices(dictionary, out iterator);
@@ -43,8 +43,10 @@ internal static class MacOSHidDeviceLookup
 
         if (status != 0)
             throw new PlatformApiException("IOServiceGetMatchingServices", status, "HID registry lookup failed.");
+        // A null iterator can mean no matches, but the kernel can also return it when it cannot
+        // allocate or wrap the iterator. Require a valid iterator before declaring the entry absent.
         if (iterator == 0)
-            throw new MacOSHidEntryUnavailableException(); // Documented successful empty result.
+            throw new PlatformApiException("IOServiceGetMatchingServices returned no iterator. Reselect the device.");
 
         try
         {
@@ -56,9 +58,9 @@ internal static class MacOSHidDeviceLookup
         }
     }
 
-    private static nint CreateDeviceFromIterator(INative native, int iterator)
+    private static nint CreateDeviceFromIterator(INative native, uint iterator)
     {
-        int service = native.NextService(iterator);
+        uint service = native.NextService(iterator);
         if (service == 0)
         {
             // Apple requires checking validity when IOIteratorNext returns zero.

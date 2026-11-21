@@ -8,16 +8,25 @@ namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid;
 
 public sealed class MacOSHidDeviceLookupTests
 {
-    [Theory]
-    [InlineData(0)]
-    [InlineData(22)]
-    public void SuccessfulEmptyQuery_IsEligibleForRediscovery(int iterator)
+    [Fact]
+    public void ValidExhaustedIterator_IsEligibleForRediscovery()
     {
-        var native = new Native { Iterator = iterator, Service = 0 };
+        var native = new Native { Service = 0 };
 
         Assert.Throws<MacOSHidEntryUnavailableException>(() => MacOSHidDeviceLookup.CreateDevice(native, 42));
 
-        Assert.Equal(iterator == 0 ? ["dictionary", "query"] : ["dictionary", "query", "next", "valid", "release 22"], native.Calls);
+        Assert.Equal(["dictionary", "query", "next", "valid", "release 22"], native.Calls);
+    }
+
+    [Fact]
+    public void SuccessfulQueryWithoutIterator_IsInconclusiveAndNotEligibleForRediscovery()
+    {
+        var native = new Native { Iterator = 0, Service = 0 };
+
+        var error = Assert.Throws<PlatformApiException>(() => MacOSHidDeviceLookup.CreateDevice(native, 42));
+
+        Assert.Contains("no iterator", error.Message);
+        Assert.Equal(["dictionary", "query"], native.Calls);
     }
 
     [Fact]
@@ -83,8 +92,8 @@ public sealed class MacOSHidDeviceLookupTests
         public List<string> Calls { get; } = [];
         public nint Dictionary { get; init; } = 11;
         public int Status { get; init; }
-        public int Iterator { get; init; } = 22;
-        public int Service { get; init; } = 33;
+        public uint Iterator { get; init; } = 22;
+        public uint Service { get; init; } = 33;
         public bool IteratorValid { get; init; } = true;
         public nint Device { get; init; } = 44;
         public EntryPointNotFoundException? BindingFailure { get; init; }
@@ -96,7 +105,7 @@ public sealed class MacOSHidDeviceLookupTests
             return Dictionary;
         }
 
-        public int GetMatchingServices(nint dictionary, out int iterator)
+        public int GetMatchingServices(nint dictionary, out uint iterator)
         {
             Calls.Add("query");
             Assert.Equal((nint)11, dictionary);
@@ -106,28 +115,28 @@ public sealed class MacOSHidDeviceLookupTests
             return Status;
         }
 
-        public int NextService(int iterator)
+        public uint NextService(uint iterator)
         {
             Calls.Add("next");
-            Assert.Equal(22, iterator);
+            Assert.Equal(22u, iterator);
             return Service;
         }
 
-        public bool IsIteratorValid(int iterator)
+        public bool IsIteratorValid(uint iterator)
         {
             Calls.Add("valid");
-            Assert.Equal(22, iterator);
+            Assert.Equal(22u, iterator);
             return IteratorValid;
         }
 
-        public nint CreateHidDevice(int service)
+        public nint CreateHidDevice(uint service)
         {
             Calls.Add("create");
-            Assert.Equal(33, service);
+            Assert.Equal(33u, service);
             return Device;
         }
 
-        public void ReleaseIoObject(int handle) => Calls.Add($"release {handle}");
+        public void ReleaseIoObject(uint handle) => Calls.Add($"release {handle}");
         public void ReleaseCFObject(nint handle) => Calls.Add($"cf release {handle}");
     }
 }

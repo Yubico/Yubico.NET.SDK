@@ -155,7 +155,7 @@ internal static partial class NativeMethods
     // that it will be supported by these platforms in the future.
     [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static partial kern_return_t IOObjectRelease(int self);
+    internal static partial kern_return_t IOObjectRelease(uint self);
 
     /*! @function IORegistryEntryGetRegistryEntryID
         @abstract Returns an ID for the registry entry that is global to all tasks.
@@ -180,14 +180,14 @@ internal static partial class NativeMethods
     // on success is owned by the caller and must be released with IOObjectRelease.
     [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static partial kern_return_t IOServiceGetMatchingServices(uint mainPort, nint matching, out int iterator);
+    internal static partial kern_return_t IOServiceGetMatchingServices(uint mainPort, nint matching, out uint iterator);
 
     [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static partial int IOIteratorNext(int iterator);
+    internal static partial uint IOIteratorNext(uint iterator);
 
     // Mach boolean_t is 32 bits, not a marshalled C/C++ bool.
     [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static partial int IOIteratorIsValid(int iterator);
+    internal static partial int IOIteratorIsValid(uint iterator);
 }

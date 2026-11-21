@@ -36,13 +36,13 @@ internal sealed class MacOSHidReportApi : IMacOSHidReportApi, MacOSHidDeviceLook
     nint MacOSHidDeviceLookup.INative.CreateMatchingDictionary(ulong entryId) =>
         IOKitNativeMethods.IORegistryEntryIDMatching(entryId);
 
-    int MacOSHidDeviceLookup.INative.GetMatchingServices(nint dictionary, out int iterator) =>
+    int MacOSHidDeviceLookup.INative.GetMatchingServices(nint dictionary, out uint iterator) =>
         (int)IOKitNativeMethods.IOServiceGetMatchingServices(0, dictionary, out iterator);
 
-    int MacOSHidDeviceLookup.INative.NextService(int iterator) => IOKitNativeMethods.IOIteratorNext(iterator);
-    bool MacOSHidDeviceLookup.INative.IsIteratorValid(int iterator) => IOKitNativeMethods.IOIteratorIsValid(iterator) != 0;
-    nint MacOSHidDeviceLookup.INative.CreateHidDevice(int service) => IOKitNativeMethods.IOHIDDeviceCreate(0, service);
-    void MacOSHidDeviceLookup.INative.ReleaseIoObject(int handle) => _ = IOKitNativeMethods.IOObjectRelease(handle);
+    uint MacOSHidDeviceLookup.INative.NextService(uint iterator) => IOKitNativeMethods.IOIteratorNext(iterator);
+    bool MacOSHidDeviceLookup.INative.IsIteratorValid(uint iterator) => IOKitNativeMethods.IOIteratorIsValid(iterator) != 0;
+    nint MacOSHidDeviceLookup.INative.CreateHidDevice(uint service) => IOKitNativeMethods.IOHIDDeviceCreate(0, service);
+    void MacOSHidDeviceLookup.INative.ReleaseIoObject(uint handle) => _ = IOKitNativeMethods.IOObjectRelease(handle);
 
     public void OpenDevice(nint device)
     {

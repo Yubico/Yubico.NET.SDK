@@ -473,7 +473,8 @@ does not change the origin in client data or make an assertion acceptable to the
 - The client asks for nothing but a PIN, supplied as `pinBytes` or by the prompt. A ceremony that needs one and has neither fails with `NotAllowed` rather than prompting.
 - `ResidentKeyPreference.Required` consumes persistent credential slots. This facade exposes no credential administration or deletion; use the CTAP2 credential-management APIs separately, after disposing the client. Firmware gates live in CTAP2.
 - Default attestation is `None`: non-self statements become `fmt: none` with an empty statement; packed self attestation with zero AAGUID and no certificate is retained, and this policy does not zero the returned AAGUID. Other preferences pass through returned statements. `Indirect` performs no anonymization service; `Enterprise` does not currently send a CTAP enterprise-attestation request.
-- Client-data construction is not a blanket claim of exact browser serialization conformance: the low-level builder currently uses short JSON escapes for some controls rather than the exact CCDToString form. See [`WebAuthnClientData`](src/Client/WebAuthnClientData.cs). For a manually created AAGUID, use an explicit constructor; `default(Aaguid)` has known empty-span/nonreflexive-equality defects, not normal 16-byte value semantics.
+- [`WebAuthnClientData`](src/Client/WebAuthnClientData.cs) uses CCDToString escapes and hashes the exact UTF-8 bytes it emits. The low-level builder does not enforce the ceremony's input rules.
+- For a manually created AAGUID, use an explicit constructor; `default(Aaguid)` has known empty-span/nonreflexive-equality defects, not normal 16-byte value semantics.
 
 ## Security notes
 

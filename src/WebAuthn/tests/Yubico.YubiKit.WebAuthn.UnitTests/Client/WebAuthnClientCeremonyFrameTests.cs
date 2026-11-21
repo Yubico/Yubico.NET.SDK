@@ -573,9 +573,11 @@ public class WebAuthnClientCeremonyFrameTests
         else
         {
             var match = Assert.Single(await client.GetAssertionAsync(options, cancellationToken: ct));
-            Assert.Equal(selected, match.Id.Span);
+            byte[] expected = [2];
+            selected.AsSpan().Clear(); // Request memory is no longer borrowed after the awaited ceremony.
+            Assert.Equal(expected, match.Id.Span);
             var response = await match.SelectAsync(ct);
-            Assert.Equal(selected, response.CredentialId.Span);
+            Assert.Equal(expected, response.CredentialId.Span);
         }
     }
 

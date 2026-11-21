@@ -90,7 +90,7 @@ internal sealed class CredentialMatcher
         GetAssertionResponse response, PublicKeyCredentialDescriptor? selected, bool hasAllowList, bool allowOmission = true)
     {
         if (response.Credential is null && allowOmission && selected is not null)
-            return selected.Id;
+            return selected.Id.ToArray(); // The response outlives the caller's allow-list storage.
 
         if (response.Credential is { Id.IsEmpty: false } descriptor
             && (!hasAllowList || (selected is not null && descriptor.Id.Span.SequenceEqual(selected.Id.Span))))

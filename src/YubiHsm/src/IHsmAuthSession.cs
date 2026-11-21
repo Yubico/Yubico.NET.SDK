@@ -257,11 +257,12 @@ public interface IHsmAuthSession : IApplicationSession
     /// <remarks>
     ///     The session returns response bytes without validating their length or EC point encoding.
     ///     Check the shape required by your HSM handshake before constructing its context.
-    ///     Protocol failures follow the general APDU error path, including password failures.
+    ///     Protocol failures follow the general APDU error path, including password failures. This
+    ///     does not assert that a rejected challenge password consumes a retry on any firmware.
     /// </remarks>
     /// <exception cref="Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduException">
-    ///     The applet rejects the command. Inspect the status word for retry information before
-    ///     deciding on another attempt; this operation uses the general exception rather than
+    ///     The applet rejects the command. The device status word is retained as returned; this
+    ///     operation uses the general exception rather than
     ///     <see cref="HsmAuthRetryException" />.
     /// </exception>
     Task<ReadOnlyMemory<byte>> GetChallengeAsync(

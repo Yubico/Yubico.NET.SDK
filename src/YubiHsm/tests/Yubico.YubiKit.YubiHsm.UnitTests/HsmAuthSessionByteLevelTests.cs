@@ -395,6 +395,21 @@ public class HsmAuthSessionByteLevelTests
     }
 
     [Fact]
+    public async Task GetChallengeAsync_WithRetryStatusKeepsGeneralApduError()
+    {
+        using var connection = CreateInitializedConnection([0x63, 0xC7]);
+        var options = new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 7, 1) };
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await HsmAuthSession.CreateAsync(connection, options, token);
+        using var password = CredentialPassword.FromUtf8("pass"u8);
+
+        var failure = await Assert.ThrowsAsync<ApduException>(() => session.GetChallengeAsync("cred", password, token));
+
+        Assert.Equal(unchecked((short)0x63C7), failure.SW);
+        Assert.Equal(0x04, connection.TransmittedCommands[^1][1]);
+    }
+
+    [Fact]
     public async Task DeleteCredentialAsync_WhenManagementKeyRetryFailure_ThrowsHsmAuthRetryException()
     {
         // SW 63C2 is the YubiHSM Auth retry-counter failure response with 2 attempts left.

@@ -31,7 +31,6 @@ public class HsmAuthSessionTests
     };
 
     private const string TestLabel = "test-credential";
-    private static ReadOnlyMemory<byte> TestPassword => "password"u8.ToArray();
 
     // ─── Reset and List ──────────────────────────────────────────────────────────
 
@@ -55,6 +54,7 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 // Put a symmetric credential
                 var keyEnc = RandomNumberGenerator.GetBytes(16);
                 var keyMac = RandomNumberGenerator.GetBytes(16);
@@ -66,7 +66,7 @@ public class HsmAuthSessionTests
                         TestLabel,
                         keyEnc,
                         keyMac,
-                        TestPassword,
+                        password,
                         cancellationToken: NewToken());
 
                     // List should contain exactly one credential
@@ -99,11 +99,12 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 await session.PutCredentialDerivedAsync(
                     DefaultManagementKey,
                     TestLabel,
                     "my-derivation-password"u8.ToArray(),
-                    TestPassword,
+                    password,
                     cancellationToken: NewToken());
 
                 var credentials = await session.ListCredentialsAsync(NewToken());
@@ -121,6 +122,7 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 // Use the fixed rotation fixture and verify that it authorizes the following PUT.
                 var newKey = ComplexManagementKey.ToArray();
                 try
@@ -138,7 +140,7 @@ public class HsmAuthSessionTests
                             TestLabel,
                             keyEnc,
                             keyMac,
-                            TestPassword,
+                            password,
                             cancellationToken: NewToken());
 
                         var credentials = await session.ListCredentialsAsync(NewToken());
@@ -180,6 +182,7 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 // Use synthetic context to exercise applet calculation and returned key lengths.
                 // A live authenticated HSM flow additionally supplies its challenge and cryptogram.
                 var keyEnc = RandomNumberGenerator.GetBytes(16);
@@ -193,14 +196,14 @@ public class HsmAuthSessionTests
                         TestLabel,
                         keyEnc,
                         keyMac,
-                        TestPassword,
+                        password,
                         cancellationToken: NewToken());
 
                     // Omit the optional card cryptogram for this isolated applet calculation.
                     using var keys = await session.CalculateSessionKeysSymmetricAsync(
                         TestLabel,
                         context,
-                        TestPassword,
+                        password,
                         cancellationToken: NewToken());
 
                     // Each key is 16 bytes
@@ -226,10 +229,11 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 await session.GenerateCredentialAsymmetricAsync(
                     DefaultManagementKey,
                     TestLabel,
-                    TestPassword,
+                    password,
                     cancellationToken: NewToken());
 
                 var credentials = await session.ListCredentialsAsync(NewToken());
@@ -252,6 +256,7 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 // Store a credential with the original password
                 var keyEnc = RandomNumberGenerator.GetBytes(16);
                 var keyMac = RandomNumberGenerator.GetBytes(16);
@@ -264,16 +269,16 @@ public class HsmAuthSessionTests
                         TestLabel,
                         keyEnc,
                         keyMac,
-                        TestPassword,
+                        password,
                         cancellationToken: NewToken());
 
                     // Device selection uses metadata; the operation also checks the session's
                     // resolved 5.8.0 feature policy. Preserve an applet rejection for diagnosis
                     // against the transmitted command and actual applet version.
-                    ReadOnlyMemory<byte> newPassword = "new-password"u8.ToArray();
+                    using var newPassword = CredentialPassword.FromUtf8("new-password"u8);
                     await session.ChangeCredentialPasswordAsync(
                         TestLabel,
-                        TestPassword,
+                        password,
                         newPassword,
                         NewToken());
 
@@ -307,6 +312,7 @@ public class HsmAuthSessionTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 var keyEnc = RandomNumberGenerator.GetBytes(16);
                 var keyMac = RandomNumberGenerator.GetBytes(16);
 
@@ -317,7 +323,7 @@ public class HsmAuthSessionTests
                         TestLabel,
                         keyEnc,
                         keyMac,
-                        TestPassword,
+                        password,
                         touchRequired: true,
                         cancellationToken: NewToken());
 

@@ -120,6 +120,8 @@ internal static class CredentialsCommand
                 return 1;
             }
 
+            using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
             var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
             if (selection is null)
             {
@@ -135,7 +137,7 @@ internal static class CredentialsCommand
                     mgmtKey,
                     label,
                     derivationPassword.Memory,
-                    credentialPassword.Memory,
+                    password,
                     touchRequired,
                     cancellationToken);
 
@@ -168,7 +170,7 @@ internal static class CredentialsCommand
                         label,
                         keyEnc,
                         keyMac,
-                        credentialPassword.Memory,
+                        password,
                         touchRequired,
                         cancellationToken);
 
@@ -232,6 +234,8 @@ internal static class CredentialsCommand
                 return 1;
             }
 
+            using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
             var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
             if (selection is null)
             {
@@ -245,7 +249,7 @@ internal static class CredentialsCommand
                 mgmtKey,
                 label,
                 privateKey,
-                credentialPassword.Memory,
+                password,
                 touchRequired,
                 cancellationToken);
 
@@ -341,6 +345,8 @@ internal static class CredentialsCommand
                 return 1;
             }
 
+            using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
             var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
             if (selection is null)
             {
@@ -353,7 +359,7 @@ internal static class CredentialsCommand
             await session.GenerateCredentialAsymmetricAsync(
                 mgmtKey,
                 label,
-                credentialPassword.Memory,
+                password,
                 touchRequired,
                 cancellationToken);
 

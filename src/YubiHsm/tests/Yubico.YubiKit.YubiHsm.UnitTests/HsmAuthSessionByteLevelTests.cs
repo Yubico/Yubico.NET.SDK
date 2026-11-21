@@ -69,6 +69,7 @@ public class HsmAuthSessionByteLevelTests
     [Fact]
     public async Task PutCredentialSymmetricAsync_TransmitsOrderedCredentialTlvs()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         var connection = CreateInitializedConnection(OkResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
@@ -80,7 +81,7 @@ public class HsmAuthSessionByteLevelTests
             "cred",
             Sequence(0x20, 16),
             Sequence(0x30, 16),
-            "pass"u8.ToArray(),
+            password,
             touchRequired: true,
             TestContext.Current.CancellationToken);
 
@@ -104,6 +105,7 @@ public class HsmAuthSessionByteLevelTests
     [Fact]
     public async Task CalculateSessionKeysSymmetricAsync_TransmitsOrderedCalculateTlvs()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
@@ -113,7 +115,7 @@ public class HsmAuthSessionByteLevelTests
         using var keys = await session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass"u8.ToArray(),
+            password,
             Sequence(0x50, 8),
             TestContext.Current.CancellationToken);
 
@@ -138,6 +140,7 @@ public class HsmAuthSessionByteLevelTests
     [InlineData(17)]
     public async Task CalculateSessionKeysSymmetricAsync_ReadsKeyPrefixAndClearsEntireFinalResponse(int suffixLength)
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         byte[] source = [.. SessionKeyResponse()[..^2], .. Sequence(0xE0, suffixLength), 0x90, 0x00];
         var response = new ApduResponse(source);
         using var connection = CreateInitializedConnection();
@@ -145,7 +148,7 @@ public class HsmAuthSessionByteLevelTests
             cancellationToken: TestContext.Current.CancellationToken);
         SetCalculateBackend(session, response);
 
-        using var keys = await session.CalculateSessionKeysSymmetricAsync("cred", new byte[16], "pass"u8.ToArray(),
+        using var keys = await session.CalculateSessionKeysSymmetricAsync("cred", new byte[16], password,
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
@@ -159,6 +162,7 @@ public class HsmAuthSessionByteLevelTests
     [Fact]
     public async Task CalculateSessionKeysSymmetricAsync_RejectsShortResponseAndClearsIt()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         byte[] source = [.. Sequence(0xA0, 47), 0x90, 0x00];
         var response = new ApduResponse(source);
         using var connection = CreateInitializedConnection();
@@ -167,7 +171,7 @@ public class HsmAuthSessionByteLevelTests
         SetCalculateBackend(session, response);
 
         var exception = await Assert.ThrowsAsync<BadResponseException>(() => session.CalculateSessionKeysSymmetricAsync(
-            "cred", new byte[16], "pass"u8.ToArray(), cancellationToken: TestContext.Current.CancellationToken));
+            "cred", new byte[16], password, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Contains("47 bytes", exception.Message);
         Assert.All(response.RawData.ToArray(), value => Assert.Equal(0, value));
@@ -186,6 +190,7 @@ public class HsmAuthSessionByteLevelTests
     [InlineData(17)]
     public async Task CalculateSessionKeysSymmetricAsync_InvalidContextLength_ThrowsBeforeDeviceIo(int length)
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
@@ -197,7 +202,7 @@ public class HsmAuthSessionByteLevelTests
             session.CalculateSessionKeysSymmetricAsync(
                 "cred",
                 new byte[length],
-                "pass"u8.ToArray(),
+                password,
                 cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("context", exception.ParamName);
@@ -209,6 +214,7 @@ public class HsmAuthSessionByteLevelTests
     [InlineData(131)]
     public async Task CalculateSessionKeysAsymmetricAsync_InvalidContextLength_ThrowsBeforeDeviceIo(int length)
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         var connection = CreateInitializedConnection(SessionKeyResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
@@ -221,7 +227,7 @@ public class HsmAuthSessionByteLevelTests
                 "cred",
                 new byte[length],
                 Sequence(0x60, 65),
-                "pass"u8.ToArray(),
+                password,
                 Sequence(0x70, 8),
                 TestContext.Current.CancellationToken));
 
@@ -251,6 +257,7 @@ public class HsmAuthSessionByteLevelTests
     [Fact]
     public async Task GetChallengeAsync_Firmware560WithPassword_DoesNotTransmitPassword()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
@@ -259,7 +266,7 @@ public class HsmAuthSessionByteLevelTests
 
         await session.GetChallengeAsync(
             "cred",
-            "pass"u8.ToArray(),
+            password,
             TestContext.Current.CancellationToken);
 
         Assert.Equal([
@@ -270,6 +277,7 @@ public class HsmAuthSessionByteLevelTests
     [Fact]
     public async Task GetChallengeAsync_Firmware571WithPassword_TransmitsPassword()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         var connection = CreateInitializedConnection([.. Sequence(0x40, 8), 0x90, 0x00]);
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
@@ -278,7 +286,7 @@ public class HsmAuthSessionByteLevelTests
 
         await session.GetChallengeAsync(
             "cred",
-            "pass"u8.ToArray(),
+            password,
             TestContext.Current.CancellationToken);
 
         Assert.Equal([
@@ -328,6 +336,8 @@ public class HsmAuthSessionByteLevelTests
     [Fact]
     public async Task ChangeCredentialPasswordAsync_TransmitsChangeInstructionWithPasswordSelector()
     {
+        using var newPassword = CredentialPassword.FromUtf8("newpass"u8);
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         var connection = CreateInitializedConnection(OkResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
@@ -336,8 +346,8 @@ public class HsmAuthSessionByteLevelTests
 
         await session.ChangeCredentialPasswordAsync(
             "cred",
-            "pass"u8.ToArray(),
-            "newpass"u8.ToArray(),
+            password,
+            newPassword,
             TestContext.Current.CancellationToken);
 
         var command = LastCommand(connection);
@@ -362,6 +372,7 @@ public class HsmAuthSessionByteLevelTests
     [Fact]
     public async Task ChangeCredentialPasswordAdminAsync_TransmitsChangeInstructionWithManagementKeySelector()
     {
+        using var newPassword = CredentialPassword.FromUtf8("newpass"u8);
         var connection = CreateInitializedConnection(OkResponse());
         await using var session = await HsmAuthSession.CreateAsync(
             connection,
@@ -371,7 +382,7 @@ public class HsmAuthSessionByteLevelTests
         await session.ChangeCredentialPasswordAdminAsync(
             Sequence(0x10, 16),
             "cred",
-            "newpass"u8.ToArray(),
+            newPassword,
             TestContext.Current.CancellationToken);
 
         var command = LastCommand(connection);

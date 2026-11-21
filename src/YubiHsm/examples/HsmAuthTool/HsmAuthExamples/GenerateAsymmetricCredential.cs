@@ -22,6 +22,8 @@ public static class GenerateAsymmetricCredential
             return;
         }
 
+        using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
         var mgmtKeyHex = AnsiConsole.Prompt(
             new TextPrompt<string>("Management key ([grey]hex, 16 bytes[/]):")
                 .DefaultValue("00000000000000000000000000000000"));
@@ -34,7 +36,7 @@ public static class GenerateAsymmetricCredential
             await session.GenerateCredentialAsymmetricAsync(
                 managementKey,
                 label,
-                credentialPassword.Memory,
+                password,
                 touchRequired,
                 cancellationToken);
 

@@ -82,9 +82,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     private const byte ResetP1 = 0xDE;
     private const byte ResetP2 = 0xAD;
 
-    // Credential password constraints
-    internal const int CredentialPasswordLength = 16;
-
     // Management key length
     internal const int ManagementKeyLength = 16;
 
@@ -173,53 +170,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
 
         _backend = backend;
-    }
-
-    /// <summary>
-    ///     Validates a UTF-8 encoded credential password.
-    /// </summary>
-    /// <param name="password">The UTF-8 encoded password bytes.</param>
-    /// <param name="paramName">
-    ///     The name of the public parameter <paramref name="password" /> was supplied through. The
-    ///     public surface spells this parameter three different ways —
-    ///     <c>credentialPassword</c>, <c>currentPassword</c> and <c>newPassword</c> — so the caller
-    ///     has to name its own, otherwise <see cref="ArgumentException.ParamName" /> would report
-    ///     this helper's local name, which matches nothing a caller can filter on.
-    /// </param>
-    /// <remarks>
-    ///     The applet wire format carries a fixed 16-byte credential password. The SDK accepts at
-    ///     most 16 bytes and null-pads shorter values in <see cref="ParseCredentialPassword" />.
-    /// </remarks>
-    /// <exception cref="ArgumentException">Thrown when the password exceeds 16 bytes.</exception>
-    internal static void ValidateCredentialPassword(ReadOnlySpan<byte> password, string paramName)
-    {
-        if (password.Length > CredentialPasswordLength)
-            throw new ArgumentException(
-                $"Credential password UTF-8 encoding ({password.Length} bytes) exceeds maximum of {CredentialPasswordLength} bytes.",
-                paramName);
-    }
-
-    /// <summary>
-    ///     Validates a UTF-8 encoded credential password and copies it into a 16-byte buffer,
-    ///     null-padding any remaining bytes.
-    /// </summary>
-    /// <param name="password">The UTF-8 encoded password bytes (at most 16).</param>
-    /// <param name="paramName">
-    ///     The name of the public parameter <paramref name="password" /> was supplied through; see
-    ///     <see cref="ValidateCredentialPassword" />.
-    /// </param>
-    /// <returns>
-    ///     A newly allocated 16-byte array containing the padded password. The caller owns the
-    ///     buffer and must zero it with <see cref="CryptographicOperations.ZeroMemory(Span{byte})" />.
-    /// </returns>
-    /// <exception cref="ArgumentException">Thrown when the password exceeds 16 bytes.</exception>
-    internal static byte[] ParseCredentialPassword(ReadOnlySpan<byte> password, string paramName)
-    {
-        ValidateCredentialPassword(password, paramName);
-
-        var buffer = new byte[CredentialPasswordLength];
-        password.CopyTo(buffer);
-        return buffer;
     }
 
     /// <summary>
@@ -312,7 +262,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         ReadOnlyMemory<byte> keyEnc,
         ReadOnlyMemory<byte> keyMac,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -330,12 +280,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 $"MAC key must be {HsmAuthAlgorithm.Aes128YubicoAuthentication.KeyLength} bytes.",
                 nameof(keyMac));
 
-        byte[]? credPwBytes = null;
+        ArgumentNullException.ThrowIfNull(credentialPassword);
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
@@ -351,8 +300,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -363,7 +310,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> managementKey,
         string label,
         ReadOnlyMemory<byte> derivationPassword,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -427,23 +374,22 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task<SessionKeys> CalculateSessionKeysSymmetricAsync(
         string label,
         ReadOnlyMemory<byte> context,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         ReadOnlyMemory<byte>? cardCryptogram = null,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(credentialPassword);
         ValidateContextLength(context, SymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(label, UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysSymmetric, cancellationToken).ConfigureAwait(false));
 
-        byte[]? credPwBytes = null;
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
             var tlvs = new List<Tlv>
             {
                 new(TagLabel, labelBytes),
@@ -467,8 +413,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -543,7 +487,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         ReadOnlyMemory<byte> context,
         ReadOnlyMemory<byte> publicKey,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         ReadOnlyMemory<byte> cardCryptogram,
         CancellationToken cancellationToken = default)
     {
@@ -555,12 +499,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(label, UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysAsymmetric, cancellationToken).ConfigureAwait(false));
 
-        byte[]? credPwBytes = null;
+        ArgumentNullException.ThrowIfNull(credentialPassword);
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
             // Keep the handshake inputs in wire order: label, context, HSM static public key,
             // HSM cryptogram, then credential password.
             data = TlvHelper.EncodeAndDisposeList(
@@ -580,8 +523,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -600,25 +541,23 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <inheritdoc />
     public async Task<ReadOnlyMemory<byte>> GetChallengeAsync(
         string label,
-        ReadOnlyMemory<byte>? credentialPassword = null,
+        CredentialPassword? credentialPassword = null,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         EnsureSupports(FeatureGetChallenge);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        byte[]? credPwBytes = null;
+        var credPwBytes = credentialPassword is not null && IsSupported(FeatureGetChallengeWithPassword)
+            ? credentialPassword.Bytes
+            : default;
         Memory<byte> data = default;
         try
         {
             var tlvs = new List<Tlv> { new(TagLabel, labelBytes) };
 
-            if (credentialPassword is { } suppliedPassword &&
-                IsSupported(FeatureGetChallengeWithPassword))
-            {
-                credPwBytes = ParseCredentialPassword(suppliedPassword.Span, nameof(credentialPassword));
+            if (!credPwBytes.IsEmpty)
                 tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
-            }
 
             data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
@@ -631,8 +570,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -643,7 +580,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> managementKey,
         string label,
         ReadOnlyMemory<byte> privateKey,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -657,12 +594,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 $"EC P256 private key must be exactly {EcP256PrivateKeyLength} bytes.",
                 nameof(privateKey));
 
-        byte[]? credPwBytes = null;
+        ArgumentNullException.ThrowIfNull(credentialPassword);
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
@@ -677,8 +613,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -688,7 +622,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task GenerateCredentialAsymmetricAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -697,12 +631,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        byte[]? credPwBytes = null;
+        ArgumentNullException.ThrowIfNull(credentialPassword);
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
@@ -718,8 +651,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -752,22 +683,21 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <inheritdoc />
     public async Task ChangeCredentialPasswordAsync(
         string label,
-        ReadOnlyMemory<byte> currentPassword,
-        ReadOnlyMemory<byte> newPassword,
+        CredentialPassword currentPassword,
+        CredentialPassword newPassword,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         EnsureSupports(FeaturePasswordChange);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        byte[]? currentPwBytes = null;
-        byte[]? newPwBytes = null;
+        ArgumentNullException.ThrowIfNull(currentPassword);
+        ArgumentNullException.ThrowIfNull(newPassword);
+        var currentPwBytes = currentPassword.Bytes;
+        var newPwBytes = newPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            currentPwBytes = ParseCredentialPassword(currentPassword.Span, nameof(currentPassword));
-            newPwBytes = ParseCredentialPassword(newPassword.Span, nameof(newPassword));
-
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagCredentialPassword, currentPwBytes),
@@ -779,10 +709,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (currentPwBytes is not null)
-                CryptographicOperations.ZeroMemory(currentPwBytes);
-            if (newPwBytes is not null)
-                CryptographicOperations.ZeroMemory(newPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -792,7 +718,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task ChangeCredentialPasswordAdminAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        ReadOnlyMemory<byte> newPassword,
+        CredentialPassword newPassword,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -800,12 +726,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        byte[]? newPwBytes = null;
+        ArgumentNullException.ThrowIfNull(newPassword);
+        var newPwBytes = newPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            newPwBytes = ParseCredentialPassword(newPassword.Span, nameof(newPassword));
-
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagManagementKey, managementKey.Span),
@@ -817,8 +742,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (newPwBytes is not null)
-                CryptographicOperations.ZeroMemory(newPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }

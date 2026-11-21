@@ -31,12 +31,12 @@ metadata is a separate version source; it is not substituted by the HSM session 
 
 A credential is identified by a public label of 1 to 64 UTF-8 bytes, represented as a plain `string`. A
 symmetric credential holds an AES-128 K-ENC and K-MAC pair, an asymmetric one an EC P-256 private key, and each is
-protected by a credential password of at most 16 UTF-8 bytes. Keep these three secret roles separate:
+protected by a 16-byte credential password. Keep these three secret roles separate:
 
 | Secret | Purpose |
 | --- | --- |
 | 16-byte management key | Authorizes credential enrollment/deletion, management-key rotation and administrator password changes. |
-| Credential password, at most 16 UTF-8 bytes | Authorizes use of a stored YubiKey credential; the SDK pads shorter values to 16 bytes. |
+| `CredentialPassword` | Authorizes use of a stored YubiKey credential; create it from UTF-8 text bytes or exactly 16 raw bytes. |
 | Derivation password | Supplies PBKDF2 input when deriving the long-lived K-ENC/K-MAC pair for symmetric HSM authentication. |
 
 ## Installation
@@ -96,7 +96,7 @@ call; the caller owns the management-key and credential-password inputs for this
 static async Task EnrollSymmetricAsync(
     IYubiKey device,
     ReadOnlyMemory<byte> managementKey,
-    ReadOnlyMemory<byte> credentialPassword,
+    CredentialPassword credentialPassword,
     string label,
     ushort hsmAuthenticationKeyId,
     Func<ushort, string, ReadOnlyMemory<byte>, ReadOnlyMemory<byte>, CancellationToken, Task> provisionHsmAsync,
@@ -161,7 +161,7 @@ interface ISymmetricHsmExchange : IAsyncDisposable
 
 static async Task UseSymmetricHsmAsync(
     IYubiKey device, string label, ushort hsmAuthenticationKeyId,
-    ReadOnlyMemory<byte> credentialPassword,
+    CredentialPassword credentialPassword,
     Func<CancellationToken, Task<ISymmetricHsmExchange>> openExchangeAsync,
     CancellationToken cancellationToken)
 {
@@ -298,8 +298,12 @@ the cancellation request as a device-interruption guarantee.
 
 ## Security notes
 
-- Credential passwords, management keys, and EC private keys cross the API as borrowed `ReadOnlyMemory<byte>`.
-  The SDK clears its owned padded/request copies. Clear your input buffers with
+- Migrate old credential-password byte arguments with `using var password = CredentialPassword.FromUtf8(input.Span);`
+  for valid UTF-8 of at most 16 bytes (zero-padded), or `CredentialPassword.FromRaw(input.Span)` for exactly 16
+  opaque bytes. Keep the holder alive through the awaited operation; disposal clears its copy, not the source.
+  Acquire secrets in clearable buffers and clear those buffers separately. Derivation passwords, management
+  keys and EC private keys remain borrowed `ReadOnlyMemory<byte>`.
+  The SDK clears its owned request copies. Clear your input buffers with
   `CryptographicOperations.ZeroMemory` in a `finally`, including when acquisition or a later operation fails.
 - `SessionKeys.Parse` copies the response into three owned arrays; disposal clears those arrays and later
   property access throws. Existing spans view the cleared storage. Clear the Parse source and any caller-made

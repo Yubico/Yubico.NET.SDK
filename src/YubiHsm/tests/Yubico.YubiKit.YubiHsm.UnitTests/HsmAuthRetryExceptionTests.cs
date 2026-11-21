@@ -36,6 +36,7 @@ public class HsmAuthRetryExceptionTests
     [Fact]
     public async Task PutCredentialSymmetricAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemainingWithoutMessageParsing()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         // SW 63C4: management-key verification failed for a credential operation,
         // 4 attempts remaining.
         var connection = CreateInitializedConnection([0x63, 0xC4]);
@@ -49,7 +50,7 @@ public class HsmAuthRetryExceptionTests
             "cred",
             Sequence(0x20, 16),
             Sequence(0x30, 16),
-            "pass"u8.ToArray(),
+            password,
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(4, exception.RetriesRemaining);
@@ -78,6 +79,7 @@ public class HsmAuthRetryExceptionTests
     [Fact]
     public async Task CalculateSessionKeysSymmetricAsync_WhenCredentialPasswordRetryFailure_ExposesRetriesRemaining()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         // SW 63C6: credential-password verification failed calculating session keys,
         // 6 attempts remaining.
         var connection = CreateInitializedConnection([0x63, 0xC6]);
@@ -89,7 +91,7 @@ public class HsmAuthRetryExceptionTests
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass"u8.ToArray(),
+            password,
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(6, exception.RetriesRemaining);
@@ -99,6 +101,8 @@ public class HsmAuthRetryExceptionTests
     [Fact]
     public async Task ChangeCredentialPasswordAsync_WhenCurrentPasswordRetryFailure_ExposesRetriesRemaining()
     {
+        using var newPassword = CredentialPassword.FromUtf8("newpass"u8);
+        using var currentPassword = CredentialPassword.FromUtf8("oldpass"u8);
         // SW 63C0: credential password change failed, 0 attempts remaining.
         var connection = CreateInitializedConnection([0x63, 0xC0]);
         await using var session = await HsmAuthSession.CreateAsync(
@@ -108,8 +112,8 @@ public class HsmAuthRetryExceptionTests
 
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.ChangeCredentialPasswordAsync(
             "cred",
-            "oldpass"u8.ToArray(),
-            "newpass"u8.ToArray(),
+            currentPassword,
+            newPassword,
             TestContext.Current.CancellationToken));
 
         Assert.Equal(0, exception.RetriesRemaining);
@@ -119,6 +123,7 @@ public class HsmAuthRetryExceptionTests
     [Fact]
     public async Task PutCredentialAsymmetricAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemaining()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         // SW 63C3: management-key verification failed for an asymmetric PUT, 3 attempts remaining.
         var connection = CreateInitializedConnection([0x63, 0xC3]);
         await using var session = await HsmAuthSession.CreateAsync(
@@ -130,7 +135,7 @@ public class HsmAuthRetryExceptionTests
             Sequence(0x10, 16),
             "cred",
             Sequence(0x20, 32),
-            "pass"u8.ToArray(),
+            password,
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(3, exception.RetriesRemaining);
@@ -141,6 +146,7 @@ public class HsmAuthRetryExceptionTests
     [Fact]
     public async Task GenerateCredentialAsymmetricAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemaining()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         // SW 63C7: management-key verification failed for asymmetric GENERATE, 7 attempts remaining.
         var connection = CreateInitializedConnection([0x63, 0xC7]);
         await using var session = await HsmAuthSession.CreateAsync(
@@ -151,7 +157,7 @@ public class HsmAuthRetryExceptionTests
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.GenerateCredentialAsymmetricAsync(
             Sequence(0x10, 16),
             "cred",
-            "pass"u8.ToArray(),
+            password,
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(7, exception.RetriesRemaining);
@@ -162,6 +168,7 @@ public class HsmAuthRetryExceptionTests
     [Fact]
     public async Task ChangeCredentialPasswordAdminAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemaining()
     {
+        using var newPassword = CredentialPassword.FromUtf8("newpass"u8);
         // SW 63C2: management-key verification failed for admin password change, 2 attempts remaining.
         var connection = CreateInitializedConnection([0x63, 0xC2]);
         await using var session = await HsmAuthSession.CreateAsync(
@@ -172,7 +179,7 @@ public class HsmAuthRetryExceptionTests
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.ChangeCredentialPasswordAdminAsync(
             Sequence(0x10, 16),
             "cred",
-            "newpass"u8.ToArray(),
+            newPassword,
             TestContext.Current.CancellationToken));
 
         Assert.Equal(2, exception.RetriesRemaining);
@@ -183,6 +190,7 @@ public class HsmAuthRetryExceptionTests
     [Fact]
     public async Task CalculateSessionKeysAsymmetricAsync_WhenCredentialPasswordRetryFailure_ExposesRetriesRemaining()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         // SW 63C5: credential-password verification failed calculating asymmetric session keys
         // with 5 attempts remaining.
         var connection = CreateInitializedConnection([0x63, 0xC5]);
@@ -195,7 +203,7 @@ public class HsmAuthRetryExceptionTests
             "cred",
             Sequence(0x40, 130),
             Sequence(0x60, 65),
-            "pass"u8.ToArray(),
+            password,
             Sequence(0x70, 8),
             TestContext.Current.CancellationToken));
 
@@ -207,6 +215,7 @@ public class HsmAuthRetryExceptionTests
     [Fact]
     public async Task PutCredentialDerivedAsync_WhenManagementKeyRetryFailure_ExposesRetriesRemaining()
     {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         // Synthetic SW 63C9 exercises nibble extraction beyond the applet's documented eight initial
         // retries. The derived operation delegates to the symmetric PUT path after deriving keys;
         // this assertion checks that the delegation preserves typed retry information.
@@ -220,7 +229,7 @@ public class HsmAuthRetryExceptionTests
             Sequence(0x10, 16),
             "cred",
             "derivationPassword"u8.ToArray(),
-            "pass"u8.ToArray(),
+            password,
             cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(9, exception.RetriesRemaining);

@@ -33,6 +33,8 @@ public static class AddDerivedCredential
             return;
         }
 
+        using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
         var mgmtKeyHex = AnsiConsole.Prompt(
             new TextPrompt<string>("Management key ([grey]hex, 16 bytes[/]):")
                 .DefaultValue("00000000000000000000000000000000"));
@@ -46,7 +48,7 @@ public static class AddDerivedCredential
                 managementKey,
                 label,
                 derivationPassword.Memory,
-                credentialPassword.Memory,
+                password,
                 touchRequired,
                 cancellationToken);
 

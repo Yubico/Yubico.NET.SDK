@@ -40,6 +40,8 @@ public static class CalculateSessionKeys
             return;
         }
 
+        using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
         var hostChallengeHex = AnsiConsole.Ask<string>(
             "Host challenge from the YubiKey or caller ([grey]hex, 8 bytes[/]):");
         var hsmChallengeHex = AnsiConsole.Ask<string>(
@@ -80,7 +82,7 @@ public static class CalculateSessionKeys
             using var keys = await session.CalculateSessionKeysSymmetricAsync(
                 label,
                 context,
-                credentialPassword.Memory,
+                password,
                 cardCryptogramMemory,
                 cancellationToken: cancellationToken);
 

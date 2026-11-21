@@ -21,7 +21,7 @@ enrollment and calculation paths handle management keys, credential passwords an
 1. **SmartCard-only** — No HID or OTP transport; `HsmAuthBackend` owns applet select/send mechanics over `ISmartCardProtocol`
 2. **Applet-owned backend** — Session code keeps APDU construction, retry extraction, and sensitive-buffer lifecycle; backend remains a thin SmartCard transport wrapper
 3. **Two credential types** — Symmetric (AES-128, all firmware) and Asymmetric (EC P256, firmware 5.6.0+)
-4. **Owned-buffer cleanup** — Session methods clear their padded passwords, encoded request buffers and derived keys in `finally`; `SessionKeys` clears its three owned arrays on disposal. Caller-owned inputs and additional copies have separate lifetimes.
+4. **Owned-buffer cleanup** — Session methods clear encoded requests and derived keys in `finally`; `CredentialPassword` and `SessionKeys` clear their owned arrays on disposal. Caller-owned inputs and additional copies have separate lifetimes.
 5. **User presence** — Session-key calculations retain the caller-owned `SessionCreationOptions.UserPresencePrompt` for notifications around CALCULATE.
 
 **Key Files:**
@@ -83,17 +83,11 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
 
 ### Credential Password Handling
 
-Credential passwords cross the public API as **UTF-8 `ReadOnlyMemory<byte>`**. Mutable byte storage lets
-the caller clear its secret; .NET strings retain immutable storage. Parameters are named plainly (`credentialPassword`,
-`derivationPassword`, `currentPassword`, `newPassword`) with no `Utf8` suffix; the UTF-8 encoding
-contract lives in the XML documentation for each parameter, not in its name.
-
-- **The caller owns the input buffer** and is responsible for zeroing it. The SDK never zeroes a
-  buffer it does not own.
-- `ValidateCredentialPassword(ReadOnlySpan<byte>)` is the single guard: **at most** 16 bytes.
-- `ParseCredentialPassword(ReadOnlySpan<byte>)` validates, then copies into a fresh 16-byte
-  buffer, null-padding the remainder.
-- The padded copy is always zeroed in a `finally` block.
+The caller supplies a `CredentialPassword` via `FromUtf8` (at most 16 encoded bytes, padded) or `FromRaw`
+(exactly 16 bytes). Both copy the input and neither modifies it. The caller owns the source and holder,
+keeps the holder alive through the operation, then disposes it and clears the separate source. The SDK
+borrows the holder and clears its encoded request buffers. The PBKDF2 derivation password remains a
+separate borrowed UTF-8 byte buffer.
 - Never log password values — log operation metadata only.
 
 Keep acquisition and all later failures inside the caller's clearing scope. The README's typed enrollment
@@ -148,7 +142,7 @@ applet verification step. GET_CHALLENGE response shape and asymmetric point/cryp
 partly delegated to the integration layer/device; preserve that distinction in public contracts.
 
 ### EC Private Key Handling
-- `PutCredentialAsymmetricAsync` clears its padded password/request copies; the caller clears imported private-key storage
+- `PutCredentialAsymmetricAsync` clears its request copies; the caller clears imported private-key storage
 - `GenerateCredentialAsymmetricAsync` generates on-device — private key never leaves the YubiKey
 
 ## PBKDF2 Key Derivation

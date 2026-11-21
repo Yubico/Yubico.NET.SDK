@@ -252,6 +252,11 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
 
+        var capabilities = _appData.Discretionary.ExtendedCapabilities;
+        if (!capabilities.Flags.HasFlag(ExtendedCapabilityFlags.GetChallenge))
+            throw new NotSupportedException("The OpenPGP applet does not advertise GET CHALLENGE.");
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(length, capabilities.ChallengeMaxLength);
+
         var command = new ApduCommand
         {
             Cla = 0x00,

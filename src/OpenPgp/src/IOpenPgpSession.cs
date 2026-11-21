@@ -560,7 +560,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Requires firmware 5.2.0+.
     /// </summary>
     /// <remarks>
-    ///     Preserves order and repeated slots. Entries with unknown tags or algorithm encodings rejected by
+    ///     Below 5.2.0, returns a built-in per-slot RSA list instead of querying the card. Otherwise
+    ///     preserves order and repeated slots. Entries with unknown tags or algorithm encodings rejected by
     ///     the parser are skipped; known Curve25519 entries receive a pre-5.6.1 workaround. Treat the result
     ///     as the SDK's interpreted list and use raw FA bytes when inspecting omitted entries.
     /// </remarks>

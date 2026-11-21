@@ -902,11 +902,16 @@ Use `Yubico.YubiKit.OpenPgp` for OpenPGP card operations. Review key slots, User
 KDF transitions, persistent card state and any optional secure-channel setup manually. The
 [OpenPGP guide](../../src/OpenPgp/README.md) covers provisioning, recovery, raw crypto formats and resource scopes.
 
-User/Admin VERIFY failures currently throw `OpenPgpInvalidPinException` for every unsuccessful response,
-including non-PIN errors. Inspect `SW` and nullable `RetriesRemaining`; change/recovery commands use general
-APDU exceptions. Extended-mode 6982 fallback currently reports Reset Code attempts instead of User attempts:
-query fresh PIN status and inspect `AttemptsUser`, and diagnose before retrying. Distinct KDF salts also affect
-extended verification. See `openpgp-exception` in `v1-to-v2-map.yml` and the guide's credential/KDF sections.
+Only recognized VERIFY, CHANGE and Reset-Code statuses produce `OpenPgpInvalidPinException`. Inspect the
+original `SW`, command header and nullable `RetriesRemaining`; other statuses remain general APDU errors.
+Both User verification references derive PW1 and query the User counter, not the Reset Code counter.
+An ambiguous rejection is not a reason to retry automatically. See `openpgp-exception` in `v1-to-v2-map.yml`.
+
+`DecryptAsync` returns caller-owned writable `Memory<byte>`; clear that exact span after its last use.
+Generation times use `uint` seconds with zero meaning unspecified. Diagnose unknown response algorithms
+with the raw application data instead of feeding them back into typed setters. Fully await one operation per
+session before starting another or disposing it. Confirmed reset reopens the same session using its original
+options; a failed refresh ends the session rather than returning a partially initialized session.
 
 OpenPGP user-interaction-flag policy notifies `SessionCreationOptions.UserPresencePrompt`; cached or unknown
 policy is advisory and may not result in a device wait.

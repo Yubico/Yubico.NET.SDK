@@ -514,7 +514,7 @@ mappings:
     evidence:
       - yubikit:src/OpenPgp/src/OpenPgpInvalidPinException.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot had zero dedicated OpenPGP exception types (historical gap 9). Current VerifyPinAsync/VerifyAdminAsync map every unsuccessful VERIFY response to OpenPgpInvalidPinException (an ApduException), including non-PIN failures. SW 63Cx supplies a count, 6983 supplies zero, and 6982 triggers a status query; other failures or a failed query can leave RetriesRemaining null. Extended-mode fallback currently selects Reset Code attempts rather than User attempts, so query fresh GetPinStatusAsync().AttemptsUser and diagnose before retrying; typed zero alone fails to establish User blocking. Distinct User/Reset KDF salts also affect extended verification. Change/recovery commands propagate general APDU exceptions. See src/OpenPgp/README.md for current qualifications.
+    notes: The initial v2 snapshot had zero dedicated OpenPGP exception types (historical gap 9). Selected VERIFY, CHANGE and Reset-Code responses now produce OpenPgpInvalidPinException (an ApduException), retaining SW and command header. Other statuses and administrator-authenticated recovery failures retain general APDU errors. Both User VERIFY references use PW1 for KDF and retry counts. An unavailable count is null, and an ambiguous 6982 is not a reason to retry automatically. See src/OpenPgp/README.md for the firmware and command-specific mappings.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: webauthn-credential-prompt
     status: assisted

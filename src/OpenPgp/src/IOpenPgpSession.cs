@@ -128,7 +128,7 @@ public interface IOpenPgpSession : IApplicationSession
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <exception cref="OpenPgpInvalidPinException">
-    ///     Thrown for every unsuccessful VERIFY response, including failures unrelated to a wrong PIN.
+    ///     Thrown for recognized credential statuses. Other failures retain their APDU error.
     ///     <see cref="OpenPgpInvalidPinException.RetriesRemaining" /> reports the available extracted or
     ///     queried User PIN count, or <c>null</c> when unavailable. Diagnose the failure before retrying.
     /// </exception>
@@ -145,7 +145,7 @@ public interface IOpenPgpSession : IApplicationSession
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <exception cref="OpenPgpInvalidPinException">
-    ///     Thrown for every unsuccessful VERIFY response, including failures unrelated to a wrong PIN.
+    ///     Thrown for recognized credential statuses. Other failures retain their APDU error.
     ///     <see cref="OpenPgpInvalidPinException.RetriesRemaining" /> reports the remaining
     ///     attempts (<c>0</c> if the PIN is now blocked), or <c>null</c> if the count could not
     ///     be determined.

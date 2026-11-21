@@ -17,20 +17,18 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     Reports an unsuccessful User or Admin VERIFY response with an optional retry count.
+///     Reports a recognized credential-command failure with an optional retry count.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Thrown by <see cref="IOpenPgpSession.VerifyPinAsync" /> and
-///         <see cref="IOpenPgpSession.VerifyAdminAsync" /> for every unsuccessful VERIFY response.
-///         SW 63Cx supplies a retry count, 6983 reports a blocked credential, and 6982 triggers a
-///         PIN-status query. Other command/security failures also currently become this exception;
-///         inspect <see cref="ApduException.SW" /> before interpreting the failure as a wrong PIN.
-///         PIN change and recovery methods propagate general APDU exceptions.
+///         Used for selected statuses from VERIFY, CHANGE and Reset-Code recovery. The original
+///         <see cref="ApduException.SW" /> and command header remain available. Unclassified statuses
+///         and administrator-authenticated recovery failures propagate as general APDU exceptions.
 ///     </para>
 ///     <para>
-///         <see cref="RetriesRemaining" /> carries the count from 63Cx, zero from 6983, or the result
-///         of a fallback status query for 6982. It is null when the count is unavailable.
+///         <see cref="RetriesRemaining" /> carries an explicit count, zero for a blocked credential,
+///         or the result of a status query. It is null when the count is unavailable. In particular,
+///         6982 may indicate something other than an incorrect credential, even when a count is available.
 ///         In either User PIN verification mode, the query reads the User PIN counter.
 ///         Diagnose uncertainty before retrying. User recovery remains available through Reset Code/Admin.
 ///     </para>

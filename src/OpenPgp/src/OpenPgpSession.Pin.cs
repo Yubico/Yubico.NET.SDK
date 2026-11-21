@@ -175,7 +175,10 @@ public sealed partial class OpenPgpSession
 
             var command = new ApduCommand(0x00, (int)Ins.ResetRetryCounter, p1, (int)Pw.User, data);
 
-            await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            if (useAdmin)
+                await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            else
+                await TransmitCredentialAsync(command, Pw.Reset, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -251,24 +254,7 @@ public sealed partial class OpenPgpSession
             derivedBytes = kdf.Process(pw, pin.Span);
 
             var command = new ApduCommand(0x00, (int)Ins.Verify, 0x00, p2, derivedBytes);
-            var response = await TransmitNoThrowAsync(command, cancellationToken)
-                .ConfigureAwait(false);
-
-            if (!response.IsOK())
-            {
-                var remaining = await ResolveRemainingRetriesAsync(pw, response, cancellationToken)
-                    .ConfigureAwait(false);
-                int? retriesRemaining = remaining >= 0 ? remaining : null;
-
-                throw new OpenPgpInvalidPinException(
-                    retriesRemaining,
-                    retriesRemaining is { } r
-                        ? $"PIN verification failed ({r} attempt(s) remaining)"
-                        : "PIN verification failed")
-                {
-                    SW = response.SW,
-                };
-            }
+            await TransmitCredentialAsync(command, pw, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -279,47 +265,57 @@ public sealed partial class OpenPgpSession
         }
     }
 
-    // VERIFY failures include non-PIN errors. Extract explicit counts or query C4 for 6982;
-    // callers retain SW to diagnose other causes and an unknown count.
-    private async Task<int> ResolveRemainingRetriesAsync(
-        Pw pw,
-        ApduResponse response,
+    private async Task TransmitCredentialAsync(
+        ApduCommand command,
+        Pw credential,
         CancellationToken cancellationToken)
     {
-        // Standard wrong-PIN SW: 0x63Cx where x = remaining retries
-        var remaining = SWConstants.ExtractRetryCount(response.SW) ?? -1;
+        var response = await TransmitNoThrowAsync(command, cancellationToken).ConfigureAwait(false);
+        if (response.IsOK())
+            return;
 
-        if (remaining < 0 && response.SW == SWConstants.AuthenticationMethodBlocked)
+        // Family-specific status interpretations require a known production version.
+        bool legacy = _numericVersion is { IsAlphaOrBeta: false } version && version.IsLessThan(4, 0, 0);
+        int? remaining = (response.SW, (Ins)command.Ins) switch
         {
-            // 6983 reports a blocked credential. User PIN recovery still has Reset Code/Admin routes.
-            return 0;
-        }
+            (SWConstants.AuthenticationMethodBlocked, _) => 0,
+            (SWConstants.InvalidCommandDataParameter, Ins.ResetRetryCounter) => 0,
+            (SWConstants.SecurityStatusNotSatisfied, _) =>
+                await TryReadRetryCountAsync(credential, cancellationToken).ConfigureAwait(false),
+            (SWConstants.ConditionsNotSatisfied, Ins.ChangePin) when legacy =>
+                await TryReadRetryCountAsync(credential, cancellationToken).ConfigureAwait(false),
+            (var sw, Ins.Verify) when legacy && SWConstants.ExtractRetryCount(sw) is { } count => count,
+            _ => throw ApduException.FromResponse(response, command, "APDU command failed"),
+        };
 
-        if (remaining < 0 && response.SW == SWConstants.SecurityStatusNotSatisfied)
+        throw new OpenPgpInvalidPinException(
+            remaining,
+            remaining is { } retries
+                ? $"{credential} credential command failed ({retries} attempt(s) remaining)"
+                : $"{credential} credential command failed (attempts remaining unknown)")
+            {
+                SW = response.SW,
+                Cla = command.Cla,
+                Ins = command.Ins,
+                P1 = command.P1,
+                P2 = command.P2,
+            };
+    }
+
+    private async Task<int?> TryReadRetryCountAsync(Pw credential, CancellationToken cancellationToken)
+    {
+        // 6982 can also mean unverified PW or a secure-messaging problem (Card §7.9).
+        // C4 only supplies the count; it cannot establish the cause of the original failure.
+        try
         {
-            // 6982 can cover wrong/unverified PW or secure-messaging failure (Card §7.9).
-            // C4 provides counters by credential, independent of the verification reference.
-            try
-            {
-                var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
-                remaining = pw switch
-                {
-                    Pw.User => status.AttemptsUser,
-                    Pw.Admin => status.AttemptsAdmin,
-                    _ => status.AttemptsReset,
-                };
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch
-            {
-                // If status query fails, the retry count is genuinely unknown.
-            }
+            var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
+            return status.GetAttempts(credential);
         }
-
-        return remaining;
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return null;
+        }
     }
 
     private async Task ChangePwAsync(
@@ -349,7 +345,7 @@ public sealed partial class OpenPgpSession
             };
 
             var command = new ApduCommand(0x00, (int)Ins.ChangePin, 0x00, p2, combined);
-            await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            await TransmitCredentialAsync(command, pw, cancellationToken).ConfigureAwait(false);
         }
         finally
         {

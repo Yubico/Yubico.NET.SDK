@@ -157,13 +157,13 @@ static async Task RecoverWithAdminAsync(
 }
 ```
 
-`VerifyPinAsync` and `VerifyAdminAsync` currently map every unsuccessful VERIFY response to
-`OpenPgpInvalidPinException`. Inspect its `SW` as well as `RetriesRemaining`: 63Cx supplies a count, 6983 supplies
-zero, and 6982 triggers a status query. Other failures or a failed query can leave the count `null`. A 6982 response
-can have causes beyond a wrong PIN. Stop automatic retries and diagnose uncertain status before spending another
-attempt. For an extended-mode failure, read fresh `GetPinStatusAsync().AttemptsUser`: the typed count can reflect
-Reset Code attempts, so even typed zero alone fails to establish that the User PIN is blocked. Change/reset-code
-commands propagate general APDU exceptions rather than this retry-aware exception.
+VERIFY, CHANGE and Reset-Code recovery map only recognized credential statuses to `OpenPgpInvalidPinException`.
+Inspect its `SW` and command header as well as `RetriesRemaining`. Before firmware 4.0, VERIFY 63Cx supplies a
+count and CHANGE 6985 triggers a status query. SW 6983 reports a blocked credential, 6982 triggers a status
+query, and Reset-Code recovery also recognizes 6A80 as blocked. VERIFY with either User PIN reference queries
+the User PIN counter, not the Reset Code counter. A failed status query leaves the count `null`; even a known
+count does not establish that 6982 means a wrong PIN. Diagnose uncertain status before spending another attempt.
+Other statuses and failures during administrator-authenticated recovery retain their general APDU errors.
 A blocked Admin PIN requires destructive application reset; a blocked User PIN has the two recovery routes above.
 
 ## Configure KDF before provisioning keys

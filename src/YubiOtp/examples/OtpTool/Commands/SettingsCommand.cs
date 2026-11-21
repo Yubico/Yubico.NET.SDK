@@ -66,7 +66,8 @@ public static class SettingsCommand
                 config.AppendCr(false);
             }
 
-            await session.UpdateConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
+            await session.UpdateConfigurationAsync(slot, config, options.DeleteAccessCode ? default : accessCode,
+                accessCode, ct);
 
             if (options.Json)
             {

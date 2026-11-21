@@ -390,8 +390,8 @@ drop-in `ykman` compatibility. Use the SDK recipes above for production-sensitiv
   host layout explicitly for non-modhex text.
 - Calculate requires an explicit hex challenge despite the help's stdin suggestion. `--totp` does not
   compute a time counter, period, truncation, or code; use your application's agreed HMAC convention instead.
-- Settings sends full masked values, not a patch, and program/settings commands omit a new access code.
-  A supplied current code authenticates the write but does not retain protection. Swap ignores the CLI code option.
+- Settings sends full masked values, not a patch. Sample programming and settings commands retain a
+  supplied current code by default; `--delete-access-code` explicitly requests removal. Swap does not accept a code.
 - Sessions use the SmartCard-first default, with no transport selector or presence prompt. A calculation
   failure does not establish that the same key cannot calculate over explicitly selected OTP HID.
 - JSON mode bypasses confirmation even without force. Generated secrets/passwords are intentionally

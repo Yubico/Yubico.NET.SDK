@@ -80,8 +80,8 @@ public static class StaticCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            // Omitting the new code can remove write protection even when current authentication succeeds.
-            await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
+            await session.PutConfigurationAsync(slot, config, options.DeleteAccessCode ? default : accessCode,
+                accessCode, ct);
 
             if (options.Json)
             {

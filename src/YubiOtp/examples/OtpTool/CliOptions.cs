@@ -36,6 +36,7 @@ public sealed record CliOptions
     /// Global option: --access-code HEX.
     /// </summary>
     public string? AccessCode { get; init; }
+    public bool DeleteAccessCode { get; init; }
 
     /// <summary>
     /// Whether to skip confirmation prompts (-f / --force).
@@ -181,6 +182,7 @@ public sealed record CliOptions
 
         Slot? slot = null;
         string? accessCode = null;
+        bool deleteAccessCode = false;
         bool force = false;
         bool json = false;
         bool generate = false;
@@ -238,6 +240,10 @@ public sealed record CliOptions
             {
                 case "--access-code":
                     accessCode = ConsumeValue(args, ref i, "access-code");
+                    break;
+
+                case "--delete-access-code":
+                    deleteAccessCode = true;
                     break;
 
                 case "--force" or "-f":
@@ -359,6 +365,7 @@ public sealed record CliOptions
             Command = command,
             Slot = slot,
             AccessCode = accessCode,
+            DeleteAccessCode = deleteAccessCode,
             Force = force,
             Json = json,
             Generate = generate,
@@ -408,7 +415,8 @@ public sealed record CliOptions
               settings SLOT [options]     Update slot settings (flags only)
 
             GLOBAL OPTIONS:
-              --access-code HEX           6-byte access code for protected slots
+              --access-code HEX           Current 6-byte code on protected writes
+              --delete-access-code        Remove protection when programming/updating (default: keep it)
               --force, -f                 Skip confirmation prompts
               --json, -j                  Output in JSON format
               --help, -h                  Show help

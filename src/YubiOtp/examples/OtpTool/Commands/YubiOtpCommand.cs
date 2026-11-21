@@ -119,7 +119,8 @@ public static class YubiOtpCommand
 
             using var config = new YubiOtpSlotConfiguration(publicId!, privateId, aesKey);
 
-            await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
+            await session.PutConfigurationAsync(slot, config, options.DeleteAccessCode ? default : accessCode,
+                accessCode, ct);
 
             if (options.Json)
             {

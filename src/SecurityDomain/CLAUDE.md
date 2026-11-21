@@ -84,14 +84,13 @@ Located in [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs), the reset
 3. **Sends at most 65 raw attempts** per processed reference with `ResetAttemptPayload`, bypassing SCP
 4. **Stops that reference** on `AuthenticationMethodBlocked` or `SecurityStatusNotSatisfied`; transport
    failures, unexpected statuses, and exhaustion are collected across references and thrown; cancellation propagates immediately
-5. **Reselects/reinitializes**, without verifying factory contents afterward
+5. **Reselects and authenticates with default SCP03** on the same session, preserving firmware policy and protocol configuration
 
 Return alone is not proof of restoration, and cancellation/failure can leave partial persistent changes.
 Yubico documents factory SCP03 restoration after last-set deletion; do not extend that to a verified
-mixed-key/firmware guarantee. Retained SCP parameters can fail reauthentication. Reinitialization currently
-omits the original configuration/version and clears the explicit-version indicator; a fresh session with
-the required options is the workaround, not a claim that losing them is intended policy.
-SCP11 can fail Core's local 5.7.2 gate during reinitialization because the omitted override becomes 5.3.0.
+mixed-key/firmware guarantee. A fresh handshake with public factory SCP03 keys only proves acceptance
+of those keys, not peer identity. The SDK disposes the reset's default parameters after derivation because
+Core's session keys independently own their DEK; do not dispose the caller's initial parameters.
 Raw attempts bypass the guard and begin only after readiness/authentication clears. A failure during or
 after the attempt phase ends the session; cleanup failures must not replace the primary failure.
 
@@ -141,8 +140,8 @@ final SCP11 1.4 and the complete YubiKey profile remain unverified.
 ### Session Initialization Pattern
 
 `CreateAsync(ISmartCardConnection, SessionCreationOptions?, CancellationToken)` combines construction and
-asynchronous initialization. The constructor retains the connection and SCP parameters. `InitializeAsync`
-takes configuration, firmware version, then cancellation token. It prepares the protocol, selects the SD
+asynchronous initialization. The constructor retains the connection and protocol configuration. `InitializeAsync`
+takes SCP parameters, firmware version, then cancellation token. It prepares the protocol, selects the SD
 through `SecurityDomainBackend.SelectApplicationAsync`, and configures it with the supplied version or
 5.3.0 fallback. If configuration returns a different protocol, the backend is rebuilt for that protocol.
 SCP11 creation therefore requires a known supported override (normally 5.7.2+), independently of the

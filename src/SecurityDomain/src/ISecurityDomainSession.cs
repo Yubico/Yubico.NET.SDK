@@ -325,26 +325,25 @@ public interface ISecurityDomainSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Attempts a destructive Security Domain reset through failed authentication, then reselects the application.
+    ///     Attempts a destructive Security Domain reset, then reselects and establishes a default SCP03 channel.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
-    ///     Use an unauthenticated session so retained keys do not prevent post-reset reinitialization.
     ///     The operation targets Security Domain keys and associated data, not other applets' credentials.
     ///     It sends at most 65 raw attempts per processed reference, skipping SCP03 component duplicates.
     ///     Device reset is intended to remove custom state; Yubico documents restoration of factory SCP03
-    ///     defaults when the last SCP03 set is deleted. The SDK does not verify factory contents afterward:
-    ///     transmission errors, unexpected statuses and exhaustion are reported together after attempting
-    ///     the remaining references. A listing with no actionable keys skips reset. Return alone does not
-    ///     prove complete restoration.
+    ///     defaults when the last SCP03 set is deleted. Transmission errors, unexpected statuses and
+    ///     exhaustion are reported together after attempting the remaining references. A listing with
+    ///     no actionable keys skips reset and leaves the existing channel unchanged.
+    ///     After confirmed stopping outcomes, the same session reselects with its configuration and
+    ///     firmware version and authenticates with the public default SCP03 keys, independent of its prior
+    ///     channel. The handshake shows those keys were accepted, not peer identity or complete restoration.
     ///     Failure or cancellation can leave persistent partial changes and cannot roll them back.
-    ///     Currently reinitialization omits the original protocol configuration and firmware override.
-    ///     Dispose this session and create a fresh one with those options when they are required after reset.
-    ///     SCP11 reinitialization can fail at the local version gate before a new handshake. Once the reset
-    ///     attempt phase starts, a failure or cancellation ends the session; reopen rather than reusing it.
+    ///     Once the reset attempt phase starts, a failure or cancellation ends the session; reopen rather
+    ///     than reusing it. Serialize whole operations and await each operation before starting another or disposing.
     /// </remarks>
     /// <exception cref="SecureChannelException">
-    ///     Retained SCP parameters cause a selected secure-channel configuration failure during reinitialization.
+    ///     The default SCP03 handshake failed during post-reset reinitialization.
     ///     The original failure is preserved as InnerException.
     /// </exception>
     /// <exception cref="AggregateException">One or more key references did not reach a stopping status.</exception>

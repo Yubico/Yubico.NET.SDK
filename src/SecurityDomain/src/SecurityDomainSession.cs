@@ -81,7 +81,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     private static readonly byte[] ResetAttemptPayload = new byte[8];
     private readonly ILogger _logger;
 
-    private readonly ScpKeyParameters? _scpKeyParams;
+    private readonly ProtocolConfiguration? _configuration;
     private ISmartCardProtocol? _protocol;
     private ISecurityDomainBackend? _backend;
     private bool _hasExplicitFirmwareVersion;
@@ -91,15 +91,15 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     internal Action<X509Certificate2>? CertificateLoadedObserver { get; set; }
 
     /// <summary>
-    ///     Retains the caller's connection and optional SCP parameters for asynchronous initialization.
+    ///     Retains the caller's connection and protocol configuration for asynchronous initialization.
     /// </summary>
     private SecurityDomainSession(
         ISmartCardConnection connection,
-        ScpKeyParameters? scpKeyParams = null)
+        ProtocolConfiguration? configuration)
         : base(connection)
     {
         _logger = Logger;
-        _scpKeyParams = scpKeyParams;
+        _configuration = configuration;
     }
 
     /// <summary>
@@ -128,11 +128,11 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     ///     Without SCP parameters the session supports unauthenticated discovery. The caller retains
     ///     ownership of supplied key parameters and disposes them after the session. Security Domain
     ///     cannot detect firmware: creation uses the supplied override or configures with 5.3.0.
-    ///     Supply an exact version for the local SCP11 generation gate. Reset currently does not forward
-    ///     the original configuration/version; create a fresh session to reapply them after reset.
+    ///     Supply an exact version for the local SCP11 generation gate. Reset reapplies configuration and
+    ///     firmware policy, but switches to the public default SCP03 keys after confirmed stopping outcomes.
     ///     SCP11 setup itself requires a known supported override, normally 5.7.2 or later: the default
-    ///     5.3.0 fails Core's gate before the handshake. Keep the retained parameters and their shared
-    ///     contained key/certificate owners alive through every reset and session using them.
+    ///     5.3.0 fails Core's gate before the handshake. Keep supplied parameters and their contained
+    ///     key/certificate owners alive through session disposal. The SDK does not dispose them.
     /// </remarks>
     /// <exception cref="SecureChannelException">
     ///     SCP parameters were supplied and secure-channel configuration threw ApduException,
@@ -146,28 +146,28 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         ConstructInitializedAsync(
             connection,
             options,
-            () => new SecurityDomainSession(connection, options?.ScpKeyParameters),
+            () => new SecurityDomainSession(connection, options?.ProtocolConfiguration),
             (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, token),
+                options?.ScpKeyParameters, options?.FirmwareVersionOverride, token),
             cancellationToken);
 
     /// <summary>
     ///     Ensures the Security Domain application is selected and secure messaging is configured if requested.
     /// </summary>
-    /// <param name="configuration">Optional protocol settings for this initialization.</param>
+    /// <param name="scpKeyParameters">Borrowed parameters for this handshake.</param>
     /// <param name="firmwareVersion">Optional firmware version used to configure the protocol.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     private async Task InitializeAsync(
-        ProtocolConfiguration? configuration = null,
-        FirmwareVersion? firmwareVersion = null,
-        CancellationToken cancellationToken = default)
+        ScpKeyParameters? scpKeyParameters,
+        FirmwareVersion? firmwareVersion,
+        CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
 
         if (IsInitialized)
             return;
 
-        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(_scpKeyParams, cancellationToken)
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParameters, cancellationToken)
             .ConfigureAwait(false);
         ISecurityDomainBackend backend = new SecurityDomainBackend(protocol);
         await backend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
@@ -183,8 +183,8 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                     protocol,
                     resolvedFirmwareVersion,
-                    configuration,
-                    _scpKeyParams,
+                    _configuration,
+                    scpKeyParameters,
                     cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -192,7 +192,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         {
             throw;
         }
-        catch (Exception ex) when (_scpKeyParams is not null &&
+        catch (Exception ex) when (scpKeyParameters is not null &&
             ex is ApduException or BadResponseException or NotSupportedException)
         {
             // Wrap selected configuration failures only when SCP was requested. Preparation and
@@ -824,7 +824,9 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             oldProtocol?.Dispose();
 
             await BlockResetReferencesAsync(keyInfo, cancellationToken).ConfigureAwait(false);
-            await InitializeSessionAsync(token => InitializeAsync(cancellationToken: token), cancellationToken)
+            using var defaultKeys = Scp03KeyParameters.Default;
+            var firmware = _hasExplicitFirmwareVersion ? FirmwareVersion : (FirmwareVersion?)null;
+            await InitializeSessionAsync(token => InitializeAsync(defaultKeys, firmware, token), cancellationToken)
                 .ConfigureAwait(false);
         }
         catch

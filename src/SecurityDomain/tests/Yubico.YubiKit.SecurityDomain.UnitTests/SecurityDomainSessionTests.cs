@@ -796,12 +796,15 @@ public class SecurityDomainSessionTests
             [0x69, 0x83],
             [0x69, 0x83],
             [0x69, 0x83],
-            OkResponse());
+            OkResponse(),
+            [0x69, 0x82]); // Even a previously plain session must attempt default SCP03.
         using var session = await SecurityDomainSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        await session.ResetAsync(TestContext.Current.CancellationToken);
+        var refreshError = await Assert.ThrowsAsync<SecureChannelException>(() => session.ResetAsync(
+            TestContext.Current.CancellationToken));
+        Assert.Equal(unchecked((short)0x6982), refreshError.StatusWord);
 
         Assert.Equal(SelectSecurityDomainCommand(), connection.TransmittedCommands[0]);
         Assert.Equal(GetDataCommand(0xE0), connection.TransmittedCommands[1]);
@@ -814,7 +817,9 @@ public class SecurityDomainSessionTests
         Assert.Equal([0x80, 0x2A, 0x03, 0x22, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
             connection.TransmittedCommands[5]);
         Assert.Equal(SelectSecurityDomainCommand(), connection.TransmittedCommands[6]);
-        Assert.True(session.IsInitialized);
+        Assert.Equal(0x50, connection.TransmittedCommands[7][1]);
+        Assert.Equal(KeyReference.Default.Kvn, connection.TransmittedCommands[7][2]);
+        Assert.False(session.IsInitialized);
         Assert.False(session.IsAuthenticated);
     }
 

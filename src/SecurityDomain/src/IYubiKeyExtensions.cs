@@ -37,8 +37,8 @@ public static class IYubiKeyExtensions
         ///     Use an await using scope. Only SmartCard transport (USB CCID or NFC) is supported.
         ///     The caller retains ownership of supplied SCP parameters and disposes them after the session.
         ///     Supply FirmwareVersionOverride when the exact firmware is known: Security Domain cannot
-        ///     detect it and otherwise configures with 5.3.0. Reset currently omits the original protocol
-        ///     configuration/version; create a fresh session with those options when needed after reset.
+        ///     detect it and otherwise configures with 5.3.0. Reset reapplies the protocol configuration
+        ///     and firmware policy and switches to default SCP03 keys after confirmed stopping outcomes.
         ///     SCP11 setup requires a known supported override (normally 5.7.2+); the default 5.3.0
         ///     fails Core's local gate before authentication. An override is policy, not hardware detection.
         /// </remarks>

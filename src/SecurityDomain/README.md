@@ -205,12 +205,11 @@ The SDK does not verify factory contents after reset. For each reference, the fi
 unexpected status stops attempts, as does reaching the limit. Incomplete outcomes are raised together after
 processing the other references. With no actionable keys, reset is skipped. Return alone does not prove
 complete restoration. Failure or cancellation during reset attempts ends the session and can leave partial changes.
-Use an unauthenticated reset session as above: retained SCP parameters may no longer work during reselection
-and reauthentication. Currently reset reinitialization also omits the original protocol configuration and
-firmware override. Dispose the reset session and create a fresh session with your required options afterward.
-SCP11 reinitialization can fail at the local version gate before a new handshake because reset falls
-back to 5.3.0. After any failed or cancelled reset, await its terminal task, dispose the session and
-reopen; raw attempts can invalidate the original channel and change persistent state.
+After all actionable references reach a stopping status, the same session reselects using the original
+protocol configuration and firmware policy and establishes a fresh channel with the public default SCP03
+keys, regardless of the previous channel. Success confirms acceptance of those keys, not peer identity or
+complete factory restoration. The channel can be used to reprovision the Security Domain. Recovery failure
+ends the session; reopen rather than relying on the old channel or assuming the reset was rolled back.
 
 ## User interaction
 

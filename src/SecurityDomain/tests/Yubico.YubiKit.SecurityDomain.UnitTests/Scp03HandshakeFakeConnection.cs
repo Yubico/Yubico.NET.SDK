@@ -82,6 +82,8 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
     /// </summary>
     public short ReinitRejectionStatusWord { get; set; } = unchecked((short)0x6982);
 
+    public bool AcceptReinitialization { get; init; }
+
     public Transport Transport { get; } = Transport.Usb;
     public ConnectionType Type { get; } = ConnectionType.SmartCard;
 
@@ -131,7 +133,10 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
             (3, InsGetData) => HandleGetData(wire),
             (4, InsInitializeUpdate) => Rejected(SWConstants.AuthenticationMethodBlocked),
             (5, InsSelect) => Ok(),
+            (6, InsInitializeUpdate) when AcceptReinitialization => HandleInitializeUpdate(wire),
             (6, InsInitializeUpdate) => Rejected(ReinitRejectionStatusWord),
+            (7, InsExternalAuthenticate) when AcceptReinitialization => HandleExternalAuthenticate(wire),
+            (8, InsGetData) when AcceptReinitialization => HandleGetData(wire),
             _ => throw new InvalidOperationException(
                 $"Unexpected command at step {step}: INS=0x{ins:X2}, wire={Convert.ToHexString(wire)}")
         };

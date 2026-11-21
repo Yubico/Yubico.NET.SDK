@@ -180,6 +180,26 @@ public class SecureChannelExceptionTests
     // Reset reinitialization reaches the same selected configuration-error wrapper as creation.
 
     [Fact]
+    public async Task ResetAsync_RefreshUsesDefaultReferenceAndKeepsSameSession()
+    {
+        using var connection = new Scp03HandshakeFakeConnection { AcceptReinitialization = true };
+        using var parameters = new Scp03KeyParameters(new KeyReference(0x01, 0x22), StaticKeys.GetDefaultKeys());
+        var firmware = new FirmwareVersion(5, 7, 2);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = parameters, FirmwareVersionOverride = firmware },
+            TestContext.Current.CancellationToken);
+
+        await session.ResetAsync(TestContext.Current.CancellationToken);
+
+        Assert.True(session.IsInitialized);
+        Assert.True(session.IsAuthenticated);
+        Assert.Equal(firmware, session.FirmwareVersion);
+        Assert.Equal((byte)0x22, connection.TransmittedCommands[1][2]);
+        Assert.Equal(KeyReference.Default.Kvn, connection.TransmittedCommands[6][2]);
+        Assert.Single(await session.ListKeyInformationAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task ResetAsync_ReinitializationRejectedAfterKeyBlocked_ThrowsSecureChannelExceptionWithInnerApduException()
     {
         // The fixture derives responses for initial SCP03 establishment and encrypted key enumeration,

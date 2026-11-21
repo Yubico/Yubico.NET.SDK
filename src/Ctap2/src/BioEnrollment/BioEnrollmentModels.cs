@@ -118,8 +118,7 @@ public enum FingerprintSampleStatus
 /// <remarks>
 /// Models selected sensor response fields. CTAP 2.1 (2022-06-21 errata), Section 6.7.3,
 /// also supplies maxTemplateFriendlyName at key 8, which is available only through RawData
-/// here. The current helper's sensor request omits the required subcommand. A decoded
-/// object does not establish complete or valid standard sensor-info exchange.
+/// here. A decoded object does not establish physical sensor interoperability.
 /// </remarks>
 public sealed class FingerprintSensorInfo
 {

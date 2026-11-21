@@ -26,7 +26,7 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 /// Exposes a ykman-like subset, not compatible or qualified standardized enrollment.
 /// </summary>
 /// <remarks>
-/// Bio helpers have known standard wire/schema/status and completion-default limitations. The support
+/// The bio helper's standard wire format has not been qualified on hardware. The support
 /// probe treats bioEnroll=false as unsupported although it can mean no templates, and masks errors/
 /// cancellation. An empty list is not reliable absence evidence. Progress/result display is not verified
 /// enrollment completion; a thrown cancellation can skip explicit cancel. Prompts are synchronous.

@@ -133,9 +133,8 @@ FidoTool credentials delete "$CREDENTIAL_ID_HEX" -f
 ### fingerprints
 
 Fingerprint flows need actual biometric hardware and advertised support; a firmware threshold is not
-qualification. The current SDK bio helper has known standard wire/authentication/timeout, template-array
-schema and sample-status limitations. An empty inventory can mean an unsupported command, and decoded
-remaining-samples zero is not verified enrollment completion. Next replies need not repeat the begin
+qualification. The standard request format is checked in software, not qualified on biometric hardware.
+A decoded remaining-samples zero is not independently verified enrollment persistence. Next replies need not repeat the begin
 template ID; the sample correctly retains it separately. A thrown cancellation can skip the explicit
 enrollment-cancel path. Do not rely on these flows as working standardized enrollment or cancellation.
 Set `FINGERPRINT_ID_HEX` to the actual template ID:

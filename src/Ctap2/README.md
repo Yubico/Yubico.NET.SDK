@@ -245,8 +245,8 @@ is a toggle, not an idempotent desired-state setter. Re-read GetInfo to reconcil
 outcome before another toggle. Setting minimum PIN policy is separate from the `minPinLength` extension,
 which only discloses the current code-point minimum to authorized RPs during creation.
 
-`FingerprintBioEnrollment` currently has known standard-command wire, response-schema and sample-status
-limitations; do not treat its presence or a firmware threshold as a working standardized enrollment flow.
+`FingerprintBioEnrollment` uses the CTAP 2.1 standard request format by default. This is not a device
+interoperability qualification. The opt-in prototype command retains its prior wire profile.
 Keep the begin template ID independently for continuation. A decoded remaining count of zero is not
 verified enrollment completion; cancellation of a .NET token is not `EnrollCancelAsync`.
 

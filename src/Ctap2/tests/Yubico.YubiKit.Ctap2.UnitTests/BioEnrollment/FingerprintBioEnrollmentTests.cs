@@ -95,7 +95,7 @@ public class FingerprintBioEnrollmentTests
         ReadOnlyMemory<byte> capturedRequest = default;
 
         _mockSession.SendCborRequestAsync(
-                Arg.Do<ReadOnlyMemory<byte>>(p => capturedRequest = p),
+                Arg.Do<ReadOnlyMemory<byte>>(p => capturedRequest = p.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(sensorInfoResponse));
 
@@ -104,15 +104,8 @@ public class FingerprintBioEnrollmentTests
         // Act
         await bioEnroll.GetFingerprintSensorInfoAsync(TestContext.Current.CancellationToken);
 
-        // Assert the current modality-only map; Section 6.7.3 requires subCommand=7 too.
-        // The prefix is skipped, not asserted to equal a particular command byte here.
-        Assert.True(capturedRequest.Length > 1, "Request should have command + payload");
-        var payload = capturedRequest.Slice(1); // Skip command byte
-        var reader = new CborReader(payload, CborConformanceMode.Lax);
-        var mapCount = reader.ReadStartMap() ?? 0;
-        Assert.Equal(1, mapCount);
-        Assert.Equal(1, reader.ReadInt32()); // modality key
-        Assert.Equal(1, reader.ReadInt32()); // fingerprint value
+        Assert.Equal("09A201010207", Convert.ToHexString(capturedRequest.Span));
+        Assert.False(_fakeProtocol.AuthenticateWasCalled);
     }
 
     [Fact]
@@ -138,8 +131,12 @@ public class FingerprintBioEnrollmentTests
         Assert.False(result.IsComplete);
     }
 
-    [Fact]
-    public async Task EnrollBeginAsync_WithTimeout_IncludesTimeoutInPayload()
+    [Theory]
+    [InlineData(false, 15000, "09A50101020103A103193A980402055820", "0101A103193A98")]
+    [InlineData(false, null, "09A4010102010402055820", "0101")]
+    [InlineData(true, 15000, "40A5010102020402055820", "02")]
+    public async Task EnrollBeginAsync_EncodesAndAuthenticatesSelectedProfile(
+        bool preview, int? timeout, string requestPrefix, string transcript)
     {
         // Arrange
         var templateId = new byte[] { 0x01 };
@@ -147,37 +144,18 @@ public class FingerprintBioEnrollmentTests
 
         ReadOnlyMemory<byte> capturedRequest = default;
         _mockSession.SendCborRequestAsync(
-                Arg.Do<ReadOnlyMemory<byte>>(p => capturedRequest = p),
+                Arg.Do<ReadOnlyMemory<byte>>(p => capturedRequest = p.ToArray()),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<ReadOnlyMemory<byte>>(enrollResponse));
 
-        var bioEnroll = CreateBioEnrollment();
+        var bioEnroll = new FingerprintBioEnrollment(_mockSession, _fakeProtocol, _pinUvAuthToken, preview);
 
         // Act
-        await bioEnroll.EnrollBeginAsync(timeout: 15000, cancellationToken: TestContext.Current.CancellationToken);
+        await bioEnroll.EnrollBeginAsync(timeout, TestContext.Current.CancellationToken);
 
-        // Assert - request format is [command][cbor_payload], skip command byte
-        Assert.True(capturedRequest.Length > 1, "Request should have command + payload");
-        var payload = capturedRequest.Slice(1);
-        var reader = new CborReader(payload, CborConformanceMode.Lax);
-        var mapCount = reader.ReadStartMap() ?? 0;
-
-        var hasTimeout = false;
-        for (var i = 0; i < mapCount; i++)
-        {
-            var key = reader.ReadInt32();
-            if (key == 6) // Current nonstandard timeout field; standard top-level key 6 is Boolean getModality.
-            {
-                hasTimeout = true;
-                Assert.Equal(15000, reader.ReadInt32());
-            }
-            else
-            {
-                reader.SkipValue();
-            }
-        }
-
-        Assert.True(hasTimeout);
+        Assert.Equal(requestPrefix + new string('0', 64) + (preview ? "06193A98" : ""),
+            Convert.ToHexString(capturedRequest.Span));
+        Assert.Equal(transcript, Convert.ToHexString(_fakeProtocol.LastAuthenticationMessage));
     }
 
     [Fact]
@@ -391,25 +369,37 @@ public class FingerprintBioEnrollmentTests
             Arg.Any<CancellationToken>());
     }
 
-    [Fact]
-    public async Task AllOperations_UseCorrectPinUvAuthProtocol()
+    [Theory]
+    [InlineData(2, "09A50101020203A201410103193A980402055820", "0102A201410103193A98")]
+    [InlineData(3, "09A201010203", "")]
+    [InlineData(4, "09A4010102040402055820", "0104")]
+    [InlineData(5, "09A50101020503A201410102616E0402055820", "0105A201410102616E")]
+    [InlineData(6, "09A50101020603A10141010402055820", "0106A1014101")]
+    public async Task StandardFingerprints_EncodeExactRequestAndAuthentication(int operation, string wire, string transcript)
     {
-        // Arrange
-        var templateId = new byte[] { 0x01 };
-        var enrollResponse = CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 4);
-
-        _mockSession.SendCborRequestAsync(
-                Arg.Any<ReadOnlyMemory<byte>>(),
+        byte[] templateId = [1];
+        byte[] reply = operation == 4
+            ? [0xA1, 0x07, 0x80]
+            : CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 1);
+        ReadOnlyMemory<byte> request = default;
+        _mockSession.SendCborRequestAsync(Arg.Do<ReadOnlyMemory<byte>>(p => request = p.ToArray()),
                 Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<ReadOnlyMemory<byte>>(enrollResponse));
+            .Returns(Task.FromResult<ReadOnlyMemory<byte>>(reply));
+        var bio = CreateBioEnrollment();
+        var ct = TestContext.Current.CancellationToken;
+        await (operation switch
+        {
+            2 => bio.EnrollCaptureNextSampleAsync(templateId, 15000, ct),
+            3 => bio.EnrollCancelAsync(ct),
+            4 => bio.EnumerateEnrollmentsAsync(ct),
+            5 => bio.SetFriendlyNameAsync(templateId, "n", ct),
+            6 => bio.RemoveEnrollmentAsync(templateId, ct),
+            _ => throw new ArgumentOutOfRangeException(nameof(operation))
+        });
 
-        var bioEnroll = CreateBioEnrollment();
-
-        // Act
-        await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
-
-        // Assert only that begin called Authenticate; neither all operations nor authenticated bytes are checked.
-        Assert.True(_fakeProtocol.AuthenticateWasCalled);
+        Assert.Equal(wire + (operation == 3 ? "" : new string('0', 64)), Convert.ToHexString(request.Span));
+        Assert.Equal(transcript, Convert.ToHexString(_fakeProtocol.LastAuthenticationMessage));
+        Assert.Equal(operation != 3, _fakeProtocol.AuthenticateWasCalled);
     }
 
     [Fact]
@@ -506,6 +496,7 @@ internal sealed class FakeBioPinUvAuthProtocol : IPinUvAuthProtocol
     public int Version => 2;
     public int AuthenticationTagLength => 32;
     public bool AuthenticateWasCalled { get; private set; }
+    public byte[] LastAuthenticationMessage { get; private set; } = [];
     public bool IsDisposed { get; private set; }
 
     public (Dictionary<int, object?> KeyAgreement, byte[] SharedSecret) Encapsulate(
@@ -534,6 +525,7 @@ internal sealed class FakeBioPinUvAuthProtocol : IPinUvAuthProtocol
     public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
     {
         AuthenticateWasCalled = true;
+        LastAuthenticationMessage = message.ToArray();
         return new byte[32];
     }
 

@@ -99,7 +99,7 @@ Yubico.YubiKit.Ctap2/
 │   │   ├── HmacSecret/             # hmac-secret inputs and outputs
 │   │   ├── MinPinLength/           # minPinLength inputs and outputs
 │   │   └── PreviewSign/            # previewSign types and canonical CBOR encoder
-│   ├── BioEnrollment/              # Fingerprint APIs; known standard wire/schema limitations
+│   ├── BioEnrollment/              # Fingerprint APIs; standard and opt-in prototype requests
 │   │   ├── BioEnrollmentSubCommand.cs
 │   │   ├── BioEnrollmentModels.cs
 │   │   └── FingerprintBioEnrollment.cs
@@ -339,7 +339,8 @@ helpers also borrow these dependencies. `SetAlwaysUvAsync` reads current state b
 after an uncertain outcome, repeat with the same desired state. `SetMinPinLengthAsync` can omit the
 length, send an empty RP list or send explicit false. minPinLength disclosure is not setting policy.
 
-Bio helpers have known standard subcommand/authentication/timeout and template-array decoding limitations.
+Standard bio requests authenticate modality, subcommand and the exact encoded parameter map when present.
+The opt-in prototype command retains its previous wire profile; it is not a fallback.
 Do not claim interoperable enrollment from fake fixtures or sensor metadata. Retain the begin template
 ID for continuation; sample `IsComplete` is only decoded remaining-count equality, including unsafe
 missing-field defaults. .NET cancellation does not automatically send enrollment cancel. Blob updates

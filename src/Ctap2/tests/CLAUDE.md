@@ -195,7 +195,7 @@ public void RegistrationExtensions_EncodePolicyAndHmacEnablement()
 - **Firmware version gates**: Some tests only work on specific firmware versions (check AuthenticatorInfo)
 - **Resident key limits**: Read credential metadata; remaining discoverable capacity is an estimate, not a fixed slot count
 - **Evidence scope**: Parsed responses, nonempty signatures and fake-wire assertions are not RP/attestation,
-  firmware, biometric or FIPS qualification. Bio APIs have known standard wire/schema/completion limitations.
+  firmware, biometric or FIPS qualification.
 - **Secret lifetime**: The SDK-write fixture checks the blob in-process without exporting its key. The
   separate external-writer fixture still requires a human-authorized key supplied via an environment
   variable; it does not erase the environment text and is not an unattended safety example.

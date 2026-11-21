@@ -168,7 +168,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         _status = initialization.Status;
 
         var (firmwareForProtocol, admitAllFirmwareGates) = ResolveFirmware(
-            options?.FirmwareVersionOverride, cachedDeviceInfo, initialization.FirmwareVersion);
+            options?.FirmwareVersionOverride, cachedDeviceInfo, initialization);
         _admitAllFirmwareGates = admitAllFirmwareGates;
 
         var effectiveProtocol = await ConfigureProtocolAsync(
@@ -185,22 +185,21 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     private static (FirmwareVersion ProtocolVersion, bool AdmitAllPreflight) ResolveFirmware(
-        FirmwareVersion? firmwareOverride, DeviceInfo? cachedDeviceInfo, FirmwareVersion appletVersion)
+        FirmwareVersion? firmwareOverride, DeviceInfo? cachedDeviceInfo, YubiOtpInitialization initialization)
     {
         if (firmwareOverride is not null)
         {
             return (firmwareOverride, firmwareOverride.IsAlphaOrBeta);
         }
 
-        if (cachedDeviceInfo is not { } info)
-        {
-            return (appletVersion, appletVersion.IsAlphaOrBeta);
-        }
-
-        // A major-zero cache is an admission sentinel, not a reason to discard known applet framing.
-        var version = info.FirmwareVersion;
-        return (version.IsAlphaOrBeta ? appletVersion : version,
-            version.IsAlphaOrBeta || info.VersionQualifier.Type != VersionQualifierType.Final);
+        var cachedVersion = cachedDeviceInfo?.FirmwareVersion;
+        var version = cachedVersion ?? initialization.FirmwareVersion;
+        var protocolVersion = version.IsAlphaOrBeta
+            ? initialization.ProtocolVersion ?? initialization.FirmwareVersion
+            : version;
+        bool prerelease = cachedVersion is not null &&
+                          cachedDeviceInfo?.VersionQualifier?.Type is { } type && type != VersionQualifierType.Final;
+        return (protocolVersion, version.IsAlphaOrBeta || prerelease);
     }
 
     /// <inheritdoc />

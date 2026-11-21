@@ -75,7 +75,8 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
             ? (managementVersion > otpVersion ? managementVersion : otpVersion)
             : managementVersion ?? otpVersion;
 
-        return new YubiOtpInitialization(firmwareVersion, status);
+        return new YubiOtpInitialization(firmwareVersion, status,
+            firmwareVersion.IsAlphaOrBeta && !otpVersion.IsAlphaOrBeta ? otpVersion : firmwareVersion);
     }
 
     private static async Task<FirmwareVersion?> TryReadManagementVersionAsync(

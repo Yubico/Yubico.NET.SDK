@@ -110,15 +110,17 @@ public class YubiOtpSessionTests
 
     [Theory]
     [InlineData(2, VersionQualifierType.Final, false)]
+    [InlineData(2, null, false)]
     [InlineData(2, VersionQualifierType.Beta, true)]
     [InlineData(0, VersionQualifierType.Final, true)]
     public async Task CreateUsingCachedInfoAsync_SeparatesAdmissionFromNumericFraming(
-        int cachedMajor, VersionQualifierType qualifier, bool admit)
+        int cachedMajor, VersionQualifierType? qualifier, bool admit)
     {
         var metadataVersion = new FirmwareVersion(cachedMajor, 1, 0);
         var info = DeviceInfo.CreateFromTlvs([], metadataVersion) with
         {
-            VersionQualifier = new VersionQualifier(metadataVersion, qualifier, 0)
+            // Custom IYubiKey providers may omit the qualifier despite its annotations.
+            VersionQualifier = qualifier is { } type ? new VersionQualifier(metadataVersion, type, 0) : null!
         };
         var ct = TestContext.Current.CancellationToken;
         var connection = Substitute.For<ISmartCardConnection>();
@@ -143,6 +145,49 @@ public class YubiOtpSessionTests
             await Assert.ThrowsAsync<NotSupportedException>(() => session.PutConfigurationAsync(Slot.Two, config, cancellationToken: ct));
             await connection.Received(1).TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
         }
+    }
+
+    [Theory]
+    [InlineData(2, false, true)]
+    [InlineData(3, false, false)]
+    [InlineData(2, true, true)]
+    public async Task CreateAsync_ManagementSentinelUsesNumericOtpStatusForSequence(
+        byte patch, bool cacheWithoutVersion, bool acceptsReset)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Type.Returns(ConnectionType.SmartCard);
+        connection.Transport.Returns(Transport.Usb);
+        List<byte[]> sent = [];
+        Queue<byte[]> replies = new([
+            [.. "YubiKey 0.0.1"u8, 0x90, 0x00],
+            [5, 4, patch, 9, 0, 0, 0x90, 0x00],
+            [5, 4, patch, 0, 1, 0, 0x90, 0x00]
+        ]);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                sent.Add(call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray());
+                return Task.FromResult<ReadOnlyMemory<byte>>(replies.Dequeue());
+            });
+        // A custom cache may exist without usable firmware; fall back to applet initialization.
+        var info = DeviceInfo.CreateFromTlvs([], new FirmwareVersion(5, 4, (int)patch));
+        await using var session = await YubiOtpSession.CreateUsingCachedInfoAsync(connection, null,
+            cacheWithoutVersion ? info with { FirmwareVersion = null! } : null, ct);
+
+        Assert.Equal(new FirmwareVersion(5, 4, (int)patch), session.FirmwareVersion);
+        if (acceptsReset)
+        {
+            await session.DeleteSlotAsync(Slot.One, cancellationToken: ct);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() => session.DeleteSlotAsync(Slot.One, cancellationToken: ct));
+        }
+
+        Assert.Equal(3, sent.Count);
+        byte[] expectedWrite = [0x00, 0x01, 0x01, 0x00, 52, .. new byte[52], 0x00];
+        Assert.Equal(expectedWrite, sent[2]);
     }
 
     [Fact]

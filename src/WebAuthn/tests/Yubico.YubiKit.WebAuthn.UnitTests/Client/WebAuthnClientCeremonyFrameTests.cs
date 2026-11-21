@@ -153,6 +153,7 @@ public class WebAuthnClientCeremonyFrameTests
     [InlineData("missing UV", WebAuthnClientErrorCode.InvalidState)]
     [InlineData("missing UP", WebAuthnClientErrorCode.InvalidState)]
     [InlineData("multiple", WebAuthnClientErrorCode.InvalidState)]
+    [InlineData("zero count", WebAuthnClientErrorCode.InvalidState)]
     [InlineData("denied", WebAuthnClientErrorCode.NotAllowed)]
     public async Task TokenlessUv_BadInteractiveAssertionStopsBeforeNextChunk(string failure, WebAuthnClientErrorCode expected)
     {
@@ -162,7 +163,7 @@ public class WebAuthnClientCeremonyFrameTests
         var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
         var c = new PublicKeyCredentialDescriptor(new byte[] { 3 });
         var response = MockCtap2Responses.CreateMockGetAssertionResponse(failure == "foreign" ? [3] : [1],
-            numberOfCredentials: failure == "multiple" ? 2u : null, omitCredential: failure == "missing ID",
+            numberOfCredentials: failure switch { "multiple" => 2u, "zero count" => 0u, _ => null }, omitCredential: failure == "missing ID",
             userVerified: failure != "missing UV", userPresent: failure != "missing UP", largeBlobKey: [9]);
         int real = 0;
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
@@ -190,6 +191,42 @@ public class WebAuthnClientCeremonyFrameTests
             Assert.Equal(-1, response.AuthenticatorDataRaw.Span.IndexOfAnyExcept((byte)0));
             Assert.Equal(new byte[1], response.LargeBlobKey?.ToArray());
         }
+    }
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public async Task TokenlessUv_PositiveSilentHitStillRequiresUvAndUpOnFinalAssertion(bool uv, bool up)
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(uvSupported: true, maxCredentialCountInList: 2));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        var rejected = MockCtap2Responses.CreateMockGetAssertionResponse(b.Id.ToArray(),
+            userVerified: uv, userPresent: up, largeBlobKey: [9], signature: [4]);
+        int real = 0;
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+                return MockCtap2Responses.CreateMockGetAssertionResponse(b.Id.ToArray(), userVerified: false, userPresent: false);
+
+            real++;
+            Assert.Equal(new[] { b }, request.AllowList);
+            return rejected;
+        });
+
+        await using var client = _client;
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(WithAllowList(a, b) with
+        {
+            UserVerification = UserVerificationPreference.Required
+        }, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+        Assert.Equal(1, real);
+        Assert.Equal(-1, rejected.AuthenticatorDataRaw.Span.IndexOfAnyExcept((byte)0));
+        Assert.Equal(new byte[1], rejected.LargeBlobKey?.ToArray());
+        Assert.Equal(new byte[1], rejected.Signature.ToArray());
+        Assert.Equal(new byte[] { 2 }, b.Id.ToArray());
     }
 
     [Theory]

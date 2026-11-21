@@ -121,6 +121,15 @@ public class PrfProcessorTests
             })
         };
         var ct = TestContext.Current.CancellationToken;
+        if (applicable && !verified)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(requestOptions, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+            Assert.Equal(1, assertions);
+            Assert.Equal(1, probes);
+            await _backend.Received(1).EncapsulateAsync(Arg.Any<CancellationToken>());
+            return;
+        }
         var match = Assert.Single(await client.GetAssertionAsync(requestOptions, cancellationToken: ct));
         var response = await match.SelectAsync(ct);
         Assert.Equal(chosen.Id.ToArray(), response.CredentialId.ToArray());

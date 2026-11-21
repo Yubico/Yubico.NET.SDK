@@ -173,9 +173,9 @@ internal static class CredentialFilter
                     "The authenticator did not return the requested user verification and presence.");
 
             // CTAP 2.0 §5.2 selects one credential; 2.1–2.3 §6.2.2 omit the count.
-            if (response.NumberOfCredentials is > 1)
+            if (response.NumberOfCredentials is > 1 || (requireUvAndUp && response.NumberOfCredentials is 0))
                 throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
-                    "The authenticator reported multiple assertions for a nonempty allow list.");
+                    "The authenticator reported an invalid assertion count for a nonempty allow list.");
 
             // Only a wire singleton allows omission repair (CTAP 2.0 §5.2).
             if (response.Credential is null && chunk.Count == 1)

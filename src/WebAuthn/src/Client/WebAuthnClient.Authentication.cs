@@ -329,7 +329,13 @@ public sealed partial class WebAuthnClient
     {
         try
         {
-            return await _backend.GetAssertionAsync(request, ct).ConfigureAwait(false);
+            var response = await _backend.GetAssertionAsync(request, ct).ConfigureAwait(false);
+            // A positive silent probe pins selection, but does not prove that the real assertion
+            // performed the explicitly requested tokenless UV and default UP.
+            if (request.AllowList is { Count: > 0 } sent && request.Options?.GetValueOrDefault("uv") == true
+                && request.PinUvAuthParam is null)
+                _ = CredentialFilter.Associate(response, sent, requireUvAndUp: true, ct);
+            return response;
         }
         catch (CtapException ex) when (CredentialMatcher.IsNoCredentialsError(ex.Status))
         {

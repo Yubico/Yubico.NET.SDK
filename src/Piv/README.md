@@ -82,10 +82,12 @@ disposes the OCE private key and certificates, not the SD public key. Record cop
 Keep one explicit cleanup owner and avoid disposing an alias during creation. See the [Core guide](../Core/README.md)
 for configuration; setup flags and generic version gates do not establish full PIV SCP/profile interoperability.
 
-Await and serialize complete public tasks before another operation or disposal. Core excludes overlapping logical
+Concurrent use of a PIV session is unsupported. Await each complete operation or workflow before the next call
+or disposal. Core excludes overlapping logical
 APDU exchanges, including chaining/SCP, but management authentication uses two exchanges and PIN-only/reset workflows
 span several. Parsing, prompt callbacks and local RSA unpadding can continue after an exchange leaves the guard.
-Keep borrowed credentials, keys, peer objects and prompt services alive through that whole task.
+Disposal does not drain that remaining work. Keep borrowed credentials, keys, peer objects and prompt services
+alive through the whole task. See the [Core session contract](../../docs/architecture/connection-ownership-and-contention.md#protocol-exchange-overlap).
 
 ## Common operations
 
@@ -145,7 +147,8 @@ Import accepts an application-owned `IPrivateKey`. Keep it alive through the awa
 afterward to clear its private material. RSA import requires exponent 65537. PIV supports its modeled RSA,
 P-256/P-384 and firmware-gated Ed25519/X25519 subsets; the shared Core catalog includes additional types
 for other applications. See [Core cryptographic keys](../Core/README.md#cryptographic-metadata) for key creation
-and loading. Key generation returns public material; the device retains the private key.
+and loading. Import overwrites a key already in the selected slot without checking for occupancy; it does not
+replace the slot's certificate. Key generation returns public material; the device retains the private key.
 
 ### Store and read a certificate
 

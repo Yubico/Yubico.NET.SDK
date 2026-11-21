@@ -34,10 +34,12 @@ namespace Yubico.YubiKit.Piv;
 /// checks do not imply ASCII-only, digit-only, or UTF-8-validity checks. Returned mutable memory is
 /// transferred to the caller, who must clear plaintext, shared secrets, and temporary PINs after use.</para>
 /// <para>
-/// Await and serialize complete public tasks before another operation or disposal. Core guards one logical
+/// Concurrent use of this session is unsupported. Await each complete public operation or workflow before
+/// starting another or disposing the session. Core guards one logical
 /// APDU exchange, including chaining/SCP, rather than a complete management-authentication, PIN-only or reset
 /// workflow. Parsing, presence callbacks and local RSA unpadding can continue after that exchange leaves the
-/// guard. Keep borrowed inputs, keys and prompt services alive through actual public-task completion.
+/// guard. Disposal does not drain that remaining work. Keep borrowed inputs, keys and prompt services
+/// alive through actual public-task completion.
 /// Cancellation is checked before each exchange is admitted; admitted constituent traffic uses
 /// CancellationToken.None and may succeed after the caller cancels. An outer canceled wait is not operation
 /// completion or permission to clear inputs. Await actual completion/teardown before inspecting or retrying
@@ -247,7 +249,8 @@ public interface IPivSession : IApplicationSession
     /// <remarks>
     /// Requires management-key authentication. The caller keeps <paramref name="privateKey"/> alive
     /// through the awaited operation and disposes it afterward. RSA import requires exponent 65537.
-    /// Key import leaves separately stored certificates unchanged.
+    /// Import overwrites an existing private key in the selected slot without checking for occupancy.
+    /// It leaves separately stored certificates unchanged.
     /// </remarks>
     /// <param name="slot">PIV slot for key storage.</param>
     /// <param name="privateKey">Private key to import.</param>

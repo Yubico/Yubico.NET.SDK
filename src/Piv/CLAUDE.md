@@ -85,7 +85,8 @@ completion and the caller-owned prompt through all callbacks. Failed direct setu
 borrowed connection; the convenience helper cleans up its failed hidden connection.
 
 Core guards logical exchanges, not complete authentication, metadata-plus-crypto, PIN-only or reset workflows.
-Await and serialize whole public tasks before other calls or disposal. PIV callbacks and RSA unpadding are outside
+Concurrent use is unsupported. Await the complete operation or workflow before another call or disposal.
+PIV callbacks and RSA unpadding are outside
 the exchange guard and can outlive its drain; this is not OTP's callback-inside-guard self-wait path. Each exchange
 checks cancellation before admission, then uses None for constituent traffic. An outer canceled wait does not
 complete the underlying task or permit borrowed-input cleanup; admitted work may still succeed.

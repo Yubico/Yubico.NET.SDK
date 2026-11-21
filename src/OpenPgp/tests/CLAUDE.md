@@ -16,6 +16,10 @@ This file provides guidance for the OpenPGP module test infrastructure.
 `WithOpenPgpSessionAsync` optionally resets in a separate plain session, disposes it, then creates the action's
 session with any SCP parameters. It awaits the action before synchronous session disposal and leaves post-action
 state in place. This setup does not exercise resetting an SCP session or restoring its channel options.
+Start a device case from known state; do not add post-failure card mutations in teardown.
+`Reset_WithScp03_ReauthenticatesUsingOriginalKeysOrEndsSession` covers a separate software fixture:
+it checks a fresh challenge, nondefault keys, authenticated follow-up and terminal refresh failure.
+It does not establish physical behavior.
 
 Keep comments within each test's actual oracle:
 
@@ -29,8 +33,10 @@ Keep comments within each test's actual oracle:
   propagation is not evidence that an admitted native SmartCard exchange can be interrupted.
 - SHA-512 KDF coverage checks length. Literal known-answer comparisons and same-logic SHA-256 calculations have
   different independence; libgcrypt-named tests execute SDK derivation, not libgcrypt.
-- Host signature/plaintext/shared-secret equality is stronger than nonempty/length checks. Ed25519/X25519 public-point
-  import checks establish no signature/agreement result, and attestation shape checks establish no key binding or trust.
+- Host signature/plaintext/shared-secret equality is stronger than nonempty/length checks. Public-point
+  import checks remain separate from the RFC 8032 signature and RFC 7748 agreement cases. The attestation
+  SPKI comparison checks target binding; a separate signature check uses the card's reported ATT issuer.
+  Neither establishes manufacturer trust.
 - Unverify's signing-failure case leaves signature policy uncontrolled and checks no other-operation state. Reset's
   three retry-counter assertions establish no complete erasure postcondition.
 

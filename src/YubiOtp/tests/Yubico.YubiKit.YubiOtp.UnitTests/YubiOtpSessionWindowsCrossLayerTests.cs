@@ -1,5 +1,4 @@
 using System.Buffers.Binary;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
@@ -93,7 +92,7 @@ public class YubiOtpSessionWindowsCrossLayerTests
         var prompt = new RecordingPrompt(cancellation);
         IOtpHidConnection? connection = null;
         YubiOtpSession? session = null;
-        Task<ReadOnlyMemory<byte>>? operation = null;
+        Task<Memory<byte>>? operation = null;
         byte[] challenge = [1, 2, 3]; // Synthetic test input; never programs a slot.
         try
         {
@@ -148,7 +147,7 @@ public class YubiOtpSessionWindowsCrossLayerTests
         var prompt = new RecordingPrompt();
         IOtpHidConnection? connection = null;
         YubiOtpSession? session = null;
-        Task<ReadOnlyMemory<byte>>? operation = null;
+        Task<Memory<byte>>? operation = null;
         try
         {
             if (!validCrc) response[21] ^= 1;
@@ -166,7 +165,7 @@ public class YubiOtpSessionWindowsCrossLayerTests
             {
                 var result = await operation.WaitAsync(Bound, Ct);
                 try { Assert.True(CryptographicOperations.FixedTimeEquals(response.AsSpan(0, 20), result.Span)); }
-                finally { CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(result).Span); }
+                finally { CryptographicOperations.ZeroMemory(result.Span); }
             }
             else
                 await Assert.ThrowsAsync<BadResponseException>(() => operation.WaitAsync(Bound, Ct));
@@ -205,14 +204,14 @@ public class YubiOtpSessionWindowsCrossLayerTests
         }
     }
 
-    private static async Task DrainAsync(Task<ReadOnlyMemory<byte>>? operation)
+    private static async Task DrainAsync(Task<Memory<byte>>? operation)
     {
         if (operation is null) return;
         // Expected operation failures are observed; a timeout must fail cleanup rather than hide a live worker.
         var error = await Record.ExceptionAsync(async () =>
         {
             var result = await operation.WaitAsync(Bound, CancellationToken.None);
-            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(result).Span);
+            CryptographicOperations.ZeroMemory(result.Span);
         });
         Assert.IsNotType<TimeoutException>(error);
     }

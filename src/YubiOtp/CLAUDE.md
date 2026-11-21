@@ -221,11 +221,10 @@ finally
 ### Challenge-response
 
 Composable fragment within an already open `YubiOtpSession session` for a correctly provisioned slot.
-`byte[] challenge` is owned by this task. Import System, System.Runtime.InteropServices and
-System.Security.Cryptography plus the module namespace. AsMemory below is only for the caller-owned SDK output.
+`byte[] challenge` is owned by this task. Import System and System.Security.Cryptography plus the module namespace.
 
 ```csharp
-ReadOnlyMemory<byte> response = default;
+Memory<byte> response = default;
 try
 {
     response = await session.CalculateHmacSha1Async(Slot.Two, challenge);
@@ -234,7 +233,7 @@ try
 finally
 {
     CryptographicOperations.ZeroMemory(challenge);
-    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+    CryptographicOperations.ZeroMemory(response.Span);
 }
 ```
 

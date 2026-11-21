@@ -80,12 +80,13 @@ public static class IYubiKeyExtensions
         /// finally even when creation or teardown fails. Use an explicit session when result ownership
         /// must be visible before teardown; lower-layer copy cleanup remains a separate limitation.
         /// </remarks>
-        /// <returns>A caller-owned 20-byte response; clear its backing memory after use.</returns>
+        /// <returns>A fresh caller-owned writable 20-byte response. Zero it with
+        /// <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/> after use.</returns>
         /// <param name="slot">The challenge-response slot.</param>
         /// <param name="challenge">The challenge data.</param>
         /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-        public async Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
+        public async Task<Memory<byte>> CalculateHmacSha1Async(
             Slot slot,
             ReadOnlyMemory<byte> challenge,
             SessionCreationOptions? options = null,

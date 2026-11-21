@@ -14,6 +14,7 @@
 
 using NSubstitute;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
@@ -497,6 +498,28 @@ public class YubiOtpSessionTests
 
     public class HmacChallengeSemantics
     {
+        [Fact]
+        public async Task CalculateHmacSha1Async_ReturnsIndependentWritableResults()
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            await using var lease = session;
+            var ct = TestContext.Current.CancellationToken;
+            byte[] transportReply = CreateApduResponseData(20);
+            transportReply.AsSpan(0, 20).Fill(0x5A);
+            connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult<ReadOnlyMemory<byte>>(transportReply));
+
+            Memory<byte> first = await session.CalculateHmacSha1Async(Slot.Two, ReadOnlyMemory<byte>.Empty, ct);
+            Memory<byte> second = await session.CalculateHmacSha1Async(Slot.Two, ReadOnlyMemory<byte>.Empty, ct);
+
+            Assert.Equal(20, first.Length);
+            Assert.True(CryptographicOperations.FixedTimeEquals(first.Span, transportReply.AsSpan(0, 20)));
+            CryptographicOperations.ZeroMemory(first.Span);
+            Assert.True(first.Span.IndexOfAnyExcept((byte)0) < 0);
+            Assert.True(CryptographicOperations.FixedTimeEquals(second.Span, transportReply.AsSpan(0, 20)));
+            Assert.Equal(0x5A, transportReply[0]);
+        }
+
         [Theory]
         [InlineData(new byte[0], (byte)0x00)]
         [InlineData(new byte[] { 0x41 }, (byte)0x00)]

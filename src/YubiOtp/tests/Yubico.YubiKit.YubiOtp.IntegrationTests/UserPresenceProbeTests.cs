@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
@@ -76,7 +75,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
         ];
         byte[] challenge = "YubiOTP touch probe"u8.ToArray();
         byte[]? expectedResponse = null;
-        ReadOnlyMemory<byte> response = default;
+        Memory<byte> response = default;
         var slotCreated = false;
 
         try
@@ -125,7 +124,7 @@ public class UserPresenceProbeTests(ITestOutputHelper output)
         {
             if (!response.IsEmpty)
             {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+                CryptographicOperations.ZeroMemory(response.Span);
             }
 
             if (expectedResponse is not null)

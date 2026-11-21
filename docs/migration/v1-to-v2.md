@@ -659,7 +659,6 @@ selected explicitly for this USB challenge recipe rather than assuming SmartCard
 
 ```csharp
 using System;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using Yubico.YubiKit.Core.Abstractions;
@@ -667,7 +666,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.YubiOtp;
 
-ReadOnlyMemory<byte> response = default;
+Memory<byte> response = default;
 try
 {
     await using var otp = await device.CreateYubiOtpSessionAsync(
@@ -692,7 +691,7 @@ finally
     CryptographicOperations.ZeroMemory(hmacKey);
     CryptographicOperations.ZeroMemory(challenge);
     // This is the documented caller-owned SDK output, not arbitrary borrowed read-only memory.
-    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+    CryptographicOperations.ZeroMemory(response.Span);
 }
 ```
 

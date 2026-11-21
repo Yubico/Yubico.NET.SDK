@@ -125,7 +125,7 @@ public class YubiOtpSessionLinuxCrossLayerTests
         {
             var result = await operation.WaitAsync(Bound, Ct);
             Assert.Equal(response.AsSpan(0, 20).ToArray(), result.ToArray());
-            CryptographicOperations.ZeroMemory(System.Runtime.InteropServices.MemoryMarshal.AsMemory(result).Span);
+            CryptographicOperations.ZeroMemory(result.Span);
         }
         else
             await Assert.ThrowsAsync<BadResponseException>(() => operation.WaitAsync(Bound, Ct));

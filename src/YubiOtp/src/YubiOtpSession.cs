@@ -352,7 +352,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
+    public Task<Memory<byte>> CalculateHmacSha1Async(
         Slot slot,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default)
@@ -371,7 +371,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return CalculateHmacSha1CoreAsync(configSlot, challenge, cancellationToken);
     }
 
-    private async Task<ReadOnlyMemory<byte>> CalculateHmacSha1CoreAsync(
+    private async Task<Memory<byte>> CalculateHmacSha1CoreAsync(
         ConfigSlot configSlot,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken)
@@ -380,13 +380,15 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
         try
         {
-            return await _backend.SendAndReceiveAsync(
+            var response = await _backend.SendAndReceiveAsync(
                     configSlot,
                     paddedChallenge,
                     YubiOtpConstants.HmacResponseSize,
                     CreateUserPresenceNotification(CreateUserPresenceContext(configSlot, UserPresenceOperations.YubiOtp.CalculateHmacSha1)),
                     cancellationToken)
                 .ConfigureAwait(false);
+            // Both backends transfer fresh SDK-owned storage, never the caller's input.
+            return System.Runtime.InteropServices.MemoryMarshal.AsMemory(response);
         }
         finally
         {

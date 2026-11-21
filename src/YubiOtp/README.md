@@ -169,13 +169,13 @@ finally
 
 ### Calculate an HMAC-SHA1 response
 
-The response is 20 bytes. This fragment needs a slot already provisioned for HMAC-SHA1 with the verifier's
+The response is 20 bytes of fresh, caller-owned writable memory. This fragment needs a slot already provisioned for HMAC-SHA1 with the verifier's
 key and short-challenge convention. Touch the key if that slot requires it; use the prompt recipe below
 to display a notification. This one-shot extension opens and disposes its own session.
 
 ```csharp
 byte[] challenge = Encoding.UTF8.GetBytes("some-challenge");
-ReadOnlyMemory<byte> response = default;
+Memory<byte> response = default;
 try
 {
     response = await device.CalculateHmacSha1Async(
@@ -186,7 +186,7 @@ try
 finally
 {
     CryptographicOperations.ZeroMemory(challenge);
-    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+    CryptographicOperations.ZeroMemory(response.Span);
 }
 ```
 
@@ -371,9 +371,9 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
   deterministically erased; choose the raw scan-code overload when mutable-source cleanup is required.
 - Session memory arguments are borrowed: keep them stable until the awaited operation finishes, including
   failure. HMAC clears its padded copy; AES sends the borrowed six-byte challenge without padding.
-- Successful calculation output belongs to you even though it is exposed as `ReadOnlyMemory<byte>`.
-  The examples use `MemoryMarshal.AsMemory` only to clear these documented, caller-owned SDK outputs.
-  Do not use that technique on arbitrary borrowed read-only memory. Consume first, then clear in `finally`.
+- Successful calculation output belongs to you. Clear the writable HMAC result in `finally` after use.
+  The AES example uses `MemoryMarshal.AsMemory` only for its documented caller-owned ticket, not for
+  arbitrary borrowed read-only memory.
   The one-shot HMAC helper transfers only after hidden-session teardown succeeds. If teardown throws
   after calculation, its task faults without exposing or clearing that result. An explicit session lets
   you retain the calculation result before teardown and clear it in an enclosing `finally`; this does

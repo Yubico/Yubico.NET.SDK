@@ -303,7 +303,8 @@ public interface IYubiOtpSession : IApplicationSession
     /// <param name="slot">The slot configured for HMAC-SHA1.</param>
     /// <param name="challenge">The challenge data (up to 64 bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The caller-owned 20-byte HMAC-SHA1 response. Clear its backing memory after use.</returns>
+    /// <returns>A fresh caller-owned writable 20-byte HMAC-SHA1 response. Zero it with
+    /// <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/> after use.</returns>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="challenge"/> is more than 64 bytes. No device I/O is
     /// performed when this is thrown.
@@ -316,7 +317,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// Thrown when the device returns a malformed or too-short response.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
-    Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
+    Task<Memory<byte>> CalculateHmacSha1Async(
         Slot slot,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default);

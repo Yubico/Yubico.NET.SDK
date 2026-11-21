@@ -338,7 +338,8 @@ public class PivDataObjectsTests
     [InlineData("cert-.example", false)]
     [InlineData("-cert.example", false)]
     [InlineData("cert..example", false)]
-    [InlineData("cert.example.", false)]
+    [InlineData("cert.example.", true)]
+    [InlineData("cert.example..", false)]
     public void KeyHistory_ReadsOnlyAsciiDnsLabelsInProfileUrl(string host, bool accepted)
     {
         byte[] url = System.Text.Encoding.ASCII.GetBytes($"http://{host}/{new string('a', 64)}");

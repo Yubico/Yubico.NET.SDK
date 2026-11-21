@@ -95,6 +95,10 @@ public readonly record struct KeyHistory
 
     private static bool IsAsciiDnsName(ReadOnlySpan<char> host)
     {
+        // A single terminal dot denotes the DNS root; leave it in the encoded URL.
+        if (host.EndsWith("."))
+            host = host[..^1];
+
         foreach (var range in host.Split('.'))
         {
             var label = host[range];

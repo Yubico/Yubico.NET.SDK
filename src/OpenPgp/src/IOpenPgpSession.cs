@@ -299,7 +299,8 @@ public interface IOpenPgpSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Imports a private key into the specified slot. Requires Admin PIN verification.
+    ///     Imports a private key into the specified slot, overwriting any key already in that slot.
+    ///     Requires Admin PIN verification.
     /// </summary>
     /// <remarks>
     ///     The algorithm attributes for the slot are derived from the key and written first (when the card

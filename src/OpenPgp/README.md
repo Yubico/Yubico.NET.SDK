@@ -297,7 +297,8 @@ support. ATT uses the vendor extension's nested CRT; ordinary target-key attesta
 operation. Replacing the factory ATT private key would irreversibly lose manufacturer
 attestation provenance, even if its public certificate had been saved.
 
-For import, supply an SDK `IPrivateKey` with a modeled OpenPGP representation: RSA 2048/3072/4096 with exponent
+Import overwrites any existing private key in the selected slot. There is no add-only mode or pre-read.
+Supply an SDK `IPrivateKey` with a modeled OpenPGP representation: RSA 2048/3072/4096 with exponent
 65537, NIST P-256/P-384/P-521, secp256k1, Brainpool P256r1/P384r1/P512r1, Ed25519 or X25519 as appropriate for
 the slot. Confirm host-provider and card support for the chosen key. This method accepts **borrowed PKCS#8 DER
 containing an RSA key**, creates its own disposable private-key object, and leaves the source DER for its caller to clear.

@@ -189,7 +189,8 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
                 GetConfigurationFirmwareVersion(detectedFirmwareVersion, info.FirmwareVersion),
                 _configuration,
                 _scpKeyParameters,
-                cancellationToken)
+                cancellationToken,
+                admitUnverifiedScpFirmware: ShouldAdmitUnverifiedScpFirmware(detectedFirmwareVersion))
             .ConfigureAwait(false);
 
         if (!ReferenceEquals(protocol, effectiveProtocol))
@@ -218,6 +219,15 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             ? applet
             : detected;
     }
+
+    private bool ShouldAdmitUnverifiedScpFirmware(FirmwareVersion detected) =>
+        // An explicit firmware override still governs SCP configuration, but not the USB gate.
+        _firmwareVersionOverride is { } configured
+            ? configured.IsAlphaOrBeta
+            : detected.IsAlphaOrBeta || HasNonFinalQualifier(_cachedDeviceInfo?.VersionQualifier);
+
+    private static bool HasNonFinalQualifier(VersionQualifier? qualifier) =>
+        qualifier is { Type: not VersionQualifierType.Final };
 
     /// <inheritdoc />
     public Task<AuthenticatorInfo> GetInfoAsync(CancellationToken cancellationToken = default)
@@ -631,7 +641,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             return;
         }
 
-        if (qualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta ||
+        if (HasNonFinalQualifier(qualifier) ||
             FeatureFido2UsbSmartCard.IsSupportedByFirmware(firmwareVersion))
         {
             return;

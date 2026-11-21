@@ -42,7 +42,7 @@ not RP registration/sign-in verification. See the README for the complete protoc
 > The firmware gate runs after SmartCard FIDO AID selection because FIDO firmware is obtained from
 > CTAP GetInfo on this transport.
 > FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
-> firmware is available through Management. The USB gate admits cached alpha/beta qualifiers and
+> firmware is available through Management. The USB gate admits present cached non-final qualifiers and
 > major-zero metadata under a permissive SDK policy, not a verified modern-firmware check.
 > SDK-managed opens claim the device view's known member interface IDs in this process. An overlapping
 > connection claim is refused with `ConnectionInUseException`; disjoint scoped views, direct factories
@@ -144,7 +144,9 @@ the session awaiting it. Prefer async disposal, but do not treat it as a whole-w
 
 Cached device firmware and its qualifier, then GetInfo firmware if the cache is absent, gate USB
 SmartCard. Configuration instead prefers numeric GetInfo over a major-zero cache, or uses the
-explicit override without changing the gate. A direct connection factory has no device cache.
+explicit override without changing the gate. SCP checks the explicit override if supplied; otherwise
+major-zero firmware or a present non-final qualifier admits an SCP attempt independently of framing.
+A direct connection factory has no device cache.
 HID INIT vendor bytes and Management firmware are separate observations. Initial SmartCard
 SELECT/GetInfo precede options-based configuration; major-zero configuration selects APDU format from
 connection support before ordinary `ForceShortApdus` handling. SCP setup rebinds the backend without

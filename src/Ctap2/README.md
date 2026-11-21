@@ -310,10 +310,12 @@ Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, Ge
 preparation directly; there is no applet-selection step.
 
 The USB SmartCard gate uses cached device firmware and its qualifier when available, otherwise GetInfo
-firmware. A known alpha/beta qualifier or a major-zero version (including missing firmware) passes the
+firmware. A present non-final qualifier or a major-zero version (including missing firmware) passes the
 SDK's permissive feature policy, not a verified modern-firmware check. GetInfo must still succeed.
 `FirmwareVersionOverride` changes session/protocol configuration, not the gate. Without it, numeric
-GetInfo firmware takes precedence over a major-zero cache for APDU configuration. HID INIT vendor bytes,
+GetInfo firmware takes precedence over a major-zero cache for APDU configuration. SCP uses the explicit
+override if supplied; otherwise unverified firmware (non-final qualifier or major zero) permits an SCP
+attempt without changing APDU framing. HID INIT vendor bytes,
 GetInfo firmware and Management firmware are separate observations. Later GetInfo reads do not reconfigure the session.
 Initial SmartCard SELECT/GetInfo precede options-based configuration. For major-zero firmware,
 Core chooses APDU format from connection support before its ordinary `ForceShortApdus` handling.

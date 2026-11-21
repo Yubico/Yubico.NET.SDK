@@ -112,9 +112,9 @@ public static class IYubiKeyExtensions
         /// Caller-supplied SCP parameters and UserPresencePrompt remain caller-owned. SmartCard
         /// selection and GetInfo precede the detected-firmware USB gate and SCP establishment;
         /// The gate uses cached firmware and its qualifier when available, otherwise GetInfo firmware.
-        /// An alpha/beta qualifier or major-zero firmware passes the optimistic gate; neither is
+        /// A present non-final qualifier or major-zero firmware passes the optimistic gate; neither is
         /// a hardware qualification. Framing prefers numeric GetInfo over a major-zero cache.
-        /// FirmwareVersionOverride changes configured firmware, not the gate.
+        /// FirmwareVersionOverride changes configured firmware and the SCP firmware check, not the USB gate.
         /// SCP authentication does not grant CTAP PIN/UV token permissions.
         /// </para>
         /// </remarks>

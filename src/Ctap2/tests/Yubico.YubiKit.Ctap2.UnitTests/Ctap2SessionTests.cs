@@ -10,6 +10,7 @@ using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Ctap2.Backend;
@@ -809,22 +810,23 @@ public class Ctap2SessionTests
     }
 
     [Theory]
-    [InlineData(true, false)]
-    [InlineData(false, false)]
-    [InlineData(true, true)]
-    public async Task UsbSmartCard_OptimisticGateRetainsNumericApduConfiguration(bool beta, bool useOverride)
+    [InlineData(VersionQualifierType.Beta, false)]
+    [InlineData((VersionQualifierType)42, false)]
+    [InlineData(null, false)]
+    [InlineData(VersionQualifierType.Beta, true)]
+    public async Task UsbSmartCard_OptimisticGateRetainsNumericApduConfiguration(VersionQualifierType? qualifier, bool useOverride)
     {
         var ct = TestContext.Current.CancellationToken;
         using var connection = new DisposeTrackingSmartCardConnection(
             [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(firmwareVersion: 0x050600), 0x90, 0x00],
             [0x00, 0x90, 0x00])
         { ExtendedApdu = true };
-        var cachedVersion = beta ? new FirmwareVersion(5, 7, 0) : new FirmwareVersion();
+        var cachedVersion = qualifier is not null ? new FirmwareVersion(5, 7, 0) : new FirmwareVersion();
         var device = new SingleConnectionYubiKey(connection)
         {
             CachedDeviceInfo = DeviceInfo.CreateFromTlvs([], cachedVersion) with
             {
-                VersionQualifier = beta ? new VersionQualifier(cachedVersion, VersionQualifierType.Beta, 1) : null!
+                VersionQualifier = qualifier is { } type ? new VersionQualifier(cachedVersion, type, 1) : null!
             }
         };
         var options = new SessionCreationOptions
@@ -836,9 +838,58 @@ public class Ctap2SessionTests
         await using var session = await device.CreateCtap2SessionAsync(options, ct);
         await session.SelectionAsync(ct);
 
-        Assert.Equal(options.FirmwareVersionOverride ?? (beta ? cachedVersion : new FirmwareVersion(5, 6, 0)), session.FirmwareVersion);
+        Assert.Equal(options.FirmwareVersionOverride ?? (qualifier is not null ? cachedVersion : new FirmwareVersion(5, 6, 0)), session.FirmwareVersion);
         Assert.Equal(3, connection.TransmittedCommands.Count);
         Assert.Equal([0x80, 0x10, 0x00, 0x00, 0x01, 0x0B, 0x00], connection.TransmittedCommands[2]);
+    }
+
+    [Theory]
+    [InlineData(VersionQualifierType.Final, false, false, false)]
+    [InlineData(null, false, false, false)]
+    [InlineData(null, true, false, true)]
+    [InlineData(VersionQualifierType.Beta, false, false, true)]
+    [InlineData((VersionQualifierType)42, false, false, true)]
+    [InlineData(VersionQualifierType.Beta, false, true, false)]
+    public async Task NfcSmartCard_ScpAdmissionDoesNotChangeNumericFraming(
+        VersionQualifierType? qualifier, bool unknown, bool overrideWithOldVersion, bool attemptsScp)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(firmwareVersion: 0x050200), 0x90, 0x00],
+            [0x90, 0x00]) // Too short to establish SCP, but sufficient to observe INITIALIZE UPDATE.
+        { ExtendedApdu = true, Transport = Transport.Nfc };
+        var cachedVersion = unknown ? new FirmwareVersion() : new FirmwareVersion(5, 2, 0);
+        var device = new SingleConnectionYubiKey(connection)
+        {
+            CachedDeviceInfo = DeviceInfo.CreateFromTlvs([], cachedVersion) with
+            {
+                VersionQualifier = qualifier is { } type ? new VersionQualifier(cachedVersion, type, 1) : null!
+            }
+        };
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            ScpKeyParameters = keys,
+            FirmwareVersionOverride = overrideWithOldVersion ? new FirmwareVersion(5, 2, 0) : null,
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true }
+        };
+
+        if (attemptsScp)
+        {
+            var failure = await Assert.ThrowsAsync<BadResponseException>(() => device.CreateCtap2SessionAsync(options, ct));
+            Assert.Contains("INITIALIZE UPDATE response too short", failure.Message);
+            Assert.Equal(3, connection.TransmittedCommands.Count);
+            byte[] initializeUpdate = connection.TransmittedCommands[2];
+            Assert.Equal(14, initializeUpdate.Length);
+            Assert.Equal([0x80, 0x50, keys.KeyReference.Kvn, 0x00, 0x08], initializeUpdate[..5]);
+            Assert.Equal(0x00, initializeUpdate[^1]); // Short Le follows the eight-byte challenge.
+        }
+        else
+        {
+            var failure = await Assert.ThrowsAsync<NotSupportedException>(() => device.CreateCtap2SessionAsync(options, ct));
+            Assert.Contains("SCP03", failure.Message);
+            Assert.Equal(2, connection.TransmittedCommands.Count);
+        }
     }
 
     [Fact]
@@ -1033,7 +1084,7 @@ public class Ctap2SessionTests
         public bool PauseAsyncDisposal { get; init; }
         public Task AsyncDisposalStarted => _asyncDisposalStarted.Task;
         public List<byte[]> TransmittedCommands { get; } = [];
-        public Transport Transport => Transport.Usb;
+        public Transport Transport { get; init; } = Transport.Usb;
         public ConnectionType Type => ConnectionType.SmartCard;
 
         public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(

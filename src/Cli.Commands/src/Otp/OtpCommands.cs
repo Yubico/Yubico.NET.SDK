@@ -189,7 +189,7 @@ public static class OtpHelpers
         }
         catch (FormatException)
         {
-            throw new ArgumentException($"Invalid hex format for {name}: {hex}");
+            throw new ArgumentException($"{name} must contain complete hexadecimal byte pairs.");
         }
     }
 

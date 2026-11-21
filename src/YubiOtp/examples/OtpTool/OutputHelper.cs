@@ -91,8 +91,7 @@ public static class OutputHelper
     }
 
     /// <summary>
-    /// Parses hex with error reporting. Failure diagnostics can echo the original input, including a
-    /// secret. This sample is not a hardened credential-input path; protect stderr/log capture.
+    /// Parses hex without echoing rejected input.
     /// </summary>
     public static byte[]? ParseHex(string? hex, string paramName)
     {
@@ -107,7 +106,7 @@ public static class OutputHelper
         }
         catch (FormatException)
         {
-            throw new ArgumentException($"Invalid hex value for {paramName}: {hex}");
+            throw new ArgumentException($"{paramName} must contain complete hexadecimal byte pairs.");
         }
     }
 

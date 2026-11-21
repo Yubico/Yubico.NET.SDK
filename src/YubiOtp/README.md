@@ -395,7 +395,7 @@ Use the SDK recipes above for production-sensitive provisioning:
 - No presence prompt is installed. There is no retry on a different transport if opening the selected connection fails.
 - JSON writes require explicit `--force`. Generated secrets/passwords are intentionally
   displayed in human mode; JSON output is not equivalent and omits generated secret material. Calculate
-  prints the response. Parser errors can echo input and immutable CLI strings cannot be zeroed: protect
+  prints the response. Rejected hex values are not echoed, but immutable CLI strings cannot be zeroed: protect
   terminal history, logs and captured output, and do not treat the sample as a hardened secret-input tool.
 
 ```bash

@@ -156,8 +156,8 @@ partly delegated to the integration layer/device; preserve that distinction in p
 - Output: 32 bytes → K-ENC[0..16], K-MAC[16..32]
 - Derived key buffer zeroed in `finally`
 - `DeriveKeys(ReadOnlyMemory<byte>)` passes the password span to PBKDF2 without an explicit helper-owned
-  input copy. The caller clears the input. `Pbkdf2DerivationTests` recomputes expected output through the
-  same .NET primitive using independently stated constants; it checks parameters rather than an external KAT.
+  input copy. The caller clears the input. `Pbkdf2DerivationTests` checks fixed ASCII and UTF-8 vectors
+  independently calculated by Python's `hashlib.pbkdf2_hmac`, with the expressions recorded alongside the vectors.
 
 ## Test Infrastructure
 

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers.Binary;
+using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -96,6 +98,50 @@ public class PivCertificateObjectIdTests
         using var actual = await CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, token);
         Assert.NotNull(actual);
         Assert.Equal(expected.RawData, actual.RawData);
+    }
+
+    [Theory]
+    [InlineData(false, 0)]
+    [InlineData(true, 0)]
+    [InlineData(true, 1)]
+    public async Task GetCertificateAsync_ReadsCompressedDerAndChecksNetIdLength(bool netId, int lengthDelta)
+    {
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var request = new CertificateRequest("CN=PIV unit test", key, HashAlgorithmName.SHA256);
+        using var expected = request.CreateSelfSigned(DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddDays(1));
+        var backend = new CertificateBackend(Compress(expected.RawData, netId, lengthDelta), [0x71, 0x01, 0x01]);
+        var token = TestContext.Current.CancellationToken;
+
+        if (lengthDelta != 0)
+        {
+            await Assert.ThrowsAsync<InvalidDataException>(() =>
+                CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, token));
+            return;
+        }
+
+        using var actual = await CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, token);
+        Assert.NotNull(actual);
+        Assert.Equal(expected.RawData, actual.RawData);
+    }
+
+    private static byte[] Compress(byte[] input, bool netId, int lengthDelta = 0)
+    {
+        using var output = new MemoryStream();
+        if (netId)
+        {
+            Span<byte> header = [0x01, 0x00, 0x00, 0x00];
+            BinaryPrimitives.WriteUInt16LittleEndian(header[2..], unchecked((ushort)(input.Length + lengthDelta)));
+            output.Write(header);
+        }
+
+        using (Stream encoder = netId
+            ? new ZLibStream(output, CompressionMode.Compress, leaveOpen: true)
+            : new GZipStream(output, CompressionMode.Compress, leaveOpen: true))
+        {
+            encoder.Write(input);
+        }
+
+        return output.ToArray();
     }
 
     private sealed class CertificateBackend(byte[] certificate, byte[] certInfo) : IBackend

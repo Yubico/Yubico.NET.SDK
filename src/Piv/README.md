@@ -169,7 +169,8 @@ The caller owns certificates returned by retrieval and attestation and disposes 
 Automatic compression uses GZip when DER exceeds 1856 bytes. That is an SDK policy based on a recommended
 PIV certificate length, rather than a hard storage limit; device capacity still applies. Select `Always`
 to force GZip even for smaller certificates; the current enum has no force-uncompressed mode.
-This reader rejects unknown nonzero CertInfo modes rather than treating them as DER.
+The reader supports ordinary DER, GZip, and Net iD zlib (read only). It rejects unknown nonzero
+CertInfo modes rather than treating them as DER.
 Use the raw-object API to inspect unsupported encodings.
 
 ### Verify the PIN, sign and verify on the host

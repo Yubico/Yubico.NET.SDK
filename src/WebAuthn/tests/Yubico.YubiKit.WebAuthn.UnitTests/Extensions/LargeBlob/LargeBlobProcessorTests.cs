@@ -74,7 +74,8 @@ public class LargeBlobProcessorTests
         var ct = TestContext.Current.CancellationToken;
         var matches = await client.GetAssertionAsync(new()
         {
-            Challenge = new byte[32], RpId = "example.com",
+            Challenge = new byte[32],
+            RpId = "example.com",
             AllowCredentials = [new(first), new(selected)],
             Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Write = payload })
         }, "123456"u8.ToArray(), ct);
@@ -254,7 +255,8 @@ public class LargeBlobProcessorTests
         var ct = TestContext.Current.CancellationToken;
         var matches = await client.GetAssertionAsync(new()
         {
-            Challenge = new byte[32], RpId = "example.com",
+            Challenge = new byte[32],
+            RpId = "example.com",
             Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
         }, cancellationToken: ct);
         var response = await Assert.Single(matches).SelectAsync(ct);
@@ -282,7 +284,8 @@ public class LargeBlobProcessorTests
         {
             var matches = await client.GetAssertionAsync(new()
             {
-                Challenge = new byte[32], RpId = "example.com",
+                Challenge = new byte[32],
+                RpId = "example.com",
                 Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
             }, cancellationToken: ct);
             var response = await Assert.Single(matches).SelectAsync(ct);
@@ -297,6 +300,34 @@ public class LargeBlobProcessorTests
         System.Security.Cryptography.CryptographicOperations.ZeroMemory(actual.Span);
         Assert.Equal(0, copy.Blob.GetValueOrDefault().Span[0]);
         Assert.Equal(0, plaintext[0]);
+    }
+
+    [Fact]
+    public async Task Authentication_LaterReadCancellationClearsEarlierUnreturnedPlaintext()
+    {
+        var info = Context().Info;
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
+        var first = MockCtap2Responses.CreateMockGetAssertionResponse(numberOfCredentials: 2, largeBlobKey: LargeBlobKey);
+        var second = MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(first);
+        _backend.GetNextAssertionAsync(Arg.Any<CancellationToken>()).Returns(second);
+        byte[] plaintext = [0x6B];
+        using var caller = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        _storage.GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()).Returns(
+            _ => Task.FromResult<byte[]?>(plaintext),
+            _ => { caller.Cancel(); return Task.FromCanceled<byte[]?>(caller.Token); });
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.GetAssertionAsync(new()
+        {
+            Challenge = new byte[32], RpId = "example.com",
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
+        }, cancellationToken: caller.Token));
+
+        Assert.Equal(0, plaintext[0]);
+        Assert.False(first.AuthenticatorDataRaw.Span.ContainsAnyExcept((byte)0));
+        Assert.False(second.AuthenticatorDataRaw.Span.ContainsAnyExcept((byte)0));
     }
 
     /// <summary>L3 §10.1.5 authentication: "If support is present, or if both read and write are present, return ... NotSupportedError".</summary>

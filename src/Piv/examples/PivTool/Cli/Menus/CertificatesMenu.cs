@@ -76,6 +76,7 @@ public static class CertificatesMenu
         var slot = SlotSelector.SelectSlot("Select slot:");
 
         var result = await PivExamples.Certificates.GetCertificateAsync(session, slot, ct);
+        using var certificate = result.Certificate;
         if (!result.Success)
         {
             OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to read certificate");

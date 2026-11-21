@@ -373,6 +373,7 @@ internal static class CliRunner
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await PivExamples.Certificates.GetCertificateAsync(session, slot.Value, ct);
+        using var certificate = result.Certificate;
 
         if (useJson)
         {
@@ -803,6 +804,8 @@ internal static class CliRunner
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await Attestation.GetAttestationAsync(session, slot.Value, ct);
+        using var attested = result.AttestationCertificate;
+        using var intermediate = result.IntermediateCertificate;
 
         if (!result.Success)
         {
@@ -842,6 +845,7 @@ internal static class CliRunner
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await Attestation.GetIntermediateCertificateAsync(session, ct);
         using var certificate = result.AttestationCertificate;
+        using var intermediate = result.IntermediateCertificate;
 
         if (!result.Success)
         {
@@ -889,23 +893,31 @@ internal static class CliRunner
             result = await SlotInfoQuery.GetAllSlotsInfoAsync(session, ct);
         }
 
-        if (useJson)
+        try
         {
-            JsonOutput.Write(result);
-        }
-        else
-        {
-            foreach (var s in result.Slots)
+            if (useJson)
             {
-                Console.WriteLine($"Slot {s.Slot} ({s.Name}): HasKey={s.HasKey} HasCert={s.HasCertificate}");
-                if (s.Metadata is SlotMetadata m)
+                JsonOutput.Write(result);
+            }
+            else
+            {
+                foreach (var s in result.Slots)
                 {
-                    Console.WriteLine($"  Key type:   {m.KeyType}");
-                    Console.WriteLine($"  PIN Policy:  {m.PinPolicy}");
-                    Console.WriteLine($"  Touch Policy:{m.TouchPolicy}");
-                    Console.WriteLine($"  Generated:   {m.IsGenerated}");
+                    Console.WriteLine($"Slot {s.Slot} ({s.Name}): HasKey={s.HasKey} HasCert={s.HasCertificate}");
+                    if (s.Metadata is SlotMetadata m)
+                    {
+                        Console.WriteLine($"  Key type:   {m.KeyType}");
+                        Console.WriteLine($"  PIN Policy:  {m.PinPolicy}");
+                        Console.WriteLine($"  Touch Policy:{m.TouchPolicy}");
+                        Console.WriteLine($"  Generated:   {m.IsGenerated}");
+                    }
                 }
             }
+        }
+        finally
+        {
+            foreach (var slot in result.Slots)
+                slot.Certificate?.Dispose();
         }
 
         return result.Success ? 0 : 1;

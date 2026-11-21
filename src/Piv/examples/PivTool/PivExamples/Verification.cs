@@ -70,7 +70,7 @@ public static class Verification
 
         try
         {
-            var cert = await session.GetCertificateAsync(slot, cancellationToken);
+            using var cert = await session.GetCertificateAsync(slot, cancellationToken);
             if (cert is null)
             {
                 return VerificationResult.Failed($"Slot {slot} has no certificate.");

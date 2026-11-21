@@ -46,6 +46,7 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Extension", "previewSign")]
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class Ctap2PreviewSignTests
 {
     /// <summary>

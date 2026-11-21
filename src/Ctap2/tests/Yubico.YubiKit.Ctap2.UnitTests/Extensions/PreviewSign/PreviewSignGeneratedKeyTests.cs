@@ -28,6 +28,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 /// The point/vector comparisons do not assert algorithm propagation from either extraction accessor,
 /// signature verification, uniqueness for every context or full Internet-Draft conformance.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignGeneratedKeyTests
 {
     [Fact]

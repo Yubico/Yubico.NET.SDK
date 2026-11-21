@@ -40,6 +40,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// These are experimental profile identifiers, not production or full Internet-Draft conformance.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class ArkgP256SignArgs : CoseSignArgs
 {
     /// <summary>

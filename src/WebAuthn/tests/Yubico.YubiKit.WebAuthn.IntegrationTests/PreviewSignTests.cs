@@ -31,6 +31,7 @@ using Fido2Extensions = Yubico.YubiKit.Ctap2.Extensions;
 namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 
 [Trait("Category", "Integration")]
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignTests
 {
     [SkippableTheory]

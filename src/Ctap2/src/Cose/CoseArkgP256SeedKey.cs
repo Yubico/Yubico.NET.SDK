@@ -58,6 +58,7 @@ namespace Yubico.YubiKit.Ctap2.Cose;
 /// <param name="DerivedKeyAlgorithm">Algorithm for the derived signing key (e.g., Esp256 = -9).</param>
 /// <param name="KemPublicKey">KEM public key as 65-byte SEC1 uncompressed point.</param>
 /// <param name="BlPublicKey">Blinding public key as 65-byte SEC1 uncompressed point.</param>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record CoseArkgP256SeedKey(
     CoseAlgorithm Algorithm,
     CoseAlgorithm DerivedKeyAlgorithm,

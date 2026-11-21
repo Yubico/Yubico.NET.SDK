@@ -24,6 +24,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Cose;
 /// Fixed public points test the experimental SDK's wrapped-map profile and label routing, not
 /// draft-wide conformance, production cryptography or device interoperability.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class CoseArkgP256SeedKeyTests
 {
     [Fact]

@@ -91,7 +91,9 @@ public sealed class PreviewSignRegistrationOutput
         {
             var coseKey = Cose.CoseKey.Decode(PublicKey);
 
+#pragma warning disable YKEXP001 // This decoder explicitly handles the ARKG variant.
             if (coseKey is Cose.CoseArkgP256SeedKey arkgKey)
+#pragma warning restore YKEXP001
             {
                 return new PreviewSignGeneratedKey(
                     KeyHandle,

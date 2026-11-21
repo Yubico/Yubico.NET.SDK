@@ -141,16 +141,16 @@ Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Equals(Yubico.YubiKit.Ctap2.Cose.CoseAlg
 Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.IsKnown.get -> bool
 Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Value.get -> int
 Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Value.init -> void
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.BlPublicKey.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.BlPublicKey.init -> void
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.CoseArkgP256SeedKey(Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm Algorithm, Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm DerivedKeyAlgorithm, System.ReadOnlyMemory<byte> KemPublicKey, System.ReadOnlyMemory<byte> BlPublicKey) -> void
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Deconstruct(out Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm Algorithm, out Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm DerivedKeyAlgorithm, out System.ReadOnlyMemory<byte> KemPublicKey, out System.ReadOnlyMemory<byte> BlPublicKey) -> void
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.DerivedKeyAlgorithm.get -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.DerivedKeyAlgorithm.init -> void
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Equals(Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? other) -> bool
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.KemPublicKey.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.KemPublicKey.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.BlPublicKey.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.BlPublicKey.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.CoseArkgP256SeedKey(Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm Algorithm, Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm DerivedKeyAlgorithm, System.ReadOnlyMemory<byte> KemPublicKey, System.ReadOnlyMemory<byte> BlPublicKey) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Deconstruct(out Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm Algorithm, out Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm DerivedKeyAlgorithm, out System.ReadOnlyMemory<byte> KemPublicKey, out System.ReadOnlyMemory<byte> BlPublicKey) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.DerivedKeyAlgorithm.get -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.DerivedKeyAlgorithm.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Equals(Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? other) -> bool
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.KemPublicKey.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.KemPublicKey.init -> void
 Yubico.YubiKit.Ctap2.Cose.CoseEc2Key
 Yubico.YubiKit.Ctap2.Cose.CoseEc2Key.CoseEc2Key(Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm Algorithm, int Curve, System.ReadOnlyMemory<byte> X, System.ReadOnlyMemory<byte> Y) -> void
 Yubico.YubiKit.Ctap2.Cose.CoseEc2Key.Curve.get -> int
@@ -422,11 +422,11 @@ Yubico.YubiKit.Ctap2.CtapStatus.UvBlocked = 60 -> Yubico.YubiKit.Ctap2.CtapStatu
 Yubico.YubiKit.Ctap2.CtapStatus.UvInvalid = 63 -> Yubico.YubiKit.Ctap2.CtapStatus
 Yubico.YubiKit.Ctap2.CtapStatus.VendorFirst = 240 -> Yubico.YubiKit.Ctap2.CtapStatus
 Yubico.YubiKit.Ctap2.CtapStatus.VendorLast = 255 -> Yubico.YubiKit.Ctap2.CtapStatus
-Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs
-Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.ArkgP256SignArgs(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> context) -> void
-Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Context.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Equals(Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? other) -> bool
-Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.KeyHandle.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.ArkgP256SignArgs(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> context) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Context.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Equals(Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? other) -> bool
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.KeyHandle.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs
 Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.CoseSignArgs(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs! original) -> void
 Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput
@@ -705,13 +705,13 @@ const Yubico.YubiKit.Ctap2.Pin.ClientPinSubCommand.GetUvRetries = 7 -> int
 const Yubico.YubiKit.Ctap2.Pin.ClientPinSubCommand.SetPin = 3 -> int
 override Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.GetHashCode() -> int
 override Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.ToString() -> string!
-override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.<Clone>$() -> Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey!
-override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Algorithm.get -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
-override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Encode() -> byte[]!
-override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Equals(object? obj) -> bool
-override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.GetHashCode() -> int
-override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.KeyType.get -> int
-override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.ToString() -> string!
+[YKEXP001]override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.<Clone>$() -> Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey!
+[YKEXP001]override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Algorithm.get -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
+[YKEXP001]override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Encode() -> byte[]!
+[YKEXP001]override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Equals(object? obj) -> bool
+[YKEXP001]override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.KeyType.get -> int
+[YKEXP001]override Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.ToString() -> string!
 override Yubico.YubiKit.Ctap2.Cose.CoseEc2Key.<Clone>$() -> Yubico.YubiKit.Ctap2.Cose.CoseEc2Key!
 override Yubico.YubiKit.Ctap2.Cose.CoseEc2Key.Algorithm.get -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
 override Yubico.YubiKit.Ctap2.Cose.CoseEc2Key.Encode() -> byte[]!
@@ -778,16 +778,16 @@ override Yubico.YubiKit.Ctap2.Credentials.UnknownAttestationStatement.Format.get
 override Yubico.YubiKit.Ctap2.Credentials.UnknownAttestationStatement.GetHashCode() -> int
 override Yubico.YubiKit.Ctap2.Credentials.UnknownAttestationStatement.RawCbor.get -> System.ReadOnlyMemory<byte>
 override Yubico.YubiKit.Ctap2.Credentials.UnknownAttestationStatement.ToString() -> string!
-override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.<Clone>$() -> Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs!
-override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Algorithm.get -> int
-override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Equals(object? obj) -> bool
-override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.GetHashCode() -> int
-override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.ToString() -> string!
+[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.<Clone>$() -> Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs!
+[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Algorithm.get -> int
+[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Equals(object? obj) -> bool
+[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.ToString() -> string!
 override Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.Equals(object? obj) -> bool
 override Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.GetHashCode() -> int
 override Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.ToString() -> string!
 override Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.GetHashCode() -> int
-override sealed Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Equals(Yubico.YubiKit.Ctap2.Cose.CoseKey? other) -> bool
+[YKEXP001]override sealed Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Equals(Yubico.YubiKit.Ctap2.Cose.CoseKey? other) -> bool
 override sealed Yubico.YubiKit.Ctap2.Cose.CoseEc2Key.Equals(Yubico.YubiKit.Ctap2.Cose.CoseKey? other) -> bool
 override sealed Yubico.YubiKit.Ctap2.Cose.CoseOkpKey.Equals(Yubico.YubiKit.Ctap2.Cose.CoseKey? other) -> bool
 override sealed Yubico.YubiKit.Ctap2.Cose.CoseOtherKey.Equals(Yubico.YubiKit.Ctap2.Cose.CoseKey? other) -> bool
@@ -797,7 +797,7 @@ override sealed Yubico.YubiKit.Ctap2.Credentials.FidoU2FAttestationStatement.Equ
 override sealed Yubico.YubiKit.Ctap2.Credentials.NoneAttestationStatement.Equals(Yubico.YubiKit.Ctap2.Credentials.AttestationStatement? other) -> bool
 override sealed Yubico.YubiKit.Ctap2.Credentials.PackedAttestationStatement.Equals(Yubico.YubiKit.Ctap2.Credentials.AttestationStatement? other) -> bool
 override sealed Yubico.YubiKit.Ctap2.Credentials.UnknownAttestationStatement.Equals(Yubico.YubiKit.Ctap2.Credentials.AttestationStatement? other) -> bool
-override sealed Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Equals(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? other) -> bool
+[YKEXP001]override sealed Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Equals(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? other) -> bool
 static Yubico.YubiKit.Ctap2.AuthenticatorInfo.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.AuthenticatorInfo!
 static Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentEnumerationResult.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentEnumerationResult!
 static Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentBeginResult.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentBeginResult!
@@ -810,8 +810,8 @@ static Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder.Create(byte command) -> Yubi
 static Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Other(int value) -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
 static Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.operator !=(Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm left, Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm right) -> bool
 static Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.operator ==(Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm left, Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm right) -> bool
-static Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.operator !=(Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? left, Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? right) -> bool
-static Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.operator ==(Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? left, Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? right) -> bool
+[YKEXP001]static Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.operator !=(Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? left, Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? right) -> bool
+[YKEXP001]static Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.operator ==(Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? left, Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey? right) -> bool
 static Yubico.YubiKit.Ctap2.Cose.CoseEc2Key.operator !=(Yubico.YubiKit.Ctap2.Cose.CoseEc2Key? left, Yubico.YubiKit.Ctap2.Cose.CoseEc2Key? right) -> bool
 static Yubico.YubiKit.Ctap2.Cose.CoseEc2Key.operator ==(Yubico.YubiKit.Ctap2.Cose.CoseEc2Key? left, Yubico.YubiKit.Ctap2.Cose.CoseEc2Key? right) -> bool
 static Yubico.YubiKit.Ctap2.Cose.CoseKey.Decode(System.ReadOnlyMemory<byte> coseEncoded) -> Yubico.YubiKit.Ctap2.Cose.CoseKey!
@@ -858,9 +858,9 @@ static Yubico.YubiKit.Ctap2.Crypto.EncryptedMetadataDecryptor.DecryptIdentifier(
 static Yubico.YubiKit.Ctap2.Crypto.EncryptedMetadataDecryptor.DeriveKey(System.ReadOnlySpan<byte> ppuat, System.ReadOnlySpan<byte> info) -> byte[]!
 static Yubico.YubiKit.Ctap2.CtapException.ThrowIfError(Yubico.YubiKit.Ctap2.CtapStatus status) -> void
 static Yubico.YubiKit.Ctap2.CtapException.ThrowIfError(byte status) -> void
-static Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.operator !=(Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? left, Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? right) -> bool
-static Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.operator ==(Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? left, Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? right) -> bool
-static Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.ArkgP256(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> context) -> Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs!
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.operator !=(Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? left, Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? right) -> bool
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.operator ==(Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? left, Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? right) -> bool
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.ArkgP256(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> context) -> Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs!
 static Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.operator !=(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? left, Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? right) -> bool
 static Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.operator ==(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? left, Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? right) -> bool
 static Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput!
@@ -890,13 +890,13 @@ static Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.Encrypt(System.ReadOnlySpa
 static Yubico.YubiKit.Ctap2.PublicKeyCredentialParameters.CreateES256() -> Yubico.YubiKit.Ctap2.PublicKeyCredentialParameters!
 static Yubico.YubiKit.Ctap2.PublicKeyCredentialParameters.CreateEdDSA() -> Yubico.YubiKit.Ctap2.PublicKeyCredentialParameters!
 static Yubico.YubiKit.Ctap2.PublicKeyCredentialParameters.CreateRS256() -> Yubico.YubiKit.Ctap2.PublicKeyCredentialParameters!
-static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.ArkgP256 -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
-static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.ArkgP256SeedKey -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
+[YKEXP001]static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.ArkgP256 -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
+[YKEXP001]static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.ArkgP256SeedKey -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
 static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.EdDsa -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
 static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Es256 -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
 static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Es384 -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
 static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Esp256 -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
-static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Esp256SplitArkgPlaceholder -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
+[YKEXP001]static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Esp256SplitArkgPlaceholder -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
 static readonly Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Rs256 -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
 static readonly Yubico.YubiKit.Ctap2.Credentials.AttestationFormat.AndroidKey -> Yubico.YubiKit.Ctap2.Credentials.AttestationFormat
 static readonly Yubico.YubiKit.Ctap2.Credentials.AttestationFormat.AndroidSafetynet -> Yubico.YubiKit.Ctap2.Credentials.AttestationFormat

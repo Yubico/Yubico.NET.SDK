@@ -27,6 +27,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 /// synthetic handles/points and do not execute sibling clients, firmware or draft-conformance checks.
 /// Ctap2Canonical supplies ordering: these keys emit 2, 6, 7 externally and 3, -1, -2 in the args map.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignCborTests
 {
     [Theory]

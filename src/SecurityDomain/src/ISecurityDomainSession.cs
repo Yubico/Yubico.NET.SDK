@@ -220,11 +220,11 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <returns>An ECPublicKey whose PublicPoint is the uncompressed point (0x04 || X || Y).</returns>
     /// <remarks>
     ///     Requires device-accepted administrative authority. Persist the public key through a trusted
-    ///     provisioning path; the private key stays on the device. The method does not locally validate
-    ///     the SCP11 KID. It checks firmware support only when an explicit version was supplied at creation;
-    ///     reset currently clears that explicit-version indicator.
+    ///     provisioning path; the private key stays on the device. Only SCP11a (0x11), SCP11b (0x13)
+    ///     and SCP11c (0x15) KIDs are accepted. It checks firmware support when a version is supplied.
     /// </remarks>
     /// <exception cref="NotSupportedException">An explicitly supplied firmware version is below 5.7.2.</exception>
+    /// <exception cref="ArgumentException">The key reference does not specify an SCP11 KID.</exception>
     /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The response is empty.</exception>
     Task<ECPublicKey> GenerateKeyAsync(
         KeyReference keyReference,

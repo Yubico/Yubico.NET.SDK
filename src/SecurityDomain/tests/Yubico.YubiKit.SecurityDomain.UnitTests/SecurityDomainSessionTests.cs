@@ -642,8 +642,11 @@ public class SecurityDomainSessionTests
         Assert.Equal([0x80, 0xE4, 0x00, 0x00, 0x03, tag, 0x01, value, 0x00], connection.TransmittedCommands[1]);
     }
 
-    [Fact]
-    public async Task GenerateAndImportEcKey_TransmitExplicitP256CurveParameters()
+    [Theory]
+    [InlineData(0x11)]
+    [InlineData(0x13)]
+    [InlineData(0x15)]
+    public async Task GenerateAndImportEcKey_TransmitExplicitP256CurveParameters(byte kid)
     {
         byte[] publicPoint =
         [
@@ -670,11 +673,11 @@ public class SecurityDomainSessionTests
             cancellationToken: TestContext.Current.CancellationToken);
 
         var generatedKey = await session.GenerateKeyAsync(
-            new KeyReference(0x13, 0x02),
+            new KeyReference(kid, 0x02),
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotNull(generatedKey);
-        Assert.Equal([0x80, 0xF1, 0x00, 0x13, 0x04, 0x02, 0xF0, 0x01, 0x00, 0x00],
+        Assert.Equal([0x80, 0xF1, 0x00, kid, 0x04, 0x02, 0xF0, 0x01, 0x00, 0x00],
             connection.TransmittedCommands[1]);
 
         await session.PutKeyAsync(new KeyReference(0x10, 0x03), generatedKey,
@@ -682,6 +685,22 @@ public class SecurityDomainSessionTests
 
         Assert.Equal([0x80, 0xD8, 0x00, 0x10, 0x48, 0x03, 0xB0, 0x41, .. publicPoint,
             0xF0, 0x01, 0x00, 0x00, 0x00], connection.TransmittedCommands[2]);
+    }
+
+    [Theory]
+    [InlineData(0x01)]
+    [InlineData(0x10)]
+    [InlineData(0x12)]
+    [InlineData(0x20)]
+    public async Task GenerateKeyAsync_ForNonScp11Key_DoesNotTransmitGenerate(byte kid)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x6A, 0x86]);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => session.GenerateKeyAsync(new KeyReference(kid, 0x02),
+            cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Single(connection.TransmittedCommands);
     }
 
     [Fact]

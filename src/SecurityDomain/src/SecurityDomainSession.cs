@@ -558,6 +558,10 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     {
         ThrowIfDisposed();
 
+        if (keyReference.Kid is not (ScpKid.SCP11a or ScpKid.SCP11b or ScpKid.SCP11c))
+            throw new ArgumentException("GenerateKeyAsync requires an SCP11 key identifier (0x11, 0x13 or 0x15).",
+                nameof(keyReference));
+
         if (_hasExplicitFirmwareVersion)
             EnsureSupports(FeatureScp11);
 

@@ -220,10 +220,11 @@ The shared selector identifies choices by index, uses cancellable selection/retr
 without prompting when a noninteractive scan finds no candidates. It reuses last-known discovery
 metadata or performs one best-effort live fallback per candidate during that selection invocation.
 
-Ctrl+C requests a cancellation token. Selection and its metadata fallback propagate cancellation;
+Ctrl+C requests a cancellation token; the console handler detaches when its source is disposed.
+Selection and the biometric support probe propagate cancellation and support-probe failures;
 synchronous menu/PIN/ReadLine prompts remain blocked until input returns. Operation helpers still catch
 general exceptions and return failure results, losing cancellation and error provenance. Support probes
-can also turn failures into unsupported results. Inspect the operation outcome and device state before
+other than the biometric probe may still conflate failure and absence. Inspect the operation outcome and device state before
 retrying; cancellation provides no rollback of a sent command.
 
 ## Security Notes

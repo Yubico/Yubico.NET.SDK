@@ -366,23 +366,16 @@ public static class BioEnrollmentExample
     /// </summary>
     /// <remarks>
     /// The option value describes whether templates exist, not whether the command is supported.
-    /// This probe does not check the prototype option. False also covers caught errors and cancellation.
+    /// This probe does not check the prototype option. Read failures and cancellation propagate.
     /// </remarks>
     public static async Task<bool> IsSupported(
         IYubiKey yubiKey,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await using var session = await yubiKey.CreateCtap2SessionAsync(
-                cancellationToken: cancellationToken);
-            var info = await session.GetInfoAsync(cancellationToken);
-            return info.Options.ContainsKey("bioEnroll");
-        }
-        catch
-        {
-            return false;
-        }
+        await using var session = await yubiKey.CreateCtap2SessionAsync(
+            cancellationToken: cancellationToken);
+        var info = await session.GetInfoAsync(cancellationToken);
+        return info.Options.ContainsKey("bioEnroll");
     }
 
     /// <summary>

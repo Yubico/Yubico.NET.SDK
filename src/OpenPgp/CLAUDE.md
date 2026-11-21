@@ -181,9 +181,10 @@ those compatibility qualifications. On-card RSA generation is refused before wri
 - Zero ALL PIN bytes after use: `CryptographicOperations.ZeroMemory()`
 - Zero private key material after import
 - Zero KDF-derived bytes after use
-- Preserve caller ownership of disposable `IPrivateKey` inputs and certificate objects. Returned signature/
-  decipher memory is caller-owned; clear its actual backing storage with `MemoryMarshal.AsMemory`, rather
-  than clearing a new copy. Borrowed input/static/model memory retains its own owner's lifetime contract.
+- Preserve caller ownership of disposable `IPrivateKey` inputs and certificate objects. Returned decipher
+  memory is writable and caller-owned; clear its span directly. Where the signature contract is read-only,
+  use `MemoryMarshal.AsMemory` on its caller-owned result rather than clearing a separate copy.
+  Borrowed input/static/model memory retains its own owner's lifetime contract.
 - RSA/ECDSA hash input; EdDSA sends raw messages and ignores the hash parameter. RSA signatures are raw,
   ECDSA output is DER and Ed25519 output is 64 bytes. RSA/EdDSA transfer successful response storage;
   ECDSA clears raw storage after conversion. Decipher copies successful output and clears its raw response.

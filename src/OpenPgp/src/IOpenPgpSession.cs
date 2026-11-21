@@ -625,7 +625,10 @@ public interface IOpenPgpSession : IApplicationSession
     ///     (04 || X || Y) for ECDH. The SDK supplies the RSA indicator or EC cipher-data wrapper.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>Caller-owned plaintext for RSA, or raw shared-secret material for ECDH; clear it after use.</returns>
+    /// <returns>
+    ///     Fresh writable caller-owned plaintext for RSA, or raw shared-secret material for ECDH.
+    ///     Zero the returned span with <c>CryptographicOperations.ZeroMemory</c> after use.
+    /// </returns>
     /// <remarks>
     ///     Verify the User PIN in extended mode first.
     ///     The host handles OpenPGP packets, content encryption/decryption, ECDH KDF and protocol validation.
@@ -633,7 +636,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     32-byte peer public key; the SDK adds the same EC wrapper as for NIST curves. The method uses
     ///     cached algorithm attributes, copies the successful result for the caller and clears the raw response.
     /// </remarks>
-    Task<ReadOnlyMemory<byte>> DecryptAsync(
+    Task<Memory<byte>> DecryptAsync(
         ReadOnlyMemory<byte> ciphertext,
         CancellationToken cancellationToken = default);
 

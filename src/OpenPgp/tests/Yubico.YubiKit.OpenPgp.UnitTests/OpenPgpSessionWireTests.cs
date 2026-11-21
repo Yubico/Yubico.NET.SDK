@@ -739,6 +739,50 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal(secret, result.ToArray());
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ResolveAndCopyDecipherResponseAsync_ClearsOwnedBytesAndNeverClearsInput(bool resolutionFails)
+    {
+        byte[] source = [0x34, 0x56, 0x90, 0x00];
+        var response = new ApduResponse(source);
+        var raw = response.RawData;
+        var command = new ApduCommand(0, 0x2A, 0x80, 0x86);
+        var expected = new InvalidOperationException("resolution failed");
+        if (resolutionFails)
+        {
+            var actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                OpenPgpSession.ResolveAndCopyDecipherResponseAsync(response, command,
+                    () => ValueTask.FromException(expected)));
+            Assert.Same(expected, actual);
+        }
+        else
+        {
+            Memory<byte> plaintext = await OpenPgpSession.ResolveAndCopyDecipherResponseAsync(response, command,
+                () => ValueTask.CompletedTask);
+            Assert.Equal(new byte[] { 0x34, 0x56 }, plaintext.ToArray());
+            CryptographicOperations.ZeroMemory(plaintext.Span);
+        }
+
+        Assert.All(raw.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal([0x34, 0x56, 0x90, 0x00], source);
+    }
+
+    [Fact]
+    public async Task ResolveAndCopyDecipherResponseAsync_WhenCardRejects_ClearsOwnedBytesAndPreservesStatus()
+    {
+        var response = new ApduResponse(new byte[] { 0x34, 0x56, 0x69, 0x82 });
+        var retainedBytes = response.RawData;
+        var command = new ApduCommand(0, 0x2A, 0x80, 0x86);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() =>
+            OpenPgpSession.ResolveAndCopyDecipherResponseAsync(response, command,
+                () => throw new InvalidOperationException("A rejected command cannot resolve as Completed.")));
+
+        Assert.Equal((short)0x6982, error.SW);
+        Assert.All(retainedBytes.ToArray(), value => Assert.Equal(0, value));
+    }
+
     [Fact]
     public async Task DecryptAsync_WhenResolutionFailsAfterSuccess_PropagatesResolutionException()
     {

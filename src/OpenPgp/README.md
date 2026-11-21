@@ -396,6 +396,8 @@ EC wrapper. Wire tests establish encoding, not device agreement or firmware qual
 
 This composable raw-operation method accepts an application callback that consumes the result before cleanup.
 The callback must finish using the memory before returning; any retained secret copy needs its own clearing scope.
+When migrating from `Task<ReadOnlyMemory<byte>>`, use `Task<Memory<byte>>` for the operation and clear the
+returned `Memory<byte>.Span` directly. Read-only consumers can still borrow it as `ReadOnlyMemory<byte>`.
 
 ```csharp
 static async Task DecipherAndConsumeAsync(
@@ -405,14 +407,14 @@ static async Task DecipherAndConsumeAsync(
 {
     await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
     await session.VerifyPinAsync(userPin, extended: true, cancellationToken: cancellationToken);
-    ReadOnlyMemory<byte> result = await session.DecryptAsync(rawCiphertextOrPoint, cancellationToken);
+    Memory<byte> result = await session.DecryptAsync(rawCiphertextOrPoint, cancellationToken);
     try
     {
         await consume(result, cancellationToken);
     }
     finally
     {
-        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(result).Span);
+        CryptographicOperations.ZeroMemory(result.Span);
     }
 }
 ```

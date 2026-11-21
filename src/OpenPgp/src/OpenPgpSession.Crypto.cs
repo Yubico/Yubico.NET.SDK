@@ -64,7 +64,7 @@ public sealed partial class OpenPgpSession
     }
 
     /// <inheritdoc />
-    public async Task<ReadOnlyMemory<byte>> DecryptAsync(
+    public async Task<Memory<byte>> DecryptAsync(
         ReadOnlyMemory<byte> ciphertext,
         CancellationToken cancellationToken = default)
     {
@@ -85,17 +85,9 @@ public sealed partial class OpenPgpSession
                     userPresenceNotification,
                     async token =>
                     {
-                        var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
-                        try
-                        {
-                            await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
-                                .ConfigureAwait(false);
-                            return response.Data.ToArray();
-                        }
-                        finally
-                        {
-                            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
-                        }
+                        var response = await TransmitNoThrowAsync(command, token).ConfigureAwait(false);
+                        return await ResolveAndCopyDecipherResponseAsync(response, command,
+                            () => userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)).ConfigureAwait(false);
                     },
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -103,6 +95,23 @@ public sealed partial class OpenPgpSession
         finally
         {
             CryptographicOperations.ZeroMemory(payload);
+        }
+    }
+
+    internal static async Task<Memory<byte>> ResolveAndCopyDecipherResponseAsync(
+        ApduResponse response, ApduCommand command, Func<ValueTask> resolveCompleted)
+    {
+        try
+        {
+            if (!response.IsOK())
+                throw ApduException.FromResponse(response, command, "DECIPHER failed");
+
+            await resolveCompleted().ConfigureAwait(false);
+            return response.Data.ToArray();
+        }
+        finally
+        {
+            response.Clear();
         }
     }
 

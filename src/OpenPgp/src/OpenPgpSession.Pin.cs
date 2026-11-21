@@ -295,13 +295,13 @@ public sealed partial class OpenPgpSession
             remaining is { } retries
                 ? $"{credential} credential command failed ({retries} attempt(s) remaining)"
                 : $"{credential} credential command failed (attempts remaining unknown)")
-            {
-                SW = response.SW,
-                Cla = command.Cla,
-                Ins = command.Ins,
-                P1 = command.P1,
-                P2 = command.P2,
-            };
+        {
+            SW = response.SW,
+            Cla = command.Cla,
+            Ins = command.Ins,
+            P1 = command.P1,
+            P2 = command.P2,
+        };
     }
 
     private async Task<int?> TryReadRetryCountAsync(Pw credential, CancellationToken cancellationToken)

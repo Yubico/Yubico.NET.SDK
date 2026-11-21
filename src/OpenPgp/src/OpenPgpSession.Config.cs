@@ -222,8 +222,8 @@ public sealed partial class OpenPgpSession
             ? [RsaSize.Rsa2048] : [RsaSize.Rsa2048, RsaSize.Rsa3072, RsaSize.Rsa4096];
         List<SupportedAlgorithm> algorithms = [];
         foreach (var slot in new[] { KeyRef.Sig, KeyRef.Dec, KeyRef.Aut })
-        foreach (var size in sizes)
-            algorithms.Add(new SupportedAlgorithm(slot, RsaAttributes.Create(size, format)));
+            foreach (var size in sizes)
+                algorithms.Add(new SupportedAlgorithm(slot, RsaAttributes.Create(size, format)));
         return algorithms;
     }
 

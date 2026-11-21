@@ -550,7 +550,7 @@ public sealed class PivKeysAttestCommand : YkCommandBase<PivSlotSettings>
         var slot = PivHelpers.ParseSlot(settings.Slot);
 
         await using var session = await deviceContext.Device.CreatePivSessionAsync();
-        var cert = await session.AttestKeyAsync(slot);
+        using var cert = await session.AttestKeyAsync(slot);
 
         OutputHelpers.WriteHeader($"Attestation — Slot {PivHelpers.FormatSlot(slot)}");
         OutputHelpers.WriteKeyValue("Subject", cert.Subject);

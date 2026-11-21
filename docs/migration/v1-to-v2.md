@@ -865,6 +865,13 @@ Client configuration uses a required `WebAuthnClientOptions` record (`RpIdValida
 
 Earlier v2 alphas also exposed a streaming ceremony-status API (`WebAuthnClient.MakeCredentialStreamAsync`/`GetAssertionStreamAsync`, returning `WebAuthnStatus`/`WebAuthnStatusProcessing`/`WebAuthnStatusFinished<T>`/`WebAuthnStatusFailed`); it was removed outright with no shim, leaving the plain async `MakeCredentialAsync`/`GetAssertionAsync` as the only ceremony entry points. See `webauthn-client-construction-and-streams` in `v1-to-v2-map.yml`.
 
+For callers migrating from earlier WebAuthn v2 previews, three extension result fields now expose
+writable memory: `PrfEvaluationResults.First` changes from `ReadOnlyMemory<byte>` to `Memory<byte>`,
+`PrfEvaluationResults.Second` from `ReadOnlyMemory<byte>?` to `Memory<byte>?`, and
+`LargeBlobAuthenticationOutput.Blob` from `ReadOnlyMemory<byte>?` to `Memory<byte>?`.
+The caller owns successful plaintext and should clear it when finished. Record copies alias the same
+storage; do not clear one while another consumer still needs it. Absence and an empty blob remain distinct.
+
 ### OATH
 
 Use `Yubico.YubiKit.Oath` for TOTP/HOTP credential management and code calculation. Review credential naming, secret handling, password flows, and time-source assumptions manually.

@@ -352,6 +352,7 @@ public class LargeBlobProcessorTests
             var response = await Assert.Single(matches).SelectAsync(ct);
             output = Assert.IsType<LargeBlobAuthenticationOutput>(response.ClientExtensionResults?.LargeBlob);
             Assert.Equal(raw, response.RawAuthenticatorData.Span);
+            Assert.True(assertion.AuthenticatorData.RawData.Equals(response.AuthenticatorData.Raw));
             Assert.False(assertion.LargeBlobKey.GetValueOrDefault().Span.ContainsAnyExcept((byte)0));
         }
 
@@ -368,7 +369,12 @@ public class LargeBlobProcessorTests
     {
         var info = Context().Info;
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
-        var first = MockCtap2Responses.CreateMockGetAssertionResponse(numberOfCredentials: 2, largeBlobKey: LargeBlobKey);
+        // A signed raw extension slice must share the same owned backing that the ceremony clears.
+        var first = MockCtap2Responses.CreateMockGetAssertionResponse(numberOfCredentials: 2, largeBlobKey: LargeBlobKey,
+            authDataExtensionsCbor: Convert.FromHexString("A16863726564426C6F62416B")); // {credBlob: h'6B'}
+        var parsed = WebAuthnAuthenticatorData.FromOwned(first.AuthenticatorData);
+        var extensionSlice = parsed.ParsedExtensions["credBlob"];
+        Assert.Equal(new byte[] { 0x41, 0x6B }, extensionSlice.ToArray());
         var second = MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(first);
         _backend.GetNextAssertionAsync(Arg.Any<CancellationToken>()).Returns(second);
@@ -382,12 +388,15 @@ public class LargeBlobProcessorTests
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.GetAssertionAsync(new()
         {
-            Challenge = new byte[32], RpId = "example.com",
+            Challenge = new byte[32],
+            RpId = "example.com",
             Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
         }, cancellationToken: caller.Token));
 
         Assert.Equal(0, plaintext[0]);
         Assert.False(first.AuthenticatorDataRaw.Span.ContainsAnyExcept((byte)0));
+        Assert.False(parsed.Raw.Span.ContainsAnyExcept((byte)0));
+        Assert.False(extensionSlice.Span.ContainsAnyExcept((byte)0));
         Assert.False(second.AuthenticatorDataRaw.Span.ContainsAnyExcept((byte)0));
     }
 

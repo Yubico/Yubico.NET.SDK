@@ -255,7 +255,7 @@ public sealed partial class WebAuthnClient
         CancellationToken cancellationToken)
     {
         // Wrap authenticator data
-        var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
+        var webAuthnAuthData = WebAuthnAuthenticatorData.FromOwned(ctapResponse.AuthenticatorData);
 
         // User from CTAP response can be used directly
         var user = ctapResponse.User;

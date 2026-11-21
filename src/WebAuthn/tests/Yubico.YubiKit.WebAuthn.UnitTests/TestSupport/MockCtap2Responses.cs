@@ -274,11 +274,12 @@ internal static class MockCtap2Responses
         return [.. data];
     }
 
-    public static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format, byte[]? largeBlobKey = null)
+    public static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format, byte[]? largeBlobKey = null,
+        byte[]? unsignedExtensions = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        writer.WriteStartMap(largeBlobKey is null ? 3 : 4);
+        writer.WriteStartMap(3 + (largeBlobKey is null ? 0 : 1) + (unsignedExtensions is null ? 0 : 1));
 
         // 0x01: fmt
         writer.WriteInt32(1);
@@ -298,6 +299,12 @@ internal static class MockCtap2Responses
         {
             writer.WriteInt32(5);
             writer.WriteByteString(largeBlobKey);
+        }
+
+        if (unsignedExtensions is not null)
+        {
+            writer.WriteInt32(6);
+            writer.WriteEncodedValue(unsignedExtensions);
         }
 
         writer.WriteEndMap();

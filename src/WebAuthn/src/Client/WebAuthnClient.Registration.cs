@@ -22,6 +22,7 @@ using Yubico.YubiKit.WebAuthn.Attestation;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Cose;
+using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
@@ -156,6 +157,7 @@ public sealed partial class WebAuthnClient
             {
                 if (ctapResponse.LargeBlobKey is { } key)
                     System.Security.Cryptography.CryptographicOperations.ZeroMemory(key.Span);
+                ClearUnsignedRegistrationOutputs(ctapResponse.UnsignedExtensionOutputs);
             }
         }
 
@@ -208,6 +210,15 @@ public sealed partial class WebAuthnClient
                 Util.SensitiveMemory.Zero(request.Extensions);
             }
         }
+    }
+
+    private static void ClearUnsignedRegistrationOutputs(IReadOnlyDictionary<string, Memory<byte>>? unsigned)
+    {
+        // PreviewSign decodes the byte-string payload into independent storage; no published output
+        // retains any of these outer dictionary values. Run after the last processor has used them.
+        if (unsigned is not null)
+            foreach (var encoded in unsigned.Values)
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(encoded.Span);
     }
 
     private static BackendMakeCredentialRequest BuildMakeCredentialRequest(
@@ -272,15 +283,23 @@ public sealed partial class WebAuthnClient
         }
 
         // Wrap authenticator data
-        var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
+        var webAuthnAuthData = WebAuthnAuthenticatorData.FromOwned(ctapResponse.AuthenticatorData);
 
         // Create attestation object from the (possibly replaced) statement so AttestationObject,
         // RawAttestationObject and AttestationStatement agree.
         var attestationObject = WebAuthnAttestationObject.Create(webAuthnAuthData, webAuthnStatement);
-
-        // Parse extension outputs via pipeline
-        var extensionOutputs = await extensions.PrepareOutputsAsync(ctapResponse, webAuthnAuthData, tokenSession, cancellationToken)
-            .ConfigureAwait(false);
+        RegistrationExtensionOutputs? extensionOutputs;
+        try
+        {
+            extensionOutputs = await extensions.PrepareOutputsAsync(ctapResponse, webAuthnAuthData, tokenSession, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch
+        {
+            // Create made an independent, unpublished copy of the signed authenticator data.
+            Util.SensitiveMemory.Zero(attestationObject.RawCbor);
+            throw;
+        }
 
         return new RegistrationResponse
         {

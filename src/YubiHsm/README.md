@@ -299,6 +299,10 @@ the cancellation request as a device-interruption guarantee.
   Exhausting a credential's password retries permanently deletes that credential. Exhausting management-key
   retries blocks management operations until an applet reset, which erases all credentials and restores defaults.
 
+Credential import and on-device generation send PUT directly, without a host pre-read or overwrite guard.
+If the applet accepts PUT at an existing label, treat the existing credential as overwritten. A duplicate-label
+rejection from the applet is not converted into replacement; the device error propagates.
+
 ## Security notes
 
 - Migrate old credential-password byte arguments with `using var password = CredentialPassword.FromUtf8(input.Span);`

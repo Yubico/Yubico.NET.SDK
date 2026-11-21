@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using NSubstitute;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
@@ -130,11 +132,18 @@ public class SmartCardBackendTests
         Assert.True(result.Length >= 6);
     }
 
-    [Fact]
-    public async Task WriteUpdateAsync_Firmware5x_SkipsProgSeqValidation()
+    [Theory]
+    [InlineData(0, 0, 3, 0, 1, true)]
+    [InlineData(4, 2, 3, 0, 1, true)]
+    [InlineData(4, 3, 3, 0, 1, false)]
+    [InlineData(5, 0, 3, 0, 1, false)]
+    [InlineData(4, 3, 3, 0, 0, true)]
+    [InlineData(4, 2, 0, 0, 0, false)]
+    [InlineData(4, 2, 3, 99, 1, false)]
+    public async Task WriteUpdateAsync_SequenceResetUsesEmptyStateOrLegacyWindow(
+        int minor, int patch, byte previous, byte current, byte bits, bool accepted)
     {
-        // The current implementation bypasses 5.0.0 <= version < 5.5.0; this fake exercises 5.2.0.
-        var response = MakeStatusResponse(progSeq: 99);
+        var response = MakeStatusResponse(progSeq: current, touchLo: bits);
 
         _protocol.TransmitAndReceiveAsync(
                 Arg.Any<ApduCommand>(),
@@ -142,11 +151,19 @@ public class SmartCardBackendTests
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(response));
 
-        var backend = CreateBackend(version: new FirmwareVersion(5, 2, 0), initialProgSeq: 0);
+        var backend = CreateBackend(version: new FirmwareVersion(5, minor, patch), initialProgSeq: previous);
+        var ct = TestContext.Current.CancellationToken;
 
-        // Should not throw despite prog_seq mismatch
-        var result = await backend.WriteUpdateAsync(ConfigSlot.Config1, ReadOnlyMemory<byte>.Empty, CancellationToken.None);
-        Assert.True(result.Length >= 6);
+        if (accepted)
+        {
+            var result = await backend.WriteUpdateAsync(ConfigSlot.Config1, ReadOnlyMemory<byte>.Empty, ct);
+            Assert.Equal(current, result.Span[3]);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                backend.WriteUpdateAsync(ConfigSlot.Config1, ReadOnlyMemory<byte>.Empty, ct).AsTask());
+        }
     }
 
     [Fact]
@@ -223,10 +240,43 @@ public class SmartCardBackendTests
                 cancellationToken: CancellationToken.None).AsTask());
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SendAndReceiveAsync_OversizedHmac_ClearsUnreturnedTail(bool teardownFails)
+    {
+        var response = new ApduResponse(new byte[] { 0x01, 0x02, 0x03, 0x04, 0xA5, 0x90, 0x00 });
+        var backing = response.Data;
+        _protocol.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+        var ct = TestContext.Current.CancellationToken;
+        var prefix = await CreateBackend().SendAndReceiveAsync(ConfigSlot.ChalHmac1, default, 4,
+            UserPresenceNotification.None, ct);
+
+        Assert.Equal(new byte[] { 1, 2, 3, 4 }, prefix.ToArray());
+        Assert.Equal(0, backing.Span[4]);
+        var writable = MemoryMarshal.AsMemory(prefix);
+        if (teardownFails)
+        {
+            var session = Substitute.For<IYubiOtpSession>();
+            session.CalculateHmacSha1Async(Slot.One, default, ct).Returns(Task.FromResult(writable));
+            session.DisposeAsync().Returns(ValueTask.FromException(new InvalidOperationException("teardown failed")));
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                IYubiKeyExtensions.CalculateAndDisposeAsync(session, Slot.One, default, ct));
+        }
+        else
+        {
+            CryptographicOperations.ZeroMemory(writable.Span);
+        }
+
+        Assert.True(backing.Span.IndexOfAnyExcept((byte)0) < 0);
+    }
+
     [Fact]
     public async Task SendAndReceiveAsync_WhenResolutionThrowsAfterSuccess_PropagatesResolutionException()
     {
-        var response = new ApduResponse(new byte[] { 0x01, 0x02, 0x03, 0x04, 0x90, 0x00 });
+        var response = new ApduResponse(new byte[] { 0x01, 0x02, 0x03, 0x04, 0xA5, 0x90, 0x00 });
+        var backing = response.Data;
         _protocol.TransmitAndReceiveAsync(
                 Arg.Any<ApduCommand>(),
                 Arg.Any<bool>(),
@@ -247,7 +297,7 @@ public class SmartCardBackendTests
                 TestContext.Current.CancellationToken).AsTask());
 
         Assert.Same(expected, actual);
-        Assert.All(response.Data.ToArray(), value => Assert.Equal(0, value));
+        Assert.True(backing.Span.IndexOfAnyExcept((byte)0) < 0);
     }
 
     [Fact]

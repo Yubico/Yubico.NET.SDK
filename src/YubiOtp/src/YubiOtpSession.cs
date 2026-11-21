@@ -20,7 +20,6 @@ using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -37,9 +36,13 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     private static readonly Feature FeatureSerial = new("Serial Number Read", 2, 2, 0);
     private static readonly Feature FeatureHmacSha1 = new("HMAC-SHA1 Challenge-Response", 2, 2, 0);
     private static readonly Feature FeatureYubicoOtpChallengeResponse = new("Yubico OTP Challenge-Response", 2, 2, 0);
-    private static readonly Feature FeatureUpdate = new("Slot Update", 2, 3, 0);
+    private static readonly Feature FeatureUpdate = new("Slot Update", 2, 2, 0);
     private static readonly Feature FeatureSwap = new("Slot Swap", 2, 3, 0);
     private static readonly Feature FeatureNdef = new("NDEF Configuration", 3, 0, 0);
+    private static readonly Feature FeatureScanMap = new("Keyboard scan map", 3, 0, 0);
+    private const int ScanMapSize = 45;
+    private static readonly FirmwareVersion AccessCodeUpdateRestrictedFrom = new(4, 3, 2);
+    private static readonly FirmwareVersion AccessCodeUpdateRestrictedUntil = new(4, 3, 6);
 
     /// <summary>
     /// NFC Forum URI prefix table (36 entries). Index 0 means no prefix compression.
@@ -89,6 +92,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
     private IYubiOtpBackend _backend = null!;
     private ReadOnlyMemory<byte> _status;
+    private bool _admitAllFirmwareGates;
 
     private YubiOtpSession(
         IConnection connection,
@@ -125,18 +129,24 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         IConnection connection,
         SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default) =>
+        CreateUsingCachedInfoAsync(connection, options, null, cancellationToken);
+
+    internal static Task<YubiOtpSession> CreateUsingCachedInfoAsync(
+        IConnection connection,
+        SessionCreationOptions? options,
+        DeviceInfo? cachedDeviceInfo,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
             () => new YubiOtpSession(connection, options?.UserPresencePrompt),
             (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+                options, cachedDeviceInfo, token),
             cancellationToken);
 
     private async Task InitializeAsync(
-        ProtocolConfiguration? configuration,
-        FirmwareVersion? firmwareVersionOverride,
-        ScpKeyParameters? scpKeyParams,
+        SessionCreationOptions? options,
+        DeviceInfo? cachedDeviceInfo,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
@@ -144,21 +154,27 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             return;
         }
 
+        var scpKeyParams = options?.ScpKeyParameters;
+        var cachedVersion = cachedDeviceInfo?.FirmwareVersion;
         var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
         var initialization = protocol switch
         {
             ISmartCardProtocol smartCard =>
-                await SmartCardBackend.ReadInitialStateAsync(smartCard, cancellationToken).ConfigureAwait(false),
+                await SmartCardBackend.ReadInitialStateAsync(smartCard, cancellationToken, cachedVersion).ConfigureAwait(false),
             IOtpHidProtocol otp =>
                 await HidBackend.ReadInitialStateAsync(otp, cancellationToken).ConfigureAwait(false),
             _ => throw new NotSupportedException("Unsupported OTP protocol.")
         };
         _status = initialization.Status;
 
+        var (firmwareForProtocol, admitAllFirmwareGates) = ResolveFirmware(
+            options?.FirmwareVersionOverride, cachedDeviceInfo, initialization);
+        _admitAllFirmwareGates = admitAllFirmwareGates;
+
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
-                firmwareVersionOverride ?? initialization.FirmwareVersion,
-                configuration,
+                firmwareForProtocol,
+                options?.ProtocolConfiguration,
                 scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
@@ -168,11 +184,29 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         _logger.LogDebug("YubiOTP session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
     }
 
+    private static (FirmwareVersion ProtocolVersion, bool AdmitAllPreflight) ResolveFirmware(
+        FirmwareVersion? firmwareOverride, DeviceInfo? cachedDeviceInfo, YubiOtpInitialization initialization)
+    {
+        if (firmwareOverride is not null)
+        {
+            return (firmwareOverride, firmwareOverride.IsAlphaOrBeta);
+        }
+
+        var cachedVersion = cachedDeviceInfo?.FirmwareVersion;
+        var version = cachedVersion ?? initialization.FirmwareVersion;
+        var protocolVersion = version.IsAlphaOrBeta
+            ? initialization.ProtocolVersion ?? initialization.FirmwareVersion
+            : version;
+        bool prerelease = cachedVersion is not null &&
+                          cachedDeviceInfo?.VersionQualifier?.Type is { } type && type != VersionQualifierType.Final;
+        return (protocolVersion, version.IsAlphaOrBeta || prerelease);
+    }
+
     /// <inheritdoc />
     public Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureSerial);
+        EnsureOtpSupports(FeatureSerial);
 
         return GetSerialCoreAsync(cancellationToken);
     }
@@ -210,7 +244,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(config);
 
-        if (!config.IsSupportedBy(FirmwareVersion))
+        if (!_admitAllFirmwareGates && !config.IsSupportedBy(FirmwareVersion))
         {
             throw new NotSupportedException(
                 $"This configuration requires firmware {config.MinimumFirmwareVersion}+, " +
@@ -231,9 +265,9 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(config);
-        EnsureSupports(FeatureUpdate);
+        EnsureOtpSupports(FeatureUpdate);
 
-        if (!config.IsSupportedBy(FirmwareVersion))
+        if (!_admitAllFirmwareGates && !config.IsSupportedBy(FirmwareVersion))
         {
             throw new NotSupportedException(
                 $"This configuration requires firmware {config.MinimumFirmwareVersion}+, " +
@@ -241,14 +275,31 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
 
         var configSlot = slot.Map(SlotOperation.Update);
+        if (!_admitAllFirmwareGates && FirmwareVersion >= AccessCodeUpdateRestrictedFrom &&
+            FirmwareVersion < AccessCodeUpdateRestrictedUntil &&
+            !AccessCodesMatch(accessCode.Span, currentAccessCode.Span))
+        {
+            throw new NotSupportedException("Updating the access code is not supported on firmware 4.3.2–4.3.5.");
+        }
+
         return WriteConfigAsync(configSlot, config, accessCode, currentAccessCode, cancellationToken);
+    }
+
+    private static bool AccessCodesMatch(ReadOnlySpan<byte> accessCode, ReadOnlySpan<byte> currentAccessCode)
+    {
+        // Compare effective protection values without changing how either argument is serialized.
+        Span<byte> unprotected = stackalloc byte[YubiOtpConstants.AccessCodeSize];
+        unprotected.Clear();
+        return CryptographicOperations.FixedTimeEquals(
+            accessCode.IsEmpty ? unprotected : accessCode,
+            currentAccessCode.IsEmpty ? unprotected : currentAccessCode);
     }
 
     /// <inheritdoc />
     public async Task SwapSlotsAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureSwap);
+        EnsureOtpSupports(FeatureSwap);
 
         _status = await _backend.WriteUpdateAsync(
                 ConfigSlot.Swap,
@@ -280,20 +331,37 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public async Task SetScanMapAsync(
+    public Task SetScanMapAsync(
         ReadOnlyMemory<byte> scanMap,
         ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        EnsureOtpSupports(FeatureScanMap);
 
-        if (scanMap.Length != YubiOtpConstants.ScanCodesSize)
+        if (scanMap.Length != ScanMapSize)
         {
             throw new ArgumentException(
-                $"Scan map must be exactly {YubiOtpConstants.ScanCodesSize} bytes, got {scanMap.Length}.",
+                $"Scan map must be exactly {ScanMapSize} bytes, got {scanMap.Length}.",
                 nameof(scanMap));
         }
 
+        return WriteScanMapAsync(scanMap, currentAccessCode, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task ResetScanMapAsync(ReadOnlyMemory<byte> currentAccessCode = default,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        EnsureOtpSupports(FeatureScanMap);
+        // Personalization v1.20.0's -S without an argument sends 45 zero bytes.
+        return WriteScanMapAsync(new byte[ScanMapSize], currentAccessCode, cancellationToken);
+    }
+
+    private async Task WriteScanMapAsync(ReadOnlyMemory<byte> scanMap, ReadOnlyMemory<byte> currentAccessCode,
+        CancellationToken cancellationToken)
+    {
         var data = BuildPayloadWithAccessCode(scanMap, currentAccessCode);
 
         try
@@ -308,19 +376,37 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public async Task SetNdefConfigurationAsync(
+    public Task SetNdefConfigurationAsync(
         Slot slot,
-        string? uri = null,
+        string uri,
         ReadOnlyMemory<byte> currentAccessCode = default,
         NdefType ndefType = NdefType.Uri,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureNdef);
+        ArgumentNullException.ThrowIfNull(uri);
+        EnsureOtpSupports(FeatureNdef);
 
-        var configSlot = slot.Map(SlotOperation.Ndef);
-        var ndefPayload = BuildNdefPayload(uri, ndefType);
-        var data = BuildPayloadWithAccessCode(ndefPayload, currentAccessCode);
+        return WriteNdefAsync(slot.Map(SlotOperation.Ndef), BuildNdefPayload(uri, ndefType), currentAccessCode,
+            cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task DisableNdefAsync(
+        Slot slot,
+        ReadOnlyMemory<byte> currentAccessCode = default,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        EnsureOtpSupports(FeatureNdef);
+        return WriteNdefAsync(slot.Map(SlotOperation.Ndef), new byte[YubiOtpConstants.NdefDataSize + 2],
+            currentAccessCode, cancellationToken);
+    }
+
+    private async Task WriteNdefAsync(ConfigSlot configSlot, byte[] payload, ReadOnlyMemory<byte> currentAccessCode,
+        CancellationToken cancellationToken)
+    {
+        var data = BuildPayloadWithAccessCode(payload, currentAccessCode);
 
         try
         {
@@ -334,13 +420,13 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
+    public Task<Memory<byte>> CalculateHmacSha1Async(
         Slot slot,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureHmacSha1);
+        EnsureOtpSupports(FeatureHmacSha1);
 
         if (challenge.Length > YubiOtpConstants.HmacChallengeSize)
         {
@@ -353,7 +439,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         return CalculateHmacSha1CoreAsync(configSlot, challenge, cancellationToken);
     }
 
-    private async Task<ReadOnlyMemory<byte>> CalculateHmacSha1CoreAsync(
+    private async Task<Memory<byte>> CalculateHmacSha1CoreAsync(
         ConfigSlot configSlot,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken)
@@ -362,13 +448,15 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
         try
         {
-            return await _backend.SendAndReceiveAsync(
+            var response = await _backend.SendAndReceiveAsync(
                     configSlot,
                     paddedChallenge,
                     YubiOtpConstants.HmacResponseSize,
                     CreateUserPresenceNotification(CreateUserPresenceContext(configSlot, UserPresenceOperations.YubiOtp.CalculateHmacSha1)),
                     cancellationToken)
                 .ConfigureAwait(false);
+            // Both backends transfer fresh SDK-owned storage, never the caller's input.
+            return System.Runtime.InteropServices.MemoryMarshal.AsMemory(response);
         }
         finally
         {
@@ -383,7 +471,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureYubicoOtpChallengeResponse);
+        EnsureOtpSupports(FeatureYubicoOtpChallengeResponse);
 
         if (challenge.Length != YubiOtpConstants.YubicoOtpChallengeSize)
         {
@@ -433,16 +521,15 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     /// <summary>
     /// Builds the 56-byte NDEF payload: [length][type][data (54 bytes, zero-padded)].
     /// </summary>
-    internal static byte[] BuildNdefPayload(string? content, NdefType ndefType)
+    internal static byte[] BuildNdefPayload(string content, NdefType ndefType)
     {
+        if (ndefType is not (NdefType.Uri or NdefType.Text))
+        {
+            throw new ArgumentOutOfRangeException(nameof(ndefType), ndefType, "Expected URI or text NDEF type.");
+        }
+
         const int payloadSize = YubiOtpConstants.NdefDataSize + 2; // 56 bytes total
         var payload = new byte[payloadSize];
-
-        if (content is null)
-        {
-            // All-zero disable request; this differs from an empty URI/text configuration with its header.
-            return payload;
-        }
 
         payload[1] = (byte)ndefType;
 
@@ -467,7 +554,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         for (int i = 1; i < NdefUriPrefixes.Length; i++)
         {
             var prefix = NdefUriPrefixes[i];
-            if (uri.StartsWith(prefix, StringComparison.Ordinal) && prefix.Length > bestPrefixLength)
+            if (uri.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && prefix.Length > bestPrefixLength)
             {
                 bestPrefixIndex = i;
                 bestPrefixLength = prefix.Length;
@@ -533,17 +620,23 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ReadOnlyMemory<byte> currentAccessCode,
         CancellationToken cancellationToken)
     {
+        ValidateCurrentAccessCode(currentAccessCode);
         var configBytes = config.GetConfig(accessCode.Span);
-        var data = BuildPayloadWithAccessCode(configBytes, currentAccessCode);
-
         try
         {
-            _status = await _backend.WriteUpdateAsync(configSlot, data, cancellationToken)
-                .ConfigureAwait(false);
+            var data = BuildPayloadWithAccessCode(configBytes, currentAccessCode);
+            try
+            {
+                _status = await _backend.WriteUpdateAsync(configSlot, data, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(data);
+            }
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(data);
             CryptographicOperations.ZeroMemory(configBytes);
         }
     }
@@ -560,17 +653,32 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             return data.ToArray();
         }
 
-        if (currentAccessCode.Length != YubiOtpConstants.AccessCodeSize)
+        ValidateCurrentAccessCode(currentAccessCode);
+        var currentCode = currentAccessCode.Span;
+        var payload = data.Span;
+        var result = new byte[data.Length + YubiOtpConstants.AccessCodeSize];
+        payload.CopyTo(result);
+        currentCode.CopyTo(result.AsSpan(data.Length));
+        return result;
+    }
+
+    private static void ValidateCurrentAccessCode(ReadOnlyMemory<byte> currentAccessCode)
+    {
+        if (!currentAccessCode.IsEmpty && currentAccessCode.Length != YubiOtpConstants.AccessCodeSize)
         {
             throw new ArgumentException(
                 $"Access code must be exactly {YubiOtpConstants.AccessCodeSize} bytes, got {currentAccessCode.Length}.",
                 nameof(currentAccessCode));
         }
 
-        var result = new byte[data.Length + YubiOtpConstants.AccessCodeSize];
-        data.Span.CopyTo(result);
-        currentAccessCode.Span.CopyTo(result.AsSpan(data.Length));
-        return result;
+    }
+
+    private void EnsureOtpSupports(Feature feature)
+    {
+        if (!_admitAllFirmwareGates)
+        {
+            EnsureSupports(feature);
+        }
     }
 
     private byte GetProgSeq()
@@ -585,7 +693,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
     private UserPresenceContext? CreateUserPresenceContext(ConfigSlot configSlot, string operation)
     {
-        if (!IsUserPresenceNotificationEnabled)
+        if (!IsUserPresenceNotificationEnabled || Protocol is not IOtpHidProtocol)
         {
             return null;
         }
@@ -594,42 +702,13 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             ? Slot.One
             : Slot.Two;
 
-        if (Protocol is IOtpHidProtocol)
-        {
-            return new UserPresenceContext
-            {
-                Basis = UserPresenceBasis.DeviceWaiting,
-                Application = UserPresenceApplications.YubiOtp,
-                Operation = operation,
-                Scope = slot.ToString()
-            };
-        }
-
-        // Cached keyboard-trigger status drives the current SmartCard notification heuristic. It is not
-        // a read-back of challenge-response RequireTouch policy, despite the emitted PolicyRequires basis.
-        if (Protocol is not ISmartCardProtocol || !IsKnownTouchTriggered(slot))
-        {
-            return null;
-        }
-
         return new UserPresenceContext
         {
-            Basis = UserPresenceBasis.PolicyRequires,
+            Basis = UserPresenceBasis.DeviceWaiting,
             Application = UserPresenceApplications.YubiOtp,
             Operation = operation,
             Scope = slot.ToString()
         };
-    }
-
-    private bool IsKnownTouchTriggered(Slot slot)
-    {
-        if (_status.Length < YubiOtpConstants.StatusBytesLength)
-        {
-            return false;
-        }
-
-        var state = new ConfigState(_status.Span);
-        return state.FirmwareVersion.IsAtLeast(3, 0, 0) && state.IsTouchTriggered(slot);
     }
 
     private static IYubiOtpBackend CreateBackend(

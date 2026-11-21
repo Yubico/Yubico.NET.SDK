@@ -659,7 +659,6 @@ selected explicitly for this USB challenge recipe rather than assuming SmartCard
 
 ```csharp
 using System;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using Yubico.YubiKit.Core.Abstractions;
@@ -667,7 +666,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.YubiOtp;
 
-ReadOnlyMemory<byte> response = default;
+Memory<byte> response = default;
 try
 {
     await using var otp = await device.CreateYubiOtpSessionAsync(
@@ -692,7 +691,7 @@ finally
     CryptographicOperations.ZeroMemory(hmacKey);
     CryptographicOperations.ZeroMemory(challenge);
     // This is the documented caller-owned SDK output, not arbitrary borrowed read-only memory.
-    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+    CryptographicOperations.ZeroMemory(response.Span);
 }
 ```
 
@@ -868,16 +867,24 @@ Touch-required credential calculations notify `SessionCreationOptions.UserPresen
 
 Use `Yubico.YubiKit.YubiOtp` for Yubico OTP configuration and slot operations. Review slot numbering, configuration flags, and write/update behavior manually.
 
+Read device information through Management/Core. V2 has no typed OTP FIPS-mode query or legacy mode/configuration
+mutator. FIPS capability and approval metadata is not OTP FIPS-mode state, and modern Management TLV writes are
+not a replacement for the legacy mode command.
+
+For NFC configuration, pass non-null URI or text content to `SetNdefConfigurationAsync`. Use `DisableNdefAsync`
+for the all-zero disable request; an empty string is a configuration with an empty content field, not disable.
+
 A keyboard-layout-aware `StaticPasswordSlotConfiguration(string, KeyboardLayout)` constructor and Yubico-OTP-algorithm challenge-response (`YubicoOtpChallengeResponseSlotConfiguration`/`CalculateYubicoOtpAsync`) were restored after an initial v2 gap; see `yubiotp-static-password-keyboard` and `yubiotp-yubico-otp-challenge-response` in `v1-to-v2-map.yml`. HMAC-SHA1 and Yubico OTP key inputs of invalid length now fail before any device I/O instead of being silently hashed or padded.
 
 Migrate v1 `UseTouchNotifier` to `SessionCreationOptions.UserPresencePrompt`. OTP HID reports a live
-`DeviceWaiting` signal. The smart-card implementation emits `PolicyRequires` from cached keyboard-trigger
-status, not a verified read-back of challenge-response `RequireTouch`; unknown/non-triggered status stays
-silent. Static-password strings have the usual immutable-string cleanup tradeoff; the raw overload needs
-translated scan codes, not UTF-8. OtpTool's static command currently makes that encoding mistake and ignores
-layout, and its `--totp` flag does not generate TOTP codes. Use the public SDK recipes, not those sample
-options, as migration guidance. Nonzero HOTP IMF and full scan-map programming also have current limitations;
-see the [YubiOTP guide](../../src/YubiOtp/README.md#constraints).
+`DeviceWaiting` signal. SmartCard has no authoritative wait signal and does not notify; the cached keyboard
+trigger is not challenge-response `RequireTouch`. Static-password strings have the usual immutable-string cleanup tradeoff; the raw overload needs
+translated scan codes, not UTF-8. OtpTool's static command translates with the selected keyboard layout
+(default `ModHex`). The demo does not generate TOTP codes. HOTP accepts initial counters from 0
+through 1,048,560 in steps of 16;
+nonzero presets require firmware 2.2 or later. Scan-map writes require a complete 45-entry map, or call
+`ResetScanMapAsync` to request the default; both require firmware 3.0.0 or later.
+See the [YubiOTP guide](../../src/YubiOtp/README.md#constraints).
 
 ### OpenPGP
 

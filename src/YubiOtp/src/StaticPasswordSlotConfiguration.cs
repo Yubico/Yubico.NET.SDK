@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
 namespace Yubico.YubiKit.YubiOtp;
@@ -30,11 +31,12 @@ namespace Yubico.YubiKit.YubiOtp;
 /// Both constructors copy scan codes into private storage; dispose the configuration and clear mutable
 /// source buffers separately. The string overload clears its translated intermediate, not the immutable
 /// password string. Use raw translated scan codes, not UTF-8 text bytes, when source erasure matters.
-/// Legacy Manual 3.3 documents 16 characters on firmware 2.1 and 38 on 2.2; the inherited type minimum
-/// does not enforce these length-dependent capabilities.
+/// The SDK requires firmware 2.2 or later for this configuration, including shorter passwords.
 /// </remarks>
 public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
 {
+    public override FirmwareVersion MinimumFirmwareVersion => new(2, 2, 0);
+
     /// <summary>
     /// Initializes a new static password configuration from a human-readable password,
     /// translating each character to a HID scan code for the given keyboard layout.

@@ -51,12 +51,14 @@ public static class NdefCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            await session.SetNdefConfigurationAsync(
-                slot,
-                options.Prefix,
-                accessCode,
-                ndefType,
-                ct);
+            if (options.Prefix is { } content)
+            {
+                await session.SetNdefConfigurationAsync(slot, content, accessCode, ndefType, ct);
+            }
+            else
+            {
+                await session.DisableNdefAsync(slot, accessCode, ct);
+            }
 
             if (options.Json)
             {

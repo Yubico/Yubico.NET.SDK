@@ -21,9 +21,9 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// Programs HOTP (event-based OTP) on a slot (ykman otp hotp SLOT).
 /// </summary>
 /// <remarks>
-/// Keep IMF zero: the current SDK's nonzero encoding uses the wrong scale. The verifier owns counter
-/// synchronization; successful programming is not proof of generated digits. Human output intentionally
-/// displays generated keys. Current-code authentication alone does not retain slot write protection.
+/// Synchronize the preset counter with the verifier; successful programming is not proof of generated
+/// digits. Human output intentionally displays generated keys. A supplied current code is retained unless
+/// removal is explicitly requested.
 /// </remarks>
 public static class HotpCommand
 {
@@ -37,11 +37,6 @@ public static class HotpCommand
         if (options.Generate)
         {
             hmacKey = RandomNumberGenerator.GetBytes(20);
-
-            if (!options.Json)
-            {
-                OutputHelper.WriteHex("Generated HMAC key", hmacKey);
-            }
         }
         else
         {
@@ -52,6 +47,13 @@ public static class HotpCommand
 
         try
         {
+            OutputHelper.ValidateAccessCode(accessCode);
+            using var config = new HotpSlotConfiguration(hmacKey, options.Imf ?? 0);
+            if (options.Generate && !options.Json)
+            {
+                OutputHelper.WriteHex("Generated HMAC key", hmacKey);
+            }
+
             if (!options.Force && !options.Json)
             {
                 if (!AnsiConsole.Confirm(
@@ -65,14 +67,13 @@ public static class HotpCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            using var config = new HotpSlotConfiguration(hmacKey, options.Imf ?? 0);
-
             if (options.Digits == 8)
             {
                 config.Use8Digits();
             }
 
-            await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
+            await session.PutConfigurationAsync(slot, config, options.DeleteAccessCode ? default : accessCode,
+                accessCode, ct);
 
             if (options.Json)
             {

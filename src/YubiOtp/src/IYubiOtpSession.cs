@@ -121,7 +121,8 @@ public interface IYubiOtpSession : IApplicationSession
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="slot"/> is not a defined value.</exception>
     /// <exception cref="NotSupportedException">
-    /// Thrown when the device firmware does not support slot updates (requires 2.3.0+), or when
+    /// Thrown when the device firmware does not support slot updates (requires 2.2.0+), when changing
+    /// the access code on firmware 4.3.2–4.3.5, or when
     /// <paramref name="config"/> requires a firmware version newer than the device has.
     /// </exception>
     /// <exception cref="InvalidOperationException">
@@ -129,7 +130,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the configuration.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task UpdateConfigurationAsync(
@@ -155,7 +156,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the swap.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SwapSlotsAsync(CancellationToken cancellationToken = default);
@@ -176,7 +177,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the deletion.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task DeleteSlotAsync(
@@ -188,15 +189,14 @@ public interface IYubiOtpSession : IApplicationSession
     /// Sets a custom keyboard scan code map.
     /// </summary>
     /// <remarks>
-    /// The current API enforces 38 bytes, whereas the tagged vendor personalization tool specifies a
-    /// 45-entry map for firmware 3+. This mismatch is an implementation limitation, not supported full-map
-    /// programming. Do not truncate a vendor map to fit. This method has no scan-map firmware gate.
+    /// Requires firmware 3.0.0+. The map applies across slots. Use <see cref="ResetScanMapAsync"/>
+    /// to request the device default.
     /// </remarks>
-    /// <param name="scanMap">The payload, currently required to be 38 bytes by the SDK.</param>
+    /// <param name="scanMap">The complete 45-byte vendor scan map.</param>
     /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="scanMap"/> is not exactly 38 bytes, or
+    /// Thrown when <paramref name="scanMap"/> is not exactly 45 bytes, or
     /// <paramref name="currentAccessCode"/> is non-empty and not exactly 6 bytes. No device I/O
     /// is performed when this is thrown.
     /// </exception>
@@ -205,7 +205,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the scan map.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SetScanMapAsync(
@@ -213,30 +213,39 @@ public interface IYubiOtpSession : IApplicationSession
         ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default);
 
+    /// <summary>Requests restoration of the device's default keyboard scan map.</summary>
+    /// <remarks>Requires firmware 3.0.0+. This changes the map across slots, not the slot configurations.</remarks>
+    /// <param name="currentAccessCode">Optional current 6-byte access code.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task ResetScanMapAsync(ReadOnlyMemory<byte> currentAccessCode = default, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Configures URI/text content for NFC output from an existing compatible OTP slot.
     /// </summary>
     /// <remarks>
     /// Requires NFC-capable hardware as well as firmware support. URI mode chooses the longest
-    /// case-sensitive ordinal table prefix and allows 53 UTF-8 bytes after that prefix. Text mode allows
+    /// case-insensitive ordinal table prefix and allows 53 UTF-8 bytes after that prefix. Text mode allows
     /// 51 UTF-8 text bytes with a fixed English (en) header. The 56-byte programming block is not the final
     /// on-tap NDEF message; legacy device documentation describes a URI prefix followed by generated OTP.
-    /// There is no NFC read-back here. Only pass defined enum values; URI syntax is not validated.
+    /// There is no NFC read-back here. URI syntax is not validated.
     /// </remarks>
     /// <param name="slot">The slot to configure NDEF for.</param>
     /// <param name="uri">
-    /// URI or text content. Null sends an all-zero disable request; verify on-tap behavior on the target
-    /// key. An empty string sends an empty content configuration with its URI/text header, not that request.
+    /// URI or text content. An empty string sends its URI/text header. Use <see cref="DisableNdefAsync"/>
+    /// to send an all-zero disable request.
     /// </param>
     /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
     /// <param name="ndefType">The type of NDEF record (URI or Text).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> is null.</exception>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="uri"/> (after URI prefix compression, or with the text
     /// language header) exceeds the maximum NDEF data size, or <paramref name="currentAccessCode"/>
     /// is non-empty and not exactly 6 bytes. No device I/O is performed when this is thrown.
     /// </exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="slot"/> is not a defined value.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="slot"/> or <paramref name="ndefType"/> is not a defined value.
+    /// </exception>
     /// <exception cref="NotSupportedException">
     /// Thrown when the device firmware does not support NDEF configuration (requires 3.0.0+).
     /// </exception>
@@ -245,14 +254,22 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the configuration.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SetNdefConfigurationAsync(
         Slot slot,
-        string? uri = null,
+        string uri,
         ReadOnlyMemory<byte> currentAccessCode = default,
         NdefType ndefType = NdefType.Uri,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Sends an all-zero NDEF configuration block to disable NFC output for the slot.</summary>
+    /// <remarks>Requires firmware 3.0.0+ and NFC-capable hardware. Verify on-tap behavior on the target key.</remarks>
+    /// <param name="slot">The slot whose NDEF configuration is disabled.</param>
+    /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task DisableNdefAsync(Slot slot, ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -285,14 +302,15 @@ public interface IYubiOtpSession : IApplicationSession
     /// The minimum-one-byte interpretation is expected by the supplied known-answer vectors, not a
     /// universal firmware guarantee from request-encoding tests. Prefer 1–63 bytes in short mode and
     /// verify empty/64-byte boundaries on your target firmware. For USB challenge-response, explicitly
-    /// selecting OTP HID avoids assuming SmartCard command parity. Notifications depend on transport;
-    /// cached keyboard-trigger status is not a read-back of RequireTouch.
+    /// selecting OTP HID avoids assuming SmartCard command parity. Only OTP HID reports touch waits;
+    /// SmartCard cannot infer RequireTouch from cached keyboard-trigger status.
     /// </para>
     /// </remarks>
     /// <param name="slot">The slot configured for HMAC-SHA1.</param>
     /// <param name="challenge">The challenge data (up to 64 bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The caller-owned 20-byte HMAC-SHA1 response. Clear its backing memory after use.</returns>
+    /// <returns>A fresh caller-owned writable 20-byte HMAC-SHA1 response. Zero it with
+    /// <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/> after use.</returns>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="challenge"/> is more than 64 bytes. No device I/O is
     /// performed when this is thrown.
@@ -305,7 +323,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// Thrown when the device returns a malformed or too-short response.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
-    Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
+    Task<Memory<byte>> CalculateHmacSha1Async(
         Slot slot,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default);

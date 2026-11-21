@@ -23,6 +23,17 @@ namespace Yubico.YubiKit.Cli.Commands.UnitTests.AuditV2;
 public class CliOtpAuditReproTests
 {
     [Theory]
+    [InlineData("key")]
+    [InlineData("access-code")]
+    public void HexParser_DiagnosticNamesOptionWithoutEchoingInput(string option)
+    {
+        const string rejected = "SYNTHETIC_OTP_SECRET";
+        var error = Assert.Throws<ArgumentException>(() => OtpHelpers.ParseHex(rejected, option));
+        Assert.Equal($"{option} must contain complete hexadecimal byte pairs.", error.Message);
+        Assert.Equal(new byte[] { 0x01, 0xFE }, OtpHelpers.ParseHex("01FE", option));
+    }
+
+    [Theory]
     [Trait("Audit", "YESDK-1633")]
     [InlineData(0)]
     [InlineData(39)]

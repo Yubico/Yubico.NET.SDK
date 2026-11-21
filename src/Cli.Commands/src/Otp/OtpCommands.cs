@@ -189,7 +189,7 @@ public static class OtpHelpers
         }
         catch (FormatException)
         {
-            throw new ArgumentException($"Invalid hex format for {name}: {hex}");
+            throw new ArgumentException($"{name} must contain complete hexadecimal byte pairs.");
         }
     }
 
@@ -388,22 +388,17 @@ public sealed class OtpChalRespCommand : YkCommandBase<OtpChalRespSettings>
         CommandContext context, OtpChalRespSettings settings, YkDeviceContext deviceContext)
     {
         var slot = OtpHelpers.ParseSlot(settings.Slot);
-        byte[] hmacKey;
-
-        if (settings.Generate)
-        {
-            hmacKey = RandomNumberGenerator.GetBytes(20);
-            OutputHelpers.WriteHex("Generated HMAC key", hmacKey);
-        }
-        else
-        {
-            hmacKey = OtpHelpers.RequireHex(settings.Key, "key");
-        }
-
-        byte[] accessCode = OtpHelpers.ParseHex(settings.AccessCode, "access-code") ?? [];
+        byte[] hmacKey = settings.Generate ? RandomNumberGenerator.GetBytes(20) : OtpHelpers.RequireHex(settings.Key, "key");
+        byte[] accessCode = [];
 
         try
         {
+            accessCode = OtpHelpers.ParseHex(settings.AccessCode, "access-code") ?? [];
+            if (settings.Generate)
+            {
+                OutputHelpers.WriteHex("Generated HMAC key", hmacKey);
+            }
+
             if (!settings.Force)
             {
                 if (!ConfirmationPrompts.ConfirmDangerous(
@@ -452,22 +447,17 @@ public sealed class OtpHotpCommand : YkCommandBase<OtpHotpSettings>
         CommandContext context, OtpHotpSettings settings, YkDeviceContext deviceContext)
     {
         var slot = OtpHelpers.ParseSlot(settings.Slot);
-        byte[] hmacKey;
-
-        if (settings.Generate)
-        {
-            hmacKey = RandomNumberGenerator.GetBytes(20);
-            OutputHelpers.WriteHex("Generated HMAC key", hmacKey);
-        }
-        else
-        {
-            hmacKey = OtpHelpers.RequireHex(settings.Key, "key");
-        }
-
-        byte[] accessCode = OtpHelpers.ParseHex(settings.AccessCode, "access-code") ?? [];
+        byte[] hmacKey = settings.Generate ? RandomNumberGenerator.GetBytes(20) : OtpHelpers.RequireHex(settings.Key, "key");
+        byte[] accessCode = [];
 
         try
         {
+            accessCode = OtpHelpers.ParseHex(settings.AccessCode, "access-code") ?? [];
+            if (settings.Generate)
+            {
+                OutputHelpers.WriteHex("Generated HMAC key", hmacKey);
+            }
+
             if (!settings.Force)
             {
                 if (!ConfirmationPrompts.ConfirmDangerous(
@@ -543,6 +533,7 @@ public sealed class OtpStaticCommand : YkCommandBase<OtpStaticSettings>
             return ExitCode.GenericError;
         }
 
+        using var configuration = config;
         byte[] accessCode = OtpHelpers.ParseHex(settings.AccessCode, "access-code") ?? [];
 
         try
@@ -568,7 +559,6 @@ public sealed class OtpStaticCommand : YkCommandBase<OtpStaticSettings>
         }
         finally
         {
-            config.Dispose();
             CryptographicOperations.ZeroMemory(accessCode);
         }
     }
@@ -688,13 +678,14 @@ public sealed class OtpCalculateCommand : YkCommandBase<OtpCalculateSettings>
         }
 
         byte[] challenge = OtpHelpers.RequireHex(settings.Challenge, "CHALLENGE");
+        Memory<byte> response = default;
 
         try
         {
             await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
                 deviceContext.SessionOptions);
 
-            var response = await session.CalculateHmacSha1Async(slot, challenge);
+            response = await session.CalculateHmacSha1Async(slot, challenge);
 
             OutputHelpers.WriteHeader("HMAC-SHA1 Challenge-Response");
             OutputHelpers.WriteKeyValue("Slot", OtpHelpers.FormatSlot(slot));
@@ -706,6 +697,7 @@ public sealed class OtpCalculateCommand : YkCommandBase<OtpCalculateSettings>
         finally
         {
             CryptographicOperations.ZeroMemory(challenge);
+            CryptographicOperations.ZeroMemory(response.Span);
         }
     }
 }
@@ -743,7 +735,14 @@ public sealed class OtpNdefCommand : YkCommandBase<OtpNdefSettings>
             await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
                 deviceContext.SessionOptions);
 
-            await session.SetNdefConfigurationAsync(slot, settings.Prefix, accessCode, ndefType);
+            if (settings.Prefix is { } content)
+            {
+                await session.SetNdefConfigurationAsync(slot, content, accessCode, ndefType);
+            }
+            else
+            {
+                await session.DisableNdefAsync(slot, accessCode);
+            }
 
             OutputHelpers.WriteSuccess($"Slot {OtpHelpers.FormatSlot(slot)} NDEF configured.");
             return ExitCode.Success;

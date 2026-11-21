@@ -58,6 +58,8 @@ OATH delivery: [draft PR #789](https://github.com/Yubico/Yubico.NET.SDK/pull/789
 documentation, including the OATH policy adoptions. OATH-DEC-004/006/007 and secure-reset qualification remain pending;
 the CORE-OATH-X005 fixture changes were compiled but not exercised on hardware.
 
+YubiOTP delivery: [draft PR #793](https://github.com/Yubico/Yubico.NET.SDK/pull/793). Hardware qualification remains pending.
+
 ## Cards
 
 | Card | Applet | Severity | Classified as | Status | Final call | Recorded in |

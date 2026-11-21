@@ -19,7 +19,8 @@ namespace Yubico.YubiKit.YubiOtp.Backend;
 
 internal readonly record struct YubiOtpInitialization(
     FirmwareVersion FirmwareVersion,
-    ReadOnlyMemory<byte> Status);
+    ReadOnlyMemory<byte> Status,
+    FirmwareVersion? ProtocolVersion = null);
 
 /// <summary>
 /// Internal abstraction for YubiOTP transport-specific operations.

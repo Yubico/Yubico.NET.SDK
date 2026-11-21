@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using NSubstitute;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
@@ -73,13 +74,15 @@ public class HidBackendTests
             Arg.Any<CancellationToken>());
     }
 
-    [Fact]
-    public async Task SendAndReceiveAsync_ValidCrc_ReturnsDataWithoutCrc()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SendAndReceiveAsync_ValidCrc_ClearsUnreturnedTail(bool teardownFails)
     {
         byte[] hmacResult = [0xAA, 0xBB, 0xCC, 0xDD, 0x11, 0x22, 0x33, 0x44,
                              0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xAA, 0xBB,
                              0xCC, 0xDD, 0xEE, 0xFF];
-        var responseWithCrc = MakeResponseWithCrc(hmacResult);
+        byte[] responseWithCrc = [.. MakeResponseWithCrc(hmacResult), 0xA5, 0x5A];
 
         _protocol.SendAndReceiveAsync(
                 Arg.Any<byte>(),
@@ -99,7 +102,23 @@ public class HidBackendTests
         Assert.Equal(20, result.Length);
         Assert.Equal(0xAA, result.Span[0]);
         Assert.Equal(0xFF, result.Span[19]);
-        Assert.Equal(responseWithCrc, result.ToArray().Concat(responseWithCrc[^2..]).ToArray());
+        Assert.All(responseWithCrc[20..], value => Assert.Equal(0, value));
+        var writable = MemoryMarshal.AsMemory(result);
+        if (teardownFails)
+        {
+            var session = Substitute.For<IYubiOtpSession>();
+            session.CalculateHmacSha1Async(Slot.One, default, TestContext.Current.CancellationToken)
+                .Returns(Task.FromResult(writable));
+            session.DisposeAsync().Returns(ValueTask.FromException(new InvalidOperationException("teardown failed")));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => IYubiKeyExtensions.CalculateAndDisposeAsync(
+                session, Slot.One, default, TestContext.Current.CancellationToken));
+        }
+        else
+        {
+            CryptographicOperations.ZeroMemory(writable.Span);
+        }
+
+        Assert.All(responseWithCrc, value => Assert.Equal(0, value));
     }
 
     [Fact]
@@ -230,7 +249,7 @@ public class HidBackendTests
     [Fact]
     public async Task SendAndReceiveAsync_WhenResolutionThrowsAfterValidation_PropagatesResolutionException()
     {
-        byte[] responseWithCrc = MakeResponseWithCrc(new byte[20]);
+        byte[] responseWithCrc = [.. MakeResponseWithCrc(Enumerable.Repeat((byte)0x3A, 20).ToArray()), 0xA5];
         var expected = new InvalidOperationException("resolution failed");
         var prompt = new ThrowingPrompt(resolutionException: expected);
         UserPresenceContext context = CreateContext();

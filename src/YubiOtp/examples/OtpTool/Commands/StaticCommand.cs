@@ -15,6 +15,7 @@
 using Spectre.Console;
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
@@ -22,9 +23,8 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// Programs a static password on a slot (ykman otp static SLOT).
 /// </summary>
 /// <remarks>
-/// Current sample limitation: UTF-8 bytes are passed as raw scan codes and KeyboardLayout is unused.
-/// For correctly translated text, use StaticPasswordSlotConfiguration(string, KeyboardLayout).
-/// That convenient overload cannot erase its immutable source string; raw translated mutable scan codes
+/// The layout-aware configuration translates text to HID scan codes. It cannot erase its immutable
+/// source string; raw translated mutable scan codes
 /// permit source-buffer cleanup. Generated passwords are intentionally displayed only in human mode.
 /// </remarks>
 public static class StaticCommand
@@ -37,28 +37,32 @@ public static class StaticCommand
         var slot = options.Slot
                    ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool static <1|2>");
 
-        byte[] scanCodes;
+        string layoutName = options.KeyboardLayout ?? nameof(KeyboardLayout.ModHex);
+        if (!Enum.TryParse<KeyboardLayout>(layoutName, ignoreCase: true, out var layout) || !Enum.IsDefined(layout))
+        {
+            throw new ArgumentException($"Unsupported keyboard layout: {layoutName}.");
+        }
+
+        string password;
 
         if (options.Generate)
         {
             int length = options.Length ?? 38;
-            string generated = GenerateStaticPassword(length);
+            password = GenerateStaticPassword(length);
 
             if (!options.Json)
             {
-                OutputHelper.WriteKeyValue("Generated password", generated);
+                OutputHelper.WriteKeyValue("Generated password", password);
             }
-
-            scanCodes = Encoding.UTF8.GetBytes(generated);
         }
         else
         {
-            string password = options.Password
+            password = options.Password
                               ?? throw new ArgumentException(
                                   "--password or --generate is required for static command.");
-            scanCodes = Encoding.UTF8.GetBytes(password);
         }
 
+        using var config = new StaticPasswordSlotConfiguration(password, layout);
         byte[] accessCode = OutputHelper.ParseHex(options.AccessCode, "access-code") ?? [];
 
         try
@@ -76,12 +80,8 @@ public static class StaticCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            // These bytes are currently UTF-8, not translated scan codes (for example 'a' is 0x61,
-            // not HID 0x04). This handoff is a sample defect, not a raw-overload usage recipe.
-            using var config = new StaticPasswordSlotConfiguration(scanCodes);
-
-            // Omitting the new code can remove write protection even when current authentication succeeds.
-            await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
+            await session.PutConfigurationAsync(slot, config, options.DeleteAccessCode ? default : accessCode,
+                accessCode, ct);
 
             if (options.Json)
             {
@@ -101,7 +101,6 @@ public static class StaticCommand
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(scanCodes);
             CryptographicOperations.ZeroMemory(accessCode);
         }
     }

@@ -14,6 +14,7 @@
 
 using NSubstitute;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
@@ -107,8 +108,90 @@ public class YubiOtpSessionTests
         Assert.Equal(9, programmingSequence);
     }
 
+    [Theory]
+    [InlineData(2, VersionQualifierType.Final, false)]
+    [InlineData(2, null, false)]
+    [InlineData(2, VersionQualifierType.Beta, true)]
+    [InlineData(0, VersionQualifierType.Final, true)]
+    public async Task CreateUsingCachedInfoAsync_SeparatesAdmissionFromNumericFraming(
+        int cachedMajor, VersionQualifierType? qualifier, bool admit)
+    {
+        var metadataVersion = new FirmwareVersion(cachedMajor, 1, 0);
+        var info = DeviceInfo.CreateFromTlvs([], metadataVersion) with
+        {
+            // Custom IYubiKey providers may omit the qualifier despite its annotations.
+            VersionQualifier = qualifier is { } type ? new VersionQualifier(metadataVersion, type, 0) : null!
+        };
+        var ct = TestContext.Current.CancellationToken;
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Type.Returns(ConnectionType.SmartCard);
+        connection.Transport.Returns(Transport.Usb);
+        byte[] rawStatus = [2, 1, 7, 9, 0, 0, 0x90, 0x00];
+        byte[] writtenStatus = [2, 1, 7, 10, 0, 0, 0x90, 0x00];
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<ReadOnlyMemory<byte>>(rawStatus), Task.FromResult<ReadOnlyMemory<byte>>(writtenStatus));
+
+        await using var session = await YubiOtpSession.CreateUsingCachedInfoAsync(connection, null, info, ct);
+        Assert.Equal(cachedMajor == 0 ? new FirmwareVersion(2, 1, 7) : metadataVersion, session.FirmwareVersion);
+        Assert.Equal(new FirmwareVersion(2, 1, 7), session.GetConfigState().FirmwareVersion);
+        using var config = new HotpSlotConfiguration(new byte[20], 16);
+        if (admit)
+        {
+            await session.PutConfigurationAsync(Slot.Two, config, cancellationToken: ct);
+            await connection.Received(2).TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.PutConfigurationAsync(Slot.Two, config, cancellationToken: ct));
+            await connection.Received(1).TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+    }
+
+    [Theory]
+    [InlineData(2, false, true)]
+    [InlineData(3, false, false)]
+    [InlineData(2, true, true)]
+    public async Task CreateAsync_ManagementSentinelUsesNumericOtpStatusForSequence(
+        byte patch, bool cacheWithoutVersion, bool acceptsReset)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Type.Returns(ConnectionType.SmartCard);
+        connection.Transport.Returns(Transport.Usb);
+        List<byte[]> sent = [];
+        Queue<byte[]> replies = new([
+            [.. "YubiKey 0.0.1"u8, 0x90, 0x00],
+            [5, 4, patch, 9, 0, 0, 0x90, 0x00],
+            [5, 4, patch, 0, 1, 0, 0x90, 0x00]
+        ]);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                sent.Add(call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray());
+                return Task.FromResult<ReadOnlyMemory<byte>>(replies.Dequeue());
+            });
+        // A custom cache may exist without usable firmware; fall back to applet initialization.
+        var info = DeviceInfo.CreateFromTlvs([], new FirmwareVersion(5, 4, (int)patch));
+        await using var session = await YubiOtpSession.CreateUsingCachedInfoAsync(connection, null,
+            cacheWithoutVersion ? info with { FirmwareVersion = null! } : null, ct);
+
+        Assert.Equal(new FirmwareVersion(5, 4, (int)patch), session.FirmwareVersion);
+        if (acceptsReset)
+        {
+            await session.DeleteSlotAsync(Slot.One, cancellationToken: ct);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() => session.DeleteSlotAsync(Slot.One, cancellationToken: ct));
+        }
+
+        Assert.Equal(3, sent.Count);
+        byte[] expectedWrite = [0x00, 0x01, 0x01, 0x00, 52, .. new byte[52], 0x00];
+        Assert.Equal(expectedWrite, sent[2]);
+    }
+
     [Fact]
-    public async Task CalculateHmacSha1Async_TouchConfiguredSmartCard_NotifiesPolicyRequires()
+    public async Task CalculateHmacSha1Async_TouchConfiguredSmartCard_DoesNotNotify()
     {
         var prompt = new RecordingUserPresencePrompt();
         var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
@@ -121,19 +204,12 @@ public class YubiOtpSessionTests
             new byte[] { 0x01 },
             TestContext.Current.CancellationToken);
 
-        UserPresenceContext requested = Assert.Single(prompt.Requested);
-        Assert.Equal(UserPresenceBasis.PolicyRequires, requested.Basis);
-        Assert.Equal("YubiOTP", requested.Application);
-        Assert.Equal(UserPresenceOperations.YubiOtp.CalculateHmacSha1, requested.Operation);
-        Assert.Equal(Slot.One.ToString(), requested.Scope);
-        var resolved = Assert.Single(prompt.Resolved);
-        Assert.Same(requested, resolved.Context);
-        Assert.Equal(UserPresenceOutcome.Completed, resolved.Outcome);
-        Assert.Equal(CancellationToken.None, resolved.CancellationToken);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     [Fact]
-    public async Task CalculateYubicoOtpAsync_TouchConfiguredSmartCard_ReportsOperation()
+    public async Task CalculateYubicoOtpAsync_TouchConfiguredSmartCard_DoesNotNotify()
     {
         var prompt = new RecordingUserPresencePrompt();
         var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
@@ -144,8 +220,8 @@ public class YubiOtpSessionTests
         _ = await session.CalculateYubicoOtpAsync(
             Slot.One, new byte[6], TestContext.Current.CancellationToken);
 
-        Assert.Equal(UserPresenceOperations.YubiOtp.CalculateYubicoOtp, Assert.Single(prompt.Requested).Operation);
-        Assert.Same(prompt.Requested[0], Assert.Single(prompt.Resolved).Context);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     [Fact]
@@ -187,7 +263,38 @@ public class YubiOtpSessionTests
     }
 
     [Fact]
-    public async Task CalculateHmacSha1Async_SmartCardTransportTimeout_ResolvesFailed()
+    public async Task PutConfigurationAsync_ShortStatusFallback_DoesNotPublishAndAllowsNextValidWrite()
+    {
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05);
+        await using var lease = session;
+        using var configuration = new HmacSha1SlotConfiguration(new byte[20]);
+        var ct = TestContext.Current.CancellationToken;
+        List<byte> instructions = [];
+        Queue<byte[]> replies = new([
+            [0x90, 0x00],
+            [5, 7, 0, 0xFE, 0x00, 0x90, 0x00],
+            [5, 7, 0, 10, 0x02, 0, 0x90, 0x00]
+        ]);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                instructions.Add(call.ArgAt<ReadOnlyMemory<byte>>(0).Span[1]);
+                return Task.FromResult<ReadOnlyMemory<byte>>(replies.Dequeue());
+            });
+
+        await Assert.ThrowsAsync<BadResponseException>(() => session.PutConfigurationAsync(
+            Slot.Two, configuration, cancellationToken: ct));
+        Assert.True(session.GetConfigState().IsConfigured(Slot.One));
+        Assert.False(session.GetConfigState().IsConfigured(Slot.Two));
+
+        await session.PutConfigurationAsync(Slot.Two, configuration, cancellationToken: ct);
+        Assert.False(session.GetConfigState().IsConfigured(Slot.One));
+        Assert.True(session.GetConfigState().IsConfigured(Slot.Two));
+        Assert.Equal([(byte)0x01, (byte)0x03, (byte)0x01], instructions);
+    }
+
+    [Fact]
+    public async Task CalculateHmacSha1Async_SmartCardTransportTimeout_PropagatesWithoutNotification()
     {
         var prompt = new RecordingUserPresencePrompt();
         var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
@@ -200,27 +307,35 @@ public class YubiOtpSessionTests
             new byte[] { 0x01 },
             TestContext.Current.CancellationToken));
 
-        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     [Fact]
-    public async Task CalculateHmacSha1Async_CallerCancellation_ResolvesCancelled()
+    public async Task CalculateHmacSha1Async_SmartCardCallerCancellation_PropagatesWithoutNotification()
     {
-        using var cancellation = new CancellationTokenSource();
-        var prompt = new RecordingUserPresencePrompt(() => cancellation.Cancel());
-        var (_, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var prompt = new RecordingUserPresencePrompt();
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
         using var _ = session;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                cancellation.Cancel();
+                return Task.FromCanceled<ReadOnlyMemory<byte>>(cancellation.Token);
+            });
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => session.CalculateHmacSha1Async(
             Slot.One,
             new byte[] { 0x01 },
             cancellation.Token));
 
-        Assert.Equal(UserPresenceOutcome.Cancelled, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     [Fact]
-    public async Task CalculateHmacSha1Async_ResponseFailure_ResolvesFailed()
+    public async Task CalculateHmacSha1Async_SmartCardResponseFailure_PropagatesWithoutNotification()
     {
         var prompt = new RecordingUserPresencePrompt();
         var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05, prompt);
@@ -233,7 +348,8 @@ public class YubiOtpSessionTests
             new byte[] { 0x01 },
             TestContext.Current.CancellationToken));
 
-        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Empty(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
     }
 
     /// <summary>
@@ -242,7 +358,8 @@ public class YubiOtpSessionTests
     /// </summary>
     private static async Task<(ISmartCardConnection Connection, YubiOtpSession Session)> CreateFakeSessionAsync(
         byte touchLow = 0,
-        IUserPresencePrompt? userPresencePrompt = null)
+        IUserPresencePrompt? userPresencePrompt = null,
+        FirmwareVersion? firmware = null)
     {
         var connection = Substitute.For<ISmartCardConnection>();
         connection.Type.Returns(ConnectionType.SmartCard);
@@ -256,9 +373,7 @@ public class YubiOtpSessionTests
 
         var session = await YubiOtpSession.CreateAsync(
             connection,
-            userPresencePrompt is null
-                ? null
-                : new SessionCreationOptions { UserPresencePrompt = userPresencePrompt },
+            new SessionCreationOptions { UserPresencePrompt = userPresencePrompt, FirmwareVersionOverride = firmware },
             cancellationToken: TestContext.Current.CancellationToken);
 
         connection.ClearReceivedCalls();
@@ -271,6 +386,118 @@ public class YubiOtpSessionTests
         var response = new byte[responseLength + 2];
         response[^2] = 0x90;
         return response;
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ScanMap_WritesFullMapAndOptionalCode(bool reset)
+    {
+        var (connection, session) = await CreateFakeSessionAsync(firmware: new FirmwareVersion(3));
+        await using var lease = session;
+        byte[] code = [1, 2, 3, 4, 5, 6];
+        byte[] map = reset ? new byte[45] : [.. Enumerable.Range(1, 45).Select(i => (byte)i)];
+        byte[]? sent = null;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                sent = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                return Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 3, 0, 0, 10, 0, 0, 0x90, 0x00 });
+            });
+        var ct = TestContext.Current.CancellationToken;
+        if (reset)
+        {
+            await session.ResetScanMapAsync(code, ct);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => session.SetScanMapAsync(map.AsMemory(0, 38), code, ct));
+            Assert.Null(sent);
+            await session.SetScanMapAsync(map, code, ct);
+        }
+
+        byte[] expected = [0x00, 0x01, 0x12, 0x00, 51, .. map, .. code, 0x00];
+        Assert.Equal(expected, sent);
+    }
+
+    [Fact]
+    public async Task ScanMap_OlderFirmwareRejectsBothOperationsWithoutIO()
+    {
+        var (connection, session) = await CreateFakeSessionAsync(firmware: new FirmwareVersion(2, 9, 9));
+        await using var lease = session;
+        var ct = TestContext.Current.CancellationToken;
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.SetScanMapAsync(new byte[45], cancellationToken: ct));
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.ResetScanMapAsync(cancellationToken: ct));
+        await connection.DidNotReceive().TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
+    [InlineData(1, false)]
+    [InlineData(2, true)]
+    [InlineData(5, true)]
+    [InlineData(6, false)]
+    public async Task UpdateConfigurationAsync_OnlyBlocksCodeChangesOnRestrictedFirmware(int patch, bool restricted)
+    {
+        var (connection, session) = await CreateFakeSessionAsync(firmware: new FirmwareVersion(4, 3, patch));
+        await using var lease = session;
+        using var configuration = new UpdateConfiguration();
+        var ct = TestContext.Current.CancellationToken;
+        byte[] currentCode = [1, 2, 3, 4, 5, 6];
+        byte[] newCode = [6, 5, 4, 3, 2, 1];
+        byte[] reply = [4, 3, (byte)patch, 10, 0, 0, 0x90, 0x00];
+        byte[]? sent = null;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                sent = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                return Task.FromResult<ReadOnlyMemory<byte>>(reply);
+            });
+
+        if (restricted)
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() =>
+                session.UpdateConfigurationAsync(Slot.Two, configuration, newCode, currentCode, ct));
+            Assert.Null(sent);
+            newCode = (byte[])currentCode.Clone();
+        }
+
+        await session.UpdateConfigurationAsync(Slot.Two, configuration, newCode, currentCode, ct);
+        Assert.NotNull(sent);
+        Assert.Equal(newCode, sent[43..49]);
+        Assert.Equal(currentCode, sent[57..63]);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task UpdateConfigurationAsync_ZeroAndOmittedCodesDoNotChangeProtection(bool omitCurrentCode)
+    {
+        var (connection, session) = await CreateFakeSessionAsync(firmware: new FirmwareVersion(4, 3, 2));
+        await using var lease = session;
+        using var configuration = new UpdateConfiguration();
+        var ct = TestContext.Current.CancellationToken;
+        byte[] zeros = new byte[6];
+        byte[]? sent = null;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                sent = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                return Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 4, 3, 2, 10, 0, 0, 0x90, 0x00 });
+            });
+
+        await session.UpdateConfigurationAsync(Slot.Two, configuration,
+            accessCode: omitCurrentCode ? zeros : default,
+            currentAccessCode: omitCurrentCode ? default : zeros,
+            cancellationToken: ct);
+
+        Assert.NotNull(sent);
+        Assert.Equal(0x05, sent[2]); // Update slot 2
+        Assert.Equal(omitCurrentCode ? 52 : 58, sent[4]);
+        Assert.Equal(zeros, sent[43..49]);
+        if (!omitCurrentCode)
+        {
+            Assert.Equal(zeros, sent[57..63]);
+        }
     }
 
     public class KeyLengthPreflightValidation
@@ -329,6 +556,20 @@ public class YubiOtpSessionTests
     public class NdefUriEncoding
     {
         [Fact]
+        public async Task SetNdefConfigurationAsync_UndefinedType_DoesNotSendWrite()
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            await using var lease = session;
+            var ct = TestContext.Current.CancellationToken;
+
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("ndefType", () =>
+                session.SetNdefConfigurationAsync(Slot.Two, "payload", ndefType: (NdefType)0x56, cancellationToken: ct));
+
+            await connection.DidNotReceive().TransmitAndReceiveAsync(
+                Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
         public void BuildNdefPayload_HttpsWwwUri_CompressesPrefix()
         {
             var payload = YubiOtpSession.BuildNdefPayload("https://www.yubico.com/products", NdefType.Uri);
@@ -359,11 +600,11 @@ public class YubiOtpSessionTests
         public void BuildNdefPayload_HttpWwwUri_CompressesLongestPrefix()
         {
             // "http://www." (index 1) is longer than "http://" (index 3)
-            var payload = YubiOtpSession.BuildNdefPayload("http://www.example.com", NdefType.Uri);
+            var payload = YubiOtpSession.BuildNdefPayload("HTTP://WWW.Example.com", NdefType.Uri);
 
             Assert.Equal(1, payload[2]); // index 1 = "http://www."
 
-            var remaining = Encoding.UTF8.GetBytes("example.com");
+            var remaining = Encoding.UTF8.GetBytes("Example.com");
             Assert.Equal(remaining, payload[3..(3 + remaining.Length)]);
         }
 
@@ -414,12 +655,38 @@ public class YubiOtpSessionTests
         }
 
         [Fact]
-        public void BuildNdefPayload_NullUri_ReturnsAllZeros()
+        public async Task SetNdefConfigurationAsync_NullContent_DoesNotSendWrite()
         {
-            var payload = YubiOtpSession.BuildNdefPayload(null, NdefType.Uri);
+            var (connection, session) = await CreateFakeSessionAsync();
+            await using var lease = session;
+            var ct = TestContext.Current.CancellationToken;
 
-            Assert.Equal(56, payload.Length);
-            Assert.All(payload, b => Assert.Equal(0, b));
+            await Assert.ThrowsAsync<ArgumentNullException>("uri", () =>
+                session.SetNdefConfigurationAsync(Slot.Two, null!, cancellationToken: ct)); // Deliberate runtime null.
+
+            await connection.DidNotReceive().TransmitAndReceiveAsync(
+                Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task DisableNdefAsync_WritesZeroBlockFollowedByCurrentCode()
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            await using var lease = session;
+            var ct = TestContext.Current.CancellationToken;
+            byte[] currentCode = [1, 2, 3, 4, 5, 6];
+            byte[]? sent = null;
+            connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+                .Returns(call =>
+                {
+                    sent = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                    return Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 5, 7, 0, 10, 0, 0, 0x90, 0x00 });
+                });
+
+            await session.DisableNdefAsync(Slot.Two, currentCode, ct);
+
+            byte[] expected = [0x00, 0x01, 0x09, 0x00, 62, .. new byte[56], .. currentCode, 0x00];
+            Assert.Equal(expected, sent);
         }
 
         [Fact]
@@ -453,18 +720,32 @@ public class YubiOtpSessionTests
             // Length = 1 (lang length byte) + 2 (lang code) + text length
             Assert.Equal(1 + 2 + textBytes.Length, payload[0]);
         }
-
-        [Fact]
-        public void BuildNdefPayload_NullText_ReturnsAllZeros()
-        {
-            var payload = YubiOtpSession.BuildNdefPayload(null, NdefType.Text);
-
-            Assert.All(payload, b => Assert.Equal(0, b));
-        }
     }
 
     public class HmacChallengeSemantics
     {
+        [Fact]
+        public async Task CalculateHmacSha1Async_ReturnsIndependentWritableResults()
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            await using var lease = session;
+            var ct = TestContext.Current.CancellationToken;
+            byte[] transportReply = CreateApduResponseData(20);
+            transportReply.AsSpan(0, 20).Fill(0x5A);
+            connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult<ReadOnlyMemory<byte>>(transportReply));
+
+            Memory<byte> first = await session.CalculateHmacSha1Async(Slot.Two, ReadOnlyMemory<byte>.Empty, ct);
+            Memory<byte> second = await session.CalculateHmacSha1Async(Slot.Two, ReadOnlyMemory<byte>.Empty, ct);
+
+            Assert.Equal(20, first.Length);
+            Assert.True(CryptographicOperations.FixedTimeEquals(first.Span, transportReply.AsSpan(0, 20)));
+            CryptographicOperations.ZeroMemory(first.Span);
+            Assert.True(first.Span.IndexOfAnyExcept((byte)0) < 0);
+            Assert.True(CryptographicOperations.FixedTimeEquals(second.Span, transportReply.AsSpan(0, 20)));
+            Assert.Equal(0x5A, transportReply[0]);
+        }
+
         [Theory]
         [InlineData(new byte[0], (byte)0x00)]
         [InlineData(new byte[] { 0x41 }, (byte)0x00)]

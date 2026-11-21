@@ -33,7 +33,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         YubiKitLogging.LoggerFactory.CreateLogger<SmartCardBackend>();
 
     private static readonly FirmwareVersion Firmware500 = new(5, 0, 0);
-    private static readonly FirmwareVersion Firmware550 = new(5, 5, 0);
+    private static readonly FirmwareVersion Firmware543 = new(5, 4, 3);
 
     private readonly ISmartCardProtocol _protocol;
     private readonly FirmwareVersion _firmwareVersion;
@@ -52,22 +52,12 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
     public static async ValueTask<YubiOtpInitialization> ReadInitialStateAsync(
         ISmartCardProtocol protocol,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        FirmwareVersion? cachedVersion = null)
     {
-        FirmwareVersion? managementVersion = null;
-
-        try
-        {
-            var mgmtResponse = await protocol
-                .SelectAsync(ApplicationIds.Management, cancellationToken)
-                .ConfigureAwait(false);
-
-            managementVersion = FirmwareVersion.FromSelectResponse(mgmtResponse.Span);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            Logger.LogDebug(ex, "Could not get version from Management SELECT, continuing with OTP SELECT.");
-        }
+        var managementVersion = cachedVersion is null
+            ? await TryReadManagementVersionAsync(protocol, cancellationToken).ConfigureAwait(false)
+            : null;
 
         var status = await protocol
             .SelectAsync(ApplicationIds.Otp, cancellationToken)
@@ -85,7 +75,24 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
             ? (managementVersion > otpVersion ? managementVersion : otpVersion)
             : managementVersion ?? otpVersion;
 
-        return new YubiOtpInitialization(firmwareVersion, status);
+        return new YubiOtpInitialization(firmwareVersion, status,
+            firmwareVersion.IsAlphaOrBeta && !otpVersion.IsAlphaOrBeta ? otpVersion : firmwareVersion);
+    }
+
+    private static async Task<FirmwareVersion?> TryReadManagementVersionAsync(
+        ISmartCardProtocol protocol, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await protocol.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
+            return FirmwareVersion.FromSelectResponse(response.Span);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Logger.LogDebug(ex, "Could not get version from Management SELECT, continuing with OTP SELECT.");
+            return null;
+        }
     }
 
     public async ValueTask<ReadOnlyMemory<byte>> WriteUpdateAsync(
@@ -109,8 +116,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
         var statusBytes = response.Data;
 
-        // A short write response needs a separate status read. The validator below currently does not
-        // reject a fallback that is still short; successful return is not complete malformed-status validation.
+        // A short write response needs a separate status read; validate before returning it to the session.
         if (statusBytes.Length < YubiOtpConstants.StatusBytesLength)
         {
             statusBytes = await ReadStatusAsync(cancellationToken).ConfigureAwait(false);
@@ -162,6 +168,11 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
             outcome = UserPresenceOutcome.Completed;
             await userPresenceNotification.ResolveAsync(outcome).ConfigureAwait(false);
+            if (slot is ConfigSlot.ChalHmac1 or ConfigSlot.ChalHmac2)
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(responseData[expectedLength..]).Span);
+            }
+
             responseTransferred = true;
             return responseData[..expectedLength];
         }
@@ -203,31 +214,24 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
     }
 
     /// <summary>
-    /// Checks the sequence when status is long enough. Current exceptions are an effective firmware
-    /// interval of 5.0.0 inclusive to 5.5.0 exclusive, and any returned zero. These permissive checks
-    /// do not establish that every malformed status or rejected device write is detected.
+    /// Validates status length and accepts an increment, wraparound, or reset to zero from a positive
+    /// predecessor when empty or in the legacy 5.0.0–5.4.2 programming-state window.
     /// </summary>
     private void ValidateProgrammingSequence(ReadOnlySpan<byte> statusBytes)
     {
         if (statusBytes.Length < YubiOtpConstants.StatusBytesLength)
         {
-            return;
+            throw new BadResponseException("OTP write status is shorter than six bytes.");
         }
 
         var newProgSeq = statusBytes[3];
 
-        // The current compatibility bypass covers all 5.0.0 <= version < 5.5.0.
-        if (_firmwareVersion >= Firmware500
-            && _firmwareVersion < Firmware550)
-        {
-            _lastProgSeq = newProgSeq;
-            return;
-        }
-
-        // Accept the increment, or zero after any predecessor (not only a 255-to-0 rollover).
         var expectedProgSeq = (byte)((_lastProgSeq + 1) & 0xFF);
+        bool legacyWindow = _firmwareVersion >= Firmware500 && _firmwareVersion < Firmware543;
+        bool acceptReset = newProgSeq == 0 && _lastProgSeq > 0 &&
+                           ((statusBytes[4] & 0x1F) == 0 || legacyWindow);
 
-        if (newProgSeq != 0 && newProgSeq != expectedProgSeq)
+        if (newProgSeq != expectedProgSeq && !acceptReset)
         {
             throw new InvalidOperationException(
                 $"Programming sequence validation failed. Expected {expectedProgSeq}, got {newProgSeq}. " +

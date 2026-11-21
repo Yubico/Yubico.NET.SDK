@@ -36,6 +36,7 @@ public sealed record CliOptions
     /// Global option: --access-code HEX.
     /// </summary>
     public string? AccessCode { get; init; }
+    public bool DeleteAccessCode { get; init; }
 
     /// <summary>
     /// Whether to skip confirmation prompts (-f / --force).
@@ -61,12 +62,6 @@ public sealed record CliOptions
     public bool RequireTouch { get; init; }
 
     /// <summary>
-    /// Enables touch and already-default short-challenge mode (--totp). Does not compute Unix-time
-    /// counters, apply a period, truncate a response, or generate a TOTP code.
-    /// </summary>
-    public bool Totp { get; init; }
-
-    /// <summary>
     /// Hex-encoded key material for programming operations (--key HEX).
     /// </summary>
     public string? Key { get; init; }
@@ -79,7 +74,7 @@ public sealed record CliOptions
     public int? Digits { get; init; }
 
     /// <summary>
-    /// Initial moving factor (--imf VALUE). Use zero: the SDK's current nonzero scaling is incorrect.
+    /// Initial moving factor (--imf VALUE), in steps of 16 from 0 through 1,048,560.
     /// </summary>
     public int? Imf { get; init; }
 
@@ -96,8 +91,7 @@ public sealed record CliOptions
     public int? Length { get; init; }
 
     /// <summary>
-    /// Parsed layout option (--keyboard-layout LAYOUT), currently unused by StaticCommand.
-    /// The public SDK string/layout constructor is the working translation route.
+    /// Keyboard layout for static-password translation (--keyboard-layout LAYOUT, default: ModHex).
     /// </summary>
     public string? KeyboardLayout { get; init; }
 
@@ -164,12 +158,12 @@ public sealed record CliOptions
     /// Parses command-line arguments into a <see cref="CliOptions"/> instance.
     /// Uses positional SLOT where required. Parsed secret strings are immutable and cannot be zeroed.
     /// </summary>
-    public static CliOptions Parse(string[] args)
+    public static CliOptions? Parse(string[] args)
     {
         if (args.Length == 0)
         {
             PrintHelp();
-            Environment.Exit(0);
+            return null;
         }
 
         string command = args[0].ToLowerInvariant();
@@ -177,16 +171,16 @@ public sealed record CliOptions
         if (command is "--help" or "-h" or "help")
         {
             PrintHelp();
-            Environment.Exit(0);
+            return null;
         }
 
         Slot? slot = null;
         string? accessCode = null;
+        bool deleteAccessCode = false;
         bool force = false;
         bool json = false;
         bool generate = false;
         bool requireTouch = false;
-        bool totp = false;
         string? key = null;
         int? digits = null;
         int? imf = null;
@@ -241,6 +235,10 @@ public sealed record CliOptions
                     accessCode = ConsumeValue(args, ref i, "access-code");
                     break;
 
+                case "--delete-access-code":
+                    deleteAccessCode = true;
+                    break;
+
                 case "--force" or "-f":
                     force = true;
                     break;
@@ -255,10 +253,6 @@ public sealed record CliOptions
 
                 case "--require-touch":
                     requireTouch = true;
-                    break;
-
-                case "--totp":
-                    totp = true;
                     break;
 
                 case "--key":
@@ -347,12 +341,26 @@ public sealed record CliOptions
 
                 case "--help" or "-h":
                     PrintCommandHelp(command);
-                    Environment.Exit(0);
-                    break;
+                    return null;
 
                 default:
                     throw new ArgumentException($"Unknown option: {arg}");
             }
+        }
+
+        if (command == "swap" && accessCode is not null)
+        {
+            throw new ArgumentException("swap does not accept --access-code.");
+        }
+
+        if (deleteAccessCode && (accessCode is null || command is not ("chalresp" or "hotp" or "static" or "yubiotp" or "settings")))
+        {
+            throw new ArgumentException("--delete-access-code requires --access-code and a programming or settings command.");
+        }
+
+        if (json && !force && command is "swap" or "delete" or "chalresp" or "hotp" or "static" or "yubiotp" or "ndef" or "settings")
+        {
+            throw new ArgumentException("JSON writes require explicit --force.");
         }
 
         return new CliOptions
@@ -360,11 +368,11 @@ public sealed record CliOptions
             Command = command,
             Slot = slot,
             AccessCode = accessCode,
+            DeleteAccessCode = deleteAccessCode,
             Force = force,
             Json = json,
             Generate = generate,
             RequireTouch = requireTouch,
-            Totp = totp,
             Key = key,
             Digits = digits,
             Imf = imf,
@@ -385,13 +393,12 @@ public sealed record CliOptions
     }
 
     /// <summary>
-    /// Prints sample usage. Existing help has known stdin/TOTP/layout/swap-code mismatches;
-    /// see the module README before relying on an advertised option.
+    /// Prints sample usage.
     /// </summary>
     public static void PrintHelp()
     {
         Console.WriteLine("""
-            OtpTool - YubiKey OTP Configuration (ykman-compatible)
+            OtpTool - YubiKey OTP configuration demo (not for production)
 
             USAGE:
               OtpTool <command> [SLOT] [options]
@@ -404,21 +411,22 @@ public sealed record CliOptions
               hotp SLOT [options]         Program HOTP (event-based OTP)
               static SLOT [options]       Program static password
               yubiotp SLOT [options]      Program Yubico OTP
-              calculate SLOT [CHALLENGE]  Perform challenge-response calculation
+              calculate SLOT CHALLENGE    Perform challenge-response calculation
               ndef SLOT [options]         Configure NDEF for NFC
               settings SLOT [options]     Update slot settings (flags only)
 
             GLOBAL OPTIONS:
-              --access-code HEX           6-byte access code for protected slots
+              --access-code HEX           Current 6-byte code on protected writes
+              --delete-access-code        Remove protection when programming/updating (default: keep it)
               --force, -f                 Skip confirmation prompts
-              --json, -j                  Output in JSON format
+              --json, -j                  Output in JSON format (writes require --force)
               --help, -h                  Show help
 
             EXAMPLES:
               OtpTool info
               OtpTool info --json
               OtpTool chalresp 2 --generate --require-touch
-              OtpTool chalresp 2 --key 0102...1314 --totp
+              OtpTool chalresp 2 --key 0102...1314 --require-touch
               OtpTool hotp 1 --key 0102...1314 --digits 8
               OtpTool static 2 --generate --length 16
               OtpTool yubiotp 1 --generate-key --generate-private-id --serial-public-id
@@ -446,7 +454,7 @@ public sealed record CliOptions
             "swap" => """
                 OtpTool swap - Swap slot 1 and slot 2 configurations
 
-                USAGE: OtpTool swap [-f] [--access-code HEX]
+                USAGE: OtpTool swap [-f]
                 """,
 
             "delete" => """
@@ -464,7 +472,6 @@ public sealed record CliOptions
                   --key HEX                 20-byte HMAC-SHA1 key (hex)
                   --generate                Generate random key
                   --require-touch           Require physical touch
-                  --totp                    TOTP mode (touch + short challenge)
                   --access-code HEX         Current access code
                 """,
 
@@ -477,7 +484,7 @@ public sealed record CliOptions
                   --key HEX                 20-byte HMAC key (hex)
                   --generate                Generate random key
                   --digits 6|8              OTP digit count (default: 6)
-                  --imf VALUE               Initial moving factor
+                  --imf VALUE               Initial moving factor: 0–1048560 in steps of 16 (default: 0)
                   --access-code HEX         Current access code
                 """,
 
@@ -490,7 +497,7 @@ public sealed record CliOptions
                   --password TEXT            Password text
                   --generate                Generate random password
                   --length N                Length of generated password (1-38)
-                  --keyboard-layout LAYOUT  Keyboard layout (default: US)
+                  --keyboard-layout LAYOUT  Keyboard layout (default: ModHex)
                   --access-code HEX         Current access code
                 """,
 
@@ -512,9 +519,9 @@ public sealed record CliOptions
             "calculate" => """
                 OtpTool calculate - Perform HMAC-SHA1 challenge-response
 
-                USAGE: OtpTool calculate SLOT [CHALLENGE]
+                USAGE: OtpTool calculate SLOT CHALLENGE
 
-                CHALLENGE is a hex-encoded value. If omitted, reads from stdin.
+                CHALLENGE is a required hex-encoded value. Calculation prefers OTP HID when available.
                 """,
 
             "ndef" => """

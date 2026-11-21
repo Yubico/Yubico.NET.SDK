@@ -41,7 +41,7 @@ Static `ReadInitialStateAsync` helpers on each concrete backend perform discover
 `IYubiOtpBackend` exposes only operational commands, not initialization.
 
 SmartCard path:
-1. SELECT `AID.MANAGEMENT` (for NEO version reliability)
+1. Without cached device info, SELECT `AID.MANAGEMENT` (for NEO version reliability)
 2. SELECT `AID.OTP` → store status bytes
 3. Use Management's version when available; when OTP major is 3, use the higher Management/OTP version.
    This Management probe runs for both USB CCID and NFC. Cached ConfigState still exposes raw OTP status.
@@ -55,8 +55,10 @@ OTP HID path:
 3. `ConfigureProtocolAsync` → configure protocol
 4. Construct the HID backend with the effective protocol
 
-The override is applied after discovery. ConfigState gates and the SmartCard touch heuristic still use
-raw status. Core's local readiness/touch windows are checked between awaited native calls, not hard
+An explicit override takes precedence; otherwise cached device info wins over the applet version for admission.
+Unknown or prerelease firmware bypasses command preflight, without discarding a known numeric framing version.
+Required status and cancellation failures still propagate. ConfigState gates still use raw status.
+Core's local readiness/touch windows are checked between awaited native calls, not hard
 call-duration bounds. Custom IOtpHidConnection providers must supply eight-byte reports; built-in length
 checks do not establish central defensive handling for malformed custom input. Keep Core report/NEO
 failure classification and polling policy separate from applet sequence/CRC interpretation.
@@ -66,16 +68,13 @@ failure classification and polling policy separate from applet sequence/CRC inte
 When `SessionCreationOptions.UserPresencePrompt` is supplied, only HMAC-SHA1 and Yubico OTP
 challenge-response operations can notify it. OTP HID waits until the device reports the touch-wait flag,
 then the Core protocol requests the operation's shared handle once with `DeviceWaiting`; `HidBackend` owns
-terminal resolution after response-length and CRC validation. SmartCard has no in-flight wait signal, so
-`SmartCardBackend` owns both the `PolicyRequires` request and terminal resolution when cached OTP status
-identifies the selected slot as touch-triggered. Unknown and non-touch SmartCard slot state remains silent.
+terminal resolution after response-length and CRC validation. SmartCard has no in-flight wait signal and
+never notifies; cached OTP status identifies the keyboard trigger, not challenge-response policy.
 Only expiration of an OTP HID wait after the device reports the touch-wait flag resolves as `TimedOut`;
-transport and readiness timeouts, including all SmartCard timeouts, resolve as `Failed`. Challenge-response
+other HID transport and readiness timeouts resolve as `Failed`. Challenge-response
 output remains backend-owned until successful resolution and is cleared if the callback prevents transfer.
 Notification context uses application `YubiOTP` and the slot enum name as its scope; configuration and status
-operations never notify. The cached trigger indicator describes keyboard activation, not a read-back of
-challenge-response RequireTouch. Treat SmartCard's PolicyRequires as the current implementation heuristic,
-not proven policy certainty; unknown/non-triggered state remains silent. Prefer explicit OTP HID for USB
+operations never notify. Prefer explicit OTP HID for USB
 challenge recipes instead of assuming SmartCard command parity across devices/interfaces.
 
 ## Slot Configuration Model
@@ -100,13 +99,13 @@ Configuration hierarchy:
 `SetNdefConfigurationAsync` builds a 56-byte NDEF payload:
 - URI type (`0x55`): Compresses prefixes using 36-entry NFC Forum URI prefix table
 - Text type (`0x54`): Language header `[0x02]["en"]` + content
-- Null content sends an all-zero disable request
+- `DisableNdefAsync` sends an all-zero disable request
 
-Null sends an all-zero disable request, distinct from an empty URI/text configuration; on-tap effects
-need target-device verification. URI remainder allows 53 UTF-8 bytes after longest ordinal/case-sensitive
+Null content is rejected; empty URI/text configuration is distinct from disable. On-tap effects
+need target-device verification. URI remainder allows 53 UTF-8 bytes after longest ordinal/case-insensitive
 prefix matching; text allows 51 UTF-8 bytes. The block configures an existing compatible slot on NFC hardware,
 not a complete NDEF record; legacy URI output can append OTP. There is no NFC read-back or arbitrary language/
-UTF-16 option. Undefined enum values are not validated; do not describe the encoder as full URI validation.
+UTF-16 option. Undefined enum values are rejected, but the encoder does not validate URI syntax.
 
 ## HMAC-SHA1 Challenge Padding
 
@@ -139,15 +138,15 @@ guarantee; prefer 1–63 bytes in short mode and verify empty/64-byte boundaries
 
 - Configurations copy inputs; Dispose clears private fixed/UID/key fields, not source buffers or GetConfig results.
 - Caller owns source buffers, every GetConfig array, and successful calculation output. Clear them separately.
-- One-shot HMAC returns only after hidden-session disposal. A teardown exception after calculation can
-  strand the transferred backend result without exposing it to the caller; no runtime fix is implied.
+- One-shot HMAC transfers output only after hidden-session disposal; it clears the retained output on
+  teardown failure. A calculation failure remains primary if teardown also fails.
 - Clearing returned prefixes/owned encodings does not clear every incoming report, Windows report-ID
   staging array, APDU owner, fragment or decrypted temporary. Ordinary callback-failure cleanup is narrower
   than all-path erasure when a logging provider itself throws.
 - HMAC clears its padded copy; AES borrows the unpadded six-byte input. Keep borrowed inputs stable until await ends.
 - Immutable password/CLI strings cannot be deterministically erased. Raw translated scan codes permit mutable-source cleanup.
-- Normal WriteConfig cleanup clears assembled blocks, but invalid new/current-code paths allocate secret copies
-  before validation/try and can strand them. No-I/O rejection is not an all-path erasure guarantee.
+- WriteConfig validates both access codes before copying secret fields and clears its assembled blocks on
+  success or failure. Separate lower-layer copies remain outside this cleanup scope.
 - Never log keys, access codes, or challenge data
 
 ## Current implementation constraints
@@ -159,15 +158,15 @@ and limited to overlapping known member IDs.
 
 - Updates send complete masked values, not patches. Defaults are SerialApiVisible/AllowUpdate, other update
   flags clear. New code omission sends zeros; repeat current code in both code arguments to retain protection.
-- HOTP nonzero IMF divides by 65,536 instead of the vendor 16; recommend zero, not the erroneous accepted range.
-- Scan-map API enforces 38 bytes versus the vendor 45-entry map; do not recommend truncation/full-map programming.
+- HOTP stores `imf / 16` as a big-endian `ushort`. Nonzero preset output still needs physical qualification.
+- Scan-map programming takes 45 bytes at firmware 3.0.0 or later. The separate reset sends 45 zeros.
 - Type/operation minimums do not validate every legacy flag, password length, preset counter, or hardware feature.
-- SmartCard write sequence checks bypass 5.0.0 <= effective version < 5.5.0, accept any returned zero, and
-  silently accept status shorter than six bytes after fallback. These are limitations, not intended validation.
+- SmartCard rejects write status shorter than six bytes after fallback. It accepts a sequence increment
+  or a reset from a positive sequence when empty or in the effective [5.0.0, 5.4.3) window.
 - SmartCard data reads return the expected prefix, allowing excess data. HID data reads validate CRC over
   expected length plus two bytes and return the expected prefix; HID writes only check status length here.
-- OtpTool's static command uses UTF-8 bytes as raw scan codes and ignores layout. Its TOTP flag is not code
-  generation, settings are not patches, and generated human output intentionally includes secrets. See README.
+- OtpTool's static command uses its selected layout to translate text. It does not generate TOTP codes;
+  settings are not patches, and generated human output intentionally includes secrets. See README.
 
 ## Test Infrastructure
 
@@ -188,11 +187,9 @@ extra hidden Configure I/O. See [L6a managed evidence](../../docs/research/linux
 ### Integration Tests
 - Use `[WithYubiKey]` attribute with firmware filters
 - Touch-triggered tests marked with `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]`
-- Existing tests are destructive: slot-2 programming deletes that slot, swap affects both slots, and the
-  protection suite replaces slot 1 as well. Original unreadable secrets are not restored. Some cleanup is not
-  in finally; a second swap attempts restoration but is not guaranteed after failure.
-- For new tests, prefer dedicated slot 2 and finally cleanup, but inspect the entire fixture and operation
-  sequence rather than treating those guidelines as guarantees of the current suite.
+- Tests are destructive: slot-2 programming can replace that slot, swap affects both slots, and the
+  protection suite also resets slot 1. Use dedicated, authorized fixtures; original unreadable secrets are
+  not restored. Start tests from known state, resetting or restoring the relevant fixture state beforehand.
 - Configured-bit/response-length assertions do not prove keyboard output, digit count, ticket validity,
   NFC read-back, or real-device compatibility. Reflection zeroing tests inspect fields; disposal rejection alone does not.
 
@@ -221,11 +218,10 @@ finally
 ### Challenge-response
 
 Composable fragment within an already open `YubiOtpSession session` for a correctly provisioned slot.
-`byte[] challenge` is owned by this task. Import System, System.Runtime.InteropServices and
-System.Security.Cryptography plus the module namespace. AsMemory below is only for the caller-owned SDK output.
+`byte[] challenge` is owned by this task. Import System and System.Security.Cryptography plus the module namespace.
 
 ```csharp
-ReadOnlyMemory<byte> response = default;
+Memory<byte> response = default;
 try
 {
     response = await session.CalculateHmacSha1Async(Slot.Two, challenge);
@@ -234,7 +230,7 @@ try
 finally
 {
     CryptographicOperations.ZeroMemory(challenge);
-    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+    CryptographicOperations.ZeroMemory(response.Span);
 }
 ```
 

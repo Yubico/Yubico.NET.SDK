@@ -18,7 +18,8 @@ challenge-response, and sets the NFC NDEF record. Stored TOTP and HOTP credentia
   | Serial number read | 2.2.0 |
   | HMAC-SHA1 challenge-response | 2.2.0 |
   | Yubico OTP challenge-response | 2.2.0 |
-  | Slot update | 2.3.0 |
+  | HOTP and static-password configurations | 2.2.0 |
+  | Slot update | 2.2.0 |
   | Slot swap | 2.3.0 |
   | NDEF configuration | 3.0.0 |
   | `ConfigState.IsTouchTriggered` | 3.0.0 |
@@ -36,11 +37,11 @@ examples below explicitly select OTP HID; this is the supported USB recipe, not 
 Session creation discovers firmware and slot status before constructing its operational backend. SmartCard
 programming-sequence validation starts from the value returned by OTP selection, including when SCP is enabled.
 On OTP HID, Core reads a first report for protocol firmware, performs the NEO refresh when needed, then
-reads a second report for cached status. SmartCard probes Management on both USB CCID and NFC, then
-selects OTP; when OTP's major version is three it uses the higher Management/OTP version. A caller override
-is applied afterward to session policy. Cached `ConfigState` still uses raw OTP status, so its gates and
-the SmartCard touch heuristic can differ from effective session feature checks. Major-zero acceptance
-is optimistic SDK policy, not proof of device/command support.
+reads a second report for cached status. Applet commands use cached device-info firmware first, then the applet's
+version if no cache is available. SmartCard still selects OTP for required status; with no cache it probes Management
+first and retains the NEO version fallback. A caller override takes precedence. Major-zero and cached prerelease
+firmware bypass command preflight without replacing a known numeric protocol version. Required initialization still
+fails on transport errors or malformed status. `ConfigState` uses raw OTP status, not session command admission.
 
 ## Installation
 
@@ -94,7 +95,7 @@ Choose a configuration for the output you need:
 | Configuration | Purpose and input |
 |---|---|
 | `YubiOtpSlotConfiguration` | Keyboard Yubico OTP: raw public-ID bytes (up to 16), 6-byte private ID and 16-byte AES key. The key emits two modhex characters per public-ID byte; do not pass modhex text bytes. Your service verifies the OTP. |
-| `HotpSlotConfiguration` | Keyboard HOTP: exact 20-byte key; synchronize the verifier's counter. Use the default `imf: 0`: nonzero IMF encoding is currently incorrect (see Constraints). |
+| `HotpSlotConfiguration` | Keyboard HOTP: exact 20-byte key; sync the verifier to the initial moving factor (default 0, or up to 1,048,560 in steps of 16). |
 | `StaticPasswordSlotConfiguration` | A string plus keyboard layout, or already translated raw scan codes; not UTF-8 bytes. |
 | `StaticTicketSlotConfiguration` | A fixed Yubico-format ticket, not a changing one-time password. |
 | `HmacSha1SlotConfiguration` | Host-supplied challenge, 20-byte HMAC-SHA1 result. |
@@ -137,9 +138,9 @@ finally
 ```
 
 Clearing `AllowUpdate` can prevent later updates. Legacy Manual 3.3 also describes dormant activation as
-one-way within updates: once cleared, setting it again requires replacement. Tagged vendor tools reject
-access-code changes on firmware 4.3.2–4.3.5; this SDK does not enforce that restriction. Check applicability
-to your firmware rather than treating legacy flag rules as universal 5.x behavior.
+one-way within updates: once cleared, setting it again requires replacement. The SDK rejects access-code
+changes on firmware 4.3.2–4.3.5, treating omission and six zero bytes as the same unprotected value.
+Do not treat legacy flag rules as universal 5.x behavior.
 
 ### Program a slot for HMAC-SHA1 challenge-response
 
@@ -169,13 +170,13 @@ finally
 
 ### Calculate an HMAC-SHA1 response
 
-The response is 20 bytes. This fragment needs a slot already provisioned for HMAC-SHA1 with the verifier's
+The response is 20 bytes of fresh, caller-owned writable memory. This fragment needs a slot already provisioned for HMAC-SHA1 with the verifier's
 key and short-challenge convention. Touch the key if that slot requires it; use the prompt recipe below
 to display a notification. This one-shot extension opens and disposes its own session.
 
 ```csharp
 byte[] challenge = Encoding.UTF8.GetBytes("some-challenge");
-ReadOnlyMemory<byte> response = default;
+Memory<byte> response = default;
 try
 {
     response = await device.CalculateHmacSha1Async(
@@ -186,7 +187,7 @@ try
 finally
 {
     CryptographicOperations.ZeroMemory(challenge);
-    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+    CryptographicOperations.ZeroMemory(response.Span);
 }
 ```
 
@@ -282,13 +283,14 @@ to allow updates). `ProtectSlot2` is a separate protection flag, not an access c
 ### Configure NFC output
 
 Call `SetNdefConfigurationAsync` for an existing compatible slot on an NFC-capable key. URI mode chooses
-the longest case-sensitive ordinal prefix in the NFC URI table and allows **53 UTF-8 bytes after that
+the longest case-insensitive ordinal prefix in the NFC URI table and allows **53 UTF-8 bytes after that
 prefix**. Text mode allows **51 UTF-8 text bytes**, with a fixed English (`en`) UTF-8 header. These are byte
 limits, not character counts. The 56-byte programming payload is not a complete on-tap NDEF message;
 legacy YubiKey documentation describes a URI prefix followed by a generated OTP.
 
-Pass only `NdefType.Uri` or `NdefType.Text`; the SDK does not validate undefined enum values or URI syntax.
-`null` sends an all-zero disable request, while `""` sends an empty URI/text configuration with its header.
+Only `NdefType.Uri` and `NdefType.Text` are accepted; the SDK does not validate URI syntax.
+`DisableNdefAsync` sends a separate all-zero disable request. `SetNdefConfigurationAsync` rejects `null`;
+`""` sends an empty URI/text configuration with its header.
 There is no NFC read-back API here: verify the resulting on-tap behavior on your target key, including disable.
 
 ## User interaction
@@ -319,9 +321,8 @@ sealed class TouchPrompt : IUserPresencePrompt
 ```
 
 The context carries application `YubiOTP` and the slot name as its scope. Over OTP HID it fires once the device reports
-it is waiting. SmartCard emits `PolicyRequires` up front only when cached status marks the slot touch-triggered.
-That keyboard-trigger indicator is not a reliable read-back of challenge-response `RequireTouch`; this is
-the current notification heuristic, not verified policy certainty. Unknown/non-triggered state stays silent. Cancelling the
+it is waiting. SmartCard does not notify: the keyboard-trigger indicator is not a reliable read-back of
+challenge-response `RequireTouch`. Cancelling the
 operation's token during an OTP HID touch wait requests a dummy-report reset before the
 notification resolves as cancelled. The reset is not a rollback of commands already sent; if it
 fails, dispose the session and connection rather than reusing them. SmartCard operations already
@@ -345,20 +346,20 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
   memory and prompt resources alive. Write/status fallback, CRC validation and notification callbacks
   extend beyond Core's individual guarded exchanges.
 - `PutConfigurationAsync`, `UpdateConfigurationAsync`, `SwapSlotsAsync`, `DeleteSlotAsync`, `SetScanMapAsync`, and
-  `SetNdefConfigurationAsync` overwrite device state irreversibly. Access codes are exactly 6 bytes.
+  `SetNdefConfigurationAsync` and `DisableNdefAsync` overwrite device state irreversibly. Access codes are exactly 6 bytes.
 - Firmware-gated operations throw `NotSupportedException`; `ConfigState` accessors throw `InvalidOperationException`.
-- Nonzero HOTP `imf` is currently encoded with a divisor of 65,536 instead of the vendor protocol's 16.
-  Do not use it to provision a desired nonzero initial counter. Keep `imf: 0` and synchronize your verifier.
-- `SetScanMapAsync` currently requires 38 bytes, whereas the tagged vendor personalization tool specifies
-  a 45-entry map for firmware 3+. This is an implementation limitation, not a supported full-map recipe;
-  do not truncate a vendor map to make it fit.
+- Nonzero HOTP `imf` presets require firmware 2.2 or later. Wire encoding is tested; keyboard output
+  and counter synchronization at those presets still require device qualification.
+- `SetScanMapAsync` takes all 45 entries on firmware 3.0.0+. `ResetScanMapAsync` requests the default map.
+  Both affect keyboard output across slots. Verify output on the intended hardware and host layout.
 - Keyboard pacing flags select 10 ms and 20 ms (30 ms combined). Mode-specific aliases share flag bits;
   the update mask's pacing bits do not grant permission to change challenge touch/short mode. Legacy
   delay, fast-trigger, numeric-keypad, and serial-visibility flags have firmware-specific applicability.
   Serial visibility merges across slots: clearing one slot's flag need not hide the device serial globally.
-- SmartCard write sequence checks are bypassed for effective firmware 5.0.0 ≤ version < 5.5.0 and accept
-  zero after any prior sequence. A short fallback write status can currently escape rejection; success
-  alone is not proof that malformed status was validated. OTP HID data reads check CRC over the expected
+- SmartCard accepts a sequence increment (including wraparound). A reset to zero from a positive sequence
+  is also accepted when status is empty or effective firmware is in [5.0.0, 5.4.3). The 5.4.3 boundary is
+  a software rule, not a physical qualification. A fallback write status shorter than six bytes is rejected without updating
+  cached status. OTP HID data reads check CRC over the expected
   response prefix; its write-status check is a minimum-length check, not that data-response CRC check.
   CRC detects transmission errors, not cryptographic authenticity.
 
@@ -370,33 +371,31 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
   deterministically erased; choose the raw scan-code overload when mutable-source cleanup is required.
 - Session memory arguments are borrowed: keep them stable until the awaited operation finishes, including
   failure. HMAC clears its padded copy; AES sends the borrowed six-byte challenge without padding.
-- Successful calculation output belongs to you even though it is exposed as `ReadOnlyMemory<byte>`.
-  The examples use `MemoryMarshal.AsMemory` only to clear these documented, caller-owned SDK outputs.
-  Do not use that technique on arbitrary borrowed read-only memory. Consume first, then clear in `finally`.
+- Successful calculation output belongs to you. Clear the writable HMAC result in `finally` after use.
+  The AES example uses `MemoryMarshal.AsMemory` only for its documented caller-owned ticket, not for
+  arbitrary borrowed read-only memory.
   The one-shot HMAC helper transfers only after hidden-session teardown succeeds. If teardown throws
-  after calculation, its task faults without exposing or clearing that result. An explicit session lets
-  you retain the calculation result before teardown and clear it in an enclosing `finally`; this does
-  not erase separate incoming-report, APDU, decrypted-response or transport staging copies.
-- Normal write cleanup clears assembled configuration/payload copies, but invalid access-code preflight
-  currently has cleanup gaps. No-I/O validation does not imply erasure of every temporary allocation.
+  after calculation, it clears the retained result and faults. This does not erase separate incoming-report,
+  APDU, decrypted-response or transport staging copies.
+- Configuration writes validate both code lengths before encoding and clear the assembled SDK-owned blocks
+  when the write completes or faults. This does not cover independent transport copies.
   None of these measures promises erasure of all heap copies. Never log keys, passwords, codes, or responses.
 
 ## Example
 
-The interactive OtpTool sample lives at src/YubiOtp/examples/OtpTool/. It demonstrates commands, not
-drop-in `ykman` compatibility. Use the SDK recipes above for production-sensitive provisioning:
+**Demo only; not for production.** OtpTool demonstrates commands, not drop-in `ykman` compatibility.
+Use the SDK recipes above for production-sensitive provisioning:
 
-- The static command currently passes UTF-8 bytes to the raw scan-code constructor and ignores its layout
-  option. It does not correctly translate text; use `StaticPasswordSlotConfiguration(string, KeyboardLayout)`.
-- Calculate requires an explicit hex challenge despite the help's stdin suggestion. `--totp` does not
-  compute a time counter, period, truncation, or code; use your application's agreed HMAC convention instead.
-- Settings sends full masked values, not a patch, and program/settings commands omit a new access code.
-  A supplied current code authenticates the write but does not retain protection. Swap ignores the CLI code option.
-- Sessions use the SmartCard-first default, with no transport selector or presence prompt. A calculation
-  failure does not establish that the same key cannot calculate over explicitly selected OTP HID.
-- JSON mode bypasses confirmation even without force. Generated secrets/passwords are intentionally
+- The static command translates text using `--keyboard-layout` (default `ModHex`). Select the intended
+  host layout explicitly for non-modhex text.
+- Calculate requires an explicit hex challenge and prefers OTP HID on USB. OtpTool does not generate TOTP
+  codes or read a challenge from stdin.
+- Settings sends full masked values, not a patch. Sample programming and settings commands retain a
+  supplied current code by default; `--delete-access-code` explicitly requests removal. Swap does not accept a code.
+- No presence prompt is installed. There is no retry on a different transport if opening the selected connection fails.
+- JSON writes require explicit `--force`. Generated secrets/passwords are intentionally
   displayed in human mode; JSON output is not equivalent and omits generated secret material. Calculate
-  prints the response. Parser errors can echo input and immutable CLI strings cannot be zeroed: protect
+  prints the response. Rejected hex values are not echoed, but immutable CLI strings cannot be zeroed: protect
   terminal history, logs and captured output, and do not treat the sample as a hardened secret-input tool.
 
 ```bash

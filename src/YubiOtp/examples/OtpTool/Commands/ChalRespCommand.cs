@@ -51,6 +51,7 @@ public static class ChalRespCommand
 
         try
         {
+            using var config = new HmacSha1SlotConfiguration(hmacKey);
             if (!options.Force && !options.Json)
             {
                 if (!AnsiConsole.Confirm(
@@ -64,21 +65,13 @@ public static class ChalRespCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            using var config = new HmacSha1SlotConfiguration(hmacKey);
-
-            if (options.RequireTouch || options.Totp)
+            if (options.RequireTouch)
             {
                 config.RequireTouch();
             }
 
-            if (options.Totp)
-            {
-                config.UseShortChallenge();
-            }
-
-            // Current code authenticates only. No new code is supplied, so this does not retain write
-            // protection. Production callers retain it by supplying accessCode in both code arguments.
-            await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
+            await session.PutConfigurationAsync(slot, config, options.DeleteAccessCode ? default : accessCode,
+                accessCode, ct);
 
             if (options.Json)
             {
@@ -87,8 +80,7 @@ public static class ChalRespCommand
                     status = "ok",
                     slot = FormatSlot(slot),
                     type = "chalresp",
-                    touch = options.RequireTouch || options.Totp,
-                    totp = options.Totp
+                    touch = options.RequireTouch
                 });
             }
             else

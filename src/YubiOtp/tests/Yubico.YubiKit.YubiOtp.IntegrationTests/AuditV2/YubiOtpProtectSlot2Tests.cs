@@ -45,6 +45,8 @@ public sealed class YubiOtpProtectSlot2Tests
         // universal SmartCard rejection code across device generations and firmware.
         await using var session = await state.Device.CreateYubiOtpSessionAsync(
             new SessionCreationOptions { PreferredConnectionType = state.ConnectionType });
+        // Slot 1 may still protect slot 2 after an earlier fixture failed during setup.
+        await DeleteIfConfiguredAsync(session, Slot.One);
         await DeleteIfConfiguredAsync(session, Slot.Two);
         using (var protectedConfig = new HmacSha1SlotConfiguration(Key))
         {

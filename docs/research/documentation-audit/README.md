@@ -18,4 +18,15 @@ The [baseline umbrella #788](https://github.com/Yubico/Yubico.NET.SDK/pull/788) 
 
 Hardware qualification is separate from software delivery. All 17 T1 items, `CORE-SD-X007`, and Q10 remain open or partial; Q10 was compile-only. The [Management metadata read](https://github.com/Yubico/Yubico.NET.SDK/pull/791#issuecomment-7064068544) is one Linux FIDO HID result. The completed [.NET/Python GetInfo comparison](https://github.com/Yubico/Yubico.NET.SDK/pull/798#issuecomment-7064157982) on serial 103 over Linux FIDO HID found agreement on selected fields, with absent `preferredPlatformUvAttempts` shown as `0` in Python. No UInt64 vendor command ID was exercised, and built-in UV was absent, so this did not qualify tokenless UV. On the same fixture, one [Selection touch](https://github.com/Yubico/Yubico.NET.SDK/pull/798#issuecomment-7066838223) went from `DeviceWaiting` to `Completed` in 3.87 s with `IsAuthenticated` false; disposal released the connection reservation. This is not cryptographic or UV qualification. One [no-touch HMAC vector](https://github.com/Yubico/Yubico.NET.SDK/pull/793#issuecomment-7064320527) passed on serial 103 over OTP HID: only previously empty slot 2 was programmed, then deleted and verified empty; slot 1 was unchanged. See the ledger and PR notes for scope. Explicit deferrals remain deferred, not jobs to run.
 
+One [PIV signing witness](https://github.com/Yubico/Yubico.NET.SDK/pull/795#issuecomment-7066954262) on
+serial 103 (Linux USB CCID, base `1126fda22`) used AES-192 management authentication and a test-owned
+P-256 key in previously empty Retired 20 (`PinNever`, `TouchAlways`). One signing touch (12.9 s)
+produced a DER signature that passed independent ECDSA verification. The test key was deleted, the slot
+was confirmed empty, and the connection was released. No PIN, PUK, certificate, F9, reset, or other-key
+operations were performed. Q10, hotplug, and cancellation qualification remain pending.
+
+[AG-33](pass-2-review-decisions.md#ag-33-review-adjudication-and-compatibility) sets the sibling SDK floor,
+the goal of keeping V1-provisioned YubiKeys usable without forced reprovisioning, and the need for explicit
+human adjudication where review findings warrant it. It does not waive hardware qualification.
+
 The [frozen audit archive](https://github.com/Yubico/Yubico.NET.SDK/tree/db72706b9ebda1f9ff95fede125e270c755966d0/docs/research/documentation-audit) contains the supporting evidence and the [approved writing style](https://github.com/Yubico/Yubico.NET.SDK/blob/db72706b9ebda1f9ff95fede125e270c755966d0/docs/research/documentation-audit/records/style.md).

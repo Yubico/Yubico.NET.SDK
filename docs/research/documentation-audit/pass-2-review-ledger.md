@@ -40,7 +40,8 @@ and pending physical qualification.
 | X12 | `CredentialPassword` with `FromUtf8` (padded, at most 16 bytes) and `FromRaw` (exactly 16) | AG-23 |
 | X13 | Conservative ROCA range [4.2.0, 4.3.5) for on-card RSA generation in PIV and OpenPGP; import, signing and decryption unchanged. PIV policy adoption does not close PIVIMP-003 qualification. | AG-20, [AG-31](pass-2-review-decisions.md#ag-31-november-21-follow-up-approvals) |
 | S1 | Sample apps: readability first, no added secret clearing, demo-only warning | AG-21 |
-| D1 | Every PR labels each divergence from the sibling SDKs with its reason | AG-21 |
+| D1 | Default to harmony with applicable sibling SDKs as the quality, correctness, and UX floor; label each deliberate divergence with its concrete reason | AG-21; [AG-33](pass-2-review-decisions.md#ag-33-review-adjudication-and-compatibility) |
+| V1 compatibility and review | Preserve formats, functionality, and existing V1-provisioned keys where possible, not V1 source or binary APIs; compare pinned `develop` source. Record explicit human adjudication where needed without waiving qualification | [AG-33](pass-2-review-decisions.md#ag-33-review-adjudication-and-compatibility) |
 | C1 | See X4 | [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) |
 
 Delivery (AG-5, AG-6, AG-7, [AG-28](pass-2-review-decisions.md#ag-28-delivery-commit-scope)): one commit per unsplit

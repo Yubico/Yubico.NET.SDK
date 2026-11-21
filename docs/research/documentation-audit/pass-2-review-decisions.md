@@ -47,6 +47,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-30](#ag-30-q11-keyreplacement-exact-shape) | 2026-11-21 | Dennis supplied the exact Security Domain `KeyReplacement` shape, replacement range, and four mandatory-argument signatures. | Approved for SD-IMP-006 |
 | [AG-31](#ag-31-november-21-follow-up-approvals) | 2026-11-21 | Dennis approved the OATH reset follow-up, CTAP reset rediscovery, WebAuthn continuation limit, PIV adoption of X13 and legacy-derived retry refusal; requested a Rust/Python PIV PIN-only design comparison and directed public NuGet.org sourcing for NativeShims. | Approved within the scope below; PIV PIN-only API design and NativeShims availability verification pending |
 | [AG-32](#ag-32-previewsign-empty-generated-handle) | 2026-11-21 | Dennis explicitly approved accepting an empty but present previewSign signing handle. | Approved: amends only the CTAP-IMP-040 handle-length facet and unblocks WA-IMP-019 |
+| [AG-33](#ag-33-review-adjudication-and-compatibility) | 2026-11-21 | Dennis approved recording human review adjudication, sibling SDK harmony, and compatibility with existing .NET V1 provisioning. | Approved; existing specific decisions stand |
 
 ### AG-8 classification run
 
@@ -681,6 +682,28 @@ there is a global default signing key. Python-fido2 (`5bc9d3a1c8c34a3c4ca408366e
 `crates/yubikit/src/webauthn/extensions/sign.rs`) also encode a present empty handle. This does not imply
 full validation parity: Python omits empty args, Rust forwards `Some(empty)`, and .NET retains its
 nonempty TBS and complete-map checks. This approval supersedes only the nonempty-handle condition of AG-11.
+
+### AG-33 review adjudication and compatibility
+
+Dennis confirmed these directions in chat on 2026-11-21 and instructed the team to record them and proceed:
+
+- **Human review.** Some Copilot findings need explicit human adjudication, especially for NEO or other
+  pre-5 YubiKeys and experimental previewSign or ARKG. Record the disposition and its scope. This is
+  not a blanket waiver, hardware qualification, or authorization for an automatic fourth review round.
+- **Sibling SDK floor.** Use Python-fido2, ykman, Rust, and Android where applicable as the floor for
+  quality, correctness, and user experience. Preserve compatible behavior by default. A deliberate
+  improvement needs a concrete reason under D1; stricter behavior is not inherently better, and shared
+  defects are not precedent to repeat.
+- **V1 upgrade compatibility.** Preserve data formats, functionality, and existing YubiKey provisioning
+  created using this repository's .NET SDK V1 as far as possible. Upgrading to V2 alone should not force
+  a reset or reprovisioning. This is not a promise of V1 source or binary API compatibility. When a
+  comparison is needed, use the actual `develop` source and record the commit OID; do not assume `main`
+  is equivalent. PIVIMP-009 timestamp encoding, OTP-IMP-008 NDEF compatibility, and PIV certificate
+  formats are relevant precedents, not evidence of global validation against V1.
+
+Keep existing approved decisions. Bring concrete conflicts with security, protocol, or previously
+approved legacy support limits to Dennis rather than reversing those decisions silently. This guidance
+does not commission a new broad audit or hardware test campaign.
 
 ### AG-14 firmware rule detail
 

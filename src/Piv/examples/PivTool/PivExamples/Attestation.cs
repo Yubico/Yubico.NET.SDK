@@ -112,7 +112,15 @@ public static class Attestation
                 return AttestationResult.Failed("No attestation intermediate certificate found.");
             }
 
-            return AttestationResult.Succeeded(intermediateCert);
+            try
+            {
+                return AttestationResult.Succeeded(intermediateCert);
+            }
+            catch
+            {
+                intermediateCert.Dispose();
+                throw;
+            }
         }
         catch (Exception ex)
         {

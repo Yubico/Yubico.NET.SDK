@@ -407,6 +407,7 @@ internal static class CliRunner
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await PivExamples.Certificates.ExportCertificatePemAsync(session, slot.Value, ct);
+        using var certificate = result.Certificate;
 
         if (!result.Success)
         {
@@ -415,7 +416,7 @@ internal static class CliRunner
             return 1;
         }
 
-        var pem = result.Certificate?.ExportCertificatePem() ?? string.Empty;
+        var pem = certificate?.ExportCertificatePem() ?? string.Empty;
 
         if (outputPath is not null)
         {
@@ -521,6 +522,7 @@ internal static class CliRunner
             }
 
             var result = await PivExamples.Certificates.GenerateSelfSignedAsync(session, slot.Value, subject, validityDays, ct);
+            using var certificate = result.Certificate;
             if (useJson) JsonOutput.Write(result);
             else if (result.Success) Console.WriteLine("Self-signed certificate generated successfully.");
             else Console.Error.WriteLine($"Error: {result.ErrorMessage}");
@@ -839,6 +841,7 @@ internal static class CliRunner
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await Attestation.GetIntermediateCertificateAsync(session, ct);
+        using var certificate = result.AttestationCertificate;
 
         if (!result.Success)
         {

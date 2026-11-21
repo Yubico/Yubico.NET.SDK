@@ -306,12 +306,16 @@ public static class Certificates
                 DateTimeOffset.UtcNow.AddDays(validityDays),
                 serialNumber);
 
-            await session.StoreCertificateAsync(
-                slot,
-                newCert,
-                CertificateCompression.Automatic,
-                cancellationToken);
-            return CertificateResult.Succeeded(newCert);
+            try
+            {
+                await session.StoreCertificateAsync(slot, newCert, CertificateCompression.Automatic, cancellationToken);
+                return CertificateResult.Succeeded(newCert);
+            }
+            catch
+            {
+                newCert.Dispose();
+                throw;
+            }
         }
         catch (Exception ex)
         {

@@ -58,6 +58,42 @@ public class HsmAuthToolInputTests
         Assert.Equal(42, result);
     }
 
+    [Theory]
+    [InlineData(16, 16, ':')]
+    [InlineData(16, 17, ':')]
+    [InlineData(16, 17, ' ')]
+    [InlineData(16, 17, '-')]
+    [InlineData(32, 32, ':')]
+    [InlineData(32, 33, ':')]
+    public void KeyPromptDoesNotAcceptTruncatedSeparatorFormattedKeys(int expectedBytes, int enteredBytes, char separator)
+    {
+        var input = string.Join(separator, Enumerable.Repeat("AB", enteredBytes)); // Synthetic fixture.
+        using var key = OutputHelpers.ReadKey("Test key", expectedBytes, TestContext.Current.CancellationToken, Read);
+
+        if (enteredBytes == expectedBytes)
+        {
+            Assert.NotNull(key);
+            Assert.Equal(Enumerable.Repeat((byte)0xAB, expectedBytes), key.Memory.ToArray());
+        }
+        else
+        {
+            Assert.Null(key);
+        }
+
+        DisposableArrayPoolBuffer? Read(CredentialReaderOptions options, CancellationToken _)
+        {
+            // Mirror the reader's filter-before-capacity order; its hex parser then counts digits.
+            var digits = input.Where(c => options.CharacterFilter?.Invoke(c) ?? true)
+                .Take(options.MaxLength).Where(char.IsAsciiHexDigit).ToArray();
+            if (digits.Length != options.ExpectedByteLength * 2)
+                return null;
+
+            var buffer = new DisposableArrayPoolBuffer(digits.Length / 2);
+            Convert.FromHexString(digits).CopyTo(buffer.Memory.Span);
+            return buffer;
+        }
+    }
+
     // Both the --derive command and the interactive Add Derived Credential menu use this reader.
     [Theory]
     [InlineData("a", 128, true)]

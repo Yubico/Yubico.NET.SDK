@@ -39,8 +39,16 @@ public static class OutputHelpers
         throw new ArgumentException($"The demo accepts derivation passwords of at most {sampleMaxLength} UTF-16 code units.");
     }
 
-    internal static IMemoryOwner<byte>? ReadKey(string prompt, int length, CancellationToken token) =>
-        ReadMasked(CredentialReaderOptions.ForHexKey(length) with { Prompt = prompt + ": " }, token);
+    internal static IMemoryOwner<byte>? ReadKey(string prompt, int length, CancellationToken token,
+        Func<CredentialReaderOptions, CancellationToken, IMemoryOwner<byte>?>? read = null) =>
+        (read ?? ReadMasked)(CredentialReaderOptions.ForHexKey(length) with
+        {
+            Prompt = prompt + ": ",
+            // Ignore separators before they can consume capacity. Keep one extra digit so the
+            // existing hex parser rejects overflow as odd-length rather than accepting a prefix.
+            CharacterFilter = char.IsAsciiHexDigit,
+            MaxLength = length * 2 + 1
+        }, token);
 
     private static IMemoryOwner<byte>? ReadMasked(CredentialReaderOptions options, CancellationToken token)
     {

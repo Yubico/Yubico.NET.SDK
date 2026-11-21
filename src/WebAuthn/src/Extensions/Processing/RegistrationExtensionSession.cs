@@ -63,7 +63,7 @@ internal sealed class RegistrationExtensionSession : IDisposable
         var processors = new List<IRegistrationExtensionProcessor>();
         if (CreateCredProtectProcessor(inputs.CredProtect, context) is { } credProtect) processors.Add(credProtect);
         if (inputs.CredBlob is not null && context.Supports(ExtensionIdentifiers.CredBlob)) processors.Add(new CredBlobProcessor(inputs.CredBlob));
-        if (inputs.MinPinLength is not null && context.Supports(ExtensionIdentifiers.MinPinLength)) processors.Add(new MinPinLengthProcessor());
+        if (inputs.MinPinLength is { Requested: true } && context.Supports(ExtensionIdentifiers.MinPinLength)) processors.Add(new MinPinLengthProcessor());
         if (inputs.LargeBlob is not null && LargeBlobProcessor.ForRegistration(inputs.LargeBlob, requireResidentKey, context) is { } largeBlob) processors.Add(largeBlob);
         if (inputs.Prf is not null && context.Supports(ExtensionIdentifiers.HmacSecret)) processors.Add(PrfProcessor.ForRegistration(inputs.Prf, context));
         if (inputs.CredProps is not null) processors.Add(new CredPropsProcessor(requireResidentKey));

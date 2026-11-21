@@ -29,8 +29,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions;
 /// <param name="MinPinLength">
 /// Requests the current minimum PIN length in Unicode code points, not a policy change. The
 /// authenticator returns it only for an RP ID authorized in its minimum-PIN-length RP list.
-/// As a current input-handling limitation, any nonnull object requests the extension even if its
-/// <c>Requested</c> property is false. Use null to omit it.
+/// Null or <c>Requested = false</c> omits the extension.
 /// </param>
 /// <param name="LargeBlob">Large blob support request.</param>
 /// <param name="Prf">Pseudo-random function extension.</param>

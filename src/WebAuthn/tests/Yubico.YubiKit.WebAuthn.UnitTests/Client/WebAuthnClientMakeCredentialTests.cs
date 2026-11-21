@@ -33,6 +33,39 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 public class WebAuthnClientMakeCredentialTests
 {
     [Theory]
+    [InlineData(null, true, false)]
+    [InlineData(false, true, false)]
+    [InlineData(true, false, false)]
+    [InlineData(true, true, true)]
+    public async Task MakeCredential_MinPinLength_OnlySendsRequestedAndSupportedExtension(bool? requested, bool supported, bool sent)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
+            extensions: supported ? ["minPinLength"] : []));
+        BackendMakeCredentialRequest? captured = null;
+        _mockBackend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(request => captured = request), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
+        var result = await _client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
+        {
+            Challenge = new byte[32],
+            Rp = new("example.com", "Example"),
+            User = new(new byte[16], "example", "Example"),
+            PubKeyCredParams = [CoseAlgorithm.Es256],
+            Extensions = new RegistrationExtensionInputs(MinPinLength: requested is { } value ? new() { Requested = value } : null)
+        }, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(captured);
+        Assert.Equal(sent, captured.Extensions.HasValue);
+        if (captured.Extensions is { } cbor)
+        {
+            var reader = new System.Formats.Cbor.CborReader(cbor);
+            Assert.Equal(1, reader.ReadStartMap());
+            Assert.Equal("minPinLength", reader.ReadTextString());
+            Assert.True(reader.ReadBoolean());
+        }
+        Assert.Null(result.ClientExtensionResults?.MinPinLength);
+    }
+
+    [Theory]
     [InlineData(false, false)]
     [InlineData(false, true)]
     [InlineData(true, true)]

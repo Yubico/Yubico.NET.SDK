@@ -359,8 +359,7 @@ a separate state. Decrypted blob and credential-blob outputs may contain sensiti
 and share the lack of an SDK-owned cleanup contract described above.
 
 `MinPinLength` reports the existing policy in Unicode code points only when the RP is authorized on
-the authenticator; it does not set a PIN policy. A current input-handling limitation means any nonnull
-input requests it, even with `Requested = false`; use null to omit it.
+the authenticator; it does not set a PIN policy. Null and `Requested = false` both omit the request.
 
 ### Evaluate experimental signing
 

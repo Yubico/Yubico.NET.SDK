@@ -444,7 +444,7 @@ Keep these conditions attached to public guidance when changing extension flow:
   nullable-array conversion turns missing data into a present empty memory value; nullable presence and
   length do not distinguish it from a stored empty blob.
   Decrypted blob outputs lack an owned cleanup contract.
-- A nonnull minPinLength input requests the extension even if Requested is false; null omits it.
+- Only a minPinLength input with `Requested = true` requests the extension on a supporting key.
   The value reports existing policy only for authorized RP IDs, not a policy-setting operation.
 - Null input containers yield null result containers; requested containers can yield records with null
   individual outputs. Explicit false enablement/support/write results have their own meanings.

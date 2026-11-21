@@ -155,7 +155,7 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
                 _configuration,
                 _scpKeyParameters,
                 cancellationToken,
-                admitUnverifiedScpFirmware: featureFirmware.IsAlphaOrBeta)
+                scpEligibilityFirmwareVersion: featureFirmware)
             .ConfigureAwait(false);
 
         FirmwareVersion = featureFirmware;

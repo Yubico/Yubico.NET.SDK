@@ -568,6 +568,32 @@ public class ManagementSessionTests
         Assert.Equal(1, connection.Reads);
     }
 
+    [Theory]
+    [InlineData(2, 3, null)]
+    [InlineData(3, 2, 14)]
+    public async Task CreateAsync_ScpReleaseFloorUsesCachedFirmwareWhenLiveVersionDisagrees(
+        int cachedMinor, byte liveMinor, int? expectedFrameLength)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(5, liveMinor) { ExtendedCapable = true };
+        var cached = DeviceInfo.CreateFromTlvs([], new FirmwareVersion(5, cachedMinor, 0));
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            ProtocolConfiguration = new() { ForceShortApdus = true },
+            ScpKeyParameters = keys,
+        };
+
+        var create = ManagementSession.CreateWithCachedDeviceInfoAsync(connection, options, cached, ct);
+        if (expectedFrameLength is null)
+            await Assert.ThrowsAsync<NotSupportedException>(() => create);
+        else
+            Assert.Equal(unchecked((short)0x6A88), (await Assert.ThrowsAsync<ApduException>(() => create)).SW);
+
+        Assert.Equal(expectedFrameLength, connection.InitializeUpdateFrameLength);
+        Assert.Equal(1, connection.Reads);
+    }
+
     [Fact]
     public async Task ResetDeviceAsync_RefreshAndCleanupLoggingFail_PreservesRefreshErrorThroughImplicitDisposal()
     {

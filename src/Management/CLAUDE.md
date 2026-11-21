@@ -732,8 +732,8 @@ for Final, whereas `VersionQualifier.ToString()` itself includes the qualifier t
 Operations call inherited `EnsureSupports(FeatureSetConfig)` (5.0.0) or
 `EnsureSupports(FeatureDeviceReset)` (5.6.0). Do not replace these with a local `_version` comparison:
 the inherited check uses effective `FirmwareVersion`, including overrides and the optimistic development
-policy. Management treats a present, non-final qualifier as development firmware for those checks
-and for SCP admission, unless firmware was explicitly overridden. Protocol setup still receives the numeric
+policy. Management passes the same effective version for SCP admission, including major zero for a
+present non-final qualifier unless firmware was explicitly overridden. Protocol setup still receives the numeric
 version from the live probe when known, otherwise the available
 cached version, unless the caller overrides it. Do not pass synthetic feature firmware to the formatter.
 

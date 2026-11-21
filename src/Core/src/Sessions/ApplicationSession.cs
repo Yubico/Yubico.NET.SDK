@@ -368,7 +368,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         ProtocolConfiguration? configuration = null,
         ScpKeyParameters? scpKeyParams = null,
         CancellationToken cancellationToken = default,
-        bool admitUnverifiedScpFirmware = false)
+        FirmwareVersion? scpEligibilityFirmwareVersion = null)
     {
         // Checked before the IsInitialized early-return: a derived session that sets IsInitialized
         // itself would otherwise skip the bind check entirely and run unguarded.
@@ -389,7 +389,7 @@ public abstract class ApplicationSession : IApplicationSession, IAsyncDisposable
         if (GetScpProtocol(protocol, scpKeyParams) is { } pcscProtocol && scpKeyParams is not null)
         {
             effectiveProtocol = await pcscProtocol
-                .InitializeScpAsync(scpKeyParams, cancellationToken, admitUnverifiedScpFirmware)
+                .InitializeScpAsync(scpKeyParams, cancellationToken, scpEligibilityFirmwareVersion)
                 .ConfigureAwait(false);
 
             isAuthenticated = true;

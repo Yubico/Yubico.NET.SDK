@@ -255,6 +255,13 @@ YubiHSM Auth delivery: [draft PR #794](https://github.com/Yubico/Yubico.NET.SDK/
 | PIVCORE-002 | PIV | High | Interview (G1; T2) | Dennis | Documentation only: general Core caller-serialization contract and PIV-specific guidance in the PIV PR. No new runtime guard or bug fix is implied. | AG-21; superseded by [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) |
 | PIV-QUAL | PIV | Qualification | T1 | T1 hardware | No code decision; device qualification | classification only |
 
-PIV software delivery is tracked in [draft PR #795](https://github.com/Yubico/Yubico.NET.SDK/pull/795).
-PIVIMP-002 software is in the draft for independent review. Q10 is compilation-only and physical qualification
-is pending. The AG-31 ROCA range policy is a software gate, not physical qualification.
+PIV software was delivered in [PR #795](https://github.com/Yubico/Yubico.NET.SDK/pull/795).
+The AG-31 ROCA range policy is a software gate, not physical qualification.
+
+PR #795 records the metadata exceptions: PIVIMP-002 is attributed in the bodies of
+[`fd982b1d1`](https://github.com/Yubico/Yubico.NET.SDK/commit/fd982b1d1d3b1dd651af03d96b4bfafad02b1abf),
+[`ee159fede`](https://github.com/Yubico/Yubico.NET.SDK/commit/ee159fedeb7c5ee7e8aeca1108db88b3f4b2ac8b), and
+[`bb7f6ecf0`](https://github.com/Yubico/Yubico.NET.SDK/commit/bb7f6ecf0ed1bce36c8c8c389552d6e039f7648a),
+which lack the AG-28 trailer pair. Follow-ups for PIVIMP-001, PIVIMP-006d, and PIVIMP-007a lack a standard
+`Triage-Rule` trailer; their primary commits are traceable in the PR table. Q10 was compiled only;
+physical qualification remains pending.

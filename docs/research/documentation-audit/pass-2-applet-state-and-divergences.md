@@ -16,9 +16,11 @@ the [final ledger][ledger] and [agreements][decisions] settle attribution and su
 
 ### OATH ([#789][oath])
 
-- **Access keys and credential URIs.** `ValidateAsync` and `SetKeyAsync` require a 16-byte raw access
-  key, matching Android's SET CODE check and Rust's access-key type rather than Python's permissive
-  forwarding. This checks the YKOATH derived-key width before sending. For `otpauth` URIs, the query
+- **Access keys and credential URIs.** `ValidateAsync` and `SetKeyAsync` reject non-16-byte access
+  keys before I/O, enforcing the YKOATH derived-key width. Rust uses its fixed-width `OathAccessKey`
+  for both operations. Android checks `setAccessKey` width; `unlock(AccessKey)` takes a response
+  callback instead. Python checks neither input width: it sends raw key bytes only in SET CODE and
+  uses the key locally to compute and verify HMACs for VALIDATE. For `otpauth` URIs, the query
   issuer wins as in Python and the Rust CLI, not the label issuer as in Android. A missing HOTP
   counter is zero; the SDK keeps its nonnegative `Int32` range (like Android's signed carrier, not
   the Python/Rust unsigned wire range) and 6–8 digits. The existing URI contract was retained; Android
@@ -79,8 +81,9 @@ the [final ledger][ledger] and [agreements][decisions] settle attribution and su
 - **Draft output.** previewSign CTAP Try extraction warns and omits malformed output like Rust, not
   the reviewed python-fido2/Android throwing paths. An entirely absent pair is not malformed.
   WebAuthn ignores unsigned-only output but rejects a decoded signed result without its unsigned
-  counterpart. The .NET wrapped ARKG P-256 seed carrier is not a standard wire-shape claim;
-  python-fido2 is the only compared sibling with ARKG. CTAP-IMP-029/038/039/040, AG-11/12/32;
+  counterpart. The .NET wrapped ARKG P-256 seed carrier is not a standard wire-shape claim.
+  Only python-fido2 exposes ARKG through the reviewed sibling libraries; Rust has P-256 derivation
+  in its device tests. CTAP-IMP-029/038/039/040, AG-11/12/32;
   [`PreviewSign` extraction and codec](../../../src/Ctap2/src/Extensions/PreviewSign).
 
 ### Management ([#791][mgmt])
@@ -124,7 +127,8 @@ the [final ledger][ledger] and [agreements][decisions] settle attribution and su
 ### YubiOTP ([#793][otp])
 
 - **Programming and status.** Scan-map writes require exactly 45 bytes and firmware 3+ rather than
-  the siblings' raw forwarding. A separate default-map reset uses the personalization tool's reset
+  Python and Rust's raw forwarding. Android has a command constant but no scan-map method at the
+  reviewed pin. A separate default-map reset uses the personalization tool's reset
   payload, not applet factory reset. The SmartCard sequence rule follows the Python/Rust precedent
   with a narrow `5.0.0 ≤ firmware < 5.4.3` window for reset to zero from a positive sequence; .NET
   uses effective session firmware, Python the returned status version. .NET admits byte wraparound,
@@ -252,8 +256,10 @@ the [final ledger][ledger] and [agreements][decisions] settle attribution and su
   resident-key intent. For writes, .NET requires a **nonempty original allow list**, but agrees with
   python-fido2, Android and Rust in accepting multiple entries, deliberately departing from L3
   §10.1.5's exact-one rule. The write binds to the selected assertion's key, not the first candidate.
-  Writes use token-authorized storage (like python-fido2's token requirement, unlike Android's
-  tokenless attempt); the direct CTAP 2.2+ route and the pinless exception were not added. WA-IMP-014/015/017,
+  .NET requires a write token for storage. Python-fido2 requests write permission when acquiring a
+  token, but can attempt storage without one when its UV policy permits; Android can also attempt
+  a tokenless write. A pinless flow the device accepts through those peers still cannot write through
+  .NET. The direct CTAP 2.2+ route and the pinless exception were not added. WA-IMP-014/015/017,
   AG-20/24/25; [`LargeBlobProcessor`](../../../src/WebAuthn/src/Extensions/Processing/Processors/LargeBlobProcessor.cs),
   [`Validation`](../../../src/WebAuthn/src/Client/WebAuthnClient.Validation.cs).
 - **Extension outputs.** An unavailable large-blob read keeps the result present without a blob;
@@ -294,8 +300,8 @@ the [final ledger][ledger] and [agreements][decisions] settle attribution and su
   command reach the card. CTAP-IMP-002, MGMT-IMP-008/012, OTP-IMP-006, PGP-CORE-003, CORE-HSM-X004;
   [`Feature`](../../../src/Core/src/Devices/Feature.cs), [#790][ctap], [#791][mgmt], [#793][otp], [#794][hsm], [#796][pgp].
 - **ROCA (X13, AG-20/31).** PIV and OpenPGP both refuse on-card RSA generation in `[4.2.0, 4.3.5)`.
-  This matches pinned Python in both and the pinned Rust OpenPGP guard; it starts earlier than the
-  Android-aligned `[4.2.6, 4.3.5)` precedent. The extra versions are conservatively excluded, not newly
+  This matches pinned Python and Rust in both applets. The pinned Android guard in both starts
+  at `4.2.6` and ends before `4.3.5`. The extra versions are conservatively excluded, not newly
   known affected. Imports and existing key use are not blocked by this check. PIVIMP-003/PGP-IMP-011;
   [`PIV feature policy`](../../../src/Piv/src/Features.cs),
   [`OpenPGP generation`](../../../src/OpenPgp/src/OpenPgpSession.Keys.cs), [#795][piv], [#796][pgp].

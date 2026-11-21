@@ -1,10 +1,16 @@
 # Pass 2 review packet
 
-See [current applet state and deliberate differences](pass-2-applet-state-and-divergences.md) for the nine merged applets.
+## Current status
+
+All nine applet PRs are merged into `yubikit-pass2-base` at [`4d217833`](https://github.com/Yubico/Yubico.NET.SDK/commit/4d217833964f35120ed54bb47e2d60fcf5328673), with 13 successful GitHub checks on that commit. [PR #788](https://github.com/Yubico/Yubico.NET.SDK/pull/788) remains open as a draft on hold for Core Pass 2. See [current applet state and deliberate differences](pass-2-applet-state-and-divergences.md) for what landed and why.
+
+The 179 ledger rows comprise 157 dispositions covered by merged changes or retained policy, two explicit deferrals, one S1 drop, one fold, and 18 qualification-only rows. Nineteen qualification items remain open or partial, including Q10, which is not a separate ledger row.
 
 Use the [final ledger](pass-2-review-ledger.md) and [decision log](pass-2-review-decisions.md) for card decisions, deferrals and PR attribution. The [master](pass-2-applet-master.md) and its review and correction records retain their original code pins and conclusions; they do not describe the current upstream tree.
 
 ## Progress checkpoint — 2026-11-21
+
+**Historical checkpoint, before #798 merged.** The status and resume instructions below describe that checkpoint, not the current state or next steps.
 
 Eight of nine applet PRs (#789–796) are merged into `yubikit-pass2-base` at `1126fda22`. The
 [baseline umbrella #788](https://github.com/Yubico/Yubico.NET.SDK/pull/788) remains open pending Dennis's

@@ -36,8 +36,12 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.LargeBlob;
 /// </summary>
 public class LargeBlobProcessorTests
 {
-    [Fact]
-    public async Task Authentication_MultiEntryWriteUsesTheSelectedAssertionsStorageKey()
+    [Theory]
+    [InlineData(true, null)]
+    [InlineData(false, 1u)]
+    [InlineData(true, 2u)]
+    [InlineData(false, 2u)]
+    public async Task Authentication_WriteUsesTheSelectedAssertionsStorageKey(bool multiEntry, uint? assertionCount)
     {
         var storage = Context().Backend;
         storage.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(new Yubico.YubiKit.Ctap2.AuthenticatorInfo
@@ -52,6 +56,8 @@ public class LargeBlobProcessorTests
         byte[] first = [1];
         byte[] selected = [2];
         byte[] payload = [0x33];
+        var assertion = MockCtap2Responses.CreateMockGetAssertionResponse(selected, numberOfCredentials: assertionCount, largeBlobKey: LargeBlobKey);
+        storage.GetNextAssertionAsync(Arg.Any<CancellationToken>()).Throws(new InvalidOperationException("A singleton request must not continue."));
         storage.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
         {
             var request = call.Arg<BackendGetAssertionRequest>();
@@ -63,7 +69,7 @@ public class LargeBlobProcessorTests
                 return MockCtap2Responses.CreateMockGetAssertionResponse(selected, largeBlobKey: new byte[32]);
             }
             Assert.Equal(selected, allowed.Id.Span);
-            return MockCtap2Responses.CreateMockGetAssertionResponse(selected, largeBlobKey: LargeBlobKey);
+            return assertion;
         });
         _storage.SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
             .Returns(call =>
@@ -75,18 +81,30 @@ public class LargeBlobProcessorTests
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         await using var client = new WebAuthnClient(storage, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
         var ct = TestContext.Current.CancellationToken;
-        var matches = await client.GetAssertionAsync(new()
+        var options = new WebAuthn.Client.Authentication.PublicKeyCredentialRequestOptions
         {
             Challenge = new byte[32],
             RpId = "example.com",
-            AllowCredentials = [new(first), new(selected)],
+            AllowCredentials = multiEntry ? [new(first), new(selected)] : [new(selected)],
             Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Write = payload })
-        }, "123456"u8.ToArray(), ct);
-        var result = await Assert.Single(matches).SelectAsync(ct);
-        Assert.Equal(selected, result.CredentialId.Span);
-        Assert.True(result.ClientExtensionResults?.LargeBlob?.Written);
-        storage.Received(1).CreateLargeBlobStorage(token);
-        await _storage.Received(1).SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        };
+        Task<IReadOnlyList<WebAuthn.Client.Authentication.MatchedCredential>> AssertAsync() => client.GetAssertionAsync(options, "123456"u8.ToArray(), ct);
+        if (assertionCount == 2)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(AssertAsync);
+            Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+            Assert.False(assertion.AuthenticatorDataRaw.Span.ContainsAnyExcept((byte)0));
+            Assert.False(assertion.LargeBlobKey.GetValueOrDefault().Span.ContainsAnyExcept((byte)0));
+        }
+        else
+        {
+            var result = await Assert.Single(await AssertAsync()).SelectAsync(ct);
+            Assert.Equal(selected, result.CredentialId.Span);
+            Assert.True(result.ClientExtensionResults?.LargeBlob?.Written);
+            storage.Received(1).CreateLargeBlobStorage(token);
+        }
+        await storage.DidNotReceive().GetNextAssertionAsync(Arg.Any<CancellationToken>());
+        await _storage.Received(assertionCount == 2 ? 0 : 1).SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]

@@ -51,7 +51,7 @@ internal sealed class CredentialMatcher
     {
         var results = new List<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
 
-        uint? numberOfCredentials = CheckAssertionCount(firstResponse);
+        uint? numberOfCredentials = CheckAssertionCount(firstResponse, hasAllowList);
 
         try
         {
@@ -101,16 +101,25 @@ internal sealed class CredentialMatcher
             "The assertion did not identify a credential matching the request.");
     }
 
-    private static uint? CheckAssertionCount(GetAssertionResponse response)
+    private static uint? CheckAssertionCount(GetAssertionResponse response, bool hasAllowList)
     {
         uint? count = response.NumberOfCredentials;
-        if (count is not > MaxAssertionsPerCeremony)
-            return count;
+        if (count is > MaxAssertionsPerCeremony)
+        {
+            ClearUnreturnedAssertion(response);
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.Constraint,
+                $"Authenticator reported {count} assertions; the SDK supports at most {MaxAssertionsPerCeremony} per ceremony.");
+        }
 
-        // These decoded buffers belong to this ceremony and won't be returned to the caller.
-        ClearUnreturnedAssertion(response);
-        throw new WebAuthnClientError(WebAuthnClientErrorCode.Constraint,
-            $"Authenticator reported {count} assertions; the SDK supports at most {MaxAssertionsPerCeremony} per ceremony.");
+        // The WebAuthn client sends exactly one descriptor on the wire, even if the original list
+        // had more. A continuation cannot represent another eligible credential for that request.
+        if (hasAllowList && count is > 1)
+        {
+            ClearUnreturnedAssertion(response);
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
+                "The authenticator reported multiple assertions for a singleton allow list.");
+        }
+        return count;
     }
 
     private static void ClearUnreturnedAssertion(GetAssertionResponse response)

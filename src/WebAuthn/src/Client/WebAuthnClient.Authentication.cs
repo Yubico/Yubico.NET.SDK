@@ -40,6 +40,8 @@ public sealed partial class WebAuthnClient
     /// <para>
     /// With a nonempty allow list, the client probes for a matching credential and narrows the final
     /// request to one descriptor; it does not return every allowed credential held by the authenticator.
+    /// A reported count greater than one for that final singleton request is rejected before any
+    /// continuation or extension processing.
     /// If that probe misses and PRF applies to every eligible entry, a configured, caller-supplied PIN
     /// can be used for one additional silent selection pass to find a verification-protected credential.
     /// Without an allow list, the authenticator can return multiple discoverable credentials for the RP,

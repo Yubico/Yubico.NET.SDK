@@ -41,6 +41,7 @@ public class Ctap2AuthenticatorConfigTests
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
+    [Trait(TestCategories.Category, TestCategories.PermanentDeviceState)]
     public async Task ToggleAlwaysUv_TogglesAlwaysUvOption(YubiKeyTestState state) =>
         await state.WithCtap2SessionAsync(async session =>
         {

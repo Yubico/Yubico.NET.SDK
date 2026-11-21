@@ -53,6 +53,8 @@ public sealed partial class OpenPgpSession
         ThrowIfDisposed();
 
         EnsureSupports(FeatureUif);
+        if (keyRef is KeyRef.Att || uif is Uif.Cached or Uif.CachedFixed)
+            EnsureSupports(FeatureCachedAndAttestationUif);
 
         _logger.LogInformation("Setting UIF for {Slot} to {Uif}", keyRef, uif);
 

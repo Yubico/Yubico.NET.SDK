@@ -47,6 +47,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     /// <summary>Current SDK UIF threshold (4.2.0); individual policies/slots need additional card support.</summary>
     public static readonly Feature FeatureUif = new("OpenPGP UIF", 4, 2, 0);
 
+    private static readonly Feature FeatureCachedAndAttestationUif = new("OpenPGP cached or attestation UIF", 5, 2, 1);
+
     /// <summary>Current SDK EC generation/import threshold (5.2.0); consult advertised algorithms.</summary>
     public static readonly Feature FeatureEc = new("OpenPGP EC Keys", 5, 2, 0);
 

@@ -477,8 +477,7 @@ packed/zero-AAGUID/no-certificate self-attestation exception and leaving the ret
 Indirect has no anonymization service; Enterprise does not send the CTAP enterprise-attestation request.
 Client-data escaping follows CCDToString. Attestation Decode
 borrows outer CBOR/statement slices: keep caller input unchanged; parsing is not verification.
-`default(Aaguid)` has empty-span and nonreflexive-equality defects; advise explicit construction, not
-intentional default semantics. Final descriptor omission can expose an empty ID: CTAP2.0 §5.2 permits
+`default(Aaguid)` is the 16-byte all-zero value. Final descriptor omission can expose an empty ID: CTAP2.0 §5.2 permits
 singleton omission, whereas 2.1/2.3 §6.2.2 require it. Never recover an ID by guessing the first of a
 multi-entry allow list; an original singleton is unambiguous but still needs RP verification.
 

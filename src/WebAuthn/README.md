@@ -474,7 +474,7 @@ does not change the origin in client data or make an assertion acceptable to the
 - `ResidentKeyPreference.Required` consumes persistent credential slots. This facade exposes no credential administration or deletion; use the CTAP2 credential-management APIs separately, after disposing the client. Firmware gates live in CTAP2.
 - Default attestation is `None`: non-self statements become `fmt: none` with an empty statement; packed self attestation with zero AAGUID and no certificate is retained, and this policy does not zero the returned AAGUID. Other preferences pass through returned statements. `Indirect` performs no anonymization service; `Enterprise` does not currently send a CTAP enterprise-attestation request.
 - [`WebAuthnClientData`](src/Client/WebAuthnClientData.cs) uses CCDToString escapes and hashes the exact UTF-8 bytes it emits. The low-level builder does not enforce the ceremony's input rules.
-- For a manually created AAGUID, use an explicit constructor; `default(Aaguid)` has known empty-span/nonreflexive-equality defects, not normal 16-byte value semantics.
+- `default(Aaguid)` represents the 16-byte all-zero AAGUID, equal to one constructed from `Guid.Empty`.
 
 ## Security notes
 

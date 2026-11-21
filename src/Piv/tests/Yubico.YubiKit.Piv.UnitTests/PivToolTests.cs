@@ -161,6 +161,49 @@ public class PivToolTests
         Assert.Contains("Operation cancelled.", errors.ToString());
     }
 
+    [Fact]
+    public async Task ResetConfirmationCancellation_ExitsWhileInputIsBlocked()
+    {
+        using var budget = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        budget.CancelAfter(TimeSpan.FromSeconds(10));
+        using var signal = CancellationTokenSource.CreateLinkedTokenSource(budget.Token);
+        using var release = new ManualResetEventSlim();
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var reader = Substitute.For<TextReader>();
+        reader.ReadLine().Returns(_ =>
+        {
+            started.TrySetResult();
+            try
+            {
+                release.Wait(budget.Token);
+                return "not confirmed";
+            }
+            finally
+            {
+                finished.TrySetResult();
+            }
+        });
+        using var errors = new StringWriter();
+        var run = CliRunner.RunWithCancellationExitAsync(() => CliRunner.RunAsync(["reset"], signal.Token, reader), errors);
+        try
+        {
+            await started.Task.WaitAsync(budget.Token);
+            signal.Cancel();
+            Assert.Equal(130, await run.WaitAsync(budget.Token));
+            Assert.False(finished.Task.IsCompleted);
+            Assert.Contains("Operation cancelled.", errors.ToString());
+        }
+        finally
+        {
+            release.Set();
+            // Independent bounded drain: the fake must release its reader before disposal.
+            await run.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+            if (started.Task.IsCompleted)
+                await finished.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+        }
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

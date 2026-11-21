@@ -44,7 +44,7 @@ internal static class CliRunner
         }
     }
 
-    internal static async Task<int> RunAsync(string[] args, CancellationToken ct = default)
+    internal static async Task<int> RunAsync(string[] args, CancellationToken ct = default, TextReader? resetInput = null)
     {
         var (command, flags) = ParseArgs(args);
 
@@ -81,7 +81,7 @@ internal static class CliRunner
             "attest" => await HandleAttestAsync(flags, serial, useJson, ct),
             "attest-intermediate" => await HandleAttestIntermediateAsync(flags, serial, useJson, ct),
             "slot-info" => await HandleSlotInfoAsync(flags, serial, useJson, ct),
-            "reset" => await HandleResetAsync(flags, serial, useJson, ct),
+            "reset" => await HandleResetAsync(flags, serial, useJson, resetInput ?? Console.In, ct),
             "help" or "--help" or "-h" or "-?" => PrintHelp(),
             _ => PrintUnknownCommand(command)
         };
@@ -941,15 +941,18 @@ internal static class CliRunner
     }
 
     private static async Task<int> HandleResetAsync(
-        Dictionary<string, string?> flags, int? serial, bool useJson, CancellationToken ct)
+        Dictionary<string, string?> flags, int? serial, bool useJson, TextReader input, CancellationToken ct)
     {
         bool force = DeviceHelper.HasFlag(flags, "force");
 
         if (!force && !useJson)
         {
             Console.Write("WARNING: This deletes ordinary PIV keys, certificates, and data objects, but retains F9 attestation. Type 'RESET' to confirm: ");
-            var input = Console.ReadLine();
-            if (!string.Equals(input, "RESET", StringComparison.Ordinal))
+            // Console.In can block synchronously even through ReadLineAsync. Only this one-shot
+            // pre-device read can be left behind when the process exits, not an admitted SDK task.
+            string? reply = await Task.Run(input.ReadLine, ct).WaitAsync(ct);
+            ct.ThrowIfCancellationRequested();
+            if (!string.Equals(reply, "RESET", StringComparison.Ordinal))
             {
                 Console.WriteLine("Reset cancelled.");
                 return 0;
@@ -962,6 +965,7 @@ internal static class CliRunner
             return 1;
         }
 
+        ct.ThrowIfCancellationRequested();
         var device = await DeviceHelper.GetDeviceAsync(serial, ct);
         if (device is null) return 1;
 

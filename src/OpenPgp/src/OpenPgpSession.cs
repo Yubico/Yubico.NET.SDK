@@ -78,6 +78,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     private FirmwareVersion? _firmwareVersionOverride;
     private readonly Func<DeviceInfo?>? _readCachedDeviceInfo;
     private FirmwareVersion? _numericVersion;
+    private FirmwareVersion? _pinAttemptsVersion;
     private bool _endingAfterResetFailure;
 
     // ── Constructor (private — use CreateAsync) ───────────────────────
@@ -181,15 +182,18 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     {
         var cachedInfo = _firmwareVersionOverride is null ? _readCachedDeviceInfo?.Invoke() : null;
         var known = _firmwareVersionOverride ?? cachedInfo?.FirmwareVersion;
-        var appletVersion = known is { IsAlphaOrBeta: false }
+        bool cachedNeo = cachedInfo?.FirmwareVersion is { Major: 3 };
+        var appletVersion = !cachedNeo && known is { IsAlphaOrBeta: false }
             ? null : await backend.ReadVersionAsync(cancellationToken).ConfigureAwait(false);
         var features = known ?? appletVersion;
         _numericVersion = known is { IsAlphaOrBeta: false } ? known
             : appletVersion is { IsAlphaOrBeta: false } ? appletVersion : null;
         // Unknown framing uses the legacy short profile, not a synthesized zero-major protocol version.
-        return (_numericVersion ?? new FirmwareVersion(1, 0, 0),
-            cachedInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta
-                ? new FirmwareVersion() : features ?? new FirmwareVersion());
+        var featureVersion = cachedInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta
+            ? new FirmwareVersion() : features ?? new FirmwareVersion();
+        // The NEO retry command was introduced in applet 1.0.7, not physical firmware 4.3.1.
+        _pinAttemptsVersion = cachedNeo && !featureVersion.IsAlphaOrBeta ? appletVersion : featureVersion;
+        return (_numericVersion ?? new FirmwareVersion(1, 0, 0), featureVersion);
     }
 
     // ── Data Access ───────────────────────────────────────────────────

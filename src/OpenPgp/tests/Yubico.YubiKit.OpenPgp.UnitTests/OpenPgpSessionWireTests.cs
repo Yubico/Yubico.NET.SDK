@@ -34,6 +34,32 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests;
 public sealed class OpenPgpSessionWireTests
 {
     [Theory]
+    [InlineData("0100069000", false)]
+    [InlineData("0100079000", true)]
+    [InlineData("6985", true)] // Advisory version failure: Q6 admits the local gate.
+    public async Task CachedNeo_UsesAppletVersionForRetryCommand(string version, bool allowed)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection(
+            [OkResponse(), Convert.FromHexString(version), ApplicationRelatedDataResponse(), OkResponse()]);
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection, null,
+            () => default(DeviceInfo) with { FirmwareVersion = new FirmwareVersion(3, 4, 0) }, token);
+        Assert.Equal(new FirmwareVersion(3, 4, 0), session.FirmwareVersion);
+        Assert.Equal(0xF1, connection.TransmittedCommands[1][1]);
+        if (allowed)
+        {
+            await session.SetPinAttemptsAsync(3, 4, 5, token);
+            Assert.Equal(0xF2, LastCommand(connection)[1]);
+            Assert.Equal(new byte[] { 3, 4, 5 }, CommandData(LastCommand(connection)).ToArray());
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.SetPinAttemptsAsync(3, 4, 5, token));
+            Assert.Equal(3, connection.TransmittedCommands.Count);
+        }
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task Reset_WithScp03_ReauthenticatesUsingOriginalKeysOrEndsSession(bool rejectRehandshake)

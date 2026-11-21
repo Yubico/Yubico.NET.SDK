@@ -107,7 +107,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         _framingFirmwareVersion = knownVersion ?? FirmwareVersion.V5_3_0;
         _admitUnverifiedFirmware = knownVersion?.IsAlphaOrBeta != false ||
             overrideVersion is null &&
-            cachedDeviceInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta;
+            cachedDeviceInfo?.VersionQualifier is { Type: not VersionQualifierType.Final };
     }
 
     /// <summary>

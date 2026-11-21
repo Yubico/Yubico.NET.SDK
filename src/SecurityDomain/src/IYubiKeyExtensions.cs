@@ -38,7 +38,8 @@ public static class IYubiKeyExtensions
         ///     The caller retains ownership of supplied SCP parameters and disposes them after the session.
         ///     An explicit firmware override takes precedence over cached device info. The Security Domain
         ///     has no version read of its own. Without either source, the protocol uses 5.3.0 framing and
-        ///     admits firmware-gated attempts. Major-zero and cached alpha/beta versions also admit them.
+        ///     admits firmware-gated attempts. Major-zero versions and cached, present non-final qualifiers
+        ///     (including unnamed values) also admit them.
         ///     This policy does not prove device support and does not change known numeric framing.
         ///     Reset reapplies the protocol configuration and firmware policy with default SCP03 keys.
         /// </remarks>

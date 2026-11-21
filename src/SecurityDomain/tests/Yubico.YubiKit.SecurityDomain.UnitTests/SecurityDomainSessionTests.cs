@@ -922,6 +922,7 @@ public class SecurityDomainSessionTests
 
     [Theory]
     [InlineData(5, VersionQualifierType.Beta, true)]
+    [InlineData(5, (VersionQualifierType)3, true)]
     [InlineData(5, VersionQualifierType.Final, false)]
     [InlineData(5, null, false)]
     [InlineData(0, VersionQualifierType.Final, true)]

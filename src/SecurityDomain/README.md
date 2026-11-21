@@ -247,7 +247,8 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
   See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
 - Without an explicit `FirmwareVersionOverride`, the device factory uses cached device info. The Security
   Domain has no version read of its own. Without either source, the protocol uses 5.3.0 framing and admits
-  firmware-gated attempts. Major-zero and cached alpha/beta versions also admit them. Known numeric versions
+  firmware-gated attempts. Major-zero versions and cached, present non-final qualifiers (including unnamed
+  values) also admit them. Known numeric versions
   still determine PC/SC framing independently of feature eligibility. Reset preserves both decisions.
 - Key generation/import/deletion, certificate/CA/allowlist storage and clearing, raw `StoreDataAsync`, and
   reset change persistent state. Review the target reference and recovery plan before sending them.

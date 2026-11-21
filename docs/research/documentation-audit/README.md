@@ -1,5 +1,7 @@
 # Pass 2 review packet
 
+See [current applet state and deliberate differences](pass-2-applet-state-and-divergences.md) for the nine merged applets.
+
 Use the [final ledger](pass-2-review-ledger.md) and [decision log](pass-2-review-decisions.md) for card decisions, deferrals and PR attribution. The [master](pass-2-applet-master.md) and its review and correction records retain their original code pins and conclusions; they do not describe the current upstream tree.
 
 ## Progress checkpoint — 2026-11-21

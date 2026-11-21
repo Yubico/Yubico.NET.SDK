@@ -10,8 +10,8 @@ using Yubico.YubiKit.Piv.DataObjects;
 
 namespace Yubico.YubiKit.Piv.Authentication;
 
-// Used only for opt-in mutations. Keep the original child encodings, including opaque fields,
-// rather than round-tripping through the typed ADMIN or recovery readers.
+// PIN-only reads and edits share one field scan. Preserve opaque child encodings for edits;
+// recovery borrows the key and salt directly from the owned response.
 internal sealed class PinOnlyMetadata : IDisposable
 {
     private const byte AdminTag = 0x80;
@@ -45,9 +45,18 @@ internal sealed class PinOnlyMetadata : IDisposable
     internal bool IsEmpty => _fields.Count == 0;
     internal byte Flags => Get(FlagsTag).Span is [byte flags] ? flags : (byte)0;
     internal ReadOnlyMemory<byte> Salt => Get(SaltTag);
-    internal bool HasStoredKey => !Get(ManagementKeyTag).IsEmpty;
+    internal ReadOnlyMemory<byte> StoredKey => Get(ManagementKeyTag);
 
-    internal static async Task<PinOnlyMetadata> ReadAsync(IBackend backend, int objectId, CancellationToken cancellationToken)
+    internal static async Task<PinOnlyMetadata> ReadAsync(IBackend backend, int objectId, CancellationToken cancellationToken) =>
+        await ReadCoreAsync(backend, objectId, ignoreMalformed: false, cancellationToken).ConfigureAwait(false)
+        ?? throw new InvalidOperationException("PIN-only metadata could not be decoded.");
+
+    // Recovery can skip an unsupported or malformed object, but not a failed GET DATA.
+    internal static Task<PinOnlyMetadata?> ReadForRecoveryAsync(IBackend backend, int objectId, CancellationToken cancellationToken) =>
+        ReadCoreAsync(backend, objectId, ignoreMalformed: true, cancellationToken);
+
+    private static async Task<PinOnlyMetadata?> ReadCoreAsync(
+        IBackend backend, int objectId, bool ignoreMalformed, CancellationToken cancellationToken)
     {
         var response = await DataObjectProtocol.GetObjectResponseAsync(backend, objectId, cancellationToken).ConfigureAwait(false);
         try
@@ -59,17 +68,28 @@ internal sealed class PinOnlyMetadata : IDisposable
             if (!response.IsOK())
                 throw ApduException.FromStatusWord(response.SW, "Could not read PIN-only metadata.");
 
-            if (!data.IsEmpty && data.Span[0] == 0x53)
-                data = Unwrap(data, 0x53);
-            if (!data.IsEmpty)
-                data = Unwrap(data, wrapper);
-            return new PinOnlyMetadata(response, wrapper, data);
+            try
+            {
+                return new PinOnlyMetadata(response, wrapper, ReadContents(data, wrapper));
+            }
+            catch (ApduException) when (ignoreMalformed)
+            {
+                response.Clear();
+                return null;
+            }
         }
         catch
         {
             response.Clear();
             throw;
         }
+    }
+
+    private static ReadOnlyMemory<byte> ReadContents(ReadOnlyMemory<byte> data, byte wrapper)
+    {
+        if (!data.IsEmpty && data.Span[0] == 0x53)
+            data = Unwrap(data, 0x53);
+        return data.IsEmpty ? data : Unwrap(data, wrapper);
     }
 
     internal void SetFlags(byte flags) => Set(FlagsTag, new byte[] { flags });

@@ -319,8 +319,12 @@ static async Task RotateProtectedAsync(
 
 Await each complete workflow before reusing or clearing an input, calling the session again, or disposing it.
 Required metadata reads and parsing fail closed; supported objects keep unrelated fields and raw timestamp
-bytes. Writes are separate, without retries or rollback. The operational exception identifies the failed phase,
-earlier acknowledged persistent writes and whether the current write was not attempted or is unconfirmed.
+bytes. PIN-only detection and recovery use the same field scan, so opaque child fields do not hide the stored
+key or derivation salt. The typed `AdminData` decoder is unchanged. If PRINTED is missing or empty when
+rotating to protected storage or removing a recorded copy, the SDK requires a successful no-data VERIFY
+before proceeding. This query does not submit a PIN. Writes are separate, without retries or rollback.
+The operational exception identifies the failed phase, earlier acknowledged persistent writes and whether
+the current write was not attempted or is unconfirmed.
 Cancellation still raises `OperationCanceledException`; the original cause remains the inner exception.
 Inspect actual card state before retrying or attempting recovery; unconfirmed does not mean unchanged.
 These messages are for people, not a parsing contract. PIN failures can consume retry attempts.
@@ -562,16 +566,20 @@ These tests reset and mutate PIV, including a protected-mode enable/reopen/recov
 and hotplug tests need separate human coordination; multi-key contention tests need two attached keys.
 
 The three integration cases in `PivMetadataMutationTests` require separate attended authorization and
-provisioning. Use the existing serial allow list with only the intended dedicated fixture eligible, and
-select one exact case at a time. Before each case, confirm the actual PIN is `123456`, the active
-management key has no touch policy, and the ADMIN/PRINTED objects have canonical PIN-only metadata:
+provisioning. Select one exact case at a time. Keep the fixture on the existing serial allow list and set
+that case's environment variable to the separately authorized serial in decimal. No other serial is eligible
+for that case. Before each case, confirm the actual PIN is `123456`, the active management key has no touch
+policy, and the ADMIN/PRINTED objects have canonical PIN-only metadata:
 
-- **Derived PIN change:** derived-only ADMIN salt and the matching active Triple-DES key. Leaves the
-  fixture with PIN `678912` and a fresh salt; tests recovery after reopening.
-- **Protected rotation:** protected-only ADMIN and a PRINTED copy matching the active key. Leaves a new
-  AES-192 key recoverable by PIN; tests that reopening recovers it without changing PUK retries.
-- **Derived rotation:** derived-only ADMIN salt and matching Triple-DES key, with PRINTED unoccupied.
-  Leaves a new PIN-protected AES-192 key without the legacy salt; authenticates it after reopening.
+- **Derived PIN change** (`YUBIKEY_PIV_Q10_DERIVED_PIN_SERIAL`): derived-only ADMIN salt and the matching
+  active Triple-DES key. Authenticates the old derived key before mutation. Leaves the fixture with PIN
+  `678912` and a fresh salt; tests recovery after reopening.
+- **Protected rotation** (`YUBIKEY_PIV_Q10_PROTECTED_ROTATION_SERIAL`): protected-only ADMIN and a PRINTED
+  copy matching the active key. Leaves a new AES-192 key recoverable by PIN; tests that reopening recovers
+  it without changing PUK retries.
+- **Derived rotation** (`YUBIKEY_PIV_Q10_DERIVED_ROTATION_SERIAL`): derived-only ADMIN salt and matching
+  Triple-DES key, with PRINTED unoccupied. Leaves a new PIN-protected AES-192 key without the legacy salt;
+  authenticates it after reopening.
 
 These cases do not reset PIV, change retry limits, or write private-key slots or attestation material.
 Inspect state after a failure rather than retrying or resetting automatically. These cases are compiled;

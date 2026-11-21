@@ -1274,9 +1274,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
             return null;
         using var printed = await ReadPinOnlyMetadataAsync(DataObject.PrintedInformation, "read PRINTED", cancellationToken)
             .ConfigureAwait(false);
-        if (storeKey && printed.IsEmpty)
+        if (printed.IsEmpty)
             await RequireCardPinVerificationAsync(cancellationToken).ConfigureAwait(false);
-        if (!storeKey && !printed.HasStoredKey)
+        if (!storeKey && printed.StoredKey.IsEmpty)
             return null;
         printed.SetStoredKey(storeKey ? newKey : default);
         return EncodePinOnlyMetadata(printed, "prepare PRINTED", cancellationToken);
@@ -1327,62 +1327,47 @@ public sealed class PivSession : ApplicationSession, IPivSession
         Logger.LogDebug("PIV: Attempting to recover PIN-only management key authentication");
 
         var mode = PinOnlyMode.None;
-        var (printedRaw, pinVerified) = await ReadPrintedForRecoveryAsync(pin, cancellationToken).ConfigureAwait(false);
+        var (printed, pinVerified) = await ReadPrintedForRecoveryAsync(pin, cancellationToken).ConfigureAwait(false);
+        using var printedOwner = printed;
+        var storedKey = printedOwner?.StoredKey ?? default;
+        if (await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false))
+            mode |= PinOnlyMode.PinProtected;
 
-        Memory<byte> storedKey = Memory<byte>.Empty;
-        bool pinProtectedAuthenticated = false;
-        try
+        // Keep PRINTED alive through a potential attempt to restore protected authentication.
+        using var admin = await PinOnlyMetadata.ReadForRecoveryAsync(_backend, DataObject.AdminData, cancellationToken).ConfigureAwait(false);
+        if (admin is { Salt: { IsEmpty: false } salt })
         {
-            if (PinOnlyProtocol.TryDecodePinProtectedManagementKey(printedRaw, out storedKey))
-            {
-                pinProtectedAuthenticated = await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false);
-                if (pinProtectedAuthenticated)
-                    mode |= PinOnlyMode.PinProtected;
-            }
-
-            // Try PIN-derived: derive a candidate management key from the PIN and the ADMIN DATA salt.
-            var adminRaw = await DataObjectProtocol.GetObjectAsync(_backend, DataObject.AdminData, cancellationToken).ConfigureAwait(false);
-
-            if (AdminData.TryDecode(adminRaw, out var adminData) && adminData.Salt is { } salt)
-            {
-                if (!pinVerified)
-                    await VerifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
-                if (await TryAuthenticateDerivedCandidateAsync(pin, salt, cancellationToken).ConfigureAwait(false))
-                    mode |= PinOnlyMode.PinDerived;
-                else if (pinProtectedAuthenticated && !await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false))
-                    mode &= ~PinOnlyMode.PinProtected;
-            }
-
-            return mode;
+            if (!pinVerified)
+                await VerifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
+            if (await TryAuthenticateDerivedCandidateAsync(pin, salt, cancellationToken).ConfigureAwait(false))
+                mode |= PinOnlyMode.PinDerived;
+            else if ((mode & PinOnlyMode.PinProtected) != 0 && !await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false))
+                mode &= ~PinOnlyMode.PinProtected;
         }
-        finally
-        {
-            if (!storedKey.IsEmpty)
-            {
-                CryptographicOperations.ZeroMemory(storedKey.Span);
-            }
-        }
+        return mode;
     }
 
-    private async Task<(byte[] Data, bool PinVerified)> ReadPrintedForRecoveryAsync(
+    private async Task<(PinOnlyMetadata? Metadata, bool PinVerified)> ReadPrintedForRecoveryAsync(
         ReadOnlyMemory<byte> pin, CancellationToken cancellationToken)
     {
         EnsureBackend(cancellationToken);
         try
         {
-            return (await DataObjectProtocol.GetObjectAsync(_backend, DataObject.PrintedInformation, cancellationToken)
+            return (await PinOnlyMetadata.ReadForRecoveryAsync(_backend, DataObject.PrintedInformation, cancellationToken)
                 .ConfigureAwait(false), false);
         }
         catch (ApduException ex) when (ex.SW == SWConstants.SecurityStatusNotSatisfied)
         {
             await VerifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
-            return (await DataObjectProtocol.GetObjectAsync(_backend, DataObject.PrintedInformation, cancellationToken)
+            return (await PinOnlyMetadata.ReadForRecoveryAsync(_backend, DataObject.PrintedInformation, cancellationToken)
                 .ConfigureAwait(false), true);
         }
     }
 
     private async Task<bool> TryAuthenticateCandidateAsync(ReadOnlyMemory<byte> candidate, CancellationToken cancellationToken)
     {
+        if (candidate.IsEmpty)
+            return false;
         cancellationToken.ThrowIfCancellationRequested();
         try
         {

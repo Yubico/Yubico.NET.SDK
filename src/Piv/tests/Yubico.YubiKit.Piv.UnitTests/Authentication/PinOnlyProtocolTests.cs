@@ -49,10 +49,9 @@ public class PinOnlyProtocolTests
     }
 
     [Fact]
-    public async Task GetPinOnlyModeAsync_PinProtectedBitSet_ReturnsPinProtected()
+    public async Task GetPinOnlyModeAsync_PinProtectedBitWithOpaqueField_ReturnsPinProtected()
     {
-        // ADMIN DATA inner content: 80 03 81 01 02 (PinProtected bit only), wrapped in 53 for GET DATA.
-        byte[] adminData = [0x80, 0x03, 0x81, 0x01, 0x02];
+        byte[] adminData = [0x80, 0x06, 0x84, 0x01, 0xAA, 0x81, 0x01, 0x02];
         var backend = CreateBackend([0x53, (byte)adminData.Length, .. adminData, 0x90, 0x00]);
 
         var mode = await PinOnlyProtocol.GetPinOnlyModeAsync(backend, TestContext.Current.CancellationToken);
@@ -84,47 +83,18 @@ public class PinOnlyProtocolTests
         Assert.Equal(PinOnlyMode.PinProtectedUnavailable | PinOnlyMode.PinDerivedUnavailable, mode);
     }
 
-    [Fact]
-    public void TryDecodePinProtectedManagementKey_Success_ZeroesInputBufferButNotExtractedKey()
+    [Theory]
+    [InlineData("8800", false)]
+    [InlineData("8900", true)]
+    [InlineData("883489180102030405060708111213141516171821222324252627288918010203040506070811121314151617182122232425262728", true)]
+    public async Task ReadPrintedForRecovery_DoesNotUseEmptyOrMalformedCandidate(string hex, bool malformed)
     {
-        byte[] key = Enumerable.Range(1, 24).Select(i => (byte)i).ToArray();
-        byte[] printed = [0x88, 0x1A, 0x89, 0x18, .. key];
-        byte[] workingCopy = (byte[])printed.Clone();
-
-        bool found = PinOnlyProtocol.TryDecodePinProtectedManagementKey(workingCopy, out var extractedKey);
-
-        Assert.True(found);
-        Assert.Equal(key, extractedKey.ToArray());
-
-        // ISC-16 family: the raw PRINTED-object bytes (containing the clear-text key) must be
-        // zeroed once this method is done with them, regardless of whether it found a key.
-        Assert.All(workingCopy, b => Assert.Equal(0, b));
-    }
-
-    [Fact]
-    public void TryDecodePinProtectedManagementKey_WrongOuterTag_StillZeroesInputBuffer()
-    {
-        byte[] key = Enumerable.Range(1, 24).Select(i => (byte)i).ToArray();
-        byte[] notPinProtected = [0x89, 0x18, .. key]; // wrong outer tag (0x89 instead of 0x88)
-        byte[] workingCopy = (byte[])notPinProtected.Clone();
-
-        bool found = PinOnlyProtocol.TryDecodePinProtectedManagementKey(workingCopy, out var extractedKey);
-
-        Assert.False(found);
-        Assert.True(extractedKey.IsEmpty);
-        Assert.All(workingCopy, b => Assert.Equal(0, b));
-    }
-
-    [Fact]
-    public void TryDecodePinProtectedManagementKey_NoManagementKeyPresent_StillZeroesInputBuffer()
-    {
-        byte[] emptyPinProtected = [0x88, 0x00]; // "cleared" PIN-protected marker, no management key
-        byte[] workingCopy = (byte[])emptyPinProtected.Clone();
-
-        bool found = PinOnlyProtocol.TryDecodePinProtectedManagementKey(workingCopy, out var extractedKey);
-
-        Assert.False(found);
-        Assert.True(extractedKey.IsEmpty);
-        Assert.All(workingCopy, b => Assert.Equal(0, b));
+        var backend = CreateBackend([.. Convert.FromHexString(hex), 0x90, 0x00]);
+        using var metadata = await PinOnlyMetadata.ReadForRecoveryAsync(backend, DataObject.PrintedInformation,
+            TestContext.Current.CancellationToken);
+        if (malformed)
+            Assert.Null(metadata);
+        else
+            Assert.True(Assert.IsType<PinOnlyMetadata>(metadata).StoredKey.IsEmpty);
     }
 }

@@ -93,6 +93,8 @@ complete the underlying task or permit borrowed-input cleanup; admitted work may
 
 The three `WithMetadataAsync` credential methods are opt-in. Keep raw methods and CLI behavior unchanged.
 Use the strict PIN-only edit reader to preserve original child encodings, including opaque tags and timestamps.
+PIN-only detection and recovery share that field scan; keep the backing response alive until the
+last authentication attempt and clear it afterward. The typed `AdminData` profile does not change.
 Use a no-data VERIFY status check when a positive PIN prerequisite is not established by a PRINTED read;
 do not use `GetPinAttemptsAsync` or a host flag for verification state. The session reports only completed
 raw write calls as acknowledged. An invoked write that fails is unconfirmed, regardless of exception type;

@@ -88,6 +88,126 @@ public class PivMetadataMutationTests
     }
 
     [Theory]
+    [InlineData(false, 0x63C3)]
+    [InlineData(true, 0x6D00)]
+    [InlineData(false, 0x9000)]
+    [InlineData(true, 0x9000)]
+    public async Task RemoveRecordedCopy_RequiresPositiveVerificationBeforeAcceptingEmptyPrinted(bool emptyWrapper, ushort status)
+    {
+        byte[] empty = emptyWrapper ? [0x53, 2, 0x88, 0, .. Ok] : Missing;
+        await using var connection = Connect(Admin(0x43, false), empty, [(byte)(status >> 8), (byte)status], Ok, Ok);
+        await using var session = await OpenAsync(connection, authenticated: true);
+        Task Rotate() => session.SetManagementKeyWithMetadataAsync(KeyType.TripleDes, Replacement, ManagementKeyStorage.NotStored,
+            cancellationToken: Ct);
+
+        if (status == 0x9000)
+        {
+            await Rotate();
+            Assert.Equal(new byte[] { 0xCB, 0xCB, 0x20, 0xFF, 0xDB }, Instructions(connection));
+            AssertPut(connection.TransmittedCommands[^1], 0x5FFF00, [0x80, (byte)(3 + Unrelated.Length), 0x81, 1, 0x41, .. Unrelated]);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(Rotate);
+            Assert.Equal(new byte[] { 0xCB, 0xCB, 0x20 }, Instructions(connection));
+        }
+        Assert.Equal(new byte[] { 0, 0x20, 0, 0x80, 0 }, connection.TransmittedCommands[5]);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task ReopenWrittenMetadata_RecoversAcrossOpaqueFieldsAndClearsOwners(bool derived, bool failAuth)
+    {
+        byte[] pin = "654321"u8.ToArray();
+        byte[] replacement = [.. Enumerable.Range(1, 24).Select(value => (byte)value)];
+        try
+        {
+            byte[] written = derived ? await WriteDerivedForReopenAsync(pin) : await WriteProtectedForReopenAsync(replacement);
+            byte[] key = derived ? Derive(pin, written.AsSpan(7, 16).ToArray()) : replacement;
+            using var card = TripleDES.Create();
+            try
+            {
+                card.Key = key;
+            }
+            finally
+            {
+                if (derived)
+                    CryptographicOperations.ZeroMemory(key);
+            }
+
+            byte[] response = [.. written, .. Ok];
+            await using var connection = Connect(derived ? [Missing, response, Ok] : [[0x69, 0x82], Ok, response, Admin(2, false)]);
+            await using var reopened = await OpenAsync(connection);
+            var observer = Observe(reopened);
+            var failure = new IOException("Simulated loss of second authentication response.");
+            int authCalls = 0;
+            observer.BeforeSend = command =>
+            {
+                if (command.Ins != 0x87)
+                    return null;
+                var reply = ReplyToAuthentication(card, command.Data.Span); // validates decrypted witness against the new key
+                if (++authCalls != 2 || !failAuth)
+                    return reply;
+                reply.Clear();
+                throw failure;
+            };
+
+            if (failAuth)
+                Assert.Same(failure, await Assert.ThrowsAsync<IOException>(() => reopened.RecoverPinOnlyModeAsync(pin, Ct)));
+            else
+                Assert.Equal(derived ? PinOnlyMode.PinDerived : PinOnlyMode.PinProtected, await reopened.RecoverPinOnlyModeAsync(pin, Ct));
+            Assert.Equal(2, authCalls);
+            Assert.Equal(!failAuth, reopened.IsManagementKeyAuthenticated);
+            Assert.Equal("654321"u8.ToArray(), pin);
+            if (derived)
+                observer.AssertAdminResponseCleared();
+            else
+                observer.AssertPrintedResponseCleared();
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(pin);
+            CryptographicOperations.ZeroMemory(replacement);
+        }
+    }
+
+    private static async Task<byte[]> WriteProtectedForReopenAsync(byte[] replacement)
+    {
+        byte[] opaque = [0x8B, 0x81, 1, 0x61];
+        byte[] before = [0x88, 30, .. opaque, 0x89, 24, .. Replacement, .. Ok];
+        await using var connection = Connect(Admin(2, false), before, Ok, Ok);
+        await using var session = await OpenAsync(connection, authenticated: true);
+        await session.SetManagementKeyWithMetadataAsync(KeyType.TripleDes, replacement, ManagementKeyStorage.PinProtected, cancellationToken: Ct);
+        AssertPut(connection.TransmittedCommands[^1], 0x5FC109, [0x88, 30, .. opaque, 0x89, 24, .. replacement]);
+        return connection.TransmittedCommands[^1][12..^1];
+    }
+
+    private static async Task<byte[]> WriteDerivedForReopenAsync(byte[] pin)
+    {
+        await using var connection = Connect(Admin(0, true), Ok, Ok, Ok, Ok);
+        await using var session = await OpenAsync(connection);
+        var observer = Observe(session);
+        using var card = TripleDES.Create();
+        byte[] previousPin = "123456"u8.ToArray();
+        byte[] previousKey = Derive(previousPin, Salt);
+        try
+        {
+            card.Key = previousKey;
+            observer.BeforeSend = command => command.Ins == 0x87 ? ReplyToAuthentication(card, command.Data.Span) : null;
+            await session.ChangePinWithMetadataAsync(previousPin, pin, Ct);
+            return connection.TransmittedCommands[^1][12..^1];
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(previousPin);
+            CryptographicOperations.ZeroMemory(previousKey);
+        }
+    }
+
+    [Theory]
     [InlineData(false, "53800580009000")]
     [InlineData(false, "53038000009000")]
     [InlineData(false, "80068101028101029000")]
@@ -138,6 +258,118 @@ public class PivMetadataMutationTests
         Assert.Contains("unconfirmed", error.Message);
         Assert.Equal(new byte[] { 0xCB, 0xCB, 0xFF, 0xDB, 0xDB }, Instructions(connection));
         observer.AssertPrintedResponseAndWriteCleared();
+    }
+
+    [Theory]
+    [InlineData("rotation", 0xFF, "CBCBFF", "set management key", "none", false)]
+    [InlineData("rotation", 0xFF, "CBCBFF", "set management key", "none", true)]
+    [InlineData("rotation", 0xDB, "CBCBFFDB", "write ADMIN DATA", "management key set", false)]
+    [InlineData("rotation", 0xDB, "CBCBFFDB", "write ADMIN DATA", "management key set", true)]
+    [InlineData("derived", 0x24, "CB24", "change PIN", "none", false)]
+    [InlineData("derived", 0x24, "CB24", "change PIN", "none", true)]
+    [InlineData("derived", 0xFF, "CB2420FF", "set derived management key", "PIN changed", false)]
+    [InlineData("derived", 0xFF, "CB2420FF", "set derived management key", "PIN changed", true)]
+    [InlineData("derived", 0xDB, "CB2420FFDB", "write ADMIN DATA", "PIN changed; derived management key set", false)]
+    [InlineData("derived", 0xDB, "CB2420FFDB", "write ADMIN DATA", "PIN changed; derived management key set", true)]
+    [InlineData("retry", 0xDB, "CB20FADB", "write ADMIN DATA", "retry limits set and factory PIN and PUK restored", false)]
+    [InlineData("retry", 0xDB, "CB20FADB", "write ADMIN DATA", "retry limits set and factory PIN and PUK restored", true)]
+    public async Task InvokedWriteWithoutCompletion_ReportsUnconfirmedAndStops(
+        string workflow, byte failingIns, string wire, string phase, string acknowledged, bool canceled)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(Ct);
+        await using var connection = Connect(workflow switch
+        {
+            "rotation" => [Admin(3, true), Printed([]), Ok, Ok, Ok],
+            "derived" => [Admin(1, true), Ok, Ok, Ok, Ok],
+            _ => [Admin(1, false), Ok, Ok, Ok],
+        });
+        await using var session = await OpenAsync(connection, authenticated: workflow != "derived");
+        var observer = Observe(session);
+        using var card = TripleDES.Create();
+        byte[] currentPin = "123456"u8.ToArray();
+        byte[] newPin = "654321"u8.ToArray();
+        byte[] replacement = Replacement;
+        byte[] oldKey = Derive(currentPin, Salt);
+        try
+        {
+            card.Key = oldKey;
+            observer.BeforeSend = command => command.Ins == 0x87 ? ReplyToAuthentication(card, command.Data.Span) : null;
+            Exception cause = canceled ? new OperationCanceledException(cts.Token) : new IOException("Simulated missing completion.");
+            observer.AfterSend = command =>
+            {
+                if (command.Ins != failingIns)
+                    return;
+                if (canceled)
+                    cts.Cancel();
+                throw cause;
+            };
+
+            Task Mutate() => workflow switch
+            {
+                "rotation" => session.SetManagementKeyWithMetadataAsync(KeyType.TripleDes, replacement,
+                    ManagementKeyStorage.PinProtected, cancellationToken: cts.Token),
+                "derived" => session.ChangePinWithMetadataAsync(currentPin, newPin, cts.Token),
+                _ => session.SetPinAttemptsWithMetadataAsync(5, 7, cts.Token),
+            };
+
+            Exception error = canceled ? await Assert.ThrowsAsync<OperationCanceledException>(Mutate)
+                : await Assert.ThrowsAsync<InvalidOperationException>(Mutate);
+            if (error is OperationCanceledException cancellation)
+                Assert.Equal(cts.Token, cancellation.CancellationToken);
+            Assert.Same(cause, error.InnerException);
+            Assert.Contains($"PIV {phase} failed.", error.Message);
+            Assert.Contains($"Acknowledged persistent writes: {acknowledged}.", error.Message);
+            Assert.Contains("Current write: unconfirmed.", error.Message);
+            Assert.Equal(Convert.FromHexString(wire), Instructions(connection));
+            observer.AssertAdminResponseCleared();
+            if (workflow == "rotation")
+                observer.AssertPrintedResponseCleared();
+            if (wire.Contains("FF", StringComparison.Ordinal))
+                observer.AssertKeyWriteCleared();
+            if (failingIns == 0xDB)
+                observer.AssertAdminWriteCleared();
+            Assert.Equal(Replacement, replacement);
+            Assert.Equal("123456"u8.ToArray(), currentPin);
+            Assert.Equal("654321"u8.ToArray(), newPin);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(oldKey);
+            CryptographicOperations.ZeroMemory(currentPin);
+            CryptographicOperations.ZeroMemory(newPin);
+            CryptographicOperations.ZeroMemory(replacement);
+        }
+    }
+
+    [Theory]
+    [InlineData(false, "CB", "set management key", "none")]
+    [InlineData(true, "CBCBFF", "write ADMIN DATA", "management key set")]
+    public async Task RotationCanceledBeforeNextWrite_ReportsNotAttempted(bool afterKey, string wire, string phase, string acknowledged)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(Ct);
+        await using var connection = Connect(afterKey ? [Admin(3, true), Printed([]), Ok, Ok, Ok] : [Missing, Ok]);
+        await using var session = await OpenAsync(connection, authenticated: true);
+        var observer = Observe(session);
+        observer.AfterSend = command =>
+        {
+            if (command.Ins == (afterKey ? 0xFF : 0xCB))
+                cts.Cancel();
+        };
+        var error = await Assert.ThrowsAsync<OperationCanceledException>(() => session.SetManagementKeyWithMetadataAsync(
+            KeyType.TripleDes, Replacement, afterKey ? ManagementKeyStorage.PinProtected : ManagementKeyStorage.NotStored,
+            cancellationToken: cts.Token));
+        Assert.Equal(cts.Token, error.CancellationToken);
+        Assert.IsType<OperationCanceledException>(error.InnerException);
+        Assert.Contains($"PIV {phase} failed.", error.Message);
+        Assert.Contains($"Acknowledged persistent writes: {acknowledged}.", error.Message);
+        Assert.Contains("Current write: not attempted.", error.Message);
+        Assert.Equal(Convert.FromHexString(wire), Instructions(connection));
+        observer.AssertAdminResponseCleared();
+        if (afterKey)
+        {
+            observer.AssertPrintedResponseCleared();
+            observer.AssertKeyWriteCleared();
+        }
     }
 
     [Theory]
@@ -333,7 +565,9 @@ public class PivMetadataMutationTests
     private sealed class Observation(IBackend backend) : IBackend
     {
         private ReadOnlyMemory<byte> _printedResponse;
+        private ReadOnlyMemory<byte> _adminResponse;
         private ReadOnlyMemory<byte> _printedWrite;
+        private ReadOnlyMemory<byte> _adminWrite;
         private ReadOnlyMemory<byte> _keyWrite;
         public Func<ApduCommand, ApduResponse?>? BeforeSend { get; set; }
         public Action<ApduCommand>? AfterSend { get; set; }
@@ -346,16 +580,22 @@ public class PivMetadataMutationTests
             // These aliases refer to actual non-pooled storage, not a disposed API projection or fake copy.
             if (IsPrintedPut(command))
                 _printedWrite = command.Data;
+            if (command.Ins == 0xDB && command.Data.Span[4] == 0)
+                _adminWrite = command.Data;
             if (command.Ins == 0xFF)
                 _keyWrite = command.Data;
             var response = BeforeSend?.Invoke(command) ?? await backend.SendAsync(command, throwOnError, cancellationToken);
             if (command.Ins == 0xCB && command.Data.Span[4] == 9)
                 _printedResponse = response.RawData;
+            if (command.Ins == 0xCB && command.Data.Span[4] == 0)
+                _adminResponse = response.RawData;
             AfterSend?.Invoke(command);
             return response;
         }
 
         public void AssertPrintedResponseCleared() => AssertCleared(_printedResponse);
+        public void AssertAdminResponseCleared() => AssertCleared(_adminResponse);
+        public void AssertAdminWriteCleared() => AssertCleared(_adminWrite);
         public void AssertKeyWriteCleared() => AssertCleared(_keyWrite);
         public void AssertPrintedResponseAndWriteCleared()
         {

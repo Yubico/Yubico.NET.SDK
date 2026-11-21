@@ -26,12 +26,22 @@ public sealed class ManagementResetSettings : GlobalSettings
 /// </summary>
 public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettings>
 {
+    private static readonly Feature ResetFeature = new("Device Reset", 5, 6, 0);
+
     protected override ConnectionType[] AppletTransports =>
         [ConnectionType.SmartCard];
 
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, ManagementResetSettings settings, YkDeviceContext deviceContext)
     {
+        await using var session = await deviceContext.Device.CreateManagementSessionAsync(
+            deviceContext.SessionOptions);
+        if (!session.IsSupported(ResetFeature))
+        {
+            OutputHelpers.WriteError($"Device reset requires firmware {ResetFeature.Version} or later. Device firmware is {session.FirmwareVersion}.");
+            return ExitCode.FeatureUnsupported;
+        }
+
         if (!settings.Force)
         {
             if (!ConfirmationPrompts.ConfirmDestructive(
@@ -42,8 +52,6 @@ public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettin
             }
         }
 
-        await using var session = await deviceContext.Device.CreateManagementSessionAsync(
-            deviceContext.SessionOptions);
         await session.ResetDeviceAsync();
 
         OutputHelpers.WriteSuccess("Combined FIDO/PIV reset confirmed.");

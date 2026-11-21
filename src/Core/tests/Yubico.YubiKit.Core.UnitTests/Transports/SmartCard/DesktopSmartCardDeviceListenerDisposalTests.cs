@@ -310,9 +310,9 @@ public class DesktopSmartCardDeviceListenerDisposalTests
     }
 
     /// <summary>
-    /// Verifies that the finalizer doesn't throw exceptions.
-    /// Note: GC collection timing is non-deterministic, so we just verify
-    /// a listener can be abandoned without causing process-level issues.
+    /// Checks that the calling thread observes no exception while abandoning a listener and requesting GC.
+    /// Startup exceptions are tolerated. The test observes neither finalizer entry, native context release,
+    /// nor thread exit; a running listener can remain reachable. It does not catch finalizer-thread failures.
     /// </summary>
     [Fact]
     public void Finalizer_DoesNotThrowException()
@@ -324,7 +324,7 @@ public class DesktopSmartCardDeviceListenerDisposalTests
             {
                 var listener = DesktopSmartCardDeviceListener.Create();
                 listener.Start(); // Start it so there's actual cleanup needed
-                // Don't dispose - let it become eligible for GC
+                // Abandon the local reference; a running thread can still keep the listener reachable.
             }
             catch (Exception)
             {

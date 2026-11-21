@@ -19,8 +19,7 @@ public class WebAuthnLargeBlobAuditReproTests
     {
         // A successful CTAP makeCredential returns largeBlobKey in response member 0x05,
         // not in the signed authenticator-data extension map.
-        var data = new byte[37];
-        data[32] = 0x01;
+        var data = TestSupport.MockCtap2Responses.BuildAuthDataWithAttestedCredential(Guid.Empty);
         var writer = new CborWriter();
         writer.WriteStartMap(4);
         writer.WriteInt32(1);

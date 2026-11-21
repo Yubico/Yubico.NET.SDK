@@ -120,8 +120,8 @@ public class PivFullWorkflowTests
             deviceECDH.PublicKey,
             HashAlgorithmName.SHA256);
 
-        // Both should derive the same shared secret
-        // Note: Actual secret comparison would need to account for different derivation methods
+        // These assertions check output presence/width only. The peer result is hash-derived while
+        // the device result is raw, so this method establishes no peer/device secret equality.
         Assert.NotEmpty(yubiKeySecret.ToArray());
         Assert.NotEmpty(peerSecret);
     }
@@ -142,11 +142,11 @@ public class PivFullWorkflowTests
         // 2. Move key to retired slot
         await session.MoveKeyAsync(Slot.Authentication, Slot.Retired1);
 
-        // 3. Verify source is empty and destination has key
+        // 3. Check absent source certificate (none was stored). Key occupancy is separate.
         var sourceCert = await session.GetCertificateAsync(Slot.Authentication);
         Assert.Null(sourceCert);
 
-        // 4. Use the moved key for signing
+        // 4. Check a nonempty destination signature; this method does not verify its key binding.
         await session.VerifyPinAsync(DefaultPin);
         var hash = SHA256.HashData("test"u8);
         var signature = await session.SignOrDecryptAsync(
@@ -172,15 +172,14 @@ public class PivFullWorkflowTests
         var attestation = await session.AttestKeyAsync(Slot.Authentication);
 
         Assert.NotNull(attestation);
-        // The attestation certificate is issued by the PIV Attestation CA
+        // Check a nonempty issuer string; chain trust and slot-key binding need separate validation.
         Assert.False(string.IsNullOrEmpty(attestation.Issuer));
 
         // 3. Verify attestation certificate has valid structure
         // YubiKey attestation cert validity varies by device/firmware
         Assert.True(attestation.NotBefore < attestation.NotAfter, "Certificate validity period is valid");
 
-        // 4. Verify the certificate has expected extensions for attestation
-        // Attestation certs should have a serial number
+        // 4. Check the serial-number string, rather than attestation extensions or chain validity.
         Assert.False(string.IsNullOrEmpty(attestation.SerialNumber));
     }
 }

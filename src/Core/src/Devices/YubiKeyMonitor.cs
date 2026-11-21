@@ -29,8 +29,12 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <para>A monitor has one lifetime: it runs from creation until <see cref="DisposeAsync"/> and cannot be
 /// paused or restarted. To resume tracking after disposal, create a new monitor. Disposal does not dispose
 /// caller-owned sessions or connections.</para>
+/// <para>After initialization, discovery failure before publication is logged and retried on the next listener
+/// or interval trigger, retaining the previous publication. A monitored enumeration timeout fails that scan rather than
+/// publishing timeout-induced removals. A terminal loop failure is reported through watch subscriptions.</para>
 /// <para>Concurrent <see cref="WatchAsync"/> enumerations are safe, and <see cref="DisposeAsync"/> may run while
-/// enumerations are active: they end normally. Do not call <see cref="DisposeAsync"/> concurrently with
+/// enumerations are active: healthy subscriptions end normally after draining. A previously faulted
+/// subscription retains its error. Do not call <see cref="DisposeAsync"/> concurrently with
 /// itself.</para>
 /// </remarks>
 public sealed class YubiKeyMonitor : IAsyncDisposable
@@ -70,10 +74,15 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     /// <param name="cancellationToken">Ends this enumeration only; the monitor keeps running.</param>
     /// <returns>A lazy stream. Nothing is subscribed until the first <c>MoveNextAsync</c>.</returns>
     /// <remarks>
-    /// Each enumeration has its own bounded buffer. Keep consuming it: a subscriber that falls more than
-    /// 256 changes behind is ended with <see cref="InvalidOperationException"/> instead of silently losing
-    /// changes; clear the projection and enumerate again to recover. Changes published before disposal may
-    /// still be delivered; an enumeration started after disposal ends immediately.
+    /// Snapshot capture and subscription registration share the publication boundary on the first move,
+    /// so the replay and its live tail cover the same membership history. Replay occupies no buffer space.
+    /// Each enumeration buffers up to 256 later changes. A write to a full buffer faults only that subscriber;
+    /// replay and buffered changes may drain before <see cref="InvalidOperationException"/> is observed.
+    /// Clear the projection and enumerate this monitor again to recover from overflow. Device records carry
+    /// retained references whose metadata can later change, rather than frozen event-time property values.
+    /// Disposal of the enumeration unregisters only that subscription. Changes published before monitor
+    /// disposal may still drain; an enumeration started after disposal ends immediately. A terminal monitoring
+    /// failure faults subscriptions; dispose that monitor and create a new one to resume tracking.
     /// </remarks>
     /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was canceled.</exception>
     /// <exception cref="InvalidOperationException">This subscriber overflowed, or monitoring failed terminally.</exception>
@@ -91,7 +100,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     /// <summary>Starts listeners and the scan loop, then awaits the first published scan.</summary>
     /// <remarks>
     /// <paramref name="cancellationToken"/> bounds only this wait. A first-scan failure is terminal and
-    /// rethrown; either outcome disposes the partially created monitor before returning.
+    /// rethrown; failure or cancellation disposes the partially created monitor before returning.
     /// </remarks>
     internal static async Task<YubiKeyMonitor> CreateAsync(
         IMonitoredDiscovery discovery,
@@ -135,7 +144,8 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
 
                 if (trigger.Reason == RescanReason.Initial)
                 {
-                    // The first scan must succeed for creation to return; later failures only log and retry.
+                    // The first scan must succeed for creation to return. Later scan failures are handled
+                    // below; scheduler or evidence-invalidation failure still terminates the loop.
                     await ScanAndPublishAsync(cancellationToken).ConfigureAwait(false);
                     _ = _firstPublication.TrySetResult(null);
                     continue;
@@ -179,12 +189,14 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     }
 
     /// <summary>
-    /// Stops tracking and ends every <see cref="WatchAsync"/> enumeration normally. Idempotent.
+    /// Stops tracking and completes healthy <see cref="WatchAsync"/> subscriptions normally. Idempotent.
     /// </summary>
     /// <remarks>
-    /// Returns after the scan loop has stopped, which waits for an in-flight scan to finish within its
-    /// discovery budgets. Active <see cref="WatchAsync"/> enumerations end normally. Not safe to call concurrently
-    /// with itself.
+    /// Stops listeners, requests cancellation, and awaits the scan loop before retiring discovery and
+    /// completing the feed. There is no separate drain timeout or scan-wide completion bound. Discovery
+    /// budgets bound individual waits, while already-dispatched native work can retain ownership afterward.
+    /// Healthy subscriptions may drain already-published changes; existing subscription errors remain observable.
+    /// Caller-owned connections and sessions retain their own lifetimes. Not safe to call concurrently with itself.
     /// </remarks>
     public ValueTask DisposeAsync() => new(_disposal ??= DisposeCoreAsync());
 
@@ -192,7 +204,7 @@ public sealed class YubiKeyMonitor : IAsyncDisposable
     {
         // Each step removes the only source of concurrency the next step would otherwise have to guard against:
         // stopped listeners cannot signal, a stopped loop cannot scan or publish, a retired discovery
-        // cannot open reads, and a completed feed accepts no subscribers.
+        // cannot open reads, and a completed feed ends later subscriptions immediately.
         _signals.Dispose();
         _lifetime.Cancel();
         if (_run is { } run)

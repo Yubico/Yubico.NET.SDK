@@ -30,12 +30,16 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// <remarks>
 /// These tests exercise credential creation workflows on real YubiKeys.
 /// Tests requiring user presence (touch) are marked with the appropriate trait.
+/// Use a human-coordinated dedicated device with known PIN state; setup can normalize the PIN.
+/// Test hashes are synthetic, not serialized-client-data bindings. These assertions inspect parsed
+/// fields/status, not attestation trust. Deletion is best effort and not every test deletes credentials;
+/// token/auth buffers lack comprehensive finally-zeroing, so this is not a secure application template.
 /// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2MakeCredentialTests
 {
     /// <summary>
-    /// Tests that MakeCredential creates a non-resident credential successfully.
+    /// Requests a non-discoverable credential and checks parsed fields and a nonempty credential ID.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -85,7 +89,7 @@ public class Ctap2MakeCredentialTests
                 pubKeyCredParams: Ctap2TestData.ES256Params,
                 options: options);
 
-            // Assert
+            // No attestation verification. Guid.Empty also encodes to 16 bytes, so length alone does not prove AAGUID presence.
             Assert.NotNull(result);
             Assert.NotNull(result.AuthenticatorData);
             Assert.NotNull(result.Format);
@@ -94,7 +98,7 @@ public class Ctap2MakeCredentialTests
         });
 
     /// <summary>
-    /// Tests that MakeCredential creates a resident (discoverable) credential.
+    /// Requests discoverable creation and checks attested data and a nonempty ID, not later RP-ID discovery.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -266,13 +270,14 @@ public class Ctap2MakeCredentialTests
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This test verifies the error path when the authenticator requires PIN/UV but the client
-    /// does not provide pinUvAuthParam. The authenticator should return an error such as
-    /// CtapStatus.PuatRequired or CtapStatus.PinInvalid depending on firmware version.
+    /// Configures/verifies a PIN, then requests discoverable creation without token authentication.
+    /// The assertion accepts one of four CTAP statuses; it does not establish which status every
+    /// firmware must return or prove rejection for every other operation.
     /// </para>
     /// <para>
-    /// This closes the architectural gap where WebAuthn proved this error path on hardware
-    /// (MakeCredential_NoPinProvided_ThrowsNotAllowed) but CTAP2 did not have an equivalent test.
+    /// Setup can fail or skip before the target request. PIN_AUTH_BLOCKED is temporary and can require
+    /// a power cycle; PIN_BLOCKED is exhausted and may require reset. The unchanged skip string does
+    /// not distinguish these states or the product-specific reset interaction window.
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -281,7 +286,7 @@ public class Ctap2MakeCredentialTests
     public async Task MakeCredential_WhenPinUvAuthRequiredButNotProvided_ThrowsCtapError(YubiKeyTestState state) =>
         await state.WithCtap2SessionAsync(async session =>
         {
-            // Arrange: Ensure PIN is set (this makes the device require PIN for operations)
+            // Establish PIN state for this discoverable-creation request, not a universal PIN requirement.
             try
             {
                 using var _ = await Ctap2TestHelpers.SetOrVerifyPinAsync(session, Ctap2TestData.PinUtf8);
@@ -316,11 +321,7 @@ public class Ctap2MakeCredentialTests
                     options: options);
             });
 
-            // Different firmware versions may return different status codes:
-            // - PuatRequired (0x36): Standard CTAP2 response when pinUvAuthToken is needed
-            // - PinInvalid (0x31): Some firmware versions return this when PIN auth is missing
-            // - PinAuthInvalid (0x33): Alternative error when pinUvAuthParam is absent
-            // - MissingParameter (0x14): Another possible response when required param is missing
+            // The accepted four-code set bounds this test; it is not per-firmware status qualification.
             Assert.True(
                 ctapEx.Status is CtapStatus.PuatRequired or CtapStatus.PinInvalid or CtapStatus.PinAuthInvalid or CtapStatus.MissingParameter,
                 $"Expected PuatRequired/PinInvalid/PinAuthInvalid/MissingParameter, got {ctapEx.Status}");
@@ -344,7 +345,7 @@ public class Ctap2MakeCredentialTests
         }
         catch
         {
-            // Cleanup failures should not fail the test
+            // Best-effort deletion preserves the primary result; failure can leave credentials and token bytes.
         }
     }
 }

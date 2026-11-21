@@ -23,10 +23,13 @@ namespace Yubico.YubiKit.YubiOtp;
 /// This is distinct from <see cref="YubiOtpSlotConfiguration"/>, which configures a slot to
 /// emit a Yubico OTP on touch. This configuration instead makes the slot respond to an
 /// explicit 6-byte challenge sent via <see cref="YubiOtpSession.CalculateYubicoOtpAsync"/>,
-/// returning a 16-byte AES-128 response.
+/// returning a 16-byte AES-encrypted Yubico ticket with variable fields, not deterministic raw challenge
+/// encryption. The private ID is zero; the verifier must check the decrypted challenge, CRC, and replay
+/// policy. The SDK performs none of that verification.
 /// <para>
 /// The 16-byte AES key is stored directly in the <c>key</c> wire format field. The key must be
 /// exactly 16 bytes; keys of any other length are rejected before any device I/O is attempted.
+/// This configuration copies the key. Dispose it and separately clear your source buffer.
 /// </para>
 /// </remarks>
 public sealed class YubicoOtpChallengeResponseSlotConfiguration : SlotConfiguration

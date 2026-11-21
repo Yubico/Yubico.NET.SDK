@@ -3,12 +3,12 @@
 
 namespace Yubico.YubiKit.Oath.Examples.OathTool.Cli.Output;
 
-// OathTool intentionally uses plain-text output (no Spectre.Console) for pipe-safe operation.
-// It does NOT delegate to Yubico.YubiKit.Cli.Shared.Output.OutputHelpers by design.
+// These helpers write plain text through Console so their output works in pipes.
+// They intentionally do not delegate to Yubico.YubiKit.Cli.Shared.Output.OutputHelpers.
 
 /// <summary>
 /// Provides plain-text formatting utilities for consistent CLI output.
-/// No Spectre.Console dependency - works in pipes and non-interactive terminals.
+/// These helpers do not use Spectre.Console; device selection elsewhere in the tool does.
 /// </summary>
 public static class OutputHelpers
 {
@@ -31,7 +31,7 @@ public static class OutputHelpers
         Console.Error.WriteLine($"WARNING: {message}");
 
     /// <summary>
-    /// Writes an informational message to stderr (so stdout remains machine-parseable).
+    /// Writes an informational message to stderr, keeping it separate from stdout results.
     /// </summary>
     public static void WriteInfo(string message) =>
         Console.Error.WriteLine(message);

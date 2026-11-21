@@ -25,8 +25,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 /// <summary>
 ///     Covers <c>ApplicationSession.ConfigureProtocolAsync</c>'s SCP guard: SCP is only valid on a PC/SC SmartCard
-///     protocol. This is the Core contract that backs the Phase 38 FIDO2 rule (ISC-9.1) — supplying
-///     <c>scpKeyParams</c> while a non-SmartCard transport (e.g. the default HID FIDO) is selected throws,
+///     protocol. Supplying SCP parameters while a non-SmartCard transport is selected throws,
 ///     rather than silently ignoring the requested secure channel.
 /// </summary>
 public class ApplicationSessionScpTests
@@ -302,8 +301,7 @@ public class ApplicationSessionScpTests
     {
         // Deliberately not `using`: DisposeAfterInitializationFailure already disposed this session, and
         // that disposal FAILED. DisposalGate makes a failed teardown terminal and replays the same failure
-        // to every later caller, so a second dispose would rethrow the cleanup IOException. Upstream's
-        // version could use `using` because it has no DisposalGate; ours shares failed completions by design.
+        // to every later caller, so a second dispose would rethrow the cleanup IOException.
         var session = TestSession.Create(new InertConnection());
         var expected = new InvalidOperationException("initialization failure");
         var protocol = new TrackingProtocol(disposeException: new IOException("cleanup failure"));
@@ -331,8 +329,7 @@ public class ApplicationSessionScpTests
                 scp));
 
         // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // The zero count checks that protocol cleanup leaves this borrowed connection open.
         Assert.Equal(0, connection.DisposeCount);
     }
 

@@ -20,6 +20,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
 /// <summary>
 /// Unit tests for <see cref="PinUvAuthProtocolV2"/>.
 /// </summary>
+/// <remarks>KDF cases check length/determinism, not an independent two-info HKDF vector. AES/MAC cases check local behavior, not device interoperability, token state or buffer clearing.</remarks>
 public sealed class PinUvAuthProtocolV2Tests
 {
     [Fact]
@@ -50,6 +51,7 @@ public sealed class PinUvAuthProtocolV2Tests
         var peerCoseKey = new Dictionary<int, object?>
         {
             { 1, 2 },      // kty: EC2
+            { 3, -25 },    // alg: ECDH-ES + HKDF-256
             { -1, 1 },     // crv: P-256
             { -2, peerParams.Q.X },
             { -3, peerParams.Q.Y }
@@ -392,13 +394,14 @@ public sealed class PinUvAuthProtocolV2Tests
             { 1, 2 },
             { -1, 1 },
             { -2, peerParams.Q.X },
-            { -3, peerParams.Q.Y }
+            { -3, peerParams.Q.Y },
+            { 3, -25 }
         };
 
         var (keyAgreement1, _) = protocol.Encapsulate(peerCoseKey);
         var (keyAgreement2, _) = protocol.Encapsulate(peerCoseKey);
 
-        // Each call should generate a new ephemeral key
+        // Compare exported public coordinates only, not remote agreement or ephemeral-key clearing.
         Assert.NotEqual(keyAgreement1[-2], keyAgreement2[-2]);
         Assert.NotEqual(keyAgreement1[-3], keyAgreement2[-3]);
     }

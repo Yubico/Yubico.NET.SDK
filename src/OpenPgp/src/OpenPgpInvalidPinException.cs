@@ -17,23 +17,20 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     Exception thrown when OpenPGP User, Admin, or Reset Code PIN verification fails.
+///     Reports a recognized credential-command failure with an optional retry count.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Thrown by <see cref="IOpenPgpSession.VerifyPinAsync" /> and
-///         <see cref="IOpenPgpSession.VerifyAdminAsync" /> whenever the card rejects the
-///         supplied PIN, regardless of which status word the card used to report it: a
-///         standard retry-counted failure (SW 0x63Cx), "security status not satisfied"
-///         (SW 0x6982, returned by some 5.8.0-alpha firmware instead of 0x63Cx), or the PIN
-///         already being permanently blocked (SW 0x6983).
+///         Used for selected statuses from VERIFY, CHANGE and Reset-Code recovery. The original
+///         <see cref="ApduException.SW" /> and command header remain available. Unclassified statuses
+///         and administrator-authenticated recovery failures propagate as general APDU exceptions.
 ///     </para>
 ///     <para>
-///         <see cref="RetriesRemaining" /> exposes the parsed retry count as a typed value so
-///         callers do not need to parse <see cref="Exception.Message" /> or separately query
-///         <see cref="IOpenPgpSession.GetPinStatusAsync" />. It is <c>0</c> when the PIN is
-///         already blocked, a positive count when retries remain, and <c>null</c> only when the
-///         card's failure status carries no retry count and a fallback status query also failed.
+///         <see cref="RetriesRemaining" /> carries an explicit count, zero for a blocked credential,
+///         or the result of a status query. It is null when the count is unavailable. In particular,
+///         6982 may indicate something other than an incorrect credential, even when a count is available.
+///         In either User PIN verification mode, the query reads the User PIN counter.
+///         Diagnose uncertainty before retrying. User recovery remains available through Reset Code/Admin.
 ///     </para>
 ///     <para>
 ///         This type derives from <see cref="ApduException" /> so existing code that catches
@@ -44,17 +41,18 @@ namespace Yubico.YubiKit.OpenPgp;
 public sealed class OpenPgpInvalidPinException : ApduException
 {
     /// <summary>
-    ///     Gets the number of verification attempts remaining before the PIN is blocked, or
-    ///     <c>null</c> if the card did not report a retry count and it could not otherwise be
-    ///     determined.
+    ///     Gets the available reported retry count, or <c>null</c> when unavailable.
     /// </summary>
+    /// <remarks>
+    ///     Diagnose the cause before another verification attempt.
+    /// </remarks>
     public int? RetriesRemaining { get; }
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="OpenPgpInvalidPinException" /> class.
     /// </summary>
     /// <param name="retriesRemaining">
-    ///     The number of remaining verification attempts, or <c>null</c> if unknown.
+    ///     The reported retry count, or <c>null</c> if unknown.
     /// </param>
     /// <param name="message">The message that describes the error.</param>
     public OpenPgpInvalidPinException(int? retriesRemaining, string message)

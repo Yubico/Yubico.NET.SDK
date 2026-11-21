@@ -20,7 +20,8 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// Output from the minPinLength extension.
 /// </summary>
 /// <remarks>
-/// Contains the minimum PIN length required by the authenticator.
+/// Reports the current minimum during credential creation for an authorized RP. Absence of output
+/// is not a zero minimum or proof the extension is unsupported.
 /// </remarks>
 public sealed class MinPinLengthOutput
 {
@@ -29,7 +30,8 @@ public sealed class MinPinLengthOutput
     /// </summary>
     /// <remarks>
     /// The minimum number of Unicode code points required for a PIN.
-    /// Default minimum is 4, maximum is 63.
+    /// The preconfigured minimum is at least four code points. The separate 63-byte UTF-8 PIN limit
+    /// is not this field's unit. Decode reads an Int32 without enforcing a 4–63 policy range.
     /// </remarks>
     public int MinPinLength { get; init; }
 

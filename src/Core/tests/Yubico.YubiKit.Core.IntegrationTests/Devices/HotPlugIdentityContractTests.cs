@@ -31,9 +31,8 @@ namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 ///     serial to be read), UNPLUG the sole YubiKey, wait roughly five seconds, and PLUG IT BACK IN.
 ///     The test waits up to 120 s for the removal and up to 120 s for the reinsertion. The windows
 ///     are deliberately generous: xUnit buffers output until the run ends, so the operator acts on
-///     elapsed time, not on a prompt. Every failure message carries the full captured timeline so a
-///     failed ceremony still tells you which layer went quiet (monitor rescan, repository snapshot,
-///     or event stream).
+///     elapsed time, not on a prompt. Assertion messages include the captured timeline to distinguish
+///     observed snapshot membership from stream delivery; the timeline alone does not establish a native cause.
 /// </remarks>
 public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLifetime
 {
@@ -133,7 +132,7 @@ public class HotPlugIdentityContractTests(ITestOutputHelper output) : IAsyncLife
         await Arrival(original).Task.WaitAsync(TimeSpan.FromSeconds(10));
         Note($"BASELINE {original.DeviceId} connections={original.AvailableConnections} serial={originalSerial}");
 
-        // The operator unplugs the key. Poll the repository snapshot alongside the event
+        // The operator unplugs the key. Read a subscription snapshot alongside the event
         // stream: if the snapshot empties without a Removed event, the event plumbing lost it; if
         // neither happens, the monitor never observed the removal.
         var snapshotEmptied = false;

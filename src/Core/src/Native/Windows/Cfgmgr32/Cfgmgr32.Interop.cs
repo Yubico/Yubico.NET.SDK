@@ -267,6 +267,7 @@ internal static partial class NativeMethods
     );
 
 
+    // LPGUID is passed by reference; list capacity and count are in UTF-16 characters, not bytes.
     [LibraryImport(Libraries.CfgMgr, EntryPoint = "CM_Get_Device_Interface_ListW",
         StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

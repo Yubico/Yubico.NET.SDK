@@ -5,6 +5,25 @@ namespace Yubico.YubiKit.Core.UnitTests.Devices;
 
 public class DeviceInfoFieldLengthTests
 {
+    [Theory]
+    [InlineData(0x01, FormFactor.UsbAKeychain, false, false)]
+    [InlineData(0x81, FormFactor.UsbAKeychain, true, false)]
+    [InlineData(0x41, FormFactor.UsbAKeychain, false, true)]
+    [InlineData(0xEF, (FormFactor)15, true, true)]
+    public void CreateFromTlvs_SeparatesBaseFormFactorAndProductFlags(int raw, FormFactor expected, bool fips, bool sky)
+    {
+        using var field = new Tlv(0x04, [(byte)raw]);
+        var info = DeviceInfo.CreateFromTlvs([field], new FirmwareVersion(5, 7, 0));
+
+        Assert.Equal(expected, info.FormFactor);
+        Assert.Equal((byte)raw, info.RawFormFactor);
+        Assert.Equal(fips, info.IsFips);
+        Assert.Equal(sky, info.IsSky);
+
+        var differentFlags = info with { RawFormFactor = (byte)(raw ^ 0x10) };
+        Assert.NotEqual(info, differentFlags);
+    }
+
     public static TheoryData<int, int> InvalidFixedFieldLengths
     {
         get

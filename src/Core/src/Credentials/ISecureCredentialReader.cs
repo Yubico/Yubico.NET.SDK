@@ -17,13 +17,13 @@ using System.Buffers;
 namespace Yubico.YubiKit.Core.Credentials;
 
 /// <summary>
-/// Provides secure credential input that never exposes sensitive data as strings.
+/// Reads credential bytes into a disposable memory owner.
 /// </summary>
 /// <remarks>
 /// <para>
-/// All credential data is returned as <see cref="IMemoryOwner{T}"/> which automatically
-/// zeros sensitive memory when disposed. Callers should use the <c>using</c> pattern
-/// to ensure credentials are cleared as soon as possible.
+/// Dispose each returned <see cref="IMemoryOwner{T}"/> to clear its credential bytes.
+/// Input storage depends on the implementation: <see cref="ConsoleCredentialReader"/> uses
+/// pooled characters interactively, but redirected input passes through a managed string.
 /// </para>
 /// <para>
 /// This is a synchronous, application-initiated terminal input helper with display and encoding
@@ -31,15 +31,19 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// SDK-to-application callback carrying protocol context for secrets requested during an operation.
 /// </para>
 /// <para>
-/// Example usage:
+/// This method borrows an open PIV session. The credential owner remains alive until verification
+/// completes and is then cleared, including on failure. The caller retains session ownership.
 /// <code>
-/// var reader = new ConsoleCredentialReader();
-/// using var credential = reader.ReadCredential(CredentialReaderOptions.ForPin());
-/// if (credential is not null)
+/// static async Task ReadAndVerifyPinAsync(
+///     Yubico.YubiKit.Piv.IPivSession pivSession, CancellationToken cancellationToken)
 /// {
-///     // Use credential.Memory.Span to access the PIN bytes
-///     pivSession.VerifyPin(credential.Memory.Span);
-/// } // Memory is automatically zeroed here
+///     var reader = new ConsoleCredentialReader();
+///     using var credential = reader.ReadCredential(CredentialReaderOptions.ForPin(), cancellationToken);
+///     if (credential is not null)
+///     {
+///         await pivSession.VerifyPinAsync(credential.Memory, cancellationToken);
+///     }
+/// }
 /// </code>
 /// </para>
 /// </remarks>
@@ -52,13 +56,13 @@ public interface ISecureCredentialReader
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>
     /// An <see cref="IMemoryOwner{T}"/> containing the credential bytes, or <c>null</c>
-    /// if the user cancelled the input (e.g., pressed Escape).
+    /// if input is declined. The console reader also returns null on end of input or rejected input.
     /// </returns>
     /// <remarks>
     /// The returned memory owner automatically zeros its contents when disposed.
     /// Callers must dispose the result to ensure sensitive data is cleared.
     /// </remarks>
-    /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
+    /// <exception cref="OperationCanceledException">The implementation observes cancellation. The console reader checks while waiting for an interactive key, rather than during redirected reads.</exception>
     IMemoryOwner<byte>? ReadCredential(CredentialReaderOptions options, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -68,17 +72,18 @@ public interface ISecureCredentialReader
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>
     /// An <see cref="IMemoryOwner{T}"/> containing the credential bytes if both entries
-    /// matched, or <c>null</c> if the user cancelled or entries did not match.
+    /// matched, or <c>null</c> if an entry was declined, rejected, unavailable, or did not match.
     /// </returns>
     /// <remarks>
     /// <para>
     /// Uses timing-safe comparison to verify the credentials match.
     /// </para>
     /// <para>
-    /// The first entry buffer is always zeroed before the second prompt,
-    /// and both buffers are zeroed if they don't match.
+    /// The console reader retains the first entry while acquiring the second. It disposes the second
+    /// entry after comparison, transfers the first to the caller on a match, and disposes the first
+    /// on every other exit. The caller must dispose the successful result.
     /// </para>
     /// </remarks>
-    /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
+    /// <exception cref="OperationCanceledException">The implementation observes cancellation while reading an entry.</exception>
     IMemoryOwner<byte>? ReadCredentialWithConfirmation(CredentialReaderOptions options, CancellationToken cancellationToken = default);
 }

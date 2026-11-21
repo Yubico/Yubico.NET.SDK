@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
-using System.Security.Cryptography;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Prompts;
 
@@ -22,65 +21,35 @@ internal static class AccessCommand
             return 1;
         }
 
-        return await ChangeManagementKeyAsync(args, cancellationToken);
+        return await ChangeManagementKeyAsync(cancellationToken);
     }
 
-    private static async Task<int> ChangeManagementKeyAsync(string[] args, CancellationToken cancellationToken)
+    private static async Task<int> ChangeManagementKeyAsync(CancellationToken cancellationToken)
     {
-        var currentKeyHex = CommandArgs.GetOption(args, "--management-key");
-        var newKeyHex = CommandArgs.GetOption(args, "--new-management-key");
-
-        // Prompt for missing values
-        currentKeyHex ??= AnsiConsole.Prompt(
-            new TextPrompt<string>("Current management key (hex, 16 bytes):")
-                .DefaultValue("00000000000000000000000000000000"));
-
-        newKeyHex ??= AnsiConsole.Ask<string>("New management key (hex, 16 bytes):");
-
-        var currentKey = CommandArgs.ParseHex(currentKeyHex);
-        var newKey = CommandArgs.ParseHex(newKeyHex);
-
-        if (currentKey is null || currentKey.Length != 16)
-        {
-            OutputHelpers.WriteError("Invalid current management key. Must be 16 bytes (32 hex characters).");
+        // Store the replacement recoverably before installing it.
+        using var currentKey = OutputHelpers.ReadKey("Current management key (16 bytes, hex)", 16, cancellationToken);
+        if (currentKey is null)
             return 1;
-        }
 
-        if (newKey is null || newKey.Length != 16)
-        {
-            OutputHelpers.WriteError("Invalid new management key. Must be 16 bytes (32 hex characters).");
+        using var newKey = OutputHelpers.ReadKey("New management key (16 bytes, hex)", 16, cancellationToken);
+        if (newKey is null)
             return 1;
-        }
 
         var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
         if (selection is null)
-        {
             return 1;
-        }
 
-        try
-        {
-            await using var session = await selection.Device.CreateHsmAuthSessionAsync(
-                cancellationToken: cancellationToken);
-
-            await session.PutManagementKeyAsync(currentKey, newKey, cancellationToken);
-            OutputHelpers.WriteSuccess("Management key changed successfully.");
-            OutputHelpers.WriteWarning("Store the new key securely. Losing it will require a factory reset.");
-            return 0;
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(currentKey);
-            CryptographicOperations.ZeroMemory(newKey);
-        }
+        await using var session = await selection.Device.CreateHsmAuthSessionAsync(cancellationToken: cancellationToken);
+        await session.PutManagementKeyAsync(currentKey.Memory, newKey.Memory, cancellationToken);
+        OutputHelpers.WriteSuccess("Management key changed successfully.");
+        OutputHelpers.WriteWarning("Store the new key securely. Losing it will require a factory reset.");
+        return 0;
     }
 
     private static void PrintUsage()
     {
-        AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool access change-management-key [[options]]");
+        AnsiConsole.MarkupLine("[bold]Usage:[/] HsmAuthTool access change-management-key");
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLine("[bold]Options:[/]");
-        AnsiConsole.MarkupLine("  --management-key HEX       Current management key (hex, 16 bytes)");
-        AnsiConsole.MarkupLine("  --new-management-key HEX   New management key (hex, 16 bytes)");
+        AnsiConsole.MarkupLine("Management keys are prompted for, not accepted as arguments.");
     }
 }

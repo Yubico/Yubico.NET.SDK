@@ -30,7 +30,7 @@ using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
 /// <summary>
-///     Pins the ceremony frame shared by MakeCredential and GetAssertion before it is refactored: UV
+///     Covers the ceremony frame shared by MakeCredential and GetAssertion: UV
 ///     escalation happens at most once, the exclude-list pre-flight probes with up:false and narrows the
 ///     exclude list, probe failures keep their wrapping, CTAP statuses keep their mapping, and extension
 ///     outputs come from the attempt that succeeded.
@@ -280,7 +280,9 @@ public class WebAuthnClientCeremonyFrameTests
         await _backend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
     }
 
-    /// <summary>After the probe the token is re-minted with MakeCredential only (5.8.0: a used token no longer authorises).</summary>
+    /// <summary>Checks combined probe permissions followed by a new MakeCredential-only token request.</summary>
+    /// <remarks>Earlier commentary attributes re-minting to used-token behavior on firmware 5.8.0.
+    /// This fake-backend test does not measure or qualify that firmware behavior.</remarks>
     [Fact]
     public async Task MakeCredential_AfterExcludeListProbe_RemintsTokenWithMakeCredentialOnly()
     {
@@ -377,8 +379,11 @@ public class WebAuthnClientCeremonyFrameTests
         Assert.Equal(2, probes.Sum(probe => probe.AllowList!.Count)); // every candidate was probed once
     }
 
-    /// <summary>Nothing matched: a dummy descriptor still goes to the authenticator so user presence is requested
-    /// and the relying party cannot learn "credential absent" without a gesture; the result is empty as before.</summary>
+    /// <summary>
+    /// After a silent-probe miss, the final request carries a dummy descriptor with normal required-UP
+    /// policy rather than returning the probe miss directly. NoCredentials produces an empty match list.
+    /// This fake checks the request and result, not a gesture or a no-disclosure guarantee.
+    /// </summary>
     [Fact]
     public async Task GetAssertion_AllowList_NothingMatches_SendsDummyDescriptorAndReturnsEmpty()
     {
@@ -399,8 +404,9 @@ public class WebAuthnClientCeremonyFrameTests
     }
 
     /// <summary>
-    ///     With a token the probe is signed and the same token signs the assertion: a getAssertion accepts a token
-    ///     already used for an up:false probe (only makeCredential does not, see the registration test).
+    ///     Checks one GetAssertion permission-token acquisition and nonnull auth parameters on both the
+    ///     probe and final assertion requests. The fake backend and noncryptographic protocol exercise the
+    ///     SDK's token-reuse choice, not authenticator acceptance or command-specific token invalidation.
     /// </summary>
     [Fact]
     public async Task GetAssertion_AllowList_WithToken_SignsProbeAndAssertionWithOneToken()

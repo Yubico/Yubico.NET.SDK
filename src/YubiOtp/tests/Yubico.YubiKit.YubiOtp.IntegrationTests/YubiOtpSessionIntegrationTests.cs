@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
-
-using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.YubiOtp.IntegrationTests;
 
 public class YubiOtpSessionIntegrationTests
@@ -41,7 +41,7 @@ public class YubiOtpSessionIntegrationTests
 
         var configState = session.GetConfigState();
 
-        // ConfigState is always parseable — verify it doesn't throw and has a parseable structure
+        // Checks that this session's cached status parses; not a guarantee for malformed device status.
         Assert.True(configState.FirmwareVersion.Major >= 0);
     }
 
@@ -84,21 +84,17 @@ public class YubiOtpSessionIntegrationTests
         Array.Fill(key, (byte)0x31); // "1111..." as key
 
         using var config = new HmacSha1SlotConfiguration(key);
-        await session.PutConfigurationAsync(Slot.Two, config);
-
-        try
+        // Dedicated fixture: start with an empty slot. An unknown protection code is a setup failure.
+        if (session.GetConfigState().IsConfigured(Slot.Two))
         {
-            // Send a challenge
-            byte[] challenge = [0x01, 0x02, 0x03, 0x04];
-            var response = await session.CalculateHmacSha1Async(Slot.Two, challenge);
-
-            Assert.Equal(20, response.Length);
-        }
-        finally
-        {
-            // Clean up: delete slot 2
             await session.DeleteSlotAsync(Slot.Two);
         }
+
+        await session.PutConfigurationAsync(Slot.Two, config);
+
+        byte[] challenge = [0x01, 0x02, 0x03, 0x04];
+        var response = await session.CalculateHmacSha1Async(Slot.Two, challenge);
+        Assert.True(CryptographicOperations.FixedTimeEquals(HMACSHA1.HashData(key, challenge), response.Span));
     }
 
     [SkippableTheory]
@@ -107,12 +103,11 @@ public class YubiOtpSessionIntegrationTests
     {
         await using var session = await state.Device.CreateYubiOtpSessionAsync();
 
-        // This test only verifies the swap command completes without error.
-        // A full test would configure both slots and verify the swap,
-        // but that risks disrupting other tests.
+        // This checks command completion, not the swapped contents. Both slots are affected, and the
+        // second swap below is not finally-protected if the first call fails after device mutation.
         await session.SwapSlotsAsync();
 
-        // Swap back to restore original state
+        // Attempt to restore placement; original secrets are not read back or verified.
         await session.SwapSlotsAsync();
     }
 
@@ -127,7 +122,8 @@ public class YubiOtpSessionIntegrationTests
             Slot.Two,
             "https://www.yubico.com");
 
-        // Disable NDEF
-        await session.SetNdefConfigurationAsync(Slot.Two);
+        // Send the all-zero disable request. This test has no NFC read-back and does not establish
+        // the resulting on-tap output or disable effect.
+        await session.DisableNdefAsync(Slot.Two);
     }
 }

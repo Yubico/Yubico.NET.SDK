@@ -196,11 +196,10 @@ public class KdfTests
     }
 
     [Fact]
-    public void Kdf_Parse_EmptyOrUnknown_ReturnsKdfNone()
+    public void Kdf_Parse_UnknownAlgorithm_DoesNotFallBackToSendingRawPin()
     {
         // Unknown algorithm ID
-        var parsed = Kdf.Parse([0x81, 0x01, 0xFF]);
-        Assert.IsType<KdfNone>(parsed);
+        Assert.Throws<NotSupportedException>(() => Kdf.Parse([0x81, 0x01, 0xFF]));
     }
 
     [Fact]

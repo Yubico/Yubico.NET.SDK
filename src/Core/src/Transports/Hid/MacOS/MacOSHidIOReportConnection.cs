@@ -11,6 +11,11 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 /// <summary>
 ///     Synchronous HID report compatibility surface over the persistent macOS FIDO input owner.
 /// </summary>
+/// <remarks>
+///     Descriptor sizes are metadata. Receive accepts fixed FIDO input: 64 payload bytes, or 65 bytes with a
+///     leading zero report ID that is removed. Other lengths terminalize input. SET preserves supported caller
+///     lengths. The six-second read timeout detaches that reader while the native input owner remains active.
+/// </remarks>
 [SupportedOSPlatform("macos")]
 internal sealed class MacOSHidIOReportConnection : IHidConnection
 {

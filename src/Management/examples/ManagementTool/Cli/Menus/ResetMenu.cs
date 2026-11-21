@@ -10,6 +10,8 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 
 /// <summary>
 /// CLI menu for factory reset operation.
+/// The firmware check does not establish Bio MPE applicability. The supported combined reset deletes
+/// FIDO/PIV user data and the shared PIN, retaining F9; the broader display is not an erasure contract.
 /// </summary>
 public static class ResetMenu
 {
@@ -37,7 +39,7 @@ public static class ResetMenu
         var info = infoResult.DeviceInfo.Value;
 
         // Check firmware version
-        if (!DeviceReset.IsResetSupported(info.FirmwareVersion))
+        if (!DeviceReset.IsResetSupported(session.FirmwareVersion))
         {
             OutputHelpers.WriteError($"Factory reset requires firmware 5.6.0 or later.");
             OutputHelpers.WriteKeyValue("Current firmware", info.FirmwareVersion.ToString());
@@ -45,7 +47,7 @@ public static class ResetMenu
             return;
         }
 
-        // Display device info and what will be lost
+        // Display device info; caller must establish Bio MPE support, not infer it from firmware alone.
         AnsiConsole.MarkupLine("[bold]Device to Reset[/]");
         OutputHelpers.WriteKeyValue("Serial Number", info.SerialNumber?.ToString());
         OutputHelpers.WriteKeyValue("Firmware Version", info.FirmwareVersion.ToString());
@@ -53,25 +55,12 @@ public static class ResetMenu
         AnsiConsole.WriteLine();
 
         // Severe warning
-        AnsiConsole.MarkupLine("[red bold]╔══════════════════════════════════════════════════════════════╗[/]");
-        AnsiConsole.MarkupLine("[red bold]║                    ⚠️  EXTREME WARNING ⚠️                     ║[/]");
-        AnsiConsole.MarkupLine("[red bold]╠══════════════════════════════════════════════════════════════╣[/]");
-        AnsiConsole.MarkupLine("[red bold]║  This operation will PERMANENTLY DESTROY all data including: ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║                                                              ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║  • All PIV keys and certificates                             ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║  • All FIDO2/WebAuthn credentials                           ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║  • All OATH (TOTP/HOTP) accounts                             ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║  • All OpenPGP keys                                          ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║  • All Yubico OTP configurations                             ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║  • The configuration lock code                               ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║  • All device configuration settings                         ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║                                                              ║[/]");
-        AnsiConsole.MarkupLine("[red bold]║  THIS CANNOT BE UNDONE.                                      ║[/]");
-        AnsiConsole.MarkupLine("[red bold]╚══════════════════════════════════════════════════════════════╝[/]");
+        AnsiConsole.MarkupLine("[red bold]Bio MPE only: permanently erase FIDO credentials, fingerprints, PIV data and the shared PIN.[/]");
+        AnsiConsole.MarkupLine("[red]Retains the F9 attestation slot. This does not recover the configuration lock code.[/]");
         AnsiConsole.WriteLine();
 
         // Double confirmation
-        if (!OutputHelpers.ConfirmDestructive("completely wipe this YubiKey and reset it to factory defaults"))
+        if (!OutputHelpers.ConfirmDestructive("reset the Bio MPE FIDO and PIV applications and shared PIN"))
         {
             OutputHelpers.WriteInfo("Factory reset cancelled");
             return;
@@ -86,9 +75,8 @@ public static class ResetMenu
         if (result.Success)
         {
             AnsiConsole.WriteLine();
-            OutputHelpers.WriteSuccess("Factory reset completed successfully");
-            OutputHelpers.WriteInfo("The YubiKey has been reset to factory defaults.");
-            OutputHelpers.WriteWarning("All PINs and PUKs are now set to their default values.");
+            OutputHelpers.WriteSuccess("Bio MPE FIDO and PIV reset confirmed, including the shared PIN.");
+            OutputHelpers.WriteInfo("This reset does not erase the F9 attestation slot.");
         }
         else
         {

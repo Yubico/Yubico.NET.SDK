@@ -27,14 +27,15 @@ public enum OathFailureReason
     Locked,
 
     /// <summary>
-    ///     Password verification failed because the supplied password (or derived key) was incorrect.
+    ///     The applet rejected access-key validation. This compatibility name does not prove that the
+    ///     user's password was incorrect; inspect the device status and the operation context.
     /// </summary>
     WrongPassword,
 }
 
 /// <summary>
 ///     Exception thrown when an OATH operation fails because the applet is locked or because
-///     password verification failed.
+///     access-key validation was rejected.
 /// </summary>
 public class OathException : Exception
 {
@@ -97,7 +98,7 @@ public class OathException : Exception
             OathFailureReason.Locked =>
                 "The OATH application is locked. Authenticate with ValidateAsync (or AuthenticateAndRetryAsync) before retrying this operation.",
             OathFailureReason.WrongPassword =>
-                "OATH password verification failed. The supplied password is incorrect.",
+                "The OATH application rejected access-key validation.",
             _ => "OATH operation failed.",
         };
 

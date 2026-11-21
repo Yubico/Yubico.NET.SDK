@@ -20,8 +20,14 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for FIPS compliance verification.
+/// Inspects advertised GetInfo metadata associated with the existing FIPS-labeled test group.
 /// </summary>
+/// <remarks>
+/// Names/traits do not establish FIPS validation: no certified-device/certificate qualification gate
+/// is present. Some checks return early or act only when optional fields exist; the clientPin check
+/// observes key presence, not its bool value. Default session setup can normalize the PIN before these
+/// metadata reads, so known PIN/device state and human coordination are needed for that setup path.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Category", "FIPS")]
 public class Ctap2FipsComplianceTests
@@ -41,7 +47,7 @@ public class Ctap2FipsComplianceTests
 
             Assert.NotNull(info.PinUvAuthProtocols);
             Assert.Contains(2, info.PinUvAuthProtocols);
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -58,7 +64,7 @@ public class Ctap2FipsComplianceTests
                         "Device with alwaysUv should have clientPin option");
                 }
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -76,7 +82,7 @@ public class Ctap2FipsComplianceTests
                     Assert.False(string.IsNullOrEmpty(cert.Key), "Certification key should not be empty");
                 }
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -90,5 +96,5 @@ public class Ctap2FipsComplianceTests
                 Assert.True(info.MinPinLength.Value >= 4,
                     $"Minimum PIN length should be at least 4, got {info.MinPinLength.Value}");
             }
-        });
+        }, normalizePin: false);
 }

@@ -46,7 +46,16 @@ public static class OathTestStateExtensions
             ScpKeyParameters? scpKeyParams = null,
             CancellationToken cancellationToken = default)
         {
-            await using var session = await state.Device
+            if (resetBeforeUse)
+            {
+                // Keep fixture setup separate: dispose the reset session before opening the test body.
+                var resetSession = await state.Device.CreateOathSessionAsync(
+                    new SessionCreationOptions { ScpKeyParameters = scpKeyParams, ProtocolConfiguration = configuration },
+                    cancellationToken).ConfigureAwait(false);
+                await WithSessionLifetimeAsync(resetSession, session => session.ResetAsync(cancellationToken)).ConfigureAwait(false);
+            }
+
+            var session = await state.Device
                 .CreateOathSessionAsync(
                     new SessionCreationOptions
                     {
@@ -56,12 +65,24 @@ public static class OathTestStateExtensions
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            if (resetBeforeUse)
-            {
-                await session.ResetAsync(cancellationToken).ConfigureAwait(false);
-            }
+            await WithSessionLifetimeAsync(session, action).ConfigureAwait(false);
+        }
+    }
 
-            await action(session).ConfigureAwait(false);
+    private static async Task WithSessionLifetimeAsync(OathSession session, Func<OathSession, Task> action)
+    {
+        Exception? primaryFailure = null;
+        try { await action(session).ConfigureAwait(false); }
+        catch (Exception exception)
+        {
+            primaryFailure = exception;
+            throw;
+        }
+        finally
+        {
+            // Close after setup or body completion without masking the original failure.
+            try { await session.DisposeAsync().ConfigureAwait(false); }
+            catch when (primaryFailure is not null) { }
         }
     }
 }

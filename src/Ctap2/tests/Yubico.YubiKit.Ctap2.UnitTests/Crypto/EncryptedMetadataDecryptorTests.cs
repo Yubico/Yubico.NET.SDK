@@ -20,6 +20,11 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Crypto;
 /// <summary>
 /// Unit tests for <see cref="EncryptedMetadataDecryptor"/>.
 /// </summary>
+/// <remarks>
+/// Local HKDF/CBC fixtures use synthetic tokens/plaintext and do not establish persistent-token issuance
+/// or device support. Generic multiblock/64-byte-token cases are not standard GetInfo field-format fixtures.
+/// Keys/plaintext are not comprehensively cleared; these are not production ownership examples.
+/// </remarks>
 public class EncryptedMetadataDecryptorTests
 {
     private static byte[] CreateRandomPpuat()
@@ -113,6 +118,20 @@ public class EncryptedMetadataDecryptorTests
         Assert.Null(result);
     }
 
+    [Theory]
+    [InlineData(32, 16)]
+    [InlineData(32, 31)]
+    [InlineData(32, 48)]
+    [InlineData(31, 32)]
+    [InlineData(64, 32)]
+    public void GetInfoDecryptors_RejectOtherThanOneCiphertextBlockAndSupportedTokenWidths(int tokenLength, int fieldLength)
+    {
+        byte[] token = new byte[tokenLength];
+        byte[] field = new byte[fieldLength];
+        Assert.Null(EncryptedMetadataDecryptor.DecryptIdentifier(token, field));
+        Assert.Null(EncryptedMetadataDecryptor.DecryptCredStoreState(token, field));
+    }
+
     [Fact]
     public void DecryptIdentifier_EmptyCiphertext_ReturnsNull()
     {
@@ -135,7 +154,7 @@ public class EncryptedMetadataDecryptorTests
         var plaintext = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                                       0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
 
-        // Encrypt with CBC mode (Java format: IV || CT)
+        // Local AES-128-CBC fixture with IV16 || ciphertext16, as in the standard 128-bit GetInfo value.
         var key = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encIdentifier"u8);
         var iv = new byte[16];
         RandomNumberGenerator.Fill(iv);
@@ -187,7 +206,7 @@ public class EncryptedMetadataDecryptorTests
         // Act - decrypt with wrong PPUAT
         var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(wrongPpuat, ivAndCiphertext);
 
-        // Assert - decryption succeeds but result is garbage
+        // Wrong-token decryption returns bytes: CBC supplies no authentication/correct-token verdict.
         Assert.NotNull(decrypted);
         Assert.NotEqual(plaintext, decrypted);
     }
@@ -230,7 +249,7 @@ public class EncryptedMetadataDecryptorTests
         var plaintext = new byte[] { 0xCA, 0xFE, 0xBA, 0xBE, 0xDE, 0xAD, 0xBE, 0xEF,
                                       0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 };
 
-        // Encrypt with CBC mode (Java format: IV || CT)
+        // Local AES-128-CBC fixture with IV16 || ciphertext16, as in the standard 128-bit GetInfo value.
         var key = EncryptedMetadataDecryptor.DeriveKey(ppuat, "encCredStoreState"u8);
         var iv = new byte[16];
         RandomNumberGenerator.Fill(iv);
@@ -308,7 +327,7 @@ public class EncryptedMetadataDecryptorTests
     [Fact]
     public void RoundTrip_MultipleBlockSize()
     {
-        // Test with 32-byte plaintext (2 AES blocks) using CBC
+        // Generic helper acceptance of 32-byte plaintext, not the standard 128-bit GetInfo field length.
         var ppuat = CreateRandomPpuat();
         var plaintext = new byte[32];
         RandomNumberGenerator.Fill(plaintext);
@@ -330,7 +349,7 @@ public class EncryptedMetadataDecryptorTests
         Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
 
         // Decrypt
-        var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(ppuat, ivAndCiphertext);
+        var decrypted = EncryptedMetadataDecryptor.DecryptWithInfo(ppuat, ivAndCiphertext, "encIdentifier"u8);
 
         // Assert
         Assert.NotNull(decrypted);
@@ -340,7 +359,7 @@ public class EncryptedMetadataDecryptorTests
     [Fact]
     public void RoundTrip_LargePpuat()
     {
-        // Test with larger PPUAT (64 bytes) using CBC
+        // Generic helper acceptance of a 64-byte synthetic token, not evidence of a valid device PPUAT.
         var ppuat = new byte[64];
         RandomNumberGenerator.Fill(ppuat);
         var plaintext = new byte[16];
@@ -363,7 +382,7 @@ public class EncryptedMetadataDecryptorTests
         Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
 
         // Decrypt
-        var decrypted = EncryptedMetadataDecryptor.DecryptCredStoreState(ppuat, ivAndCiphertext);
+        var decrypted = EncryptedMetadataDecryptor.DecryptWithInfo(ppuat, ivAndCiphertext, "encCredStoreState"u8);
 
         // Assert
         Assert.NotNull(decrypted);
@@ -392,7 +411,7 @@ public class EncryptedMetadataDecryptorTests
         aes.IV = iv;
         var encrypted = aes.EncryptCbc(plaintext, iv, PaddingMode.None);
 
-        // Prepend IV to ciphertext (Java format: IV || CT)
+        // Prepend IV to ciphertext; this local fixture does not execute Java YubiKit.
         var ivAndCiphertext = new byte[iv.Length + encrypted.Length];
         Array.Copy(iv, 0, ivAndCiphertext, 0, iv.Length);
         Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
@@ -425,7 +444,7 @@ public class EncryptedMetadataDecryptorTests
         aes.IV = iv;
         var encrypted = aes.EncryptCbc(plaintext, iv, PaddingMode.None);
 
-        // Prepend IV to ciphertext (Java format: IV || CT)
+        // Prepend IV to ciphertext; this local fixture does not execute Java YubiKit.
         var ivAndCiphertext = new byte[iv.Length + encrypted.Length];
         Array.Copy(iv, 0, ivAndCiphertext, 0, iv.Length);
         Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);

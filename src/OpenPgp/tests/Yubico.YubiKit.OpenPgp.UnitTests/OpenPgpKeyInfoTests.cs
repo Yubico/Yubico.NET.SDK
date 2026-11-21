@@ -48,7 +48,7 @@ public class OpenPgpKeyInfoTests
     {
         Assert.False(OpenPgpCurveOids.TryFromOidValueBytes([0x2A, 0x03, 0x04], out var keyType));
         Assert.Equal(KeyType.None, keyType);
-        Assert.Throws<ArgumentException>(() => AlgorithmAttributes.Parse([0x13, 0x2A, 0x03, 0x04]));
+        Assert.IsNotType<EcAttributes>(AlgorithmAttributes.Parse([0x13, 0x2A, 0x03, 0x04]));
     }
 
     [Fact]

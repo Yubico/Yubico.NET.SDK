@@ -35,7 +35,8 @@ public class DeviceInfoReaderTests
         var info = await ProtocolDeviceInfo.ReadAsync(connection, TestContext.Current.CancellationToken);
 
         Assert.Equal(0x01020304, info.SerialNumber);
-        // Borrows: ProtocolDeviceInfo does not own this connection; the caller disposes it.
+        // The connection is borrowed. This fake's counter observes synchronous Dispose calls only;
+        // its completed no-op DisposeAsync supplies no asynchronous-disposal oracle.
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -47,7 +48,7 @@ public class DeviceInfoReaderTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             ProtocolDeviceInfo.ReadAsync(connection, TestContext.Current.CancellationToken));
 
-        // Borrows: ProtocolDeviceInfo does not own this connection; the caller disposes it.
+        // The connection is borrowed. This counter detects synchronous disposal, not the fake's no-op DisposeAsync.
         Assert.Equal(0, connection.DisposeCount);
     }
 

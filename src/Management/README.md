@@ -3,7 +3,8 @@
 The Management application is the device-level control surface of a YubiKey. This package reads device
 information - serial number, firmware, form factor, supported and enabled capabilities - and writes device
 configuration: enabled applications per transport, timeouts, device flags, NFC restriction, and the
-configuration lock code. Other modules talk to one application; this one decides which applications exist.
+configuration lock code. Other modules talk to one application; this one controls which supported applications
+are enabled on each transport. Configuration cannot add applications the hardware does not support.
 
 > The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
 > constraints.
@@ -11,7 +12,7 @@ configuration lock code. Other modules talk to one application; this one decides
 ## Requirements
 
 - .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
-- Any YubiKey with firmware 4.1.0 or later; writing configuration needs 5.0.0 or later.
+- Device-information reads support firmware 4.1.0 or later; writing configuration needs 5.0.0 or later.
 - Transports: SmartCard (CCID, USB or NFC), HID FIDO, or HID OTP - the only module that runs over all three.
 
 SCP is available only over SmartCard. Supplying `SessionCreationOptions.ScpKeyParameters` with a HID connection
@@ -25,7 +26,17 @@ rejected without sending a reset command.
 |---------|------------------|-----------|
 | Read device information | 4.1.0 | SmartCard, HID FIDO, HID OTP |
 | Write device configuration | 5.0.0 | SmartCard, HID FIDO, HID OTP |
-| Factory reset (`ResetDeviceAsync`) | 5.6.0 | SmartCard (CCID) only |
+| Bio Multi-protocol Edition combined reset (`ResetDeviceAsync`) | 5.6.0 SDK gate | SmartCard (CCID) only |
+
+Public reads check the 4.1 firmware minimum before sending a command; the factory's best-effort metadata
+probe does not use this gate. Reads, writes and reset check the effective session firmware;
+the device extension uses cached device information first, then the applet's firmware read or transport
+version. Unknown and prerelease firmware admit the gates optimistically. SmartCard framing still uses the
+known numeric version (including for prereleases), so a numeric 5.7 beta respects `ForceShortApdus`.
+Live reads are not served from that cache, and required transport-setup errors and cancellation still
+propagate. Separately,
+passing those generic checks does not establish support for every field or device family. In particular,
+NFC restriction needs NFC-capable hardware with firmware 5.7 or later.
 
 ## Installation
 
@@ -47,14 +58,16 @@ using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Management;
 
 IYubiKey device = await YubiKeyManager.FindFirstAsync();
-await using var session = await device.CreateManagementSessionAsync();
-
-var info = await session.GetDeviceInfoAsync();
-Console.WriteLine($"Serial {info.SerialNumber}, firmware {info.FirmwareVersion}, {info.FormFactor}");
-Console.WriteLine($"USB enabled: {info.UsbEnabled}");
+await using (var session = await device.CreateManagementSessionAsync())
+{
+    var info = await session.GetDeviceInfoAsync();
+    Console.WriteLine($"Serial {info.SerialNumber}, firmware {info.FirmwareVersion}, {info.FormFactor}");
+    Console.WriteLine($"USB enabled: {info.UsbEnabled}");
+}
 ```
 
-Later snippets assume these directives and a `device` obtained the same way. For a single operation, the
+Later snippets are independent alternatives, each assuming these directives and a `device` obtained the
+same way, with no previous connection/session still open. For a single operation, the
 one-shot extensions `device.GetDeviceInfoAsync()` and `device.SetDeviceConfigAsync(...)` open a connection, act,
 and dispose both.
 
@@ -69,28 +82,70 @@ bool oathEnabledOverNfc = (info.NfcEnabled & DeviceCapabilities.Oath) != 0;
 Console.WriteLine($"Configuration locked: {info.IsLocked}");
 ```
 
-`UsbSupported` and `NfcSupported` describe the hardware; `UsbEnabled` and `NfcEnabled` describe what is on now.
+`UsbSupported` and `NfcSupported` describe the hardware; `UsbEnabled` and `NfcEnabled` report enabled
+applications. After a configuration write, reported persisted values need not mean the active interfaces
+have already changed.
+
+Each call performs device I/O, but the firmware field also uses the version captured during session
+initialization: that default takes precedence over the ordinary firmware tag, while a non-final qualifier
+can replace it. A firmware override changes session policy, not this returned value. Live reads and writes
+do not refresh `IYubiKey.CachedDeviceInfo` or a test fixture's initial snapshot. The current `DeviceInfo`
+also contains memory-backed timeout data; copying the record or a result wrapper does not clone those bytes.
+
+Core decodes the reported FIPS capability and approval masks separately from ordinary application masks.
+These are metadata, not proof that a particular operation ran in an approved configuration. `IsFips` is
+a separate manufacturing indicator, not an operating mode. `FormFactor` holds the base form factor;
+`RawFormFactor` preserves the complete byte, including unknown product flags.
 
 ### Enable or disable applications
 
 ```csharp
-var config = new DeviceConfig { UsbEnabled = DeviceCapabilities.Piv | DeviceCapabilities.Oath };
+var info = await device.GetDeviceInfoAsync();
+var requested = DeviceCapabilities.Piv | DeviceCapabilities.Oath;
+if ((info.UsbSupported & requested) != requested)
+{
+    throw new NotSupportedException("This key does not support both requested USB applications.");
+}
+var config = new DeviceConfig { UsbEnabled = requested };
 
 await using (var session = await device.CreateManagementSessionAsync())
 {
     await session.SetDeviceConfigAsync(config, new SetDeviceConfigOptions { Reboot = true });
 }
 
-// The key disconnects and re-enumerates. The session above is disposed; rescan before using the device again.
+// The session above is disposed. This pause is illustrative, not an enumeration guarantee.
 await Task.Delay(TimeSpan.FromSeconds(3));
 var rebooted = await YubiKeyManager.FindAllAsync(); // Every Find performs fresh discovery.
 ```
 
-`DeviceConfig` is a record whose properties mirror `DeviceInfo`: `UsbEnabled`, `NfcEnabled`, `AutoEjectTimeout`,
+`UsbEnabled` and `NfcEnabled` are complete replacement sets, not lists of applications to add. The example
+disables every other USB application. Preserve a supported USB application and a recovery route; after
+reboot, select the same intended key from fresh discovery results before opening another session. Discovery
+order and a fixed delay do not establish device identity or readiness.
+
+`DeviceConfig` is a record with settings corresponding to `DeviceInfo`: `UsbEnabled`, `NfcEnabled`, `AutoEjectTimeout`,
 `ChallengeResponseTimeout`, `DeviceFlags` and `NfcRestricted`. Leave a property `null` to keep the device's
 current value, so deriving from what the key reports is a one-liner:
 `new DeviceConfig { UsbEnabled = info.UsbEnabled & ~DeviceCapabilities.Otp }`. At least one USB capability must
-remain enabled; `SetDeviceConfigAsync` rejects `DeviceCapabilities.None` before anything is sent.
+remain enabled. The SDK rejects `DeviceCapabilities.None` for USB and values outside the wire widths
+(16 bits for capability masks, 8 bits for flags). It preserves unknown bits within those widths and does
+not check whether the device supports the requested applications. NFC `None` clears that transport's
+enabled application set.
+
+### Timeouts, flags and NFC restriction
+
+Timeouts are in seconds. The SDK accepts auto-eject values 0–3600 and challenge-response values 0–60,
+checking those limits when properties are assigned; these are SDK limits, not established firmware maxima.
+Auto-eject zero disables automatic ejection. Nonzero auto-eject controls CCID inactivity and is meaningful
+with `DeviceFlags.TouchEject` in CCID-only mode. Setting the timeout does not set that flag. Challenge-response
+zero requests the device default (normally 15 seconds). A non-null `DeviceFlags` replaces the entire flag set.
+
+On NFC-capable keys with firmware 5.7 or later, `new DeviceConfig { NfcRestricted = true }` requests temporary
+NFC restriction. The configured NDEF URL remains readable. To remove the restriction, supply USB power for
+three seconds; a charger is sufficient, with no touch or authenticated USB operation required. This differs
+from changing `NfcEnabled`. `null` omits the restriction field; `false` encodes a zero-valued request, but
+must not be relied on as a verified recovery procedure. Use the documented USB-power procedure. The SDK
+checks the 5.7 firmware minimum for `true` only; it leaves NFC hardware support to the device.
 
 ### Lock the configuration
 
@@ -110,35 +165,76 @@ finally
 }
 ```
 
-While locked, every later `SetDeviceConfigAsync` must supply `CurrentLockCode`. Passing `NewLockCode` again
-replaces the code; there is no unlock without the current one.
+While locked, each protected write must supply `CurrentLockCode`. It authorizes that command only; it does
+not unlock the session or remove the persistent lock. Passing a nonzero `NewLockCode` replaces the code.
+
+To remove the lock, supply the current code and sixteen zero bytes in the same write. This fragment assumes
+`byte[] currentLockCode` was loaded from your secret store and is owned by this scope:
+
+```csharp
+try
+{
+    await device.SetDeviceConfigAsync(
+        new DeviceConfig(),
+        new SetDeviceConfigOptions
+        {
+            CurrentLockCode = currentLockCode,
+            NewLockCode = new byte[16]
+        });
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(currentLockCode);
+}
+```
+
+An empty memory value is not a removal request: present lock codes must contain exactly 16 bytes.
 
 ### Factory reset
 
-Whole-device reset erases credentials, keys, and configuration and cannot be undone. It requires firmware
-5.6.0 or later and SmartCard (CCID); select that transport explicitly rather than allowing a HID session:
+This combined reset is documented for **YubiKey Bio Multi-protocol Edition**, not every key whose firmware
+passes the SDK check. It deletes FIDO credentials, fingerprints and the shared PIN, and PIV keys,
+certificates and user data, except the F9 attestation slot. It cannot be undone. It is not a documented
+recovery procedure for a lost Management configuration lock code. Other families use per-application resets.
+
+After confirming the product and authorizing the destruction, select SmartCard explicitly:
 
 ```csharp
 await using var session = await device.CreateManagementSessionAsync(
     new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard });
 
-// Destructive: only call after confirming that all device data may be erased.
+// Destructive: the caller has confirmed Bio MPE applicability and application-data erasure.
 await session.ResetDeviceAsync();
 ```
 
 If SmartCard is not exposed, session creation throws `NotSupportedException`. On an existing session,
 `ResetDeviceAsync` throws `NotSupportedException` if the effective session firmware is a release version below
 5.6.0 or the session uses either HID transport, without sending a reset command.
-`SessionCreationOptions.FirmwareVersionOverride` applies to this check; alpha/beta versions bypass it.
+`SessionCreationOptions.FirmwareVersionOverride` applies to this check; major-zero development versions bypass it.
 Passing the check does not guarantee that the device implements whole-device reset; a device rejection
 propagates as `ApduException` rather than `NotSupportedException`.
 
+After confirmed reset, the same session reselects Management, refreshes metadata and, if configured,
+establishes a new SCP channel with the original caller-owned parameters. Keep those parameters alive
+through any reset. If refresh fails, the session ends and reports that reset was confirmed while
+preserving the refresh error. If the exchange outcome itself is uncertain, close the old scopes and
+rediscover the intended key before further use; an exchange failure does not establish completion.
+
 ## User interaction
 
-Management operations need no touch, no PIN, and no management key. `SessionCreationOptions.UserPresencePrompt`
-is accepted by the options object but never invoked by this module. The only secret it handles is the 16-byte
-configuration lock code. Pass a `cancellationToken` to request cancellation; an admitted SmartCard
-exchange drains before returning, and cancellation does not roll back configuration already sent.
+Management commands do not require touch, a PIN or a PIV management key. Configuration protection uses
+the 16-byte configuration lock code. Optional SCP uses separately supplied, caller-owned key parameters;
+the session borrows them for initialization, and the caller remains responsible for their disposal.
+`SessionCreationOptions.UserPresencePrompt` is accepted by the options object but is not retained,
+invoked or disposed by this module.
+
+Pass a `cancellationToken` to request cancellation; an admitted SmartCard
+exchange drains before returning, and cancellation does not roll back configuration already sent. HID wait
+cancellation has transport-specific behavior. Await operations sequentially: overlapping exchanges are
+refused, not queued. A multi-page read contains separate exchanges; it is not one atomic public operation.
+Await the complete public task before disposal or input cleanup. On the current Windows HID path, report
+calls run synchronously and a blocked native call must return before protocol cancellation can advance.
+Disposing a connection concurrently with I/O is not a way to prove native completion or release.
 
 Configuration can change how the device behaves afterwards. `DeviceFlags.TouchEject` makes the CCID smart card
 absent until the user touches the key, affecting every SmartCard session that follows, but it only takes effect
@@ -155,31 +251,50 @@ device does not expose throws `NotSupportedException`.
 | Management | SmartCard, HID FIDO, HID OTP | yes |
 | YubiOTP | SmartCard, HID OTP | yes |
 | FIDO2 and WebAuthn | HID FIDO, SmartCard | yes |
-| PIV, OATH, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no |
+| OATH | SmartCard only | `SmartCard` only; no alternative transport |
+| PIV, OpenPGP, Security Domain, YubiHSM Auth | SmartCard only | no |
 
 - Supplying `ScpKeyParameters` without an explicit preference selects SmartCard, because SCP does not run over
   HID.
-- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection.
+- Within this process, a grouped physical YubiKey admits one live connection across its known member
+  interfaces, and one session per connection. Ungrouped records cannot provide cross-interface exclusion.
   A second session throws `ConnectionInUseException` until the first is disposed; connection failures propagate
   rather than falling back to another interface.
 - Sessions from `device.CreateManagementSessionAsync()` own the connection they opened and close it on
   disposal. `ManagementSession.CreateAsync(connection, ...)` borrows a connection you opened, and you dispose
-  it yourself. Use `await using` for both; there is no finalizer backstop.
-- `SetDeviceConfigAsync` with `Reboot = true` terminates every session on the device, and capability changes
-  can disable applications other code depends on. `ResetDeviceAsync` resets the whole device and cannot be undone.
-- Firmware-gated operations throw `NotSupportedException` when the connected key is too old.
+  it yourself. Use `await using` for both. Sessions have no finalizer recovery; a built-in connection's
+  best-effort native finalizer cleanup is not a lifetime guarantee.
+- With a direct factory, `PreferredConnectionType` checks the already-open connection; it does not switch
+  transports. A failed direct creation still leaves connection disposal to its creator.
+- `SetDeviceConfigAsync` with `Reboot = true` requests a reboot; it does not automatically dispose managed
+  session objects. If the requested reboot occurs, do not reuse existing sessions or connections. Dispose
+  them, rediscover the intended key and create fresh scopes. Capability changes can disable applications
+  other code depends on. Reset has the Bio MPE scope described above.
+- Write/reset firmware checks use the effective session version. An override affects protocol configuration
+  and feature checks, not the hardware metadata reported by later reads; initialization still probes the key.
+- Initialization attempts device metadata before establishing optional SCP. An SCP session does not mean
+  every initialization metadata exchange was protected by SCP.
 
 ## Security notes
 
 - The lock codes in `SetDeviceConfigOptions` are borrowed `ReadOnlyMemory<byte>` of exactly 16 bytes. The
-  options object is not retained; zero your buffer with `CryptographicOperations.ZeroMemory` in a `finally`.
+  options object is not retained. Keep source buffers valid and unchanged until the awaited operation
+  completes, then zero owned secrets with `CryptographicOperations.ZeroMemory` in a `finally`.
 - The session zeroes the encoded configuration buffer, lock-code copies included, after transmitting it.
-- A lost lock code cannot be recovered, and firmware below 5.6.0 has no device reset to fall back on.
+  This clears that encoding, not every downstream formatter, transport or SCP temporary.
+- A lost lock code cannot be read back. Do not assume device reset removes it, even on Bio MPE.
 - Never log lock codes.
+
+Successful SCP creation records channel setup and performs no later protected Management command inside
+the factory. `IsAuthenticated` does not authorize a configuration-lock write or monitor ongoing channel
+health. SCP11b authenticates the device, not the host. For SCP11a/c, the August 2023 **1.3.0.13 Public Review**
+draft §4.3 includes the first correct-MAC command after setup in host authentication; final SCP11 1.4 and
+the complete YubiKey profile remain unverified. Keep these actor/phase limits distinct from lock-code checks.
 
 ## Example
 
-The interactive ManagementTool sample lives at src/Management/examples/ManagementTool/.
+The [ManagementTool sample](examples/ManagementTool/README.md) provides menus and read-only `info`/`config`
+commands. Its active selector currently lists only SmartCard-capable keys, despite SDK support for HID.
 
 ```bash
 dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj
@@ -189,7 +304,7 @@ This standalone tool accepts SmartCard devices only, including for its reset men
 [shared CLI selection flow](../../docs/usage/device-discovery.md#selection-in-the-cli-examples);
 multiple devices require an interactive choice, so a noninteractive invocation returns no selection.
 The SDK and unified `yk management` also support HID FIDO and HID OTP. Selection labels are last-known
-metadata; info/config output and reset prerequisites still use explicit live Management reads.
+metadata; the standalone info/config output and reset prompt use explicit live Management reads.
 
 ## Related
 

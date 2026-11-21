@@ -23,8 +23,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Topology evidence is optional by contract. It is absent on macOS and Linux (no supported
-///         reader-name → USB-device mapping exists on either platform), and absent on Windows whenever the
+///         Topology evidence is optional by contract. This SDK supplies no topology keys on macOS or Linux.
+///         On Windows it is absent whenever the
 ///         topology read fails — a stale devnode mid-hotplug, <c>CR_NO_SUCH_DEVNODE</c>, a missing
 ///         ContainerId property, or the API being unavailable. A resolver NEVER guesses: it either returns a
 ///         key it read, or returns <c>false</c>.
@@ -46,8 +46,8 @@ internal interface IDeviceTopologyResolver
 }
 
 /// <summary>
-///     The no-topology resolver used on platforms with no supported reader/interface → USB device mapping
-///     (macOS, Linux). Always reports "unknown", which is the documented platform bound.
+///     The resolver currently selected on macOS and Linux. It always reports unknown; this describes the
+///     SDK implementation rather than the availability of topology APIs on those operating systems.
 /// </summary>
 internal sealed class NullDeviceTopologyResolver : IDeviceTopologyResolver
 {

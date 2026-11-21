@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Formats.Cbor;
+
 namespace Yubico.YubiKit.Ctap2.Extensions;
 
 /// <summary>
@@ -27,30 +29,56 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <c>additionalArgs</c> fields of the previewSign signing input dictionary.
 /// The <see cref="Tbs"/> and <see cref="AdditionalArgs"/> values are algorithm-specific
 /// signing inputs and are encoded unchanged.
-/// Pass <c>null</c> to omit key 7. Passing an empty memory value emits key 7 with an empty
-/// byte string, matching the caller-supplied algorithm-specific value.
+/// Pass <c>null</c> to omit key 7; a present value must encode one complete CBOR map.
 /// Experimental typed helpers such as <see cref="CoseSignArgs"/> can be converted to raw
 /// <c>additionalArgs</c> bytes with <see cref="PreviewSignCbor.EncodeAdditionalArgs"/>.
+/// The map's algorithm-specific semantics are the caller's responsibility. Tbs may be raw data
+/// or a digest depending on the selected algorithm; the encoder does not hash it.
+/// </para>
+/// <para>
+/// Inputs are borrowed until encoding and awaited transmission complete; keep storage unchanged.
+/// Encoders make independent copies without a disposable cleanup owner. Clear caller-owned
+/// application-sensitive data after use. This preview is experimental and not production guidance.
+/// The nonempty keyHandle/Tbs guards are SDK restrictions, not universal draft rules
+/// (the draft permits an empty handle).
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed class PreviewSignSigningParams
 {
     /// <summary>
     /// Gets the key handle from registration output.
     /// </summary>
-    public ReadOnlyMemory<byte> KeyHandle { get; init; }
+    public ReadOnlyMemory<byte> KeyHandle
+    {
+        get;
+        init => field = RequireNonEmpty(value, "keyHandle");
+    }
 
     /// <summary>
-    /// Gets the raw data to be signed.
+    /// Gets the algorithm-specific to-be-signed bytes, which may already be a digest.
     /// </summary>
-    public ReadOnlyMemory<byte> Tbs { get; init; }
+    public ReadOnlyMemory<byte> Tbs
+    {
+        get;
+        init => field = RequireNonEmpty(value, "tbs");
+    }
 
     /// <summary>
     /// Gets the optional algorithm-specific <c>additionalArgs</c> value.
-    /// When present, including when empty, the encoder emits these bytes unchanged under
+    /// When present, the encoder emits this validated map unchanged under
     /// authentication input key 7. A <c>null</c> value omits key 7.
     /// </summary>
-    public ReadOnlyMemory<byte>? AdditionalArgs { get; init; }
+    public ReadOnlyMemory<byte>? AdditionalArgs
+    {
+        get;
+        init
+        {
+            if (value is { } args)
+                ValidateAdditionalArgs(args);
+            field = value;
+        }
+    }
 
     /// <summary>
     /// Initializes a new instance of <see cref="PreviewSignSigningParams"/>.
@@ -63,18 +91,31 @@ public sealed class PreviewSignSigningParams
         ReadOnlyMemory<byte> tbs,
         ReadOnlyMemory<byte>? additionalArgs = null)
     {
-        if (keyHandle.Length == 0)
-        {
-            throw new ArgumentException("KeyHandle must not be empty.", nameof(keyHandle));
-        }
-
-        if (tbs.Length == 0)
-        {
-            throw new ArgumentException("Tbs must not be empty.", nameof(tbs));
-        }
-
         KeyHandle = keyHandle;
         Tbs = tbs;
         AdditionalArgs = additionalArgs;
+    }
+
+    private static ReadOnlyMemory<byte> RequireNonEmpty(ReadOnlyMemory<byte> input, string parameter) =>
+        input.IsEmpty ? throw new ArgumentException("Signing input must not be empty.", parameter) : input;
+
+    private static void ValidateAdditionalArgs(ReadOnlyMemory<byte> additionalArgs)
+    {
+        var reader = new CborReader(additionalArgs, CborConformanceMode.Strict);
+        try
+        {
+            if (reader.PeekState() == CborReaderState.StartMap)
+            {
+                reader.SkipValue();
+                if (reader.BytesRemaining == 0)
+                    return;
+            }
+        }
+        catch (CborContentException ex)
+        {
+            throw new ArgumentException("Additional arguments must encode one complete CBOR map.", nameof(additionalArgs), ex);
+        }
+
+        throw new ArgumentException("Additional arguments must encode one complete CBOR map.", nameof(additionalArgs));
     }
 }

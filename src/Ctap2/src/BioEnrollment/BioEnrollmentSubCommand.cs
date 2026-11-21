@@ -1,7 +1,7 @@
 // Copyright 2025 Yubico AB
 //
-// Licensed under the Apache License, Version 2.0 (the "License").
-// You may not use this file except in compliance with the License.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
@@ -14,56 +14,14 @@
 
 namespace Yubico.YubiKit.Ctap2.BioEnrollment;
 
-/// <summary>
-/// CTAP2.1 authenticatorBioEnrollment sub-commands.
-/// </summary>
-/// <remarks>
-/// <para>
-/// See: CTAP 2.1 Section 6.7 - authenticatorBioEnrollment (0x09)
-/// </para>
-/// </remarks>
+/// <summary>Standard CTAP 2.1 Section 6.7 fingerprint subcommands.</summary>
 internal static class BioEnrollmentSubCommand
 {
-    /// <summary>
-    /// Get fingerprint sensor info (0x01).
-    /// </summary>
-    public const byte GetFingerprintSensorInfo = 0x01;
-
-    /// <summary>
-    /// Begin fingerprint enrollment (0x02).
-    /// </summary>
-    public const byte EnrollBegin = 0x02;
-
-    /// <summary>
-    /// Continue fingerprint enrollment (0x03).
-    /// </summary>
-    public const byte EnrollCaptureNextSample = 0x03;
-
-    /// <summary>
-    /// Cancel fingerprint enrollment (0x04).
-    /// </summary>
-    public const byte EnrollCancel = 0x04;
-
-    /// <summary>
-    /// Begin enumeration of enrolled templates (0x05).
-    /// </summary>
-    public const byte EnumerateEnrollments = 0x05;
-
-    /// <summary>
-    /// Set friendly name for enrolled template (0x06).
-    /// </summary>
-    public const byte SetFriendlyName = 0x06;
-
-    /// <summary>
-    /// Remove enrolled template (0x07).
-    /// </summary>
-    public const byte RemoveEnrollment = 0x07;
-
-    /// <summary>
-    /// Get template info - returns sample count for existing template (0x08).
-    /// </summary>
-    /// <remarks>
-    /// This command is vendor-specific (YubiKey specific).
-    /// </remarks>
-    public const byte GetTemplateInfo = 0x08;
+    public const byte EnrollBegin = 0x01;
+    public const byte EnrollCaptureNextSample = 0x02;
+    public const byte EnrollCancel = 0x03;
+    public const byte EnumerateEnrollments = 0x04;
+    public const byte SetFriendlyName = 0x05;
+    public const byte RemoveEnrollment = 0x06;
+    public const byte GetFingerprintSensorInfo = 0x07;
 }

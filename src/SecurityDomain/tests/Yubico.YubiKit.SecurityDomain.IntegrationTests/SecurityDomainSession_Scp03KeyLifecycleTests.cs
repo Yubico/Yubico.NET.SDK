@@ -30,8 +30,8 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateR
 
     /// <summary>
     ///     Imports two custom SCP03 key sets, then deletes them one at a time, verifying
-    ///     each deletion. Follows the pattern from the Java SDK's testDeleteKey: to delete
-    ///     a key you must authenticate with a different key that remains on the device.
+    ///     each deletion. Uses the retained second set to delete the first, then explicitly
+    ///     permits deletion of the last custom set while authenticated with that set.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.4.3")]
@@ -68,14 +68,14 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateR
             await state.WithSecurityDomainSessionAsync(true,
                 async session =>
                 {
-                    await session.PutKeyAsync(keyRef1, staticKeys1, 0, ct);
+                    await session.PutKeyAsync(keyRef1, staticKeys1, KeyReplacement.New, ct);
                 }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: ct);
 
             // Session 2: Authenticate with first key, import second key set
             await state.WithSecurityDomainSessionAsync(false,
                 async session =>
                 {
-                    await session.PutKeyAsync(keyRef2, staticKeys2, 0, ct);
+                    await session.PutKeyAsync(keyRef2, staticKeys2, KeyReplacement.New, ct);
                 }, scpKeyParams: keyParams1, cancellationToken: ct);
 
             // Session 3: Authenticate with second key, delete first key
@@ -129,14 +129,14 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateR
         }
         finally
         {
-            // Both custom key sets were deleted, leaving no SCP03 key on the device. Restore factory
-            // defaults so later tests and suites can still authenticate with the default keys.
+            // Request cleanup even if a lifecycle assertion failed. Last-SCP03-set deletion is
+            // documented to restore defaults; this test does not assert that restored state.
             await state.ResetSecurityDomainAsync(ct);
         }
     }
 
     /// <summary>
-    ///     Imports a custom SCP03 key set, then replaces (rotates) it with a new key set using the replaceKvn parameter.
+    ///     Imports a custom SCP03 key set, then replaces it using KeyReplacement.Of.
     ///     Verifies that the original key no longer works and the replacement key authenticates successfully.
     /// </summary>
     [SkippableTheory]
@@ -172,7 +172,7 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateR
             await state.WithSecurityDomainSessionAsync(true,
                 async session =>
                 {
-                    await session.PutKeyAsync(originalKeyRef, originalStaticKeys, 0, ct);
+                    await session.PutKeyAsync(originalKeyRef, originalStaticKeys, KeyReplacement.New, ct);
                 }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: ct);
 
             // Session 2: Authenticate with original key, then replace it with a rotated key
@@ -180,8 +180,7 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateR
             await state.WithSecurityDomainSessionAsync(false,
                 async session =>
                 {
-                    // PutKeyAsync with replaceKvn=originalKeyRef.Kvn replaces the original key
-                    await session.PutKeyAsync(rotatedKeyRef, rotatedStaticKeys, originalKeyRef.Kvn, ct);
+                    await session.PutKeyAsync(rotatedKeyRef, rotatedStaticKeys, KeyReplacement.Of(originalKeyRef.Kvn), ct);
                 }, scpKeyParams: originalKeyParams, cancellationToken: ct);
 
             // Session 3: Verify the rotated key works for authentication
@@ -208,8 +207,9 @@ public class SecurityDomainSession_Scp03KeyLifecycleTests : SecurityDomainStateR
         }
         finally
         {
-            // The rotated key set replaced the defaults. Restore factory defaults so later tests and
-            // suites can still authenticate with Scp03KeyParameters.Default.
+            // Session 2 replaces the original custom key set imported in Session 1, not the defaults.
+            // Request reset to attempt the default-key precondition for later tests and suites using
+            // Scp03KeyParameters.Default; this cleanup does not assert restored factory contents.
             await state.ResetSecurityDomainAsync(ct);
         }
     }

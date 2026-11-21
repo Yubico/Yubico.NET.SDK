@@ -17,18 +17,18 @@ using Microsoft.Extensions.Logging;
 namespace Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 /// <summary>
-///     Implements allow list verification to prevent integration tests from running on production YubiKeys.
-///     This is a CRITICAL safety mechanism that validates device serial numbers before any test operations.
+///     Checks configured serial numbers for integration-test fixture authorization.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         The AllowList performs a hard fail (Environment.Exit(-1)) if:
-///         - No allowed serial numbers are configured
-///         - A device's serial number is not in the allow list
+///         Construction exits with Environment.Exit(-1) only when the configured serial list is empty
+///         and AllowUnknownSerials is false. IsDeviceAllowed returns a Boolean; it does not exit for
+///         a missing or disallowed serial.
 ///     </para>
 ///     <para>
-///         This aggressive approach prevents accidental test execution on production keys, which could
-///         lead to data loss or device misconfiguration.
+///         The fixture harness filters rejected devices and failed identification reads. An empty
+///         fixture list causes SkipException at lazy row binding. Discovery and live identification
+///         reads can occur before per-device authorization, so connect only dedicated test hardware.
 ///     </para>
 /// </remarks>
 public sealed class AllowList
@@ -42,7 +42,8 @@ public sealed class AllowList
     /// <param name="logger">Optional logger for diagnostics.</param>
     /// <exception cref="ArgumentNullException">Thrown when provider is null.</exception>
     /// <remarks>
-    ///     Constructor performs hard fail (Environment.Exit(-1)) if allow list is empty.
+    ///     Exits with Environment.Exit(-1) when the configured serial list is empty and
+    ///     <see cref="AllowUnknownSerials"/> is false. Individual serial checks do not exit the process.
     /// </remarks>
     public AllowList(IAllowListProvider provider, ILogger<AllowList>? logger = null)
     {

@@ -21,6 +21,11 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// <summary>
 /// A class that converts private key parameters to ASN.1 DER encoding.
 /// </summary>
+/// <remarks>
+/// Returns caller-owned, unencrypted PKCS#8 version-0 encodings; clear them after use. Inputs remain
+/// borrowed. Explicit INTEGER and nested encoding temporaries have local clearing owners. AsnWriter
+/// storage is separate: Encode copies it, and these paths do not Reset the writers to clear that storage.
+/// </remarks>
 internal static class AsnPrivateKeyEncoder
 {
     /// <summary>
@@ -214,11 +219,13 @@ internal static class AsnPrivateKeyEncoder
         // Private key
         ecKeyWriter.WriteOctetString(privateKey.Span);
 
-        // [0] parameters (optional) - omitted since we include the OID in the AlgorithmIdentifier
+        // The inner [0] parameters are omitted; the outer AlgorithmIdentifier carries the curve OID.
+        // Although the ASN.1 field is OPTIONAL, RFC 5915 §3 requires conforming implementations to
+        // include it. This encoding therefore differs from that requirement.
 
         // [1] Public key (optional). RFC 5915 uses EXPLICIT tags, so this is a constructed [1]
-        // wrapper around a universal BIT STRING. An implicitly tagged BIT STRING here is rejected
-        // by standards-compliant importers, including ECDsa.ImportPkcs8PrivateKey.
+        // wrapper around a universal BIT STRING. The primitive legacy form differs from that schema;
+        // the encoder tests cover the explicit wrapper and selected BCL import scenarios.
         if (publicPoint.HasValue)
         {
             var publicKeyTag = new Asn1Tag(TagClass.ContextSpecific, 1, isConstructed: true);

@@ -39,7 +39,15 @@ internal static class ResetCommand
         await using var session = await selection.Device.CreateHsmAuthSessionAsync(
             cancellationToken: cancellationToken);
 
-        await session.ResetAsync(cancellationToken);
+        try
+        {
+            await session.ResetAsync(cancellationToken);
+        }
+        catch when (!session.IsInitialized)
+        {
+            OutputHelpers.WriteWarning("The applet was reset, but the session could not be refreshed.");
+            throw;
+        }
 
         OutputHelpers.WriteSuccess("YubiHSM Auth applet has been reset.");
 

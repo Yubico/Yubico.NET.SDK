@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Spectre.Console" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Piv.UnitTests" />
   </ItemGroup>
 
   <ItemGroup>

@@ -29,28 +29,36 @@ namespace Yubico.YubiKit.OpenPgp;
 ///     Byte 5:   Remaining attempts Reset Code
 ///     Byte 6:   Remaining attempts Admin PIN
 ///     </code>
+///     User and Admin length bytes separately report the PIN block format flag. Reset Code has the User
+///     credential format. User PIN modes share AttemptsUser; AttemptsReset belongs to the Reset Code.
 /// </remarks>
 public sealed class PwStatus
 {
     /// <summary>
-    ///     The signature PIN policy (whether PIN must be verified before each signature).
+    ///     The signature PIN policy. Unrecognized wire values are preserved as unnamed enum values.
     /// </summary>
     public PinPolicy SignaturePinPolicy { get; init; }
 
     /// <summary>
-    ///     Maximum length of the User PIN.
+    ///     Maximum User PIN length, excluding the format bit.
     /// </summary>
     public int MaxLenUser { get; init; }
 
     /// <summary>
-    ///     Maximum length of the Reset Code.
+    ///     Maximum Reset Code length.
     /// </summary>
     public int MaxLenReset { get; init; }
 
     /// <summary>
-    ///     Maximum length of the Admin PIN.
+    ///     Maximum Admin PIN length, excluding the format bit.
     /// </summary>
     public int MaxLenAdmin { get; init; }
+
+    /// <summary>Whether the card reports PIN block format 2 for the User PIN and Reset Code.</summary>
+    public bool UserUsesPinBlock2 { get; init; }
+
+    /// <summary>Whether the card reports PIN block format 2 for the Admin PIN.</summary>
+    public bool AdminUsesPinBlock2 { get; init; }
 
     /// <summary>
     ///     Remaining retry attempts for the User PIN.
@@ -103,17 +111,14 @@ public sealed class PwStatus
             throw new ArgumentException("PW status must be at least 7 bytes.", nameof(encoded));
         }
 
-        var policyByte = encoded[0];
-        var policy = Enum.IsDefined((PinPolicy)policyByte)
-            ? (PinPolicy)policyByte
-            : PinPolicy.Once;
-
         return new PwStatus
         {
-            SignaturePinPolicy = policy,
-            MaxLenUser = encoded[1],
+            SignaturePinPolicy = (PinPolicy)encoded[0],
+            MaxLenUser = encoded[1] & 0x7F,
             MaxLenReset = encoded[2],
-            MaxLenAdmin = encoded[3],
+            MaxLenAdmin = encoded[3] & 0x7F,
+            UserUsesPinBlock2 = (encoded[1] & 0x80) != 0,
+            AdminUsesPinBlock2 = (encoded[3] & 0x80) != 0,
             AttemptsUser = encoded[4],
             AttemptsReset = encoded[5],
             AttemptsAdmin = encoded[6],

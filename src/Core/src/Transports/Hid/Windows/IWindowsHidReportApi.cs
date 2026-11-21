@@ -19,6 +19,8 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 /// One instance retains native resources solely at its owner's direction. The owner's worker
 /// calls these methods; this seam supplies no scheduler, physical claim or public completion.
 /// Report arrays belong to the owner and include the native report-ID-zero byte.
+/// Descriptor lengths include that byte; connection payload sizes exclude it. The typed FIDO
+/// connection separately requires 64 payload bytes, rather than accepting every descriptor size.
 /// </remarks>
 internal interface IWindowsHidReportApi
 {

@@ -25,7 +25,10 @@ This file provides Claude-specific guidance for working with the CTAP2 module. *
 - `CtapCommand`, `CtapStatus`, and `CtapException` belong directly to `Yubico.YubiKit.Ctap2`,
   even though their files remain in the module-local `Ctap/` source folder. Touch operation IDs use `UserPresenceOperations.Ctap2`.
 
-The CTAP2 module implements CTAP 2.1/2.3 (Client to Authenticator Protocol) for YubiKey authenticators. This module supports passkey creation, authentication, and advanced CTAP2 features like credential management, biometric enrollment, and WebAuthn extensions.
+The module exposes CTAP2 credential operations and selected CTAP 2.1/2.3 features. Revision advertisement,
+optional capabilities, configured state, token permissions and firmware metadata are separate checks;
+none alone proves per-device support or standards conformance. The session sends/parses protocol data,
+not RP registration/sign-in verification. See the README for the complete protocol-demo/RP boundary.
 
 **Transports Supported:**
 - FIDO HID protocol over USB (primary transport)
@@ -39,12 +42,13 @@ The CTAP2 module implements CTAP 2.1/2.3 (Client to Authenticator Protocol) for 
 > The firmware gate runs after SmartCard FIDO AID selection because FIDO firmware is obtained from
 > CTAP GetInfo on this transport.
 > FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
-> firmware is available through Management; firmware gates use `Feature.IsSupportedByFirmware(...)`
-> so `Major == 0` sentinel firmware is treated as modern.
-> A grouped physical YubiKey admits one live SDK connection across all known interfaces. A second
-> session is refused with `ConnectionInUseException` until the current session disposes its owned
-> connection. CTAP2/WebAuthn selects HID FIDO when exposed, otherwise SmartCard, and never switches
-> transport after a connection failure.
+> firmware is available through Management. The USB gate admits present cached non-final qualifiers and
+> major-zero metadata under a permissive SDK policy, not a verified modern-firmware check.
+> SDK-managed opens claim the device view's known member interface IDs in this process. An overlapping
+> connection claim is refused with `ConnectionInUseException`; disjoint scoped views, direct factories
+> and other processes need separate coordination. Each connection admits one live session.
+> CTAP2/WebAuthn selects HID FIDO when exposed, otherwise SmartCard, and never switches
+> transport after an opening or initialization failure.
 
 ## Architecture Overview
 
@@ -62,7 +66,9 @@ Yubico.YubiKit.Ctap2/
 │   ├── Cbor/                       # CBOR serialization
 │   │   ├── CtapRequestBuilder.cs   # Fluent CBOR request builder
 │   │   └── CtapResponseParser.cs   # CBOR response parsing utilities
-│   ├── Config/                     # authenticatorConfig (FW 5.4+)
+│   ├── Cose/                       # Public-key carriers, including experimental ARKG seed keys
+│   ├── Arkg/                       # Experimental offline derivation convenience
+│   ├── Config/                     # authenticatorConfig; per-subcommand advertised support
 │   │   ├── ConfigSubCommand.cs
 │   │   └── AuthenticatorConfig.cs
 │   ├── CredentialManagement/       # Credential enumeration/management
@@ -80,7 +86,7 @@ Yubico.YubiKit.Ctap2/
 │   │   ├── MakeCredentialResponse.cs
 │   │   ├── GetAssertionResponse.cs
 │   │   └── PublicKeyCredentialTypes.cs
-│   ├── Crypto/                     # YK 5.7/5.8 encrypted metadata
+│   ├── Crypto/                     # Offline encrypted GetInfo metadata helpers
 │   │   └── EncryptedMetadataDecryptor.cs
 │   ├── Ctap/                       # CTAP protocol types
 │   │   ├── CtapCommand.cs
@@ -91,11 +97,9 @@ Yubico.YubiKit.Ctap2/
 │   │   ├── CredProtect/            # credProtect policy
 │   │   ├── CredBlob/               # credBlob inputs and outputs
 │   │   ├── HmacSecret/             # hmac-secret inputs and outputs
-│   │   ├── LargeBlob/              # largeBlob inputs, support enum, outputs
 │   │   ├── MinPinLength/           # minPinLength inputs and outputs
-│   │   ├── Prf/                    # PRF inputs and outputs
 │   │   └── PreviewSign/            # previewSign types and canonical CBOR encoder
-│   ├── BioEnrollment/              # Fingerprint enrollment (FW 5.2+)
+│   ├── BioEnrollment/              # Fingerprint APIs; standard and opt-in prototype requests
 │   │   ├── BioEnrollmentSubCommand.cs
 │   │   ├── BioEnrollmentModels.cs
 │   │   └── FingerprintBioEnrollment.cs
@@ -107,8 +111,7 @@ Yubico.YubiKit.Ctap2/
 │       ├── PinUvAuthProtocolV1.cs
 │       ├── PinUvAuthProtocolV2.cs
 │       ├── ClientPin.cs
-│       ├── ClientPinSubCommand.cs
-│       └── PinUvAuthTokenPermissions.cs
+│       └── ClientPinSubCommand.cs   # Includes PinUvAuthTokenPermissions
 └── tests/
     ├── Yubico.YubiKit.Ctap2.UnitTests/
     └── Yubico.YubiKit.Ctap2.IntegrationTests/
@@ -123,12 +126,32 @@ only on `SmartCardBackend`; neither `ICtap2Backend` nor `HidBackend` exposes sel
 before channel initialization or GetInfo; SmartCard selection and firmware discovery still precede SCP establishment.
 
 ```csharp
-// Recommended: Use extension method
+// With IYubiKey yubiKey in an async method; this factory owns the opened connection.
 await using var session = await yubiKey.CreateCtap2SessionAsync();
-
-// Or direct creation
-await using var directSession = await Ctap2Session.CreateAsync(connection);
 ```
+
+Alternatively, pass an existing supported `IConnection connection` to
+`Ctap2Session.CreateAsync(connection)`. That session borrows the connection; keep the caller's disposal
+scope outside the session's. Do not append the direct factory or a one-shot GetInfo helper while another
+connection-owning session is live on the same key. SCP03 requires an authorized SmartCard key configured
+with the supplied keys; own/dispose `Scp03KeyParameters` outside the secure session scope.
+
+Serialize and fully await complete operations and helper workflows before disposal. The Core guard
+drains one admitted exchange; it does not join ClientPin's multiple exchanges, begin/next enumeration,
+blob read-modify-write, or post-exchange parsing and callbacks. Keep borrowed inputs, protocols, tokens
+and caller-owned prompts usable through their last continuation. A callback must not reenter or dispose
+the session awaiting it. Prefer async disposal, but do not treat it as a whole-workflow completion join.
+
+Cached device firmware and its qualifier, then GetInfo firmware if the cache is absent, gate USB
+SmartCard. Configuration instead prefers numeric GetInfo over a major-zero cache, or uses the
+explicit override without changing the gate. SCP checks the explicit override if supplied; otherwise
+major-zero firmware or a present non-final qualifier admits an SCP attempt independently of framing.
+A direct connection factory has no device cache.
+HID INIT vendor bytes and Management firmware are separate observations. Initial SmartCard
+SELECT/GetInfo precede options-based configuration; major-zero configuration selects APDU format from
+connection support before ordinary `ForceShortApdus` handling. SCP setup rebinds the backend without
+another SELECT or protected CTAP probe. Applet-selection survival and FIDO-over-SCP product acceptance
+remain device/profile qualifications; `IsAuthenticated` is not CTAP PIN/UV authorization.
 
 ### GetInfo (No User Presence Required)
 
@@ -140,11 +163,15 @@ var info = await session.GetInfoAsync();
 bool ctap2_1 = info.Versions.Contains("FIDO_2_1");
 
 // Check supported extensions
-bool hasHmacSecret = info.Extensions?.Contains("hmac-secret") ?? false;
+bool hasHmacSecret = info.Extensions.Contains("hmac-secret");
 
 // Check options
-bool hasRk = info.Options?.TryGetValue("rk", out var rk) == true && rk;
+bool hasRk = info.Options.TryGetValue("rk", out var rk) && rk;
 ```
+
+GetInfo decoding requires a nonempty `Versions` list and a 16-byte `Aaguid`. It rejects trailing bytes
+and preserves unknown fields in `RawData`. Absent `EncIdentifier` and `EncCredStoreState` remain null;
+an empty byte string is present but does not establish support or decryptability.
 
 ### PIN/UV Auth Protocols
 
@@ -153,12 +180,15 @@ authenticator; `ClientPin` performs the `getKeyAgreement` round trip and ECDH en
 internally on each token request.
 
 ```csharp
-// Protocol V2 (recommended, CTAP 2.1)
+// Fragment: session, byte[] pin, string rpId, byte[32] clientDataHash,
+// MakeCredentialOptions options, RP/user entities and CancellationToken cancellationToken are supplied.
+// Requires mutually supported protocol 2; this constructor does not negotiate it.
 using var protocol = new PinUvAuthProtocolV2();
 using var clientPin = new ClientPin(session, protocol);
 
 // Get PIN token with permissions. rpId is required for MakeCredential/GetAssertion permissions.
 byte[]? pinToken = null;
+byte[]? authParam = null;
 try
 {
     pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
@@ -168,41 +198,69 @@ try
         cancellationToken);
 
     // Authenticate command
-    var authParam = protocol.Authenticate(pinToken, clientDataHash);
+    authParam = protocol.Authenticate(pinToken, clientDataHash);
     options.WithPinUvAuth(authParam, protocol.Version);
+    // Keep options.UserVerification null; even uv:false is mutually exclusive with token auth.
+    await session.MakeCredentialAsync(
+        clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options,
+        cancellationToken);
 }
 finally
 {
     if (pinToken is not null) CryptographicOperations.ZeroMemory(pinToken);
+    if (authParam is not null) CryptographicOperations.ZeroMemory(authParam);
 }
 ```
 
-The returned token is caller-owned; zero it when done (see
+This composable fragment sends a creation command but does not verify RP registration. Supply a fresh
+exact client-data hash and RP/account context as described in the README, or demo inputs on the dedicated
+evaluation key. The PIN is borrowed; the caller clears it after the final await.
+`ClientPin.Dispose` disposes its supplied protocol, not the session. The returned token is caller-owned;
+zero it when done (see
 `examples/FidoTool/FidoExamples/MakeCredential.cs`). On authenticators that do not advertise the
 `pinUvAuthToken` option, `GetPinUvAuthTokenUsingPinAsync` falls back to the legacy
-`getPinToken` subcommand and the requested permissions do not apply.
+`getPinToken` subcommand with the same protocol; requested permissions/RP do not apply. This is not V1
+negotiation or general administrative authorization. Built-in UV token acquisition needs configured UV,
+token capability and any permission-specific gates, and can require biometric interaction without an
+SDK presence notification. Token issuance/lifetime and host buffer lifetime are different boundaries.
 
 ### Extensions (WebAuthn)
 
-The SDK uses the **ExtensionBuilder** fluent pattern for all WebAuthn/CTAP extensions. Extensions are NOT implemented as separate classes that you instantiate—instead, you compose them via the builder.
+Compose CTAP extension bytes with `ExtensionBuilder`; some overloads take typed inputs such as
+`HmacSecretInput` and `PreviewSignRegistrationInput`. Building bytes does not negotiate support, enforce
+RP policy or perform a ceremony. Client-side WebAuthn transformations belong in the WebAuthn package.
 
 #### Available Extensions
 
-| Extension | Builder Method | Description | YubiKey FW |
+| Extension | Builder Method | Description | Availability check |
 |-----------|---------------|-------------|------------|
-| credProtect | `.WithCredProtect()` | Credential protection level | 5.2+ |
-| hmac-secret | `.WithHmacSecret()` (makeCredential: `true`) / `.WithHmacSecret(...)` (getAssertion: encrypted salts) | CTAP2 symmetric secret derivation; WebAuthn's prf extension is built on it in the WebAuthn package | 5.2+ |
-| hmac-secret-mc | `.WithHmacSecretMakeCredential()` | hmac-secret during MakeCredential | 5.4+ |
-| credBlob | `.WithCredBlob()` | Per-credential blob storage | 5.5+ |
-| largeBlob | `.WithLargeBlob()` / `.WithLargeBlobKey()` | Large blob support (makeCredential) and the storage key (§12.3); blobs are read/written with `LargeBlobStorage` (§6.10). The direct §12.4 getAssertion read/write extension is not implemented (no YubiKey supports it) | 5.5+ |
-| minPinLength | `.WithMinPinLength()` | Require minimum PIN length | 5.4+ |
-| previewSign | `.WithPreviewSign(...)` | Delegated signing with a generated signing key | YubiKey FW with previewSign support |
+| credProtect | `.WithCredProtect(...)` | Requests policy; `enforcePolicy` is currently not honored | Extension support and applicable UV policy |
+| hmac-secret | `.WithHmacSecret()` / `.WithHmacSecret(...)` | Registration enablement / assertion encrypted salts | Advertised extension, protocol and UP |
+| hmac-secret-mc | `.WithHmacSecretMakeCredential(input)` | Encrypted evaluation during creation; also emits hmac-secret=true | Separate advertisement; firmware metadata alone is insufficient |
+| credBlob | `.WithCredBlob(blobData)` / `.WithGetCredBlob()` | Store at creation / retrieve at assertion | Advertised extension and maxCredBlobLength |
+| largeBlobKey | `.WithLargeBlobKey()` | Key in response envelope; `LargeBlobStorage` reads/writes shared array | Extension plus largeBlobs option and discoverable credential |
+| minPinLength | `.WithMinPinLength()` | Reports existing code-point minimum during creation, only to authorized RP IDs | Extension plus configured disclosure RP list |
+| previewSign | `.WithPreviewSign(...)` | Generated-key signing in experimental vendor draft | Advertised previewSign and algorithm support |
 
-> **Note:** The `previewSign` extension is a first-class CTAP2 extension via `WithPreviewSign(PreviewSignRegistrationInput)` and `WithPreviewSign(PreviewSignAuthenticationInput)`. The generic signing API is algorithm-agile: `tbs` and optional `additionalArgs` are algorithm-specific bytes and are encoded unchanged. **WARNING -- EXPERIMENTAL --** Public ARKG helpers remain available as experimental conveniences; they are not ready for production use and must not be treated as production cryptographic guidance. Convert them to raw `additionalArgs` with `PreviewSignCbor.EncodeAdditionalArgs(...)`. WebAuthn provides a high-level adapter (`Yubico.YubiKit.WebAuthn.Extensions.PreviewSign`) for Client API consumers; both layers share the canonical encoder in Ctap2.
+`previewSign` follows the experimental [Yubico sign-extension draft v4](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension)
+(Editor's Draft, 2025-08-26), not CTAP v4 or an adopted W3C signing standard. CTAP overloads take
+`PreviewSignRegistrationInput` or `PreviewSignSigningParams`; `PreviewSignAuthenticationInput` is a
+WebAuthn-layer type. Generic `tbs` and optional `additionalArgs` are encoded unchanged; callers must
+provide algorithm-appropriate TBS/prehashing and a CBOR COSE_Sign_Args map when required. Inner attestation
+is parsed, not trust-verified. **WARNING -- EXPERIMENTAL --** Public ARKG conveniences are not ready for
+production and must not be treated as production cryptographic guidance. Convert arguments with
+`PreviewSignCbor.EncodeAdditionalArgs(...)`. The seed algorithm placeholder -65700 and BL=-1/KEM=-2
+labels agree with ARKG Internet-Draft -10, as does the example's derived ESP256=-9. The SDK's outer kty=2
+and byte-string-wrapped nested maps differ from the draft's kty=-65537/direct maps; the SDK also requires
+an integer derived algorithm where the draft permits an optional int/text value. This partial agreement
+is not full-profile conformance; the draft's stated expiry is 2026-08-31. Signing and derived-key
+identifiers remain distinct; the convenience verifier handles raw
+messages with P-256/SHA-256 and strict DER signatures, not arbitrary generic TBS algorithms.
 
 #### Example Usage
 
 ```csharp
+// Builder fragment: ReadOnlyMemory<byte> blobData and the hmac-secret inputs below are caller-supplied.
 // Build extensions for MakeCredential
 var extensions = new ExtensionBuilder()
     .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
@@ -216,24 +274,41 @@ var options = new MakeCredentialOptions
 };
 
 // For GetAssertion: encrypted salts under the shared secret from key agreement
+// protocol/sharedSecret/keyAgreement and 32-byte salt1/salt2 belong to the caller.
 var assertionExtensions = new ExtensionBuilder()
     .WithHmacSecret(protocol, sharedSecret, keyAgreement, salt1, salt2)
     .Build();
 ```
 
+Keep borrowed extension inputs unchanged through encoding/transmission and clear caller-owned secrets.
+For sensitive/PII credBlob content the RP must request level-3 credProtect with enforcement; the current
+builder does not enforce that policy, so this composition alone is not a safe sensitive-storage recipe.
+Use nonsensitive demo blobData unless support/policy prevention is independently handled.
+
 #### hmac-secret vs WebAuthn PRF
 
-`hmac-secret` is the CTAP2 extension (§12.7) and lives here. WebAuthn's `prf` extension (L3 §10.1.4) is a
+`hmac-secret` is the CTAP2 extension (2.1 §12.5; 2.3 §12.7) and lives here. Its credential-scoped random
+secrets have separate verified/unverified variants; repeatability depends on credential, salt and UV
+mode, not on the PIN/biometric value. Salt authentication under the shared secret differs from command
+token authentication over clientDataHash. WebAuthn's `prf` extension (L3 §10.1.4) is a
 *client* extension built on top of it: the WebAuthn package hashes the relying party's inputs into salts
 (`SHA-256("WebAuthn PRF" || 0x00 || input)`), performs key agreement, encrypts and authenticates the salts
 with `WithHmacSecret(...)`, and decrypts the result. There is no `"prf"` key on the CTAP wire, so this
 package has no PRF types; see `Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput` and
 docs/architecture/webauthn-extension-processing.md ("Where code belongs").
 
+The current WebAuthn adapter does not enforce PRF's required verified-variant UV override, and result/
+intermediate copies lack an owned cleanup guarantee; retain these limitations when linking the transform.
+For large blobs, the SDK uses largeBlobKey/storage rather than the standard direct largeBlob extension.
+`ExtensionOutput.TryGetLargeBlobSupport` reads only a legacy registration boolean, never a storage write or key.
+The direct route does define makeCredential support input; its absence here is an SDK-route limitation,
+not a claim that CTAP forbids it or that every current YubiKey lacks it.
+
 ### Credential Management
 
 ```csharp
-var credMgmt = new CredentialManagement(session, protocol, pinToken);
+// With live session/protocol, authorized borrowed pinToken, returned RP hash and descriptor credentialId.
+using var credMgmt = new CredentialManagement(session, protocol, pinToken);
 
 // Get credential metadata
 var metadata = await credMgmt.GetCredentialsMetadataAsync();
@@ -258,6 +333,28 @@ collection count. `ClientPin.GetPinRetriesAsync` and `GetUvRetriesAsync` return 
 `PinRetryStatus` and `UserVerificationRetryStatus` models; their response parsers retain the existing protocol
 behavior.
 
+Use the returned 32-byte RP hash unchanged: RP display text can be truncated. Enumeration eagerly sends
+an authenticated begin, then `total - 1` subcommand-only next calls. A successful begin must report 1–65535 entries (SDK limit);
+`NoCredentials` on begin is the empty result. Do not interleave other device operations. A continuation failure throws rather than
+returning partial results. `CredentialManagement.Dispose` rejects subsequent operations but neither
+owns nor clears the borrowed token, and does not end device authorization. Config/bio/storage
+helpers also borrow these dependencies. `SetAlwaysUvAsync` reads current state before sending a toggle;
+after an uncertain outcome, repeat with the same desired state. `SetMinPinLengthAsync` can omit the
+length, send an empty RP list or send explicit false. An empty list is not a revocation request:
+CTAP updates the stored recipient list only for an array containing at least one string.
+
+Standard bio requests authenticate modality, subcommand and the exact encoded parameter map when present.
+The opt-in prototype command retains its previous wire profile; it is not a fallback.
+Do not claim interoperable enrollment from fake fixtures or sensor metadata. Retain the template ID from
+`EnrollmentBeginResult` for continuation; `EnrollmentSampleResult` contains feedback without an ID.
+`IsComplete` means that the authenticator reports zero remaining samples. .NET cancellation does not
+automatically send enrollment cancel. Blob updates
+are shared-array read-modify-write operations without whole-sequence conflict protection or rollback.
+The SDK requires protocol/token authorization for writes, stricter than CTAP's conditional rule. The
+SDK enforces a symmetric 1 MiB plaintext cap and bounds the serialized array by the device limit (when
+present), 16 MiB, and the capacity of 32768 reads including the terminating short/empty fragment.
+A bad array hash is treated as empty; malformed CBOR behind a valid hash throws.
+
 ### User-presence notifications
 
 Supply `SessionCreationOptions.UserPresencePrompt` when creating a `Ctap2Session` to receive touch
@@ -267,11 +364,25 @@ resolution after the response is fully drained and the CTAP status is known. Sma
 equivalent in-flight signal, so `SmartCardBackend` owns both the policy request and resolution;
 MakeCredential and GetAssertion emit `PolicyRequires` immediately before the APDU unless their
 effective `UserPresence` option is `false`. Their scope is the RP ID.
-Successful response ownership transfers only after terminal resolution succeeds; a callback failure clears
-the untransferred backend response, including secret-derived extension output.
+Successful response ownership transfers only after terminal resolution succeeds. The backends clear
+their untransferred response view after resolution on failure, including secret-derived extension
+output. Cleanup runs even when notification resolution fails. A callback or logger failure does not
+replace a primary exchange error; secondary failures are recorded in its exception data.
+APDU failures before a backend receives a response and independent report/APDU/decoded copies also
+remain outside that view's cleanup scope.
+
+Resolution uses an uncancelled token and can delay return after cancellation; a failed request callback
+disables resolution. Completed describes CTAP status before decoding, not an entire WebAuthn ceremony
+or RP acceptance. Baseline Windows HID uses synchronous report I/O without native read interruption;
+neither keep-alive cancellation nor async disposal imposes a completion deadline. Dispose and reopen
+after uncertain framing, transport or teardown state rather than promising universal reuse.
 
 Selection and Reset carry null-scope context for an authoritative HID keep-alive, but do not predict
-touch on SmartCard. Generic `SendCborRequestAsync` calls do not infer touch semantics. Bio enrollment
+touch on SmartCard. Once typed Reset observes a successful status, it rebuilds the protocol, reselects
+on SmartCard, refreshes GetInfo-derived limits and reestablishes any configured SCP channel on the same
+session. FIDO reset does not reset Security Domain keys; keep caller-owned SCP parameters alive through
+reset. A refresh failure ends the session without undoing the reset. Generic `SendCborRequestAsync`
+calls do not infer touch semantics or run typed reset recovery. Bio enrollment
 and other helpers that currently route through that generic API remain silent until their individual
 user-presence behavior is modeled explicitly.
 
@@ -290,10 +401,15 @@ var response = await session.SendCborRequestAsync(request);
 
 Key rules:
 - Parameters are **integer keys** (not strings) for CTAP
-- Use **Ctap2Canonical** conformance mode (sorted integer keys)
+- Use **Ctap2Canonical** conformance mode (map keys sorted by encoded type/length/bytes, not numeric or alphabetical order; the current writer sorts at map completion)
 - Build request returns command byte + CBOR payload
 - Use `.WithValue(key, writer => ...)` for complex values or sensitive byte spans that should be written directly instead of copied through `.WithBytes(...)`
 - Keep operation-level request builders as pure encoding helpers; do not introduce operation-specific CTAP command classes
+- Builders are single-use, including after a failed Build. WithBytes and WithEncodedValue copies are
+  cleared when replaced, built or disposed; dispose a builder if abandoning it. WithValue callbacks
+  borrow their inputs until Build returns. Clear caller-owned encoded request arrays after the awaited send.
+  The session enforces GetInfo maxMsgSize (1024 bytes if absent) on typed and raw sends, including
+  the command byte. Canonical encoding alone does not enforce command schema, CTAP depth or full input exhaustion.
 
 ## Forward compatibility and escape hatches
 
@@ -301,13 +417,21 @@ Valid authenticator response data that is not yet modeled must remain usable wit
 
 - `RawData` on response owners such as `AuthenticatorInfo`, credential metadata, relying-party information, `StoredCredentialInfo`, `FingerprintSensorInfo`, and `EnrollmentSampleResult` preserves the complete response envelope. Dispose `StoredCredentialInfo` directly, or its owning `CredentialEnumerationResult`, because its envelope can contain secret fields.
 - `AttestedCredentialData.CredentialPublicKey`, with `CoseOtherKey.RawCbor` when an unmodeled key type is not claimed by a modeled algorithm. COSE keys must still report an algorithm.
-- `ExtensionOutput.TryGetRawExtension` and `WebAuthnAuthenticatorData.ParsedExtensions` for extension outputs.
+- AuthenticatorData raw extension bytes and `WebAuthnAuthenticatorData.ParsedExtensions` expose encoded
+  extension data. Both `ExtensionOutput.Decode` overloads preserve exact encoded values as borrowed
+  slices; keep the input unchanged while using those views.
 - `ICtap2Session.SendCborRequestAsync` for explicitly constructed raw CTAP CBOR requests and responses.
 
-PIN/UV key agreement is a separate security-critical boundary: forward-compatible response handling must not relax its required P-256 key type, curve, coordinates, or protocol structure. Raw response access is not a bypass, and unknown response fields must not be blindly copied into requests.
+PIN/UV key agreement is a separate security-critical boundary: do not relax required P-256 key type,
+curve, coordinates or protocol structure for forward compatibility. The helper requires all three
+peer labels and validates coordinate widths before point import. Unknown response
+fields must not be blindly copied into requests. Credential/GetInfo decoders also have known required-
+field/envelope-validation gaps; preserve valid unknown data without promising universal malformed rejection.
 
-Add `RawData` to models that own a complete, non-secret authenticator response. A response that can contain
-secret material instead needs explicit disposable ownership. `StoredCredentialInfo` owns one private complete
+Add `RawData` to models that own a complete, non-secret authenticator response. For credential creation and
+assertion, result buffers are caller-owned writable memory; signed extensions alias the raw authenticator data.
+The session clears its typed-response input after parsing; public decoders don't clear borrowed input. No
+complete credential response envelope is exposed. `StoredCredentialInfo` owns one private complete
 response clone; `LargeBlobKey` is a view into it, and disposal clears that clone, including unknown fields.
 The public decoder never clears its borrowed input, and the session's read-only response contract is unchanged,
 so this is not an end-to-end cleanup guarantee. Do not duplicate the same buffer on nested entities.
@@ -317,23 +441,22 @@ Use `RawCbor` only for an encoded nested CBOR structure, such as an attestation 
 
 ### Memory Handling
 
-```csharp
-// ✅ Zero sensitive data
-CryptographicOperations.ZeroMemory(pinBytes);
+This synchronous fragment illustrates cleanup of a caller-owned PIN and its derived hash, not the
+complete ClientPin protocol. Small synchronous buffers use stack allocation; bytes crossing an await
+need Memory/owned storage instead. Never log the PIN, hash, tokens or secret-derived extension output.
 
-// ✅ Use ArrayPool for crypto buffers
-var buffer = ArrayPool<byte>.Shared.Rent(32);
+```csharp
+// With byte[] pinBytes supplied by the caller, in a synchronous method.
+Span<byte> pinHash = stackalloc byte[32];
 try
 {
-    // use buffer
+    SHA256.HashData(pinBytes, pinHash);
 }
 finally
 {
-    CryptographicOperations.ZeroMemory(buffer.AsSpan(0, 32));
-    ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+    CryptographicOperations.ZeroMemory(pinHash);
+    CryptographicOperations.ZeroMemory(pinBytes);
 }
-
-// ❌ NEVER log PIN, keys, or sensitive CTAP data
 ```
 
 ### Protocol Disposal
@@ -344,10 +467,11 @@ using var protocol = new PinUvAuthProtocolV2();
 ```
 
 The ephemeral ECDH key pair lives entirely inside a single `Encapsulate` call:
-`PinUvAuthHelpers.PerformEcdhKeyAgreement` creates it with `using var ecdh = ...` and the raw
-shared point `z` is zeroed in that call's `finally`. `Encapsulate` hands the derived shared secret
+`PinUvAuthHelpers.PerformEcdhKeyAgreement` creates it with `using var ecdh = ...`; after the helper
+returns, `Encapsulate` zeroes raw `z` in its `finally`. The helper allocates its public map before deriving
+the secret; this does not guarantee clearing of provider-internal copies. `Encapsulate` hands the derived shared secret
 to the caller, who owns it — `ClientPin` zeroes it in its own `finally`. Still use `using` on the
-protocol so disposed-instance misuse throws `ObjectDisposedException` rather than silently working.
+protocol so its crypto methods reject disposed-instance use; Version/AuthenticationTagLength remain readable.
 
 ## Test Patterns
 
@@ -365,13 +489,14 @@ owned pending-exchange disposal with claim retention through true quiescence. It
 [Fact]
 public void AuthenticatorInfo_Decode_ParsesVersions()
 {
-    // Arrange - raw CBOR bytes
     var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-    writer.WriteStartMap(1);
+    writer.WriteStartMap(2);
     writer.WriteInt32(1);
     writer.WriteStartArray(1);
     writer.WriteTextString("FIDO_2_0");
     writer.WriteEndArray();
+    writer.WriteInt32(3);
+    writer.WriteByteString(new byte[16]);
     writer.WriteEndMap();
     byte[] cborData = writer.Encode();
     
@@ -387,27 +512,35 @@ public void AuthenticatorInfo_Decode_ParsesVersions()
 
 When testing classes that send CBOR commands via `ICtap2Session`:
 
+The following complete method belongs in the CTAP UnitTests project with xUnit v3, NSubstitute,
+System.Formats.Cbor and PIN namespaces imported. It checks a real helper request, not biometric or
+cryptographic interoperability. Mock `ICtap2Session`, not the sealed `Ctap2Session`.
+
 ```csharp
-// 1. Mock ICtap2Session (not Ctap2Session - it's sealed)
-var session = Substitute.For<ICtap2Session>();
+[Fact]
+public async Task PinRetries_EncodesProtocolAndSubcommand()
+{
+    var session = Substitute.For<ICtap2Session>();
+    ReadOnlyMemory<byte> mockResponse = new byte[] { 0xA1, 0x03, 0x08 }; // {pinRetries: 8}
+    ReadOnlyMemory<byte> capturedRequest = default;
+    session.SendCborRequestAsync(
+        Arg.Do<ReadOnlyMemory<byte>>(value => capturedRequest = value),
+        Arg.Any<CancellationToken>()).Returns(mockResponse);
+    using var protocol = new PinUvAuthProtocolV2();
+    using var clientPin = new ClientPin(session, protocol);
 
-// 2. Mock SendCborRequestAsync with the 2-arg signature
-session.SendCborRequestAsync(
-    Arg.Any<ReadOnlyMemory<byte>>(), 
-    Arg.Any<CancellationToken>())
-    .Returns(mockResponse);
+    var retries = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
 
-// 3. When capturing request for assertions:
-ReadOnlyMemory<byte> capturedRequest = default;
-session.SendCborRequestAsync(
-    Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x),
-    Arg.Any<CancellationToken>())
-    .Returns(mockResponse);
-
-// 4. Request format: [command_byte][cbor_payload]
-// Skip byte 0 when parsing the CBOR payload:
-var cborPayload = capturedRequest.Slice(1);  // Skip command byte
-var reader = new CborReader(cborPayload, CborConformanceMode.Ctap2Canonical);
+    Assert.Equal(8, retries.RetriesRemaining);
+    Assert.Equal(CtapCommand.ClientPin, capturedRequest.Span[0]);
+    var reader = new CborReader(capturedRequest.Slice(1), CborConformanceMode.Ctap2Canonical);
+    Assert.Equal(2, reader.ReadStartMap());
+    Assert.Equal(1, reader.ReadInt32());
+    Assert.Equal(protocol.Version, reader.ReadInt32());
+    Assert.Equal(2, reader.ReadInt32());
+    Assert.Equal(ClientPinSubCommand.GetRetries, reader.ReadInt32());
+    reader.ReadEndMap();
+}
 ```
 
 **Common gotcha:** Tests may fail if they parse `capturedRequest` directly without skipping the command byte prefix.
@@ -416,36 +549,42 @@ var reader = new CborReader(cborPayload, CborConformanceMode.Ctap2Canonical);
 
 Tests requiring user presence must be marked and excluded from unattended runs:
 
+Use the xUnit v2 IntegrationTests project with Tests.Shared, its Infrastructure namespace and Core
+Devices/Sessions namespaces imported. This direct-session example has no PIN-normalizing helper setup:
+
 ```csharp
-// Test that can run without user interaction
-[Fact]
-public async Task GetInfoAsync_Returns_AAGUID()
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.HidFido)]
+public async Task GetInfoAsync_Returns_Aaguid(YubiKeyTestState state)
 {
-    await using var session = await device.CreateCtap2SessionAsync();
+    await using var session = await state.Device.CreateCtap2SessionAsync(
+        new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido });
     var info = await session.GetInfoAsync();
     Assert.Equal(16, info.Aaguid.Length);
 }
-
-// Test requiring user touch - MUST be excluded from automated runs
-[Fact]
-[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]
-public async Task MakeCredentialAsync_CreatesPasskey()
-{
-    // This requires user touch
-}
 ```
 
-Run tests excluding user presence:
+For a meaningful marked creation example, use [tests/CLAUDE.md](tests/CLAUDE.md#user-interaction-and-coordination-lanes).
+Keep its actual setup, arguments, assertion and cleanup in the real test-project context. Most existing
+`WithCtap2SessionAsync` calls default to PIN normalization before the callback; even a final GetInfo can
+therefore set/change a PIN or consume a retry. Smoke filters do not make those paths read-only. Preserve
+the existing module human-coordination policy; GetInfo itself needs no new approval gate.
+
+From the repository root, the first command selects units only; the second includes unit/integration
+projects then filters to integration smoke. The latter still requires inspecting actual setup for PIN/
+state work under the existing coordination policy; it is not an unattended safety guarantee.
 ```bash
-dotnet toolchain.cs -- test --project Ctap2 --smoke --filter "Category!=RequiresUserPresence"
+dotnet toolchain.cs -- test --project Ctap2
+dotnet toolchain.cs -- test --integration --project Ctap2 --smoke --filter "FullyQualifiedName~Yubico.YubiKit.Ctap2.IntegrationTests"
 ```
 
 ## Feature Flags
 
-The module defines firmware feature flags:
+The following schematic declarations summarize actual `Ctap2Session` firmware metadata, not a new class
+to paste into the library. They do not check model hardware, advertised command/extension or permission:
 
 ```csharp
-public static readonly Feature FeatureCtap2 = new("CTAP2", 5, 0, 0);
+public static readonly Feature FeatureFido2 = new("FIDO2", 5, 0, 0);
 public static readonly Feature FeatureBioEnrollment = new("Bio Enrollment", 5, 2, 0);
 public static readonly Feature FeatureCredentialManagement = new("Credential Management", 5, 2, 0);
 public static readonly Feature FeatureHmacSecretMc = new("hmac-secret-mc", 5, 4, 0);
@@ -454,7 +593,8 @@ public static readonly Feature FeatureCredBlob = new("credBlob", 5, 5, 0);
 public static readonly Feature FeatureEncIdentifier = new("Encrypted Identifier", 5, 7, 0);
 ```
 
-Check firmware support before using features:
+With a `FirmwareVersion firmwareVersion`, a threshold comparison can rule out known older firmware.
+Major-zero sentinel/default metadata passes `IsSupportedByFirmware`; this is not qualified feature support:
 ```csharp
 if (!Ctap2Session.FeatureBioEnrollment.IsSupportedByFirmware(firmwareVersion))
 {
@@ -464,15 +604,19 @@ if (!Ctap2Session.FeatureBioEnrollment.IsSupportedByFirmware(firmwareVersion))
 
 ## Common Pitfalls
 
-1. **CBOR Key Order**: CTAP2 requires canonical CBOR with sorted integer keys. Always use `CborConformanceMode.Ctap2Canonical`.
+1. **CBOR Key Order**: CTAP2 canonical keys sort by encoded type/length/bytes, not numeric value.
+   Use `CborConformanceMode.Ctap2Canonical`; the current writer sorts completed maps automatically.
 
-2. **PIN Padding**: Client PIN commands require specific padding (64 bytes, PKCS#7 style) before encryption.
+2. **PIN Padding**: ClientPin normalizes a new UTF-8 PIN to NFC, validates code-point and byte limits,
+   and right-zero-pads to 64 bytes before encryption. Non-ASCII requires a working normalization backend;
+   device-specific PIN policy still applies. AES uses no padding, not PKCS#7.
 
 3. **Protocol Reuse**: PIN/UV auth protocols are stateless with respect to the authenticator; token requests perform key agreement internally. Dispose the protocol when done.
 
 4. **User Presence**: Configure `SessionCreationOptions.UserPresencePrompt` for SDK notifications; do not infer touch from generic CBOR traffic. Hardware tests that actually require touch must still use the `RequiresUserPresence` trait.
 
-5. **Extension Order**: Extensions map keys must be in canonical order when encoding.
+5. **Extension Order**: Canonical output uses encoded-key order, not numeric/alphabetical insertion;
+   the current Ctap2Canonical writer sorts completed maps. Do not infer broken update-user wire from insertion order.
 
 ## References
 

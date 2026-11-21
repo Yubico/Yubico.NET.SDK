@@ -55,6 +55,12 @@ public static class InfoMenu
     /// <summary>
     /// Displays authenticator info for CLI verb mode (no interactive prompts).
     /// </summary>
+    /// <remarks>
+    /// Displays advertised metadata/current state, not feature execution or certification verification.
+    /// false/absent options have field-specific meanings. PIN lengths are code points (encoded-byte
+    /// limits remain separate), and remaining discoverable capacity is an estimate. The display itself
+    /// has no prompts; the preceding selection flow can prompt or swallow info-query failures.
+    /// </remarks>
     public static void DisplayAuthenticatorInfo(AuthenticatorInfo info)
     {
         // Versions

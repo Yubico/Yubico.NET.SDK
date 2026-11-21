@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers.Binary;
+using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backends;
 using Yubico.YubiKit.Piv.Certificates;
 
 namespace Yubico.YubiKit.Piv.UnitTests.Certificates;
@@ -66,5 +73,104 @@ public class PivCertificateObjectIdTests
 
         Assert.Equal("slot", exception.ParamName);
         Assert.StartsWith("Slot 0x00 does not support certificates", exception.Message);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("7100")]
+    [InlineData("710100")]
+    [InlineData("710102")]
+    public async Task GetCertificateAsync_AdmitsDerOnlyForUncompressedMode(string certInfo)
+    {
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var request = new CertificateRequest("CN=PIV unit test", key, HashAlgorithmName.SHA256);
+        using var expected = request.CreateSelfSigned(DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddDays(1));
+        var backend = new CertificateBackend(expected.RawData, Convert.FromHexString(certInfo));
+        var token = TestContext.Current.CancellationToken;
+
+        if (certInfo == "710102")
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() =>
+                CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, token));
+            return;
+        }
+
+        using var actual = await CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, token);
+        Assert.NotNull(actual);
+        Assert.Equal(expected.RawData, actual.RawData);
+    }
+
+    [Theory]
+    [InlineData(false, 0)]
+    [InlineData(true, 0)]
+    [InlineData(true, 1)]
+    public async Task GetCertificateAsync_ReadsCompressedDerAndChecksNetIdLength(bool netId, int lengthDelta)
+    {
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var request = new CertificateRequest("CN=PIV unit test", key, HashAlgorithmName.SHA256);
+        using var expected = request.CreateSelfSigned(DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddDays(1));
+        var backend = new CertificateBackend(Compress(expected.RawData, netId, lengthDelta), [0x71, 0x01, 0x01]);
+        var token = TestContext.Current.CancellationToken;
+
+        if (lengthDelta != 0)
+        {
+            await Assert.ThrowsAsync<InvalidDataException>(() =>
+                CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, token));
+            return;
+        }
+
+        using var actual = await CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, token);
+        Assert.NotNull(actual);
+        Assert.Equal(expected.RawData, actual.RawData);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetCertificateAsync_StopsHighExpansionBeforeLoadingCertificate(bool netId)
+    {
+        var backend = new CertificateBackend(Compress(new byte[64 * 1024 + 1], netId), [0x71, 0x01, 0x01]);
+
+        var failure = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, TestContext.Current.CancellationToken));
+
+        Assert.Contains("64 KiB", failure.Message);
+    }
+
+    private static byte[] Compress(byte[] input, bool netId, int lengthDelta = 0)
+    {
+        using var output = new MemoryStream();
+        if (netId)
+        {
+            Span<byte> header = [0x01, 0x00, 0x00, 0x00];
+            BinaryPrimitives.WriteUInt16LittleEndian(header[2..], unchecked((ushort)(input.Length + lengthDelta)));
+            output.Write(header);
+        }
+
+        using (Stream encoder = netId
+            ? new ZLibStream(output, CompressionMode.Compress, leaveOpen: true)
+            : new GZipStream(output, CompressionMode.Compress, leaveOpen: true))
+        {
+            encoder.Write(input);
+        }
+
+        return output.ToArray();
+    }
+
+    private sealed class CertificateBackend(byte[] certificate, byte[] certInfo) : IBackend
+    {
+        public Task<Initialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public Task<ApduResponse> SendAsync(
+            ApduCommand command,
+            bool throwOnError = true,
+            CancellationToken cancellationToken = default)
+        {
+            Assert.Equal(0xCB, command.Ins);
+            byte[] length = new byte[BerLength.EncodingSize(certificate.Length)];
+            BerLength.Write(length, certificate.Length);
+            return Task.FromResult(new ApduResponse([0x70, .. length, .. certificate, .. certInfo, 0xFE, 0x00], unchecked((short)0x9000)));
+        }
     }
 }

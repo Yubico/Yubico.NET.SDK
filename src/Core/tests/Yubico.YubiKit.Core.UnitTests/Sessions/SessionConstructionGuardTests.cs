@@ -28,7 +28,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Sessions;
 /// <remarks>
 ///     Binding happens in <c>ApplicationSession.Construct</c> rather than in the constructor precisely so the
 ///     failing-constructor case cannot strand a claim: when construction throws, nothing has been bound yet.
-///     Found by cross-vendor review (G5, ISA Phase 16 Finding 2).
+///     The fake connection checks binding and disposal bookkeeping, rather than wire or device recovery.
 /// </remarks>
 public class SessionConstructionGuardTests
 {

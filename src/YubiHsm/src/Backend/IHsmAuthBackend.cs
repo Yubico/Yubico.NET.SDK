@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 namespace Yubico.YubiKit.YubiHsm.Backend;
@@ -20,7 +19,7 @@ namespace Yubico.YubiKit.YubiHsm.Backend;
 
 internal interface IHsmAuthBackend
 {
-    Task<FirmwareVersion> ReadInitialStateAsync(CancellationToken cancellationToken = default);
+    Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken = default);
 
     Task<ApduResponse> SendAsync(
         ApduCommand command,

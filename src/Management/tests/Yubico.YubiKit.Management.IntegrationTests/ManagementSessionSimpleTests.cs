@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -24,6 +25,8 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 /// <summary>
 ///     Integration tests for ManagementSession creation via different connection types and factories.
 ///     All tests use the YubiKeyTestInfrastructure which enforces AllowList authorization.
+///     Attribute connection filters select devices, not operation transports. Unless a typed connection
+///     or explicit preference is supplied, extensions/helpers use Management's default selection.
 /// </summary>
 public class ManagementSessionSimpleTests
 {
@@ -74,7 +77,7 @@ public class ManagementSessionSimpleTests
 
     /// <summary>
     ///     Verify ManagementSession can be created via HID FIDO connection.
-    ///     Management over HID requires the FIDO interface (UsagePage 0xF1D0).
+    ///     This test explicitly opens the FIDO interface (UsagePage 0xF1D0); Management also supports OTP HID.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -89,15 +92,16 @@ public class ManagementSessionSimpleTests
     }
 
     /// <summary>
-    ///     Verify device info can be retrieved directly from HID FIDO device.
+    ///     Reads live metadata over the row's FIDO HID interface.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     public async Task GetDeviceInfo_WithHidFidoDevice_ReturnsValidInfo(YubiKeyTestState state)
     {
-        Assert.Equal(ConnectionType.HidFido, state.ConnectionType);
-
-        var deviceInfo = await state.Device.GetDeviceInfoAsync();
+        await using var session = await state.Device.CreateManagementSessionAsync(
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidFido });
+        Assert.Equal(ConnectionType.HidFido, session.ConnectionType);
+        var deviceInfo = await session.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
         Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
     }
@@ -115,15 +119,16 @@ public class ManagementSessionSimpleTests
     }
 
     /// <summary>
-    ///     Verify device info can be retrieved from HID OTP device.
+    ///     Reads live metadata over the row's OTP HID interface.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
     public async Task GetDeviceInfo_WithHidOtpDevice_ReturnsValidInfo(YubiKeyTestState state)
     {
-        Assert.Equal(ConnectionType.HidOtp, state.ConnectionType);
-
-        var deviceInfo = await state.Device.GetDeviceInfoAsync();
+        await using var session = await state.Device.CreateManagementSessionAsync(
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.HidOtp });
+        Assert.Equal(ConnectionType.HidOtp, session.ConnectionType);
+        var deviceInfo = await session.GetDeviceInfoAsync();
         Assert.NotEqual(0, deviceInfo.SerialNumber);
         Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
     }
@@ -132,54 +137,60 @@ public class ManagementSessionSimpleTests
 
     /// <summary>
     ///     Verify SetDeviceConfigAsync works via ManagementSession.
-    ///     Tests changing and restoring AutoEjectTimeout to verify config changes are applied.
+    ///     Reads, changes and restores the timeout on a single Management session.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task SetDeviceConfigAsync_WithManagementSession_AppliesAndRestoresConfig(YubiKeyTestState state)
     {
-        await state.WithManagementAsync(async (mgmt, deviceInfo) =>
-        {
-            var originalAutoEject = deviceInfo.AutoEjectTimeout;
-            var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
-
-            var newConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = newAutoEject };
-
-            await mgmt.SetDeviceConfigAsync(newConfig);
-
-            var updatedInfo = await mgmt.GetDeviceInfoAsync();
-            Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
-
-            // Restore original setting
-            var restoreConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = originalAutoEject };
-
-            await mgmt.SetDeviceConfigAsync(restoreConfig);
-        });
+        await state.WithManagementAsync((mgmt, _) => VerifyTimeoutWriteAsync(
+            () => mgmt.GetDeviceInfoAsync(), config => mgmt.SetDeviceConfigAsync(config)),
+            preferredConnection: ConnectionType.SmartCard);
     }
 
     /// <summary>
-    ///     Verify SetDeviceConfigAsync works via YubiKey extension method.
+    ///     Reads, changes and restores the timeout through one-shot extension calls.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task SetDeviceConfigAsync_WithExtensionMethod_AppliesAndRestoresConfig(YubiKeyTestState state)
     {
         var device = state.Device;
-        var originalInfo = await device.GetDeviceInfoAsync();
+        var options = new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard };
+        await VerifyTimeoutWriteAsync(
+            () => device.GetDeviceInfoAsync(options), config => device.SetDeviceConfigAsync(config, sessionOptions: options));
+    }
+
+    private static async Task VerifyTimeoutWriteAsync(Func<Task<DeviceInfo>> read, Func<DeviceConfig, Task> write)
+    {
+        var originalInfo = await read();
+        Skip.If(originalInfo.IsLocked, "The test requires an unlocked configuration.");
         var originalAutoEject = originalInfo.AutoEjectTimeout;
+        Assert.InRange(originalAutoEject, (ushort)0, (ushort)3600);
         var newAutoEject = originalAutoEject == 0 ? (ushort)10 : (ushort)0;
-
-        var newConfig = new DeviceConfig { UsbEnabled = originalInfo.UsbEnabled, AutoEjectTimeout = newAutoEject };
-
-        await device.SetDeviceConfigAsync(newConfig);
-
-        var updatedInfo = await device.GetDeviceInfoAsync();
-        Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
-
-        // Restore original setting
-        var restoreConfig = new DeviceConfig { UsbEnabled = originalInfo.UsbEnabled, AutoEjectTimeout = originalAutoEject };
-
-        await device.SetDeviceConfigAsync(restoreConfig);
+        Exception? primary = null;
+        try
+        {
+            await write(new DeviceConfig { AutoEjectTimeout = newAutoEject });
+            Assert.Equal(newAutoEject, (await read()).AutoEjectTimeout);
+        }
+        catch (Exception exception)
+        {
+            primary = exception;
+            throw;
+        }
+        finally
+        {
+            try
+            {
+                await write(new DeviceConfig { AutoEjectTimeout = originalAutoEject });
+                Assert.Equal(originalAutoEject, (await read()).AutoEjectTimeout);
+            }
+            catch (Exception cleanup) when (primary is not null)
+            {
+                throw new AggregateException("Management fixture operation and restoration both failed.", primary, cleanup);
+            }
+        }
     }
 
 
@@ -209,11 +220,12 @@ public class ManagementSessionSimpleTests
     }
 
     /// <summary>
-    ///     Verify SCP03 authentication fails with incorrect keys.
+    ///     Expects session creation with incorrect SCP03 keys to fail. The broad exception assertion does
+    ///     not distinguish authentication rejection from unrelated initialization failures.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.3.0", ConnectionType = ConnectionType.SmartCard)]
-    public async Task CreateManagementSession_WithScp03WrongKeys_ThrowsException(YubiKeyTestState state)
+    public async Task CreateManagementSession_WithScp03WrongKeys_RejectsCardCryptogram(YubiKeyTestState state)
     {
         // Create SCP03 key parameters with intentionally wrong keys
         var wrongKeyBytes = new byte[16];
@@ -226,13 +238,14 @@ public class ManagementSessionSimpleTests
 
         await using var connection = await state.Device.ConnectAsync<ISmartCardConnection>();
 
-        // Attempt to create ManagementSession with wrong SCP keys should throw
-        await Assert.ThrowsAnyAsync<Exception>(async () =>
+        // A wrong key should fail verification of the card cryptogram, not selection or transport.
+        var exception = await Assert.ThrowsAsync<BadResponseException>(async () =>
         {
             await using var mgmtSession = await ManagementSession.CreateAsync(
                 connection,
                 new SessionCreationOptions { ScpKeyParameters = scpKeyParams });
         });
+        Assert.Contains("card cryptogram verification failed", exception.Message, StringComparison.Ordinal);
     }
 
 
@@ -281,7 +294,7 @@ public class ManagementSessionSimpleTests
     }
 
     /// <summary>
-    ///     Demonstrates iterating over all authorized devices with specific capabilities.
+    ///     Iterates the authorized device list without an additional capability filter.
     /// </summary>
     [SkippableFact]
     public async Task GetDeviceInfo_ForAllAuthorizedDevices_ValidatesAllowList()

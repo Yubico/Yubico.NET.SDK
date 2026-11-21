@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers.Binary;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
@@ -55,15 +56,22 @@ internal sealed class SmartCardBackend(ISmartCardProtocol protocol) : IManagemen
         await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
     }
 
-    public async ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken)
+    // No production caller. Firmware 5.0+ and development firmware use DeviceConfig instead.
+    internal async ValueTask SetModeAsync(
+        FirmwareVersion firmwareVersion, byte mode, byte challengeResponseTimeout, ushort autoEjectTimeout,
+        CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(data);
+        if (firmwareVersion.IsAtLeast(5, 0, 0))
+            throw new NotSupportedException("Use DeviceConfig instead of SET_MODE on this firmware.");
+
+        byte[] data = [mode, challengeResponseTimeout, 0, 0];
+        BinaryPrimitives.WriteUInt16LittleEndian(data.AsSpan(2), autoEjectTimeout);
 
         var apdu = new ApduCommand
         {
             Cla = 0,
             Ins = InsSetMode,
-            P1 = 0,
+            P1 = 0x11,
             P2 = 0,
             Data = data
         };

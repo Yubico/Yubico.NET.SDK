@@ -38,6 +38,7 @@ internal sealed class AuthenticationExtensionSession : IDisposable
     /// <summary>
     /// Creates the session for the extensions the relying party asked for and the authenticator
     /// advertises; see <see cref="RegistrationExtensionSession.Create"/>.
+    /// LargeBlob writes currently lack the WebAuthn check that the original allow list has exactly one entry.
     /// </summary>
     /// <param name="inputs">The relying party's extension inputs, or null.</param>
     /// <param name="allowCredentials">The relying party's allow list; per-credential inputs are validated against it.</param>
@@ -56,7 +57,9 @@ internal sealed class AuthenticationExtensionSession : IDisposable
         if (inputs.GetCredBlob && context.Supports(ExtensionIdentifiers.CredBlob)) processors.Add(new CredBlobProcessor(input: null));
         if (inputs.LargeBlob is not null && LargeBlobProcessor.ForAuthentication(inputs.LargeBlob, context) is { } largeBlob) processors.Add(largeBlob);
         if (inputs.Prf is not null && context.Supports(ExtensionIdentifiers.HmacSecret)) processors.Add(PrfProcessor.ForAuthentication(inputs.Prf, allowCredentials, context));
+#pragma warning disable YKEXP001 // Bridge only explicitly requested previewSign inputs.
         if (inputs.PreviewSign is not null && context.Supports(ExtensionIdentifiers.PreviewSign)) processors.Add(PreviewSignProcessor.ForAuthentication(inputs.PreviewSign, allowCredentials));
+#pragma warning restore YKEXP001
         return new AuthenticationExtensionSession(processors, requested: true);
     }
 
@@ -87,7 +90,9 @@ internal sealed class AuthenticationExtensionSession : IDisposable
 
     /// <summary>
     /// Derives the client extension outputs for one assertion, or null when the relying party requested
-    /// no extensions. A malformed or wrong-typed output from one extension drops that extension's output only.
+    /// no extensions. CborContentException or InvalidOperationException from a processor omits that
+    /// processor's output. Other errors, including CTAP read-storage errors and cancellation, propagate
+    /// even when the assertion itself succeeded.
     /// </summary>
     public async ValueTask<AuthenticationExtensionOutputs?> PrepareOutputsAsync(
         GetAssertionResponse response,
@@ -109,9 +114,10 @@ internal sealed class AuthenticationExtensionSession : IDisposable
             }
             catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
             {
-                // Malformed or wrong-typed extension output: skip this extension only (WebAuthn L3 §9.4
-                // "ignore any extension output it ... cannot process"). System.Formats.Cbor reports bad
-                // encodings as CborContentException and a wrong major type as InvalidOperationException.
+                // SDK isolation policy: omit this processor's output for these exception categories.
+                // This covers malformed CBOR and wrong types, but can also catch storage failures
+                // expressed as InvalidOperationException. WebAuthn §9.4 does not prescribe this policy;
+                // CTAP storage errors, explicit client errors, and cancellation are not caught here.
             }
         }
 

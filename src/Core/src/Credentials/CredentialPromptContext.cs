@@ -21,6 +21,9 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// This is a non-positional record so that optional properties can be added in
 /// later releases without breaking implementations or callers. Implementations
 /// should ignore properties they do not use.
+/// The minimum counts Unicode code points and the maximum counts encoded bytes. These units differ
+/// from <see cref="CredentialReaderOptions"/>, whose console input limits count UTF-16 code units;
+/// adapters must apply the requested units rather than copying the limits directly.
 /// </remarks>
 public record CredentialPromptContext
 {

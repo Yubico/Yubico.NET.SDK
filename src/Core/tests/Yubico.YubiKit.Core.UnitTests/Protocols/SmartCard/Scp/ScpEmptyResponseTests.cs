@@ -7,10 +7,11 @@ using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
 
 /// <summary>
-///     Under SCP with R-MAC in the security level, the card authenticates every success response,
-///     including one with no data (GlobalPlatform SCP03 Amd D §6.2.5); a YubiKey appends the 8-byte
-///     R-MAC to an empty 9000 under SCP03 and SCP11. A success response without one is therefore not
-///     the card's, and is refused like a wrong MAC. Error status words carry no R-MAC and pass through.
+///     Checks missing-R-MAC rejection for ordinary success responses and the initialization exception.
+///     With R-MAC selected, as in Core's SCP03 level 0x33, SCP03 1.1.2 Public Release (March 2019), §6.2.5
+///     requires the card to protect 9000/62xx/63xx except EXTERNAL AUTHENTICATE. Other statuses return status
+///     only without protection; R-MAC is optional across SCP03 security levels. These synthetic
+///     cases do not establish device/profile interoperability or phase-gating of a later raw INS 82 call.
 /// </summary>
 [Collection(CryptographyProvidersCollection.Name)]
 public sealed class ScpEmptyResponseTests

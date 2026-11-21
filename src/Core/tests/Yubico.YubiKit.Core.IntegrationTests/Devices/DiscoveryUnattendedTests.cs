@@ -19,12 +19,15 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
 /// <summary>
-/// Unattended discovery and monitoring checks against whatever keys are attached. Read-only: no applet
-/// session is opened, so keys outside the allow list may be present.
+/// Unattended discovery and monitoring checks against attached keys. Discovery opens internal metadata
+/// connections and selects Management on PC/SC; these reads can affect selection on a competing shared
+/// handle. No public applet session or configuration write is requested by these test bodies.
 /// </summary>
 /// <remarks>
 /// Run with <c>--filter "Category=Discovery&amp;Category!=RequiresUserPresence"</c>. The attended hotplug
 /// ceremonies live in <see cref="DeviceEventHotPlugTests"/> and <see cref="HotPlugIdentityContractTests"/>.
+/// Use an idle rig without competing sessions. These direct-discovery tests do not filter through the
+/// shared fixture allow list. Revision-one assertions assume subscription capture precedes a later scan.
 /// </remarks>
 [Trait(TestCategories.Category, TestCategories.RequiresHardware)]
 [Trait(TestCategories.Category, TestCategories.Discovery)]
@@ -35,6 +38,8 @@ public class DiscoveryUnattendedTests(ITestOutputHelper output)
     [Fact]
     public async Task FindAllAsync_ReturnsAtLeastOneKey_AndScopedScansAreSubsets()
     {
+        // The scoped assertions constrain exposed interface bits; they do not compare physical membership
+        // with the independent All scan, whose grouping can differ under a different scope.
         using var timeout = new CancellationTokenSource(Bound);
         var all = await TransientScanRetry.ScanAsync(() => YubiKeyManager.FindAllAsync(cancellationToken: timeout.Token));
         Assert.NotEmpty(all);

@@ -25,12 +25,16 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// </summary>
 /// <remarks>
 /// These tests exercise the SmartCard CTAP2 APDU path when the connected authenticator exposes the FIDO AID.
+/// The helper's default PIN normalization can set/change a PIN or consume retries before GetInfo;
+/// these are approved known-PIN device tests, not read-only smoke. Each assertion covers the named
+/// metadata only. NotSupportedException is skipped, including the backend's broad SELECT-error wrapper;
+/// that skip does not independently establish the precise reason the application was unavailable.
 /// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2SmartCardTests
 {
     /// <summary>
-    /// Tests that creating a Ctap2Session over SmartCard succeeds and returns valid info.
+    /// Checks a returned model, nonempty versions and AAGUID length 16 over the selected SmartCard path.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
@@ -53,7 +57,7 @@ public class Ctap2SmartCardTests
                 Assert.NotNull(info);
                 Assert.True(info.Versions.Count > 0, "AuthenticatorInfo.Versions should not be empty");
                 Assert.Equal(16, info.Aaguid.Length);
-            }, preferredConnection: ConnectionType.SmartCard);
+            }, normalizePin: false, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {
@@ -89,7 +93,7 @@ public class Ctap2SmartCardTests
                     info.Versions.Contains("FIDO_2_1") ||
                     info.Versions.Contains("FIDO_2_3"),
                     $"Expected at least one CTAP2 version, got: [{string.Join(", ", info.Versions)}]");
-            }, preferredConnection: ConnectionType.SmartCard);
+            }, normalizePin: false, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {
@@ -124,7 +128,7 @@ public class Ctap2SmartCardTests
                 var hasEs256 = info.Algorithms.Any(a =>
                     a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
                 Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
-            }, preferredConnection: ConnectionType.SmartCard);
+            }, normalizePin: false, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {

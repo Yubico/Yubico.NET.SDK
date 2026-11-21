@@ -23,8 +23,15 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 
 /// <summary>
 /// Interactive menu for fingerprint enrollment operations.
-/// Mirrors ykman's "fido fingerprints" command group.
+/// Exposes a ykman-like subset, not compatible or qualified standardized enrollment.
 /// </summary>
+/// <remarks>
+/// The bio helper's standard wire format has not been qualified on hardware. The support
+/// probe checks bioEnroll presence without requiring enrolled templates and propagates read
+/// errors and cancellation. Progress/result display is not independently verified
+/// enrollment completion; a thrown cancellation can skip explicit cancel. Prompts are synchronous.
+/// The current sensor display treats every non-Touch kind as Swipe; unknown-kind UI correction is deferred.
+/// </remarks>
 public static class FingerprintsMenu
 {
     /// <summary>
@@ -106,14 +113,15 @@ public static class FingerprintsMenu
         var info = result.SensorInfo!;
         OutputHelpers.WriteSuccess("Fingerprint sensor info retrieved.");
         OutputHelpers.WriteKeyValue("Sensor type",
-            info.FingerprintKind == FingerprintKind.Touch ? "Touch" : "Swipe");
+            info.FingerprintKind switch
+            {
+                FingerprintKind.Touch => "Touch",
+                FingerprintKind.Swipe => "Swipe",
+                _ => $"Unknown ({(int)info.FingerprintKind})"
+            });
         OutputHelpers.WriteKeyValue("Max samples for enrollment",
             info.MaxCaptureSamplesRequiredForEnroll.ToString());
 
-        if (info.MaxTemplateCount.HasValue)
-        {
-            OutputHelpers.WriteKeyValue("Max templates", info.MaxTemplateCount.ToString());
-        }
     }
 
     private static async Task RunAddAsync(IYubiKey device, CancellationToken cancellationToken)

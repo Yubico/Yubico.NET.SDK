@@ -21,7 +21,7 @@ namespace Yubico.YubiKit.YubiOtp.IntegrationTests;
 
 /// <summary>
 ///     Integration tests for YubiOTP slot configurations: static password,
-///     Yubico OTP, HOTP, and touch-triggered OTP modes.
+///     Yubico OTP and HOTP. Assertions check configured/cleared status, not captured keyboard output.
 /// </summary>
 public class YubiOtpSlotConfigTests
 {
@@ -74,7 +74,7 @@ public class YubiOtpSlotConfigTests
         await using var connection = await state.Device.ConnectAsync<IOtpHidConnection>();
         await using var session = await YubiOtpSession.CreateAsync(connection);
 
-        // Public ID (modhex-encoded, up to 16 bytes)
+        // Raw binary public ID (up to 16 bytes); keyboard output modhex-encodes each byte.
         byte[] publicId = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06];
 
         // Private ID (exactly 6 bytes)
@@ -143,7 +143,7 @@ public class YubiOtpSlotConfigTests
 
     /// <summary>
     ///     Programs slot 2 with an HOTP configuration using 8 digits mode.
-    ///     Verifies the slot is configured with the 8-digit option, then cleans up.
+    ///     Checks configured/cleared status only; it does not capture output or assert eight digits.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]

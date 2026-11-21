@@ -17,10 +17,18 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Yubico.YubiKit.Core;
 
+/// <summary>Configures the factory used to create SDK loggers.</summary>
+/// <remarks>
+/// Configure logging before first SDK use. Replacing the factory affects newly created loggers;
+/// SDK static logger fields keep previously created instances. The application owns supplied factories and must
+/// keep them alive while their loggers are in use. This class neither disposes factories nor redacts
+/// payloads or exception text; choose providers, levels, and retention appropriate to their contents.
+/// </remarks>
 public static class YubiKitLogging
 {
     private static readonly Lock _lock = new();
 
+    /// <summary>Gets or sets the process-wide factory for subsequently created loggers.</summary>
     public static ILoggerFactory LoggerFactory
     {
         get
@@ -47,8 +55,13 @@ public static class YubiKitLogging
         LoggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
 
     /// <summary>
-    /// Temporarily replaces the LoggerFactory. Dispose to restore. Useful for testing.
+    /// Temporarily replaces the process-wide factory and restores the captured factory on disposal.
     /// </summary>
+    /// <remarks>
+    /// Use only with coordinated, non-overlapping scopes. Restoration does not reconfigure existing
+    /// loggers or dispose either factory; concurrent replacement or out-of-order disposal can restore
+    /// a stale factory.
+    /// </remarks>
     public static IDisposable UseTemporary(ILoggerFactory factory)
     {
         var original = LoggerFactory;

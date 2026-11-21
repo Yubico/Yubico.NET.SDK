@@ -34,7 +34,7 @@ internal static class MockCtap2Responses
 
     public static GetAssertionResponse CreateMockGetAssertionResponse(
         byte[]? credentialId = null,
-        int? numberOfCredentials = null,
+        uint? numberOfCredentials = null,
         byte[]? signature = null,
         PublicKeyCredentialUserEntity? user = null,
         byte[]? authDataExtensionsCbor = null,
@@ -85,7 +85,7 @@ internal static class MockCtap2Responses
         if (numberOfCredentials is not null)
         {
             writer.WriteInt32(5);
-            writer.WriteInt32(numberOfCredentials.Value);
+            writer.WriteUInt32(numberOfCredentials.Value);
         }
 
         // 0x07: largeBlobKey (optional, CTAP §12.3)

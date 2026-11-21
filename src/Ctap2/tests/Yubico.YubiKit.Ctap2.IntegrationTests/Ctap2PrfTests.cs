@@ -23,10 +23,15 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for the CTAP2 PRF (Pseudo-Random Function) extension.
-/// PRF is the WebAuthn-level interface to hmac-secret, allowing key derivation
-/// from credentials using arbitrary salt inputs.
+/// Registration and ordinary-assertion fixtures for the hmac-secret substrate of WebAuthn PRF.
 /// </summary>
+/// <remarks>
+/// There is no CTAP "prf" extension key. These tests do not hash PRF inputs, exchange encrypted salts,
+/// decode a PRF result or compare deterministic outputs, despite the retained test names. The first
+/// checks extension presence only conditionally; the second makes one ordinary assertion.
+/// Setup normalizes the known PIN and cleanup deletes all credentials for this RP. Tokens are not
+/// comprehensively cleared; these are human-approved dedicated-device fixtures, not production examples.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Extension", "prf")]
 public class Ctap2PrfTests
@@ -39,8 +44,8 @@ public class Ctap2PrfTests
         {
             var info = await session.GetInfoAsync();
 
-            // PRF extension requires FIDO 2.1 or later; CTAP 2.0-only authenticators
-            // return "Invalid CTAP command" for the hmac-secret-mc extension input.
+            // Retained fixture gate, not a universal PRF/hmac-secret protocol floor.
+            // This request emits hmac-secret:true, not hmac-secret-mc.
             if (!info.Versions.Contains("FIDO_2_1") && !info.Versions.Contains("FIDO_2_1_PRE"))
             {
                 Skip.If(true, "PRF extension requires FIDO 2.1 — this authenticator only supports CTAP 2.0");
@@ -83,7 +88,7 @@ public class Ctap2PrfTests
                 var makePinUvAuthParam = Ctap2TestHelpers.ComputeMakeCredentialAuthParam(
                     clientPin.Protocol, makePinToken, makeChallenge);
 
-                // Request PRF support during credential creation
+                // Request the underlying hmac-secret credential support, without PRF input processing.
                 var extensions = new ExtensionBuilder()
                     .WithHmacSecret()
                     .Build();
@@ -104,12 +109,11 @@ public class Ctap2PrfTests
                 credentialId = makeResult.GetCredentialId().ToArray();
                 Assert.NotNull(makeResult);
 
-                // The authenticator should echo back hmac-secret: true in extensions
-                // indicating PRF/hmac-secret is supported for this credential
+                // Conditional presence check only; this does not assert the hmac-secret boolean value.
                 if (makeResult.ExtensionOutputs.HasValue)
                 {
                     var extOutput = ExtensionOutput.DecodeWithRawData(makeResult.ExtensionOutputs.Value);
-                    // hmac-secret output during makeCredential is a boolean true
+                    // The standard registration output is boolean; this assertion only checks any output.
                     Assert.True(extOutput.HasExtensions, "Extension outputs should be present");
                 }
             }
@@ -127,7 +131,7 @@ public class Ctap2PrfTests
         {
             var info = await session.GetInfoAsync();
 
-            // PRF extension requires FIDO 2.1 or later
+            // Retained fixture version gate; advertisement, not this gate, identifies hmac-secret support.
             if (!info.Versions.Contains("FIDO_2_1") && !info.Versions.Contains("FIDO_2_1_PRE"))
             {
                 Skip.If(true, "PRF extension requires FIDO 2.1 — this authenticator only supports CTAP 2.0");
@@ -189,10 +193,9 @@ public class Ctap2PrfTests
 
                 credentialId = makeResult.GetCredentialId().ToArray();
 
-                // Perform two assertions with the same PRF salt and verify deterministic output
-                // Note: actual hmac-secret evaluation during assertion requires the encrypted
-                // salt exchange via the PIN protocol's key agreement. This test verifies
-                // the credential was created with PRF support and assertion works.
+                // One ordinary assertion follows registration; no salts or PRF results are supplied.
+                // Deterministic evaluation needs encrypted salts and comparison of actual outputs;
+                // those assertions remain separate unfinished test work.
                 var assertChallenge = Ctap2TestData.GenerateChallenge();
                 byte[] assertPinToken;
                 if (supportsPermissions)

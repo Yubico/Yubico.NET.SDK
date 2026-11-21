@@ -24,6 +24,10 @@ public static class FormFactorFormatter
     /// <summary>
     /// Formats a form factor as a human-readable string.
     /// </summary>
+    /// <remarks>
+    /// Matches exact enum values. A value retaining product flag bits falls through to Unknown,
+    /// even when its base form factor would otherwise have a display name.
+    /// </remarks>
     public static string Format(FormFactor formFactor) =>
         formFactor switch
         {

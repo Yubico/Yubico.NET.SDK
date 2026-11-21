@@ -26,8 +26,10 @@ using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
 
 /// <summary>
-///     Unit tests for ScpProtocolAdapter class.
-///     Tests the decorator pattern implementation that wraps a protocol with SCP.
+///     Checks the SCP protocol decorator using synthetic responses and a local card model. The model's
+///     protected 0x61xx/0x6A82 responses and padded empty commands describe its script, not independently
+///     verified SCP03 status/error or empty-data behavior. Split encrypted-response interoperability
+///     requires independent expected bytes or device/profile evidence.
 /// </summary>
 /// <remarks>
 ///     Shares <see cref="CryptographyProvidersCollection"/> because SCP paths read the mutable

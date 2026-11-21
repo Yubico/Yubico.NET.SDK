@@ -14,7 +14,8 @@
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
-// Keyboard Mapping for es_US.
+// Current es_US table is US-shaped. Treat it as the explicit mappings below, not proof of complete
+// Spanish host-layout coverage; table corrections and host validation are separate work.
 public sealed partial class HidCodeTranslator
 {
     private static HidCodeTranslator GetES_US()

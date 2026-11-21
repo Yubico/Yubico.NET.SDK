@@ -352,8 +352,8 @@ public sealed class SecureCredentialTests
     [Fact]
     public void MemoryIsSizedExactlyToTheSecret()
     {
-        // The SDK transmits the whole of Memory, so a buffer longer than the secret would send
-        // trailing padding as part of the credential.
+        // Assert a one-byte exposed view over a larger backing buffer. This test does not transmit
+        // a credential or establish the cleanup of SDK/native copies.
         ConsoleKeyInfo[] keys =
         [
             new('1', ConsoleKey.D1, shift: false, alt: false, control: false),
@@ -457,6 +457,8 @@ public sealed class SecureCredentialTests
     [Fact]
     public void DeclinedInteractiveInputLeavesNoSecretBehind()
     {
+        // This vector checks only the declined result. The tracking-pool decline test above
+        // separately inspects whether the returned buffer was cleared.
         ConsoleKeyInfo[] keys =
         [
             new('9', ConsoleKey.D9, shift: false, alt: false, control: false),

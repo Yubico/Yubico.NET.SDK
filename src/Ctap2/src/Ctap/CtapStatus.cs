@@ -19,14 +19,19 @@ namespace Yubico.YubiKit.Ctap2;
 /// </summary>
 /// <remarks>
 /// <para>
-/// This enum includes CTAP 2.1 status codes plus CTAP 2.2 status-code additions used by
-/// newer authenticators.
+/// Includes CTAP2.1 statuses and retained legacy identifiers. The meaning of some values differs
+/// by revision; enum membership does not establish that every revision assigns that status.
+/// These values do not collapse CTAPHID transport errors into CTAP CBOR response statuses.
 /// </para>
 /// <para>
 /// CTAP 2.1: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#error-responses
 /// </para>
 /// <para>
-/// CTAP 2.2 Review Draft: https://fidoalliance.org/specs/fido-v2.2-rd-20241003/fido-client-to-authenticator-protocol-v2.2-rd-20241003.html#error-responses
+/// CTAP2.0 legacy statuses: https://fidoalliance.org/specs/fido-v2.0-ps-20190130/fido-client-to-authenticator-protocol-v2.0-ps-20190130.html#error-responses
+/// </para>
+/// <para>
+/// CTAP2.2 Review Draft, October 3, 2024: https://fidoalliance.org/specs/fido-v2.2-rd-20241003/fido-client-to-authenticator-protocol-v2.2-rd-20241003.html#error-responses
+/// CTAP2.3 Proposed Standard, February 26, 2026: https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#error-responses
 /// </para>
 /// </remarks>
 public enum CtapStatus : byte
@@ -162,7 +167,7 @@ public enum CtapStatus : byte
     InvalidOption = 0x2C,
 
     /// <summary>
-    /// Pending keep alive was cancelled.
+    /// The outstanding CTAP request was cancelled; this is its response, not a response to HID CANCEL.
     /// </summary>
     KeepAliveCancel = 0x2D,
 
@@ -177,8 +182,7 @@ public enum CtapStatus : byte
     UserActionTimeout = 0x2F,
 
     /// <summary>
-    /// Continuation command, such as authenticatorGetNextAssertion
-    /// not allowed.
+    /// The command is not allowed in the current state, including an invalid continuation or late reset.
     /// </summary>
     NotAllowed = 0x30,
 
@@ -188,7 +192,7 @@ public enum CtapStatus : byte
     PinInvalid = 0x31,
 
     /// <summary>
-    /// PIN Blocked.
+    /// PIN retries are exhausted; FIDO reset is destructive and requires coordinated timing/presence.
     /// </summary>
     PinBlocked = 0x32,
 
@@ -198,7 +202,7 @@ public enum CtapStatus : byte
     PinAuthInvalid = 0x33,
 
     /// <summary>
-    /// PIN authentication using pinUvAuthToken blocked.
+    /// PIN authentication is temporarily blocked; CTAP2.1 requires a power cycle before further PIN attempts.
     /// </summary>
     PinAuthBlocked = 0x34,
 
@@ -210,16 +214,19 @@ public enum CtapStatus : byte
     /// <summary>
     /// A pinUvAuthToken is required for the selected operation.
     /// </summary>
+    /// <remarks>CTAP2.0 names value 0x36 PIN_REQUIRED; later revisions use PUAT_REQUIRED.</remarks>
     PuatRequired = 0x36,
 
     /// <summary>
-    /// PIN policy violation. Currently only enforces minimum length.
+    /// PIN policy violation; CTAP2.1 describes minimum length, while CTAP2.3 also names complexity.
     /// </summary>
     PinPolicyViolation = 0x37,
 
     /// <summary>
-    /// The pinUvAuthToken has expired.
+    /// Legacy CTAP2.0 PIN_TOKEN_EXPIRED: the authenticator's pinToken expired.
     /// </summary>
+    /// <remarks>Value 0x38 is reserved in CTAP2.1, the CTAP2.2 October 2024 Review Draft and
+    /// CTAP2.3 February 2026 Proposed Standard. This is not a CTAP2.2 status addition.</remarks>
     PinTokenExpired = 0x38,
 
     /// <summary>
@@ -268,12 +275,12 @@ public enum CtapStatus : byte
     Other = 0x7F,
 
     /// <summary>
-    /// CTAP 1/U2F error.
+    /// Start of the extension-specific error range (0xE0–0xEF).
     /// </summary>
     ExtensionFirst = 0xE0,
 
     /// <summary>
-    /// CTAP 1/U2F error.
+    /// End of the extension-specific error range (0xE0–0xEF).
     /// </summary>
     ExtensionLast = 0xEF,
 

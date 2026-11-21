@@ -83,7 +83,7 @@ internal static class YubiKeyTestInfrastructure
                 filtered = filtered.Where(d => d.FirmwareVersion >= minFw);
         }
 
-        // Filter by form factor
+        // Compare the complete value: retained product flag bits can prevent a base-enum match.
         if (criteria.FormFactor != FormFactor.Unknown)
             filtered = filtered.Where(d => d.FormFactor == criteria.FormFactor);
 
@@ -177,10 +177,12 @@ internal static class YubiKeyTestInfrastructure
     /// </summary>
     /// <remarks>
     ///     This method:
-    ///     1. Discovers all connected YubiKey devices
-    ///     2. Filters by allow list (hard fail if no authorized devices)
-    ///     3. Retrieves device information for each authorized device
-    ///     4. Caches devices for use in tests
+    ///     1. Discovers available YubiKey views across all connection types.
+    ///     2. Reads live Management information before checking each device's serial against the allow list.
+    ///     3. Caches authorized devices and their metadata for later test rows.
+    ///     Unknown or disallowed serials and failed per-device reads are filtered, not process exits.
+    ///     An empty authorized result is cached; row binding then skips when no device is available.
+    ///     AllowList construction separately exits for an empty list unless unknown serials are enabled.
     ///     Uses GetAwaiter().GetResult() to call async methods from static context.
     ///     This is acceptable for test infrastructure initialization (not hot path).
     /// </remarks>
@@ -258,7 +260,7 @@ internal static class YubiKeyTestInfrastructure
                         $"(initialization failed: {deviceEx.GetType().Name}: {deviceEx.Message})");
                 }
 
-            // Hard fail if no authorized devices
+            // Report the empty result; lazy row binding turns it into a skipped test.
             if (authorizedDevices.Count == 0)
             {
                 var errorMessage =
@@ -285,7 +287,7 @@ internal static class YubiKeyTestInfrastructure
                     "═══════════════════════════════════════════════════════════════════════════";
 
                 Console.Error.WriteLine(errorMessage);
-                return []; // Return empty list - tests will be skipped during discovery
+                return []; // Binding a row during execution skips when this cached list is empty.
             }
 
             Console.WriteLine(
@@ -303,7 +305,7 @@ internal static class YubiKeyTestInfrastructure
             // Other initialization failures retain the existing degraded no-device behavior.
             Console.Error.WriteLine($"[YubiKey Infrastructure] FATAL: Device initialization failed: {ex.Message}");
             Console.Error.WriteLine(ex.StackTrace);
-            return []; // Return empty list - tests will be skipped during discovery
+            return []; // Binding a row during execution skips when this cached list is empty.
         }
     }
 

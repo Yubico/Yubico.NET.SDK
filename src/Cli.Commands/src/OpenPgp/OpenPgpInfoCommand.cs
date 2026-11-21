@@ -38,9 +38,7 @@ public sealed class OpenPgpInfoCommand : YkCommandBase<GlobalSettings>
         AnsiConsole.WriteLine();
         OutputHelpers.WriteHeader("PIN Status");
         OutputHelpers.WriteKeyValue("Signature PIN Policy",
-            pinStatus.SignaturePinPolicy == PinPolicy.Always
-                ? "Verify every signature"
-                : "Verify once per session");
+            FormatSignaturePolicy(pinStatus.SignaturePinPolicy));
 
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]Remaining Attempts[/]");
@@ -71,11 +69,10 @@ public sealed class OpenPgpInfoCommand : YkCommandBase<GlobalSettings>
                 fpString = fpString[..40] + "...";
             }
 
-            var status = fingerprint.Length > 0 ? "[green]Present[/]" : "[grey]Empty[/]";
             table.AddRow(
                 Markup.Escape(FormatSlotShort(slot)),
                 Markup.Escape(algString),
-                status,
+                FormatKeyStatus(disc.KeyInformation, slot),
                 Markup.Escape(fpString));
         }
 
@@ -107,6 +104,23 @@ public sealed class OpenPgpInfoCommand : YkCommandBase<GlobalSettings>
 
         return ExitCode.Success;
     }
+
+    private static string FormatKeyStatus(KeyInformation info, KeyRef slot) =>
+        (info.TryGetValue(slot, out var status) ? status : (KeyStatus?)null) switch
+        {
+            KeyStatus.None => "[grey]Empty[/]",
+            KeyStatus.Generated => "[green]Generated[/]",
+            KeyStatus.Imported => "[green]Imported[/]",
+            { } raw => $"[grey]Unknown (0x{(byte)raw:X2})[/]",
+            null => "[grey]Not reported[/]",
+        };
+
+    private static string FormatSignaturePolicy(PinPolicy policy) => policy switch
+    {
+        PinPolicy.Always => "Verify every signature",
+        PinPolicy.Once => "Verify once per session",
+        var raw => $"Unknown (0x{(byte)raw:X2})",
+    };
 
     private static void WriteAttempts(string label, int attempts)
     {

@@ -46,9 +46,10 @@ public class WebAuthnBackendTests
     private const int SharedSecretLengthV2 = 64;             // PIN/UV protocol 2: HMAC key (32) || AES key (32)
 
     /// <summary>
-    ///     CTAP §6.5.5.4 getKeyAgreement + §6.5.6 encapsulate: the backend asks the authenticator for its
-    ///     COSE key, derives the shared secret with the protocol's own ephemeral key, and the secret is
-    ///     zeroed on dispose. The authenticator here is a real P-256 key so the ECDH actually runs.
+    ///     CTAP2.3 §6.5.5.4 getKeyAgreement and §6.5.7 protocol-2 encapsulation: checks key shape,
+    ///     nonzero derived secret bytes, and the disposal access guard. The fake authenticator supplies
+    ///     a real P-256 key, so ECDH runs. No retained view is inspected after disposal; these assertions
+    ///     do not establish that the owner's shared-secret bytes were zeroed.
     /// </summary>
     [Fact]
     public async Task EncapsulateAsync_DerivesSharedSecretFromAuthenticatorKeyAgreement_AndZeroesOnDispose()
@@ -78,10 +79,10 @@ public class WebAuthnBackendTests
         var copy = secret.SharedSecret.ToArray();
         secret.Dispose();
         Assert.Throws<ObjectDisposedException>(() => secret.SharedSecret);
-        Assert.NotEqual(copy, new byte[copy.Length]); // the copy proves the secret existed; the owner is zeroed
+        Assert.NotEqual(copy, new byte[copy.Length]); // Checks the pre-disposal copy, not the owner's cleared storage.
     }
 
-    /// <summary>The protocol is reachable without a token, as hmac-secret on CTAP 2.0 requires.</summary>
+    /// <summary>The backend exposes its protocol-2 object without acquiring a token; this does not prove protocol-1 compatibility.</summary>
     [Fact]
     public async Task Protocol_IsAvailableWithoutAToken()
     {

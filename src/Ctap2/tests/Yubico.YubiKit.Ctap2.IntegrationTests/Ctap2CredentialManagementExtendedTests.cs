@@ -26,8 +26,16 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
 /// Extended integration tests for CTAP2 credential management operations.
-/// Tests user info updates and multiple users per RP enumeration.
+/// Checks updated display name and presence of two created IDs in credential enumeration for one RP.
 /// </summary>
+/// <remarks>
+/// Default known-PIN normalization precedes capability checks and can set/change the PIN
+/// or consume retries. These are human-approved PIN/credential operations on a known-state
+/// test device. The update assertion does not check Name, user-handle/public-key preservation
+/// or all stored fields. Cleanup deletes all discoverable credentials for the shared test RP,
+/// not only the IDs created here. Finally schedules that cleanup but does not guarantee success;
+/// make tokens are not cleared and management tokens are cleared only on successful paths.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Feature", "CredentialManagement")]
 public class Ctap2CredentialManagementExtendedTests
@@ -45,7 +53,7 @@ public class Ctap2CredentialManagementExtendedTests
                 return;
             }
 
-            // UpdateUserInformation requires CTAP 2.1
+            // This test's version gate permits FIDO_2_1/FIDO_2_1_PRE only; it is not complete subcommand negotiation.
             var supportsPermissions = info.Versions.Contains("FIDO_2_1") ||
                                        info.Versions.Contains("FIDO_2_1_PRE");
             if (!supportsPermissions)
@@ -103,7 +111,7 @@ public class Ctap2CredentialManagementExtendedTests
                     var descriptor = new PublicKeyCredentialDescriptor(credentialId);
                     await credMan.UpdateUserInformationAsync(descriptor, updatedUser);
 
-                    // Verify the update by enumerating credentials
+                    // Re-enumerate and assert the matching ID's display name only; other updated/preserved fields are unchecked.
                     var rpIdHash = SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(Ctap2TestData.RpId));
                     using var result = await credMan.EnumerateCredentialsAsync(rpIdHash);
 

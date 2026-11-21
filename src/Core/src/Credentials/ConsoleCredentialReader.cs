@@ -29,21 +29,23 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// (e.g., in a pipeline or with redirected input).
 /// </para>
 /// <para>
-/// <b>Security Features:</b>
-/// <list type="bullet">
-/// <item>Never allocates credential data as managed strings</item>
-/// <item>Returns <see cref="IMemoryOwner{T}"/> that zeros memory on disposal</item>
-/// <item>Uses timing-safe comparison for credential confirmation</item>
-/// <item>Clears intermediate buffers on all code paths</item>
-/// </list>
+/// Interactive input uses a pooled character buffer that is cleared and returned after reading.
+/// Redirected input uses <c>ReadLine</c>, which creates a managed string that this reader cannot clear.
+/// Dispose the returned <see cref="IMemoryOwner{T}"/> to clear its independent credential bytes.
+/// Confirmation compares byte lengths and then uses a fixed-time byte comparison.
 /// </para>
 /// <para>
-/// <b>Platform Limitations:</b>
-/// <list type="bullet">
-/// <item>Windows: Full support for masked input</item>
-/// <item>Linux/macOS: Requires TTY; masked input may not work over SSH without PTY</item>
-/// <item>Non-interactive mode: Input is not masked (warning displayed)</item>
-/// </list>
+/// Interactive input requires console key access; remote terminals may require a pseudo-terminal.
+/// Disallowed or excess UTF-16 code units are ignored, and Backspace removes one code unit.
+/// Redirected text instead rejects a whole line that violates the text policy. Redirected hex input
+/// checks hex syntax and decoded byte length without applying the text length or character filter.
+/// The selected encoding determines text conversion; the default UTF-8 encoding replaces malformed
+/// surrogate input. These input options do not replace the consuming operation's applet-specific checks.
+/// </para>
+/// <para>
+/// Cancellation is checked while waiting for an interactive key. Queued keys and redirected line reads
+/// do not check the token. Empty input that reaches result allocation currently throws because the
+/// pooled byte owner requires a positive size; use a positive minimum and a positive expected hex length.
 /// </para>
 /// </remarks>
 public sealed class ConsoleCredentialReader : ISecureCredentialReader
@@ -176,7 +178,7 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         }
         finally
         {
-            // Can't zero a managed string, but we minimize exposure
+            // Dropping this reference does not erase the managed string's contents.
             line = null;
         }
     }
@@ -217,7 +219,7 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         {
             while (true)
             {
-                // Wait for key availability with cancellation support
+                // Poll cancellation while waiting; already queued keys bypass this wait.
                 while (!_console.KeyAvailable)
                 {
                     cancellationToken.ThrowIfCancellationRequested();

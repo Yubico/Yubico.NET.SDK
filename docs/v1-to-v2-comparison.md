@@ -26,17 +26,20 @@ sits outside that lane and is refreshed by hand.</sub>
 
 These aren't regressions, and it'd be misleading to describe them as such.
 V1 made almost everything public, which meant almost every internal
-improvement became a breaking change. V2 keeps low-level primitives internal
-so the SDK can keep moving.
+improvement became a breaking change. V2 retires selected low-level extension points and keeps
+protocol composition internal, while retaining public raw sessions, raw connections, and selected
+TLV, Base32, and cryptographic helpers. The smaller extension surface lets internal implementations
+evolve without removing every low-level consumer API.
 
 | V1 capability | V2 status | Why |
 |---|---|---|
 | `TlvReader`/`TlvWriter` typed, sequential TLV parsing | Replaced by a thinner `Tlv`/`TlvHelper`/`DisposableTlvList` surface — tag/value containers and static helpers only | V1's public typed TLV API was a broad extensibility surface; every change to it was a breaking change |
-| `Base16`/`Base32`/`Bcd`/`ModHex` standalone codecs | No longer public | Same reasoning — general-purpose public utilities constrained internal iteration |
+| `Base16`/`Base32`/`Bcd`/`ModHex` standalone codecs | The full codec surface is not restored; public `Core.Utilities.Base32` provides decoding only | The small shared decoder supports OATH input without restoring the v1 encoding framework |
 | Pluggable crypto primitives (`IAesGcmPrimitives`, `IEcdhPrimitives`, `ICmacPrimitives`) | No longer public extension points | Same reasoning; AES-CMAC is now hardcoded internal to SCP code |
 
-If your code used any of these directly, you'll need your own replacement.
-That's the cost, and we think the smaller surface is worth it.
+If your code used the removed APIs directly, you'll need an alternative. For Base32 decoding, use
+[`Yubico.YubiKit.Core.Utilities.Base32`](../src/Core/README.md#decode-base32-text); it does not provide encoding
+or replacements for the other codecs.
 
 ### Device discovery, events, and ownership
 
@@ -53,13 +56,13 @@ That's the cost, and we think the smaller surface is worth it.
 - Discovery models a physical key as one `IYubiKey` when evidence supports
   grouping its interfaces. `SerialNumber` and tri-state `SameDeviceAs`
   (`Same`, `Different`, or `Unknown`) support correlation. Ambiguous evidence
-  conservatively produces separate records rather than a guessed composite;
+  often produces separate records, while PID-completeness grouping retains the complementary-partials bound;
   see [the discovery guarantees](architecture/device-discovery-guarantees.md).
 - Within a process, a grouped physical key permits one live connection across
   its known interfaces, and each connection permits one live session.
   Overlapping acquisition throws `ConnectionInUseException`; sequential reuse
-  remains supported. Cross-process contention is out of scope and still
-  surfaces a platform `SCardException`.
+  remains supported within the known-member scope. Cross-process access follows OS sharing policy;
+  built-in strict-exclusive PC/SC maps a sharing violation to `ConnectionInUseException`.
 
 ### Standard applet session creation
 
@@ -67,7 +70,8 @@ All eight applet sessions now use the same two factory shapes:
 `IYubiKey.CreateXSessionAsync` for an owned connection and
 `XSession.CreateAsync` for a borrowed connection. Both accept
 `SessionCreationOptions`, which carries shared connection, secure-channel,
-protocol-configuration, firmware-version, and user-presence notification policy. Existing one-shot
+protocol-configuration, firmware-version, and user-presence notification policy. Versions are effective
+session policy, not hardware attestation; major-zero feature checks are optimistic. Existing one-shot
 conveniences also accept session options before their cancellation token, so
 callers can apply the same creation policy without opening a session manually.
 
@@ -80,7 +84,7 @@ applications inspect valid fields introduced before the SDK models them.
 ## Still being decided
 
 **How far to extend credential prompting.** Direct credential parameters on
-applet sessions are settled: calls such as `PivSession.VerifyPinAsync(pinUtf8)`
+applet sessions are settled: calls such as `piv.VerifyPinAsync(pin)`
 keep authentication flow under application control. One applet-local exception
 exists — OATH's `AuthenticateAndRetryAsync` takes a password-provider callback
 so it can re-authenticate a locked applet mid-operation. Core now provides
@@ -136,14 +140,15 @@ The gaps table above already accounts for these:
 - The cross-applet `IUserPresencePrompt` touch contract, replacing the alpha-only
   PIV and YubiHSM Auth `OnTouchRequired` callbacks and covering FIDO2/WebAuthn,
   OATH, OpenPGP, and YubiOTP as well.
-- YubiHSM Auth's `HsmAuthRetryException` and
-  the hardware-verified `Counter` → `RetriesRemaining` rename.
+- YubiHSM Auth's `HsmAuthRetryException` for enrollment, deletion, management-key changes, CALCULATE and
+  password changes, plus the `Counter` → `RetriesRemaining` rename. `GetChallengeAsync` uses general APDU
+  errors; applications own retry decisions for both paths.
 - YubiHSM Auth password inputs are back to UTF-8 `ReadOnlyMemory<byte>`, as in
   v1, so callers can clear them after use. Its parameters are named plainly
   (`credentialPassword`, `derivationPassword`, `currentPassword`,
-  `newPassword`, and `password`). FIDO2, OpenPGP, and OATH secret parameters
-  were renamed the same way, which breaks named-argument call sites; PIV still
-  uses the `...Utf8` suffix.
+  and `newPassword`). FIDO2, OpenPGP, and OATH secret parameters
+  were renamed the same way, which breaks named-argument call sites. Current PIV
+  parameters also use plain role names such as `pin`, `currentPin` and `currentPuk`.
 - YubiOTP keyboard-layout-aware static passwords and Yubico-OTP-algorithm
   challenge-response.
 - Dedicated exception types for SecurityDomain (`SecureChannelException`) and
@@ -157,18 +162,23 @@ v2 can detect and recover an existing PIN-derived configuration.
 
 Not differences at all — v1 never had these:
 
-- **WebAuthn** (`Yubico.YubiKit.WebAuthn`) — a client package that runs the
-  full FIDO ceremony.
-- **OpenPGP** (`Yubico.YubiKit.OpenPgp`) — OpenPGP applet support.
+- **WebAuthn** (`Yubico.YubiKit.WebAuthn`) — client-side registration and authentication
+  orchestration over CTAP2; the RP still supplies options and verifies responses.
+- **OpenPGP** (`Yubico.YubiKit.OpenPgp`) — card key management, signing, raw decipher/agreement and
+  certificates; see the [task guide](../src/OpenPgp/README.md) for credential, firmware and ownership conditions.
 
 [What's new in v2](v2-highlights.md) covers both in more detail.
 
 ## Verified at full parity
 
+This heading preserves the historical analysis's capability classification. It is not current
+all-platform runtime, native ABI, secure-channel conformance, or device qualification. Use each module's
+current limitations and the [Native AOT evidence terms](NATIVE-AOT.md#evidence-terms) when planning deployment.
+
 The 2026-07-21 analysis classified these areas as parity or outright
 improvements over v1. For discovery, that means the capability is present and
 improved, not that every platform can always prove how interfaces group:
-ambiguous evidence deliberately splits rather than guesses. The exact
+ambiguous evidence can split results and PID-completeness can still group complementary partials. The exact
 platform guarantees and bounds are documented in
 [device discovery guarantees](architecture/device-discovery-guarantees.md).
 
@@ -178,6 +188,8 @@ Windows/macOS/Linux platform interop; PIV key management and algorithms
 the FIDO2 CTAP2 surface (GetInfo, PIN protocols, bio enrollment, credential
 management, config, largeBlob, extensions); SCP03/SCP11 core protocol and key
 management; Management device-info read and device-config write; OATH
-credential types and PBKDF2 handling; and YubiHSM Auth's new capabilities
-(password change, on-device EC key generation, derived credentials, and
-zeroizing `SessionKeys`).
+credential types and PBKDF2 handling. YubiHSM Auth adds SDK surfaces for password change (5.8.0 gate),
+on-device EC key generation, derived credentials, and `SessionKeys` owned-array clearing. Use the
+[module guide](../src/YubiHsm/README.md) for applet-version policy, enrollment on both devices and external
+HSM handshake responsibilities; these additions describe SDK capability rather than every development
+applet's behavior or authenticated HSM interoperability.

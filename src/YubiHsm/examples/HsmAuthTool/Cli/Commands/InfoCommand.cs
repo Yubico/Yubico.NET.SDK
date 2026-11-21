@@ -27,7 +27,7 @@ internal static class InfoCommand
         var retries = await session.GetManagementKeyRetriesAsync(cancellationToken);
         var credentials = await session.ListCredentialsAsync(cancellationToken);
 
-        AnsiConsole.MarkupLine($"YubiHSM Auth version: [green]{session.FirmwareVersion}[/]");
+        AnsiConsole.MarkupLine($"Effective session feature policy: [green]{session.FirmwareVersion}[/]");
         AnsiConsole.MarkupLine($"Management key retries remaining: [green]{retries}[/]");
         AnsiConsole.MarkupLine($"Stored credentials: [green]{credentials.Count}[/]");
 

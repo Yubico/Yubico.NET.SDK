@@ -25,14 +25,17 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 namespace Yubico.YubiKit.Management.UnitTests;
 
 /// <summary>
-///     Phase 38: Management transport selection — app-specific smart default
+///     Management transport selection — app-specific smart default
 ///     (SmartCard, then HID FIDO, then HID OTP) plus explicit caller override, validated over a fake probe.
 /// </summary>
+/// <remarks>
+///     The fake connection failures do not establish device <see cref="ApduException" /> handling.
+/// </remarks>
 public class IYubiKeyExtensionsTransportTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    // (a) default top-choice: all transports present -> SmartCard.
+    // With all transports exposed, default selection chooses SmartCard.
     [Fact]
     public async Task CreateManagementSessionAsync_DefaultAllTransports_PicksSmartCard()
     {
@@ -44,7 +47,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal(typeof(ISmartCardConnection), device.RequestedConnection);
     }
 
-    // (b) default fallback: first choice (SmartCard) absent -> HID FIDO (second choice).
+    // With SmartCard absent, selection chooses HID FIDO without attempting SmartCard.
     [Fact]
     public async Task CreateManagementSessionAsync_DefaultNoSmartCard_FallsBackToHidFido()
     {
@@ -55,7 +58,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal(typeof(IFidoHidConnection), device.RequestedConnection);
     }
 
-    // (b) default fallback: only the third choice (HID OTP) remains.
+    // With only HID OTP exposed, selection chooses it directly.
     [Fact]
     public async Task CreateManagementSessionAsync_DefaultOnlyHidOtp_FallsBackToHidOtp()
     {
@@ -66,7 +69,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal(typeof(IOtpHidConnection), device.RequestedConnection);
     }
 
-    // (c) explicit non-default override on a multi-transport device beats the default order.
+    // An explicit non-default override on a multi-transport device beats the default order.
     [Fact]
     public async Task CreateManagementSessionAsync_OverrideHidOtp_OnAllTransports_UsesHidOtp()
     {
@@ -80,7 +83,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal(typeof(IOtpHidConnection), device.RequestedConnection);
     }
 
-    // (d) device-unsupported applet-valid override -> NotSupportedException, no connect attempt.
+    // A supported preference absent from this device is rejected without a connection attempt.
     [Fact]
     public async Task CreateManagementSessionAsync_OverrideSmartCard_NotOnDevice_ThrowsNotSupported()
     {
@@ -93,7 +96,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Null(device.RequestedConnection);
     }
 
-    // (e) non-concrete override values -> ArgumentException, no connect attempt.
+    // A non-concrete preference is rejected without a connection attempt.
     [Theory]
     [InlineData(ConnectionType.Hid)]
     [InlineData(ConnectionType.All)]
@@ -176,15 +179,15 @@ public class IYubiKeyExtensionsTransportTests
             .Throws(ConnectionType.SmartCard, new ConnectionInUseException("pcsc:test-reader is in use."))
             .Returns(ConnectionType.HidFido, new FailingFidoConnection());
 
+        using var scpKeyParams = Scp03KeyParameters.Default;
         _ = await Assert.ThrowsAsync<ConnectionInUseException>(() =>
             device.CreateManagementSessionAsync(
-                new SessionCreationOptions { ScpKeyParameters = Scp03KeyParameters.Default }, Ct));
+                new SessionCreationOptions { ScpKeyParameters = scpKeyParams }, Ct));
 
         Assert.Equal([ConnectionType.SmartCard], device.Attempts);
     }
 
-    // The same in-process refusal on an EXPLICIT override is honoured, not routed around. Silently opening a
-    // different transport than the caller named would be a lie; an override never falls back.
+    // In-process refusal on an explicit preference propagates; no other transport is attempted.
     [Fact]
     public async Task CreateManagementSessionAsync_CcidHeldInProcess_ExplicitOverrideDoesNotFallBack()
     {
@@ -217,12 +220,34 @@ public class IYubiKeyExtensionsTransportTests
         }
     }
 
+    [Theory]
+    [InlineData(0, VersionQualifierType.Final)]
+    [InlineData(4, VersionQualifierType.Beta)]
+    [InlineData(5, VersionQualifierType.Final)]
+    public async Task CachedFirmwareControlsGateWithoutSubstitutingLiveMetadata(int major, VersionQualifierType qualifier)
+    {
+        using var field = new Yubico.YubiKit.Core.Utilities.Tlv(0x05, [(byte)major, 7, 0]);
+        var cached = DeviceInfo.CreateFromTlvs([field], null) with
+        {
+            VersionQualifier = new VersionQualifier(new FirmwareVersion(major, 7, 0), qualifier, 1),
+        };
+        var connection = new ManagementSessionTests.VersionedSmartCardConnection(4, 1);
+        var device = new FallbackProbeYubiKey(ConnectionType.SmartCard) { CachedDeviceInfo = cached }
+            .Returns(ConnectionType.SmartCard, connection);
+        await using var session = await device.CreateManagementSessionAsync(cancellationToken: Ct);
+
+        Assert.True(session.IsSupported(new Feature("configuration", 5, 0, 0)));
+        Assert.Equal(new FirmwareVersion(4, 1, 0), (await session.GetDeviceInfoAsync(Ct)).FirmwareVersion);
+        Assert.Equal(2, connection.Reads);
+    }
+
     private sealed class FallbackProbeYubiKey(ConnectionType available) : IYubiKey
     {
         private readonly Dictionary<ConnectionType, Func<IConnection>> _behaviors = new();
 
         public string DeviceId => "fallback-probe";
         public ConnectionType AvailableConnections { get; } = available;
+        public DeviceInfo? CachedDeviceInfo { get; init; }
         public List<ConnectionType> Attempts { get; } = [];
 
         public FallbackProbeYubiKey Returns(ConnectionType transport, IConnection connection)

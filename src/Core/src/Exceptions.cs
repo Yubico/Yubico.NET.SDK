@@ -14,17 +14,17 @@
 
 namespace Yubico.YubiKit.Core;
 
+/// <summary>Reports invalid data in a YubiKey response.</summary>
 public class BadResponseException(string message) : Exception(message)
 {
-    //The data contained in a YubiKey response was invalid
 }
 
 /// <summary>
 /// Exception thrown when a platform interop (P/Invoke) operation fails.
 /// </summary>
 /// <remarks>
-/// This exception wraps platform-specific errors from native API calls (PC/SC, HID, etc.)
-/// and provides context about what operation failed.
+/// Call sites use this type to add operation context. Native failures are not universally wrapped in it:
+/// PC/SC, Configuration Manager, and Windows report calls can expose other exception types.
 /// </remarks>
 public class PlatformInteropException : Exception
 {

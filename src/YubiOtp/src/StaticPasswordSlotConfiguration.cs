@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
 namespace Yubico.YubiKit.YubiOtp;
@@ -27,9 +28,15 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <item><c>uid[0..6]</c> — scan code bytes 16–21</item>
 /// <item><c>key[0..16]</c> — scan code bytes 22–37</item>
 /// </list>
+/// Both constructors copy scan codes into private storage; dispose the configuration and clear mutable
+/// source buffers separately. The string overload clears its translated intermediate, not the immutable
+/// password string. Use raw translated scan codes, not UTF-8 text bytes, when source erasure matters.
+/// The SDK requires firmware 2.2 or later for this configuration, including shorter passwords.
 /// </remarks>
 public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
 {
+    public override FirmwareVersion MinimumFirmwareVersion => new(2, 2, 0);
+
     /// <summary>
     /// Initializes a new static password configuration from a human-readable password,
     /// translating each character to a HID scan code for the given keyboard layout.
@@ -38,7 +45,8 @@ public sealed class StaticPasswordSlotConfiguration : KeyboardSlotConfiguration
     /// The YubiKey itself has no concept of a keyboard layout; it only emits HID scan
     /// codes over USB. The scan codes produced here will render as <paramref name="password"/>
     /// only on a host configured with the same <paramref name="keyboardLayout"/>. Use
-    /// <see cref="KeyboardLayout.ModHex"/> for a layout-independent password.
+    /// <see cref="KeyboardLayout.ModHex"/> for characters whose scan codes are shared by supported
+    /// host layouts. Verify the selected characters and actual host layout; this is not universal layout independence.
     /// </remarks>
     /// <param name="password">The human-readable password (up to 38 characters).</param>
     /// <param name="keyboardLayout">The keyboard layout to translate characters with.</param>

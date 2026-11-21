@@ -22,12 +22,13 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Simple integration tests for Ctap2Session.
-/// These tests exercise basic CTAP2 operations that do NOT require user presence.
+/// Integration checks of CTAP2 session creation, metadata, selection and reset refusal.
 /// </summary>
 /// <remarks>
-/// Tests requiring user presence or PIN verification are excluded from automated runs.
-/// Mark such tests with [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)] to exclude them.
+/// Helper-based tests use default PIN normalization and can set/change PIN or consume retries before
+/// their actions. They require approved PIN work and known device state; filtering touch traits does
+/// not make them read-only. Direct creation/GetInfo paths do not use that helper. Selection and reset
+/// require human coordination. Assertions establish only the properties named below, not certification.
 /// </remarks>
 public class Ctap2SessionSimpleTests
 {
@@ -68,7 +69,7 @@ public class Ctap2SessionSimpleTests
             var info = await session.GetInfoAsync();
             Assert.NotNull(info);
             Assert.True(info.Versions.Count > 0, "AuthenticatorInfo.Versions should not be empty");
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -77,9 +78,9 @@ public class Ctap2SessionSimpleTests
         {
             var info = await session.GetInfoAsync();
 
-            // YubiKey 5+ should support CTAP2
+            // Require this advertised version string; do not infer execution of all CTAP2 features.
             Assert.Contains("FIDO_2_0", info.Versions);
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -88,10 +89,10 @@ public class Ctap2SessionSimpleTests
         {
             var info = await session.GetInfoAsync();
 
-            // AAGUID should be 16 bytes
+            // Length is the protocol requirement; rejecting all-zero bytes is an additional test assumption.
             Assert.Equal(16, info.Aaguid.Length);
             Assert.False(info.Aaguid.Span.SequenceEqual(new byte[16]), "AAGUID should not be all zeros");
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -102,11 +103,12 @@ public class Ctap2SessionSimpleTests
 
             if (info.Extensions is { Count: > 0 })
             {
+                // This guarded disjunction is always true; it does not establish hmac-secret support.
                 var hasHmacSecret = info.Extensions.Contains("hmac-secret");
                 Assert.True(hasHmacSecret || info.Extensions.Count > 0,
                     "YubiKey should support at least one extension");
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -117,11 +119,12 @@ public class Ctap2SessionSimpleTests
 
             if (info.Algorithms is { Count: > 0 })
             {
+                // ES256 is checked only for a nonempty advertisement, not by creating that algorithm.
                 var hasEs256 = info.Algorithms.Any(a =>
                     a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
                 Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -132,11 +135,12 @@ public class Ctap2SessionSimpleTests
 
             if (info.Options is { Count: > 0 })
             {
+                // This guarded disjunction does not establish that rk is present or enabled.
                 var hasRk = info.Options.ContainsKey("rk");
                 Assert.True(hasRk || info.Options.Count > 0,
                     "YubiKey should have at least one option");
             }
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Tests that the IYubiKey extension method for creating CTAP2 sessions works.
@@ -175,7 +179,7 @@ public class Ctap2SessionSimpleTests
     }
 
     /// <summary>
-    /// Tests SelectionAsync which requires user touch to confirm device selection.
+    /// Awaits selection completion on the coordinated HID device; no response UP/UV flags are asserted.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -184,11 +188,13 @@ public class Ctap2SessionSimpleTests
         await state.WithCtap2SessionAsync(async session =>
         {
             await session.SelectionAsync();
-        });
+        }, normalizePin: false);
 
     /// <summary>
-    /// Tests ResetAsync which requires user presence within a short window after power-up.
+    /// Expects some CtapException from reset, without checking its status or whether state changed.
     /// </summary>
+    /// <remarks>This is not a safe reset-window or no-deletion proof. Reset command receipt and
+    /// presence use separate clocks; human-approved power-cycle/presence coordination is required.</remarks>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
     [Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]

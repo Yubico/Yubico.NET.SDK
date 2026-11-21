@@ -12,14 +12,17 @@ This file provides Claude-specific guidance for working with the YubiHSM Auth mo
 
 ## Module Context
 
-The YubiHSM Auth module implements the **YubiHSM Auth applet** for authenticating to YubiHSM 2 hardware security modules. This is the **most security-sensitive applet** in the SDK — every operation involves management keys, session keys, credential passwords, or EC private keys.
+The YubiHSM Auth module manages the **YubiHSM Auth applet** on a YubiKey. It enrolls credentials and
+calculates session keys used to authenticate to a YubiHSM 2. The application owns matching HSM object
+enrollment, connector communication and handshake completion. LIST and retry reads return public metadata;
+enrollment and calculation paths handle management keys, credential passwords and cryptographic material.
 
 **Key characteristics:**
 1. **SmartCard-only** — No HID or OTP transport; `HsmAuthBackend` owns applet select/send mechanics over `ISmartCardProtocol`
 2. **Applet-owned backend** — Session code keeps APDU construction, retry extraction, and sensitive-buffer lifecycle; backend remains a thin SmartCard transport wrapper
 3. **Two credential types** — Symmetric (AES-128, all firmware) and Asymmetric (EC P256, firmware 5.6.0+)
-4. **Strict security** — All sensitive buffers zeroed in `finally` blocks; `SessionKeys` is `IDisposable`
-5. **User presence** — Session-key calculations retain `SessionCreationOptions.UserPresencePrompt`; the removed alpha `OnTouchRequired` callback has no compatibility adapter
+4. **Owned-buffer cleanup** — Session methods clear encoded requests and derived keys in `finally`; `CredentialPassword` and `SessionKeys` clear their owned arrays on disposal. Caller-owned inputs and additional copies have separate lifetimes.
+5. **User presence** — Session-key calculations retain the caller-owned `SessionCreationOptions.UserPresencePrompt` for notifications around CALCULATE.
 
 **Key Files:**
 - [`HsmAuthSession.cs`](src/HsmAuthSession.cs) - Main session class (all APDU operations)
@@ -32,7 +35,18 @@ The YubiHSM Auth module implements the **YubiHSM Auth applet** for authenticatin
 
 ## Firmware Feature Gates
 
-All firmware-gated operations use `EnsureSupports(Feature)` at method entry:
+Asymmetric, challenge and password-change operations use feature gates; base operations rely on successful
+applet selection. An explicit override wins, else cached device firmware if available, else the applet version
+from SELECT. Major-zero, a present non-final qualifier, or missing/malformed version metadata admit applet
+and SCP version gates optimistically. A missing qualifier is not evidence that a known version is non-final.
+The protocol uses the known numeric version for framing, or the 5.4.3 applet floor when it is unknown.
+This feature policy does not prove availability. A failed or cancelled required SELECT still propagates.
+A confirmed reset retires
+the old protocol and clears ready/auth state. The same session reselects over a fresh protocol and reauthenticates
+with the caller's retained SCP parameters, if supplied. A refresh failure ends the session without masking
+the primary exception; completing RESET alone does not establish a new channel.
+No PC/SC transaction is created by this protocol path. Inherited IsAuthenticated records SCP setup,
+not applet management/password authority, live channel health or external HSM authentication.
 
 | Feature | Version | Methods |
 |---------|---------|---------|
@@ -41,6 +55,9 @@ All firmware-gated operations use `EnsureSupports(Feature)` at method entry:
 | `FeatureGetChallenge` | 5.6.0 | `GetChallengeAsync` |
 | `FeatureGetChallengeWithPassword` | 5.7.1 | `GetChallengeAsync` with credential password |
 | `FeaturePasswordChange` | 5.8.0 | `ChangeCredentialPasswordAsync`, `ChangeCredentialPasswordAdminAsync` |
+
+`FeatureGetChallengeNoPassword` is an obsolete alias of `FeatureGetChallengeWithPassword`; test basic
+challenge availability with `FeatureGetChallenge` and password transmission with the correctly named field.
 
 ## Wire Protocol
 
@@ -56,7 +73,7 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
 | 0x04 | GET_CHALLENGE | 0 | 0 | Get host challenge / EPK-OCE |
 | 0x05 | LIST | 0 | 0 | List credentials |
 | 0x06 | RESET | 0xDE | 0xAD | Factory reset |
-| 0x07 | GET_VERSION | 0 | 0 | Get applet version |
+| 0x07 | GET_VERSION | 0 | 0 | Protocol instruction; this SDK resolves version from SELECT instead |
 | 0x08 | PUT_MANAGEMENT_KEY | 0 | 0 | Change management key |
 | 0x09 | GET_MANAGEMENT_KEY_RETRIES | 0 | 0 | Get retry counter |
 | 0x0A | GET_PUBLIC_KEY | 0 | 0 | Get EC public key |
@@ -68,48 +85,41 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
 
 ### Credential Password Handling
 
-Credential passwords cross the public API as **UTF-8 `ReadOnlyMemory<byte>`**, never `string`.
-.NET strings are immutable and cannot be wiped, so a `string` parameter makes it impossible for
-the caller to zero the secret. Parameters are named plainly (`credentialPassword`,
-`derivationPassword`, `currentPassword`, `newPassword`) with no `Utf8` suffix; the UTF-8 encoding
-contract lives in the XML documentation for each parameter, not in its name.
-
-- **The caller owns the input buffer** and is responsible for zeroing it. The SDK never zeroes a
-  buffer it does not own.
-- `ValidateCredentialPassword(ReadOnlySpan<byte>)` is the single guard: **at most** 16 bytes.
-- `ParseCredentialPassword(ReadOnlySpan<byte>)` validates, then copies into a fresh 16-byte
-  buffer, null-padding the remainder.
-- The padded copy is always zeroed in a `finally` block.
+The caller supplies a `CredentialPassword` via `FromUtf8` (at most 16 encoded bytes, padded) or `FromRaw`
+(exactly 16 bytes). Both copy the input and neither modifies it. The caller owns the source and holder,
+keeps the holder alive through the operation, then disposes it and clears the separate source. The SDK
+borrows the holder and clears its encoded request buffers. The PBKDF2 derivation password remains a
+separate borrowed UTF-8 byte buffer.
 - Never log password values — log operation metadata only.
 
-```csharp
-// Caller side: own the bytes, zero them.
-var credentialPassword = Encoding.UTF8.GetBytes(password);
-try
-{
-    await session.PutCredentialSymmetricAsync(
-        managementKey, label, keyEnc, keyMac, credentialPassword);
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(credentialPassword);
-}
-```
+Keep acquisition and all later failures inside the caller's clearing scope. The README's typed enrollment
+sketch borrows management/password inputs while owning the generated K-ENC/K-MAC buffer. Its provisioning
+callback completes matching HSM enrollment and recovery storage before that buffer is cleared.
 
-`label` is **not** a secret — it is echoed back verbatim by the LIST command — and stays `string`.
+`label` is public LIST metadata and stays `string`.
 
 ### Management Key Verification
 - Failed management key attempts return SW 0x63Cx (x = remaining retries)
-- `ThrowOnManagementKeyFailure()` extracts retry count and throws `ApduException`
+- `ThrowOnManagementKeyFailure()` extracts retry count and throws `HsmAuthRetryException`, an `ApduException`
 - Always call with `throwOnError: false` to allow retry extraction
+- Enrollment, DELETE, management-key/password changes and CALCULATE use the retry helper.
+  GET_CHALLENGE uses ordinary backend error handling, including when a password is transmitted.
+- Yubico's descriptive applet overview says successful authentication before exhaustion restores the
+  corresponding counter to eight. Exhausted credential retries delete that credential; exhausted
+  management retries block management operations until destructive applet reset.
 
 ### Session Keys Lifecycle
-```csharp
-using var keys = await session.CalculateSessionKeysSymmetricAsync(
-    label, context, credentialPassword, cardCryptogram);
-// Use keys.SEnc, keys.SMac, keys.SRmac
-// All key material zeroed automatically on dispose
-```
+Keep the returned `SessionKeys` in a `using` scope through the host's HSM task. `Parse` copies three
+16-byte slices into owned arrays. Disposal clears those arrays, including storage viewed by existing spans,
+and rejects later property access. The Parse input and any additional caller/connector copies require
+separate clearing. Calculation returns key material; the HSM library completes host authentication.
+The calculation helper's final-response cleanup reaches the actual raw owner, including status bytes,
+after Parse/callback success or failure, using `ApduResponse.Clear()`. Earlier transport/fragment/decrypted arrays remain independent,
+and retry/backend errors before that try have a different scope. Keep standalone Parse input cleanup separate.
+The session passes the leading 48 CALCULATE data bytes to the strict key-region parser. It rejects
+short responses with `BadResponseException`, logs only the data length for longer responses, and
+clears the entire final owner including the suffix. Do not assign the extra bytes a meaning or firmware
+boundary; software key extraction establishes no authenticated HSM handshake.
 
 For symmetric and asymmetric CALCULATE operations, a listed credential with
 `TouchRequired=true` maps to `PolicyRequires`; `false` is silent. A missing credential is also silent;
@@ -117,15 +127,25 @@ unknown touch values on a found credential and LIST failures map conservatively 
 `Application="YubiHSM Auth"` and the credential label as scope, occur immediately before the
 CALCULATE APDU, and are resolved once with `CancellationToken.None`. Do not report `TimedOut`
 without a hardware status that confirms a touch timeout.
+LIST cancellation propagates. A session without a prompt skips this notification lookup. Keep callbacks
+prompt and non-reentrant. After cancellation is requested, await the operation's terminal result and
+cleanup; an admitted SmartCard exchange can drain until a device response and end with an APDU failure.
+Follow that outcome for recovery rather than promising native device interruption.
+Await the entire public workflow before disposal or another call. LIST policy lookup and CALCULATE are
+separate exchanges; parsing, callbacks and finally cleanup are outside Core's per-exchange guard. Keep
+borrowed inputs/prompt resources alive through actual completion, not an outer cancelled wait.
 
 The symmetric context is `hostChallenge[8] || hsmChallenge[8]`; the HSM challenge and optional
-card cryptogram come from the YubiHSM connector. The asymmetric context is
-`epkOce[65] || epkSd[65]`. Validate these exact lengths before any device I/O, and never generate
-the connector-owned half locally.
+card cryptogram are generated by the HSM and relayed by its connector. The asymmetric context is
+`epkOce[65] || epkSd[65]`. Validate exact context lengths before calculation I/O and use the actual HSM
+half for a live handshake. The asymmetric static public-key input identifies the trusted HSM; GET_PUBLIC_KEY
+exports the YubiKey credential's PK-OCE for enrollment. Validate both static public keys as uncompressed
+on-curve P-256 points; point validation does not establish key provenance. Optional symmetric cryptogram omission skips that
+applet verification step. GET_CHALLENGE response shape and asymmetric point/cryptogram validation remain
+partly delegated to the integration layer/device; preserve that distinction in public contracts.
 
 ### EC Private Key Handling
-- Private keys are never generated or stored in managed memory longer than necessary
-- `PutCredentialAsymmetricAsync` zeros credential password but relies on caller to manage private key memory
+- `PutCredentialAsymmetricAsync` clears its request copies; the caller clears imported private-key storage
 - `GenerateCredentialAsymmetricAsync` generates on-device — private key never leaves the YubiKey
 
 ## PBKDF2 Key Derivation
@@ -136,50 +156,45 @@ the connector-owned half locally.
 - Iterations: 10,000
 - Output: 32 bytes → K-ENC[0..16], K-MAC[16..32]
 - Derived key buffer zeroed in `finally`
-- `DeriveKeys(ReadOnlyMemory<byte>)` makes **no copy** of the derivation password — the caller
-  owns and zeros it. These constants are pinned by `Pbkdf2DerivationTests`, which recomputes the
-  known-answer vector independently; do not change them.
+- `DeriveKeys(ReadOnlyMemory<byte>)` passes the password span to PBKDF2 without an explicit helper-owned
+  input copy. The caller clears the input. `Pbkdf2DerivationTests` checks fixed ASCII and UTF-8 vectors
+  independently calculated by Python's `hashlib.pbkdf2_hmac`, with the expressions recorded alongside the vectors.
 
 ## Test Infrastructure
 
 ### Unit Tests
-Located in `tests/Yubico.YubiKit.YubiHsm.UnitTests/`. Test pure logic that doesn't require APDU transmission:
+Located in `tests/Yubico.YubiKit.YubiHsm.UnitTests/`. Pure helpers and recording-connection tests run without hardware:
 
 - `SessionKeysTests` — Parse/dispose/zeroing behavior
 - `CredentialPasswordTests` — UTF-8 encoding, padding, validation
 - `LabelValidationTests` — Label length and encoding constraints
 - `RetryExtractionTests` — Status word 0x63Cx parsing
-- `HsmAuthCredentialTests` — Record equality and sorting
-- `Pbkdf2DerivationTests` — Known-answer PBKDF2 derivation
+- `HsmAuthCredentialTests` — Label ordering and all-property record equality
+- `Pbkdf2DerivationTests` — Derivation parameters, split shape and repeatability
+- `HsmAuthSessionByteLevelTests` — Headers, selected TLV bytes/order, context guards and reset override policy
+- `HsmAuthRetryExceptionTests` — Typed retry translation for nine operation paths, excluding GET_CHALLENGE
 - `TouchNotificationTests` — Recording-prompt policy mapping, request/resolution lifecycle, and no-hardware CALCULATE ordering
 
 **Run tests:** `dotnet toolchain.cs test` (never `dotnet test` directly)
 
 ### Integration Tests
 Located in `tests/Yubico.YubiKit.YubiHsm.IntegrationTests/`. Require a physical YubiKey with firmware 5.4.3+.
+Read each assertion for its scope: symmetric calculation checks key lengths, derived enrollment checks
+algorithm metadata, and the two touch-tagged cases check stored policy only. The asymmetric dummy flow
+contains several invalid handshake inputs and checks an exact general APDU exception with nonzero status.
+These are applet tests; use a real HSM handshake to establish authenticated interoperability. The helper
+resets before the body by default and disposes resources afterward; arrange explicit post-run applet
+cleanup/readback when persistent credentials or a replacement management key remain.
 
-## Common Anti-Patterns
+## Maintenance constraints
 
-**❌ Don't skip `finally` blocks for password/key zeroing**
-```csharp
-// BAD — password leaks on exception
-var pw = ParseCredentialPassword(password);
-await SendApdu(pw);
-CryptographicOperations.ZeroMemory(pw); // Never reached on exception
-```
+The demo tool uses `ConsoleCredentialReader` for passwords and keys and prints generated long-lived/session
+keys with a demo-only warning. It is not a production cleanup or provisioning template. Its calculation menu
+filters to symmetric credentials and wires the shared console user-presence prompt.
 
-**❌ Don't use `throwOnError: true` with management-key-gated operations**
-```csharp
-// BAD — 0x63Cx is treated as generic error, retry count lost
-var response = await _backend.SendAsync(command, cancellationToken: ct);
-```
+Use the retry-checking send helper for operations whose public contract exposes typed retry failures.
+Ordinary backend error throwing bypasses the helper's status parsing, as the current GET_CHALLENGE path
+illustrates. Keep feature gates aligned with the actual operation and resolved applet policy.
 
-**❌ Don't forget firmware gates on asymmetric/password-change operations**
-```csharp
-// BAD — crashes on firmware < 5.6.0 with confusing APDU error
-await PutCredentialAsymmetricAsync(...);
-
-// GOOD — clear error message
-EnsureSupports(FeatureAsymmetric);
-await PutCredentialAsymmetricAsync(...);
-```
+Vendor manuals describe product behavior and pinned vendor encoders corroborate wire choices. Preserve
+that source strength: neither establishes conformance to a versioned normative applet specification.

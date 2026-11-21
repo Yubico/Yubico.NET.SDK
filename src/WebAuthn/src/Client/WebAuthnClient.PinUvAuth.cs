@@ -253,8 +253,8 @@ public sealed partial class WebAuthnClient
             or CtapStatus.PinAuthBlocked;
 
     /// <summary>
-    /// Maps a terminal CTAP PIN status onto the client's error vocabulary, so raw CTAP status
-    /// codes never reach high-level consumers.
+    /// Maps the PIN rejection statuses recognized by IsPinRejection onto the client's error vocabulary,
+    /// retaining the CTAP exception as the cause. Other token-acquisition failures are not mapped here.
     /// </summary>
     private static WebAuthnClientError MapPinRejection(CtapException ex) => ex.Status switch
     {

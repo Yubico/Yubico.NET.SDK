@@ -20,8 +20,11 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </summary>
 public enum VersionQualifierType
 {
+    /// <summary>An alpha release.</summary>
     Alpha = 0x00,
+    /// <summary>A beta release.</summary>
     Beta = 0x01,
+    /// <summary>A final release.</summary>
     Final = 0x02
 }
 
@@ -35,19 +38,19 @@ public class VersionQualifier
     /// <summary>
     ///     Initializes a new instance of the <see cref="VersionQualifier" /> class.
     ///     This constructor allows you to specify the firmware version, type, and iteration.
-    ///     The iteration must be a non-negative value and less than or equal to int.MaxValue.
+    ///     The iteration must be a non-negative value and less than or equal to uint.MaxValue.
     ///     If the firmware version is null, an <see cref="ArgumentNullException" /> will be thrown.
-    ///     If the iteration is negative or greater than int.MaxValue, an <see cref="ArgumentOutOfRangeException" /> will be
+    ///     If the iteration is negative or greater than uint.MaxValue, an <see cref="ArgumentOutOfRangeException" /> will be
     ///     thrown.
     /// </summary>
     /// <param name="firmwareVersion">The firmware version associated with this qualifier.</param>
-    /// <param name="type">The type of version qualifier (Alpha, Beta, Final).</param>
+    /// <param name="type">The qualifier type; unnamed numeric values are retained.</param>
     /// <param name="iteration">
     ///     The iteration number of the version qualifier, must be a non-negative value and less than or
-    ///     equal to int.MaxValue.
+    ///     equal to uint.MaxValue.
     /// </param>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="iteration"/> is outside 0..uint.MaxValue.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="firmwareVersion"/> is null.</exception>
     public VersionQualifier(FirmwareVersion firmwareVersion, VersionQualifierType type, long iteration)
     {
         if (iteration is < 0 or > uint.MaxValue)
@@ -79,15 +82,16 @@ public class VersionQualifier
     /// <summary>
     ///     Represents the type of version qualifier, such as Alpha, Beta, or Final.
     /// </summary>
+    /// <remarks>Unnamed values remain representable and are treated as non-final by device-info decoding.</remarks>
     public VersionQualifierType Type { get; }
 
     /// <summary>
-    ///     Represents the iteration number of the version qualifier.
+    ///     The iteration number in the inclusive range 0..uint.MaxValue, carried as a long.
     /// </summary>
     public long Iteration { get; }
 
     /// <summary>
-    ///     Returns a string that represents the current <see cref="VersionQualifier" />.
+    ///     Formats this qualifier as major.minor.patch.type.iteration, with the type in lowercase.
     /// </summary>
     public override string ToString() => $"{FirmwareVersion}.{Type.ToString().ToLowerInvariant()}.{Iteration}";
 

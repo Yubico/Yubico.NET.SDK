@@ -103,6 +103,8 @@ public class WebAuthnClientDataTests
     [Fact]
     public void Create_WithTopOrigin_AppendsTopOriginField()
     {
+        // Intentionally inconsistent crossOrigin/topOrigin values exercise only the low-level builder.
+        // The public ceremony methods reject this combination; it is not a valid ceremony example.
         // Arrange
         var origin = WebAuthnOrigin.TryParse("https://example.com", out var o) ? o : throw new InvalidOperationException();
         var challenge = new byte[] { 0xCC };

@@ -11,7 +11,7 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Prompts;
 public static class DeviceSelector
 {
     // Preserve this tool's SmartCard eligibility, including its reset menu. Management itself also supports HID.
-    // Discovery still scans all interfaces and retains complete composite devices; no per-interface dedup is needed.
+    // All-interface discovery retains complete composite devices before eligibility filtering.
     private static readonly SharedSelector Selector = new(
         [ConnectionType.SmartCard], NonInteractiveSelection.RequireChoice);
 
@@ -19,6 +19,6 @@ public static class DeviceSelector
     public static Task<DeviceSelection?> SelectDeviceAsync(CancellationToken cancellationToken = default) =>
         Selector.SelectDeviceAsync(cancellationToken);
 
-    /// <summary>Formats form factor for display.</summary>
+    /// <summary>Formats form factor; current Core product-flag retention can produce unnamed enum values.</summary>
     public static string FormatFormFactor(FormFactor formFactor) => FormFactorFormatter.Format(formFactor);
 }

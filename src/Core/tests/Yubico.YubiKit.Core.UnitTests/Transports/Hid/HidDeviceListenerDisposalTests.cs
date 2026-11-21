@@ -17,8 +17,8 @@ using Yubico.YubiKit.Core.Transports.Hid;
 namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid;
 
 /// <summary>
-/// Tests verifying that HidDeviceListener implementations lifecycle and disposal
-/// work correctly. These tests are CRITICAL for shutdown safety.
+/// Checks platform-listener status, repeated lifecycle calls, and disposal-task timing. Timing races below
+/// observe which task becomes terminal; they do not inspect that task's result or prove native callback drain.
 /// </summary>
 [Trait("Category", "Disposal")]
 public class HidDeviceListenerDisposalTests
@@ -229,8 +229,8 @@ public class HidDeviceListenerDisposalTests
     }
 
     /// <summary>
-    /// Verifies that Dispose completes within a reasonable timeout when listener is running.
-    /// If this test hangs, the cancellation logic is broken.
+    /// Checks that the disposal task wins a ten-second race after Start. A faulted task also wins;
+    /// Start may report Error, so this is not proof of successful registration or unregister.
     /// </summary>
     [Fact]
     public async Task Dispose_AfterStart_CompletesWithinTimeout()
@@ -255,7 +255,7 @@ public class HidDeviceListenerDisposalTests
     }
 
     /// <summary>
-    /// Verifies that Dispose completes quickly when listener was never started.
+    /// Checks that the disposal task wins a one-second race without Start; its result is not awaited here.
     /// </summary>
     [Fact]
     public async Task Dispose_NeverStarted_CompletesImmediately()

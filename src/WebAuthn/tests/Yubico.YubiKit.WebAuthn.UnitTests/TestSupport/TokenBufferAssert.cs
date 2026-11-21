@@ -19,9 +19,8 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 /// inspects afterwards.
 /// </summary>
 /// <remarks>
-/// A sentinel fill is used instead of random bytes so that "still holds the token" and "was
-/// zeroed" are unambiguous: a randomly generated buffer can contain zero bytes by chance, which
-/// would make a per-byte assertion flaky.
+/// A fixed nonzero sentinel gives tests a known populated starting state. Zeroed checks every byte;
+/// NotZeroed checks only that some nonzero data remains, not that every sentinel byte is intact.
 /// </remarks>
 internal static class TokenBufferAssert
 {
@@ -64,8 +63,8 @@ internal static class TokenBufferAssert
     }
 
     /// <summary>
-    /// Asserts the buffer still holds its sentinel pattern, so a later <see cref="Zeroed"/>
-    /// assertion is measuring a real transition rather than a buffer that was never populated.
+    /// Asserts that at least one byte is nonzero. Paired with a later <see cref="Zeroed"/> assertion,
+    /// this establishes a transition from populated to cleared, but does not check the exact sentinel pattern.
     /// </summary>
     public static void NotZeroed(byte[] buffer, string? because = null)
     {

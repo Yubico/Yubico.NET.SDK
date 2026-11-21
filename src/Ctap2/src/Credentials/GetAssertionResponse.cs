@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Ctap2.Credentials;
 
@@ -22,13 +23,27 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// <remarks>
 /// <para>
 /// CTAP2 getAssertion response structure:
-/// - 0x01: credential (map, optional) - selected credential
+/// - 0x01: credential (map) - selected credential; see <see cref="Credential"/> for version conditions
 /// - 0x02: authData (byte string) - authenticator data
 /// - 0x03: signature (byte string) - assertion signature
-/// - 0x04: user (map, optional) - user entity (discoverable credentials only)
+/// - 0x04: user (map, optional) - authenticator-supplied account information
 /// - 0x05: numberOfCredentials (uint, optional) - total credentials for first response
 /// - 0x06: userSelected (bool, optional) - user selected this credential
 /// - 0x07: largeBlobKey (byte string, optional) - large blob key
+/// </para>
+/// <para>
+/// CTAP 2.3 §6.2.2 also defines unsigned extension outputs at key 0x08. This decoder skips that
+/// field and other unknown outer fields; it does not retain a complete response envelope.
+/// </para>
+/// <para>
+/// Decoding leaves the input unchanged. The caller owns <see cref="LargeBlobKey"/> and
+/// <see cref="AuthenticatorDataRaw"/> and should zero them after use; <see cref="ExtensionOutputs"/>
+/// aliases the signed authenticator-data buffer. Keep the bytes intact through verification.
+/// Session disposal does not clear these buffers. Do not log secret extension data or keys.
+/// </para>
+/// <para>
+/// Parsing is not authentication. The RP must verify the signature and client-data challenge/origin,
+/// credential/account binding, RP ID, required UP/UV and counter policy before accepting the assertion.
 /// </para>
 /// </remarks>
 public sealed class GetAssertionResponse
@@ -37,8 +52,10 @@ public sealed class GetAssertionResponse
     /// Gets the credential descriptor for the selected credential.
     /// </summary>
     /// <remarks>
-    /// May be absent if only one credential matches (pre-CTAP2.1) or
-    /// if using non-discoverable credentials.
+    /// CTAP 2.0 §5.2 permits omission only when the request allowList contains exactly one descriptor,
+    /// not merely when one credential matches. CTAP 2.1/2.3 §6.2.2 require this field. This decoder has
+    /// no request/version context and exposes absence as null; it does not recover the requested ID.
+    /// A caller handling the 2.0 exception must retain the known singleton descriptor for association.
     /// </remarks>
     public PublicKeyCredentialDescriptor? Credential { get; }
 
@@ -50,18 +67,24 @@ public sealed class GetAssertionResponse
     /// <summary>
     /// Gets the raw authenticator data bytes.
     /// </summary>
-    public ReadOnlyMemory<byte> AuthenticatorDataRaw { get; }
+    public Memory<byte> AuthenticatorDataRaw => AuthenticatorData.RawData;
 
     /// <summary>
-    /// Gets the assertion signature.
+    /// Gets the received assertion signature bytes; their encoding depends on the credential algorithm.
     /// </summary>
     public ReadOnlyMemory<byte> Signature { get; }
 
     /// <summary>
-    /// Gets the user entity for discoverable credentials.
+    /// Gets the authenticator-supplied user entity, if present.
     /// </summary>
     /// <remarks>
-    /// Only present for discoverable credentials when user verification is performed.
+    /// CTAP 2.1/2.3 §6.2.2 require at least the opaque user ID for discoverable credentials and permit
+    /// a user entity for server-side credentials. The ID is not conditional on UV. Authenticators MUST
+    /// NOT return identifying name/displayName/icon fields without UV; this decoder passes modeled
+    /// name/displayName through rather than enforcing that privacy rule, and skips icon. Use the ID,
+    /// not display fields, for RP account binding and authorization. Names can be absent even with UV.
+    /// Treat the returned entity as native application account-picker data, not a browser-equivalent
+    /// result to forward wholesale to the RP. Your application owns which fields it discloses.
     /// </remarks>
     public PublicKeyCredentialUserEntity? User { get; }
 
@@ -69,46 +92,48 @@ public sealed class GetAssertionResponse
     /// Gets the total number of credentials matching the request.
     /// </summary>
     /// <remarks>
-    /// Only present in the first response when multiple credentials match.
-    /// Use GetNextAssertionAsync to retrieve additional assertions.
+    /// CTAP defaults an absent count to one; authenticator account selection can omit it even when
+    /// multiple accounts exist. When a valid first-response count N exceeds one, collect N−1 next
+    /// assertions promptly, without unrelated authenticator operations between calls. The SDK does
+    /// not reserve the sequence. The wire count is an unsigned 32-bit value.
+    /// Next-assertion responses omit the count.
     /// </remarks>
-    public int? NumberOfCredentials { get; }
+    public uint? NumberOfCredentials { get; }
 
     /// <summary>
     /// Gets whether the user explicitly selected this credential.
     /// </summary>
+    /// <remarks>Reports the received field, not an SDK account-picker result. CTAP defaults absence to false.</remarks>
     public bool? UserSelected { get; }
 
     /// <summary>
-    /// Gets the large blob key for this credential.
+    /// Gets the secret symmetric large-blob storage key from response key 0x07, if supplied.
     /// </summary>
-    public ReadOnlyMemory<byte>? LargeBlobKey { get; }
+    /// <remarks>Presence does not establish the required key length; the decoder does not check it.</remarks>
+    public Memory<byte>? LargeBlobKey { get; }
 
     /// <summary>
-    /// Gets the CBOR-encoded extension outputs, if any.
+    /// Gets the signed authenticator-data extension bytes, if the ED bit is set.
     /// </summary>
-    public ReadOnlyMemory<byte>? ExtensionOutputs { get; }
+    /// <remarks>These bytes are not the unsigned output map at response key 0x08, and are not verified here.</remarks>
+    public Memory<byte>? ExtensionOutputs => AuthenticatorData.Extensions;
 
     private GetAssertionResponse(
         PublicKeyCredentialDescriptor? credential,
         AuthenticatorData authenticatorData,
-        ReadOnlyMemory<byte> authenticatorDataRaw,
         ReadOnlyMemory<byte> signature,
         PublicKeyCredentialUserEntity? user,
-        int? numberOfCredentials,
+        uint? numberOfCredentials,
         bool? userSelected,
-        ReadOnlyMemory<byte>? largeBlobKey,
-        ReadOnlyMemory<byte>? extensionOutputs)
+        Memory<byte>? largeBlobKey)
     {
         Credential = credential;
         AuthenticatorData = authenticatorData;
-        AuthenticatorDataRaw = authenticatorDataRaw;
         Signature = signature;
         User = user;
         NumberOfCredentials = numberOfCredentials;
         UserSelected = userSelected;
         LargeBlobKey = largeBlobKey;
-        ExtensionOutputs = extensionOutputs;
     }
 
     /// <summary>
@@ -116,6 +141,12 @@ public sealed class GetAssertionResponse
     /// </summary>
     /// <param name="data">The CBOR-encoded response (excluding status byte).</param>
     /// <returns>The parsed response.</returns>
+    /// <remarks>
+    /// Uses a lax CBOR reader and checks authData/signature presence, but not signature nonemptiness,
+    /// version-dependent fields, all conditional rules or complete input consumption. CBOR errors can
+    /// raise <see cref="CborContentException"/>; missing required modeled fields raise
+    /// <see cref="InvalidOperationException"/>. Authenticator-data and entity checks can also fail.
+    /// </remarks>
     public static GetAssertionResponse Decode(ReadOnlyMemory<byte> data)
     {
         var reader = new CborReader(data, CborConformanceMode.Lax);
@@ -127,19 +158,33 @@ public sealed class GetAssertionResponse
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The parsed response.</returns>
+    /// <remarks>Consumes one response map using the supplied reader; the same model/verification limits apply.</remarks>
     public static GetAssertionResponse Decode(CborReader reader)
     {
-        var mapLength = reader.ReadStartMap();
+        ArgumentNullException.ThrowIfNull(reader);
+        byte[]? authDataRaw = null;
+        byte[]? largeBlobKey = null;
+        try
+        {
+            return DecodeCore(reader, ref authDataRaw, ref largeBlobKey);
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(authDataRaw);
+            CryptographicOperations.ZeroMemory(largeBlobKey);
+            throw;
+        }
+    }
+
+    private static GetAssertionResponse DecodeCore(CborReader reader, ref byte[]? authDataRaw, ref byte[]? largeBlobKey)
+    {
+        int? mapLength = reader.ReadStartMap();
 
         PublicKeyCredentialDescriptor? credential = null;
-        byte[]? authDataRaw = null;
-        AuthenticatorData? authData = null;
         byte[]? signature = null;
         PublicKeyCredentialUserEntity? user = null;
-        int? numberOfCredentials = null;
+        uint? numberOfCredentials = null;
         bool? userSelected = null;
-        byte[]? largeBlobKey = null;
-        ReadOnlyMemory<byte>? extensionOutputs = null;
 
         for (var i = 0; i < mapLength; i++)
         {
@@ -150,12 +195,8 @@ public sealed class GetAssertionResponse
                     credential = PublicKeyCredentialDescriptor.Parse(reader);
                     break;
                 case 2: // authData
+                    CryptographicOperations.ZeroMemory(authDataRaw);
                     authDataRaw = reader.ReadByteString();
-                    authData = AuthenticatorData.Parse(authDataRaw);
-                    if (authData.HasExtensions && authData.Extensions.HasValue)
-                    {
-                        extensionOutputs = authData.Extensions;
-                    }
                     break;
                 case 3: // signature
                     signature = reader.ReadByteString();
@@ -164,12 +205,13 @@ public sealed class GetAssertionResponse
                     user = PublicKeyCredentialUserEntity.Parse(reader);
                     break;
                 case 5: // numberOfCredentials
-                    numberOfCredentials = (int)reader.ReadUInt32();
+                    numberOfCredentials = reader.ReadUInt32();
                     break;
                 case 6: // userSelected
                     userSelected = reader.ReadBoolean();
                     break;
                 case 7: // largeBlobKey
+                    CryptographicOperations.ZeroMemory(largeBlobKey);
                     largeBlobKey = reader.ReadByteString();
                     break;
                 default:
@@ -180,31 +222,30 @@ public sealed class GetAssertionResponse
 
         reader.ReadEndMap();
 
-        if (authData is null || authDataRaw is null || signature is null)
+        if (authDataRaw is null || signature is null)
         {
             throw new InvalidOperationException("GetAssertion response missing required fields.");
         }
 
         return new GetAssertionResponse(
             credential,
-            authData,
-            authDataRaw,
+            AuthenticatorData.ParseOwned(authDataRaw),
             signature,
             user,
             numberOfCredentials,
             userSelected,
-            // byte[]? → ReadOnlyMemory<byte>? converts a null array to an EMPTY memory; keep absent as null.
-            largeBlobKey is null ? null : (ReadOnlyMemory<byte>?)largeBlobKey,
-            extensionOutputs);
+            largeBlobKey is null ? (Memory<byte>?)null : largeBlobKey.AsMemory());
     }
 
     /// <summary>
     /// Gets the credential ID from the credential descriptor or returns empty.
     /// </summary>
+    /// <remarks>Empty reports a missing descriptor, not a recovered request ID or a failed signature verification.</remarks>
     public ReadOnlyMemory<byte> GetCredentialId() => Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
 
     /// <summary>
     /// Gets the user handle from the user entity or returns empty.
     /// </summary>
+    /// <remarks>Empty reports absence of the entity, not proof that no account exists or authentication failed.</remarks>
     public ReadOnlyMemory<byte> GetUserHandle() => User?.Id ?? ReadOnlyMemory<byte>.Empty;
 }

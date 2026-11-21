@@ -24,13 +24,14 @@ namespace Yubico.YubiKit.WebAuthn.Preferences;
 public enum AttestationPreference
 {
     /// <summary>
-    /// No attestation statement required.
+    /// Remove attestation statements other than self attestation, using format "none" and an empty statement.
     /// </summary>
     None,
 
     /// <summary>
     /// Client may replace direct attestation with an anonymized version.
     /// </summary>
+    /// <remarks>This client currently passes the returned statement through without an anonymization service.</remarks>
     Indirect,
 
     /// <summary>
@@ -39,8 +40,12 @@ public enum AttestationPreference
     Direct,
 
     /// <summary>
-    /// Request enterprise attestation (requires authenticator and RP support).
+    /// Prefer enterprise attestation under an RP's enterprise policy.
     /// </summary>
+    /// <remarks>
+    /// This client currently passes the returned statement through but does not send the CTAP
+    /// enterprise-attestation parameter. Selecting this value does not request enterprise attestation.
+    /// </remarks>
     Enterprise
 }
 

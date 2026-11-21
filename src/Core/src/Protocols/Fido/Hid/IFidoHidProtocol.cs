@@ -14,7 +14,9 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 /// <remarks>
 ///     Implementations admit one full logical exchange at a time. An overlapping operation throws
 ///     <see cref="InvalidOperationException" /> immediately. A token is checked before entry; an exchange already
-///     in flight runs to completion to avoid stranding the device mid-transaction.
+///     in flight keeps receiving the original response. Caller cancellation can send CANCEL after a keep-alive;
+///     it does not interrupt a pending read or impose a deadline. Use request/response commands here, not the
+///     no-response CANCEL control command. A failed partial exchange requires connection recovery by the caller.
 /// </remarks>
 internal interface IFidoHidProtocol : IProtocol
 {
@@ -58,7 +60,8 @@ internal interface IFidoHidProtocol : IProtocol
     bool IsChannelInitialized { get; }
 
     /// <summary>
-    /// Gets the firmware version reported during channel initialization.
+    /// Gets the vendor-defined device version bytes reported during channel initialization, distinct from
+    /// the CTAPHID protocol version and CTAP specification edition.
     /// </summary>
     FirmwareVersion? FirmwareVersion { get; }
 }

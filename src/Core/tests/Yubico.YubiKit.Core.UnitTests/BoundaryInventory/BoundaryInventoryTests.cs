@@ -219,10 +219,10 @@ public class BoundaryInventoryTests
     {
         var root = BoundaryScanner.CoreSourceRoot();
         var sites = BoundaryScanner.ScanDirectory(root);
-        // The Windows interop cleanup removed 11 unused imports; other site counts did not change.
-        Assert.Equal(234, sites.Count);
+        // Status-bearing macOS registry lookup replaces one import with three; other site counts are unchanged.
+        Assert.Equal(236, sites.Count);
         Assert.Equal(sites.Count, sites.Select(site => site.Id).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(130, sites.Count(site => site.Kind == "native-import"));
+        Assert.Equal(132, sites.Count(site => site.Kind == "native-import"));
         Assert.Equal(46, sites.Count(site => site.Kind == "blocking-wait"));
         Assert.Equal(22, sites.Count(site => site.Kind == "scheduling"));
         Assert.Equal(22, sites.Count(site => site.Kind == "dispatch-gap"));

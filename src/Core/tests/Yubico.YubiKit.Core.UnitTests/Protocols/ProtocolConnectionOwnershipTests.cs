@@ -33,9 +33,7 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols;
 ///     </para>
 ///     <para>
 ///         <see cref="Devices.ConnectionOwnershipContractTests" /> already pins this for
-///         <c>PcscProtocol</c>. The HID protocols had no equivalent, which made the rule silently
-///         reversible for them — exactly the kind of one-line semantic regression a large merge can
-///         introduce without turning a single test red. These close that gap.
+///         <c>PcscProtocol</c>. These HID cases observe the supplied connection's DisposeCount directly.
 ///     </para>
 /// </remarks>
 public class ProtocolConnectionOwnershipTests

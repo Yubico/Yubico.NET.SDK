@@ -19,6 +19,7 @@ namespace Yubico.YubiKit.Oath;
 /// </summary>
 internal static class OathConstants
 {
+    internal const int AccessKeyLength = 16;
     // TLV tags for credential data
     internal const byte TagName = 0x71;
     internal const byte TagNameList = 0x72;
@@ -30,6 +31,7 @@ internal static class OathConstants
     internal const byte TagProperty = 0x78;
     internal const byte TagVersion = 0x79;
     internal const byte TagImf = 0x7A;
+    internal const byte TagAlgorithm = 0x7B;
     internal const byte TagTouch = 0x7C;
 
     // Instruction bytes for commands
@@ -56,5 +58,6 @@ internal static class OathConstants
     internal const int DefaultDigits = 6;
     internal const int DefaultImf = 0;
     internal const int ChallengeLength = 8;
+    // SDK storage-padding threshold, not an HMAC minimum key length or entropy requirement.
     internal const int HmacMinimumKeySize = 14;
 }

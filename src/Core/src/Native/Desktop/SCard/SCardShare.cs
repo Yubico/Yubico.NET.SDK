@@ -31,8 +31,8 @@ internal enum SCARD_SHARE
     SHARED = 2,
 
     /// <summary>
-    ///     This application is allocating the reader for its private use, and will be controlling
-    ///     it directly. No other applications are allowed access to it.
+    ///     Direct reader control. Windows allocates the reader exclusively; pcsc-lite permits shared
+    ///     direct mode. This value does not supply one portable reader-exclusion policy.
     /// </summary>
     DIRECT = 3
 }

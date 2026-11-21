@@ -19,7 +19,8 @@ namespace Yubico.YubiKit.Management.Backend;
 
 /// <summary>
 /// Backend implementation for Management operations over OTP HID (8-byte feature reports).
-/// Encodes operations as OTP slot commands with CRC validation.
+/// Delegates OTP slot commands to the Core protocol, which frames the feature reports and generates outbound CRCs.
+/// Inbound CRC validation is command-specific; device-information reads use Core's device-information reader.
 /// </summary>
 internal sealed class OtpBackend(IOtpHidProtocol otpProtocol) : IManagementBackend
 {

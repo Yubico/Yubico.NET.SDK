@@ -25,7 +25,8 @@ namespace Yubico.YubiKit.Core.Credentials;
 ///     the immutable, shared no-op instance used when no prompt or context was supplied. A successful request is
 ///     emitted at most once, and only that request can be resolved. A request callback exception propagates and
 ///     terminally disables the handle without emitting resolution. A resolution callback exception propagates when
-///     there is no primary operation exception; otherwise it is logged and the primary exception is preserved.
+///     there is no primary operation exception; otherwise the application-supplied exception object is logged
+///     and the primary exception is preserved. Providers may render its message and associated details.
 /// </remarks>
 internal sealed class UserPresenceNotification
 {
@@ -44,9 +45,6 @@ internal sealed class UserPresenceNotification
         /// <summary>The notification is terminal and cannot be requested or resolved again.</summary>
         Terminal
     }
-
-    /// <summary>Writes cleanup callback failures without adding a public logger dependency.</summary>
-    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<UserPresenceNotification>();
 
     /// <summary>The application-owned callback, or <c>null</c> only for <see cref="None" />.</summary>
     private readonly IUserPresencePrompt? _prompt;
@@ -161,10 +159,31 @@ internal sealed class UserPresenceNotification
         }
         catch (Exception ex) when (primaryException is not null)
         {
-            Logger.LogWarning(
-                ex,
-                "User-presence resolution callback failed while preserving primary {ExceptionType}",
-                primaryException.GetType().Name);
+            TryAttachDiagnostic(primaryException, "UserPresenceResolutionException", ex);
+            try
+            {
+                // Logger creation is also fallible; keep it within the secondary failure boundary.
+                YubiKitLogging.CreateLogger<UserPresenceNotification>().LogWarning(
+                    ex,
+                    "User-presence resolution callback failed while preserving primary {ExceptionType}",
+                    primaryException.GetType().Name);
+            }
+            catch (Exception loggingFailure)
+            {
+                TryAttachDiagnostic(primaryException, "UserPresenceLoggingException", loggingFailure);
+            }
+        }
+    }
+
+    private static void TryAttachDiagnostic(Exception primary, string key, Exception secondary)
+    {
+        try
+        {
+            primary.Data[key] = secondary;
+        }
+        catch (Exception)
+        {
+            // Exception.Data can be overridden or read-only. Diagnostic attachment is best effort.
         }
     }
 

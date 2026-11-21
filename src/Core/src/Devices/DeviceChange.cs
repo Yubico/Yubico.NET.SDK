@@ -18,7 +18,8 @@ namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>A notification from a device monitoring subscription.</summary>
 /// <remarks>The set of derived records is closed: <see cref="DeviceAdded"/>, <see cref="DeviceRemoved"/>,
-/// <see cref="DeviceUpdated"/> and <see cref="SnapshotComplete"/>. A switch over those four is exhaustive.</remarks>
+/// <see cref="DeviceUpdated"/> and <see cref="SnapshotComplete"/>. A switch over those four covers the record kinds.
+/// Device-bearing records retain the published object; its last-known metadata may change after delivery.</remarks>
 public abstract record DeviceChange
 {
     private protected DeviceChange(long revision) => Revision = revision;

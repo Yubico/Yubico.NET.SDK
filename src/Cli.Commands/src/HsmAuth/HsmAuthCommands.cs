@@ -295,6 +295,8 @@ public sealed class HsmAuthCredentialsAddCommand : YkCommandBase<HsmAuthCredenti
                 return ExitCode.GenericError;
             }
 
+            using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
             await using var session = await deviceContext.Device.CreateHsmAuthSessionAsync();
 
             if (settings.DerivationPassword is not null)
@@ -303,7 +305,7 @@ public sealed class HsmAuthCredentialsAddCommand : YkCommandBase<HsmAuthCredenti
 
                 await session.PutCredentialDerivedAsync(
                     mgmtKey, settings.Label, derivationPassword.Memory,
-                    credentialPassword.Memory, settings.Touch);
+                    password, settings.Touch);
 
                 OutputHelpers.WriteSuccess($"Derived credential '{settings.Label}' stored successfully.");
             }
@@ -316,7 +318,7 @@ public sealed class HsmAuthCredentialsAddCommand : YkCommandBase<HsmAuthCredenti
                 {
                     await session.PutCredentialSymmetricAsync(
                         mgmtKey, settings.Label, keyEnc, keyMac,
-                        credentialPassword.Memory, settings.Touch);
+                        password, settings.Touch);
 
                     OutputHelpers.WriteSuccess($"Symmetric credential '{settings.Label}' stored.");
                     OutputHelpers.WriteHex("K-ENC (generated)", keyEnc);
@@ -399,10 +401,12 @@ public sealed class HsmAuthCredentialsGenerateCommand : YkCommandBase<HsmAuthCre
                 return ExitCode.GenericError;
             }
 
+            using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
             await using var session = await deviceContext.Device.CreateHsmAuthSessionAsync();
 
             await session.GenerateCredentialAsymmetricAsync(
-                mgmtKey, settings.Label, credentialPassword.Memory, settings.Touch);
+                mgmtKey, settings.Label, password, settings.Touch);
 
             OutputHelpers.WriteSuccess($"Asymmetric credential '{settings.Label}' generated on device.");
             OutputHelpers.WriteInfo("Private key was generated on-device and never leaves the YubiKey.");

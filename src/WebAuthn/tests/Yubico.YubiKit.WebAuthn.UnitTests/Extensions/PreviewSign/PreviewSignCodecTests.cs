@@ -25,8 +25,9 @@ using WebAuthnPreviewSign = Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 
 /// <summary>
-/// Tests for PreviewSignCodec - validates extension input/output wire-up per Phase 8 spec.
+/// Tests previewSign draft v4 §10.2.1 input translation and output extraction through PreviewSignCodec.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignCodecTests
 {
     [Fact(Timeout = 5000)]
@@ -86,11 +87,94 @@ public class PreviewSignCodecTests
         reader.ReadEndMap();
     }
 
+    [Theory]
+    [InlineData(true, true, 0)]
+    [InlineData(false, false, 0)]
+    [InlineData(true, false, 0)]
+    [InlineData(false, true, 0)]
+    [InlineData(true, true, 1)] // trailing inner data
+    [InlineData(true, true, 2)] // inner attStmt is not a map
+    public void RegistrationExtraction_BothRoutesHandleTheSameWireResponse(bool signed, bool unsigned, int malformation)
+    {
+        using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        ECPoint point = ecdsa.ExportParameters(false).Q;
+        byte[] sec1 = [4, .. Assert.IsType<byte[]>(point.X), .. Assert.IsType<byte[]>(point.Y)];
+        var seed = new CoseArkgP256SeedKey(new CoseAlgorithm(-65700), CoseAlgorithm.Es256, sec1, sec1);
+        byte[] seedKey = seed.Encode();
+        byte[] outerAuthData = signed
+            ? [.. new byte[32], 0xC5, .. new byte[4 + 16], 0, 1, 0x2A, .. seedKey,
+                .. Convert.FromHexString("A16B707265766965775369676EA10328")]
+            : [.. new byte[32], 0x45, .. new byte[4 + 16], 0, 1, 0x2A, .. seedKey];
+
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(unsigned ? 4 : 3);
+        writer.WriteInt32(1);
+        writer.WriteTextString("none");
+        writer.WriteInt32(2);
+        writer.WriteByteString(outerAuthData);
+        writer.WriteInt32(3);
+        writer.WriteEncodedValue([0xA0]);
+        if (unsigned)
+        {
+            byte[] inner = BuildAttestationObject(seedKey, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, []);
+            if (malformation == 1) inner = [.. inner, 0xF5];
+            if (malformation == 2) inner[^1] = 0x80; // Replace {} with [].
+
+            writer.WriteInt32(6);
+            writer.WriteStartMap(1);
+            writer.WriteTextString("previewSign");
+            writer.WriteStartMap(1);
+            writer.WriteInt32(7);
+            writer.WriteByteString(inner);
+            writer.WriteEndMap();
+            writer.WriteEndMap();
+        }
+        writer.WriteEndMap();
+
+        var response = MakeCredentialResponse.Decode(writer.Encode());
+        var authData = WebAuthnAuthenticatorData.Decode(response.AuthenticatorDataRaw);
+        bool extracted = PreviewSignCbor.TryExtractGeneratedKey(response, out var ctapKey);
+        WebAuthnPreviewSign.PreviewSignRegistrationOutput? ExtractWebAuthn() =>
+            PreviewSignCodec.ParseRegistrationOutput(authData, response.UnsignedExtensionOutputs);
+
+        if (signed && unsigned && malformation == 0)
+        {
+            Assert.True(extracted);
+            Assert.NotNull(ctapKey);
+            var webAuthn = ExtractWebAuthn();
+            Assert.NotNull(webAuthn);
+            Assert.Equal(new CoseAlgorithm(-9), ctapKey.DerivedKeyAlgorithm);
+            Assert.Equal(ctapKey.DerivedKeyAlgorithm, webAuthn.GeneratedKey.Algorithm);
+            Assert.True(ctapKey.KeyHandle.IsEmpty);
+            Assert.True(webAuthn.GeneratedKey.KeyHandle.IsEmpty);
+            Assert.Equal(sec1, ctapKey.BlindingPublicKey.ToArray());
+            Assert.IsType<CoseArkgP256SeedKey>(webAuthn.GeneratedKey.PublicKey);
+
+            var innerAuth = webAuthn.GeneratedKey.AttestationObject.AuthenticatorData;
+            var innerCredential = Assert.IsType<AttestedCredentialData>(innerAuth.AttestedCredentialData);
+            var dto = new PreviewSignRegistrationOutput(innerCredential.CredentialId,
+                innerCredential.CredentialPublicKey, webAuthn.GeneratedKey.Algorithm.Value);
+            var dtoKey = Assert.IsType<PreviewSignGeneratedKey>(dto.TryGetGeneratedKey());
+            Assert.Equal(ctapKey.DerivedKeyAlgorithm, dtoKey.DerivedKeyAlgorithm);
+            Assert.True(dtoKey.KeyHandle.IsEmpty);
+            return;
+        }
+
+        Assert.False(extracted);
+        Assert.Null(ctapKey);
+        if (!signed)
+            Assert.Null(ExtractWebAuthn());
+        else if (!unsigned)
+            Assert.Equal(WebAuthnClientErrorCode.InvalidState, Assert.Throws<WebAuthnClientError>(() => ExtractWebAuthn()).Code);
+        else
+            Assert.Throws<CborContentException>(() => ExtractWebAuthn());
+    }
+
     [Fact(Timeout = 5000)]
     public void PreviewSign_Registration_OutputPopulatedFromUnsignedAttObj()
     {
         // Arrange - mock authenticator data with previewSign extension containing algorithm + flags in authData
-        // and attestation object in unsignedExtensionOutputs (per Fix #6b)
+        // and the inner generated-key attestation object in unsignedExtensionOutputs.
         var innerCredentialId = RandomNumberGenerator.GetBytes(32);
         var publicKeyBytes = BuildCoseEc2PublicKey(CoseAlgorithm.Es256);
         var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, innerCredentialId);
@@ -118,7 +202,7 @@ public class PreviewSignCodecTests
 
         var parsedAuthData = WebAuthnAuthenticatorData.Decode(authData);
 
-        var unsignedExtensionOutputs = new Dictionary<string, ReadOnlyMemory<byte>>
+        var unsignedExtensionOutputs = new Dictionary<string, Memory<byte>>
         {
             ["previewSign"] = unsignedExtension.Encode()
         };
@@ -200,7 +284,7 @@ public class PreviewSignCodecTests
 
     private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags, byte[] credId)
     {
-        // Build a minimal inner attestation object with the previewSign extension in authData, in the
+        // Build an inner attestation fixture with the previewSign extension in authData, in the
         // on-the-wire shape: the previewSign unsigned-extension-output wraps an attestation object whose
         // keys are CTAP-style integers ({1: fmt, 2: authData, 3: attStmt}), not WebAuthn-style text
         // strings ({"fmt", "authData", "attStmt"}). A text-keyed fixture would not exercise the decoder.
@@ -230,7 +314,9 @@ public class PreviewSignCodecTests
         // publicKey (COSE_Key)
         authDataList.AddRange(publicKey);
 
-        // Extensions: previewSign with flags AND algorithm (both required per decoder)
+        // This inner fixture contains flags and an extra algorithm field. Draft v4 describes flags
+        // here and the algorithm in the outer registration output; both are not required here by the
+        // decoder. A minimal flags-only inner fixture remains a separate test-coverage gap.
         var extensionWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
         extensionWriter.WriteStartMap(1);
         extensionWriter.WriteTextString("previewSign");

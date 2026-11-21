@@ -97,7 +97,7 @@ v2 location: `src/Piv/src/**`
 
 - **Feature/API**: Typed PIV data object model — `CardholderUniqueId` (CHUID), `CardCapabilityContainer` (CCC), `AdminData`, `KeyHistory`, `PinProtectedData`, base `PivDataObject` with `Encode()`/`Decode()`/`TryDecode()`
   **v2 status**: Different shape — `DataObject.cs` holds tag constants and `DataObjectProtocol.cs` provides raw GET/PUT exchanges. Typed `DataObjects.CardholderUniqueId`, `CardCapabilityContainer`, `AdminData`, and `KeyHistory` models provide parsed field access without the V1 `PivDataObject` base-class hierarchy; PIN-protected management material is handled by session workflows rather than a public `PinProtectedData` model.
-  **User impact**: Use the typed models and session accessors for CHUID, CCC, admin data, and key history. Adapt code relying on the V1 base-class hierarchy; use PIN-only session workflows for protected management keys.
+  **User impact**: Use the typed models/session accessors for their fixed provisioning shapes and raw objects for other encodings. Adapt the V1 base-class hierarchy; use session workflows for protected keys. ADMIN timestamp byte order differs from Python; coordinate cross-tool writes.
   **Severity**: Minor (API shape change) | **Confidence**: High
 
 - **Feature/API**: MSROOTS support (`WriteMsroots`, `WriteMsrootsStream`, `ReadMsroots`, `ReadMsrootsStream`, `DeleteMsroots`) for Windows minidriver root-cert bundle storage
@@ -114,14 +114,18 @@ v2 location: `src/Piv/src/**`
   **Severity**: Cosmetic | **Confidence**: Medium
 
 - **Feature/API**: Certificate compression default behavior
-  **v2 status**: Behavior-changed — v1 only compresses when `compress: true` is explicitly passed; v2's `StoreCertificateAsync` auto-compresses any cert > 1856 bytes even when `compress: false` is passed. Format-compatible (both use GZip), arguably an improvement, but differs from the literal v1 contract.
+  **v2 status**: Behavior-changed — select `CertificateCompression.Always` for GZip, or the default `Automatic` to use GZip above 1856 DER bytes. The current enum has no force-uncompressed mode. This is SDK policy based on a recommended PIV length, not a hard device maximum; the enum replaces the earlier preview boolean.
   **Severity**: Minor | **Confidence**: High
 
 - **Feature/API**: Non-throwing `Try*` family — `TryVerifyPin`, `TryChangePin`, `TryChangePuk`, `TryResetPin`, `TryAuthenticateManagementKey`, `TryChangeManagementKey`, `TryReadObject<T>` with `out int? retriesRemaining`
   **v2 status**: Behavior-changed — only throwing variants exist; retry info surfaced via `InvalidPinException.RetriesRemaining` or `GetPinMetadataAsync`/`GetPukMetadataAsync`. Deliberate async/exception-first style shift, not a capability loss.
   **Severity**: Minor | **Confidence**: Medium
 
-**Verified improvement, no gap**: key generation/import (all algorithms incl. Ed25519/X25519), all 20 retired slots, Move/Delete key, AttestKey, GetMetadata, management-key ops (incl. touch policy, AES/3DES), PIN/PUK verify/change/unblock/retry-count, biometric UV + temporary PIN — v2 additionally adds shared `IUserPresencePrompt` touch notification and algorithm-auto-detecting `SignOrDecryptAsync`.
+**Source-present surface**: key generation/import (including firmware-gated Ed25519/X25519), 20 retired slots,
+Move/Delete, attestation, metadata, AES/Triple-DES management, PIN/PUK operations and biometric UV/temporary PIN.
+Shared `IUserPresencePrompt` and metadata-driven private-key operations are also present. These are source/API
+observations; product-profile, Bio, transport and platform qualification remain separate. See the PIV guide
+for reset/F9 scope, partial PIN-only transitions, crypto formats and result ownership.
 
 ---
 
@@ -200,15 +204,15 @@ v1 location: `Yubico.YubiKey/src/Yubico/YubiKey/Otp/**`
 v2 location: `src/YubiOtp/src/**`
 
 - **Feature/API**: Static password from human-readable string with keyboard-layout translation (`SetPassword(ReadOnlyMemory<char>)`, `WithKeyboard(KeyboardLayout)`, `GeneratePassword(...)`)
-  **v2 status**: Missing from the YubiOtp public surface — v2's `StaticPasswordSlotConfiguration` only takes raw scan-code bytes. `HidCodeTranslator`/`KeyboardLayout` still exist under Core but are wired only into the `OtpTool` CLI, not the public session API.
-  **Severity**: Major | **Confidence**: High
+  **v2 status**: String/layout construction is restored through `StaticPasswordSlotConfiguration(string, KeyboardLayout)`; generation helpers remain absent from the library. The string is immutable and cannot be cleared by disposal. The raw overload copies already translated scan codes, not UTF-8 bytes. OtpTool's static command currently passes UTF-8 bytes to that raw overload and ignores its layout option; use the public string/layout constructor instead.
+  **Severity**: Minor for missing generation; sample encoding defect | **Confidence**: High
 
 - **Feature/API**: Yubico-OTP-algorithm challenge-response (config + calculate) and TOTP-style challenge convenience (`UseYubiOtp()`, `UseTotp()`, `WithPeriod()`, `GetCode()`)
-  **v2 status**: Missing — v2's `YubiOtpSession` only exposes `CalculateHmacSha1Async`; no Yubico-OTP-algorithm challenge-response path at all.
-  **Severity**: Major | **Confidence**: High
+  **v2 status**: AES challenge-response is restored through `YubicoOtpChallengeResponseSlotConfiguration` and `CalculateYubicoOtpAsync`: exact 16-byte key, six-byte challenge, 16-byte encrypted Yubico ticket. Repeated challenges need not produce equal tickets; the application verifies decrypted challenge, CRC and replay policy. TOTP time/period/truncation/code conveniences remain absent; OtpTool's `--totp` does not implement them. See the [HMAC length convention](../../src/YubiOtp/README.md#calculate-an-hmac-sha1-response) before building a time-based application.
+  **Severity**: Minor for remaining convenience gap | **Confidence**: High
 
 - **Feature/API**: Touch-required notification callback during challenge-response (`UseTouchNotifier(Action)`)
-  **v2 status**: Restored through the cross-applet `SessionCreationOptions.UserPresencePrompt`/`IUserPresencePrompt` contract for both HMAC-SHA1 and Yubico OTP challenge-response. OTP HID reports `DeviceWaiting` from live transport status; the smart-card path uses known slot policy.
+  **v2 status**: Restored through `SessionCreationOptions.UserPresencePrompt`/`IUserPresencePrompt` for both calculations. OTP HID reports `DeviceWaiting` from live status; SmartCard emits `PolicyRequires` from a cached keyboard-trigger indicator, not a verified read-back of challenge-response `RequireTouch`. Unknown/non-triggered SmartCard status stays silent.
   **Severity**: Minor | **Confidence**: Medium
 
 - **Feature/API**: Reading back a programmed NDEF tag over NFC (`ReadNdefTag()`)
@@ -216,11 +220,11 @@ v2 location: `src/YubiOtp/src/**`
   **Severity**: Minor | **Confidence**: High
 
 - **Feature/API**: NDEF URI well-known-prefix compression and text language-code/UTF-16 configuration
-  **v2 status**: Degraded — `SetNdefConfigurationAsync` has no prefix-compression, language-code, or UTF-16 parameters, risking overflow of the ~54-byte NDEF payload for long URIs that fit in v1.
+  **v2 status**: URI prefix compression is present and automatic (longest case-sensitive ordinal table match). URI remainder allows 53 UTF-8 bytes; text allows 51 UTF-8 bytes with fixed English (`en`) metadata. Arbitrary language and UTF-16 options remain missing. Null sends an all-zero disable request, distinct from an empty URI/text configuration; verify on-tap effects on the target NFC-capable key. No read-back API is supplied.
   **Severity**: Minor | **Confidence**: Medium
 
 - **Feature/API**: "Use device serial number as Yubico OTP public ID" convenience (`UseSerialNumberAsPublicId`)
-  **v2 status**: Missing — no serial-derived helper anywhere.
+  **v2 status**: Missing from the library configuration API. OtpTool contains a serial-to-six-byte-public-ID helper; callers can implement that convention explicitly using raw public-ID bytes (the key emits modhex characters).
   **Severity**: Minor | **Confidence**: High
 
 - **Feature/API**: In-builder cryptographically random key/private-ID/IMF generation helpers (`GenerateKey`, `GeneratePrivateId`)
@@ -228,9 +232,16 @@ v2 location: `src/YubiOtp/src/**`
   **Severity**: Minor | **Confidence**: Medium
 
 - **Feature/API**: Exact-size key validation for HMAC-SHA1/Yubico OTP keys (throws on wrong length)
-  **v2 status**: Behavior-changed — v2 silently SHA-1-hashes keys >20 bytes and zero-pads keys <20 bytes instead of throwing.
-  **User impact**: A caller passing a wrong-length key gets silently different key material programmed onto the device instead of an immediate error — can go undetected until a production challenge-response mismatch.
+  **v2 status**: Restored — HMAC keys must be exactly 20 bytes and AES keys exactly 16; wrong lengths are rejected before device I/O, not silently normalized. Configuration objects copy inputs and must be disposed; callers separately clear source buffers and successful calculation output. Invalid access-code preflight still has internal temporary-buffer cleanup gaps.
+  **Severity**: No key-normalization gap; cleanup limitation remains | **Confidence**: High
+
+- **Feature/API**: HOTP initial moving factor and full keyboard scan-map programming
+  **v2 status**: Present with implementation limitations. Nonzero HOTP IMF is scaled by 65,536 instead of the vendor protocol's 16; use the default zero and synchronize the verifier. `SetScanMapAsync` enforces 38 bytes versus the vendor's 45-entry map; do not truncate a map to fit. Type-level firmware checks also do not validate every selected flag or password length.
   **Severity**: Major | **Confidence**: High
+
+- **Feature/API**: Slot flag updates and access-code retention
+  **v2 status**: Updates send complete masked values, not patches. Keep intended flags in application state. Supply `currentAccessCode` to authenticate and repeat it as the new `accessCode` to retain protection; omission sends zeros where firmware allows removal. OtpTool does not preserve this protection automatically. Legacy code-change restrictions are not fully gated by the SDK.
+  **Severity**: Manual migration required | **Confidence**: High
 
 - **Feature/API**: FIPS-mode query (`QueryFipsModeCommand`)
   **v2 status**: Missing from YubiOtp session — not verified whether it moved to Management.
@@ -240,7 +251,7 @@ v2 location: `src/YubiOtp/src/**`
   **v2 status**: Degraded/Missing at YubiOtp-session level — not verified against `src/Management`.
   **Severity**: Minor | **Confidence**: Low (unverified relocation)
 
-**Verified improvement, no gap**: slot configuration flags, config-state, swap/delete/update operations all present with clearer typed enums (`ConfigFlag`/`TicketFlag`/`ExtendedFlag`), plus v2 adds SmartCard transport in addition to HID.
+**Present surfaces**: typed flags, cached config-state, and swap/delete/update operations. SmartCard and OTP HID sessions are supported, but this does not establish per-command device parity across USB CCID/NFC/HID. Use explicit OTP HID for the documented USB challenge recipe. Configured-bit/response-length tests alone do not prove keyboard output or cryptographic correctness. FIPS and legacy-command relocation above remains unverified.
 
 ---
 
@@ -279,6 +290,15 @@ v2 location: `src/YubiHsm/src/**`
 
 Scope confirmed identical on both branches: YubiHSM Auth *applet* operations only (credential put/delete/list, management-key ops, session-key derivation) — not full HSM connector/object management.
 
+**Current reading of this historical section:** enrollment, deletion, management-key changes, CALCULATE
+and password changes translate retry-count status words to `HsmAuthRetryException`. `GetChallengeAsync`
+uses general `ApduException` errors, including password failures. Retry loops belong to the application.
+Initialization resolves the SELECT applet version or a caller override; `ResetAsync` reselects while
+retaining that policy. The SDK exposes password change behind its 5.8.0 gate. Development-build metadata
+alone provides no operation-level qualification; use the actual applet response and operation evidence.
+`SessionKeys` disposal clears its owned arrays; callers clear input buffers and additional copies separately.
+The entries below retain the earlier analysis and subsequent remediation history.
+
 - **Feature/API**: Interactive `KeyCollector` + auto-retrying `Try*` overloads (`TryAddCredential`, `TryDeleteCredential`, `TryChangeManagementKey`, `TryGetAes128SessionKeys`, `TryGetEccP256SessionKeys`)
   **v2 status**: Missing — every operation in v2 is single-attempt with no retry loop.
   **Severity**: Major | **Confidence**: High
@@ -297,7 +317,7 @@ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations onl
   **Severity**: No remaining gap | **Confidence**: High
 
 - **Feature/API**: Explicit live application-version query (`GetApplicationVersion()`)
-  **v2 status**: Missing as public method — version is cached from SELECT response, refreshed only on `ResetAsync`; functionally equivalent for normal use via `FirmwareVersion`, but no on-demand re-check.
+  **v2 status**: Missing as public method — `FirmwareVersion` exposes the session's resolved SELECT/override policy. Reset reselects the applet and retains that policy; create a new session to resolve it again.
   **Severity**: Cosmetic | **Confidence**: Medium
 
 - **Feature/API**: Strongly-typed reusable credential value objects (`Credential`, `CredentialWithSecrets`, `Aes128CredentialWithSecrets`, `EccP256CredentialWithSecret`)
@@ -308,7 +328,11 @@ Scope confirmed identical on both branches: YubiHSM Auth *applet* operations onl
   **v2 status**: **Regressed, now fixed (2026-08-31).** v2 originally shipped these as `string`, which callers cannot wipe — the only module in the SDK still doing so after the `75353fd1` Fido2/OpenPgp/Oath sweep, which missed `src/YubiHsm/` because it landed seven days earlier. Nine members now take UTF-8 `ReadOnlyMemory<byte>`, restoring v1 parity. Padding and PBKDF2 behavior are unchanged. The parameters are named plainly (`credentialPassword` and friends), with the UTF-8 and ownership contracts documented on each `<param>`.
   **Severity**: Major (while it lasted) | **Confidence**: High
 
-**Verified improvement, no gap**: `ChangeCredentialPasswordAsync`/`ChangeCredentialPasswordAdminAsync` (fw 5.8.0+), `GenerateCredentialAsymmetricAsync` (on-device EC keygen), `PutCredentialDerivedAsync` (PBKDF2-derived symmetric credential), `SessionKeys` as `IDisposable` with zeroization — all new capabilities beyond v1.
+**Implemented SDK additions beyond v1**: `ChangeCredentialPasswordAsync`/`ChangeCredentialPasswordAdminAsync`
+(5.8.0 SDK gate), `GenerateCredentialAsymmetricAsync` (on-device EC keygen), `PutCredentialDerivedAsync`
+(PBKDF2-derived symmetric credential), and disposable `SessionKeys` with owned-array clearing. These surface
+additions have their documented version and ownership conditions; qualify interoperability through the
+intended HSM enrollment and handshake workflow.
 
 ---
 
@@ -350,6 +374,10 @@ v2 location: `src/Management/src/**`
   **Severity**: Blocker (for that segment) | **Confidence**: High
 
 - **Exception hierarchy**: v1 has 10 dedicated exception types (`ApduException`, `TlvException`, `SCardException`, `PlatformApiException`, `Ctap2DataException`, `Fido2Exception`, `KeyboardConnectionException`, `MalformedYubiKeyResponseException`, `SecureChannelException` ×2). v2 has 8 (`BadResponseException`, `PlatformInteropException`, `SCardException`, `PlatformApiException`, `ApduException`, `CtapException`, `InvalidPinException`, `WebAuthnClientError`). No v2 equivalent for `TlvException`, `KeyboardConnectionException`, or either `SecureChannelException`; `Fido2Exception`/`Ctap2DataException`'s two-level hierarchy collapses into one flat `CtapException`. SecurityDomain, YubiOtp, OpenPgp, Management, YubiHsm, and Oath have **zero** dedicated exception types.
+  **Current OpenPGP qualification**: The zero-type statement above describes the historical snapshot.
+  Current `OpenPgpInvalidPinException` exposes nullable retry counts for selected VERIFY, CHANGE and
+  Reset-Code failures. Both User VERIFY references use the User counter. Preserve the status and diagnose
+  ambiguity before retrying. Other statuses retain general APDU errors. See the [OpenPGP guide](../../src/OpenPgp/README.md).
   **User impact**: Consumers catching specific v1 exception types lose that precision and fall back to broad/generic catching.
   **Severity**: Major | **Confidence**: High
 

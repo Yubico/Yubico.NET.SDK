@@ -56,17 +56,17 @@ public static class DeviceInfoMenu
             OutputHelpers.WriteKeyValue("Part Number", info.PartNumber);
         }
 
-        // Status flags
+        // IsFips is a manufacturing indicator, not the active mode implied by the display label below.
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]Status[/]");
 
         if (info.IsFips)
         {
-            OutputHelpers.WriteKeyValueMarkup("FIPS Mode", "[green]Yes[/]");
+            OutputHelpers.WriteKeyValueMarkup("FIPS manufacturing indicator", "[green]Yes[/]");
         }
         else
         {
-            OutputHelpers.WriteKeyValue("FIPS Mode", "No");
+            OutputHelpers.WriteKeyValue("FIPS manufacturing indicator", "No");
         }
 
         if (info.IsSky)
@@ -93,7 +93,7 @@ public static class DeviceInfoMenu
             OutputHelpers.WriteCapabilities("Enabled", info.NfcEnabled);
         }
 
-        // FIPS Capabilities (if applicable)
+        // Current Core FIPS-tag mapping is incorrect; displayed masks cannot establish application approval.
         if (info.FipsCapabilities != DeviceCapabilities.None)
         {
             AnsiConsole.WriteLine();
@@ -137,7 +137,7 @@ public static class DeviceInfoMenu
             }
         }
 
-        // Factory reset eligibility
+        // Firmware-only display; it does not establish Bio MPE reset eligibility.
         AnsiConsole.WriteLine();
         if (DeviceReset.IsResetSupported(info.FirmwareVersion))
         {

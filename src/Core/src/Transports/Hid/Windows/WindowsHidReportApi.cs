@@ -25,6 +25,11 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 /// <remarks>
 /// The owner supplies all scheduling and lifetime barriers. Windows JIT/AOT callback-tail and HID
 /// driver validation are required; hardware-free result/handle tests do not attest native execution.
+/// FIDO ReadFile/WriteFile requires GENERIC_READ | GENERIC_WRITE and overlapped submission; a
+/// zero-access feature handle cannot substitute for it. Open success still depends on the collection,
+/// ACL, driver, process token and existing handles' sharing policies. Elevation is an environment-specific
+/// troubleshooting step, not a universal prerequisite. FILE_SHARE.ALL neither overrides another handle's
+/// sharing restrictions nor acquires a grouped SDK claim; the native owner receives any such claim separately.
 /// </remarks>
 internal sealed class WindowsHidReportApi : IWindowsHidReportApi
 {

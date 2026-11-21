@@ -37,9 +37,10 @@ internal static class ArkgPrimitives
     /// is stateless and thread-safe.
     /// </para>
     /// <para>
-    /// For testing or custom implementations, applications can replace the
-    /// default factory by setting the <c>ArkgPrimitivesCreator</c> property
-    /// in <see cref="CryptographyProviders"/>.
+    /// SDK tests can replace the internal <c>ArkgPrimitivesCreator</c> delegate in
+    /// <see cref="CryptographyProviders"/>. It is not a public application extension point.
+    /// NativeShims loading, export availability, and provider behavior depend on the deployed artifact;
+    /// constructing this managed wrapper alone establishes none of those qualifications.
     /// </para>
     /// </remarks>
     public static IArkgPrimitives Create() => new ArkgPrimitivesOpenSsl();

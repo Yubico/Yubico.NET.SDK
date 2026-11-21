@@ -31,6 +31,13 @@ public enum KdfHashAlgorithm : byte
 ///     Base class for OpenPGP Key Derivation Function (KDF) configuration.
 ///     Dispatches parsing to <see cref="KdfNone" /> or <see cref="KdfIterSaltedS2k" />.
 /// </summary>
+/// <remarks>
+///     Standalone instances are caller-owned and disposable. A session retains the same object supplied
+///     to SetKdfAsync or returned by GetKdfAsync and disposes its current cache during teardown. Keep that
+///     object undisposed while the session uses it; retain outer cleanup scopes for replaced/reset objects.
+///     KdfIterSaltedS2k disposal clears its backing arrays but does not prevent subsequent Process calls.
+///     Disposing an aliased object early can therefore change derivation rather than produce a disposed-object error.
+/// </remarks>
 public abstract class Kdf : IDisposable
 {
     /// <summary>
@@ -54,6 +61,7 @@ public abstract class Kdf : IDisposable
     /// <summary>
     ///     Serializes the KDF configuration to its wire format (concatenated TLVs).
     /// </summary>
+    /// <returns>Caller-owned bytes, potentially containing initial PIN hashes; clear after transmission/use.</returns>
     public abstract byte[] ToBytes();
 
     /// <inheritdoc />
@@ -62,20 +70,40 @@ public abstract class Kdf : IDisposable
     /// <summary>
     ///     Parses a KDF configuration from the encoded TLV data (DO 0xF9).
     /// </summary>
+    /// <remarks>
+    ///     A disabled configuration (algorithm 0) produces KdfNone. Unknown algorithms cannot be used
+    ///     to derive credentials; use raw GET DATA to inspect them. The caller owns the returned object and
+    ///     the supplied encoding separately.
+    /// </remarks>
     public static Kdf Parse(ReadOnlySpan<byte> encoded)
     {
-        var data = TlvHelper.DecodeDictionary(encoded);
-
-        if (data.TryGetValue(0x81, out var algorithmData) && algorithmData.Length > 0)
+        var data = new Dictionary<int, ReadOnlyMemory<byte>>();
+        var fields = new List<byte[]>();
+        try
         {
-            var algorithm = algorithmData.Span[0];
-            if (algorithm == KdfIterSaltedS2k.KdfAlgorithm)
+            while (!encoded.IsEmpty)
             {
-                return KdfIterSaltedS2k.ParseData(data);
+                var (tag, _, value) = Tlv.ParseData(ref encoded);
+                fields.Add(value);
+                if (!data.TryAdd(tag, value))
+                    throw new FormatException("Duplicate OpenPGP KDF field.");
             }
-        }
 
-        return new KdfNone();
+            if (!data.TryGetValue(0x81, out var algorithm) || algorithm.Length != 1)
+                throw new FormatException("Missing or malformed OpenPGP KDF algorithm.");
+
+            return algorithm.Span[0] switch
+            {
+                0 => new KdfNone(),
+                KdfIterSaltedS2k.KdfAlgorithm => KdfIterSaltedS2k.ParseData(data),
+                _ => throw new NotSupportedException("Unsupported OpenPGP KDF algorithm."),
+            };
+        }
+        finally
+        {
+            foreach (var field in fields)
+                CryptographicOperations.ZeroMemory(field);
+        }
     }
 }
 
@@ -108,13 +136,12 @@ public sealed class KdfNone : Kdf
 ///         <c>IterationCount</c> is the total number of bytes fed to one hash computation, not a number
 ///         of rounds; the card stores it as an unsigned 32-bit value. The salt followed by the PIN is
 ///         repeated until that many bytes have been hashed, then the hash is finalised once. When the
-///         count is smaller than salt plus PIN, one full copy is hashed anyway: "at least one copy of
-///         the full salt plus passphrase will be provided as input to each hash context regardless of
-///         the octet count" (RFC 9580 §3.7.1.3). This is what GnuPG computes (libgcrypt
-///         <c>GCRY_KDF_ITERSALTED_S2K</c>), so PINs set by either side verify on the other.
+///         count is smaller than salt plus PIN, one full copy is hashed anyway, as required by
+///         RFC 9580 §3.7.1.3. That citation defines the derivation primitive; Card specification 3.4.1
+///         §4.3.2 defines F9 fields and assigns credential/configuration alignment to terminal software.
 ///     </para>
 ///     <para>
-///         This is not PBKDF2. The algorithm is:
+///         The iterated-salted S2K calculation is:
 ///         <code>
 ///         data = salt + pin_bytes
 ///         total = max(iteration_count, len(data))
@@ -130,8 +157,7 @@ public sealed class KdfIterSaltedS2k : Kdf
     internal const int KdfAlgorithm = 3;
 
     // Backing fields — KdfIterSaltedS2k always owns these arrays.
-    // The init setters clone caller-provided memory so Dispose() can safely
-    // zero them without risk of zeroing buffers owned by the caller (T12).
+    // Init setters clone input so this instance can clear its own storage on disposal.
     private byte[] _saltUser = [];
     private byte[]? _saltReset;
     private byte[]? _saltAdmin;
@@ -147,7 +173,8 @@ public sealed class KdfIterSaltedS2k : Kdf
     public KdfHashAlgorithm HashAlgorithm { get; init; }
 
     /// <summary>
-    ///     The total number of bytes to feed into the hash function, 0 to <see cref="uint.MaxValue" />.
+    ///     The expanded input-byte count, 0 to <see cref="uint.MaxValue" />; derivation hashes at least
+    ///     one full salt-plus-PIN copy. F9 encodes this as four bytes, unlike RFC packet S2K's coded octet.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">The value does not fit the card's unsigned 32-bit field.</exception>
     public long IterationCount
@@ -191,7 +218,7 @@ public sealed class KdfIterSaltedS2k : Kdf
     }
 
     /// <summary>
-    ///     Pre-computed hash of the default User PIN. Null if not stored.
+    ///     Initial User PIN hash used for provisioning. Null if absent.
     ///     <para>The setter copies the provided memory — this instance owns the backing array.</para>
     /// </summary>
     public ReadOnlyMemory<byte>? InitialHashUser
@@ -201,7 +228,7 @@ public sealed class KdfIterSaltedS2k : Kdf
     }
 
     /// <summary>
-    ///     Pre-computed hash of the default Admin PIN. Null if not stored.
+    ///     Initial Admin PIN hash used for provisioning. Null if absent.
     ///     <para>The setter copies the provided memory — this instance owns the backing array.</para>
     /// </summary>
     public ReadOnlyMemory<byte>? InitialHashAdmin
@@ -306,7 +333,15 @@ public sealed class KdfIterSaltedS2k : Kdf
                 tlvs.Add(new Tlv(0x88, hashAdmin.Span));
             }
 
-            return TlvHelper.EncodeList([.. tlvs]).ToArray();
+            Memory<byte> encoded = TlvHelper.EncodeList([.. tlvs]);
+            try
+            {
+                return encoded.ToArray();
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(encoded.Span);
+            }
         }
         finally
         {
@@ -330,15 +365,43 @@ public sealed class KdfIterSaltedS2k : Kdf
         base.Dispose();
     }
 
-    internal static KdfIterSaltedS2k ParseData(IDictionary<int, ReadOnlyMemory<byte>> data) =>
-        new()
+    internal static KdfIterSaltedS2k ParseData(IDictionary<int, ReadOnlyMemory<byte>> data)
+    {
+        var hashId = ReadField(data, 0x82, 1, required: true).GetValueOrDefault();
+        var algorithm = (KdfHashAlgorithm)hashId.Span[0];
+        int digestLength = algorithm switch
         {
-            HashAlgorithm = (KdfHashAlgorithm)data[0x82].Span[0],
-            IterationCount = BinaryPrimitives.ReadUInt32BigEndian(data[0x83].Span),
-            SaltUser = data[0x84],                                                // init setter clones
-            SaltReset = data.TryGetValue(0x85, out var sr) ? sr : null,           // init setter clones
-            SaltAdmin = data.TryGetValue(0x86, out var sa) ? sa : null,           // init setter clones
-            InitialHashUser = data.TryGetValue(0x87, out var hu) ? hu : null,     // init setter clones
-            InitialHashAdmin = data.TryGetValue(0x88, out var ha) ? ha : null,    // init setter clones
+            KdfHashAlgorithm.Sha256 => 32,
+            KdfHashAlgorithm.Sha512 => 64,
+            _ => throw new NotSupportedException("Unsupported OpenPGP KDF hash algorithm."),
         };
+        var iterations = ReadField(data, 0x83, 4, required: true).GetValueOrDefault();
+        // RFC 4880 iterated-and-salted S2K uses eight salt octets. Optional per-PW salts
+        // may be omitted, in which case derivation uses the User salt.
+        var user = ReadField(data, 0x84, 8, required: true).GetValueOrDefault();
+        var reset = ReadField(data, 0x85, 8);
+        var admin = ReadField(data, 0x86, 8);
+        var userHash = ReadField(data, 0x87, digestLength);
+        var adminHash = ReadField(data, 0x88, digestLength);
+        return new()
+        {
+            HashAlgorithm = algorithm,
+            IterationCount = BinaryPrimitives.ReadUInt32BigEndian(iterations.Span),
+            SaltUser = user,
+            SaltReset = reset,
+            SaltAdmin = admin,
+            InitialHashUser = userHash,
+            InitialHashAdmin = adminHash,
+        };
+    }
+
+    private static ReadOnlyMemory<byte>? ReadField(
+        IDictionary<int, ReadOnlyMemory<byte>> data, int tag, int width, bool required = false)
+    {
+        if (data.TryGetValue(tag, out var value) && value.Length == width)
+            return value;
+        if (!required && !data.ContainsKey(tag))
+            return null;
+        throw new FormatException($"Missing or malformed OpenPGP KDF field 0x{tag:X2}.");
+    }
 }

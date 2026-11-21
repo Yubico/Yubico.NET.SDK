@@ -15,15 +15,21 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Ctap2.BioEnrollment;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 
 /// <summary>
 /// Biometric (fingerprint) enrollment operations.
-/// Requires firmware 5.2+ and the bioEnroll authenticator option.
+/// Requires actual sensor hardware, advertised support and appropriate authorization.
 /// </summary>
+/// <remarks>
+/// Current standard bio helpers have known subcommand/authentication/timeout, template-array schema
+/// and sample-status limitations; these methods are not qualified standardized enrollment workflows.
+/// Protocol 2 is selected without negotiation. PIN input is borrowed and tokens are finally-cleared,
+/// not an end-to-end cleanup guarantee. General catches convert cancellation/errors to failed results;
+/// failure or decoded completion does not establish device state or rollback.
+/// </remarks>
 public static class BioEnrollmentExample
 {
     /// <summary>
@@ -134,6 +140,12 @@ public static class BioEnrollmentExample
     /// Enrolls a fingerprint with a multi-sample capture loop.
     /// Calls <paramref name="onSampleCaptured"/> after each sample for progress reporting.
     /// </summary>
+    /// <remarks>
+    /// Retains the begin template ID independently because continuation responses need not repeat it.
+    /// IsComplete only tests decoded remaining count, with known missing-field defaults. Token cancellation
+    /// is not the CTAP enrollment-cancel command: the explicit cancel below is reached only on the checked
+    /// loop-exit path, not after a thrown cancellation or callback failure. No automatic rollback is provided.
+    /// </remarks>
     public static async Task<EnrollResult> EnrollFingerprintAsync(
         IYubiKey yubiKey,
         ReadOnlyMemory<byte> pin,
@@ -158,13 +170,14 @@ public static class BioEnrollmentExample
             var bio = new FingerprintBioEnrollment(session, protocol, pinToken);
 
             // Begin enrollment - first sample
-            var result = await bio.EnrollBeginAsync(cancellationToken: cancellationToken);
-            var templateId = result.TemplateId;
+            var begin = await bio.EnrollBeginAsync(cancellationToken: cancellationToken);
+            var templateId = begin.TemplateId;
+            EnrollmentSampleResult result = begin;
             var sampleNumber = 1;
 
             onSampleCaptured?.Invoke(sampleNumber, result.RemainingSamples, result.LastSampleStatus);
 
-            // Capture remaining samples
+            // Continue using the ID from begin, regardless of later sample feedback.
             while (!result.IsComplete && !cancellationToken.IsCancellationRequested)
             {
                 try
@@ -349,23 +362,20 @@ public static class BioEnrollmentExample
     }
 
     /// <summary>
-    /// Checks if the authenticator supports bio enrollment.
+    /// Returns true if GetInfo advertises the standard bioEnroll option.
     /// </summary>
+    /// <remarks>
+    /// The option value describes whether templates exist, not whether the command is supported.
+    /// This probe does not check the prototype option. Read failures and cancellation propagate.
+    /// </remarks>
     public static async Task<bool> IsSupported(
         IYubiKey yubiKey,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await using var session = await yubiKey.CreateCtap2SessionAsync(
-                cancellationToken: cancellationToken);
-            var info = await session.GetInfoAsync(cancellationToken);
-            return info.Options.TryGetValue("bioEnroll", out var supported) && supported;
-        }
-        catch
-        {
-            return false;
-        }
+        await using var session = await yubiKey.CreateCtap2SessionAsync(
+            cancellationToken: cancellationToken);
+        var info = await session.GetInfoAsync(cancellationToken);
+        return info.Options.ContainsKey("bioEnroll");
     }
 
     /// <summary>
@@ -385,9 +395,10 @@ public static class BioEnrollmentExample
             FingerprintSampleStatus.TooSkewed => "Finger too skewed",
             FingerprintSampleStatus.TooShort => "Touch too short",
             FingerprintSampleStatus.MergeFailure => "Merge failure",
-            FingerprintSampleStatus.StorageFull => "Fingerprint storage full",
-            FingerprintSampleStatus.NoUserActivity => "No finger detected (timeout)",
-            FingerprintSampleStatus.NoUserPresence => "No user presence",
+            FingerprintSampleStatus.Exists => "Fingerprint already enrolled",
+            FingerprintSampleStatus.DatabaseFull => "Fingerprint storage full",
+            FingerprintSampleStatus.NoUserActivity => "No touch or swipe detected",
+            FingerprintSampleStatus.NoUpTransition => "Lift your finger and try again",
             _ => $"Unknown status: {status}"
         };
 

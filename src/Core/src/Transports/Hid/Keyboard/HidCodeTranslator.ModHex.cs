@@ -14,7 +14,8 @@
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
-// Keyboard Mapping for ModHex.
+// Maps the sixteen ModHex letters in both cases (32 characters). Shifted uppercase entries require
+// matching host layout/modifier behavior; the table alone does not guarantee identical text on every host.
 public sealed partial class HidCodeTranslator
 {
     private static HidCodeTranslator GetModHex()

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -22,17 +23,72 @@ using Yubico.YubiKit.Tests.Shared;
 namespace Yubico.YubiKit.SecurityDomain.UnitTests;
 
 /// <summary>
-///     Verifies the <see cref="SecureChannelException" /> contract (ISC-43): SCP handshake/
-///     authentication failures during <see cref="SecurityDomainSession.CreateAsync" /> and
-///     <see cref="SecurityDomainSession.ResetAsync" /> surface as <see cref="SecureChannelException" />
+///     Checks selected SCP03 configuration failures during CreateAsync and ResetAsync reinitialization
+///     surface as <see cref="SecureChannelException" />
 ///     with the original failure preserved as <see cref="Exception.InnerException" /> and, when
 ///     available, the ISO 7816 status word preserved on <see cref="SecureChannelException.StatusWord" />.
-///     Post-handshake, per-operation Security Domain failures are unaffected and continue to surface
-///     their original exception type directly.
+///     Also checks an unauthenticated malformed key-information response retains its original exception type.
 /// </summary>
 public class SecureChannelExceptionTests
 {
     private static byte[] OkResponse() => [0x90, 0x00];
+
+    [Fact]
+    public async Task CreateAsync_Scp11bRejectsInvalidReceiptWithBadResponseCause()
+    {
+        // Standard P-256 generator point, not device material; the zero receipt is deliberately invalid.
+        var point = Convert.FromHexString("046B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296" +
+            "4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5");
+        byte[] response = [0x5F, 0x49, 0x41, .. point, 0x86, 0x10, .. new byte[16], 0x90, 0x00];
+        using var connection = new RecordingSmartCardConnection(OkResponse(), response, OkResponse());
+        var publicKey = ECPublicKey.CreateFromValue(point, KeyType.P256);
+        using var parameters = new Scp11KeyParameters(new KeyReference(0x13, 0xFF), publicKey);
+
+        var error = await Assert.ThrowsAsync<SecureChannelException>(() => SecurityDomainSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = parameters, FirmwareVersionOverride = new(5, 7, 2) },
+            TestContext.Current.CancellationToken));
+
+        Assert.Contains("Receipt does not match", Assert.IsType<BadResponseException>(error.InnerException).Message);
+        Assert.Equal(0x88, connection.TransmittedCommands[1][1]);
+        await using var reopened = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        Assert.False(reopened.IsAuthenticated);
+    }
+
+    [Fact]
+    public async Task CreateAsync_AfterDisposingFirstSession_ReusesCallerOwnedParameters()
+    {
+        using var keys = Scp03KeyParameters.Default;
+        using var first = new Scp03HandshakeFakeConnection();
+        using var second = new Scp03HandshakeFakeConnection();
+        var options = new SessionCreationOptions { ScpKeyParameters = keys };
+
+        await using (var session = await SecurityDomainSession.CreateAsync(first, options,
+                         TestContext.Current.CancellationToken))
+        {
+            Assert.True(session.IsAuthenticated);
+        }
+
+        await using var reopened = await SecurityDomainSession.CreateAsync(second, options,
+            TestContext.Current.CancellationToken);
+        Assert.True(reopened.IsAuthenticated);
+    }
+
+    [Fact]
+    public async Task CreateAsync_Scp03ClaNotSupported_PreservesNestedStatusWithoutCopyingDetails()
+    {
+        using var connection = new RecordingSmartCardConnection(OkResponse(), [0x6E, 0x00]);
+        using var keys = Scp03KeyParameters.Default;
+
+        var exception = await Assert.ThrowsAsync<SecureChannelException>(() => SecurityDomainSession.CreateAsync(
+            connection, new SessionCreationOptions { ScpKeyParameters = keys }, TestContext.Current.CancellationToken));
+
+        var inner = Assert.IsType<NotSupportedException>(exception.InnerException);
+        var apdu = Assert.IsType<ApduException>(inner.InnerException);
+        Assert.Equal(unchecked((short)0x6E00), apdu.SW);
+        Assert.Equal(apdu.SW, exception.StatusWord);
+        Assert.Equal("Failed to establish a secure channel (SCP) with the Security Domain.", exception.Message);
+    }
 
     [Fact]
     public async Task RawSmartCardSession_CreateWithScp_MarksSessionReadyAfterHandshake()
@@ -57,13 +113,12 @@ public class SecureChannelExceptionTests
         Assert.Equal(3, connection.TransmittedCommands.Count);
     }
 
-    // --- ISC-43: APDU-level rejection (e.g. wrong key detected by the device) ---
+    // APDU-level rejection supplied by the recording connection.
 
     [Fact]
     public async Task CreateAsync_Scp03InitializeUpdateRejectedByDevice_ThrowsSecureChannelExceptionWithStatusWordAndInnerApduException()
     {
-        // INITIALIZE UPDATE rejected with SW=0x6982 (Security status not satisfied), the status word
-        // a device returns for APDU-level authentication rejection such as an unrecognized/wrong key.
+        // Simulate INITIALIZE UPDATE rejection with SW=0x6982 (Security status not satisfied).
         var connection = new RecordingSmartCardConnection(
             OkResponse(), // SELECT
             [0x69, 0x82]); // INITIALIZE UPDATE rejected
@@ -82,7 +137,7 @@ public class SecureChannelExceptionTests
         Assert.Contains("INITIALIZE UPDATE", inner.Message);
     }
 
-    // --- ISC-43: cryptographic verification failure (e.g. wrong static keys) ---
+    // Local card-cryptogram verification failure.
 
     [Fact]
     public async Task CreateAsync_Scp03CardCryptogramMismatch_ThrowsSecureChannelExceptionWithInnerBadResponseException()
@@ -118,7 +173,7 @@ public class SecureChannelExceptionTests
         Assert.Same(inner, ex.InnerException);
     }
 
-    // --- ISC-43: SCP not supported by the connected firmware ---
+    // Unsupported supplied firmware version.
 
     [Fact]
     public async Task CreateAsync_Scp03UnsupportedFirmware_ThrowsSecureChannelExceptionWithInnerNotSupportedException()
@@ -144,14 +199,13 @@ public class SecureChannelExceptionTests
         Assert.Contains("SCP03", ex.InnerException!.Message);
     }
 
-    // --- ISC-43: post-handshake, per-operation failures are unaffected ---
+    // Per-operation parsing failure without SCP.
 
     [Fact]
     public async Task ListKeyInformationAsync_MalformedResponse_DoesNotWrapAsSecureChannelException()
     {
-        // No scpKeyParams: the session establishes without a secure channel, so a subsequent
-        // per-operation failure must surface as the original exception type, not
-        // SecureChannelException, since ISC-43 only concerns the SCP handshake phase.
+        // No SCP parameters: assert that parsing the later malformed entry throws BadResponseException
+        // directly, outside initialization's SecureChannelException catch.
         var connection = new RecordingSmartCardConnection(
             OkResponse(),
             [0xC0, 0x00, 0x90, 0x00]); // Key information entry advertises 0 bytes for its value
@@ -165,19 +219,35 @@ public class SecureChannelExceptionTests
         Assert.IsNotType<SecureChannelException>(ex);
     }
 
-    // --- ISC-43: ResetAsync's post-reset reinitialization is wrapped identically to CreateAsync ---
+    // Reset reinitialization reaches the same selected configuration-error wrapper as creation.
+
+    [Fact]
+    public async Task ResetAsync_RefreshUsesDefaultReferenceAndKeepsSameSession()
+    {
+        using var connection = new Scp03HandshakeFakeConnection { AcceptReinitialization = true };
+        using var parameters = new Scp03KeyParameters(new KeyReference(0x01, 0x22), StaticKeys.GetDefaultKeys());
+        var firmware = new FirmwareVersion(5, 7, 2);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = parameters, FirmwareVersionOverride = firmware },
+            TestContext.Current.CancellationToken);
+
+        await session.ResetAsync(TestContext.Current.CancellationToken);
+
+        Assert.True(session.IsInitialized);
+        Assert.True(session.IsAuthenticated);
+        Assert.Equal(firmware, session.FirmwareVersion);
+        Assert.Equal((byte)0x22, connection.TransmittedCommands[1][2]);
+        Assert.Equal(KeyReference.Default.Kvn, connection.TransmittedCommands[6][2]);
+        Assert.Single(await session.ListKeyInformationAsync(TestContext.Current.CancellationToken));
+    }
 
     [Fact]
     public async Task ResetAsync_ReinitializationRejectedAfterKeyBlocked_ThrowsSecureChannelExceptionWithInnerApduException()
     {
-        // This drives a genuine end-to-end scenario through the real SCP03 handshake/secure-messaging
-        // math (see Scp03HandshakeFakeConnection): a session is created with real SCP03 key params
-        // (the handshake must actually succeed, cryptographically, for CreateAsync to return a
-        // session at all), ResetAsync() enumerates the one live key via an encrypted+MACed GET DATA,
-        // blocks it via the raw (non-SCP) reset-attempt bypass, and then the reinit's INITIALIZE
-        // UPDATE is rejected -- simulating the just-blocked key failing to reauthenticate. This proves
-        // the SecureChannelException wrap applies to ResetAsync's reinit call to InitializeAsync, not
-        // only to CreateAsync's.
+        // The fixture derives responses for initial SCP03 establishment and encrypted key enumeration,
+        // reports a blocked status on the raw reset attempt, then rejects reinitialization. Assertions
+        // check the wrapper, immediate status/inner exception and failed-session flags, not device reset
+        // or complete SCP03 protocol verification.
         var connection = new Scp03HandshakeFakeConnection();
         using var scpKeyParams = Scp03KeyParameters.Default;
 

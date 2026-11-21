@@ -14,6 +14,11 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 /// <summary>
 ///     Imports a private key from a PEM file (openpgp keys import).
 /// </summary>
+/// <remarks>
+///     This sample reads PEM into an immutable string; clearing temporary DER/private-key objects leaves that
+///     string outside an explicit zeroing scope. Use caller-owned binary input with the direct SDK for controlled
+///     secret lifetime. Attribute/import commands can leave partial changes; inspect state before retrying.
+/// </remarks>
 public sealed class KeysImportCommand : OpenPgpCommand<KeysImportCommand.Settings>
 {
     public sealed class Settings : CommandSettings

@@ -7,7 +7,11 @@ using SharedSelector = Yubico.YubiKit.Cli.Shared.Device.DeviceSelector;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Prompts;
 
-/// <summary>SmartCard-only selection for YubiHSM Auth operations.</summary>
+/// <summary>Selects SmartCard-capable candidates for YubiHSM Auth operations.</summary>
+/// <remarks>
+/// Opening an HsmAuth session subsequently selects the applet and establishes its availability
+/// on the selected key. Interface eligibility supplies the transport prerequisite only.
+/// </remarks>
 public static class DeviceSelector
 {
     private static readonly SharedSelector Selector = new(

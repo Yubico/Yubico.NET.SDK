@@ -21,19 +21,20 @@ namespace Yubico.YubiKit.Management.IntegrationTests;
 /// <summary>
 ///     Integration tests for toggling USB/NFC capabilities and NFC restricted mode via
 ///     <see cref="ManagementSession.SetDeviceConfigAsync" />.
-///     These tests are destructive: they modify device configuration, but always restore original state.
+///     These tests modify configuration and attempt restoration in finally. USB restoration is read back;
+///     NFC-restriction restoration is not verified. Helpers receive cached starting metadata and use default transport selection.
 /// </summary>
 public class ManagementSessionCapabilityTests
 {
     /// <summary>
-    ///     Toggles an individual USB capability (OATH) off and on, verifying the change takes effect.
-    ///     The device is always restored to its original configuration.
+    ///     Clears the reported USB OATH bit and checks readback, then attempts restoration and readback in finally.
     /// </summary>
     /// <remarks>
     ///     This test disables OATH on USB, reads back the config, then restores. It requires a device
     ///     that has OATH currently enabled on USB. The test does NOT reboot the device because
-    ///     rebooting would disrupt the test session; instead it passes <c>reboot: false</c> and
+    ///     rebooting would disrupt the test session; instead it leaves <c>SetDeviceConfigOptions.Reboot</c> false and
     ///     validates the persisted config via a fresh <see cref="ManagementSession.GetDeviceInfoAsync" /> call.
+    ///     This does not verify active OATH transport behavior after re-enumeration; restoration can fail on device errors.
     /// </remarks>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0.0", ConnectionType = ConnectionType.SmartCard)]
@@ -83,11 +84,12 @@ public class ManagementSessionCapabilityTests
     ///     <see cref="ManagementSession.SetDeviceConfigAsync" />.
     /// </summary>
     /// <remarks>
-    ///     NFC restricted mode (tag 0x17) is available on firmware 5.7.0+. When enabled, the device
-    ///     will not respond over NFC until physically touched via USB first.
-    ///     This test only verifies setting NFC restricted to <c>true</c> because disabling it
-    ///     (setting to <c>false</c>) requires a device reboot to take effect, which would disrupt
-    ///     the test session. This matches the Java SDK test behavior.
+    ///     Restricted NFC is available on NFC-capable devices with firmware 5.7.0 or later. It restricts
+    ///     NFC operations except reading the configured NDEF URL. USB power for three seconds clears the
+    ///     restriction; neither touch nor USB data communication is required.
+    ///     This test checks true write/readback only, not NFC communication or USB-power activation.
+    ///     It sends the cached starting value in finally without readback. The encoder sends an explicit
+    ///     false byte when requested, but this test does not establish that it restores NFC access.
     /// </remarks>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.7.0", ConnectionType = ConnectionType.SmartCard)]
@@ -115,9 +117,8 @@ public class ManagementSessionCapabilityTests
             }
             finally
             {
-                // Best-effort restore: set back to original value.
-                // Note: if original was false, this may not take effect without a reboot,
-                // but we send it anyway so the config is queued for next reboot.
+                // Attempt to restore the cached value; no readback or NFC-access check follows.
+                // Direct false-write behavior is not established here; USB power is the documented activation route.
                 var restoreConfig = new DeviceConfig { NfcRestricted = originalNfcRestricted };
 
                 await mgmt.SetDeviceConfigAsync(restoreConfig);

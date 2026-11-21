@@ -22,7 +22,8 @@ namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
 
 /// <summary>
 ///     Unit tests for SCP11 (Secure Channel Protocol 11) API.
-///     These tests verify the SCP11KeyParams and related types work correctly.
+///     Checks parameter shapes and fixture subject/public-key parsing, rather than certificate trust,
+///     private-key association, or a device handshake. Skipped bodies below are proposed plans only.
 /// </summary>
 public class Scp11Tests
 {
@@ -186,7 +187,7 @@ public class Scp11Tests
         var pkcs12Data = Scp11TestData.Oce;
         var password = Scp11TestData.OcePassword.Span;
 
-        // Assert - Should be able to load PKCS12
+        // Checks nonempty container bytes and the password fixture; this test does not import the PKCS12.
         Assert.NotEmpty(pkcs12Data.ToArray());
         Assert.Equal("password", new string(password));
     }
@@ -203,8 +204,8 @@ public class Scp11Tests
         // 1. Get YubiKey device
         // 2. Connect SmartCard
         // 3. Query certificate bundle from device
-        // 4. Extract leaf certificate public key
-        // 5. Create Scp11KeyParams
+        // 4. Validate the chain against independently trusted provisioning before selecting the SD public key
+        // 5. Create Scp11KeyParameters with that trusted key
         // 6. Initialize SCP session
         // 7. Verify encrypted communication works
         await Task.CompletedTask;

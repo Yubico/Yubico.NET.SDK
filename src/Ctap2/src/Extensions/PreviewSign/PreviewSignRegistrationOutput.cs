@@ -18,8 +18,13 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// Output from the previewSign extension registration.
 /// </summary>
 /// <remarks>
-/// Contains the generated signing key information returned by the authenticator.
+/// Contains experimental generated signing-key information, not verified attestation or device identity.
+/// The signed outer previewSign output carries the chosen algorithm; the unsigned wrapped signing-key
+/// attestation carries the generated key and inner signing policy. Verify attestation/key binding and
+/// policy before trusting it. The constructor borrows memory; decoders may allocate independent copies.
+/// This DTO supplies no disposal/zeroing boundary.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed class PreviewSignRegistrationOutput
 {
     /// <summary>
@@ -72,8 +77,9 @@ public sealed class PreviewSignRegistrationOutput
     /// an ARKG seed-key variant.
     /// </para>
     /// <para>
-    /// This is a backwards-compatible accessor: the raw <see cref="PublicKey"/>
-    /// field remains available for direct CBOR processing.
+    /// This is syntactic extraction, not attestation verification. The raw PublicKey remains available.
+    /// The generated key uses the reported registration algorithm, not the seed-key marker (-65700)
+    /// or signing-operation identifier (-65539). This is not validated negotiation.
     /// </para>
     /// </remarks>
     /// <returns>
@@ -92,14 +98,14 @@ public sealed class PreviewSignRegistrationOutput
                     KeyHandle,
                     arkgKey.BlPublicKey,
                     arkgKey.KemPublicKey,
-                    arkgKey.Algorithm);
+                    new Cose.CoseAlgorithm(Algorithm));
             }
 
             return null;
         }
-        catch
+        catch (Exception ex) when (ex is System.Formats.Cbor.CborContentException or InvalidOperationException or ArgumentException or OverflowException)
         {
-            // CBOR decode failure or invalid shape - return null
+            PreviewSignCbor.LogMalformedRegistration();
             return null;
         }
     }

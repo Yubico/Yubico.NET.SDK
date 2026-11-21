@@ -28,7 +28,9 @@ public sealed record class PublicKeyCredentialRequestOptions
     /// Gets the cryptographic challenge from the relying party.
     /// </summary>
     /// <remarks>
-    /// Must be at least 16 bytes of random data.
+    /// The RP must generate an unpredictable challenge, retain it for the ceremony, and verify its
+    /// freshness in the response. WebAuthn L3 §13.4.3 requires enough entropy to make guessing infeasible
+    /// and recommends at least 16 bytes. The SDK checks only that this value is nonempty.
     /// </remarks>
     public required ReadOnlyMemory<byte> Challenge { get; init; }
 
@@ -65,16 +67,21 @@ public sealed record class PublicKeyCredentialRequestOptions
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The WebAuthn L3 §5.1.4 <c>lifetimeTimer</c>. When set, the client cancels the pending authenticator
-    /// request (FIDO HID: <c>CTAPHID_CANCEL</c> at the next keep-alive), the PIN prompt and the exclude-list
-    /// pre-flight, and the call fails with <see cref="WebAuthnClientErrorCode.NotAllowed"/>. The deadline is a
-    /// signal: a PC/SC exchange already in flight runs to its answer first.
+    /// Starts after local validation and the RP validation callback. Expiry signals cancellation of
+    /// authenticator work, PIN prompting, allow-list selection, and extension processing. FIDO HID sends
+    /// <c>CTAPHID_CANCEL</c> at the next keep-alive; a PC/SC exchange already in flight runs to its answer.
+    /// If this produces an <see cref="OperationCanceledException"/> and the caller has not cancelled,
+    /// the client reports <see cref="WebAuthnClientErrorCode.NotAllowed"/>. Successful completion can
+    /// win the cancellation race; expiry is not a guarantee of failure or absence of extension side effects.
     /// </para>
     /// <para>
     /// <c>null</c> starts no timer; L3 §15.1 recommends a 300 s default, which this client does not apply.
     /// Values are not clamped to the L3 range. A non-positive value is rejected with
-    /// <see cref="WebAuthnClientErrorCode.InvalidRequest"/>. Cancelling the caller's token still surfaces as
-    /// <see cref="OperationCanceledException"/>.
+    /// <see cref="WebAuthnClientErrorCode.InvalidRequest"/>; a positive value exceeding the delay supported
+    /// by <see cref="CancellationTokenSource"/> throws <see cref="ArgumentOutOfRangeException"/>.
+    /// This cooperative timer is not a complete implementation of L3 §5.1.4's lifetime timer.
+    /// A resulting <see cref="OperationCanceledException"/> propagates unchanged if the caller's token
+    /// is cancelled, rather than being wrapped as a timeout.
     /// </para>
     /// </remarks>
     public TimeSpan? Timeout { get; init; }

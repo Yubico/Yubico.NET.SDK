@@ -22,8 +22,15 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 public static class Ctap2CredentialOptions
 {
     /// <summary>
-    /// Creates options configured for FIDO2 PIN input (4-63 bytes UTF-8).
+    /// Creates a FIDO2 PIN prompt preset with console-reader limits of 4–63 UTF-16 characters.
     /// </summary>
+    /// <remarks>
+    /// ConsoleCredentialReader counts char values before converting with the default UTF-8 encoding,
+    /// not UTF-8 bytes or Unicode code points. Non-ASCII text can exceed 63 encoded bytes. This preset
+    /// does not enforce the authenticator's current minimum or full CTAP PIN rules; the input layer must
+    /// validate NFC UTF-8, code-point/byte limits and no final NUL before submitting PIN bytes.
+    /// Dispose the credential reader's returned memory owner after the awaited operation to clear its secret.
+    /// </remarks>
     public static CredentialReaderOptions ForCtap2Pin() => new()
     {
         Prompt = "Enter FIDO2 PIN: ",

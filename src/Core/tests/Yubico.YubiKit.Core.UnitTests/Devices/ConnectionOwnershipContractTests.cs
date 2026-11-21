@@ -235,12 +235,12 @@ public class ConnectionOwnershipContractTests
     }
 
     // ------------------------------------------------------------------------------------------------
-    // Rule 2 — one live session per connection (Python's model, enforced at binding).
+    // Rule 2 — one live session per connection, enforced at binding.
     // ------------------------------------------------------------------------------------------------
 
     /// <summary>
     ///     Rule 1 cannot see this case: one connection, opened once, handed to two sessions. That is exactly
-    ///     what Python's base Session guards, and it is the same applet-deselection hazard one level down.
+    ///     the same applet-deselection hazard at the session-binding boundary.
     /// </summary>
     [Fact]
     public async Task Session_SecondLiveSessionOnOneConnection_IsRefused()
@@ -294,7 +294,7 @@ public class ConnectionOwnershipContractTests
 
     /// <summary>
     ///     The end-to-end shape the refusal rules require: one connection, successive applet sessions, no
-    ///     reconnect. This is Rust's <c>into_connection</c> handoff expressed in C# lifetimes.
+    ///     reconnect. Each session borrows the same enclosing caller-owned connection scope.
     /// </summary>
     [Fact]
     public async Task SuccessiveSessions_OverOneConnection_BothReachTheWire()

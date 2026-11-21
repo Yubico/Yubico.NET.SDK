@@ -22,8 +22,12 @@ namespace Yubico.YubiKit.Ctap2.Cbor;
 internal static class CoseKeyWriter
 {
     /// <summary>
-    /// Writes a COSE_Key dictionary as a CBOR map with numerically sorted keys.
+    /// Writes a COSE_Key dictionary with numerically sorted insertion keys.
     /// </summary>
+    /// <remarks>
+    /// Numeric order is not canonical encoded-key order. A Ctap2Canonical writer automatically sorts
+    /// the closed map by encoding; this helper's sorting alone does not supply canonicalization.
+    /// </remarks>
     /// <param name="writer">The CBOR writer.</param>
     /// <param name="coseKey">The COSE key as a dictionary of integer keys to values.</param>
     /// <exception cref="InvalidOperationException">If an unsupported value type is encountered.</exception>

@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Formats.Cbor;
+using Yubico.YubiKit.Core;
 
 namespace Yubico.YubiKit.Ctap2.Extensions;
 
@@ -22,7 +24,13 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <remarks>
 /// This is the canonical CBOR encoder for previewSign extension, shared by both
 /// CTAP2 and WebAuthn layers.
+/// The wire shape follows the Yubico Labs previewSign v4 Editor's Draft (26 August 2025),
+/// https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension, not CTAP version 4.
+/// This is experimental, not production cryptographic guidance. Encoders read borrowed inputs and
+/// return independent arrays; they do not validate negotiation, attestation or algorithm-specific
+/// Tbs/args semantics. Decoded byte strings are copies without a disposable cleanup owner.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public static class PreviewSignCbor
 {
     /// <summary>
@@ -120,10 +128,9 @@ public static class PreviewSignCbor
     /// <c>{3: -65539, -1: kh, -2: ctx}</c> in CTAP2-canonical order.
     /// </summary>
     /// <remarks>
-    /// CTAP2-canonical orders integer keys by ascending unsigned encoding: positive ints
-    /// (3) precede negative ints (-1, -2). Verified against
-    /// <c>cnh-authenticator-rs/src/get_assertion.rs:290-323</c> and
-    /// <c>Yubico.NET.SDK-Legacy/Yubico.YubiKey/src/Yubico/YubiKey/Fido2/GetAssertionParameters.cs:402-499</c>.
+    /// For these one-byte keys the canonical encoded order is 3, -1, -2. Ctap2Canonical supplies
+    /// ordering at map completion. This experimental signing-op profile is not proof of full ARKG
+    /// draft conformance; encoded output is a new copy of the supplied handle/context.
     /// </remarks>
     private static byte[] EncodeArkgP256SignArgs(ArkgP256SignArgs arkg)
     {
@@ -180,7 +187,7 @@ public static class PreviewSignCbor
     /// CBOR-encoded flat map {2: kh, 6: tbs, 7?: args} for the single credential.
     /// </returns>
     /// <remarks>
-    /// Per spec §10.2.1 step 9, the client sends the chosen credential's params as a flat map:
+    /// Per Yubico Labs previewSign v4 §10.2.1, the client sends the chosen credential's params as a flat map:
     /// - 2 (kh): key handle (bstr)
     /// - 6 (tbs): to-be-signed data (bstr)
     /// - 7 (args): optional additional args wrapped as bstr (omitted if null)
@@ -218,14 +225,15 @@ public static class PreviewSignCbor
     /// </summary>
     /// <param name="reader">CBOR reader positioned at the start of the previewSign output map.</param>
     /// <returns>
-    /// A tuple containing (algorithm, flags) where flags may be null (YubiKey 5.8.0-beta behavior).
+    /// The chosen algorithm and a nullable outer flags value accepted by this parser.
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the output is missing the required algorithm key or is malformed.
+    /// Thrown when the required algorithm is missing. CBOR shape/content failures can throw CborContentException.
     /// </exception>
     /// <remarks>
-    /// Per CTAP v4 draft §10.2.1 step 5, the output contains keys 3 (alg) and optionally 4 (flags).
-    /// Swift's implementation (PreviewSign.swift:132-176) treats flags as optional (absent on YubiKey 5.8.0-beta).
+    /// The v4 Editor's Draft signed outer output has algorithm key 3 only; policy flags belong inside
+    /// the signing-key attestation. This parser tolerates outer key 4 but its absence is not a
+    /// beta-firmware exception or evidence about the inner policy. Parsing does not verify the signature.
     /// </remarks>
     public static (int Algorithm, int? Flags) DecodeRegistrationOutput(CborReader reader)
     {
@@ -267,9 +275,8 @@ public static class PreviewSignCbor
     /// <remarks>
     /// The previewSign unsigned-extension-output payload wraps an inner attestation object whose
     /// keys are CTAP-style integers ({1:fmt, 2:authData, 3:attStmt}), NOT WebAuthn-style text
-    /// strings ({"fmt","authData","attStmt"}). This matches the legacy SDK
-    /// (Yubico.NET.SDK-Legacy/Yubico/YubiKey/Fido2/PreviewSignExtension.cs:144-147 and 249-282)
-    /// and is what YubiKey 5.8.0-beta firmware actually returns on the wire.
+    /// strings ({"fmt","authData","attStmt"}). The Yubico Labs v4 draft wraps the encoded inner map
+    /// in a byte string; this shape alone is not attestation verification or device qualification.
     /// </remarks>
     private static class InnerAttestationObjectKeys
     {
@@ -283,8 +290,8 @@ public static class PreviewSignCbor
     /// unsignedExtensionOutputs["previewSign"][7].
     /// </summary>
     /// <param name="Fmt">Attestation format identifier (e.g. "none", "packed").</param>
-    /// <param name="AuthData">Raw CTAP authenticator-data bytes.</param>
-    /// <param name="AttStmtRawCbor">Raw CBOR slice of the attStmt map (caller decodes with the appropriate AttestationStatement decoder).</param>
+    /// <param name="AuthData">An independently decoded copy of CTAP authenticator-data bytes.</param>
+    /// <param name="AttStmtRawCbor">Slice of the decoded inner-map storage; not a complete original response. Decode and verify with the appropriate format/policy.</param>
     public readonly record struct InnerAttestationObject(
         string Fmt,
         ReadOnlyMemory<byte> AuthData,
@@ -293,19 +300,21 @@ public static class PreviewSignCbor
     /// <summary>
     /// Decodes unsigned registration output from unsignedExtensionOutputs["previewSign"].
     /// </summary>
-    /// <param name="cbor">CBOR-encoded outer map with key {7: inner-att-obj}.</param>
+    /// <param name="cbor">CBOR outer map with key 7 containing a byte string of encoded inner-attestation CBOR.</param>
     /// <returns>
     /// The decoded inner attestation object components (fmt, authData, attStmt raw CBOR).
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when CBOR is malformed or required fields are missing.
+    /// Thrown when required fields are missing. CBOR content/type failures can throw CborContentException.
     /// </exception>
     /// <remarks>
-    /// Per CTAP v4 draft, the unsigned output contains key 7 (att-obj) wrapping a CTAP-shaped
+    /// Per the Yubico Labs previewSign v4 Editor's Draft, unsigned output contains key 7 (att-obj), a byte string wrapping a CTAP-shaped
     /// attestation object map {1:fmt, 2:authData, 3:attStmt}. NOTE: the inner map uses integer
     /// keys (not the WebAuthn text-string keys "fmt"/"authData"/"attStmt"). Callers that need a
     /// WebAuthn-spec attestation object must rebuild it from these components rather than feeding
     /// the inner CBOR directly to a WebAuthn decoder.
+    /// These components are parsed, not verified; validate attestation, chosen algorithm, key binding
+    /// and inner policy before trust. The copied inner map/authData have no disposal/zeroing owner.
     /// </remarks>
     public static InnerAttestationObject DecodeUnsignedRegistrationOutput(ReadOnlyMemory<byte> cbor)
     {
@@ -328,6 +337,9 @@ public static class PreviewSignCbor
         }
 
         reader.ReadEndMap();
+
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the previewSign unsigned registration map.");
 
         if (!innerCbor.HasValue)
         {
@@ -362,11 +374,9 @@ public static class PreviewSignCbor
                     authData = reader.ReadByteString();
                     break;
                 case InnerAttestationObjectKeys.AttStmt:
-                    var bytesBefore = reader.BytesRemaining;
-                    reader.SkipValue();
-                    var bytesConsumed = bytesBefore - reader.BytesRemaining;
-                    var offset = innerCbor.Length - bytesBefore;
-                    attStmtRaw = innerCbor.Slice(offset, bytesConsumed);
+                    if (reader.PeekState() != CborReaderState.StartMap)
+                        throw new CborContentException("previewSign inner attestation statement must be a map.");
+                    attStmtRaw = reader.ReadEncodedValue();
                     break;
                 default:
                     reader.SkipValue();
@@ -375,6 +385,9 @@ public static class PreviewSignCbor
         }
 
         reader.ReadEndMap();
+
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the previewSign inner attestation object.");
 
         if (fmt is null)
         {
@@ -402,10 +415,11 @@ public static class PreviewSignCbor
     /// The signature bytes.
     /// </returns>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when CBOR is malformed or signature is missing.
+    /// Thrown when signature is missing. CBOR content/type failures can throw CborContentException.
     /// </exception>
     /// <remarks>
-    /// Per CTAP v4 draft §10.2.1 step 10, the output contains key 6 (sig) with the signature.
+    /// Per Yubico Labs previewSign v4 §10.2.1, key 6 contains the signature. The returned byte string
+    /// is an independent copy; this does not verify the signature or its algorithm-specific format.
     /// </remarks>
     public static ReadOnlyMemory<byte> DecodeAuthenticationOutput(ReadOnlyMemory<byte> cbor)
     {
@@ -447,24 +461,18 @@ public static class PreviewSignCbor
     /// otherwise, <c>null</c>.
     /// </param>
     /// <returns>
-    /// <c>true</c> if the response contains a valid previewSign ARKG-P256 seed key;
+    /// <c>true</c> if syntactic extraction yields the SDK's experimental ARKG-P256 seed-key carrier;
     /// otherwise, <c>false</c>.
     /// </returns>
     /// <remarks>
     /// <para>
-    /// This method:
-    /// 1. Checks for unsignedExtensionOutputs["previewSign"]
-    /// 2. Decodes the CTAP-shaped inner attestation object
-    /// 3. Parses the authData to extract AttestedCredentialData (credential ID + COSE public key)
-    /// 4. Decodes the COSE public key and validates it's a CoseArkgP256SeedKey
-    /// 5. Constructs a PreviewSignGeneratedKey from the extracted components
+    /// Parses unsignedExtensionOutputs["previewSign"], extracts the inner attested credential data
+    /// and decodes its COSE seed-key carrier. It does not verify attestation, device identity,
+    /// signed algorithm agreement, generated-key binding or inner UP/UV policy.
     /// </para>
     /// <para>
-    /// Returns <c>false</c> if:
-    /// - The response lacks unsignedExtensionOutputs["previewSign"]
-    /// - The inner attestation object is malformed
-    /// - The authData lacks AttestedCredentialData
-    /// - The COSE public key is not a CoseArkgP256SeedKey variant
+    /// Returns false for absent output, malformed present output or another key carrier. Malformed
+    /// output is diagnosed without logging its contents. The reported algorithm is not verified here.
     /// </para>
     /// </remarks>
     public static bool TryExtractGeneratedKey(
@@ -475,17 +483,17 @@ public static class PreviewSignCbor
 
         try
         {
-            if (response.UnsignedExtensionOutputs?.ContainsKey("previewSign") != true)
-            {
+            if (!TryGetRegistrationParts(response, out var signedPreviewSign, out var unsignedPreviewSign))
                 return false;
-            }
+            var signedReader = new CborReader(signedPreviewSign, CborConformanceMode.Ctap2Canonical);
+            (int algorithm, _) = DecodeRegistrationOutput(signedReader);
 
-            var previewSignCbor = response.UnsignedExtensionOutputs["previewSign"];
-            var innerAttestation = DecodeUnsignedRegistrationOutput(previewSignCbor);
+            var innerAttestation = DecodeUnsignedRegistrationOutput(unsignedPreviewSign);
             var authData = Credentials.AuthenticatorData.Parse(innerAttestation.AuthData);
 
             if (authData.AttestedCredentialData is null)
             {
+                LogMalformedRegistration();
                 return false;
             }
 
@@ -499,17 +507,46 @@ public static class PreviewSignCbor
                 authData.AttestedCredentialData.CredentialId,
                 arkgSeedKey.BlPublicKey,
                 arkgSeedKey.KemPublicKey,
-                arkgSeedKey.DerivedKeyAlgorithm);  // -9 (Esp256), NOT -65700 (seed-key alg)
+                new Cose.CoseAlgorithm(algorithm));
 
             return true;
         }
-        catch (System.Formats.Cbor.CborContentException)
+        catch (Exception ex) when (ex is CborContentException or InvalidOperationException or ArgumentException or OverflowException)
         {
+            LogMalformedRegistration();
             return false;
         }
-        catch (InvalidOperationException)
+    }
+
+    private static bool TryGetRegistrationParts(
+        Credentials.MakeCredentialResponse response,
+        out ReadOnlyMemory<byte> signed,
+        out Memory<byte> unsigned)
+    {
+        unsigned = default;
+        bool hasUnsigned = response.UnsignedExtensionOutputs?.TryGetValue("previewSign", out unsigned) == true;
+        signed = default;
+        bool hasSigned = response.ExtensionOutputs is { } signedOutputs &&
+            ExtensionOutput.Decode(signedOutputs).TryGetRawExtension("previewSign", out signed);
+        if (hasSigned != hasUnsigned)
+            LogMalformedRegistration();
+        return hasSigned && hasUnsigned;
+    }
+
+    internal static void LogMalformedRegistration()
+    {
+        try
         {
-            return false;
+            PreviewSignDiagnostics.Logger.LogWarning("Malformed previewSign registration output was ignored.");
         }
+        catch (Exception)
+        {
+            // Diagnostics are best-effort; a provider must not break the Try contract.
+        }
+    }
+
+    private static class PreviewSignDiagnostics
+    {
+        internal static readonly ILogger Logger = YubiKitLogging.LoggerFactory.CreateLogger(nameof(PreviewSignCbor));
     }
 }

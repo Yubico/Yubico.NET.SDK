@@ -54,8 +54,8 @@ public class CoreNumericBoundaryAuditReproTests
     // ---- #25 e) and #20: Tlv long-form length decoding ----------------------------------------
 
     /// <summary>
-    ///     A five-byte length (85 01 00 00 00 01) overflows the 32-bit accumulator to 1, so the parser
-    ///     silently accepts a TLV whose declared length is 2^32 + 1.
+    ///     Regression for a declared length of 2^32 + 1 that formerly wrapped a 32-bit accumulator.
+    ///     The parser now rejects values above Int32.MaxValue before slicing the value.
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1633")]
@@ -67,8 +67,8 @@ public class CoreNumericBoundaryAuditReproTests
     }
 
     /// <summary>
-    ///     Guard: 84 FF FF FF FF decodes to -1, which is rejected today via span slicing
-    ///     (ArgumentOutOfRangeException, an ArgumentException subtype).
+    ///     The unsigned length FF FF FF FF exceeds Int32.MaxValue and reaches the explicit range
+    ///     guard. The assertion allows any ArgumentException subtype rather than a slicing failure.
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1633")]
@@ -119,8 +119,8 @@ public class CoreNumericBoundaryAuditReproTests
     // ---- #25 f) TlvHelper.EncodeDictionary ----------------------------------------------------
 
     /// <summary>
-    ///     The size estimate assumes 1-byte tag + 1-byte length. A 2-byte tag or a long-form length
-    ///     overflows the rented buffer once the estimate lands exactly on an ArrayPool bucket size.
+    ///     Regression inputs exceed the former one-byte-tag/one-byte-length estimate. Encoding now
+    ///     sizes from each TLV's exact TotalLength; the assertion compares the complete encoded bytes.
     /// </summary>
     [Theory]
     [Trait("Audit", "YESDK-1633")]

@@ -21,13 +21,13 @@ namespace Yubico.YubiKit.YubiOtp;
 
 /// <summary>
 /// Abstract base class for OTP slot configurations. Provides common flag setters,
-/// wire format assembly, and secure disposal of key material.
+/// wire format assembly, and disposal that clears its private key/identity/scan-code fields.
 /// </summary>
 /// <remarks>
 /// The 52-byte wire format struct layout:
 /// <code>
 /// Offset  Size  Field
-///   0      16   fixed (modhex public ID, scan codes, or zero-padded)
+///   0      16   fixed (raw binary public ID, scan codes, or zero-padded)
 ///  16       6   uid (private ID, HMAC key overflow, or HOTP IMF)
 ///  22      16   key (AES key, HMAC key prefix, or scan code overflow)
 ///  38       6   acc_code (access code, or zeros)
@@ -38,6 +38,10 @@ namespace Yubico.YubiKit.YubiOtp;
 ///  48       2   rfu (reserved, zero)
 ///  50       2   crc (CRC-16, complement of CalculateCrc)
 /// </code>
+/// Inputs are copied into private storage. Dispose the configuration, and separately clear caller-owned
+/// source buffers and every GetConfig result. Base defaults enable SerialApiVisible and AllowUpdate.
+/// Serial visibility flags merge across slots on legacy devices; clearing one slot need not hide the
+/// device serial globally. Firmware checks cover the configuration type, not every selected flag/length.
 /// </remarks>
 public abstract class SlotConfiguration : IDisposable
 {
@@ -56,7 +60,7 @@ public abstract class SlotConfiguration : IDisposable
     public virtual FirmwareVersion MinimumFirmwareVersion => new(2, 0, 0);
 
     /// <summary>
-    /// Checks whether this configuration is supported by the given firmware version.
+    /// Checks the configuration-type minimum, not all selected flags or length-dependent capabilities.
     /// Alpha/beta firmware sentinels are treated as modern firmware (see <see cref="FirmwareVersion.IsAlphaOrBeta" />).
     /// </summary>
     public bool IsSupportedBy(FirmwareVersion version) =>
@@ -74,6 +78,10 @@ public abstract class SlotConfiguration : IDisposable
     /// <summary>
     /// Enables or disables dormant mode for the slot.
     /// </summary>
+    /// <remarks>
+    /// Legacy Manual 3.3 describes activation by clearing this flag as one-way during updates: setting
+    /// it again requires full replacement. Applicability depends on device firmware.
+    /// </remarks>
     public SlotConfiguration Dormant(bool enable = true)
     {
         SetExtFlag(ExtendedFlag.Dormant, enable);
@@ -132,11 +140,27 @@ public abstract class SlotConfiguration : IDisposable
     /// <summary>
     /// Assembles the 52-byte wire format configuration struct.
     /// </summary>
-    /// <param name="accCode">Optional 6-byte access code. If empty, zeros are used.</param>
-    /// <returns>A 52-byte array containing the complete configuration struct with CRC.</returns>
+    /// <param name="accCode">The new 6-byte write-protection code, not the current authentication code. Empty sends zeros.</param>
+    /// <returns>A new caller-owned 52-byte array containing secrets and CRC. Clear it after use; disposing this object does not clear it.</returns>
+    /// <remarks>
+    /// Validates the code and evaluates configuration flags before copying secret fields into the result.
+    /// Do not reuse the configuration after disposal.
+    /// </remarks>
     public byte[] GetConfig(ReadOnlySpan<byte> accCode = default)
     {
         ThrowIfDisposed();
+
+        if (!accCode.IsEmpty && accCode.Length != YubiOtpConstants.AccessCodeSize)
+        {
+            throw new ArgumentException(
+                $"Access code must be exactly {YubiOtpConstants.AccessCodeSize} bytes, got {accCode.Length}.",
+                nameof(accCode));
+        }
+
+        // The flag getters may be overridden by callers. Run them before allocating the secret block.
+        var extFlags = GetEffectiveExtFlags();
+        var tktFlags = GetEffectiveTktFlags();
+        var cfgFlags = GetEffectiveCfgFlags();
 
         var config = new byte[YubiOtpConstants.ConfigSize];
 
@@ -144,22 +168,12 @@ public abstract class SlotConfiguration : IDisposable
         _uid.CopyTo(config.AsSpan(YubiOtpConstants.FixedSize, YubiOtpConstants.UidSize));
         _key.CopyTo(config.AsSpan(YubiOtpConstants.FixedSize + YubiOtpConstants.UidSize, YubiOtpConstants.KeySize));
 
-        if (!accCode.IsEmpty)
-        {
-            if (accCode.Length != YubiOtpConstants.AccessCodeSize)
-            {
-                throw new ArgumentException(
-                    $"Access code must be exactly {YubiOtpConstants.AccessCodeSize} bytes, got {accCode.Length}.",
-                    nameof(accCode));
-            }
-
-            accCode.CopyTo(config.AsSpan(38, YubiOtpConstants.AccessCodeSize));
-        }
+        accCode.CopyTo(config.AsSpan(38, YubiOtpConstants.AccessCodeSize));
 
         config[44] = _fixedSize;
-        config[45] = (byte)GetEffectiveExtFlags();
-        config[46] = (byte)GetEffectiveTktFlags();
-        config[47] = (byte)GetEffectiveCfgFlags();
+        config[45] = (byte)extFlags;
+        config[46] = (byte)tktFlags;
+        config[47] = (byte)cfgFlags;
 
         // Bytes 48-49 are RFU (reserved), already zero
 
@@ -253,6 +267,7 @@ public abstract class SlotConfiguration : IDisposable
 
     protected void SetExtFlag(ExtendedFlag flag, bool enable)
     {
+        ThrowIfDisposed();
         if (enable)
         {
             _extFlags |= flag;
@@ -265,6 +280,7 @@ public abstract class SlotConfiguration : IDisposable
 
     protected void SetTktFlag(TicketFlag flag, bool enable)
     {
+        ThrowIfDisposed();
         if (enable)
         {
             _tktFlags |= flag;
@@ -277,6 +293,7 @@ public abstract class SlotConfiguration : IDisposable
 
     protected void SetCfgFlag(ConfigFlag flag, bool enable)
     {
+        ThrowIfDisposed();
         if (enable)
         {
             _cfgFlags |= flag;
@@ -295,7 +312,7 @@ public abstract class SlotConfiguration : IDisposable
     /// The raw HMAC key. Must be exactly <see cref="YubiOtpConstants.HmacKeySize"/> (20) bytes.
     /// </param>
     /// <param name="initialMovingFactor">
-    /// The HOTP initial moving factor divided by 0x10000, or zero for HMAC challenge-response.
+    /// The raw two-byte HOTP counter field (counter divided by 16), or zero for HMAC challenge-response.
     /// </param>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="hmacKey"/> is not exactly

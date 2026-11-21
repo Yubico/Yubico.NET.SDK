@@ -22,7 +22,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
     private static readonly CancellationTokenSource CancellationTokenSource = new(TimeSpan.FromSeconds(100));
 
     /// <summary>
-    ///     Verifies that GenerateEcKeyAsync generates a valid P256 EC key pair and returns the public key.
+    ///     Checks GenerateKeyAsync's returned P-256 point and lists its reference in a later unauthenticated session.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.2")]
@@ -37,7 +37,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
             // Act - Generate a new EC key on the YubiKey
             var publicKey = await session.GenerateKeyAsync(
                 keyReference,
-                0,
+                KeyReplacement.New,
                 CancellationTokenSource.Token);
 
             var publicKeyBytes = publicKey.PublicPoint;
@@ -67,7 +67,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
                 ecdh.ExportParameters(false).Curve.Oid.Value);
         }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
 
-        // Verify the generated key can be used for authentication
+        // Verify persistence by listing without SCP; this callback does not authenticate with the generated key.
         await state.WithSecurityDomainSessionAsync(false,
             async session =>
             {
@@ -105,12 +105,12 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
         await state.WithSecurityDomainSessionAsync(false,
             async session =>
             {
-                // Only the above serials shall work.
+                // Install the fixture's approved serials; no unlisted-chain rejection is asserted here.
                 await session.StoreAllowListAsync(oceKeyRef, serials);
             }, scpKeyParams: keyParams, cancellationToken: CancellationTokenSource.Token);
 
-        // A new SCP11a session succeeding here shows the allowlist admitted our OCE certificate.
-        // Removing the list is an explicit operation (audit 26m); the key must still authenticate afterwards.
+        // A fresh SCP11a session checks that this fixture chain is admitted, then explicitly clears
+        // the restriction. The next session checks authentication still succeeds after clearing.
         await state.WithSecurityDomainSessionAsync(false,
             async session =>
             {
@@ -143,7 +143,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
 
             keyParameters = new Scp11KeyParameters(keyReference, publicKey);
 
-            await session.PutKeyAsync(keyReference, privateKey);
+            await session.PutKeyAsync(keyReference, privateKey, KeyReplacement.New);
         }, scpKeyParams: Scp03KeyParameters.Default);
 
 
@@ -180,6 +180,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
             async session =>
             {
                 Assert.True(session.IsAuthenticated);
+                // SCP11b establishes a channel but does not authorize the host's management attempt.
                 await Assert.ThrowsAsync<ApduException>(async () =>
                     await VerifyScp11bAuth(session, CancellationTokenSource.Token)
                 );
@@ -192,7 +193,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
             SecurityDomainSession session, CancellationToken cancellationToken = default)
         {
             var keyRef = new KeyReference(ScpKid.SCP11b, 0x7f);
-            await session.GenerateKeyAsync(keyRef, 0, cancellationToken);
+            await session.GenerateKeyAsync(keyRef, KeyReplacement.New, cancellationToken);
             await session.DeleteKeyAsync(keyRef, cancellationToken: cancellationToken);
         }
     }
@@ -235,7 +236,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
                 // Retrieve and verify
                 var result = await session.GetCertificatesAsync(keyReference, CancellationTokenSource.Token);
 
-                // Assert that we can store and retrieve the off card entity certificate
+                // Compare certificate thumbprints, not chain validity or association with the device key.
                 var oceThumbprint = oceCertificates.Bundle.Single().Thumbprint;
                 Assert.Single(result);
                 Assert.Equal(oceThumbprint, result[0].Thumbprint);
@@ -251,23 +252,23 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
     {
         var sessionRef = new KeyReference(scpKid, kvn);
         var oceRef = new KeyReference(OceKid, kvn);
-        var newPublicKey = await session.GenerateKeyAsync(sessionRef, 0, CancellationTokenSource.Token);
+        var newPublicKey = await session.GenerateKeyAsync(sessionRef, KeyReplacement.New, CancellationTokenSource.Token);
 
         var oceCerts = GetOceCertificates(Scp11TestData.OceCerts);
         ArgumentNullException.ThrowIfNull(oceCerts.Ca);
 
-        // Put Oce Keys
+        // Import the fixture CA-KLOC public key used to authenticate the host's chain.
         var ocePublicKey = ECPublicKey.CreateFromParameters(
             oceCerts.Ca.PublicKey.GetECDsaPublicKey()!.ExportParameters(false)
         );
 
-        await session.PutKeyAsync(oceRef, ocePublicKey, 0, CancellationTokenSource.Token);
+        await session.PutKeyAsync(oceRef, ocePublicKey, KeyReplacement.New, CancellationTokenSource.Token);
 
-        // Get Oce subject key identifier
+        // Get the CA's Subject Key Identifier.
         var ski = GetSki(oceCerts.Ca);
         if (ski.IsEmpty) throw new InvalidOperationException("CA certificate missing Subject Key Identifier");
 
-        // Store the key identifier with the referenced off card entity on the Yubikey
+        // Associate that identifier with the CA-KLOC key reference on the device.
         await session.StoreCaIssuerAsync(oceRef, ski, CancellationTokenSource.Token);
 
         var (certChain, privateKey) = GetOceCertificateChainAndPrivateKey(Scp11TestData.Oce, Scp11TestData.OcePassword);

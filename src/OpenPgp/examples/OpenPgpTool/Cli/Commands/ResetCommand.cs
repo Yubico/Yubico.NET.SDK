@@ -9,8 +9,12 @@ using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 
 /// <summary>
-///     Resets all OpenPGP data (openpgp reset).
+///     Attempts the OpenPGP application reset sequence (openpgp reset).
 /// </summary>
+/// <remarks>
+///     Successful YubiKey reset preserves ATT key/certificate and fixed ATT policy. Verify persistent
+///     state independently before treating a normal return as proof of erasure.
+/// </remarks>
 public sealed class ResetCommand : OpenPgpCommand<ResetCommand.Settings>
 {
     public sealed class Settings : CommandSettings
@@ -28,14 +32,14 @@ public sealed class ResetCommand : OpenPgpCommand<ResetCommand.Settings>
         if (!settings.Force)
         {
             AnsiConsole.MarkupLine("[red bold]WARNING: This will reset the OpenPGP application.[/]");
-            AnsiConsole.MarkupLine("[red]  - Delete ALL private keys[/]");
-            AnsiConsole.MarkupLine("[red]  - Delete ALL certificates[/]");
+            AnsiConsole.MarkupLine("[red]  - Delete ordinary keys and certificates (SIG, DEC, AUT)[/]");
+            AnsiConsole.MarkupLine("[red]  - Preserve the ATT key, certificate, and fixed touch policy[/]");
             AnsiConsole.MarkupLine("[red]  - Reset PINs to defaults (User: 123456, Admin: 12345678)[/]");
-            AnsiConsole.MarkupLine("[red]  - Clear all fingerprints and metadata[/]");
+            AnsiConsole.MarkupLine("[red]  - Clear ordinary key fingerprints and metadata[/]");
             AnsiConsole.WriteLine();
 
             if (!OutputHelpers.ConfirmDestructive(
-                    "factory reset the OpenPGP application, permanently destroying all keys and data"))
+                    "factory reset the OpenPGP application, permanently destroying ordinary key material"))
             {
                 OutputHelpers.WriteInfo("Reset cancelled.");
                 return 1;
@@ -48,7 +52,7 @@ public sealed class ResetCommand : OpenPgpCommand<ResetCommand.Settings>
                 await session.ResetAsync();
             });
 
-        OutputHelpers.WriteSuccess("OpenPGP application has been reset.");
+        OutputHelpers.WriteSuccess("OpenPGP reset completed and the applet was reopened. Inspect persistent state to verify erasure.");
         OutputHelpers.WriteInfo("Default User PIN: 123456");
         OutputHelpers.WriteInfo("Default Admin PIN: 12345678");
         return 0;

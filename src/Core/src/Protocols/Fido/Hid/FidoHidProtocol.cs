@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Buffers.Binary;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
@@ -20,11 +21,10 @@ namespace Yubico.YubiKit.Core.Protocols.Fido.Hid;
 /// Based on FIDO CTAP HID Protocol Specification.
 /// </summary>
 /// <remarks>
-///     Concurrency: CTAP HID permits one transaction at a time per channel — a request is an init
-///     packet plus continuation packets, and a foreign init packet mid-transaction aborts it on the
-///     device. This class serializes full logical exchanges (including lazy channel initialization)
-///     through an internal guard: overlapping calls are refused immediately. An exchange in flight runs to
-///     completion.
+///     This class admits one logical exchange, including lazy channel initialization, at a time and refuses
+///     overlap. CTAP 2.3 Proposed Standard (February 26, 2026), §11.2.5 distinguishes same-channel INIT
+///     resynchronization from another channel's busy response; an arbitrary foreign initialization packet
+///     is not an abort command. The guard covers an exchange rather than a multi-exchange applet workflow.
 /// </remarks>
 internal class FidoHidProtocol(
     IFidoHidConnection connection,
@@ -79,11 +79,20 @@ internal class FidoHidProtocol(
         SendCommandAsync(command, data, UserPresenceNotification.None, cancellationToken);
 
     /// <inheritdoc cref="IFidoHidProtocol.SendCommandAsync(byte, ReadOnlyMemory{byte}, UserPresenceNotification, CancellationToken)" />
-    public async Task<ReadOnlyMemory<byte>> SendCommandAsync(
+    public Task<ReadOnlyMemory<byte>> SendCommandAsync(
         byte command,
         ReadOnlyMemory<byte> data,
         UserPresenceNotification userPresenceNotification,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default) =>
+        SendCommandAsync(command, data, userPresenceNotification, cancellationToken, onCtapSuccess: null);
+
+    // The internal reset observer records device state, even if a subsequent host callback fails.
+    internal async Task<ReadOnlyMemory<byte>> SendCommandAsync(
+        byte command,
+        ReadOnlyMemory<byte> data,
+        UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken,
+        Action? onCtapSuccess)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(userPresenceNotification);
@@ -104,7 +113,8 @@ internal class FidoHidProtocol(
                                 data,
                                 userPresenceNotification,
                                 exchangeToken,
-                                cancellationToken)
+                                cancellationToken,
+                                onCtapSuccess)
                             .ConfigureAwait(false);
                     }
                     finally { _insideExchange.Value = false; }
@@ -112,8 +122,16 @@ internal class FidoHidProtocol(
                 cancellationToken)
             .ConfigureAwait(false);
 
-        _logger.LogTrace("Received CTAP HID command response: {Length} bytes", response.Length);
-        return response;
+        try
+        {
+            _logger.LogTrace("Received CTAP HID command response: {Length} bytes", response.Length);
+            return response;
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+            throw;
+        }
     }
 
     /// <summary>
@@ -168,7 +186,8 @@ internal class FidoHidProtocol(
             // Extract channel ID (bytes 8-11, big-endian)
             _channelId = BinaryPrimitives.ReadUInt32BigEndian(response.Span[8..12]);
 
-            // Extract firmware version (bytes 13-15) - skip protocol version byte at 12
+            // INIT's vendor-defined major/minor/build bytes (13-15), distinct from protocol version at 12.
+            // CTAP 2.3 Proposed Standard §11.2.9.1.3 permits responses longer than the 17-byte base layout.
             if (response.Length >= 16)
             {
                 var major = response.Span[13];
@@ -195,7 +214,8 @@ internal class FidoHidProtocol(
         ReadOnlyMemory<byte> data,
         UserPresenceNotification userPresenceNotification,
         CancellationToken exchangeToken,
-        CancellationToken callerToken = default)
+        CancellationToken callerToken = default,
+        Action? onCtapSuccess = null)
     {
         await SendRequest(channelId, command, data, exchangeToken).ConfigureAwait(false);
         return await ReceiveResponse(
@@ -203,7 +223,8 @@ internal class FidoHidProtocol(
                 command,
                 userPresenceNotification,
                 exchangeToken,
-                callerToken)
+                callerToken,
+                onCtapSuccess)
             .ConfigureAwait(false);
     }
 
@@ -267,15 +288,18 @@ internal class FidoHidProtocol(
     /// </summary>
     /// <remarks>
     /// <paramref name="exchangeToken"/> governs the reads and is uncancellable inside an
-    /// exchange, so a partially framed response is never stranded. <paramref name="callerToken"/>
-    /// is signal-only: it never aborts a read, it makes this method send CTAPHID_CANCEL.
+    /// exchange. <paramref name="callerToken"/> is signal-only: after a keep-alive it can trigger one
+    /// CTAPHID_CANCEL, followed by draining the original response. It never interrupts a pending read;
+    /// without further input the exchange can remain pending indefinitely. Transport/framing failures
+    /// still require recovery; an uncancellable read token alone does not ensure a successful drain.
     /// </remarks>
     private async Task<ReadOnlyMemory<byte>> ReceiveResponse(
         uint channelId,
         byte expectedCommand,
         UserPresenceNotification userPresenceNotification,
         CancellationToken exchangeToken,
-        CancellationToken callerToken)
+        CancellationToken callerToken,
+        Action? onCtapSuccess)
     {
         _logger.LogTrace("Receiving CTAP HID response");
 
@@ -292,18 +316,19 @@ internal class FidoHidProtocol(
             {
                 await ReadResponseDataAsync(initPacket, responseData, responseLength, channelId, exchangeToken)
                     .ConfigureAwait(false);
-                _logger.LogTrace("Received {Length} bytes in response", responseLength);
                 terminalResponseDrained = true;
+                bool ctapSuccess = IsCtapSuccess(expectedCommand, responseData);
+                if (ctapSuccess)
+                    onCtapSuccess?.Invoke();
 
-                // Only here is the channel provably clean. Throwing any earlier would strand the
-                // remaining frames for the next exchange to misread.
+                // Surface a callback failure after complete drain and confirmation, before fallible logging.
                 promptFailure?.Throw();
+                _logger.LogTrace("Received {Length} bytes in response", responseLength);
 
-                // CTAP 2.3 §11.2.9.1.5: a cancelled request "will reply with the error
-                // CTAP2_ERR_KEEPALIVE_CANCEL". A touch that raced the cancel yields a real success
-                // instead; the authenticator has done the work (a credential may now exist), and the
-                // spec never says to discard it, so it is returned.
-                if (cancelRequested && !IsCtapSuccess(expectedCommand, responseData))
+                // CTAP 2.3 Proposed Standard §11.2.9.1.5 requires the authenticator to return
+                // KEEPALIVE_CANCEL on the canceled original CBOR request, with no reply to CANCEL itself.
+                // Returning a raced CBOR success is this SDK's nonrollback policy, not a normative host rule.
+                if (cancelRequested && !ctapSuccess)
                     callerToken.ThrowIfCancellationRequested();
 
                 ownershipTransferred = true;
@@ -317,10 +342,22 @@ internal class FidoHidProtocol(
         }
         catch (Exception) when (promptFailure is not null && !terminalResponseDrained)
         {
+            WarnAboutTerminalValidationFailure(promptFailure.SourceException);
+            throw;
+        }
+    }
+
+    private void WarnAboutTerminalValidationFailure(Exception promptFailure)
+    {
+        try
+        {
             _logger.LogWarning(
                 "User-presence callback failed before CTAP HID terminal response validation also failed; exception type {ExceptionType}",
-                promptFailure.SourceException.GetType().FullName);
-            throw;
+                promptFailure.GetType().FullName);
+        }
+        catch (Exception)
+        {
+            // A logging failure must not replace the original transport or framing failure.
         }
     }
 
@@ -414,6 +451,8 @@ internal class FidoHidProtocol(
     private async Task ReadResponseDataAsync(ReadOnlyMemory<byte> initPacket, byte[] responseData,
         int responseLength, uint channelId, CancellationToken exchangeToken)
     {
+        // responseData is a separate accumulation owner. This reader copies connection-returned reports
+        // without clearing their storage; clearing the result alone does not erase those incoming copies.
         int initDataLength = Math.Min(responseLength, CtapConstants.InitDataSize);
         initPacket.Span.Slice(CtapConstants.InitHeaderSize, initDataLength).CopyTo(responseData);
 

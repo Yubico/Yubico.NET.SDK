@@ -13,6 +13,7 @@
     <!-- Package versions come from Directory.Packages.props -->
     <!-- When using Microsoft Testing Platform, DON'T use Microsoft.NET.Test.Sdk or xunit.runner.visualstudio -->
     <PackageReference Include="xunit.v3" />
+    <PackageReference Include="Spectre.Console.Testing" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,7 +26,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKit.YubiHsm.csproj" />
+    <ProjectReference Include="..\..\examples\HsmAuthTool\HsmAuthTool.csproj" />
     <ProjectReference Include="..\..\..\Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj" />
+    <Compile Include="..\..\..\SecurityDomain\tests\Yubico.YubiKit.SecurityDomain.UnitTests\Scp03HandshakeFakeConnection.cs" Link="TestSupport\Scp03HandshakeFakeConnection.cs" />
   </ItemGroup>
 
 </Project>

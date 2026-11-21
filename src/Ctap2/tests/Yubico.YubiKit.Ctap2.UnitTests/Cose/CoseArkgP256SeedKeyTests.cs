@@ -20,40 +20,46 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Cose;
 /// <summary>
 /// Tests for <see cref="CoseArkgP256SeedKey"/> CBOR decoding and encoding.
 /// </summary>
+/// <remarks>
+/// Fixed public points test the experimental SDK's wrapped-map profile and label routing, not
+/// draft-wide conformance, production cryptography or device interoperability.
+/// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class CoseArkgP256SeedKeyTests
 {
-    // Test P-256 coordinates for nested COSE_Key maps
-    private static readonly byte[] TestKemX = new byte[32];
-    private static readonly byte[] TestKemY = new byte[32];
-    private static readonly byte[] TestBlX = new byte[32];
-    private static readonly byte[] TestBlY = new byte[32];
-
-    static CoseArkgP256SeedKeyTests()
+    [Fact]
+    public void RegistrationOutput_ExtractsReportedAlgorithmInsteadOfSeedMarker()
     {
-        // Fill with distinct non-zero data
-        for (int i = 0; i < 32; i++)
-        {
-            TestKemX[i] = (byte)(0x10 + i);
-            TestKemY[i] = (byte)(0x30 + i);
-            TestBlX[i] = (byte)(0x20 + i);
-            TestBlY[i] = (byte)(0x40 + i);
-        }
+        byte[] point = [0x04, .. TestKemX, .. TestKemY];
+        var seed = new CoseArkgP256SeedKey(new CoseAlgorithm(-65700), new CoseAlgorithm(-9), point, point);
+        var output = new Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput(new byte[] { 1 }, seed.Encode(), -9);
+
+        var generated = output.TryGetGeneratedKey();
+
+        Assert.NotNull(generated);
+        Assert.Equal(-9, generated.DerivedKeyAlgorithm.Value);
     }
+
+    // Same public seed points as the ARKG derivation vector in PreviewSignGeneratedKeyTests.
+    private static readonly byte[] TestKemX = Convert.FromHexString("c38bbdd7286196733fa177e43b73cfd3d6d72cd11cc0bb2c9236cf85a42dcff5");
+    private static readonly byte[] TestKemY = Convert.FromHexString("dfa339c1e07dfcdfda8d7be2a5a3c7382991f387dfe332b1dd8da6e0622cfb35");
+    private static readonly byte[] TestBlX = Convert.FromHexString("6d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df");
+    private static readonly byte[] TestBlY = Convert.FromHexString("65ed42169c69675f936ff7de5f9bd93adbc8ea73036b16e8d90adbfabdaddba7");
 
     /// <summary>
     /// Builds a nested COSE_Key EC2 map: {1:2, 3:-7, -1:1, -2:x, -3:y}
     /// </summary>
-    private static byte[] BuildNestedEc2Key(byte[] x, byte[] y)
+    private static byte[] BuildNestedEc2Key(byte[] x, byte[] y, int curve = 1)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
-        // Canonical order: -3, -2, -1, 1, 3
+        // Numeric insertion order; the canonical writer sorts the map to 1, 3, -1, -2, -3.
         writer.WriteInt32(-3);
         writer.WriteByteString(y);
         writer.WriteInt32(-2);
         writer.WriteByteString(x);
         writer.WriteInt32(-1);
-        writer.WriteInt32(1); // P-256 curve ID
+        writer.WriteInt32(curve);
         writer.WriteInt32(1);
         writer.WriteInt32(2); // kty = 2 (EC2)
         writer.WriteInt32(3);
@@ -65,20 +71,21 @@ public class CoseArkgP256SeedKeyTests
     [Fact]
     public void Decode_WithValidArkgSeedKey_ReturnsCorrectVariant()
     {
-        // Arrange: construct CBOR map with NESTED COSE_Key maps
-        // Wire layout per spec: {1:2, 3:-65700, -3:-9, -2:<KEM nested map>, -1:<BL nested map>}
+        // SDK-profile fixture: kty2/alg-65700, -3 derived alg, -2 bstr(KEM map), -1 bstr(BL map).
+        // ARKG-10 agrees on seed alg=-65700, BL/KEM labels and example derived alg=-9, but uses
+        // kty=-65537/direct maps and permits optional int/tstr dkalg instead of requiring an integer.
         var kemNested = BuildNestedEc2Key(TestKemX, TestKemY);
         var blNested = BuildNestedEc2Key(TestBlX, TestBlY);
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
-        // Canonical order: -3, -2, -1, 1, 3
+        // Numeric insertion order; the canonical writer sorts the map to 1, 3, -1, -2, -3.
         writer.WriteInt32(-3);
         writer.WriteInt32(-9); // Derived key alg (Esp256)
         writer.WriteInt32(-2);
-        writer.WriteByteString(kemNested); // -2 = pkKem (per spec)
+        writer.WriteByteString(kemNested); // -2 = KEM; SDK wrapper contains the encoded map.
         writer.WriteInt32(-1);
-        writer.WriteByteString(blNested);  // -1 = pkBl  (per spec)
+        writer.WriteByteString(blNested);  // -1 = BL; SDK wrapper contains the encoded map.
         writer.WriteInt32(1);  // kty = 2
         writer.WriteInt32(2);
         writer.WriteInt32(3);  // alg = -65700
@@ -143,46 +150,31 @@ public class CoseArkgP256SeedKeyTests
     }
 
     /// <summary>
-    /// Spec contract: per draft-bradleylundberg-cfrg-arkg-10, python-fido2 (cose.py:428-433),
-    /// and the legacy SDK (Yubico.NET.SDK-Legacy/Yubico.YubiKey/src/Yubico/YubiKey/Fido2/PreviewSignExtension.cs:317-323),
-    /// the ARKG-P256 seed-key nested-COSE_Key wire format is:
+    /// Keeps the distinct ARKG-10 §5.1 public-seed derivation roles mapped correctly:
     ///   -1 = pkBl  (blinding public key)
     ///   -2 = pkKem (KEM public key)
-    /// This test builds a seed-key with two visually distinguishable nested EC2 keys
-    /// — one with all-0xAA coordinates at <c>-1</c>, one with all-0xBB at <c>-2</c> —
+    /// This test builds the SDK wrapped-map profile with two distinguishable P-256 keys
     /// and asserts that the decoder routes them to <c>BlPublicKey</c> and <c>KemPublicKey</c>
-    /// respectively. Regression guard for the modern-vs-legacy/python wire-mapping divergence
-    /// that caused FullCeremony GetAssertion to return CTAP2_ERR_OTHER (0x7F) on YubiKey
-    /// 5.8.0-beta — see Plans/snoopy-strolling-star.md (2026-04-29).
+    /// respectively. Swapping these roles changes downstream derivation inputs. The test does not
+    /// execute previewSign or establish firmware behavior or full Internet-Draft conformance.
+    /// ARKG-10 is work in progress with stated expiry 31 August 2026, not a production standard.
     /// </summary>
     [Fact]
     public void Decode_pkBlAtMinus1_pkKemAtMinus2_PerSpec()
     {
         // Arrange: nested EC2 keys with distinguishable coordinates
-        byte[] blX = new byte[32];
-        byte[] blY = new byte[32];
-        byte[] kemX = new byte[32];
-        byte[] kemY = new byte[32];
-        for (int i = 0; i < 32; i++)
-        {
-            blX[i] = 0xAA;  // BL = 0xAA pattern
-            blY[i] = 0xAB;
-            kemX[i] = 0xBB; // KEM = 0xBB pattern
-            kemY[i] = 0xBC;
-        }
+        var blNested = BuildNestedEc2Key(TestBlX, TestBlY);
+        var kemNested = BuildNestedEc2Key(TestKemX, TestKemY);
 
-        var blNested = BuildNestedEc2Key(blX, blY);
-        var kemNested = BuildNestedEc2Key(kemX, kemY);
-
-        // Wire layout per spec: -1 = pkBl, -2 = pkKem
+        // Label routing: -1 = BL, -2 = KEM; the byte-string wrappers are the SDK profile.
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(5);
         writer.WriteInt32(-3);
         writer.WriteInt32(-9); // derived alg
         writer.WriteInt32(-2);
-        writer.WriteByteString(kemNested); // -2 = KEM (per spec)
+        writer.WriteByteString(kemNested); // -2 = KEM, wrapped encoded map
         writer.WriteInt32(-1);
-        writer.WriteByteString(blNested);  // -1 = BL  (per spec)
+        writer.WriteByteString(blNested);  // -1 = BL, wrapped encoded map
         writer.WriteInt32(1);
         writer.WriteInt32(2);   // kty
         writer.WriteInt32(3);
@@ -193,12 +185,28 @@ public class CoseArkgP256SeedKeyTests
         var decoded = (CoseArkgP256SeedKey)CoseKey.Decode(writer.Encode());
 
         // Assert — modern routes -1 to BlPublicKey and -2 to KemPublicKey
-        Assert.Equal(0xAA, decoded.BlPublicKey.Span[1]);    // BL X starts with 0xAA
-        Assert.Equal(0xBB, decoded.KemPublicKey.Span[1]);   // KEM X starts with 0xBB
-        Assert.Equal(blX, decoded.BlPublicKey.Slice(1, 32).ToArray());
-        Assert.Equal(blY, decoded.BlPublicKey.Slice(33, 32).ToArray());
-        Assert.Equal(kemX, decoded.KemPublicKey.Slice(1, 32).ToArray());
-        Assert.Equal(kemY, decoded.KemPublicKey.Slice(33, 32).ToArray());
+        Assert.Equal(TestBlX, decoded.BlPublicKey.Slice(1, 32).ToArray());
+        Assert.Equal(TestBlY, decoded.BlPublicKey.Slice(33, 32).ToArray());
+        Assert.Equal(TestKemX, decoded.KemPublicKey.Slice(1, 32).ToArray());
+        Assert.Equal(TestKemY, decoded.KemPublicKey.Slice(33, 32).ToArray());
+    }
+
+    [Theory]
+    [InlineData(2, 32)] // wrong curve with otherwise valid coordinates
+    [InlineData(1, 31)] // short coordinate
+    [InlineData(1, 0)]  // use the full-width off-curve (0,0) point
+    public void Decode_RejectsInvalidNestedPoint(int curve, int xLength)
+    {
+        byte[] x = xLength == 0 ? new byte[32] : TestKemX[..xLength];
+        byte[] y = xLength == 0 ? new byte[32] : TestKemY;
+        var fields = new Dictionary<int, object?>
+        {
+            [-1] = BuildNestedEc2Key(TestBlX, TestBlY),
+            [-2] = BuildNestedEc2Key(x, y, curve),
+            [-3] = -9,
+        };
+
+        Assert.Throws<InvalidOperationException>(() => CoseArkgP256SeedKey.Decode(fields, new CoseAlgorithm(-65700)));
     }
 
     [Fact]

@@ -27,6 +27,13 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// credBlob allows storing a small blob of data (up to maxCredBlobLength bytes)
 /// alongside a discoverable credential, retrievable during assertions.
 /// </summary>
+/// <remarks>
+/// Retrieval byte equality is asserted unconditionally; creation/max-length storage results are checked
+/// only if returned. The fixed text/random fixtures are not PII examples: sensitive content requires
+/// level-3 credProtect with platform enforcement, which this builder does not implement.
+/// Setup normalizes the known PIN; cleanup deletes all credentials for the RP and does not comprehensively
+/// clear tokens/output copies. Run only on an explicitly approved dedicated device with a human present.
+/// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Extension", "credBlob")]
 public class Ctap2CredBlobTests
@@ -48,9 +55,8 @@ public class Ctap2CredBlobTests
 
             try
             {
-                // Guard against known SDK HID transport bug where
-                // FidoHidConnection.ReceiveAsync can throw NullReferenceException
-                // when the macOS HID RunLoop fails to dequeue a report in time.
+                // The retained catch below skips exceptions matching historical macOS HID stack names.
+                // It does not establish the cause or continued existence of that earlier transport issue.
                 using var clientPin = await Ctap2TestHelpers.SetOrVerifyPinAsync(session, Ctap2TestData.PinUtf8);
 
                 var rp = Ctap2TestData.CreateRelyingParty();
@@ -98,7 +104,7 @@ public class Ctap2CredBlobTests
 
                 credentialId = makeResult.GetCredentialId().ToArray();
 
-                // Verify the blob was stored
+                // Check the reported stored flag if present; absence does not fail this creation check.
                 if (makeResult.ExtensionOutputs.HasValue)
                 {
                     var extOutput = ExtensionOutput.DecodeWithRawData(makeResult.ExtensionOutputs.Value);
@@ -233,7 +239,7 @@ public class Ctap2CredBlobTests
 
                 Assert.NotNull(makeResult);
 
-                // Verify the blob was stored
+                // Conditional max-length stored check; no unconditional output-presence assertion here.
                 if (makeResult.ExtensionOutputs.HasValue)
                 {
                     var extOutput = ExtensionOutput.DecodeWithRawData(makeResult.ExtensionOutputs.Value);

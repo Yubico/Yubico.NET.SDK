@@ -34,9 +34,7 @@ public class PivSessionTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
-        // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // The factory borrows this connection; its creator retains disposal responsibility on failure.
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -46,12 +44,11 @@ public class PivSessionTests
         var mockConnection = Substitute.For<ISmartCardConnection>();
         mockConnection.Transport.Returns(Transport.Usb);
 
-        // This will likely fail during actual PIV selection since it's a mock,
-        // but it tests that the CreateAsync method exists and accepts the right parameters
+        // This substitute supplies no successful initialization responses.
         var exception = await Record.ExceptionAsync(() =>
             PivSession.CreateAsync(mockConnection, cancellationToken: TestContext.Current.CancellationToken));
 
-        // We expect this to fail with an ApduException since the mock doesn't implement real protocol
+        // The assertion checks only that an exception occurred, without establishing its type or stage.
         Assert.NotNull(exception);
     }
 
@@ -195,9 +192,9 @@ public class PivSessionTests
     ///     metadata is unavailable.
     /// </summary>
     /// <remarks>
-    ///     A major version of 0 marks a development key, which is at least 5.8.0 and therefore defaults
-    ///     to AES-192. Assuming Triple-DES for it would pick an algorithm the key does not use. See
-    ///     <see cref="FirmwareVersion.IsAlphaOrBeta" />.
+    ///     A major-zero fixture selects the SDK's optimistic development-version policy and AES-192
+    ///     fallback. These synthetic bytes establish no physical firmware minimum or installed key type.
+    ///     Available management metadata takes precedence. See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
     /// </remarks>
     [Theory]
     [InlineData(0, 0, 0)]
@@ -329,8 +326,8 @@ public class PivSessionTests
     [Fact]
     public async Task SignOrDecryptAsync_TransmitsAuthenticateTemplateWithChallenge()
     {
-        // Response data: dynamic-auth template(7C) containing one-byte result in response tag(82), then SW 9000.
-        var connection = CreateInitializedConnection([0x7C, 0x03, 0x82, 0x01, 0xAA, 0x90, 0x00]);
+        byte[] expected = Convert.FromHexString("3006020101020102");
+        var connection = CreateInitializedConnection([0x7C, 0x0A, 0x82, 0x08, .. expected, 0x90, 0x00]);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         // ECC P-256 sign/decrypt input is 32 bytes; 0xCC is a sentinel proving the payload survives encoding.
         var data = new byte[32];
@@ -342,7 +339,7 @@ public class PivSessionTests
             data,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal([0xAA], result.ToArray());
+        Assert.Equal(expected, result.ToArray());
         var command = LastCommand(connection);
         // APDU header: INS=GENERAL AUTHENTICATE, P1=algorithm, P2=target slot.
         Assert.Equal(0x87, command[1]);
@@ -504,24 +501,86 @@ public class PivSessionTests
     }
 
     [Fact]
+    public async Task VerifyPinAsync_WhenPinIsWrong_PreservesManagementAuthenticationAndAllowsRetry()
+    {
+        var connection = CreateInitializedConnection([0x63, 0xC2], OkResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: token);
+        MarkAuthenticated(session);
+
+        var failure = await Assert.ThrowsAsync<InvalidPinException>(() => session.VerifyPinAsync("123457"u8.ToArray(), token));
+        Assert.Equal(2, failure.RetriesRemaining);
+        Assert.True(session.IsManagementKeyAuthenticated);
+        await session.VerifyPinAsync("123456"u8.ToArray(), token);
+
+        Assert.True(session.IsInitialized);
+        Assert.True(session.IsManagementKeyAuthenticated);
+        Assert.Equal(0x20, LastCommand(connection)[1]);
+    }
+
+    [Fact]
     public async Task ResetAsync_BlocksPinAndPukThenResets()
     {
-        // Regression test for the BlockPukAsync -> AuthenticationProtocol.BlockPukAsync extraction:
-        // the APDU sequence (PIN metadata, VERIFY-until-blocked, RESET RETRY-until-blocked P2=0x80,
-        // RESET, re-fetch management key metadata) must be unchanged.
         var connection = CreateInitializedConnection(
+            [0x06, 0x01, 0x05, 0x09, 0x01, 0xAA, 0x07, 0x01, 0x00, 0x90, 0x00], // Bio unconfigured with a supported unknown tag
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata: 1 retry remaining
             [0x63, 0xC0], // VERIFY empty PIN -> blocked (0 retries)
             [0x63, 0xC0], // RESET RETRY empty PUK/PIN -> blocked (0 retries)
             [0x90, 0x00], // RESET
+            OkResponse(), VersionResponse(),
             ManagementKeyMetadataResponse());
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        int before = connection.TransmittedCommands.Count;
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.Contains(connection.TransmittedCommands, c => c[1] == 0x20 && c[3] == 0x80); // VERIFY PIN
-        Assert.Contains(connection.TransmittedCommands, c => c[1] == 0x2C && c[3] == 0x80); // RESET RETRY, PUK-blocking quirk
-        Assert.Contains(connection.TransmittedCommands, c => c[1] == 0xFB); // RESET
+        Assert.Equal<byte>([0xF7, 0xF7, 0x20, 0x2C, 0xFB, 0xA4, 0xFD, 0xF7],
+            connection.TransmittedCommands.Skip(before).Select(c => c[1]));
+        Assert.True(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+    }
+
+    [Theory]
+    [InlineData("0601050701019000", typeof(InvalidOperationException))]
+    [InlineData("0701009000", typeof(ApduException))]
+    [InlineData("6982", typeof(ApduException))]
+    [InlineData("6A82", typeof(ApduException))]
+    [InlineData("0601050701010701009000", typeof(ApduException))]
+    [InlineData("0601059F810104AA0500000701019000", typeof(ApduException))]
+    [InlineData("0601050701009F810104AA0500000701019000", typeof(ApduException))]
+    [InlineData("0601059F2101AA0701019000", typeof(InvalidOperationException))]
+    public async Task ResetAsync_WhenBioPreflightRefusesOrFails_DoesNotConsumeRetries(string response, Type error)
+    {
+        var connection = CreateInitializedConnection(Convert.FromHexString(response));
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: token);
+        int before = connection.TransmittedCommands.Count;
+
+        await Assert.ThrowsAsync(error, () => session.ResetAsync(token));
+
+        var command = Assert.Single(connection.TransmittedCommands.Skip(before));
+        Assert.Equal(0xF7, command[1]);
+        Assert.Equal(0x96, command[3]);
+    }
+
+    [Fact]
+    public async Task ResetAsync_WhenReselectFails_EndsSessionAndPreservesSelectError()
+    {
+        var connection = CreateInitializedConnection(
+            [0x6D, 0x00], // Bio unavailable
+            PinMetadataResponse(), [0x63, 0xC0], [0x63, 0xC0],
+            OkResponse(), [0x6A, 0x82]); // RESET succeeds; SELECT fails
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: token);
+        MarkAuthenticated(session);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(token));
+
+        Assert.Equal((short)0x6A82, error.SW);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetPinMetadataAsync(token));
     }
 
     [Fact]
@@ -529,10 +588,12 @@ public class PivSessionTests
     {
         var connection = CreateInitializedConnection(
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x6A, 0x88], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET
+            OkResponse(), VersionResponse(),
             ManagementKeyMetadataResponse(KeyType.Aes128)); // authoritative post-reset metadata
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -548,18 +609,21 @@ public class PivSessionTests
     ///     After reset on an alpha or beta key whose metadata is unsupported, the fallback is AES-192.
     /// </summary>
     /// <remarks>
-    ///     <c>VersionResponse</c> reports 0.0.1, marking a development key, which is at least 5.8.0 and
-    ///     therefore defaults to AES-192. See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
+    ///     <c>VersionResponse</c> supplies 0.0.1. The test checks the SDK's development-version AES-192
+    ///     fallback and management-flag clearing, not a physical 5.8.0 minimum or real reset default.
+    ///     See <see cref="FirmwareVersion.IsAlphaOrBeta" />.
     /// </remarks>
     [Fact]
     public async Task ResetAsync_WhenMetadataUnsupportedOnAlphaFirmware_UsesAes192FallbackAndClearsAuthentication()
     {
         var connection = CreateInitializedConnection(
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES128
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET
+            OkResponse(), VersionResponse(),
             [0x6D, 0x00]); // GET METADATA unsupported
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -580,10 +644,12 @@ public class PivSessionTests
     {
         var connection = CreateInitializedConnectionWithVersion(
             [0x05, 0x06, 0x00, 0x90, 0x00], // PIV applet version 5.6.0
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET
+            OkResponse(), [0x05, 0x06, 0x00, 0x90, 0x00],
             [0x6D, 0x00]); // GET METADATA unsupported
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -600,10 +666,12 @@ public class PivSessionTests
         var connection = CreateInitializedConnectionWithVersion(
             [0x05, 0x07, 0x00, 0x90, 0x00],
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET
+            OkResponse(), [0x05, 0x07, 0x00, 0x90, 0x00],
             [0x6D, 0x00]); // GET METADATA unsupported
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -623,10 +691,12 @@ public class PivSessionTests
         var connection = CreateInitializedConnectionWithVersion(
             [0x05, 0x07, 0x00, 0x90, 0x00],
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET succeeded
+            OkResponse(), [0x05, 0x07, 0x00, 0x90, 0x00],
             [(byte)(statusWord >> 8), (byte)statusWord]); // unexpected metadata refresh failure
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -645,10 +715,12 @@ public class PivSessionTests
     {
         var connection = CreateInitializedConnection(
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET succeeded
+            OkResponse(), VersionResponse(),
             [0x6A, 0x80]); // unexpected metadata refresh failure
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -664,6 +736,7 @@ public class PivSessionTests
     public async Task ResetAsync_WhenPinBlockingReturnsUnexpectedStatus_ThrowsAndDoesNotSendReset()
     {
         var connection = CreateInitializedConnection(
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata: 1 retry remaining
             [0x6A, 0x80], // VERIFY empty PIN -> unexpected status
             [0x63, 0xC0], // Would block PUK if ResetAsync continued

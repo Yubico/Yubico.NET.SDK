@@ -32,6 +32,9 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 /// <para>
 /// Most write operations require management key authentication.
 /// Certificate generation requires PIN if the slot's PIN policy requires it.
+/// Callers dispose returned Certificate objects; result records themselves provide no disposal.
+/// Examples borrow managementKey/pin buffers from the caller, which keeps them alive through each
+/// awaited call and clears them afterward. Existing certificates and keys are separate resources.
 /// </para>
 /// </remarks>
 public static class Certificates
@@ -45,12 +48,13 @@ public static class Certificates
     /// <returns>Result containing the certificate or error information.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await Certificates.GetCertificateAsync(session, Slot.Authentication, ct);
-    /// if (result.Success)
+    /// using var certificate = result.Certificate;
+    /// if (result.Success &amp;&amp; certificate is not null)
     /// {
-    ///     Console.WriteLine($"Subject: {result.Certificate!.Subject}");
+    ///     Console.WriteLine($"Subject: {certificate.Subject}");
     /// }
     /// </code>
     /// </example>
@@ -68,7 +72,7 @@ public static class Certificates
                 ? CertificateResult.Succeeded(cert)
                 : CertificateResult.Failed($"Slot {slot} is empty.");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Failed to read certificate: {ex.Message}");
         }
@@ -80,17 +84,18 @@ public static class Certificates
     /// <param name="session">An authenticated PIV session (management key verified).</param>
     /// <param name="slot">The target slot.</param>
     /// <param name="certificateData">Certificate data in PEM or DER format.</param>
-    /// <param name="compress">Whether to compress the certificate data.</param>
+    /// <param name="compress">True forces GZip; false selects SDK Automatic compression (GZip above 1856 DER bytes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result indicating success or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// await session.AuthenticateAsync(managementKey, ct);
     /// 
     /// var certData = await File.ReadAllBytesAsync("certificate.pem", ct);
     /// var result = await Certificates.ImportCertificateAsync(
-    ///     session, Slot.Authentication, certData, CertificateCompression.Automatic, ct);
+    ///     session, Slot.Authentication, certData, compress: false, cancellationToken: ct);
+    /// using var certificate = result.Certificate;
     /// </code>
     /// </example>
     public static async Task<CertificateResult> ImportCertificateAsync(
@@ -120,7 +125,7 @@ public static class Certificates
         {
             return CertificateResult.Failed("Certificate format not recognized. Expected PEM or DER.");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Import failed: {ex.Message}");
         }
@@ -132,15 +137,16 @@ public static class Certificates
     /// <param name="session">A PIV session.</param>
     /// <param name="slot">The slot to export from.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Result containing the PEM string or error.</returns>
+    /// <returns>Result containing a caller-owned certificate to export/dispose, or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await Certificates.ExportCertificatePemAsync(session, Slot.Authentication, ct);
-    /// if (result.Success &amp;&amp; result.Certificate is not null)
+    /// using var certificate = result.Certificate;
+    /// if (result.Success &amp;&amp; certificate is not null)
     /// {
-    ///     var pem = result.Certificate.ExportCertificatePem();
+    ///     var pem = certificate.ExportCertificatePem();
     ///     await File.WriteAllTextAsync("certificate.pem", pem, ct);
     /// }
     /// </code>
@@ -162,7 +168,7 @@ public static class Certificates
 
             return CertificateResult.Succeeded(cert);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Export failed: {ex.Message}");
         }
@@ -177,7 +183,7 @@ public static class Certificates
     /// <returns>Result indicating success or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// await session.AuthenticateAsync(managementKey, ct);
     /// 
     /// var result = await Certificates.DeleteCertificateAsync(session, Slot.Authentication, ct);
@@ -195,7 +201,7 @@ public static class Certificates
             await session.DeleteCertificateAsync(slot, cancellationToken);
             return CertificateResult.Deleted();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Delete failed: {ex.Message}");
         }
@@ -212,12 +218,13 @@ public static class Certificates
     /// <returns>Result containing the generated certificate or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// await session.AuthenticateAsync(managementKey, ct);
     /// await session.VerifyPinAsync(pin, ct);
     /// 
     /// var result = await Certificates.GenerateSelfSignedAsync(
     ///     session, Slot.Authentication, "CN=Test User", 365, ct);
+    /// using var certificate = result.Certificate;
     /// </code>
     /// </example>
     public static async Task<CertificateResult> GenerateSelfSignedAsync(
@@ -264,12 +271,12 @@ public static class Certificates
             if (publicKey is RSA rsa)
             {
                 request = new CertificateRequest(subjectName, rsa, hashAlgorithm, RSASignaturePadding.Pkcs1);
-                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa);
+                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa, cancellationToken);
             }
             else if (publicKey is ECDsa ecdsa)
             {
                 request = new CertificateRequest(subjectName, ecdsa, hashAlgorithm);
-                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa);
+                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa, cancellationToken);
             }
             else
             {
@@ -299,14 +306,18 @@ public static class Certificates
                 DateTimeOffset.UtcNow.AddDays(validityDays),
                 serialNumber);
 
-            await session.StoreCertificateAsync(
-                slot,
-                newCert,
-                CertificateCompression.Automatic,
-                cancellationToken);
-            return CertificateResult.Succeeded(newCert);
+            try
+            {
+                await session.StoreCertificateAsync(slot, newCert, CertificateCompression.Automatic, cancellationToken);
+                return CertificateResult.Succeeded(newCert);
+            }
+            catch
+            {
+                newCert.Dispose();
+                throw;
+            }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Generation failed: {ex.Message}");
         }
@@ -322,14 +333,16 @@ public static class Certificates
     /// <returns>Result containing the CSR in PEM format or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
-    /// 
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+    /// await session.VerifyPinAsync(pin, ct); // Borrowed caller-owned PIN; required by the slot policy.
+    ///
     /// var result = await Certificates.GenerateCsrAsync(
     ///     session, Slot.Authentication, "CN=Test User", ct);
     /// 
-    /// if (result.Success)
+    /// using var certificate = result.Certificate;
+    /// if (result.Success &amp;&amp; result.CsrPem is { } csrPem)
     /// {
-    ///     await File.WriteAllTextAsync("request.csr", result.CsrPem!, ct);
+    ///     await File.WriteAllTextAsync("request.csr", csrPem, ct);
     /// }
     /// </code>
     /// </example>
@@ -378,12 +391,12 @@ public static class Certificates
             if (publicKey is RSA rsa)
             {
                 request = new CertificateRequest(subjectName, rsa, hashAlgorithm, RSASignaturePadding.Pkcs1);
-                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa);
+                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa, cancellationToken);
             }
             else if (publicKey is ECDsa ecdsa)
             {
                 request = new CertificateRequest(subjectName, ecdsa, hashAlgorithm);
-                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa);
+                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa, cancellationToken);
             }
             else
             {
@@ -398,7 +411,7 @@ public static class Certificates
 
             return CertificateResult.CsrGenerated(pem);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"CSR generation failed: {ex.Message}");
         }
@@ -412,7 +425,8 @@ internal sealed class YubiKeyRsaSignatureGenerator(
     IPivSession session,
     Slot slot,
     KeyType keyType,
-    RSA publicKey) : X509SignatureGenerator
+    RSA publicKey,
+    CancellationToken cancellationToken) : X509SignatureGenerator
 {
     public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
     {
@@ -450,21 +464,20 @@ internal sealed class YubiKeyRsaSignatureGenerator(
             _ => throw new ArgumentException($"Unsupported hash algorithm: {hashAlgorithm}")
         };
 
-        // Build DigestInfo structure for PKCS#1 v1.5 signing
-        // DigestInfo ::= SEQUENCE { digestAlgorithm AlgorithmIdentifier, digest OCTET STRING }
-        byte[] digestInfo = BuildDigestInfo(hash, hashAlgorithm);
-
         // Pad to key size with PKCS#1 v1.5 padding
         int keySize = publicKey.KeySize / 8;
-        byte[] padded = ApplyPkcs1Padding(digestInfo, keySize);
+        byte[] padded = EncodeSignatureInput(hash, hashAlgorithm, keySize);
 
-        // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
-        var signature = session.SignOrDecryptAsync(slot, keyType, padded).GetAwaiter().GetResult();
+        // X509SignatureGenerator is synchronous: wait for the full operation, not a separately cancelable wait.
+        var signature = session.SignOrDecryptAsync(slot, keyType, padded, cancellationToken).GetAwaiter().GetResult();
 
         return signature.ToArray();
     }
 
     protected override PublicKey BuildPublicKey() => new(publicKey);
+
+    internal static byte[] EncodeSignatureInput(byte[] digest, HashAlgorithmName hashAlgorithm, int keySize) =>
+        ApplyPkcs1Padding(BuildDigestInfo(digest, hashAlgorithm), keySize);
 
     private static byte[] BuildDigestInfo(byte[] hash, HashAlgorithmName hashAlgorithm)
     {
@@ -518,7 +531,8 @@ internal sealed class YubiKeyEcdsaSignatureGenerator(
     IPivSession session,
     Slot slot,
     KeyType keyType,
-    ECDsa publicKey) : X509SignatureGenerator
+    ECDsa publicKey,
+    CancellationToken cancellationToken) : X509SignatureGenerator
 {
     public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
     {
@@ -552,7 +566,7 @@ internal sealed class YubiKeyEcdsaSignatureGenerator(
         // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
         // YubiKey returns ECDSA signatures in DER format (RFC 3279 SEQUENCE { INTEGER r, INTEGER s }).
         // X.509 CSR signature fields also expect DER, so no conversion is needed.
-        var signatureMemory = session.SignOrDecryptAsync(slot, keyType, hash).GetAwaiter().GetResult();
+        var signatureMemory = session.SignOrDecryptAsync(slot, keyType, hash, cancellationToken).GetAwaiter().GetResult();
         return signatureMemory.ToArray();
     }
 

@@ -17,6 +17,11 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 /// <summary>
 ///     Delegate for encrypting data using the DEK (Data Encryption Key) of a current SCP session.
 /// </summary>
+/// <remarks>
+///     The delegate borrows live session keys; use it only while its SCP session remains alive. The caller owns
+///     input and returned storage and clears sensitive bytes separately. Disposing parameters is not a substitute
+///     for disposing the session's derived-key owner.
+/// </remarks>
 /// <param name="data">The data to encrypt.</param>
 /// <returns>The encrypted data.</returns>
 public delegate byte[] DataEncryptor(ReadOnlySpan<byte> data);

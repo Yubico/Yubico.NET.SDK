@@ -1,12 +1,59 @@
 using FluentAssertions;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Ctap2.Cbor;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
+/// <summary>Checks command prefixes and selected request-builder values.</summary>
+/// <remarks>Most With* cases assert only nonempty payload and command byte. They do not establish
+/// complete command schema, allocation behavior or canonical wire order from their method names.</remarks>
 public class CtapRequestBuilderTests
 {
+    [Fact]
+    public void Build_EncodesSnapshotAndConsumesBuilder()
+    {
+        byte[] source = [0xAA];
+        var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin).WithBytes(1, source);
+        source[0] = 0xBB;
+
+        Assert.Equal(new byte[] { CtapCommand.ClientPin, 0xA1, 0x01, 0x41, 0xAA }, builder.Build());
+        Assert.Equal(0xBB, source[0]);
+        Assert.Throws<InvalidOperationException>(builder.Build);
+        Assert.Throws<InvalidOperationException>(() => builder.WithInt(2, 3));
+    }
+
+    [Fact]
+    public void Build_ReleasesWrittenWriterStateAfterSuccessfulEncoding()
+    {
+        CborWriter? retained = null;
+        using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin).WithValue(1, writer =>
+        {
+            retained = writer;
+            writer.WriteByteString([0xA5]);
+        });
+
+        Assert.Equal(new byte[] { CtapCommand.ClientPin, 0xA1, 0x01, 0x41, 0xA5 }, builder.Build());
+        Assert.Equal(0, Assert.IsType<CborWriter>(retained).BytesWritten);
+    }
+
+    [Fact]
+    public void Build_WhenValueCallbackFails_StillConsumesBuilder()
+    {
+        var failure = new FormatException("Fixture failure");
+        CborWriter? retained = null;
+        var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            .WithBytes(1, new byte[] { 0xAA })
+            .WithValue(2, writer =>
+            {
+                retained = writer;
+                throw failure;
+            });
+
+        Assert.Same(failure, Assert.Throws<FormatException>(builder.Build));
+        Assert.Equal(0, Assert.IsType<CborWriter>(retained).BytesWritten);
+        Assert.Throws<InvalidOperationException>(builder.Build);
+    }
+
     [Fact]
     public void Create_WithCommandOnly_ReturnsCommandByte()
     {
@@ -26,7 +73,7 @@ public class CtapRequestBuilderTests
             .WithInt(1, 42)
             .Build();
 
-        // Assert - command byte + CBOR map {1: 42}
+        // Assert payload presence and command byte only; the map/value is not decoded here.
         result.Should().HaveCountGreaterThan(1);
         result[0].Should().Be(CtapCommand.ClientPin);
     }
@@ -76,6 +123,7 @@ public class CtapRequestBuilderTests
     [Fact]
     public void WithValue_WritesParameterWithoutIntermediateCopy()
     {
+        // Decodes the key/value; no allocation measurement establishes the method name's copy claim.
         // Arrange & Act
         var result = CtapRequestBuilder.Create(CtapCommand.MakeCredential)
             .WithValue(1, writer => writer.WriteByteString([0xAA, 0xBB]))
@@ -100,10 +148,10 @@ public class CtapRequestBuilderTests
             .WithInt(2, 200)
             .Build();
 
-        // Assert - parameters should be sorted in canonical CBOR order
+        // Assert prefix/payload presence only; this test does not inspect the key order.
         result.Should().HaveCountGreaterThan(1);
         result[0].Should().Be(CtapCommand.MakeCredential);
-        // CBOR map with 3 entries, keys 1, 2, 3 in sorted order
+        // Exact encoded-key order needs a separate byte-level assertion, not this length check.
     }
 
     [Fact]

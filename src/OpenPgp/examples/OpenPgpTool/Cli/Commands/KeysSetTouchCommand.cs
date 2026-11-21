@@ -49,17 +49,19 @@ public sealed class KeysSetTouchCommand : OpenPgpCommand<KeysSetTouchCommand.Set
                 $"Invalid policy: {settings.Policy}. Must be on, off, fixed, cached, or cached-fixed.")
         };
 
-        // Check if current policy is fixed
+        var fixedPolicyEffect = keyRef == KeyRef.Att
+            ? "Fixed ATT policy survives reset; clearing it requires irreversible ATT key replacement."
+            : "Fixed policy clears only on ordinary key replacement, deletion, or reset.";
         var current = await session.GetUifAsync(keyRef);
         if (current.IsFixed())
         {
-            OutputHelpers.WriteError("Current touch policy is fixed and cannot be changed without factory reset.");
+            OutputHelpers.WriteError(fixedPolicyEffect);
             return 1;
         }
 
         // Warn about fixed policies
         if (uif.IsFixed() && !ConfirmAction(
-                "set a PERMANENT touch policy that cannot be changed without factory reset", settings.Force))
+                $"set a fixed touch policy. {fixedPolicyEffect}", settings.Force))
         {
             OutputHelpers.WriteInfo("Touch policy change cancelled.");
             return 1;

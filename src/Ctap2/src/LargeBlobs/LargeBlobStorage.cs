@@ -14,7 +14,6 @@
 
 using System.Formats.Cbor;
 using System.Security.Cryptography;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.LargeBlobs;
@@ -26,17 +25,40 @@ namespace Yubico.YubiKit.Ctap2.LargeBlobs;
 /// <para>
 /// The authenticatorLargeBlobs command allows storing arbitrary data associated with
 /// discoverable credentials. Data is encrypted using the credential's largeBlobKey,
-/// which is derived from the credential private key.
+/// returned in the credential response envelope when largeBlobKey is requested. Do not assume the
+/// authenticator derives this random storage key from the credential private key. Check both
+/// largeBlobKey advertisement and largeBlobs:true; this helper does not perform capability preflight.
 /// </para>
 /// <para>
-/// Large blobs are stored in a single array on the authenticator. Reading is always
-/// allowed; writing requires PIN/UV authentication with the LargeBlobWrite permission.
+/// Large blobs share one serialized array. Reading ciphertext needs no PIN/UV parameter here, but
+/// returning a credential's plaintext requires its key. Actual writes always require a supplied
+/// protocol/token in this SDK, stricter than CTAP 2.3 §6.10.2's conditional device UV rule.
+/// The device checks the opaque token's authorization when configured UV or alwaysUv:true requires it;
+/// this helper does not inspect token permissions, validity or expiry.
 /// </para>
 /// <para>
-/// For credentials created with the largeBlob extension, use
+/// For credentials created with largeBlobKey, use
 /// <see cref="GetBlobAsync(ReadOnlyMemory{byte}, CancellationToken)"/> and
 /// <see cref="SetBlobAsync(ReadOnlyMemory{byte}, ReadOnlyMemory{byte}, CancellationToken)"/>
 /// to read/write blobs for specific credentials.
+/// The alternative direct largeBlob extension is not implemented by this helper.
+/// </para>
+/// <para>
+/// Limits are cached per helper from GetInfo: fragment length is maxMsgSize minus 64 (default 960),
+/// and the reported maximum serialized array size gates writes. Normally these limits remain cached;
+/// a write with no cached maximum array size reloads GetInfo and refreshes the fragment limit too.
+/// Reads continue until a short/empty fragment; writes send sequential chunks with total length only
+/// on the first chunk and authentication on each. Intermediate success is not a complete-array commit.
+/// Coordinate the entire operation with other users of the session/shared array: there is no
+/// sequence-wide lock, conflict detection, rollback or resume. After failure/cancellation, re-read
+/// state rather than assuming no write occurred or blindly resuming at the failed offset.
+/// </para>
+/// <para>
+/// The session, protocol and token are borrowed, not disposed or cleared by this helper. Keep them
+/// usable and token storage unchanged throughout each awaited operation. Returned plaintext arrays
+/// are caller-owned; clear them and caller-owned keys/data when finished, including later failures.
+/// Internal membership probes, compression and authenticated-request copies are not comprehensively
+/// cleared, so this is not an end-to-end sensitive-data cleanup guarantee.
 /// </para>
 /// </remarks>
 public sealed class LargeBlobStorage : ILargeBlobStorage
@@ -61,12 +83,14 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
     private const int DefaultMaxMsgSize = 1024;   // CTAP §6.4: "If this member is absent, a default value of 1024 is assumed"
     private const int FragmentOverhead = 64;       // CTAP §6.10.2: maxFragmentLength = maxMsgSize − 64
+    private const int MaxSerializedSize = 16 * 1024 * 1024;
+    private const int MaxReadFragments = 32768;
 
     private int? _maxFragmentLength;
     private int? _maxSerializedLargeBlobArray;
 
     /// <summary>Creates read-only storage. Fragment sizes come from the authenticator's GetInfo.</summary>
-    /// <param name="session">The CTAP2 session.</param>
+    /// <param name="session">A borrowed initialized session; keep it open through each operation.</param>
     public LargeBlobStorage(ICtap2Session session)
     {
         ArgumentNullException.ThrowIfNull(session);
@@ -74,9 +98,9 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     }
 
     /// <summary>Creates read/write storage; writes need a PIN/UV token with the LargeBlobWrite permission.</summary>
-    /// <param name="session">The CTAP2 session.</param>
-    /// <param name="protocol">The PIN/UV auth protocol the token was minted with.</param>
-    /// <param name="pinUvAuthToken">A PIN/UV auth token carrying LargeBlobWrite (CTAP §6.10.2).</param>
+    /// <param name="session">A borrowed initialized session.</param>
+    /// <param name="protocol">A borrowed usable protocol matching the token; this helper does not dispose it.</param>
+    /// <param name="pinUvAuthToken">Borrowed token with LargeBlobWrite authorization; keep storage stable until operations finish, then clear it when no longer needed.</param>
     public LargeBlobStorage(
         ICtap2Session session,
         IPinUvAuthProtocol protocol,
@@ -90,7 +114,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
     /// <summary>
     /// CTAP §6.10.2: "maxFragmentLength = maxMsgSize − 64" with GetInfo's maxMsgSize (default 1024, §6.4).
-    /// Read once per instance.
+    /// Cached per instance; LoadLimitsAsync can refresh it when a write has no reported maximum array size.
     /// </summary>
     private async ValueTask<int> GetMaxFragmentLengthAsync(CancellationToken cancellationToken)
     {
@@ -114,6 +138,11 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The large blob array.</returns>
+    /// <remarks>
+    /// Short/hash-corrupt data becomes the initial empty array. Malformed fragments and malformed
+    /// CBOR behind a valid hash throw. Reads are bounded by the advertised size (when present),
+    /// an SDK ceiling of 16 MiB and at most 32768 fragments, including the final short or empty fragment.
+    /// </remarks>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
     public async Task<LargeBlobArray> ReadLargeBlobArrayAsync(CancellationToken cancellationToken = default)
     {
@@ -134,6 +163,12 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// Writes the entire large blob array to the authenticator.
     /// </summary>
     /// <param name="array">The array to write.</param>
+    /// <remarks>
+    /// Replaces the complete shared array, not only one credential's entry. Keep entry/list storage
+    /// unchanged until completion and preserve other clients' entries where possible. A failed call
+    /// can leave changed/torn state; there is no transactional rollback or conflict detection.
+    /// The serialized array must fit the same byte and fragment limits as a subsequent read.
+    /// </remarks>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <exception cref="InvalidOperationException">Thrown when PIN/UV auth is not configured.</exception>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
@@ -150,8 +185,6 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
                 "Use the constructor that accepts a protocol and token.");
         }
 
-        var serialized = array.Serialize();
-
         // CTAP §6.10.2: "Platforms MUST NOT attempt to write a serialized large-blob array that exceeds the
         // maxSerializedLargeBlobArray reported by the authenticator in the authenticatorGetInfo response."
         if (_maxSerializedLargeBlobArray is null)
@@ -159,13 +192,16 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
             await LoadLimitsAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        if (_maxSerializedLargeBlobArray is { } max && serialized.Length > max)
+        int maxFragmentLength = await GetMaxFragmentLengthAsync(cancellationToken).ConfigureAwait(false);
+        int max = GetEffectiveArrayCapacity(maxFragmentLength);
+        var serialized = array.Serialize();
+        if (serialized.Length > max)
         {
             throw new InvalidOperationException(
-                $"Serialized large-blob array is {serialized.Length} bytes; the authenticator accepts at most {max} (maxSerializedLargeBlobArray, CTAP §6.10.2).");
+                $"Serialized large-blob array is {serialized.Length} bytes; the effective read/write limit is {max} bytes.");
         }
 
-        await WriteRawBlobAsync(serialized, cancellationToken).ConfigureAwait(false);
+        await WriteRawBlobAsync(serialized, maxFragmentLength, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -173,9 +209,10 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// </summary>
     /// <param name="largeBlobKey">The credential's largeBlobKey (32 bytes).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>The decrypted blob data, or null if no blob exists for this credential.</returns>
+    /// <returns>Caller-owned plaintext to clear after use, or null if no entry decrypts within the SDK's 1 MiB read cap.</returns>
     /// <exception cref="ArgumentException">Thrown when largeBlobKey is not 32 bytes.</exception>
     /// <exception cref="CtapException">Thrown when reading fails.</exception>
+    /// <exception cref="InvalidDataException">A decrypted entry cannot inflate to its declared original size.</exception>
     public async Task<byte[]?> GetBlobAsync(
         ReadOnlyMemory<byte> largeBlobKey,
         CancellationToken cancellationToken = default)
@@ -197,9 +234,13 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <remarks>
     /// <para>
-    /// This operation replaces any existing blob for this credential.
-    /// It reads the current array, removes any existing entry for this key,
+    /// This operation replaces entries that decrypt with this key within the SDK read cap.
+    /// It reads the current array, removes those matching entries,
     /// adds the new encrypted entry, and writes the array back.
+    /// This is a full-array read-modify-write, not an atomic per-credential update. Foreign entries are
+    /// preserved only within LargeBlobArray's modeled scope. The SDK limits plaintext to 1 MiB on
+    /// both read and write, independently of the serialized array limit. Inputs are borrowed through
+    /// the completed await.
     /// </para>
     /// </remarks>
     /// <exception cref="ArgumentException">Thrown when largeBlobKey is not 32 bytes.</exception>
@@ -215,6 +256,8 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
             throw new ArgumentException("Large blob key must be 32 bytes.", nameof(largeBlobKey));
         }
 
+        ArgumentOutOfRangeException.ThrowIfGreaterThan((ulong)data.Length, LargeBlobEntry.MaxOriginalSize, nameof(data));
+
         // Read current array
         var array = await ReadLargeBlobArrayAsync(cancellationToken).ConfigureAwait(false);
 
@@ -222,7 +265,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         var newEntries = new List<LargeBlobEntry>();
         foreach (var entry in array.Entries)
         {
-            if (entry.TryDecrypt(largeBlobKey.Span) is null)
+            if (!BelongsToCredential(entry, largeBlobKey.Span))
             {
                 // Keep entries that don't decrypt with this key
                 newEntries.Add(entry);
@@ -243,7 +286,13 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// </summary>
     /// <param name="largeBlobKey">The credential's largeBlobKey (32 bytes).</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>True if a blob was deleted, false if no blob existed for this key.</returns>
+    /// <returns>True after rewriting the array without matching decryptable entries; false when none matched, including entries above the read cap.</returns>
+    /// <remarks>
+    /// Reads and rewrites the full shared array without a transaction or conflict lock. A read-only
+    /// helper can return false without writing; a matching entry requires configured write authentication.
+    /// Successful membership probes currently leave discarded plaintext copies. Failure/cancellation
+    /// does not establish rollback; re-read storage before deciding how to recover.
+    /// </remarks>
     /// <exception cref="ArgumentException">Thrown when largeBlobKey is not 32 bytes.</exception>
     /// <exception cref="InvalidOperationException">Thrown when PIN/UV auth is not configured.</exception>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
@@ -265,7 +314,7 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
         foreach (var entry in array.Entries)
         {
-            if (entry.TryDecrypt(largeBlobKey.Span) is not null)
+            if (BelongsToCredential(entry, largeBlobKey.Span))
             {
                 found = true;
                 // Skip this entry (delete it)
@@ -290,20 +339,30 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// <summary>
     /// Reads raw blob data from the authenticator (for advanced use).
     /// </summary>
+    private static bool BelongsToCredential(LargeBlobEntry entry, ReadOnlySpan<byte> key)
+    {
+        byte[]? plaintext = entry.TryDecrypt(key);
+        CryptographicOperations.ZeroMemory(plaintext);
+        return plaintext is not null;
+    }
+
     private async Task<byte[]> ReadRawBlobAsync(CancellationToken cancellationToken)
     {
-        var maxFragmentLength = await GetMaxFragmentLengthAsync(cancellationToken).ConfigureAwait(false);
+        int maxFragmentLength = await GetMaxFragmentLengthAsync(cancellationToken).ConfigureAwait(false);
+        int maximum = GetEffectiveArrayCapacity(maxFragmentLength);
         using var result = new MemoryStream();
-        var offset = 0;
+        int offset = 0;
+        int maxReads = maximum / maxFragmentLength + 1;
 
-        while (true)
+        for (int i = 0; i < maxReads; i++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var fragment = await ReadFragmentAsync(offset, maxFragmentLength, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (fragment.Length == 0)
+            if (fragment.Length > maxFragmentLength || fragment.Length > maximum - offset)
             {
-                break;
+                throw new InvalidOperationException("Large-blob fragment exceeds the request or array limit.");
             }
 
             result.Write(fragment.Span);
@@ -312,11 +371,22 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
             // If we got less than requested, we're done
             if (fragment.Length < maxFragmentLength)
             {
-                break;
+                return result.ToArray();
             }
         }
 
-        return result.ToArray();
+        throw new InvalidOperationException("Large-blob read exceeded the fragment limit.");
+    }
+
+    private int GetEffectiveArrayCapacity(int maxFragmentLength)
+    {
+        if (maxFragmentLength <= 0 || _maxSerializedLargeBlobArray is < 0)
+            throw new InvalidOperationException("Invalid large-blob limits in GetInfo.");
+
+        // A read ends only on a short fragment (empty when the length is an exact multiple).
+        long fragmentCapacity = (long)maxFragmentLength * MaxReadFragments - 1;
+        int byteCapacity = Math.Min(_maxSerializedLargeBlobArray ?? MaxSerializedSize, MaxSerializedSize);
+        return (int)Math.Min(byteCapacity, fragmentCapacity);
     }
 
     /// <summary>
@@ -359,9 +429,9 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
     /// </summary>
     private async Task WriteRawBlobAsync(
         ReadOnlyMemory<byte> data,
+        int maxFragmentLength,
         CancellationToken cancellationToken)
     {
-        var maxFragmentLength = await GetMaxFragmentLengthAsync(cancellationToken).ConfigureAwait(false);
         var totalLength = data.Length;
         var offset = 0;
 
@@ -387,12 +457,12 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
         int totalLength,
         CancellationToken cancellationToken)
     {
-        // Build the message for PIN/UV auth: 32-byte hash of (0xff || offset bytes || SHA-256(data))
+        // Authenticate a 70-byte message: 32*0xff || 0x0c00 || LE32(offset) || SHA-256(fragment).
         // First, compute SHA-256 of the fragment
         Span<byte> fragmentHash = stackalloc byte[32];
         SHA256.HashData(fragment.Span, fragmentHash);
 
-        // Build auth message per CTAP 2.1 spec section 6.10.3:
+        // Build auth message per CTAP 2.1-2.3 §6.10.2:
         // authenticate(pinUvAuthToken, 32*0xff || 0x0C || 0x00 || uint32LittleEndian(offset) || SHA-256(contents of set byte string))
         var authMessage = new byte[32 + 2 + 4 + 32];
         authMessage.AsSpan(0, 32).Fill(0xff);
@@ -450,21 +520,21 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
 
     private static ReadOnlyMemory<byte> ParseReadResponse(ReadOnlyMemory<byte> response)
     {
-        if (response.Length == 0)
-        {
-            return ReadOnlyMemory<byte>.Empty;
-        }
-
         var reader = new CborReader(response, CborConformanceMode.Ctap2Canonical);
-        var mapCount = reader.ReadStartMap() ?? 0;
+        reader.ReadStartMap();
+        ReadOnlyMemory<byte>? config = null;
 
-        for (var i = 0; i < mapCount; i++)
+        while (reader.PeekState() is not CborReaderState.EndMap)
         {
             var key = reader.ReadInt32();
 
             if (key == KeyConfig)
             {
-                return reader.ReadByteString();
+                if (reader.PeekState() is not CborReaderState.ByteString)
+                {
+                    throw new CborContentException("Large-blob fragment must be a byte string.");
+                }
+                config = reader.ReadDefiniteLengthByteString();
             }
             else
             {
@@ -472,6 +542,11 @@ public sealed class LargeBlobStorage : ILargeBlobStorage
             }
         }
 
-        return ReadOnlyMemory<byte>.Empty;
+        reader.ReadEndMap();
+        if (reader.BytesRemaining != 0)
+        {
+            throw new CborContentException("Unexpected bytes after the large-blob response map.");
+        }
+        return config ?? throw new CborContentException("Large-blob response is missing its fragment.");
     }
 }

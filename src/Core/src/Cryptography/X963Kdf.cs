@@ -27,6 +27,11 @@ internal static class X963Kdf
     /// <param name="sharedInfo">Optional shared information (can be empty)</param>
     /// <param name="keyDataLength">Desired output length in bytes</param>
     /// <returns>Derived key material of exactly keyDataLength bytes</returns>
+    /// <remarks>
+    /// Inputs are borrowed. Clear the returned secret-derived array after use. This helper does not
+    /// explicitly clear its stack hash or a partially populated result when hashing fails; those
+    /// intermediate lifetimes are distinct from the caller's successful result owner.
+    /// </remarks>
     /// <exception cref="ArgumentException">Thrown if keyDataLength is invalid</exception>
     internal static byte[] DeriveKeyMaterial(
         ReadOnlySpan<byte> z,

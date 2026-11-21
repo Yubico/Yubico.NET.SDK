@@ -36,22 +36,25 @@ internal static class BioProtocol
     private const int ShortTlvHeaderLength = 2;
     private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(BioProtocol));
 
-    internal static async Task<BioMetadata> GetBioMetadataAsync(IBackend backend, CancellationToken cancellationToken = default)
+    internal static async Task<BioMetadata> GetBioMetadataAsync(IBackend backend, CancellationToken cancellationToken = default) =>
+        await ReadBioMetadataAsync(backend, forReset: false, cancellationToken).ConfigureAwait(false)
+        ?? throw new NotSupportedException("Biometric verification is not supported by this YubiKey.");
+
+    internal static Task<BioMetadata?> ReadResetPreflightAsync(IBackend backend, CancellationToken cancellationToken) =>
+        ReadBioMetadataAsync(backend, forReset: true, cancellationToken);
+
+    private static async Task<BioMetadata?> ReadBioMetadataAsync(IBackend backend, bool forReset, CancellationToken cancellationToken)
     {
         var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Bio);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
         try
         {
-            EnsureAvailable(response);
-            // Python YubiKit 4ca60f7 piv.py:1111-1133: retries are required; the two flags are optional.
-            var fields = TlvHelper.DecodeDictionary(response.Data);
-            byte retries = ReadByte(fields, TagRetries, required: true);
-            byte configured = ReadByte(fields, TagConfigured);
-            byte temporaryPin = ReadByte(fields, TagTemporaryPinActive);
-            if (configured > 1 || temporaryPin > 1)
-                throw new ApduException("Invalid biometric metadata flag.");
-            Logger.LogDebug("PIV: Biometric metadata configured={Configured}, retries={Retries}, temporary PIN active={Active}", configured == 1, retries, temporaryPin == 1);
-            return new BioMetadata(configured == 1, retries, temporaryPin == 1);
+            if (response.SW is SWConstants.DataNotFound or SWConstants.InsNotSupported
+                || (!forReset && response.SW == SWConstants.FileOrApplicationNotFound))
+                return null;
+            if (!response.IsOK())
+                throw ApduException.FromStatusWord(response.SW, "Biometric operation failed");
+            return ParseBioMetadata(response.Data, forReset);
         }
         catch (Exception ex) when (ex is ArgumentException or IndexOutOfRangeException)
         {
@@ -61,6 +64,38 @@ internal static class BioProtocol
         {
             response.Clear();
         }
+    }
+
+    private static BioMetadata ParseBioMetadata(ReadOnlyMemory<byte> data, bool forReset)
+    {
+        // Python YubiKit 4ca60f7 piv.py:1111-1133: retries are required; the two flags are optional.
+        using var tlvs = TlvHelper.DecodeList(data);
+        var fields = new Dictionary<int, ReadOnlyMemory<byte>>();
+        foreach (var tlv in tlvs)
+        {
+            RejectUnsupportedResetTag(tlv.Tag, forReset);
+            if (tlv.Tag is not (TagRetries or TagConfigured or TagTemporaryPinActive))
+                continue;
+            if (forReset && fields.ContainsKey(tlv.Tag))
+                throw new ApduException($"Duplicate biometric metadata field 0x{tlv.Tag:X2}.");
+            fields[tlv.Tag] = tlv.Value;
+        }
+
+        byte retries = ReadByte(fields, TagRetries, required: true);
+        byte configured = ReadByte(fields, TagConfigured);
+        byte temporaryPin = ReadByte(fields, TagTemporaryPinActive);
+        if (configured > 1 || temporaryPin > 1)
+            throw new ApduException("Invalid biometric metadata flag.");
+        Logger.LogDebug("PIV: Biometric metadata configured={Configured}, retries={Retries}, temporary PIN active={Active}", configured == 1, retries, temporaryPin == 1);
+        return new BioMetadata(configured == 1, retries, temporaryPin == 1);
+    }
+
+    private static void RejectUnsupportedResetTag(int tag, bool forReset)
+    {
+        // The Core decoder reads at most two tag octets. A continuation bit on the
+        // second can shift field boundaries and hide the configured flag before reset.
+        if (forReset && tag > byte.MaxValue && (tag & 0x80) != 0)
+            throw new ApduException("Unsupported biometric metadata tag continuation.");
     }
 
     private static byte ReadByte(IDictionary<int, ReadOnlyMemory<byte>> fields, byte tag, bool required = false)

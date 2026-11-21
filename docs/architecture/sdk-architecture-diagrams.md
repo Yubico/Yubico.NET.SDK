@@ -9,7 +9,7 @@
 >
 > **How to use these:** Read top to bottom. Each level zooms in one step. For a talk, one
 > diagram per slide, in this order. For learning, study L2–L4 with the code open beside you —
-> every box is a real type you can grep for.
+> type boxes name source types; grouping boxes and arrows are schematic explanations, not complete call graphs.
 
 ---
 
@@ -76,10 +76,11 @@ flowchart TD
 ```
 
 **Key facts to say out loud:**
-- **Core is the only hub.** Every app module has exactly *one* project reference → Core.
+- **Core is the foundational hub.** Direct applet modules reference Core; WebAuthn is the exception,
+  referencing Ctap2 as its higher-level client layer.
 - **WebAuthn is the only 2nd-level module:** `Core ← Ctap2 ← WebAuthn`. WebAuthn is a
   higher-level client over CTAP2 and must never duplicate CTAP2 behavior.
-- App modules **do not** reference each other. They are independent verticals over Core.
+- Other applet modules are independent verticals over Core; the WebAuthn-to-Ctap2 edge is deliberate.
 - (Not shown: CLI/test/example projects — noise for an architecture talk.)
 
 ---
@@ -115,7 +116,7 @@ flowchart TD
     end
 
     subgraph CtapLayer["CTAP2 path (beside APDU, not below it)"]
-        CborB["CtapRequestBuilder → CBOR bytes<br/>CtapResponseParser ← CBOR bytes"]
+        CborB["Ctap2SessionRequestEncoding → request bytes<br/>MakeCredentialResponse / GetAssertionResponse.Decode ← response bytes"]
         FBack["ICtap2Backend"]
         HidB["HidBackend<br/>CTAPHID_CBOR (0x10) frames"]
         ScB["SmartCardBackend<br/>wraps CTAP in APDU (CLA 0x80, INS 0x10)"]
@@ -172,8 +173,11 @@ flowchart TD
   - *Backend pattern (multi-transport):* Management, CTAP2, YubiOTP — an `IxxxBackend`
     interface with a `SmartCard` impl and a `Hid` impl.
 - **CTAP2 path (the box beside APDU):** CTAP2 does **not** build APDUs at the session
-  layer — it builds **CBOR** via `CtapRequestBuilder` and parses replies via
-  `CtapResponseParser`. That CBOR then goes through `ICtap2Backend`, which has two impls:
+  layer — `Ctap2SessionRequestEncoding` composes command-prefixed **CBOR** through
+  `CtapRequestBuilder`. `ICtap2Backend` exchanges those bytes and resolves the response status;
+  the session then calls `MakeCredentialResponse.Decode` or `GetAssertionResponse.Decode`.
+  `CtapResponseParser` is a general utility, not the decoder on these traced credential paths.
+  The backend has two impls:
   - `HidBackend` — sends CTAPHID_CBOR frames (command `0x10`) over `IFidoHidProtocol`.
     This is the genuinely separate path.
   - `SmartCardBackend` — wraps the CTAP payload in a single APDU (`CLA 0x80, INS 0x10`) and
@@ -228,10 +232,16 @@ sequenceDiagram
   `ApduTransmitter` (send) wraps `IApduFormatter` (wire serialization). Each layer has one job.
 - **Short vs Extended APDU** is chosen by firmware + `SupportsExtendedApdu()` at
   `Configure()` time. Extended = FW ≥ 4.0; short path uses `ChainedApduTransmitter` to split.
-- **SCP variant:** if `scpKeyParams` were passed, an `ScpProcessor` sits in the chain and
-  encrypts/MACs every APDU before it hits the wire, decrypts on the way back.
-- **Security detail worth mentioning:** the wire buffer is zeroed in a `finally` — the SDK
-  is disciplined about not leaving sensitive bytes in memory.
+- **SCP variant:** ordinary protected command traffic passes through `ScpProcessor`, with encryption
+  controlled separately from secure wrapping. The current SCP03 initializer selects security level
+  `0x33` (C-MAC, C-DECRYPTION, R-MAC, R-ENCRYPTION); setup's EXTERNAL AUTHENTICATE is MACed without
+  encrypting its command data. SELECT uses a plain pass-through, and the current empty-response
+  R-MAC exception checks INS `0x82`, not handshake phase. This schematic is not an every-APDU or
+  conformance guarantee; see [Core raw SCP limits](raw-access-tiers.md#raw-smartcard-with-scp) for
+  wrapping, response, recovery, and profile qualifications.
+- **Buffer ownership:** selected wire buffers are cleared in `finally`. Caller input, response owners,
+  earlier fragments, and decrypted temporaries have separate lifetimes; one cleared buffer supplies
+  no all-copy erasure guarantee. `ApduResponse` is a sealed copied owner with explicit `Clear()`.
 
 ### L3b — the CTAP2 variant (same shape, different bytes)
 
@@ -243,13 +253,13 @@ sequenceDiagram
     autonumber
     actor Caller as Your code
     participant Sess as Ctap2Session
-    participant Build as CtapRequestBuilder
+    participant Build as Ctap2SessionRequestEncoding
     participant Back as ICtap2Backend
-    participant Parse as CtapResponseParser
+    participant Parse as MakeCredentialResponse
     participant HW as YubiKey
 
     Caller->>Sess: MakeCredentialAsync(params)
-    Sess->>Build: Create(0x01).Add(...).Build()
+    Sess->>Build: BuildMakeCredentialRequest(params)
     Build-->>Sess: command byte + CBOR payload
     alt HID transport (USB)
         Sess->>Back: SendCborAsync(request) [HidBackend]
@@ -263,15 +273,17 @@ sequenceDiagram
     end
     Back->>Back: check CtapStatus, strip status byte
     Back-->>Sess: CBOR response bytes
-    Sess->>Parse: parse CBOR → typed result
-    Parse-->>Sess: MakeCredentialData
+    Sess->>Parse: Decode(CBOR response)
+    Parse-->>Sess: MakeCredentialResponse
     Sess-->>Caller: typed credential
 ```
 
 **Teaching notes (CTAP2):**
-- **CBOR in, CBOR out** — `CtapRequestBuilder` / `CtapResponseParser` replace the inline
-  `ApduCommand` build that every other module uses. This is *the* CTAP2 exception to the flat
-  command model.
+- **CBOR in, CBOR out** — the internal `Ctap2SessionRequestEncoding` helper composes the request
+  through `CtapRequestBuilder`, and `MakeCredentialResponse.Decode` parses the returned envelope.
+  These are flat encoding/decoding helpers, not operation-specific command executors. The sequence
+  shows the main exchange, not every validation, callback or cleanup branch; status/notification
+  resolution precedes typed decode, so a later failure need not mean the device created nothing.
 - **Status byte convention:** the authenticator's reply starts with a single `CtapStatus`
   byte; the backend checks it (`CtapException.ThrowIfError`) then strips it before parsing.
 - **The convergence point:** in the SmartCard branch, everything below "wrap in APDU" is the
@@ -324,9 +336,14 @@ flowchart TD
 ```
 
 One-shot Find retires its read scope on exit. A monitor has one lifetime: create, run, dispose; there is no
-pause, restart or manual rescan. Disposal is sequential (stop listeners, cancel and await the loop, retire
-discovery, complete the feed) and waits for an in-flight scan to finish within its discovery budgets; no
-drain timeout exists. `YubiKeyManager.WatchAsync` owns a private monitor for one enumeration;
+pause, restart or manual rescan. Disposal attempts listener cleanup before canceling and awaiting the
+loop, retiring discovery, and completing the feed. Later stages depend on preceding calls returning;
+a throwing logger during listener cleanup can prevent cancellation/join, retirement, or feed completion.
+The loop-await stage has no separate drain timeout; discovery budgets bound individual waits, not
+total disposal. If cleanup reaches feed completion, healthy uncanceled tails can drain and end normally,
+existing terminal/overflow errors remain observable, and later enumerations end empty. These diagrams
+are schematic; the [current lifecycle guide](event-driven-device-discovery.md#monitor-lifecycle-and-disposal)
+describes the complete conditions. `YubiKeyManager.WatchAsync` owns a private monitor for one enumeration;
 `CreateMonitorAsync` returns one monitor to share across subscribers. See
 [event-driven device discovery](event-driven-device-discovery.md).
 
@@ -381,12 +398,14 @@ flowchart TD
 ```
 
 **Teaching notes:**
-- **One `IYubiKey` = one physical key.** It exposes `AvailableConnections`
+- **`IYubiKey` is a discovered view of a physical key.** It exposes `AvailableConnections`
   (`SmartCard | HidFido | HidOtp` flags). Discovery publishes one internal production implementation,
   `YubiKeyDevice`. Before merging, each live PC/SC or HID handle is a raw `PcscConnectionSlot` or `HidConnectionSlot`,
   not an `IYubiKey`.
-- **Merge logic** is conservative: interfaces merge by USB Product ID; NFC is never merged
-  with USB; ambiguity → surface as separate rows rather than mis-merge.
+- **Merge logic** uses topology, serial, PID-completeness, and pigeonhole evidence; NFC stays separate
+  from USB. Ambiguity often splits results, but complementary partial same-PID observations can form
+  a cross-key composite. The schematic labels above omit that bound; use the
+  [current guarantees](device-discovery-guarantees.md#g2-the-epistemic-bound) when teaching identity-sensitive selection.
 - **Connection ownership:** a grouped physical key admits one live connection across CCID, FIDO HID,
   and OTP HID. One live session is allowed per connection. A direct session factory borrows
   the caller's connection; only convenience entry points own the hidden connection they create.
@@ -410,7 +429,7 @@ If your audience remembers only six names, make it these:
 | `IConnection` | transport | base for SmartCard / FIDO-HID / OTP-HID connections |
 | `ApplicationSession` | session base | firmware, init, auth, protocol lifetime, optional hidden-connection ownership |
 | `RawSmartCardSession` | raw session | supported explicit SELECT and APDU exchange path |
-| `ApduCommand` / `ApduResponse` | pipeline | the record structs that flow through the decorator chain |
+| `ApduCommand` / `ApduResponse` | pipeline | borrowed-payload command record struct / sealed copied response owner |
 
 ---
 

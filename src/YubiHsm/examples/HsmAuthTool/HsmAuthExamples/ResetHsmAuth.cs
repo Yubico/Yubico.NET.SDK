@@ -18,7 +18,15 @@ public static class ResetHsmAuth
             return;
         }
 
-        await session.ResetAsync(cancellationToken);
+        try
+        {
+            await session.ResetAsync(cancellationToken);
+        }
+        catch when (!session.IsInitialized)
+        {
+            OutputHelpers.WriteWarning("The applet was reset, but the session could not be refreshed.");
+            throw;
+        }
 
         OutputHelpers.WriteSuccess("YubiHSM Auth applet reset to factory defaults.");
         OutputHelpers.WriteInfo("Management key has been reset to the default (all zeros).");

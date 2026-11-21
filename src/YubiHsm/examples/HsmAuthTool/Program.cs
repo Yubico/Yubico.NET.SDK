@@ -6,6 +6,7 @@ using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Menus;
 
+AnsiConsole.MarkupLine("[yellow]Demo only, not for production. Generated and calculated keys are printed; use disposable test credentials.[/]");
 // ── Non-interactive CLI mode ─────────────────────────────────────────────────
 if (args.Length > 0)
 {

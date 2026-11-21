@@ -11,6 +11,9 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 /// <summary>
 ///     Imports a certificate into a key slot (openpgp certificates import).
 /// </summary>
+/// <remarks>
+///     Certificate storage is independent of private-key import and key binding.
+/// </remarks>
 public sealed class CertificatesImportCommand : OpenPgpCommand<CertificatesImportCommand.Settings>
 {
     public sealed class Settings : CommandSettings
@@ -52,6 +55,7 @@ public sealed class CertificatesImportCommand : OpenPgpCommand<CertificatesImpor
             return 1;
         }
 
+        using var ownedCertificate = cert;
         OutputHelpers.WriteKeyValue("Subject", cert.Subject);
         OutputHelpers.WriteKeyValue("Issuer", cert.Issuer);
         OutputHelpers.WriteKeyValue("Thumbprint", cert.Thumbprint);

@@ -64,7 +64,8 @@ public class SecurityDomainSession_Scp11cTests : SecurityDomainStateRestoringTes
             {
                 Assert.True(session.IsAuthenticated);
 
-                // Verify we can perform an authenticated operation
+                // Check protected key listing, which is also available without host authentication;
+                // this does not establish restricted administrative authority.
                 var keyInfo = await session.ListKeyInformationAsync(ct);
                 Assert.True(keyInfo.Count > 0);
             }, scpKeyParams: keyParams, cancellationToken: ct);
@@ -79,7 +80,7 @@ public class SecurityDomainSession_Scp11cTests : SecurityDomainStateRestoringTes
         var oceRef = new KeyReference(OceKid, kvn);
 
         // Generate EC key pair on device for SCP11c
-        var newPublicKey = await session.GenerateKeyAsync(sessionRef, 0, cancellationToken);
+        var newPublicKey = await session.GenerateKeyAsync(sessionRef, KeyReplacement.New, cancellationToken);
 
         // Load OCE CA certificate and extract its public key
         var oceCerts = GetOceCertificates(Scp11TestData.OceCerts);
@@ -90,7 +91,7 @@ public class SecurityDomainSession_Scp11cTests : SecurityDomainStateRestoringTes
         );
 
         // Import OCE CA public key to the device
-        await session.PutKeyAsync(oceRef, ocePublicKey, 0, cancellationToken);
+        await session.PutKeyAsync(oceRef, ocePublicKey, KeyReplacement.New, cancellationToken);
 
         // Store the CA issuer SKI for the OCE reference
         var ski = GetSki(oceCerts.Ca);

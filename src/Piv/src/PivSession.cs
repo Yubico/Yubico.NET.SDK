@@ -50,6 +50,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private IBackend? _backend;
     private bool _isAuthenticated;
     private FirmwareVersion _detectedFirmwareVersion = new(0, 0, 0);
+    private ProtocolConfiguration? _protocolConfiguration;
+    private FirmwareVersion? _firmwareVersionOverride;
+    private ScpKeyParameters? _scpKeyParameters;
 
     /// <inheritdoc />
     public KeyType? ManagementKeyType { get; private set; } = KeyType.TripleDes;
@@ -76,12 +79,10 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// Initializes a new PivSession with the specified connection.
     /// </summary>
     /// <remarks>
-    ///     Not public: construction must go through
+    ///     Creation goes through
     ///     <see cref="CreateAsync(ISmartCardConnection, SessionCreationOptions?, CancellationToken)" />,
-    ///     which routes through <c>ApplicationSession.Construct</c> so the session is bound to its
-    ///     connection and the one-live-session-per-connection rule is enforced. PivSession was the only
-    ///     one of the eight applet sessions exposing a public constructor, and that door let a caller
-    ///     create an unbound session that bypassed the guard.
+    ///     which uses <c>ApplicationSession.ConstructInitializedAsync</c> to bind the session to its
+    ///     connection before initialization and enforce one live session per connection.
     /// </remarks>
     /// <param name="connection">The connection to use for PIV operations.</param>
     /// <param name="userPresencePrompt">Optional user-presence notification service.</param>
@@ -99,6 +100,15 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// <param name="options">Optional cross-cutting session creation settings.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An initialized PIV session.</returns>
+    /// <remarks>
+    /// The caller retains the connection and disposes it after session teardown. The factory binds before
+    /// SELECT and registers protocol disposal before setup. It reads the PIV version, configures the effective
+    /// override-or-detected version and optional SCP, then resolves the management-key type before publishing
+    /// readiness. Failed initialization disposes/detaches the session without closing this borrowed connection.
+    /// Keep borrowed SCP inputs alive through factory completion and any reset, which reuses them.
+    /// The session owns its protocol; its backend
+    /// borrows that protocol, and its user-presence prompt remains caller-owned.
+    /// </remarks>
     /// <exception cref="ArgumentNullException">If connection is null.</exception>
     /// <exception cref="ApduException">If PIV application selection fails.</exception>
     public static Task<PivSession> CreateAsync(
@@ -128,8 +138,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         try
         {
-            // Production applet versions match firmware. Major zero is development firmware;
-            // Core's feature evaluation deliberately treats it as current.
+            // Read the PIV applet's version before SCP. Core treats major-zero versions optimistically;
+            // that compatibility policy establishes no independently identified physical firmware version.
             var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
             var detectedFirmwareVersion = initialization.FirmwareVersion;
             _detectedFirmwareVersion = detectedFirmwareVersion;
@@ -155,6 +165,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
             // Detect management key type from device metadata (firmware 5.3+)
             // This is critical for YubiKey 5.7+ which defaults to AES-192 instead of 3DES
             ManagementKeyType = await ResolveManagementKeyTypeAsync(backend, cancellationToken).ConfigureAwait(false);
+            _protocolConfiguration = configuration;
+            _firmwareVersionOverride = firmwareVersionOverride;
+            _scpKeyParameters = scpKeyParams;
 
             Logger.LogInformation("PIV session initialized successfully. Version: {Version}", detectedFirmwareVersion);
         }
@@ -180,7 +193,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         Logger.LogDebug("PIV: Resetting PIV application");
 
-        // TODO: Check bio not configured (Phase 7)
+        var bio = await BioProtocol.ReadResetPreflightAsync(_backend, cancellationToken).ConfigureAwait(false);
+        if (bio is { IsConfigured: true })
+            throw new InvalidOperationException("PIV reset is unavailable while biometrics are configured. Follow the device-reset procedure for this product.");
 
         // Step 1: Block PIN by verifying with empty PIN until blocked
         // Empty PIN encodes as 8 bytes of 0xFF per PIV spec
@@ -198,13 +213,14 @@ public sealed class PivSession : ApplicationSession, IPivSession
             throw ApduException.FromStatusWord(response.SW, "PIV reset failed");
         }
 
-        // Reset authentication state
         SetManagementKeyAuthenticationState(false);
 
         // RESET changed the physical applet even if the metadata refresh below fails. Establish a
         // conservative post-reset type before querying: a >=5.7 version defaults to AES-192, and an
-        // alpha/beta version counts as >=5.7 because such a key is at least 5.8.0.
+        // major-zero development version follows the SDK's modern-default compatibility convention.
         ManagementKeyType = GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
+
+        await RestoreProtocolAfterResetAsync(cancellationToken).ConfigureAwait(false);
 
         // Update management key type from metadata (firmware 5.3+)
         ManagementKeyType = await ResolveManagementKeyTypeAsync(_backend, cancellationToken).ConfigureAwait(false);
@@ -212,13 +228,55 @@ public sealed class PivSession : ApplicationSession, IPivSession
         Logger.LogDebug("PIV: Reset completed successfully");
     }
 
+    private async Task RestoreProtocolAfterResetAsync(CancellationToken cancellationToken)
+    {
+        IsAuthenticated = false;
+        IsInitialized = false;
+        _backend = null;
+        var previousProtocol = Protocol;
+        Protocol = null;
+
+        try
+        {
+            if (previousProtocol is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+            else
+                previousProtocol?.Dispose();
+
+            var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(_scpKeyParameters, cancellationToken)
+                .ConfigureAwait(false);
+            var backend = new SmartCardBackend(protocol);
+            var state = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+            _detectedFirmwareVersion = state.FirmwareVersion;
+            ManagementKeyType = GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
+
+            var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(protocol,
+                _firmwareVersionOverride ?? _detectedFirmwareVersion, _protocolConfiguration, _scpKeyParameters,
+                cancellationToken).ConfigureAwait(false);
+            _backend = ReferenceEquals(protocol, effectiveProtocol) ? backend : new SmartCardBackend(effectiveProtocol);
+            IsInitialized = true;
+        }
+        catch
+        {
+            try
+            {
+                await DisposeAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                // Cleanup must not replace the error that prevented the confirmed reset from restoring the session.
+            }
+            throw;
+        }
+    }
+
     /// <summary>
     ///     Returns the management key type to assume before metadata has been read.
     /// </summary>
     /// <remarks>
     ///     <see cref="FirmwareVersion.IsAtLeast(int,int,int)" /> reports <see langword="true" /> for an alpha or
-    ///     beta version, which is intended: such a key is at least 5.8.0 and therefore defaults to AES-192.
-    ///     Excluding it here would assume Triple-DES for a development key that does not use it.
+    ///     beta version under the SDK development-firmware convention, selecting the AES-192 fallback.
+    ///     Authoritative management metadata still takes precedence when available.
     /// </remarks>
     private static KeyType GetConservativeDefaultManagementKeyType(FirmwareVersion firmwareVersion) =>
         firmwareVersion.IsAtLeast(5, 7, 0)
@@ -259,7 +317,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
         catch (NotSupportedException)
         {
-            // Firmware < 5.3 - assume max retries
+            // Older firmware uses a bounded 15-attempt budget, matching the status-word count width.
             retriesRemaining = 15;
         }
 
@@ -291,6 +349,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return MetadataProtocol.GetPinMetadataAsync(_backend, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task AuthenticateAsync(ReadOnlyMemory<byte> managementKey, CancellationToken cancellationToken = default)
     {
         // Readiness/disposal admission precedes state mutation; cancellation is an attempted
@@ -304,6 +363,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         SetManagementKeyAuthenticationState(true);
     }
 
+    /// <inheritdoc />
     public Task VerifyPinAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -311,6 +371,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return AuthenticationProtocol.VerifyPinAsync(_backend, pin, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<int> GetPinAttemptsAsync(CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -332,6 +393,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return await AuthenticationProtocol.GetPinAttemptsAsync(_backend, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public Task ChangePinAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -339,6 +401,36 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return AuthenticationProtocol.ChangePinAsync(_backend, currentPin, newPin, cancellationToken);
     }
 
+    /// <inheritdoc />
+    public async Task ChangePinWithMetadataAsync(
+        ReadOnlyMemory<byte> currentPin,
+        ReadOnlyMemory<byte> newPin,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureBackend(CancellationToken.None);
+        if (currentPin.Length is < 6 or > PinUtilities.PinLength)
+            throw new ArgumentException("Current PIN must be 6-8 bytes", nameof(currentPin));
+        if (newPin.Length is < 6 or > PinUtilities.PinLength)
+            throw new ArgumentException("New PIN must be 6-8 bytes", nameof(newPin));
+
+        using var admin = await ReadPinOnlyMetadataAsync(DataObject.AdminData, "read ADMIN DATA", cancellationToken)
+            .ConfigureAwait(false);
+        if (admin.Salt.IsEmpty)
+        {
+            await WritePinOnlyStepAsync("change PIN", null, () => ChangePinAsync(currentPin, newPin, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
+        if ((admin.Flags & PinOnlyMetadata.KeyStored) != 0)
+            throw new NotSupportedException("Changing the PIN with metadata is not supported when both stored and derived management keys are recorded.");
+        if (ManagementKeyType != KeyType.TripleDes)
+            throw new NotSupportedException("Legacy PIN derivation requires a Triple-DES management key.");
+
+        await ChangeDerivedPinAsync(admin, currentPin, newPin, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
     public Task ChangePukAsync(ReadOnlyMemory<byte> currentPuk, ReadOnlyMemory<byte> newPuk, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -346,6 +438,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return AuthenticationProtocol.ChangePukAsync(_backend, currentPuk, newPuk, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task UnblockPinAsync(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -353,6 +446,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return AuthenticationProtocol.UnblockPinAsync(_backend, puk, newPin, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -361,6 +455,45 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return AuthenticationProtocol.SetPinAttemptsAsync(_backend, pinAttempts, pukAttempts, cancellationToken);
     }
 
+    /// <inheritdoc />
+    public async Task SetPinAttemptsWithMetadataAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default)
+    {
+        EnsureBackend(CancellationToken.None);
+        EnsureManagementKeyAuthenticated();
+        ArgumentOutOfRangeException.ThrowIfLessThan(pinAttempts, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(pinAttempts, 255);
+        ArgumentOutOfRangeException.ThrowIfLessThan(pukAttempts, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(pukAttempts, 255);
+
+        using var admin = await ReadPinOnlyMetadataAsync(DataObject.AdminData, "read ADMIN DATA", cancellationToken)
+            .ConfigureAwait(false);
+        if (!admin.Salt.IsEmpty)
+            throw new NotSupportedException("Rotate away from legacy PIN-derived management-key mode before changing retry limits with metadata.");
+        await RequireCardPinVerificationAsync(cancellationToken).ConfigureAwait(false);
+
+        byte[]? adminEdit = null;
+        if ((admin.Flags & PinOnlyMetadata.PukBlocked) != 0)
+        {
+            admin.SetFlags((byte)(admin.Flags & ~PinOnlyMetadata.PukBlocked));
+            adminEdit = EncodePinOnlyMetadata(admin, "prepare ADMIN DATA", cancellationToken);
+        }
+
+        try
+        {
+            await WritePinOnlyStepAsync("set PIN and PUK retry limits (restore factory PIN and PUK)", null,
+                () => SetPinAttemptsAsync(pinAttempts, pukAttempts, cancellationToken), cancellationToken).ConfigureAwait(false);
+            if (adminEdit is not null)
+                await WritePinOnlyStepAsync("write ADMIN DATA", "retry limits set and factory PIN and PUK restored",
+                    () => DataObjectProtocol.PutObjectAsync(_backend, DataObject.AdminData, adminEdit, cancellationToken),
+                    cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(adminEdit);
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<IPublicKey> GenerateKeyAsync(
         Slot slot,
         KeyType keyType,
@@ -380,6 +513,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
             .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task ImportKeyAsync(
         Slot slot,
         IPrivateKey privateKey,
@@ -400,6 +534,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
             .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public Task MoveKeyAsync(Slot sourceSlot, Slot destinationSlot, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -411,6 +546,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return KeyProtocol.MoveKeyAsync(_backend, sourceSlot, destinationSlot, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task DeleteKeyAsync(Slot slot, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -421,6 +557,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return KeyProtocol.DeleteKeyAsync(_backend, slot, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<X509Certificate2> AttestKeyAsync(Slot slot, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -432,6 +569,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     // Both overloads are established alpha entry points: one explicit algorithm and one metadata-driven.
 #pragma warning disable RS0026
+    /// <inheritdoc />
     public async Task<Memory<byte>> SignOrDecryptAsync(
         Slot slot,
         KeyType keyType,
@@ -456,6 +594,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
     // Metadata-based algorithm discovery is intentionally a second established alpha overload.
 #pragma warning disable RS0026
+    /// <inheritdoc />
     public async Task<Memory<byte>> SignOrDecryptAsync(
         Slot slot,
         ReadOnlyMemory<byte> data,
@@ -497,6 +636,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
     }
 #pragma warning restore RS0026
 
+    /// <inheritdoc />
     public async Task<Memory<byte>> DecryptAsync(
         Slot slot,
         ReadOnlyMemory<byte> cipherText,
@@ -528,6 +668,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
             .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task<Memory<byte>> CalculateSecretAsync(
         Slot slot,
         IPublicKey peerPublicKey,
@@ -553,6 +694,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
             .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public Task<X509Certificate2?> GetCertificateAsync(Slot slot, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -561,6 +703,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return CertificateProtocol.GetCertificateAsync(_backend, slot, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task StoreCertificateAsync(
         Slot slot,
         X509Certificate2 certificate,
@@ -574,6 +717,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return CertificateProtocol.StoreCertificateAsync(_backend, slot, certificate, compression, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task DeleteCertificateAsync(Slot slot, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -583,6 +727,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return CertificateProtocol.DeleteCertificateAsync(_backend, slot, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<PukMetadata> GetPukMetadataAsync(CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -591,6 +736,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return MetadataProtocol.GetPukMetadataAsync(_backend, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<ManagementKeyMetadata> GetManagementKeyMetadataAsync(CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -599,6 +745,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return MetadataProtocol.GetManagementKeyMetadataAsync(_backend, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<SlotMetadata?> GetSlotMetadataAsync(Slot slot, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -608,6 +755,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return MetadataProtocol.GetSlotMetadataAsync(_backend, slot, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<BioMetadata> GetBioMetadataAsync(CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -615,6 +763,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return BioProtocol.GetBioMetadataAsync(_backend, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<Memory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -622,6 +771,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return await DataObjectProtocol.GetObjectAsync(_backend, objectId, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public Task PutObjectAsync(int objectId, ReadOnlyMemory<byte>? data, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -630,6 +780,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return DataObjectProtocol.PutObjectAsync(_backend, objectId, data, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<CardholderUniqueId> GetCardholderUniqueIdAsync(CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -637,6 +788,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return TypedDataObjectProtocol.GetCardholderUniqueIdAsync(_backend, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task SetCardholderUniqueIdAsync(CardholderUniqueId cardholderUniqueId, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -645,6 +797,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return TypedDataObjectProtocol.SetCardholderUniqueIdAsync(_backend, cardholderUniqueId, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<CardCapabilityContainer> GetCardCapabilityContainerAsync(CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -652,6 +805,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return TypedDataObjectProtocol.GetCardCapabilityContainerAsync(_backend, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task SetCardCapabilityContainerAsync(CardCapabilityContainer cardCapabilityContainer, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -660,6 +814,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return TypedDataObjectProtocol.SetCardCapabilityContainerAsync(_backend, cardCapabilityContainer, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<AdminData> GetAdminDataAsync(CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -667,6 +822,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return TypedDataObjectProtocol.GetAdminDataAsync(_backend, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task SetAdminDataAsync(AdminData adminData, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -675,6 +831,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return TypedDataObjectProtocol.SetAdminDataAsync(_backend, adminData, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<KeyHistory> GetKeyHistoryAsync(CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -682,6 +839,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return TypedDataObjectProtocol.GetKeyHistoryAsync(_backend, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task SetKeyHistoryAsync(KeyHistory keyHistory, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -690,6 +848,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return TypedDataObjectProtocol.SetKeyHistoryAsync(_backend, keyHistory, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<PinOnlyMode> GetPinOnlyModeAsync(CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -697,12 +856,14 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return PinOnlyProtocol.GetPinOnlyModeAsync(_backend, cancellationToken);
     }
 
+    /// <inheritdoc />
     public Task<PinOnlyMode> RecoverPinOnlyModeAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
         return RecoverPinOnlyModeCoreAsync(pin, cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task SetPinOnlyModeAsync(
         PinOnlyMode pinOnlyMode,
         ReadOnlyMemory<byte> pin,
@@ -746,6 +907,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         await DisablePinOnlyModeAsync(cancellationToken).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public async Task SetManagementKeyAsync(
         KeyType keyType,
         ReadOnlyMemory<byte> newKey,
@@ -777,6 +939,55 @@ public sealed class PivSession : ApplicationSession, IPivSession
         }
     }
 
+    /// <inheritdoc />
+    public async Task SetManagementKeyWithMetadataAsync(
+        KeyType keyType,
+        ReadOnlyMemory<byte> newKey,
+        ManagementKeyStorage storage,
+        bool requireTouch = false,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureBackend(CancellationToken.None);
+        if (storage is not (ManagementKeyStorage.NotStored or ManagementKeyStorage.PinProtected))
+            throw new ArgumentOutOfRangeException(nameof(storage));
+        _ = KeyTypeEncoding.EncodeManagement(keyType);
+        if (newKey.Length != keyType.GetKeyInfo().KeySizeBytes)
+            throw new ArgumentException("The replacement key length must match its algorithm.", nameof(newKey));
+        if (keyType != KeyType.TripleDes)
+            EnsureSupports(Features.AesKey);
+        if (requireTouch)
+            EnsureSupports(Features.UsagePolicy);
+        EnsureManagementKeyAuthenticated();
+
+        using var admin = await ReadPinOnlyMetadataAsync(DataObject.AdminData, "read ADMIN DATA", cancellationToken)
+            .ConfigureAwait(false);
+        bool storeKey = storage == ManagementKeyStorage.PinProtected;
+        bool wasStored = (admin.Flags & PinOnlyMetadata.KeyStored) != 0;
+        byte[]? adminEdit = PrepareRotationAdminEdit(admin, storeKey, wasStored, cancellationToken);
+        byte[]? printedEdit = null;
+        try
+        {
+            printedEdit = await PrepareRotationPrintedEditAsync(storeKey, wasStored, newKey, cancellationToken)
+                .ConfigureAwait(false);
+            await WritePinOnlyStepAsync("set management key", null,
+                () => SetManagementKeyAsync(keyType, newKey, requireTouch, cancellationToken), cancellationToken).ConfigureAwait(false);
+            if (adminEdit is not null)
+                await WritePinOnlyStepAsync("write ADMIN DATA", "management key set",
+                    () => DataObjectProtocol.PutObjectAsync(_backend, DataObject.AdminData, adminEdit, cancellationToken),
+                    cancellationToken).ConfigureAwait(false);
+            if (printedEdit is not null)
+                await WritePinOnlyStepAsync("write PRINTED", adminEdit is null ? "management key set" : "management key set; ADMIN DATA written",
+                    () => DataObjectProtocol.PutObjectAsync(_backend, DataObject.PrintedInformation, printedEdit, cancellationToken),
+                    cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(adminEdit);
+            CryptographicOperations.ZeroMemory(printedEdit);
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<Memory<byte>?> VerifyUvAsync(
         UserVerification userVerification = UserVerification.Verify,
         CancellationToken cancellationToken = default)
@@ -787,6 +998,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
         return temporaryPin is null ? null : temporaryPin.AsMemory();
     }
 
+    /// <inheritdoc />
     public Task VerifyTemporaryPinAsync(ReadOnlyMemory<byte> temporaryPin, CancellationToken cancellationToken = default)
     {
         EnsureBackend(cancellationToken);
@@ -870,6 +1082,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
     protected override void Dispose(bool disposing)
     {
         SetManagementKeyAuthenticationState(false);
+        _scpKeyParameters = null;
         base.Dispose(disposing);
     }
 
@@ -917,7 +1130,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
             EnsureSupports(required);
         EnsureKeyPoliciesSupported(pinPolicy, touchPolicy);
         if (generate && keyType.IsRsa() && !Features.SupportsRsaGeneration(FirmwareVersion))
-            throw new NotSupportedException("RSA key generation is disabled on ROCA-affected firmware 4.2.6–4.3.4.");
+            throw new NotSupportedException("SDK ROCA policy disables on-card RSA generation on firmware from 4.2.0 up to, but not including, 4.3.5.");
         EnsureFipsKeyPolicySupported(keyType, pinPolicy);
     }
 
@@ -946,68 +1159,215 @@ public sealed class PivSession : ApplicationSession, IPivSession
             throw new NotSupportedException("RSA1024 and PIN policy Never are not supported on YubiKey 4 FIPS.");
     }
 
+    private async Task ChangeDerivedPinAsync(
+        PinOnlyMetadata admin, ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken)
+    {
+        EnsureBackend(CancellationToken.None);
+        int keyLength = KeyType.TripleDes.GetKeyInfo().KeySizeBytes;
+        var oldKey = new byte[keyLength];
+        var newKey = new byte[keyLength];
+        byte[] newSalt = RandomNumberGenerator.GetBytes(16);
+        byte[]? adminEdit = null;
+        try
+        {
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                PinOnlyProtocol.DeriveManagementKey(currentPin.Span, admin.Salt.Span, oldKey);
+                PinOnlyProtocol.DeriveManagementKey(newPin.Span, newSalt, newKey);
+                admin.SetSalt(newSalt);
+                adminEdit = admin.Encode();
+            }
+            catch (Exception ex)
+            {
+                throw PinOnlyStepFailure("prepare derived management keys and ADMIN DATA", null, false, ex, cancellationToken);
+            }
+
+            await WritePinOnlyStepAsync("change PIN", null, () => ChangePinAsync(currentPin, newPin, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
+
+            string phase = "authenticate old derived management key";
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await AuthenticateAsync(oldKey, cancellationToken).ConfigureAwait(false);
+                phase = "verify new PIN";
+                cancellationToken.ThrowIfCancellationRequested();
+                await VerifyPinAsync(newPin, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw PinOnlyStepFailure(phase, "PIN changed", false, ex, cancellationToken);
+            }
+
+            await WritePinOnlyStepAsync("set derived management key", "PIN changed",
+                () => SetManagementKeyAsync(KeyType.TripleDes, newKey, cancellationToken: cancellationToken), cancellationToken)
+                .ConfigureAwait(false);
+            await WritePinOnlyStepAsync("write ADMIN DATA", "PIN changed; derived management key set",
+                () => DataObjectProtocol.PutObjectAsync(_backend, DataObject.AdminData, adminEdit, cancellationToken), cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(oldKey);
+            CryptographicOperations.ZeroMemory(newKey);
+            CryptographicOperations.ZeroMemory(newSalt);
+            CryptographicOperations.ZeroMemory(adminEdit);
+        }
+    }
+
+    private async Task<PinOnlyMetadata> ReadPinOnlyMetadataAsync(int objectId, string phase, CancellationToken cancellationToken)
+    {
+        EnsureBackend(CancellationToken.None);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return await PinOnlyMetadata.ReadAsync(_backend, objectId, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            throw PinOnlyStepFailure(phase, null, false, ex, cancellationToken);
+        }
+    }
+
+    private async Task RequireCardPinVerificationAsync(CancellationToken cancellationToken)
+    {
+        EnsureBackend(CancellationToken.None);
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            // VERIFY with no data queries the card's PIN state without presenting a credential.
+            var command = new ApduCommand(0, 0x20, 0, KeyReference.Pin);
+            var response = await _backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                if (response.IsOK())
+                    return;
+                if (SWConstants.ExtractRetryCount(response.SW) is null && response.SW != SWConstants.AuthenticationMethodBlocked)
+                    throw ApduException.FromStatusWord(response.SW, "Could not query PIV PIN verification state.");
+            }
+            finally
+            {
+                response.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw PinOnlyStepFailure("query card PIN verification", null, false, ex, cancellationToken);
+        }
+        throw new InvalidOperationException("Verify the PIN on the card before starting this operation.");
+    }
+
+    private static byte[]? PrepareRotationAdminEdit(PinOnlyMetadata admin, bool storeKey, bool wasStored, CancellationToken cancellationToken)
+    {
+        bool hadSalt = !admin.Salt.IsEmpty;
+        if (hadSalt)
+            admin.SetSalt(default);
+        if (storeKey != wasStored)
+            admin.SetFlags(storeKey ? (byte)(admin.Flags | PinOnlyMetadata.KeyStored) : (byte)(admin.Flags & ~PinOnlyMetadata.KeyStored));
+        return hadSalt || storeKey != wasStored ? EncodePinOnlyMetadata(admin, "prepare ADMIN DATA", cancellationToken) : null;
+    }
+
+    private async Task<byte[]?> PrepareRotationPrintedEditAsync(bool storeKey, bool wasStored, ReadOnlyMemory<byte> newKey, CancellationToken cancellationToken)
+    {
+        if (!storeKey && !wasStored)
+            return null;
+        using var printed = await ReadPinOnlyMetadataAsync(DataObject.PrintedInformation, "read PRINTED", cancellationToken)
+            .ConfigureAwait(false);
+        if (printed.IsEmpty)
+            await RequireCardPinVerificationAsync(cancellationToken).ConfigureAwait(false);
+        if (!storeKey && printed.StoredKey.IsEmpty)
+            return null;
+        printed.SetStoredKey(storeKey ? newKey : default);
+        return EncodePinOnlyMetadata(printed, "prepare PRINTED", cancellationToken);
+    }
+
+    private static byte[] EncodePinOnlyMetadata(PinOnlyMetadata metadata, string phase, CancellationToken cancellationToken)
+    {
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return metadata.Encode();
+        }
+        catch (Exception ex)
+        {
+            throw PinOnlyStepFailure(phase, null, false, ex, cancellationToken);
+        }
+    }
+
+    private static async Task WritePinOnlyStepAsync(string phase, string? acknowledged, Func<Task> write, CancellationToken cancellationToken)
+    {
+        bool invoked = false;
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            invoked = true;
+            await write().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // Only a completed raw call acknowledges a write. Exceptions from lower layers do not
+            // establish whether a command was sent or whether this card applied it.
+            throw PinOnlyStepFailure(phase, acknowledged, invoked, ex, cancellationToken);
+        }
+    }
+
+    private static Exception PinOnlyStepFailure(string phase, string? acknowledged, bool writeInvoked, Exception cause, CancellationToken cancellationToken)
+    {
+        string outcome = writeInvoked ? "unconfirmed" : "not attempted";
+        string message = $"PIV {phase} failed. Acknowledged persistent writes: {acknowledged ?? "none"}. Current write: {outcome}.";
+        return cause is OperationCanceledException
+            ? new OperationCanceledException(message, cause, cancellationToken)
+            : new InvalidOperationException(message, cause);
+    }
+
     private async Task<PinOnlyMode> RecoverPinOnlyModeCoreAsync(ReadOnlyMemory<byte> pin, CancellationToken cancellationToken)
     {
         EnsureBackend(cancellationToken);
         Logger.LogDebug("PIV: Attempting to recover PIN-only management key authentication");
 
         var mode = PinOnlyMode.None;
-        var (printedRaw, pinVerified) = await ReadPrintedForRecoveryAsync(pin, cancellationToken).ConfigureAwait(false);
+        var (printed, pinVerified) = await ReadPrintedForRecoveryAsync(pin, cancellationToken).ConfigureAwait(false);
+        using var printedOwner = printed;
+        var storedKey = printedOwner?.StoredKey ?? default;
+        if (await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false))
+            mode |= PinOnlyMode.PinProtected;
 
-        Memory<byte> storedKey = Memory<byte>.Empty;
-        bool pinProtectedAuthenticated = false;
-        try
+        // Keep PRINTED alive through a potential attempt to restore protected authentication.
+        using var admin = await PinOnlyMetadata.ReadForRecoveryAsync(_backend, DataObject.AdminData, cancellationToken).ConfigureAwait(false);
+        if (admin is { Salt: { IsEmpty: false } salt })
         {
-            if (PinOnlyProtocol.TryDecodePinProtectedManagementKey(printedRaw, out storedKey))
-            {
-                pinProtectedAuthenticated = await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false);
-                if (pinProtectedAuthenticated)
-                    mode |= PinOnlyMode.PinProtected;
-            }
-
-            // Try PIN-derived: derive a candidate management key from the PIN and the ADMIN DATA salt.
-            var adminRaw = await DataObjectProtocol.GetObjectAsync(_backend, DataObject.AdminData, cancellationToken).ConfigureAwait(false);
-
-            if (AdminData.TryDecode(adminRaw, out var adminData) && adminData.Salt is { } salt)
-            {
-                if (!pinVerified)
-                    await VerifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
-                if (await TryAuthenticateDerivedCandidateAsync(pin, salt, cancellationToken).ConfigureAwait(false))
-                    mode |= PinOnlyMode.PinDerived;
-                else if (pinProtectedAuthenticated && !await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false))
-                    mode &= ~PinOnlyMode.PinProtected;
-            }
-
-            return mode;
+            if (!pinVerified)
+                await VerifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
+            if (await TryAuthenticateDerivedCandidateAsync(pin, salt, cancellationToken).ConfigureAwait(false))
+                mode |= PinOnlyMode.PinDerived;
+            else if ((mode & PinOnlyMode.PinProtected) != 0 && !await TryAuthenticateCandidateAsync(storedKey, cancellationToken).ConfigureAwait(false))
+                mode &= ~PinOnlyMode.PinProtected;
         }
-        finally
-        {
-            if (!storedKey.IsEmpty)
-            {
-                CryptographicOperations.ZeroMemory(storedKey.Span);
-            }
-        }
+        return mode;
     }
 
-    private async Task<(byte[] Data, bool PinVerified)> ReadPrintedForRecoveryAsync(
+    private async Task<(PinOnlyMetadata? Metadata, bool PinVerified)> ReadPrintedForRecoveryAsync(
         ReadOnlyMemory<byte> pin, CancellationToken cancellationToken)
     {
         EnsureBackend(cancellationToken);
         try
         {
-            return (await DataObjectProtocol.GetObjectAsync(_backend, DataObject.PrintedInformation, cancellationToken)
+            return (await PinOnlyMetadata.ReadForRecoveryAsync(_backend, DataObject.PrintedInformation, cancellationToken)
                 .ConfigureAwait(false), false);
         }
         catch (ApduException ex) when (ex.SW == SWConstants.SecurityStatusNotSatisfied)
         {
             await VerifyPinAsync(pin, cancellationToken).ConfigureAwait(false);
-            return (await DataObjectProtocol.GetObjectAsync(_backend, DataObject.PrintedInformation, cancellationToken)
+            return (await PinOnlyMetadata.ReadForRecoveryAsync(_backend, DataObject.PrintedInformation, cancellationToken)
                 .ConfigureAwait(false), true);
         }
     }
 
     private async Task<bool> TryAuthenticateCandidateAsync(ReadOnlyMemory<byte> candidate, CancellationToken cancellationToken)
     {
+        if (candidate.IsEmpty)
+            return false;
         cancellationToken.ThrowIfCancellationRequested();
         try
         {

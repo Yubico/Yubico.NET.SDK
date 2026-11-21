@@ -7,6 +7,12 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.Hid.MacOS;
 
+/// <summary>
+/// Observes a real started manager's matching/removal callback, stop request and cleanup ordering.
+/// Late-drain mode holds an existing callback past Stop's budget and checks restart before/after exit;
+/// it does not exercise ambiguous partial startup with no worker. CloseResult is recorded, but the
+/// ordering assertions below do not require a zero close status or establish every native release path.
+/// </summary>
 internal static class ListenerDrainScenario
 {
     internal static async Task<int> RunAsync()

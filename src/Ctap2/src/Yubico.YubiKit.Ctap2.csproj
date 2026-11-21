@@ -6,7 +6,7 @@
     <AssemblyName>Yubico.YubiKit.Ctap2</AssemblyName>
 
     <!-- Package Metadata -->
-    <Description>CTAP2 authenticator support for YubiKey devices including credential management, biometric authentication, and passwordless login.</Description>
+    <Description>CTAP2 protocol operations for YubiKey authenticators, including credential/PIN management and selected configuration, biometric, and extension APIs; device support and RP verification are separate responsibilities.</Description>
     <PackageTags>yubikey;yubico;fido2;webauthn;ctap2;passwordless;biometric</PackageTags>
 
     <!-- Opts this published library into the shared Native AOT analyzer and metadata properties. -->
@@ -14,6 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The in-repo reset demo passes live metadata to a borrowed CTAP session without reopening the key. -->
+    <InternalsVisibleTo Include="FidoTool" />
     <!-- For NSubstitute to mock internal types in tests -->
     <InternalsVisibleTo Include="Yubico.YubiKit.Ctap2.UnitTests" />
     <InternalsVisibleTo Include="Yubico.YubiKit.WebAuthn" />

@@ -155,17 +155,14 @@ static class TestTargets
         return $"{vsTestCommand} --filter \"{vsTestFilter}\"";
     }
 
-    // Translates a VSTest-style --filter expression to xUnit v3 MTP native filter arguments.
-    // Supports: FullyQualifiedName~X, Method~X, Category!=X, Category=X, and '&' compounds.
-    // Returns (filter args string, whether any positive/inclusion filters are present).
     // Translates a VSTest-style --filter expression to xUnit v3 Microsoft.Testing.Platform options.
+    // Returns generated arguments, whether inclusion filters exist, and their separate arguments.
     //
-    // Supported shapes: `A&B&C` (every term must match) and `A|B|C` (any term matches). MTP has no
-    // grouping operator, so an expression that mixes `&` and `|` is rejected with a clear message
-    // instead of silently matching the wrong set. Repeated options of one kind are ORed by xUnit
-    // (`--filter-method X --filter-method Y`), which is what `|` maps onto; `&` maps onto options of
-    // different kinds, or onto a single `--filter-method` with both wildcards when both terms are
-    // method patterns (xUnit ANDs distinct option kinds, so two method terms cannot be ANDed).
+    // Mixed '&'/'|' expressions are rejected. For '|' alternatives, positive inclusion flags must
+    // be of one kind. Each translated term appends its own native flag, including repeated method
+    // patterns split by '&'; two such patterns are not combined into one wildcard.
+    // Emitted arguments alone do not establish the pinned runner's same-kind boolean selection.
+    // Check actual discovery and execution before treating compound filters as coverage evidence.
     static (string Args, bool HasPositiveFilters, string[] PositiveArgs) TranslateToMtpFilter(string vstestFilter)
     {
         if (vstestFilter.Contains('|'))

@@ -18,8 +18,20 @@ using Yubico.YubiKit.Core.Cryptography;
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 /// <summary>
-///     SCP key parameters for SCP11 authentication (supports SCP11a, SCP11b, SCP11c).
+///     Carries key and certificate inputs for SCP11a, SCP11b, or SCP11c setup.
 /// </summary>
+/// <remarks>
+///     Supply inputs compatible with Core's fixed P-256/AES-128 setup path. Constructor shape checks do not establish
+///     curve compatibility, certificate trust, validity, order, or key association. The caller selects a trusted
+///     Security Domain public key and supplies the OCE chain in device-required order; Core sends that chain,
+///     and the Security Domain checks it under its provisioning policy.
+///     The parameters retain the exact key and certificate objects, copying only the certificate collection.
+///     Dispose releases the private key and certificates, not the public key. Record with-clones share these
+///     owners. Dispose sessions before parameters, including Security Domain sessions that reuse them on reset.
+///     Setup receipt verification is distinct from applet authorization. In the inspected SCP11 1.3.0.13
+///     Public Review (August 2023), §4.3, a/c host authentication also requires the first correct-MAC APDU
+///     after establishment. This implementation is not a statement of verified final 1.4 profile conformance.
+/// </remarks>
 public sealed record Scp11KeyParameters : ScpKeyParameters
 {
     private bool _disposed;
@@ -30,7 +42,7 @@ public sealed record Scp11KeyParameters : ScpKeyParameters
     /// <param name="keyReference">The key reference (KID must be 0x11, 0x13, or 0x15).</param>
     /// <param name="pkSdEcka">The Security Domain public key.</param>
     /// <param name="skOceEcka">The Off-Card Entity private key (required for SCP11a/c).</param>
-    /// <param name="oceKeyRef">The Off-Card Entity key reference (required for SCP11a/c).</param>
+    /// <param name="oceKeyRef">The provisioned Off-Card Entity reference for SCP11a/c; null currently sends 00/00.</param>
     /// <param name="certificates">The certificate chain (required for SCP11a/c).</param>
     /// <exception cref="ArgumentException">Thrown if KID is invalid or required parameters are missing.</exception>
     public Scp11KeyParameters(
@@ -78,19 +90,20 @@ public sealed record Scp11KeyParameters : ScpKeyParameters
 
     /// <summary>
     ///     Gets the private key of the Off-Card Entity ECKA.
-    ///     Required for SCP11a and SCP11c, null for SCP11b.
+    ///     Required for SCP11a and SCP11c. Normal SCP11b setup uses the short constructor and no static OCE key;
+    ///     the long constructor admits one without establishing that input's profile compatibility.
     /// </summary>
     public ECPrivateKey? SkOceEcka { get; }
 
     /// <summary>
     ///     Gets the Off-Card Entity key reference.
-    ///     Required for SCP11a and SCP11c, null for SCP11b.
+    ///     Supply the provisioned reference for SCP11a/c; null currently falls back to 00/00 on the wire.
     /// </summary>
     public KeyReference? OceKeyRef { get; }
 
     /// <summary>
     ///     Gets the certificate chain for the Off-Card Entity.
-    ///     Required for SCP11a and SCP11c (non-empty), empty for SCP11b.
+    ///     Required for SCP11a and SCP11c (non-empty). The short SCP11b constructor supplies an empty collection.
     /// </summary>
     public IReadOnlyList<X509Certificate2> Certificates { get; }
 

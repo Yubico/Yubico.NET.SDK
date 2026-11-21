@@ -24,10 +24,13 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <list type="bullet">
 /// <item><c>key[0..16]</c> — first 16 bytes of the HMAC key</item>
 /// <item><c>uid[0..4]</c> — bytes 16–19 of the HMAC key</item>
-/// <item><c>uid[4..6]</c> — initial moving factor / 0x10000 (big-endian)</item>
+/// <item><c>uid[4..6]</c> — two-byte initial-counter field (big-endian)</item>
 /// </list>
 /// The key must be exactly 20 bytes. Keys of any other length are rejected
 /// before any device I/O is attempted; they are never hashed or padded to fit.
+/// The configuration owns a copy of the key; dispose it and separately clear the source.
+/// HOTP is keyboard output; synchronize the initial counter with your verifier. Nonzero counter
+/// presets still require physical qualification on the target firmware.
 /// </remarks>
 public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
 {
@@ -38,29 +41,26 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
     /// The HMAC secret key. Must be exactly <see cref="YubiOtpConstants.HmacKeySize"/> (20) bytes.
     /// </param>
     /// <param name="imf">
-    /// Initial moving factor. Must be 0 or a positive multiple of 0x10000. Because this
-    /// parameter is a signed <see cref="int"/>, the largest representable value is
-    /// 0x7FFF0000 (2,147,450,880) — not the wire format's theoretical 0xFFFF0000 maximum,
-    /// which would require an unsigned value wider than 31 bits.
+    /// Initial moving factor, from 0 to 1,048,560 (0xFFFF0) in steps of 16. Defaults to zero.
     /// </param>
     /// <exception cref="ArgumentException">
-    /// Thrown when the key is not exactly 20 bytes, or IMF is negative or not a multiple of 0x10000.
+    /// Thrown when the key is not exactly 20 bytes or the IMF cannot be represented.
     /// </exception>
     public HotpSlotConfiguration(ReadOnlySpan<byte> hmacKey, int imf = 0)
     {
-        if (imf != 0 && (imf % 0x10000 != 0 || imf < 0))
+        if (imf < 0 || imf > 0xFFFF0 || imf % 16 != 0)
         {
             throw new ArgumentException(
-                "Initial moving factor must be 0 or a positive multiple of 0x10000.",
+                "Initial moving factor must be between 0 and 1,048,560, in steps of 16.",
                 nameof(imf));
         }
 
-        SetHmacKey(hmacKey, (ushort)(imf / 0x10000));
+        SetHmacKey(hmacKey, (ushort)(imf / 16));
 
         _tktFlags |= TicketFlag.OathHotp;
     }
 
-    public override FirmwareVersion MinimumFirmwareVersion => new(2, 1, 0);
+    public override FirmwareVersion MinimumFirmwareVersion => new(2, 2, 0);
 
     /// <summary>
     /// Configures the OTP output to use 8 digits instead of the default 6.

@@ -20,6 +20,11 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// <summary>
 /// Configures NDEF for NFC on a slot (ykman otp ndef SLOT).
 /// </summary>
+/// <remarks>
+/// Requires NFC-capable hardware and a suitable existing slot. URI remainder allows 53 UTF-8 bytes after
+/// automatic prefix compression; English UTF-8 text allows 51. A missing prefix sends an all-zero disable
+/// request, not the same request as empty text/URI. This command does not read back the on-tap record.
+/// </remarks>
 public static class NdefCommand
 {
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
@@ -46,12 +51,14 @@ public static class NdefCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            await session.SetNdefConfigurationAsync(
-                slot,
-                options.Prefix,
-                accessCode,
-                ndefType,
-                ct);
+            if (options.Prefix is { } content)
+            {
+                await session.SetNdefConfigurationAsync(slot, content, accessCode, ndefType, ct);
+            }
+            else
+            {
+                await session.DisableNdefAsync(slot, accessCode, ct);
+            }
 
             if (options.Json)
             {

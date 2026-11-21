@@ -29,6 +29,11 @@ public static class HsmAuthTestStateExtensions
         /// <param name="configuration">Optional protocol configuration.</param>
         /// <param name="scpKeyParams">Optional SCP key parameters for authentication.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
+        /// <remarks>
+        ///     The reset session uses the supplied protocol configuration; SCP parameters apply to the
+        ///     action session. Scoped disposal closes session/connection resources. Persistent changes
+        ///     made by the body remain afterward, so the hardware-run owner arranges final applet cleanup.
+        /// </remarks>
         public Task WithHsmAuthSessionAsync(
             Func<HsmAuthSession, Task> action,
             bool resetBeforeUse = true,

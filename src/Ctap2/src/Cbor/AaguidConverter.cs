@@ -18,15 +18,14 @@ namespace Yubico.YubiKit.Ctap2.Cbor;
 /// Helper for converting between big-endian AAGUID bytes and .NET Guid.
 /// </summary>
 /// <remarks>
-/// CTAP2/WebAuthn store AAGUIDs in big-endian (network byte order) format,
-/// while .NET Guid uses mixed-endian representation. This helper handles the conversion.
+/// CTAP2/WebAuthn encode AAGUIDs in network byte order, independently of native machine byte order.
 /// </remarks>
 public static class AaguidConverter
 {
     /// <summary>
     /// Converts a big-endian AAGUID byte array to a .NET Guid.
     /// </summary>
-    /// <param name="bigEndianBytes">The 16-byte big-endian AAGUID.</param>
+    /// <param name="bigEndianBytes">Exactly 16 big-endian AAGUID bytes; borrowed and left unchanged.</param>
     /// <returns>The corresponding Guid.</returns>
     public static Guid FromBigEndianBytes(ReadOnlySpan<byte> bigEndianBytes)
     {
@@ -35,53 +34,13 @@ public static class AaguidConverter
             throw new ArgumentException("AAGUID must be exactly 16 bytes", nameof(bigEndianBytes));
         }
 
-        // AAGUID is stored in big-endian (network byte order) format
-        // .NET Guid constructor expects mixed-endian (first 3 components little-endian on little-endian systems)
-        Span<byte> guidBytes = stackalloc byte[16];
-        bigEndianBytes.CopyTo(guidBytes);
-
-        // Convert from big-endian to little-endian for first 3 components on little-endian systems
-        if (BitConverter.IsLittleEndian)
-        {
-            // Reverse bytes for Data1 (4 bytes)
-            (guidBytes[0], guidBytes[1], guidBytes[2], guidBytes[3]) =
-                (guidBytes[3], guidBytes[2], guidBytes[1], guidBytes[0]);
-
-            // Reverse bytes for Data2 (2 bytes)
-            (guidBytes[4], guidBytes[5]) = (guidBytes[5], guidBytes[4]);
-
-            // Reverse bytes for Data3 (2 bytes)
-            (guidBytes[6], guidBytes[7]) = (guidBytes[7], guidBytes[6]);
-        }
-
-        return new Guid(guidBytes);
+        return new Guid(bigEndianBytes, bigEndian: true);
     }
 
     /// <summary>
-    /// Converts a .NET Guid to a big-endian AAGUID byte array.
+    /// Produces an AAGUID byte array from a .NET Guid.
     /// </summary>
     /// <param name="guid">The Guid to convert.</param>
-    /// <returns>A 16-byte array in big-endian format.</returns>
-    public static byte[] ToBigEndianBytes(Guid guid)
-    {
-        // .NET Guid.ToByteArray() produces mixed endianness on little-endian systems:
-        // - First 4 bytes (time_low): little-endian
-        // - Next 2 bytes (time_mid): little-endian
-        // - Next 2 bytes (time_hi_and_version): little-endian
-        // - Last 8 bytes (clock_seq_and_node): big-endian
-        // WebAuthn/CTAP2 AAGUID is fully big-endian, so we reverse the first three components
-        Span<byte> bytes = stackalloc byte[16];
-        guid.TryWriteBytes(bytes);
-
-        if (BitConverter.IsLittleEndian)
-        {
-            // Reverse first 3 components to convert to big-endian
-            bytes[0..4].Reverse();  // time_low
-            bytes[4..6].Reverse();  // time_mid
-            bytes[6..8].Reverse();  // time_hi_and_version
-            // bytes[8..16] already big-endian
-        }
-
-        return bytes.ToArray();
-    }
+    /// <returns>A newly allocated, caller-owned 16-byte array in network byte order.</returns>
+    public static byte[] ToBigEndianBytes(Guid guid) => guid.ToByteArray(bigEndian: true);
 }

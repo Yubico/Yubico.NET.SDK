@@ -1,9 +1,11 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0.
 
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Prompts;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
+using ConsoleUserPresencePrompt = Yubico.YubiKit.Cli.Shared.Output.ConsoleUserPresencePrompt;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Menus;
 
@@ -19,6 +21,7 @@ public static class SessionKeyMenu
         OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
         await using var session = await selection.Device.CreateHsmAuthSessionAsync(
+            options: new SessionCreationOptions { UserPresencePrompt = ConsoleUserPresencePrompt.Instance },
             cancellationToken: cancellationToken);
         await CalculateSessionKeys.RunAsync(session, cancellationToken);
     }

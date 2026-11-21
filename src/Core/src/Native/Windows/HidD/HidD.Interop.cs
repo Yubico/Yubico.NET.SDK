@@ -36,6 +36,8 @@ internal static partial class NativeMethods
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     internal static partial byte FreeHidPreparsedData(nint preparsedData);
 
+    // Native HIDP_CAPS fields are unsigned 16-bit values. The report APIs reinterpret these
+    // short fields as ushort; other consumers need separate review for values above 32767.
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     internal unsafe struct HIDP_CAPS
     {

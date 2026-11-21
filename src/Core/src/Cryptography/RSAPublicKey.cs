@@ -26,14 +26,15 @@ namespace Yubico.YubiKit.Core.Cryptography;
 public sealed class RSAPublicKey : PublicKey
 {
     /// <summary>
-    /// Gets the RSA cryptographic parameters required for the private key operations.
+    /// Gets the RSA modulus and public exponent.
     /// </summary>
     /// <value>
-    /// A structure containing RSA parameters, including Modulus, Exponent, D, P, Q, DP, DQ, and InverseQ values.
+    /// A parameter structure containing Modulus and Exponent, with no private components.
     /// </value>
     /// <remarks>
-    /// This property provides access to the fundamental mathematical components needed for RSA private key operations.
-    /// The parameters are used in cryptographic operations such as decryption and digital signature creation.
+    /// The structure contains references to key-owned mutable arrays. Treat them as borrowed and leave
+    /// them unchanged; copying the structure does not copy the arrays. Construction copies the supplied
+    /// arrays and selects a modeled modulus storage width, rather than performing full mathematical validation.
     /// </remarks>
     public RSAParameters Parameters { get; }
 
@@ -104,6 +105,11 @@ public sealed class RSAPublicKey : PublicKey
     /// <exception cref="CryptographicException">
     /// Thrown if the public key is invalid.
     /// </exception>
+    /// <exception cref="System.Formats.Asn1.AsnContentException">The ASN.1 structure or algorithm parameters are malformed.</exception>
+    /// <remarks>
+    /// The shared decoder checks the RSA component sequence and AlgorithmIdentifier; it does not
+    /// uniformly check surrounding reader exhaustion or perform full RSA mathematical validation.
+    /// </remarks>
     public static RSAPublicKey CreateFromSubjectPublicKeyInfo(ReadOnlyMemory<byte> subjectPublicKeyInfo) =>
         AsnPublicKeyDecoder
             .CreatePublicKey(subjectPublicKeyInfo)

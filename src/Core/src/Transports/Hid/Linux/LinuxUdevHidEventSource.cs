@@ -113,7 +113,7 @@ internal sealed class LinuxUdevHidEventSource : ILinuxHidEventSource
     {
         var pollFds = _pollFds ?? throw new InvalidOperationException("The event source is not initialized.");
         // The listener thread owns both handles. Retain them explicitly for this raw-fd
-        // poll; future report-reactor registrations need references across registration too.
+        // poll. The separate report reactor retains device references across each entire registration.
         using var shutdownLease = new LinuxDescriptorLease(_shutdownEventHandle
             ?? throw new InvalidOperationException("The shutdown event is not initialized."));
         using var monitorLease = new LinuxDescriptorLease(_monitorHandle

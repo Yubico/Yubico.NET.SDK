@@ -43,20 +43,20 @@ internal static class PinOnlyProtocol
     {
         Logger.LogDebug("PIV: Getting PIN-only mode from ADMIN DATA");
 
-        var raw = await DataObjectProtocol.GetObjectAsync(backend, DataObject.AdminData, cancellationToken).ConfigureAwait(false);
+        using var admin = await PinOnlyMetadata.ReadForRecoveryAsync(backend, DataObject.AdminData, cancellationToken).ConfigureAwait(false);
 
-        if (!AdminData.TryDecode(raw, out var adminData))
+        if (admin is null)
         {
             Logger.LogDebug("PIV: ADMIN DATA is not valid PIN-only data; treating both modes as unavailable");
             return PinOnlyMode.PinProtectedUnavailable | PinOnlyMode.PinDerivedUnavailable;
         }
 
         var mode = PinOnlyMode.None;
-        if (adminData.PinProtected)
+        if ((admin.Flags & PinOnlyMetadata.KeyStored) != 0)
         {
             mode |= PinOnlyMode.PinProtected;
         }
-        if (adminData.Salt is not null)
+        if (!admin.Salt.IsEmpty)
         {
             mode |= PinOnlyMode.PinDerived;
         }
@@ -96,59 +96,6 @@ internal static class PinOnlyProtocol
         }
 
         Logger.LogDebug("PIV: Stored PIN-protected management key in PRINTED");
-    }
-
-    /// <summary>
-    /// Decodes PIN-protected data from the PRINTED object: <c>88 len [ 89 len key ]</c>.
-    /// </summary>
-    /// <remarks>
-    /// This method takes ownership of <paramref name="data"/> for zeroing purposes: <paramref name="data"/>
-    /// is the caller's raw PRINTED-object bytes, which contain the management key in the clear when
-    /// present, and it is unconditionally zeroed before this method returns - on a successful decode,
-    /// a "not found"/wrong-shape result, and a malformed-data decode failure alike. The returned
-    /// <paramref name="managementKey"/> is a separate copy and remains the caller's responsibility to
-    /// zero after use.
-    /// </remarks>
-    internal static bool TryDecodePinProtectedManagementKey(Span<byte> data, out Memory<byte> managementKey)
-    {
-        managementKey = Memory<byte>.Empty;
-
-        try
-        {
-            if (data.IsEmpty)
-            {
-                return false;
-            }
-
-            using var outer = Tlv.Create(data);
-            if (outer.Tag != PinProtectedTag)
-            {
-                return false;
-            }
-
-            // PRINTED's PIN-protected payload is a single, fixed-shape nested TLV (no other tags to
-            // enumerate), so parse the inner management-key TLV directly instead of going through
-            // TlvHelper.DecodeDictionary. Every intermediate copy then lives inside a disposable
-            // Tlv that zeroes itself, instead of leaving a bare, unzeroed byte[] behind in a dictionary.
-            using var keyTlv = Tlv.Create(outer.Value.Span);
-            if (keyTlv.Tag != ManagementKeyTag || Array.IndexOf(ValidManagementKeyLengths, keyTlv.Length) < 0)
-            {
-                return false;
-            }
-
-            managementKey = keyTlv.Value.ToArray();
-            return true;
-        }
-        catch (Exception ex) when (ex is ArgumentException or IndexOutOfRangeException)
-        {
-            // Truncated/malformed TLV data can throw IndexOutOfRangeException from the
-            // underlying Tlv parser rather than ArgumentException; treat both as decode failure.
-            return false;
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(data);
-        }
     }
 
     internal static void DeriveManagementKey(ReadOnlySpan<byte> pin, ReadOnlySpan<byte> salt, Span<byte> destination)

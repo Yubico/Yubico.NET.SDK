@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 
 namespace Yubico.YubiKit.YubiOtp;
@@ -28,8 +27,8 @@ public static class IYubiKeyExtensions
     extension(IYubiKey yubiKey)
     {
         /// <summary>
-        /// Gets the OTP slot configuration state from the YubiKey.
-        /// Creates a session, queries state, and disposes automatically.
+        /// Opens a session to obtain its initial OTP-status snapshot, then disposes it automatically.
+        /// Unlike an already-open session's cached GetConfigState, this opens a new session for the read.
         /// </summary>
         /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
@@ -48,8 +47,8 @@ public static class IYubiKeyExtensions
         /// Creates a session, writes the configuration, and disposes automatically.
         /// </summary>
         /// <param name="slot">The slot to configure.</param>
-        /// <param name="config">The configuration to write.</param>
-        /// <param name="accessCode">The new access code.</param>
+        /// <param name="config">The caller-owned configuration to write; not disposed by this method.</param>
+        /// <param name="accessCode">The new six-byte code; omission sends zeros, not preservation of the old code.</param>
         /// <param name="currentAccessCode">The current access code.</param>
         /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
@@ -72,33 +71,50 @@ public static class IYubiKeyExtensions
         /// Performs an HMAC-SHA1 challenge-response operation.
         /// Creates a session, computes the response, and disposes automatically.
         /// </summary>
+        /// <remarks>
+        /// See IYubiOtpSession.CalculateHmacSha1Async for input/payload/slot-mode distinctions. Use one
+        /// challenge-length convention per slot. Explicit OTP HID is the USB recipe; default SmartCard
+        /// selection does not establish challenge-command parity. Output ownership transfers to the caller.
+        /// Transfer occurs only when this outer task returns successfully, after hidden-session teardown.
+        /// If teardown throws after calculation succeeds, the helper clears the retained result and faults.
+        /// Keep caller input cleanup in finally even when creation or teardown fails.
+        /// </remarks>
+        /// <returns>A fresh caller-owned writable 20-byte response. Zero it with
+        /// <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/> after use.</returns>
         /// <param name="slot">The challenge-response slot.</param>
         /// <param name="challenge">The challenge data.</param>
         /// <param name="options">Optional cross-cutting session creation settings.</param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-        public async Task<ReadOnlyMemory<byte>> CalculateHmacSha1Async(
+        public async Task<Memory<byte>> CalculateHmacSha1Async(
             Slot slot,
             ReadOnlyMemory<byte> challenge,
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            await using var session = await yubiKey
+            var session = await yubiKey
                 .CreateYubiOtpSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
-            return await session.CalculateHmacSha1Async(slot, challenge, cancellationToken)
+            return await CalculateAndDisposeAsync(session, slot, challenge, cancellationToken)
                 .ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Creates a YubiOTP session for the device. The caller owns the session lifetime.
+        /// Creates a YubiOTP session that owns its opened connection. The caller disposes the session.
         /// </summary>
         /// <param name="options">
         /// Optional creation settings. YubiOTP selects SmartCard, then HID OTP unless
         /// <see cref="SessionCreationOptions.PreferredConnectionType" /> specifies a supported transport.
         /// Secure-channel parameters force SmartCard when no preference is specified.
+        /// A connection failure propagates without fallback. Session transport support does not guarantee
+        /// support for every command on every device/interface.
         /// </param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
+        /// <remarks>
+        /// Grouped connection exclusion is process-local and limited to overlapping known member IDs.
+        /// Await complete public operations before disposal; the exchange guard does not own a whole
+        /// configuration/status/notification workflow or the caller's configuration and prompt resources.
+        /// </remarks>
         public async Task<YubiOtpSession> CreateYubiOtpSessionAsync(
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
@@ -119,9 +135,10 @@ public static class IYubiKeyExtensions
                     async (connection, ct) =>
                     {
                         var session = await YubiOtpSession
-                            .CreateAsync(
+                            .CreateUsingCachedInfoAsync(
                                 connection,
                                 sessionOptions,
+                                yubiKey.CachedDeviceInfo,
                                 ct)
                             .ConfigureAwait(false);
 
@@ -136,10 +153,44 @@ public static class IYubiKeyExtensions
 
     }
 
+    // The one-shot producer owns both the session and the result until teardown succeeds.
+    internal static async Task<Memory<byte>> CalculateAndDisposeAsync(
+        IYubiOtpSession session, Slot slot, ReadOnlyMemory<byte> challenge, CancellationToken cancellationToken)
+    {
+        Memory<byte> result;
+        try
+        {
+            result = await session.CalculateHmacSha1Async(slot, challenge, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            try
+            {
+                await session.DisposeAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                // A secondary teardown failure must not mask the calculation error.
+            }
+
+            throw;
+        }
+
+        try
+        {
+            await session.DisposeAsync().ConfigureAwait(false);
+            return result;
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(result.Span);
+            throw;
+        }
+    }
+
     // YubiOTP is dual-transport (SmartCard or OTP HID). On a physical (possibly multi-connection) device
     // the parameterless ConnectAsync() is ambiguous, so a transport is chosen by an app-specific smart
-    // default (SmartCard first, matching the shipped OtpTool example's "prefers SmartCard for richer
-    // protocol support", then OTP HID) or an explicit caller override. The default order selects exactly one
+    // default (SmartCard first, then OTP HID) or an explicit caller override. The default order selects exactly one
     // transport; connection failures propagate without fallback.
     private static readonly ConnectionType[] YubiOtpTransportOrder =
         [ConnectionType.SmartCard, ConnectionType.HidOtp];

@@ -35,6 +35,8 @@ public static class AttestationMenu
             .StartAsync("Getting attestation...", async ctx =>
             {
                 var result = await Attestation.GetAttestationAsync(session, slot, cancellationToken);
+                using var attested = result.AttestationCertificate;
+                using var intermediate = result.IntermediateCertificate;
 
                 if (!result.Success)
                 {
@@ -67,6 +69,8 @@ public static class AttestationMenu
         if (AnsiConsole.Confirm("Export attestation certificate?", defaultValue: false))
         {
             var result = await Attestation.GetAttestationAsync(session, slot, cancellationToken);
+            using var attested = result.AttestationCertificate;
+            using var intermediate = result.IntermediateCertificate;
             if (result.Success && result.AttestationCertificate is not null)
             {
                 var filename = AnsiConsole.Ask<string>("Enter filename:");

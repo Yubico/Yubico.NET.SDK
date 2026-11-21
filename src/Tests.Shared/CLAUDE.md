@@ -6,7 +6,7 @@ This file provides AI agent guidance for working with the YubiKit Integration Te
 ## Module Context
 
 Tests.Shared provides the foundation for all YubiKit integration tests. It implements:
-- **Safety-first allow list** - Prevents accidental testing on production devices
+- **Allow-list filtering** - Authorizes test-body fixtures after discovery and live identification reads
 - **Attribute-based test discovery** - xUnit integration for declarative device filtering
 - **Device caching** - Single device discovery per test run for performance
 - **Extension methods** - Fluent API for session management across applications
@@ -28,6 +28,9 @@ compile the same type twice.
 ## Critical Design Patterns
 
 ### 1. xUnit DataAttribute Integration
+
+The structural snippets in sections 1, 4 and 5 are abbreviated implementation sketches, not replacement
+implementations or copy-paste tests. Read the actual named source files before changing the harness.
 
 The `[WithYubiKey]` attribute extends `DataAttribute` to provide test data for `[Theory]` tests:
 
@@ -62,47 +65,24 @@ public class WithYubiKeyAttribute : DataAttribute
 **Discovery phase** (when test explorer enumerates tests):
 - `WithYubiKeyAttribute.GetData()` returns a placeholder `YubiKeyTestState`
 - Placeholder contains serialized `FilterCriteria`
-- NO device access occurs
+- The attribute itself performs no device access; it serializes criteria into one placeholder.
 
 **Execution phase** (when tests actually run):
 - Test receives placeholder `YubiKeyTestState`
 - Accessing `Device` property triggers `BindToRealDevice()`
-- `YubiKeyTestInfrastructure.FilterDevices()` finds matching device
-- Placeholder is replaced with real device state
+- `YubiKeyTestInfrastructure.FilterDevices()` finds candidates; the placeholder binds to the first match
+- The same placeholder stores the first matching authorized state; it does not produce one row per key.
 
 ### 3. Lazy Static Device Cache
 
-```csharp
-public static class YubiKeyTestInfrastructure
-{
-    private static readonly Lazy<IReadOnlyList<YubiKeyTestState>> LazyAuthorizedDevices =
-        new(() => InitializeDevicesAsync().GetAwaiter().GetResult());
-
-    public static IReadOnlyList<YubiKeyTestState> AllAuthorizedDevices => LazyAuthorizedDevices.Value;
-
-    private static async Task<IReadOnlyList<YubiKeyTestState>> InitializeDevicesAsync()
-    {
-        // 1. Discover all YubiKeys via YubiKeyManager
-        var devices = await YubiKeyManager.FindAllAsync();
-
-        // 2. Load allow list via provider
-        var provider = new AppSettingsAllowListProvider();
-        var allowList = new AllowList(provider);
-
-        // 3. Filter to authorized devices only
-        foreach (var device in devices)
-        {
-            if (allowList.IsDeviceAllowed(device.SerialNumber))
-                authorizedDevices.Add(/* ... */);
-        }
-
-        return authorizedDevices;
-    }
-}
-```
+`LazyAuthorizedDevices` invokes the synchronous `InitializeDevicesAsync` method once. That method bridges
+the retry-wrapped `YubiKeyManager.FindAllAsync(interfaces: ConnectionType.All)` call with
+`GetAwaiter().GetResult()`, then performs live `GetDeviceInfoAsync` reads before serial authorization.
+It caches authorized views with the read metadata. This cache is local to the test process and is not a
+Core monitor or a guarantee of stable device state across the run.
 
 **Why Lazy<> pattern:**
-- Device discovery is expensive (~500ms per device)
+- Device discovery and live identification involve interface opens and device I/O; no fixed latency is promised.
 - Initialization happens only when first test accesses devices
 - CLR guarantees thread-safe initialization
 - `GetAwaiter().GetResult()` bridges async initialization to static context
@@ -118,7 +98,7 @@ public sealed class AllowList
     {
         _allowedSerials = [..provider.GetList()];
 
-        if (_allowedSerials.Count == 0)
+        if (_allowedSerials.Count == 0 && !provider.AllowUnknownSerials)
         {
             Console.Error.WriteLine(provider.OnInvalidInputErrorMessage());
             Environment.Exit(-1); // Hard fail - cannot continue without allow list
@@ -135,10 +115,14 @@ public sealed class AllowList
 - Production uses `AppSettingsAllowListProvider` (reads from appsettings.json)
 - Tests can inject mock providers
 
-**Why Environment.Exit:**
-- Must prevent ANY test from running on unauthorized devices
-- Clear, loud failure that cannot be caught
-- Forces developer to explicitly authorize devices
+**Actual authorization outcomes:**
+- The empty-list constructor exits only when `AllowUnknownSerials` is false.
+- Initialization reads metadata before filtering disallowed or unreadable serials. It does not exit for
+  each rejected device. Per-device read errors are also filtered.
+- No authorized devices produces a cached empty list, then `SkipException` at lazy row binding;
+  `[SkippableTheory]` handles that as a skip. Exhausted transient scan retries propagate separately.
+- Unknown-serial authorization deliberately broadens the fixture set; keep unauthorized hardware off
+  the rig. The allow list is not a pre-I/O barrier for discovery or identification.
 
 ### 5. FilterCriteria and Serialization
 
@@ -208,7 +192,7 @@ public static async Task WithOathAsync(
 
     await using var session = await OathSession.CreateAsync(
         connection,
-        scpKeyParams: scpKeyParams,
+        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
         cancellationToken: cancellationToken);
 
     await action(session, state.DeviceInfo);
@@ -220,6 +204,10 @@ public static async Task WithOathAsync(
 Pass the connection straight through. A session is a user of the connection it is handed, so disposing a reset session leaves the connection open for the test session that follows; the `WithConnectionAsync` owner disposes it. This used to need a non-owning `SharedSmartCardConnection` wrapper, which is gone — non-owning is the default now.
 
 One live session per connection: dispose the reset session before creating the test session, or the second construction throws `ConnectionInUseException`. Scope the reset session to its own `using` block.
+
+**OATH reset setup:** successful `ResetAsync` refreshes the same session and keeps its connection. The OATH
+module's `WithOathSessionAsync` uses separate owned reset and body connections for fixture isolation, not
+because RESET requires closing or reopening the connection. See [OATH reset boundaries](../Oath/CLAUDE.md#reset-and-timestamp-boundaries).
 
 ### Recording SmartCard APDUs In Unit Tests
 
@@ -235,12 +223,10 @@ Use `RecordingSmartCardConnection` when a unit test needs to assert exact APDU b
 
 ## Performance Considerations
 
-Device discovery has fixed costs:
-- USB enumeration: ~100ms
-- SmartCard enumeration: ~200ms
-- Per-device `GetDeviceInfo`: ~100ms per device
-
-Static cache eliminates per-test cost, making this worthwhile for test suites with >5 tests.
+The static cache avoids repeating the initial scan and metadata reads for each test row. Actual latency
+depends on the attached devices, enabled interfaces, operating system and native calls. This is a source
+description of reuse, not benchmark evidence or a per-test latency bound. Session helpers and explicit
+live metadata reads still perform their own I/O.
 
 ## Debugging Tips
 
@@ -264,8 +250,21 @@ Static cache eliminates per-test cost, making this worthwhile for test suites wi
 ## Known Limitations
 
 1. **Static device cache:** Devices must be connected before test runner starts
-2. **Environment.Exit:** Cannot recover from allow list violations
-3. **Single device per test case:** Each `[WithYubiKey]` attribute produces one test case per matching device
+2. **Authorization outcomes:** Empty configuration can exit; rejected devices are filtered and an empty
+   fixture result causes row-binding skips. Discovery/metadata reads precede per-device authorization.
+3. **Single device per attribute:** Each `[WithYubiKey]` attribute yields one placeholder bound to the
+   first matching authorized device at execution. Multiple attributes bind independently and may choose
+   the same key; this is not automatic execution over every matching device.
+4. **Cached callback metadata:** `WithManagementAsync` passes `state.DeviceInfo` without refreshing it.
+   A session initialization read is separate from the callback snapshot. Read explicitly for fresh settings.
+5. **Filtering versus pinning:** Connection filters select eligible devices; pass a concrete
+   `preferredConnection` and assert `mgmt.ConnectionType` when operation transport matters. The unfiltered
+   state's multi-flag set is not a valid preference. Helper argument order is `action`, `configuration`,
+   `scpKeyParams`, `preferredConnection`, `cancellationToken`; use names for policy options.
+6. **Metadata filters:** Malformed firmware strings are ignored; use three components. Capability checks
+   accept USB or NFC enabled bits independently of `RequireUsb`. Current Core FIPS-tag mapping is wrong,
+   so FIPS masks/filters cannot establish application approval. Product flag bits can remain in
+   `FormFactor`, causing exact base-enum filters to miss flagged devices.
 
 ## Security Considerations
 

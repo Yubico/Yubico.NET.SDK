@@ -3,6 +3,7 @@
 
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Buffers;
 using System.ComponentModel;
 using System.Formats.Asn1;
 using System.Security.Cryptography;
@@ -76,6 +77,10 @@ public sealed class KeysAttestSettings : GlobalSettings
     [CommandOption("--pin <PIN>")]
     [Description("User PIN (prompted if not provided).")]
     public string? Pin { get; init; }
+
+    public override ValidationResult Validate() => Key.ToLowerInvariant() is "sig" or "dec" or "aut"
+        ? base.Validate()
+        : ValidationResult.Error("Attestation requires the sig, dec, or aut slot.");
 }
 
 // ── Commands ────────────────────────────────────────────────────────────────
@@ -102,15 +107,16 @@ public sealed class OpenPgpKeysSetTouchCommand : YkCommandBase<KeysSetTouchSetti
                 $"Invalid policy: {settings.Policy}. Must be on, off, fixed, cached, or cached-fixed.")
         };
 
+        var fixedPolicyEffect = DescribeFixedPolicy(keyRef);
         var current = await session.GetUifAsync(keyRef);
         if (current.IsFixed())
         {
-            OutputHelpers.WriteError("Current touch policy is fixed and cannot be changed without factory reset.");
+            OutputHelpers.WriteError(fixedPolicyEffect);
             return ExitCode.GenericError;
         }
 
         if (uif.IsFixed() && !ConfirmAction(
-                "set a PERMANENT touch policy that cannot be changed without factory reset", settings.Force))
+                $"set a fixed touch policy. {fixedPolicyEffect}", settings.Force))
         {
             OutputHelpers.WriteInfo("Touch policy change cancelled.");
             return ExitCode.UserCancelled;
@@ -130,6 +136,10 @@ public sealed class OpenPgpKeysSetTouchCommand : YkCommandBase<KeysSetTouchSetti
         OutputHelpers.WriteSuccess($"Touch policy for {FormatKeyRef(keyRef)} set to {settings.Policy}.");
         return ExitCode.Success;
     }
+
+    private static string DescribeFixedPolicy(KeyRef keyRef) => keyRef == KeyRef.Att
+        ? "Fixed ATT policy survives reset; clearing it requires irreversible ATT key replacement."
+        : "Fixed policy clears only on ordinary key replacement, deletion, or reset.";
 }
 
 public sealed class OpenPgpKeysImportCommand : YkCommandBase<KeysImportSettings>
@@ -305,13 +315,33 @@ public sealed class OpenPgpKeysAttestCommand : YkCommandBase<KeysAttestSettings>
 {
     protected override ConnectionType[] AppletTransports => [ConnectionType.SmartCard];
 
-    protected override async Task<int> ExecuteCommandAsync(
-        CommandContext context, KeysAttestSettings settings, YkDeviceContext deviceContext)
+    internal Func<string?, IMemoryOwner<byte>?> AcquirePin { get; init; } =
+        static provided => GetPin(provided, "Enter User PIN");
+
+    protected override Task<int> ExecuteCommandAsync(
+        CommandContext context, KeysAttestSettings settings, YkDeviceContext deviceContext) =>
+        ExecuteWithSelectionAsync(context, settings, run => run(deviceContext));
+
+    protected override async Task<int> ExecuteWithSelectionAsync(CommandContext context, KeysAttestSettings settings,
+        Func<Func<YkDeviceContext, Task<int>>, Task<int>> selectAndRun)
+    {
+        var keyRef = ParseKeyRef(settings.Key);
+        if (keyRef == KeyRef.Att)
+            throw new ArgumentException("Attestation requires the sig, dec, or aut slot.");
+        using var pin = AcquirePin(settings.Pin);
+        if (pin is null)
+        {
+            return ExitCode.UserCancelled;
+        }
+
+        return await selectAndRun(device => AttestAsync(device, keyRef, pin.Memory));
+    }
+
+    private static async Task<int> AttestAsync(YkDeviceContext deviceContext, KeyRef keyRef, ReadOnlyMemory<byte> pin)
     {
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
-
-        var keyRef = ParseKeyRef(settings.Key);
-        var cert = await session.AttestKeyAsync(keyRef);
+        await session.VerifyPinAsync(pin);
+        using var cert = await session.AttestKeyAsync(keyRef);
 
         AnsiConsole.MarkupLine("[bold]Attestation Certificate[/]");
         OutputHelpers.WriteKeyValue("Subject", cert.Subject);

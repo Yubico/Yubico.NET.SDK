@@ -25,6 +25,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </summary>
 /// <remarks>
 /// This adapter owns the Ctap2Session lifetime and manages the PinUvAuthProtocolV2 instance.
+/// It does not negotiate protocol 1 from GetInfo. Legacy token-command fallback still uses protocol 2.
 /// </remarks>
 internal sealed class WebAuthnBackend : IWebAuthnBackend
 {
@@ -286,8 +287,8 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         if (_protocol is null)
         {
             _protocol = new PinUvAuthProtocolV2();
-            // Protocol initialization is async in the session context, but we defer it
-            // until the first use in ClientPin methods which handle initialization
+            // The protocol object is stateless. ClientPin performs key agreement per operation;
+            // constructing this object does not start asynchronous authenticator initialization.
         }
     }
 }

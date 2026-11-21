@@ -47,8 +47,10 @@ IYubiKey device = await YubiKeyManager.FindFirstAsync();
 Console.WriteLine($"Serial {device.SerialNumber}: {device.AvailableConnections}");
 ```
 
-One `IYubiKey` is one physical key, whichever interfaces it exposes. `FindFirstAsync` throws when no key is
-present; `FindAllAsync` returns every connected key, and `FindFirstOrDefaultAsync` takes a predicate. From here, an application package adds
+An `IYubiKey` is discovery's view of a physical key through its observed interfaces. Grouping depends
+on available serial, topology, and PID evidence; partial observations can split a key or combine
+complementary same-PID interfaces. `FindFirstAsync` throws when nothing matches the current scan;
+`FindFirstOrDefaultAsync` returns null, and neither waits for insertion. From here, an application package adds
 `device.Create<Application>SessionAsync()`; each package README opens with that step and a first read-only
 call, then covers the common operations. For applet specifics and features, see that documentation.
 
@@ -56,6 +58,12 @@ For continuous presence tracking, use `YubiKeyManager.WatchAsync(ct)`, or share 
 `CreateMonitorAsync` and dispose it with `await using`. Both emit `DeviceAdded` replay, `SnapshotComplete`,
 then live `DeviceChange` records. The ownership rule is: manager watch creates a producer; monitor watch subscribes to an existing one.
 There is no pause/restart; see [Core monitoring](src/Core/README.md#own-continuous-tracking).
+
+Read `device.CachedDeviceInfo` for last-known metadata without I/O, or use Management for a live read.
+Discovery itself can open short-lived connections and select applets; coordinate direct/raw connections
+and independent scoped views. Device convenience sessions own their hidden connections, while
+`Session.CreateAsync(connection)` borrows yours. Await each complete operation, then dispose sessions
+and connections with `await using`; cancellation of a wait is not proof of native completion or release.
 
 ## Packages
 
@@ -66,7 +74,7 @@ There is no pause/restart; see [Core monitoring](src/Core/README.md#own-continuo
 | [Yubico.YubiKit.WebAuthn](src/WebAuthn/README.md) | WebAuthn client API over CTAP2 |
 | [Yubico.YubiKit.Oath](src/Oath/README.md) | TOTP and HOTP credentials |
 | [Yubico.YubiKit.YubiOtp](src/YubiOtp/README.md) | OTP slot configuration and challenge-response |
-| [Yubico.YubiKit.OpenPgp](src/OpenPgp/README.md) | OpenPGP card keys, PINs, signing, decryption |
+| [Yubico.YubiKit.OpenPgp](src/OpenPgp/README.md) | OpenPGP card keys, PINs, signatures, raw decipher/agreement, certificates |
 | [Yubico.YubiKit.SecurityDomain](src/SecurityDomain/README.md) | Secure channel (SCP03/SCP11) key management |
 | [Yubico.YubiKit.YubiHsm](src/YubiHsm/README.md) | YubiHSM Auth applet on a YubiKey |
 | [Yubico.YubiKit.Management](src/Management/README.md) | Device information and configuration |
@@ -80,7 +88,7 @@ secure channel. Interactive sample tools live under `src/<Module>/examples/`.
 - [User interaction](docs/usage/user-interaction.md): touch notification and credential prompting across applications.
 - [Migrating from v1](docs/migration/v1-to-v2.md) and [what changed in v2](docs/v2-highlights.md).
 - [Native AOT](docs/NATIVE-AOT.md): every library package publishes AOT compatibility metadata.
-- [API reference](https://docs.yubico.com/yesdk/).
+- [v1 API reference](https://docs.yubico.com/yesdk/). For v2, start with the [module guides](#packages).
 
 ## Contributing
 

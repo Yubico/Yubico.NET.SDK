@@ -84,8 +84,9 @@ Console.WriteLine($"PASS Core SHA-256 {args[1].ToUpperInvariant()}, native SHA-2
 // the methods and their SafeHandle/enum parameter types are internal). It establishes and releases one
 // user-scope context, passes a deliberately invalid context handle to SCardCancel, and asks SCardConnect
 // for a reader name that cannot exist. No card or reader is opened. Error codes are recorded, not assumed.
-// With releaseFailureControl the context is released once beforehand, so the explicit release must fail,
-// leave the SafeHandle valid for its disposal fallback, and fail the run.
+// With releaseFailureControl the context is released once beforehand, so the explicit release must fail
+// without marking the SafeHandle invalid. The later Require fails the run; it does not observe
+// ReleaseHandle or prove disposal/finalization before the unhandled failure terminates the process.
 static void SmartCardErrorStage(Assembly core, bool releaseFailureControl)
 {
     const string ns = "Yubico.YubiKit.Core.Native.Desktop.SCard.";
@@ -114,7 +115,8 @@ static void SmartCardErrorStage(Assembly core, bool releaseFailureControl)
         Console.WriteLine($"SCardReleaseContext(established) -> {Describe(errors, code)}");
     }
 
-    // A failed explicit release leaves the handle valid, so `using` disposal retries through ReleaseHandle.
+    // A failed explicit release leaves fallback eligible. This assertion observes that failure,
+    // not whether the SafeHandle's ReleaseHandle later runs during exceptional process termination.
     Require(code == 0, $"SCardReleaseContext failed for the established context; " +
         $"SafeHandle left for disposal fallback (IsInvalid={context.IsInvalid}, IsClosed={context.IsClosed})");
 }

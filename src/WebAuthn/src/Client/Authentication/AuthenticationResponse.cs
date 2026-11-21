@@ -24,6 +24,13 @@ public sealed record class AuthenticationResponse
     /// <summary>
     /// Gets the credential identifier used for this authentication.
     /// </summary>
+    /// <remarks>
+    /// Currently empty if the authenticator omits the credential descriptor. CTAP2.0 §5.2 permits
+    /// omission for a single-descriptor request; CTAP2.1/2.3 §6.2.2 require the descriptor. Failure to
+    /// recover an omitted identifier is a client limitation, not a usable empty credential ID.
+    /// An original single-entry allow list can identify the requested credential application-side;
+    /// the first entry of a multi-entry list cannot. The RP must verify the response and account binding.
+    /// </remarks>
     public required ReadOnlyMemory<byte> CredentialId { get; init; }
 
     /// <summary>
@@ -47,10 +54,12 @@ public sealed record class AuthenticationResponse
     public required ReadOnlyMemory<byte> Signature { get; init; }
 
     /// <summary>
-    /// Gets the user information for discoverable credentials.
+    /// Gets the user entity, when provided by the authenticator.
     /// </summary>
     /// <remarks>
-    /// Only present for discoverable credentials when user verification is performed.
+    /// The user handle identifies the account; display fields may be absent, especially without user
+    /// verification. CTAP can also return this entity for a non-discoverable credential. Use the handle
+    /// and the RP's verified credential/account binding for authorization, not a display name.
     /// </remarks>
     public PublicKeyCredentialUserEntity? User { get; init; }
 

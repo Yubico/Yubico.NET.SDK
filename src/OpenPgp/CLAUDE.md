@@ -5,9 +5,12 @@ For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.m
 
 ## Module Context
 
-OpenPGP implements the OpenPGP card application (v3.4 specification) for YubiKey devices. It provides:
-- **Key Management**: Generate, import, delete, and attest RSA and EC keys across four key slots
-- **Cryptographic Operations**: Sign, decrypt, and authenticate using on-device private keys
+OpenPGP implements host access to the OpenPGP card application for YubiKey devices. The referenced
+functional specification is Version 3.4.1, March 18, 2020, despite its URL's 3.4 filename. It provides:
+- **Key Management**: Generate/import/delete ordinary-slot keys and attest generated Sig/Dec/Aut keys;
+  ATT is a vendor extension that uses a nested CRT, `B6 03 84 01 81`
+- **Cryptographic Operations**: Sign, raw RSA decipher/ECDH agreement, and authentication using on-device keys;
+  host applications handle packet/content processing and trust decisions
 - **PIN Management**: Verify, change, and reset User PINs, Admin PINs, and Reset Codes with KDF support
 - **Certificate Storage**: Store and retrieve X.509 certificates associated with key slots
 - **Device Configuration**: Configure touch policy (UIF), algorithm attributes, and KDF settings
@@ -15,7 +18,7 @@ OpenPGP implements the OpenPGP card application (v3.4 specification) for YubiKey
 ## Architecture
 
 ### Transport
-SmartCard-only (`ISmartCardConnection`). OpenPGP spec is SmartCard/CCID only. Applet SELECT and APDU send mechanics are routed through the module-local `OpenPgpBackend`; OpenPGP APDU construction stays in `OpenPgpSession`.
+SmartCard-only (`ISmartCardConnection`), over USB CCID or NFC. Applet SELECT and APDU send mechanics are routed through the module-local `OpenPgpBackend`; OpenPGP APDU construction stays in `OpenPgpSession`.
 
 ### Session Structure
 `OpenPgpSession` is a `sealed partial class` split across 7 files:
@@ -31,10 +34,12 @@ SmartCard-only (`ISmartCardConnection`). OpenPGP spec is SmartCard/CCID only. Ap
 | `OpenPgpSession.Reset.cs` | Factory reset sequence |
 
 ### Shared Session State
-- `OpenPgpBackend _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
-- `FirmwareVersion _version` — firmware for feature gating
+- `IOpenPgpBackend? _backend` — selected SmartCard APDU send/select wrapper; protocol disposal remains owned by `ApplicationSession`
+- Inherited `ApplicationSession.FirmwareVersion` — effective version for protocol configuration and feature gating;
+  initialization chooses the override or detected applet version. The detected version is logged, not retained in a `_version` field.
 - `ApplicationRelatedData _appData` — cached card state (refreshable)
-- `Kdf? _kdf` — active KDF configuration (lazy-loaded)
+- `GetKdfAsync` reads F9 when advertised and returns a caller-owned configuration. `SetKdfAsync`
+  borrows its input while writing F9. Each credential operation reads and disposes its own configuration.
 - User-presence policy uses the UIF already parsed into cached application-related data. If that per-key
   entry is absent, the operation falls back to one direct UIF read. `SetUifAsync` updates the session cache
 
@@ -44,18 +49,34 @@ split into reset-code and prior-administrator-authentication methods so no input
 ## Key Patterns
 
 ### Initialization Sequence
-1. SELECT OpenPGP AID → handle 0x6285/0x6985 with ACTIVATE → re-SELECT
-2. GET_VERSION (INS=0xF1) → BCD decode; default to 1.0.0 if CONDITIONS_NOT_SATISFIED
-3. Cache `ApplicationRelatedData` for feature detection and KDF state
+1. Bind the borrowed connection and register the owned protocol before device I/O.
+2. SELECT OpenPGP AID → handle 0x6285/0x6985 with ACTIVATE → re-SELECT
+3. Use explicit override, cached physical-device firmware, or applet GET VERSION (BCD bytes). Unknown or
+   prerelease metadata admits local feature checks. Preserve known numeric framing separately; missing numeric
+   data uses the legacy profile without qualifying a minimum firmware version.
+4. Configure framing and optional SCP, then rebind the backend if needed. Pass Core's
+   `scpEligibilityFirmwareVersion` independently of numeric framing: the resolved feature version for known
+   production firmware, otherwise `FirmwareVersion.Default`. Explicit overrides bypass cached qualifiers.
+5. Cache `ApplicationRelatedData` for algorithms/UIF; F9/KDF is read on demand. Publish readiness only after initialization
+   completes. Failed initialization disposes/detaches the session; the device helper cleans up its hidden connection.
+
+Core guards each logical exchange, not whole certificate, key, credential or reset workflows. Await the complete public
+task before another operation or disposal, including parsing and presence callbacks. Keep borrowed inputs/keys and the
+caller-owned prompt alive through that task. Session disposal does not supply a whole-workflow lease.
 
 ### KDF (Iterated-Salted-S2K)
-**NOT PBKDF2.** The `iteration_count` is total bytes to hash, not rounds:
+Iterated-and-Salted S2K hashes a byte count in one hash context:
 ```
 data = salt + pin_bytes
-data_count, trailing = divmod(iteration_count, len(data))
+data_count, trailing = divmod(max(iteration_count, len(data)), len(data))
 hash data data_count times, then data[:trailing]
 ```
 Supports SHA256 (0x08) and SHA512 (0x0A).
+
+Card §4.3.2 assigns credential/F9 alignment to terminal software. YubiKey's vendor transition uses initial
+User/Admin hashes and invalidates the Reset Code. Configure before ordinary keys; a state-dependent F9 refusal
+needs inspection rather than an invented universal firmware rule. Change methods derive both old/new inputs
+with the current KDF. Both User VERIFY references (P2=81 and 82) use PW1 for derivation and retry lookup.
 
 ### Factory Reset Sequence
 1. Get PIN status (remaining attempts)
@@ -63,6 +84,16 @@ Supports SHA256 (0x08) and SHA512 (0x0A).
 3. Block Admin PIN: same
 4. TERMINATE (INS=0xE6)
 5. ACTIVATE (INS=0x44)
+
+TERMINATE and ACTIVATE statuses are checked. Reselection and application-data readback establish access, not
+complete erasure; reset guidance requires independent state inspection. Ordinary material
+is erased on successful device reset; YubiKey ATT key/certificate and fixed ATT policy survive. Ordinary
+key replacement clears fixed UIF; fixed ATT recovery requires irreversible ATT private-key replacement.
+
+After confirmation, reset clears host readiness, authentication and UIF state, retires the old protocol, and
+reinitializes the same session with the original options, including SCP when requested. A failed refresh ends
+the session. Reopen after uncertainty and inspect persistent state before retrying. The integration helper resets in a separate
+plain session before creating an optional SCP body session, so it supplies no SCP-reset oracle.
 
 ## Model Layer
 
@@ -75,7 +106,7 @@ representations and only RSA 2048/3072/4096, not Core's RSA 1024.
 Internal `OpenPgpCurveOids` caches DER **value octets only**, deriving them from dotted OIDs with AsnWriter.
 Ordinary curve OIDs come from Core; the protocol's legacy X25519 (1.3.6.1.4.1.3029.1.5.1) and Ed25519
 (1.3.6.1.4.1.11591.15.1) overrides stay here. They are not RFC 8410 SPKI algorithm OIDs. Failed Try lookup
-returns `KeyType.None`. Unknown OID parser rejection is unchanged; do not silently select P-256.
+returns `KeyType.None`. Valid unmodeled OIDs retain their attribute bytes without inferring a known curve.
 
 Factories choose ECDH/ECDSA/EdDSA from construction and slot, rejecting non-EC families instead of falling
 through to ECDSA. Parsing must preserve the received algorithm byte and import format; never call the factory
@@ -89,12 +120,12 @@ by `NamedCurveCatalogVectorsTests` (Core) and `OpenPgpPutKeyWireTests`; hardware
 
 ### Protocol Enums (internal)
 - `Ins` — Instruction bytes
-- `Crt` — Control Reference Templates
-- `DataObject` — All Data Object tags
+- Backend, `BcdHelper`, `DigestInfo`, `PrivateKeyImport` and the private-key-template hierarchy
 
 ### Domain Enums (public)
 - `KeyRef` — Key slots with computed DO tag properties
-- `Pw` — PIN identifiers (User=0x81, Reset=0x82, Admin=0x83)
+- `Crt` (static class), `DataObject` — public CRT/data-object carriers; direct-access rules are object-specific
+- `Pw` — logical credentials (User=0x81, Reset Code=0x82, Admin=0x83). VERIFY P2=82 separately means PW1 other-operation mode
 - `Uif` — User Interaction Flag with `IsFixed`/`IsCached`
 - `PinPolicy`, `KeyStatus`, `RsaSize`, `RsaImportFormat`, `EcImportFormat`
 - Core `KeyType` — concrete EC key identity in algorithm attributes
@@ -106,7 +137,7 @@ by `NamedCurveCatalogVectorsTests` (Core) and `OpenPgpPutKeyWireTests`; hardware
 - `OpenPgpAid` — Parsed AID with BCD-decoded version
 - `PwStatus` — PIN attempt counters and length limits
 - `Kdf` (abstract) → `KdfNone`, `KdfIterSaltedS2k`
-- `PrivateKeyTemplate` (abstract) → `RsaKeyTemplate`, `RsaCrtKeyTemplate`, `EcKeyTemplate`
+- `SupportedAlgorithm` — ordered per-slot algorithm entry; list slots can repeat
 - `KeyInformation`, `KeyFingerprints`, `GenerationTimes` — sealed read-only dictionary domain types with
   private collection storage; parsers transfer exclusively owned dictionaries into them
 
@@ -118,15 +149,24 @@ valid and preserve the card's per-slot algorithm multiplicity.
 
 ## Firmware Compatibility
 
-| Feature | Min Firmware | Gating |
+These are current SDK checks, subject to advertised card/family/slot capabilities and separate historical
+qualification. Vendor commercial-version wording and development-source gates have different provenance.
+
+| Feature | SDK threshold | Gating |
 |---------|-------------|--------|
-| Basic OpenPGP | 1.0.0 | Always available |
 | Factory reset | 1.0.6 | `EnsureSupports` |
 | UIF (touch policy) | 4.2.0 | `EnsureSupports` |
 | EC key support | 5.2.0 | `EnsureSupports` |
 | Certificates | 5.2.0 | `EnsureSupports` |
 | Key attestation | 5.2.0 | `EnsureSupports` |
 | Unverify PIN | 5.6.0 | `EnsureSupports` |
+
+Cached/ATT UIF writes require 5.2.1; challenge checks the advertised flag and length. Changing PIN attempts
+uses the applet version floor of 1.0.7 on the major-1 path and 4.3.1 otherwise. NEO RSA import labels the
+modulus-bearing CRT template as format 03. NEO deletion is unsupported rather than overwriting the key;
+old-family device qualification remains separate. On-card RSA generation is refused before writing attributes on
+`[4.2.0, 4.3.5)` as a conservative policy; YSA-2017-01 identifies 4.2.6–4.3.4 as affected and
+4.3.5 as corrected. Independently generated imports are not subject to this gate.
 
 ## Security Requirements
 
@@ -136,6 +176,14 @@ valid and preserve the card's per-slot algorithm multiplicity.
 - Zero ALL PIN bytes after use: `CryptographicOperations.ZeroMemory()`
 - Zero private key material after import
 - Zero KDF-derived bytes after use
+- Preserve caller ownership of disposable `IPrivateKey` inputs and certificate objects. Returned decipher
+  memory is writable and caller-owned; clear its span directly. Where the signature contract is read-only,
+  use `MemoryMarshal.AsMemory` on its caller-owned result rather than clearing a separate copy.
+  Borrowed input/static/model memory retains its own owner's lifetime contract.
+- RSA/ECDSA hash input; EdDSA sends raw messages and ignores the hash parameter. RSA signatures are raw,
+  ECDSA output is DER and Ed25519 output is 64 bytes. RSA/EdDSA transfer successful response storage;
+  ECDSA clears raw storage after conversion. Decipher copies successful output and clears its raw response.
+- X25519 decipher wraps the raw 32-byte peer public key in the EC cipher DO; import/public-key tests establish no agreement result.
 - Use `CryptographicOperations.FixedTimeEquals()` for comparisons
 - NEVER log PINs, keys, or credentials — only slot names, algorithm types, lengths
 
@@ -149,15 +197,21 @@ See `tests/CLAUDE.md` for test runner requirements.
 - PrivateKeyTemplate TLV encoding, PwStatus parsing, exact OpenPGP OID value vectors
 
 **Integration tests** use `[Theory] [WithYubiKey]` with firmware version gating.
+The helper resets before use when requested and leaves post-test state in place. Comments should name
+actual assertions: nonempty/length checks establish response shape, host verification establishes a signature,
+and certificate-byte replacement establishes overwrite rather than trust-chain validation. Full reset verification
+requires more than the existing three retry-counter assertions.
+The Unverify signing-failure test leaves signature policy uncontrolled: `Always` could already consume the earlier
+authorization. Its later APDU exception does not isolate Unverify's effect or establish both User modes cleared.
 
 ## User-presence notifications
 
 When `SessionCreationOptions.UserPresencePrompt` is supplied, signing, decryption, authentication, and
 attestation use the relevant cached UIF before the cryptographic APDU. `On`/`Fixed` map to `PolicyRequires`,
 `Cached`/`CachedFixed` map to `PolicyMayRequire`, and `Off` is silent. Attestation uses the attestation-key
-UIF (`KeyRef.Att`). A failed UIF read falls back to `PolicyMayRequire` without replacing the cryptographic
-operation; cancellation still propagates. Firmware without UIF support stays silent because it cannot configure
+UIF (`KeyRef.Att`). A failed advisory UIF read falls back to `PolicyMayRequire` even if diagnostic logging
+also fails; cancellation still propagates. Firmware without UIF support stays silent because it cannot configure
 that policy. A direct GET DATA is issued only when the cached application-related data omitted that key's UIF.
-No OpenPGP status word is currently verified as a user-presence timeout, so terminal outcomes are limited to
-`Completed`, `Cancelled`, and `Failed`. Decryption resolves successfully before materializing the caller's
+Device APDU errors resolve as `Failed`; OpenPGP statuses including 6600 currently receive no `TimedOut`
+classification. Terminal outcomes are `Completed`, `Cancelled`, and `Failed`. Decryption resolves successfully before materializing the caller's
 plaintext copy; the raw response is cleared whether resolution succeeds or throws.

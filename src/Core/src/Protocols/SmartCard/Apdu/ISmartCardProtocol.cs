@@ -23,7 +23,9 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 ///     Implementations admit one logical exchange at a time. An overlapping call throws
 ///     <see cref="InvalidOperationException" /> immediately because parallel APDU streams would corrupt chained
 ///     commands, chained responses, and SCP MAC chains. A token is checked before entry; an exchange already
-///     in flight runs to completion so no partial chained state is left on the card.
+///     in flight retains admission until terminal, with uncancellable constituent transmits. Transport or
+///     framing failure can still leave card state uncertain; local recovery notifications are not a universal
+///     recovery guarantee. Await complete public workflows separately from this per-exchange guard.
 /// </remarks>
 internal interface ISmartCardProtocol : IProtocol
 {
@@ -32,7 +34,7 @@ internal interface ISmartCardProtocol : IProtocol
     /// </summary>
     /// <param name="command">The APDU command to transmit.</param>
     /// <param name="throwOnError">
-    /// When <c>true</c> (default), throws <see cref="ApduException"/> for non-success status words.
+    /// When <c>true</c> (default), throws <see cref="ApduException"/> for any final status other than 0x9000, including warnings.
     /// When <c>false</c>, returns the response without throwing.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>

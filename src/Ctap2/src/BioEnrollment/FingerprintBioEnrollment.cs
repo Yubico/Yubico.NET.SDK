@@ -13,7 +13,8 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
-using Yubico.YubiKit.Ctap2;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Ctap2.Cbor;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.BioEnrollment;
@@ -23,17 +24,34 @@ namespace Yubico.YubiKit.Ctap2.BioEnrollment;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Bio enrollment requires authenticator support (bioEnroll option) and a
-/// PIN/UV auth token with the <see cref="PinUvAuthTokenPermissions.BioEnrollment"/>
-/// permission.
+/// Standard enrollment requires fingerprint hardware, bioEnroll option presence and a
+/// token with <see cref="PinUvAuthTokenPermissions.BioEnrollment"/> permission. A false
+/// bioEnroll value means supported with no templates, not unsupported. Acquiring this
+/// permission through built-in UV additionally requires uvBioEnroll support. The helper
+/// does not negotiate command/protocol support, obtain tokens or check their permissions/expiry.
 /// </para>
 /// <para>
-/// Requires YubiKey firmware 5.2 or later with bio-enabled hardware.
+/// The standard path uses the CTAP 2.1 Section 6.7 request format. The opt-in prototype
+/// path retains its previous request format; the SDK does not establish prototype interoperability.
 /// </para>
 /// <para>
-/// IMPORTANT: Fingerprint enrollment operations require physical user interaction
-/// (placing finger on sensor). These operations will timeout if no user activity
-/// is detected.
+/// Capture requires the user to place or swipe a finger on the sensor; inventory, rename,
+/// removal and enrollment cancellation do not themselves require a capture. Calls route
+/// through generic CBOR exchange and do not provide operation-specific SDK presence
+/// notifications. No local interaction deadline or automatic enrollment cancellation is
+/// implemented. The SDK's firmware threshold alone does not establish hardware or wire support.
+/// </para>
+/// <para>
+/// This helper borrows the session, protocol and token memory. Keep both objects alive
+/// and the token unchanged through awaited calls, then clear caller-owned token bytes
+/// with CryptographicOperations.ZeroMemory, including on failure. Unlike ClientPin, this
+/// helper does not dispose the protocol. It clears the named temporary request and
+/// authentication buffers it owns. Cancellation or failure is not device rollback.
+/// </para>
+/// <para>
+/// For a valid enrollment response, retain the template ID from begin independently
+/// of later results. Continue captures using that same ID until the device reports zero
+/// remaining samples, an unrecoverable error occurs or the user cancels.
 /// </para>
 /// </remarks>
 public sealed class FingerprintBioEnrollment
@@ -46,12 +64,16 @@ public sealed class FingerprintBioEnrollment
     /// <summary>
     /// Initializes a new instance of the <see cref="FingerprintBioEnrollment"/> class.
     /// </summary>
-    /// <param name="session">The CTAP2 session to use for communication.</param>
-    /// <param name="protocol">The PIN/UV auth protocol to use.</param>
-    /// <param name="pinUvAuthToken">The PIN/UV auth token with bio enrollment permission.</param>
+    /// <param name="session">The borrowed CTAP2 session to use for communication.</param>
+    /// <param name="protocol">The borrowed, authenticator-supported PIN/UV auth protocol.</param>
+    /// <param name="pinUvAuthToken">Borrowed token bytes with bio enrollment permission for
+    /// the standard command; the caller owns their lifetime and clearing.</param>
     /// <param name="usePreviewCommand">
-    /// If true, uses the prototype bio enrollment command (0x40) for older authenticators.
-    /// Default is false to use the standard command (0x09).
+    /// Selects prototype command 0x40 when true, standard 0x09 otherwise, without negotiation.
+    /// CTAP 2.1 (2022-06-21 errata), Section 6.12, forbids prototype use when bioEnroll is
+    /// present and specifies FIDO_2_1_PRE/preview feature detection. Preview authorization
+    /// differs from permission-based standard authorization; this switch does not validate
+    /// the prototype payload format.
     /// </param>
     public FingerprintBioEnrollment(
         ICtap2Session session,
@@ -76,13 +98,12 @@ public sealed class FingerprintBioEnrollment
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>Information about the fingerprint sensor capabilities.</returns>
     /// <remarks>
-    /// This command does not require user interaction.
+    /// No capture or token authentication is requested.
     /// </remarks>
     public async Task<FingerprintSensorInfo> GetFingerprintSensorInfoAsync(
         CancellationToken cancellationToken = default)
     {
-        var payload = BuildGetSensorInfoPayload();
-        var response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
+        var response = await SendBioEnrollmentCommandAsync(BioEnrollmentSubCommand.GetFingerprintSensorInfo, cancellationToken)
             .ConfigureAwait(false);
 
         return FingerprintSensorInfo.Decode(response);
@@ -92,33 +113,31 @@ public sealed class FingerprintBioEnrollment
     /// Begins a new fingerprint enrollment.
     /// </summary>
     /// <param name="timeout">
-    /// Optional timeout in milliseconds for user interaction.
-    /// Default is 10000ms (10 seconds).
+    /// Optional interaction timeout in milliseconds. Null omits it; no SDK ten-second
+    /// default or host deadline is set. The standard command sends it in subCommandParams key 3.
     /// </param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of the first enrollment capture.</returns>
     /// <remarks>
     /// <para>
-    /// This begins a new fingerprint enrollment. The user must place their finger
-    /// on the sensor when this method is called. The returned result contains:
-    /// - TemplateId: The ID of the new template being enrolled
-    /// - RemainingSamples: Number of additional samples needed
-    /// - LastSampleStatus: Status of the first capture
+    /// The standard begin operation captures a sample and cancels any unfinished enrollment
+    /// (CTAP 2.1 Section 6.7.4).
     /// </para>
     /// <para>
-    /// After calling this method, continue calling <see cref="EnrollCaptureNextSampleAsync"/>
-    /// until <see cref="EnrollmentSampleResult.IsComplete"/> is true.
+    /// Retain the begin TemplateId for every <see cref="EnrollCaptureNextSampleAsync"/> call.
+    /// Standard next responses need not repeat it. Use sample status and remaining count
+    /// as device feedback, not a fixed SDK capture budget. Stop on unrecoverable error or
+    /// user cancellation. Responses missing required fields fail decoding.
     /// </para>
     /// </remarks>
-    public async Task<EnrollmentSampleResult> EnrollBeginAsync(
+    public async Task<EnrollmentBeginResult> EnrollBeginAsync(
         int? timeout = null,
         CancellationToken cancellationToken = default)
     {
-        var payload = BuildEnrollBeginPayload(timeout);
-        var response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
+        var response = await SendBioEnrollmentCommandAsync(BioEnrollmentSubCommand.EnrollBegin, cancellationToken, timeout: timeout)
             .ConfigureAwait(false);
 
-        return EnrollmentSampleResult.Decode(response);
+        return EnrollmentBeginResult.Decode(response);
     }
 
     /// <summary>
@@ -126,15 +145,17 @@ public sealed class FingerprintBioEnrollment
     /// </summary>
     /// <param name="templateId">The template ID from the EnrollBegin response.</param>
     /// <param name="timeout">
-    /// Optional timeout in milliseconds for user interaction.
-    /// Default is 10000ms (10 seconds).
+    /// Optional interaction timeout in milliseconds. Null omits it; the standard command
+    /// sends it in subCommandParams key 3.
     /// </param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The result of this capture, including remaining samples.</returns>
     /// <remarks>
     /// <para>
-    /// Continue calling this method until <see cref="EnrollmentSampleResult.IsComplete"/>
-    /// is true. Each call requires the user to place their finger on the sensor.
+    /// Retain and reuse the ID from begin; this result contains only sample feedback.
+    /// A standard capture requires sensor interaction and reports status/remaining count
+    /// (CTAP 2.1 Section 6.7.4). IsComplete is only a decoded-count projection,
+    /// not independently verified persistence.
     /// </para>
     /// <para>
     /// If the sample quality is poor (LastSampleStatus != Good), the sample may
@@ -146,8 +167,7 @@ public sealed class FingerprintBioEnrollment
         int? timeout = null,
         CancellationToken cancellationToken = default)
     {
-        var payload = BuildEnrollCaptureNextPayload(templateId, timeout);
-        var response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
+        var response = await SendBioEnrollmentCommandAsync(BioEnrollmentSubCommand.EnrollCaptureNextSample, cancellationToken, templateId, timeout: timeout)
             .ConfigureAwait(false);
 
         return EnrollmentSampleResult.Decode(response);
@@ -158,88 +178,53 @@ public sealed class FingerprintBioEnrollment
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <remarks>
-    /// Call this method if enrollment needs to be aborted before completion.
-    /// This does not require user interaction.
+    /// Sends cancelCurrentEnrollment without sensor capture or authentication.
+    /// This is distinct from cancelling a .NET wait or CTAPHID exchange. Cancellation tokens
+    /// do not automatically call this method, and its completion is not a rollback guarantee.
     /// </remarks>
     public async Task EnrollCancelAsync(CancellationToken cancellationToken = default)
     {
-        var payload = BuildEnrollCancelPayload();
-        await SendBioEnrollmentCommandAsync(payload, cancellationToken)
+        await SendBioEnrollmentCommandAsync(BioEnrollmentSubCommand.EnrollCancel, cancellationToken)
             .ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Enumerates all enrolled fingerprint templates.
+    /// Requests enrollment inventory.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A list of all enrolled templates.</returns>
+    /// <returns>The returned templates, or an empty list for InvalidOption (no enrollments).</returns>
     /// <remarks>
-    /// This does not require user interaction.
+    /// No sensor capture is needed. CTAP 2.1 Section 6.7.6 returns a key-7 array
+    /// of nested templates (required ID key 1, optional name key 2). Other CTAP statuses propagate.
     /// </remarks>
     public async Task<IReadOnlyList<TemplateInfo>> EnumerateEnrollmentsAsync(
         CancellationToken cancellationToken = default)
     {
-        var payload = BuildEnumerateEnrollmentsPayload();
         ReadOnlyMemory<byte> response;
 
         try
         {
-            response = await SendBioEnrollmentCommandAsync(payload, cancellationToken)
+            response = await SendBioEnrollmentCommandAsync(BioEnrollmentSubCommand.EnumerateEnrollments, cancellationToken)
                 .ConfigureAwait(false);
         }
-        catch (CtapException ex) when (ex.Status == CtapStatus.InvalidCommand)
+        catch (CtapException ex) when (ex.Status == CtapStatus.InvalidOption)
         {
-            // No templates enrolled - return empty list
             return [];
         }
 
-        var results = new List<TemplateInfo>();
-        var reader = new CborReader(response, CborConformanceMode.Lax);
-
-        // Parse the response which may contain a list or single template
-        var mapCount = reader.ReadStartMap() ?? 0;
-        ReadOnlyMemory<byte>? templateId = null;
-        string? friendlyName = null;
-
-        for (var i = 0; i < mapCount; i++)
-        {
-            var key = reader.ReadInt32();
-            switch (key)
-            {
-                case 4: // templateId
-                    templateId = reader.ReadByteString();
-                    break;
-                case 7: // templateFriendlyName
-                    friendlyName = reader.ReadTextString();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
-            }
-        }
-
-        reader.ReadEndMap();
-
-        if (templateId.HasValue)
-        {
-            results.Add(new TemplateInfo
-            {
-                TemplateId = templateId.Value,
-                FriendlyName = friendlyName
-            });
-        }
-
-        return results;
+        return EnrollmentEnumerationResult.Decode(response).Templates;
     }
 
     /// <summary>
     /// Sets a friendly name for an enrolled fingerprint template.
     /// </summary>
-    /// <param name="templateId">The template ID to rename.</param>
-    /// <param name="friendlyName">The friendly name to set.</param>
+    /// <param name="templateId">The opaque template ID to rename, not fingerprint template bytes.</param>
+    /// <param name="friendlyName">The nonblank friendly name to set. The device's advertised
+    /// UTF-8 byte limit applies; CTAP 2.1 Section 6.7.7 recommends at most the lesser of 64
+    /// bytes and maxTemplateFriendlyName. This helper only checks null/blank locally.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <remarks>
-    /// This does not require user interaction.
+    /// No sensor capture is needed.
     /// </remarks>
     public async Task SetFriendlyNameAsync(
         ReadOnlyMemory<byte> templateId,
@@ -248,323 +233,128 @@ public sealed class FingerprintBioEnrollment
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(friendlyName);
 
-        var payload = BuildSetFriendlyNamePayload(templateId, friendlyName);
-        await SendBioEnrollmentCommandAsync(payload, cancellationToken)
+        await SendBioEnrollmentCommandAsync(BioEnrollmentSubCommand.SetFriendlyName, cancellationToken, templateId, friendlyName)
             .ConfigureAwait(false);
     }
 
     /// <summary>
     /// Removes an enrolled fingerprint template.
     /// </summary>
-    /// <param name="templateId">The template ID to remove.</param>
+    /// <param name="templateId">The opaque template ID to remove, not fingerprint template bytes.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <remarks>
-    /// This does not require user interaction.
+    /// No sensor capture is needed. The standard operation permanently removes the template
+    /// and returns InvalidOption for an unknown ID (CTAP 2.1 Section 6.7.8).
+    /// A failed call does not establish unchanged device state.
     /// </remarks>
     public async Task RemoveEnrollmentAsync(
         ReadOnlyMemory<byte> templateId,
         CancellationToken cancellationToken = default)
     {
-        var payload = BuildRemoveEnrollmentPayload(templateId);
-        await SendBioEnrollmentCommandAsync(payload, cancellationToken)
+        await SendBioEnrollmentCommandAsync(BioEnrollmentSubCommand.RemoveEnrollment, cancellationToken, templateId)
             .ConfigureAwait(false);
     }
 
     private async Task<ReadOnlyMemory<byte>> SendBioEnrollmentCommandAsync(
-        ReadOnlyMemory<byte> payload,
-        CancellationToken cancellationToken)
+        byte subCommand,
+        CancellationToken cancellationToken,
+        ReadOnlyMemory<byte>? templateId = null,
+        string? friendlyName = null,
+        int? timeout = null)
     {
-        // Build request with command byte prefix
-        var request = new byte[1 + payload.Length];
-        request[0] = _command;
-        payload.CopyTo(request.AsMemory(1));
-
-        return await _session.SendCborRequestAsync(request, cancellationToken)
-            .ConfigureAwait(false);
-    }
-
-    private ReadOnlyMemory<byte> BuildGetSensorInfoPayload()
-    {
-        // Get sensor info uses modality parameter but no auth
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(1);
-
-        // 0x01: modality (fingerprint = 0x01)
-        writer.WriteInt32(1);
-        writer.WriteInt32(FingerprintModality.Fingerprint);
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
-    }
-
-    private ReadOnlyMemory<byte> BuildEnrollBeginPayload(int? timeout)
-    {
-        const byte subCommand = BioEnrollmentSubCommand.EnrollBegin;
-
-        // Build message to authenticate (subCommand only for enrollBegin)
-        var subCommandBytes = new byte[] { subCommand };
-        var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, subCommandBytes);
-
-        // Count map entries
-        var mapSize = 4; // modality, subCommand, pinUvAuthProtocol, pinUvAuthParam
-        if (timeout.HasValue) mapSize++;
-
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(mapSize);
-
-        // 0x01: modality
-        writer.WriteInt32(1);
-        writer.WriteInt32(FingerprintModality.Fingerprint);
-
-        // 0x02: subCommand
-        writer.WriteInt32(2);
-        writer.WriteInt32(subCommand);
-
-        // 0x04: pinUvAuthProtocol
-        writer.WriteInt32(4);
-        writer.WriteInt32(_protocol.Version);
-
-        // 0x05: pinUvAuthParam
-        writer.WriteInt32(5);
-        writer.WriteByteString(pinUvAuthParam.AsSpan());
-
-        // 0x06: timeout (optional)
-        if (timeout.HasValue)
+        var request = _command == CtapCommand.PrototypeBioEnrollment
+            ? BuildPreviewRequest(subCommand, templateId, friendlyName, timeout)
+            : BuildRequest(CtapCommand.BioEnrollment, subCommand, templateId, friendlyName, timeout);
+        try
         {
-            writer.WriteInt32(6);
-            writer.WriteInt32(timeout.Value);
+            return await _session.SendCborRequestAsync(request, cancellationToken).ConfigureAwait(false);
         }
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
-    }
-
-    private ReadOnlyMemory<byte> BuildEnrollCaptureNextPayload(
-        ReadOnlyMemory<byte> templateId,
-        int? timeout)
-    {
-        const byte subCommand = BioEnrollmentSubCommand.EnrollCaptureNextSample;
-
-        // Build subCommandParams
-        var subCommandParams = BuildTemplateIdParam(templateId);
-
-        // Build message to authenticate: subCommand || subCommandParams
-        var messageToAuth = new byte[1 + subCommandParams.Length];
-        messageToAuth[0] = subCommand;
-        subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
-
-        var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, messageToAuth);
-
-        // Count map entries
-        var mapSize = 5; // modality, subCommand, subCommandParams, pinUvAuthProtocol, pinUvAuthParam
-        if (timeout.HasValue) mapSize++;
-
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(mapSize);
-
-        // 0x01: modality
-        writer.WriteInt32(1);
-        writer.WriteInt32(FingerprintModality.Fingerprint);
-
-        // 0x02: subCommand
-        writer.WriteInt32(2);
-        writer.WriteInt32(subCommand);
-
-        // 0x03: subCommandParams
-        writer.WriteInt32(3);
-        writer.WriteStartMap(1);
-        writer.WriteInt32(1); // templateId key
-        writer.WriteByteString(templateId.Span);
-        writer.WriteEndMap();
-
-        // 0x04: pinUvAuthProtocol
-        writer.WriteInt32(4);
-        writer.WriteInt32(_protocol.Version);
-
-        // 0x05: pinUvAuthParam
-        writer.WriteInt32(5);
-        writer.WriteByteString(pinUvAuthParam.AsSpan());
-
-        // 0x06: timeout (optional)
-        if (timeout.HasValue)
+        finally
         {
-            writer.WriteInt32(6);
-            writer.WriteInt32(timeout.Value);
+            CryptographicOperations.ZeroMemory(request);
         }
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
     }
 
-    private ReadOnlyMemory<byte> BuildEnrollCancelPayload()
+    // Preserve the existing opt-in prototype wire profile; do not treat 0x40 as a standard fallback.
+    private byte[] BuildPreviewRequest(
+        byte subCommand, ReadOnlyMemory<byte>? templateId, string? friendlyName, int? timeout) =>
+        BuildRequest(CtapCommand.PrototypeBioEnrollment, (byte)(subCommand + 1), templateId, friendlyName,
+            timeout: null, previewTimeout: timeout);
+
+    private byte[] BuildRequest(
+        byte command, byte subCommand, ReadOnlyMemory<byte>? templateId, string? friendlyName,
+        int? timeout, int? previewTimeout = null)
     {
-        const byte subCommand = BioEnrollmentSubCommand.EnrollCancel;
+        using var request = CtapRequestBuilder.Create(command).WithInt(1, FingerprintModality.Fingerprint);
+        if (command == CtapCommand.PrototypeBioEnrollment && subCommand == 8)
+            return request.Build(); // Prototype sensor info previously used only modality.
 
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
+        request.WithInt(2, subCommand);
+        if (previewTimeout is int milliseconds)
+            request.WithInt(6, milliseconds);
 
-        // 0x01: modality
-        writer.WriteInt32(1);
-        writer.WriteInt32(FingerprintModality.Fingerprint);
-
-        // 0x02: subCommand
-        writer.WriteInt32(2);
-        writer.WriteInt32(subCommand);
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
+        bool authenticated = command == CtapCommand.BioEnrollment
+            ? subCommand is not (BioEnrollmentSubCommand.EnrollCancel or
+                BioEnrollmentSubCommand.GetFingerprintSensorInfo)
+            : subCommand != 4;
+        return authenticated
+            ? BuildAuthenticatedRequest(request, command, subCommand, templateId, friendlyName, timeout)
+            : request.Build();
     }
 
-    private ReadOnlyMemory<byte> BuildEnumerateEnrollmentsPayload()
+    private byte[] BuildAuthenticatedRequest(
+        CtapRequestBuilder request, byte command, byte subCommand, ReadOnlyMemory<byte>? templateId,
+        string? friendlyName, int? timeout)
     {
-        const byte subCommand = BioEnrollmentSubCommand.EnumerateEnrollments;
+        byte[] parameters = BuildParameters(templateId, friendlyName, timeout);
+        byte[]? message = null;
+        byte[]? tag = null;
+        try
+        {
+            bool standard = command == CtapCommand.BioEnrollment;
+            int prefixLength = standard ? 2 : 1;
+            message = new byte[prefixLength + parameters.Length];
+            if (standard) message[0] = FingerprintModality.Fingerprint;
+            message[prefixLength - 1] = subCommand;
+            parameters.CopyTo(message.AsSpan(prefixLength));
+            tag = _protocol.Authenticate(_pinUvAuthToken.Span, message);
 
-        // Build PIN/UV auth param over just the subcommand
-        var subCommandBytes = new byte[] { subCommand };
-        var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, subCommandBytes);
-
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(4);
-
-        // 0x01: modality
-        writer.WriteInt32(1);
-        writer.WriteInt32(FingerprintModality.Fingerprint);
-
-        // 0x02: subCommand
-        writer.WriteInt32(2);
-        writer.WriteInt32(subCommand);
-
-        // 0x04: pinUvAuthProtocol
-        writer.WriteInt32(4);
-        writer.WriteInt32(_protocol.Version);
-
-        // 0x05: pinUvAuthParam
-        writer.WriteInt32(5);
-        writer.WriteByteString(pinUvAuthParam.AsSpan());
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
+            if (parameters.Length != 0)
+                request.WithEncodedValue(3, parameters);
+            request.WithInt(4, _protocol.Version).WithBytes(5, tag.AsSpan());
+            return request.Build();
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(parameters);
+            if (message is not null) CryptographicOperations.ZeroMemory(message);
+            if (tag is not null) CryptographicOperations.ZeroMemory(tag);
+        }
     }
 
-    private ReadOnlyMemory<byte> BuildSetFriendlyNamePayload(
-        ReadOnlyMemory<byte> templateId,
-        string friendlyName)
+    private static byte[] BuildParameters(ReadOnlyMemory<byte>? templateId, string? friendlyName, int? timeout)
     {
-        const byte subCommand = BioEnrollmentSubCommand.SetFriendlyName;
-
-        // Build subCommandParams
-        var subCommandParams = BuildSetNameParams(templateId, friendlyName);
-
-        // Build message to authenticate: subCommand || subCommandParams
-        var messageToAuth = new byte[1 + subCommandParams.Length];
-        messageToAuth[0] = subCommand;
-        subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
-
-        var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, messageToAuth);
+        if (templateId is null && timeout is null)
+            return [];
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(5);
-
-        // 0x01: modality
-        writer.WriteInt32(1);
-        writer.WriteInt32(FingerprintModality.Fingerprint);
-
-        // 0x02: subCommand
-        writer.WriteInt32(2);
-        writer.WriteInt32(subCommand);
-
-        // 0x03: subCommandParams
-        writer.WriteInt32(3);
-        writer.WriteStartMap(2);
-        writer.WriteInt32(1); // templateId key
-        writer.WriteByteString(templateId.Span);
-        writer.WriteInt32(2); // templateFriendlyName key
-        writer.WriteTextString(friendlyName);
-        writer.WriteEndMap();
-
-        // 0x04: pinUvAuthProtocol
-        writer.WriteInt32(4);
-        writer.WriteInt32(_protocol.Version);
-
-        // 0x05: pinUvAuthParam
-        writer.WriteInt32(5);
-        writer.WriteByteString(pinUvAuthParam.AsSpan());
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
-    }
-
-    private ReadOnlyMemory<byte> BuildRemoveEnrollmentPayload(ReadOnlyMemory<byte> templateId)
-    {
-        const byte subCommand = BioEnrollmentSubCommand.RemoveEnrollment;
-
-        // Build subCommandParams
-        var subCommandParams = BuildTemplateIdParam(templateId);
-
-        // Build message to authenticate: subCommand || subCommandParams
-        var messageToAuth = new byte[1 + subCommandParams.Length];
-        messageToAuth[0] = subCommand;
-        subCommandParams.Span.CopyTo(messageToAuth.AsSpan(1));
-
-        var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, messageToAuth);
-
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(5);
-
-        // 0x01: modality
-        writer.WriteInt32(1);
-        writer.WriteInt32(FingerprintModality.Fingerprint);
-
-        // 0x02: subCommand
-        writer.WriteInt32(2);
-        writer.WriteInt32(subCommand);
-
-        // 0x03: subCommandParams
-        writer.WriteInt32(3);
-        writer.WriteStartMap(1);
-        writer.WriteInt32(1); // templateId key
-        writer.WriteByteString(templateId.Span);
-        writer.WriteEndMap();
-
-        // 0x04: pinUvAuthProtocol
-        writer.WriteInt32(4);
-        writer.WriteInt32(_protocol.Version);
-
-        // 0x05: pinUvAuthParam
-        writer.WriteInt32(5);
-        writer.WriteByteString(pinUvAuthParam.AsSpan());
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
-    }
-
-    private static ReadOnlyMemory<byte> BuildTemplateIdParam(ReadOnlyMemory<byte> templateId)
-    {
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(1);
-        writer.WriteInt32(1); // templateId
-        writer.WriteByteString(templateId.Span);
-        writer.WriteEndMap();
-        return writer.Encode();
-    }
-
-    private static ReadOnlyMemory<byte> BuildSetNameParams(
-        ReadOnlyMemory<byte> templateId,
-        string friendlyName)
-    {
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
-        writer.WriteInt32(1); // templateId
-        writer.WriteByteString(templateId.Span);
-        writer.WriteInt32(2); // templateFriendlyName
-        writer.WriteTextString(friendlyName);
+        int count = (templateId.HasValue ? 1 : 0) + (friendlyName is not null ? 1 : 0) + (timeout.HasValue ? 1 : 0);
+        writer.WriteStartMap(count);
+        if (templateId is { } id)
+        {
+            writer.WriteInt32(1);
+            writer.WriteByteString(id.Span);
+        }
+        if (friendlyName is not null)
+        {
+            writer.WriteInt32(2);
+            writer.WriteTextString(friendlyName);
+        }
+        if (timeout is int milliseconds)
+        {
+            writer.WriteInt32(3);
+            writer.WriteInt32(milliseconds);
+        }
         writer.WriteEndMap();
         return writer.Encode();
     }

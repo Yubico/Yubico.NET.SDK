@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.Oath;
 ///         Natural ordering compares <see cref="DeviceId" /> ordinally, then compares
 ///         <see cref="Id" /> lexicographically as unsigned bytes. Comparison returns zero
 ///         exactly for equal identities, regardless of display metadata, OATH type, period,
-///         or touch policy. This replaces the previous case-insensitive issuer/name ordering.
+///         or touch policy.
 ///     </para>
 ///     <para>
 ///         For UI display, sort explicitly by issuer (or name when there is no issuer), then
@@ -128,11 +128,22 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
         OathType oathType,
         int period = OathConstants.DefaultPeriod)
     {
+        ArgumentException.ThrowIfNullOrEmpty(name);
+        if (issuer is "")
+        {
+            throw new ArgumentException("Credential name must be nonempty and issuer must be null or nonempty.");
+        }
+
+        if (oathType == OathType.Totp && period <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(period), "TOTP period must be positive.");
+        }
+
         var credId = new StringBuilder();
 
         if (oathType == OathType.Totp && period != OathConstants.DefaultPeriod)
         {
-            credId.Append(period);
+            credId.Append(period.ToString(CultureInfo.InvariantCulture));
             credId.Append('/');
         }
 
@@ -144,22 +155,38 @@ public sealed partial class Credential : IEquatable<Credential>, IComparable<Cre
 
         credId.Append(name);
 
-        return Encoding.UTF8.GetBytes(credId.ToString());
+        string text = credId.ToString();
+        if (Encoding.UTF8.GetByteCount(text) > 64)
+        {
+            throw new ArgumentException("Credential ID must fit 64 UTF-8 bytes.");
+        }
+
+        byte[] encoded = Encoding.UTF8.GetBytes(text);
+        var parsed = ParseCredentialId(encoded, oathType);
+        if (parsed != (issuer, name, oathType == OathType.Totp ? period : 0))
+        {
+            throw new ArgumentException("Credential identity cannot round-trip through the host naming convention.");
+        }
+
+        return encoded;
     }
 
     /// <summary>
     ///     Parses a credential ID from the OATH applet wire protocol.
     /// </summary>
     /// <remarks>
-    ///     For TOTP the optional <c>period/</c> prefix is the RFC 6238 §4.1 time step X in seconds, the
-    ///     divisor in <c>T = (Current Unix time - T0) / X</c> (§4.2). A prefix that is not a positive
-    ///     integer is malformed. HOTP has no period and reports 0.
+    ///     The host-side TOTP naming convention recognizes an optional prefix of ASCII digits followed
+    ///     by <c>/</c>. Its value must fit a positive <see cref="int" /> and represents the RFC 6238 §4.1
+    ///     time step X in seconds, the divisor in <c>T = (Current Unix time - T0) / X</c> (§4.2).
+    ///     A name such as <c>-30/name</c> has no recognized period prefix. YKOATH does not define this
+    ///     naming convention. HOTP has no period and reports 0.
     /// </remarks>
     /// <param name="credentialId">The raw credential ID bytes.</param>
     /// <param name="oathType">The OATH type (TOTP or HOTP).</param>
     /// <returns>A tuple of (issuer, name, period).</returns>
     /// <exception cref="ArgumentException">
-    ///     <paramref name="oathType" /> is TOTP and the period prefix is zero, negative or out of range.
+    ///     <paramref name="oathType" /> is TOTP and a recognized ASCII-digit period prefix is zero or
+    ///     exceeds <see cref="int.MaxValue" />.
     /// </exception>
     internal static (string? Issuer, string Name, int Period) ParseCredentialId(
         ReadOnlySpan<byte> credentialId,

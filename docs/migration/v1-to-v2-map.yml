@@ -208,7 +208,7 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/OtpSession.cs
       - yubikit:src/YubiOtp/
-    notes: Review slot configuration behavior manually.
+    notes: Review replacement versus complete masked updates, current/new access-code retention, cached status, and device/transport command support manually; see src/YubiOtp/README.md for current HOTP IMF, scan-map and sample limitations.
     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
   - id: applet-openpgp
     status: assisted
@@ -219,7 +219,7 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/OpenPgp/
       - yubikit:src/OpenPgp/
-    notes: Review PIN, key slot, and card state behavior manually.
+    notes: Review User/Admin PIN authorization, KDF transitions, raw crypto formats, key slots and persistent state manually. DecryptAsync returns caller-owned writable Memory<byte>; clear its span directly. GenerationTimes and SetGenerationTimeAsync use uint seconds since 1970-01-01 UTC, with zero meaning unspecified. See src/OpenPgp/README.md. Historical v1 availability remains unverified against the separate first-in-v2 narrative.
     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
   - id: applet-security-domain
     status: manual
@@ -241,7 +241,7 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/YubiHsmAuth/YubiHsmAuthSession.cs
       - yubikit:src/YubiHsm/
-    notes: Authentication, connector, object, and command behavior require manual review.
+    notes: The package manages the YubiKey YubiHSM Auth applet and calculates session keys. The application uses an HSM library for connector sessions, HSM object enrollment and protected commands. Manually preserve the YubiKey label/HSM authentication-key ID mapping and provision matching long-lived keys on both devices; see the module README enrollment guide.
     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
   - id: low-level-commands
     status: manual
@@ -367,7 +367,7 @@ mappings:
       - yubikit:src/YubiOtp/src/HmacSha1SlotConfiguration.cs
       - yubikit:src/YubiOtp/examples/OtpTool/Commands/ChalRespCommand.cs
       - yubikit:src/YubiOtp/examples/OtpTool/Commands/CalculateCommand.cs
-    notes: Slot programming is persistent and requires manual review for slot number, access-code, touch, short-challenge, update, and NDEF behavior; v1 ShortPress/LongPress map semantically to v2 Slot.One/Slot.Two.
+    notes: Slot programming is persistent; v1 ShortPress/LongPress map semantically to Slot.One/Slot.Two. Use explicit OTP HID for the documented USB challenge recipe. Agree one challenge-length convention with the verifier (see src/YubiOtp/README.md); the SDK sends 64 bytes but does not know the slot mode. Review touch notifications, complete masked updates and both current/new access-code arguments. Clear caller-owned source buffers and returned response separately from configuration disposal.
     last_reviewed_commit: 5a82db9bce05addc0385162e9f085adbc2366c5b
   - id: piv-pin-only-mode
     status: assisted
@@ -378,25 +378,25 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Piv/PivSession.Pinonly.cs
       - yubikit:src/Piv/src/IPivSession.cs
-      - yubikit:src/Piv/src/Authentication/PivPinOnlyProtocol.cs
-      - yubikit:src/Piv/src/PivPinOnlyMode.cs
+      - yubikit:src/Piv/src/Authentication/PinOnlyProtocol.cs
+      - yubikit:src/Piv/src/PinOnlyMode.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: PIV PIN-only mode was absent from the initial v2 snapshot (see historical `docs/migration/v1-to-v2-gaps.md` finding 3) and was restored by the `yubikit-gaps` remediation effort. V2 narrows the enable/disable surface to `PivPinOnlyMode.PinProtected` only; PIN-derived mode remains detectable via `GetPinOnlyModeAsync` and recoverable via `RecoverPinOnlyModeAsync`, but cannot be newly enabled (v1's `PinDerived` is a deprecated, weaker mechanism kept only for backwards compatibility). `SetPinOnlyModeAsync` requires the caller to have already authenticated the management key and pass it again explicitly; PIN-derived candidate key material is zeroed internally after each recovery attempt. Review any v1 code enabling `PivPinOnlyMode.PinDerived` manually, since v2 has no enable path for it.
+    notes: Protected setup uses PinOnlyMode.PinProtected and disabling uses None. Authenticate first and supply the already-active key again for enabling. Recovery supports existing protected/legacy-derived configurations; new derived setup is excluded. Enable authenticates the supplied key, verifies PIN, stores PRINTED, blocks PUK and updates ADMIN. Disable restores the type-appropriate public default before deleting PRINTED then ADMIN, leaving PUK blocked. Separate commands provide no rollback; keep a secure key backup and inspect/re-authenticate after partial failure. Raw PIN/key/retry changes leave recovery objects unchanged. Reopen and recover to validate migration; see the module task guide.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: piv-typed-data-objects
     status: assisted
     confidence: high
     migration_kind: type
     v1: Yubico.YubiKey.Piv.Objects.CardholderUniqueId / CardCapabilityContainer / AdminData / KeyHistory
-    v2: Yubico.YubiKit.Piv.DataObjects.PivCardholderUniqueId / PivCardCapabilityContainer / PivAdminData / PivKeyHistory
+    v2: Yubico.YubiKit.Piv.DataObjects.CardholderUniqueId / CardCapabilityContainer / AdminData / KeyHistory
     evidence:
-      - yubikit:src/Piv/src/DataObjects/PivCardholderUniqueId.cs
-      - yubikit:src/Piv/src/DataObjects/PivCardCapabilityContainer.cs
-      - yubikit:src/Piv/src/DataObjects/PivAdminData.cs
-      - yubikit:src/Piv/src/DataObjects/PivKeyHistory.cs
+      - yubikit:src/Piv/src/DataObjects/CardholderUniqueId.cs
+      - yubikit:src/Piv/src/DataObjects/CardCapabilityContainer.cs
+      - yubikit:src/Piv/src/DataObjects/AdminData.cs
+      - yubikit:src/Piv/src/DataObjects/KeyHistory.cs
       - yubikit:src/Piv/src/IPivSession.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: Typed PIV data objects were absent from the initial v2 snapshot (historical gap 10; v2's `PivDataObject.cs` was only tag constants) and were restored by the `yubikit-gaps` remediation effort with golden-vector round-trip tests. V2 exposes them as `readonly record struct` types read/written through `IPivSession.Get{Chuid,CardCapabilityContainer,AdminData,KeyHistory}Async`/`Set*Async`, replacing v1's mutable `PivDataObject`-derived classes with `Encode()`/`Decode()`/`TryDecode()`. Field names and encode/decode call shape are not guaranteed one-to-one; review call sites that read or write CHUID/CCC/AdminData/KeyHistory fields directly.
+    notes: Typed models are readonly record structs with Encode/TryDecode and IPivSession GetCardholderUniqueIdAsync, GetCardCapabilityContainerAsync, GetAdminDataAsync, GetKeyHistoryAsync and corresponding setters. They replace the mutable v1 base-class hierarchy. CHUID/CCC accept fixed SDK provisioning shapes; raw GET/PUT supports other encodings. Constructors borrow identifier/salt memory and decoders copy it. KeyHistory counts describe retired keys and its validation is narrower than the full federal profile. ADMIN timestamps use trimmed little-endian Unix seconds, differing from Python's fixed four-byte big-endian field; coordinate cross-tool writes.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: oath-password-protection-state
     status: assisted
@@ -427,13 +427,13 @@ mappings:
     confidence: high
     migration_kind: behavior
     v1: SecurityException with status-word-to-message mapping on wrong/locked OATH password
-    v2: OathException with OathFailureReason (Locked, WrongPassword) and StatusWord
+    v2: OathException with OathFailureReason and StatusWord for device rejection; BadResponseException for device-HMAC mismatch
     evidence:
       - yubikit:src/Oath/src/OathException.cs
       - yubikit:src/Oath/src/IOathSession.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot threw generic `ArgumentException`/`InvalidOperationException`/`BadResponseException` for wrong-password or locked-applet failures with no dedicated exception type (historical gap 11). The `yubikit-gaps` remediation effort added `OathException`, a dedicated public exception with a typed `Reason` (`OathFailureReason.Locked` or `WrongPassword`) and an optional `StatusWord`, thrown by `ValidateAsync` and by operations that fail because the applet is locked. Update `catch` clauses that targeted v1's `SecurityException` to catch `OathException` and branch on `Reason` instead of parsing the message.
-    last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
+    notes: Catch `OathException` for a locked applet or device-reported access-key rejection, and inspect `Reason` and `StatusWord` rather than parsing its message. The retained `WrongPassword` category does not prove that a password was mistyped. A device-HMAC mismatch during `ValidateAsync` instead throws `BadResponseException`; handle it separately from a request to collect another password.
+    last_reviewed_commit: d74cdd44f0d00874f93ac4aa462212a8c6dbc90e
   - id: yubiotp-static-password-keyboard
     status: assisted
     confidence: high
@@ -444,7 +444,7 @@ mappings:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/Otp/Operations/ConfigureStaticPassword.cs
       - yubikit:src/YubiOtp/src/StaticPasswordSlotConfiguration.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot's `StaticPasswordSlotConfiguration` only accepted raw scan-code bytes, losing v1's human-readable-string-plus-keyboard-layout entry point (historical gap 12). The `yubikit-gaps` remediation effort added a `StaticPasswordSlotConfiguration(string password, KeyboardLayout keyboardLayout)` constructor that translates each character to a HID scan code via the existing Core `HidCodeTranslator`, validates every character against the layout before allocating the scan-code buffer, and zeroes the intermediate scan-code array after copying it into the configuration. Password/scan-code generation helpers and NDEF read-back from v1 are not restored; review those manually if used.
+    notes: The string/layout constructor restores the historical missing entry point. It validates characters before allocating translated scan codes and clears the intermediate after copying into the configuration; it cannot erase the immutable source string. The raw overload takes translated scan codes, not UTF-8. OtpTool currently makes that encoding mistake and ignores layout, so use the public constructor as the migration route. Library generation helpers and NDEF read-back remain absent.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: yubiotp-yubico-otp-challenge-response
     status: manual
@@ -457,7 +457,7 @@ mappings:
       - yubikit:src/YubiOtp/src/YubicoOtpChallengeResponseSlotConfiguration.cs
       - yubikit:src/YubiOtp/src/IYubiOtpSession.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot's `YubiOtpSession` only exposed `CalculateHmacSha1Async`, with no Yubico-OTP-algorithm (AES-128) challenge-response path at all (historical gap 12). The `yubikit-gaps` remediation effort added `YubicoOtpChallengeResponseSlotConfiguration`, which requires an exact 16-byte AES key (validated before any device I/O), plus `CalculateYubicoOtpAsync` on `IYubiOtpSession`. Slot programming is persistent state; review slot number, touch requirement (`RequireTouch(...)`), and access-code behavior manually before migrating production slot code.
+    notes: The restored AES configuration requires an exact 16-byte key; CalculateYubicoOtpAsync sends six challenge bytes and returns a caller-owned 16-byte encrypted Yubico ticket, not deterministic raw challenge encryption. The application verifies decrypted challenge, ticket CRC and replay policy. TOTP time/period/code conveniences are separate and remain absent. Review persistent slot effects, explicit OTP HID selection, touch notifications and current/new access-code behavior manually.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: yubihsm-retry-exception
     status: assisted
@@ -468,7 +468,7 @@ mappings:
     evidence:
       - yubikit:src/YubiHsm/src/HsmAuthRetryException.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot had no `Try*` retry-loop family and embedded the retry count only in an exception's string message (historical gap 13). The `yubikit-gaps` remediation effort added `HsmAuthRetryException` (derives from `ApduException`, so existing `catch (ApduException)` still observes it), thrown uniformly by every retry-counted management-key- or credential-password-gated operation with a typed `RetriesRemaining` property. There is still no automatic retry loop; callers must catch `HsmAuthRetryException` and decide whether to prompt and retry themselves.
+    notes: The initial v2 snapshot embedded retry counts in exception messages (historical gap 13). Current enrollment, deletion, management-key changes, both CALCULATE methods and both password-change methods translate retry-count statuses into HsmAuthRetryException.RetriesRemaining. The type derives from ApduException. GetChallengeAsync uses general ApduException errors, including with a password; inspect its status word when applying retry policy. Each SDK call makes one attempt; the application decides whether to prompt and retry.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: yubihsm-touch-notify
     status: assisted
@@ -492,7 +492,7 @@ mappings:
     evidence:
       - yubikit:src/YubiHsm/src/HsmAuthCredential.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: An earlier v2-only `HsmAuthCredential.Counter` member was documented as a usage counter, the opposite meaning from v1's "retries remaining before deletion" for the same wire byte (historical gap 13, flagged as needing hardware verification). The `yubikit-gaps` remediation effort hardware-verified against a live YubiKey 5.8 that the byte decrements on failed credential-password authentication (observed 8 to 7 after one deliberate failure) and renamed the member to `RetriesRemaining` to match v1's semantics and the verified behavior. Behavior on successful authentication was not separately hardware-verified.
+    notes: An earlier v2-only Counter member described this byte as a usage counter (historical gap 13). The rename to RetriesRemaining followed a recorded 8-to-7 failed-authentication observation. Current LIST results are snapshots. Yubico's descriptive YubiHSM Auth overview says successful authentication before exhaustion restores retries to eight; exhaustion deletes the credential. Management-key exhaustion instead blocks management operations until destructive applet reset. Refresh LIST or the management retry query to observe current state; historical observation scope remains in the remediation records.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: securitydomain-exception
     status: assisted
@@ -503,7 +503,7 @@ mappings:
     evidence:
       - yubikit:src/SecurityDomain/src/SecureChannelException.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot had zero dedicated SecurityDomain exception types; SCP handshake failures surfaced as a generic `ApduException`, `BadResponseException`, or `NotSupportedException` (historical gap 9, cross-cutting exception-hierarchy shrinkage). The `yubikit-gaps` remediation effort added a dedicated `SecureChannelException`, thrown only for failures while establishing a secure channel during `SecurityDomainSession.CreateAsync` or the post-reset reinitialization inside `ResetAsync`; it always preserves the original failure as `InnerException` and the status word (when present) as `StatusWord`. Per-operation failures after a channel is already open (`GetDataAsync`, `PutKeyAsync`, `DeleteKeyAsync`, etc.) are unchanged and still surface their original exception type directly.
+    notes: With SCP parameters supplied, SecurityDomainSession.CreateAsync and post-reset reinitialization wrap ApduException, BadResponseException, or NotSupportedException from secure-channel configuration in SecureChannelException. The original failure is preserved as InnerException; StatusWord is copied only from an immediate ApduException, not a nested exception. Protocol preparation and application selection occur before this catch, cancellation is rethrown unchanged, and later per-operation failures retain their original exception types.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: openpgp-exception
     status: assisted
@@ -514,7 +514,7 @@ mappings:
     evidence:
       - yubikit:src/OpenPgp/src/OpenPgpInvalidPinException.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: The initial v2 snapshot had zero dedicated OpenPGP exception types (historical gap 9). The `yubikit-gaps` remediation effort added `OpenPgpInvalidPinException` (derives from `ApduException`), thrown by `IOpenPgpSession.VerifyPinAsync`/`VerifyAdminAsync` for every PIN rejection shape observed across firmware (standard SW 0x63Cx, SW 0x6982 on some 5.8.0-alpha firmware, and SW 0x6983 for an already-blocked PIN), exposing a typed nullable `RetriesRemaining` instead of requiring callers to parse the message or separately call `GetPinStatusAsync`.
+    notes: The initial v2 snapshot had zero dedicated OpenPGP exception types (historical gap 9). Selected VERIFY, CHANGE and Reset-Code responses now produce OpenPgpInvalidPinException (an ApduException), retaining SW and command header. Other statuses and administrator-authenticated recovery failures retain general APDU errors. Both User VERIFY references use PW1 for KDF and retry counts. An unavailable count is null, and an ambiguous 6982 is not a reason to retry automatically. See src/OpenPgp/README.md for the firmware and command-specific mappings.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: webauthn-credential-prompt
     status: assisted
@@ -529,19 +529,28 @@ mappings:
       - yubikit:src/WebAuthn/src/Client/WebAuthnClient.cs
       - yubikit:src/WebAuthn/src/Client/WebAuthnClientOptions.cs
       - yubikit:src/WebAuthn/CLAUDE.md
-    notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Ctap2 (ICtap2Session); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt (set via WebAuthnClientOptions.CredentialPrompt - see `webauthn-client-construction-and-streams` for the options-record construction change), an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (WebAuthnClientOptions.MaxPromptAttempts, default 3, now caller-configurable); returning null from the prompt means the user declined, not a retry request. This replaces the credential-collection part of KeyCollector only for WebAuthn; the lower-level Yubico.YubiKit.Ctap2.ICtap2Session still takes PIN bytes explicitly. Touch is separate and no longer a gap; supply IUserPresencePrompt through the FIDO SessionCreationOptions, and FIDO HID reports DeviceWaiting from the authenticator's live user-presence-needed keep-alive. Review the credential prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
+    notes: V1 had no WebAuthn package; interactive PIN retry for FIDO2 operations went through the global, cross-applet Fido2Session.KeyCollector. V2 introduces Yubico.YubiKit.WebAuthn, a new higher-level package built on Yubico.YubiKit.Ctap2 (ICtap2Session); its WebAuthnClient accepts an optional Yubico.YubiKit.Core.Credentials.ICredentialPrompt (set via WebAuthnClientOptions.CredentialPrompt - see `webauthn-client-construction-and-streams` for the options-record construction change), an async, cancellable, context-carrying callback (CredentialPromptContext, carrying Kind, Scope, RetriesRemaining, and IsRetry) invoked when an operation needs a PIN and the caller did not pass pinBytes directly. The client, not the prompt, owns the bounded retry loop (WebAuthnClientOptions.MaxPromptAttempts, default 3, now caller-configurable); returning null from the prompt means the user declined, not a retry request. This replaces the credential-collection part of KeyCollector only for WebAuthn; lower-level CTAP callers pass PIN bytes to ClientPin to acquire a token, then supply PinUvAuthParam/PinUvAuthProtocol through credential options on ICtap2Session (omitting the mutually exclusive uv key). Touch is separate; supply IUserPresencePrompt through CTAP2 SessionCreationOptions. HID reports DeviceWaiting on a user-presence-needed keep-alive; SmartCard ordinary creation/assertion reports PolicyRequires before the APDU, while generic helper traffic has no modeled notification. A notification is not proof of gesture, UV or RP acceptance. Review the credential prompt's exactly-sized-buffer and ownership-transfer contract against any existing v1 KeyCollector implementation being carried forward.
     last_reviewed_commit: a05f96552f504a031823fd8c315df4e37656abff
   - id: yubihsm-credential-password-bytes
     status: assisted
     confidence: high
     migration_kind: member
     v1: YubiHsmAuthSession credential-password parameters (ReadOnlyMemory<byte> in Symmetric.cs; string in Aes128CredentialWithSecrets.cs and related asymmetric/admin members)
-    v2: IHsmAuthSession/HsmAuthSession credential-password parameters as plainly-named UTF-8 ReadOnlyMemory<byte> (credentialPassword, derivationPassword, currentPassword, newPassword, password)
+    v2: IHsmAuthSession/HsmAuthSession uses disposable CredentialPassword for credentialPassword, currentPassword, and newPassword; derivationPassword remains borrowed UTF-8 ReadOnlyMemory<byte>
     evidence:
       - yubikit:src/YubiHsm/src/HsmAuthSession.cs
       - yubikit:src/YubiHsm/src/IHsmAuthSession.cs
+      - yubikit:src/YubiHsm/src/CredentialPassword.cs
       - yubikit:docs/migration/v1-to-v2-changelog.md
-    notes: The initial v2 snapshot regressed nine IHsmAuthSession/HsmAuthSession members (11 parameters) to a string credential-password parameter, which .NET cannot securely zero. This finished the sweep started for Fido2/OpenPgp/Oath (`75353fd1`, 2026-04-09) and closes a v1 regression rather than introducing one - v1's YubiHsmAuthSession.Symmetric.cs path already took a ReadOnlyMemory<byte> credentialPassword. Affected members - PutCredentialSymmetricAsync, PutCredentialDerivedAsync, CalculateSessionKeysSymmetricAsync, CalculateSessionKeysAsymmetricAsync, GetChallengeAsync, PutCredentialAsymmetricAsync, GenerateCredentialAsymmetricAsync, ChangeCredentialPasswordAsync, ChangeCredentialPasswordAdminAsync. Breaking, with no [Obsolete] overload (package is 2.0.0-alpha.2). Migrate by passing Encoding.UTF8.GetBytes(password) and zeroing the resulting array in a finally, or an owning buffer type that zeroes on disposal; validation (max 16 UTF-8 bytes, null-padded) and PBKDF2-HMAC-SHA256 derivation are unchanged. The same change corrected the GetChallengeAsync firmware boundary (5.6.0 supports the command without a password; 5.7.1 adds the optional password field) and added session-key context-length validation (8-byte host+HSM challenges for symmetric; 65-byte EPK-OCE+EPK-SD for asymmetric) before device I/O; see the 2026-08-31 and 2026-09-03 changelog entries for full detail. The parameters briefly carried a `...Utf8` suffix (`credentialPasswordUtf8`, etc.); `refactor(yubihsm,core): drop Utf8 param suffix and split prompt types` (c5dc3aec) dropped that suffix in favor of the plain names shown above, matching the same rename applied to Fido2/OpenPgp/Oath (see `2026-09-05` changelog entry). Breaking for named arguments only.
+    notes: >-
+      Migrate PutCredentialSymmetricAsync, PutCredentialDerivedAsync, CalculateSessionKeysSymmetricAsync,
+      CalculateSessionKeysAsymmetricAsync, GetChallengeAsync, PutCredentialAsymmetricAsync,
+      GenerateCredentialAsymmetricAsync, ChangeCredentialPasswordAsync, and ChangeCredentialPasswordAdminAsync
+      to the disposable holder, with no legacy overload. Use FromUtf8 on clearable encoded input (up to 16 bytes,
+      zero-padded), or FromRaw on exactly 16 opaque bytes. Dispose the holder after the awaited operation;
+      separately clear the caller-owned source. The derivation password remains borrowed UTF-8 ReadOnlyMemory<byte>
+      and PBKDF2-HMAC-SHA256 derivation is unchanged. GetChallengeAsync supports the command from 5.6.0;
+      5.7.1 adds the optional password field. The symmetric and asymmetric contexts are 16 and 130 bytes respectively.
     last_reviewed_commit: 277920d9de48d4aedad7ecc5d00201a015b5a297
   - id: core-device-serial-and-correlation
     status: assisted

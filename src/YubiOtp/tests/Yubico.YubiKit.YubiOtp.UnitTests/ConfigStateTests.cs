@@ -143,9 +143,8 @@ public class ConfigStateTests
     [Fact]
     public void TouchLevel_HighByte_ParsedCorrectly()
     {
-        // touch_level is little-endian: lo=0x00, hi=0x01 => 0x0100 => bit 8 set
-        // Bits 0-4 are defined; bit 8 is in high byte but not a defined flag
-        // LED inverted is bit 4 (0x10 in low byte)
+        // This vector exercises defined low-byte flags (0x13) with a zero high byte. It does not
+        // independently establish parsing of nonzero high-byte bits or challenge-response touch policy.
         byte[] status = [5, 0, 0, 0, 0x13, 0x00];
 
         var state = new ConfigState(status);

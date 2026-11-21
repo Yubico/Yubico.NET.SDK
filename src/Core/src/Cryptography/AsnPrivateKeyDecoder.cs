@@ -22,6 +22,14 @@ namespace Yubico.YubiKit.Core.Cryptography;
 /// <summary>
 /// A class that converts ASN.1 DER encoded private keys to parameters and values.
 /// </summary>
+/// <remarks>
+/// The typed decoders accept an attribute-free PKCS#8 version-0 subset. They fully consume the
+/// AlgorithmIdentifier, but do not uniformly check outer or nested trailing data. The EC inner key
+/// uses BER parsing and skips unrecognized optional fields; its inner curve parameters are not compared
+/// with the outer named curve. These parsing checks are distinct from key shape and mathematical checks.
+/// Malformed ASN.1 can raise <see cref="AsnContentException"/>; explicit version and format checks use
+/// <see cref="CryptographicException"/>, with algorithm errors documented by the typed entry points.
+/// </remarks>
 internal class AsnPrivateKeyDecoder
 {
     private const string Rfc5958Version1UnsupportedMessage =
@@ -95,7 +103,7 @@ internal class AsnPrivateKeyDecoder
     public static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
         GetCurve25519PrivateKeyData(pkcs8EncodedKey, privateKeyDecoded: null);
 
-    // Test observation hook. The callback must not retain or mutate the decoded private value.
+    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
     internal static (byte[] privateKey, KeyType keyType) GetCurve25519PrivateKeyData(
         ReadOnlyMemory<byte> pkcs8EncodedKey,
         Action<byte[]>? privateKeyDecoded)
@@ -218,8 +226,8 @@ internal class AsnPrivateKeyDecoder
                 if (tag.IsConstructed)
                 {
                     // RFC 5915 defines publicKey as EXPLICIT [1] BIT STRING, so the constructed
-                    // [1] wrapper holds a universal BIT STRING. This is what every standards
-                    // compliant producer, including .NET, emits.
+                    // [1] wrapper holds a universal BIT STRING. Read and exhaust that wrapper
+                    // separately from the surrounding ECPrivateKey fields.
                     var seqPublicKey = seqEcPrivateKey.ReadSequence(tag);
                     publicKeyBytes = seqPublicKey.ReadBitString(out unusedBits);
                     seqPublicKey.ThrowIfNotEmpty();
@@ -284,7 +292,7 @@ internal class AsnPrivateKeyDecoder
     public static RSAParameters CreateRSAParameters(ReadOnlyMemory<byte> pkcs8EncodedKey) =>
         CreateRSAParameters(pkcs8EncodedKey, parametersDecoded: null);
 
-    // Test observation hook. The callback must not retain or mutate the decoded private arrays.
+    // Test-only observers may retain aliases to inspect clearing after the owner exits; never mutate live arrays.
     internal static RSAParameters CreateRSAParameters(
         ReadOnlyMemory<byte> pkcs8EncodedKey,
         Action<RSAParameters>? parametersDecoded)

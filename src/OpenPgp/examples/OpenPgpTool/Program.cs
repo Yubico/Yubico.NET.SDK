@@ -15,7 +15,7 @@ app.Configure(config =>
         .WithDescription("Display general status of the OpenPGP application.");
 
     config.AddCommand<ResetCommand>("reset")
-        .WithDescription("Reset all OpenPGP data.");
+        .WithDescription("Reset ordinary OpenPGP data; preserve attestation material.");
 
     config.AddBranch("access", access =>
     {
@@ -51,7 +51,7 @@ app.Configure(config =>
             .WithDescription("Generate a new key on the YubiKey.");
 
         keys.AddCommand<KeysAttestCommand>("attest")
-            .WithDescription("Generate an attestation certificate for a key.");
+            .WithDescription("Generate an attestation certificate, replacing the slot's existing certificate.");
     });
 
     config.AddBranch("certificates", certs =>

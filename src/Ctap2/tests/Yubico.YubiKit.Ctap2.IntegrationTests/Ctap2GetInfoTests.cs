@@ -21,11 +21,14 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for GetInfo validation.
+/// Integration checks of selected GetInfo fields on a dedicated, approved test device.
 /// </summary>
 /// <remarks>
-/// These tests verify the authenticator info returned by GetInfo command.
-/// Based on Java yubikit-android Ctap2SessionTests.testCtap2GetInfo() patterns.
+/// The shared helper defaults to PIN normalization before the GetInfo action: it can set/change
+/// the PIN or consume a retry. These paths require approved PIN work and known device state,
+/// even though GetInfo itself needs no PIN or presence. Assertions inspect metadata, not feature
+/// execution, complete GetInfo validity or protocol conformance; optional-field checks can be bypassed
+/// by absence. A setup skip does not establish that no device mutation occurred.
 /// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2GetInfoTests
@@ -47,10 +50,10 @@ public class Ctap2GetInfoTests
                 info.Versions.Contains("FIDO_2_1") ||
                 info.Versions.Contains("FIDO_2_3"),
                 $"Expected at least one CTAP2 version, got: [{string.Join(", ", info.Versions)}]");
-        });
+        }, normalizePin: false);
 
     /// <summary>
-    /// Tests that GetInfo returns a valid 16-byte AAGUID.
+    /// Checks length 16 and an additional nonzero-AAGUID test assumption, not authenticator identity verification.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -63,10 +66,10 @@ public class Ctap2GetInfoTests
             Assert.Equal(16, info.Aaguid.Length);
             Assert.False(info.Aaguid.Span.SequenceEqual(new byte[16]),
                 "AAGUID should not be all zeros");
-        });
+        }, normalizePin: false);
 
     /// <summary>
-    /// Tests that GetInfo returns expected options for YubiKey.
+    /// Requires clientPin key presence and checks plat/rk/up values only if supplied.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -94,7 +97,7 @@ public class Ctap2GetInfoTests
 
             Assert.True(info.Options.ContainsKey("clientPin"),
                 "YubiKey should have clientPin option");
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Tests that GetInfo returns PIN/UV auth protocol versions.
@@ -112,7 +115,7 @@ public class Ctap2GetInfoTests
             Assert.True(
                 info.PinUvAuthProtocols.Contains(1) || info.PinUvAuthProtocols.Contains(2),
                 "YubiKey should support PIN/UV auth protocol 1 or 2");
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Tests that GetInfo returns supported algorithms including ES256.
@@ -130,10 +133,10 @@ public class Ctap2GetInfoTests
             var hasEs256 = info.Algorithms.Any(a =>
                 a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
             Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
-        });
+        }, normalizePin: false);
 
     /// <summary>
-    /// Tests that GetInfo returns extensions list.
+    /// Checks a non-null extension list; the guarded disjunction does not establish hmac-secret support.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -150,10 +153,10 @@ public class Ctap2GetInfoTests
                 Assert.True(hasHmacSecret || info.Extensions.Count > 0,
                     "YubiKey should support at least one extension");
             }
-        });
+        }, normalizePin: false);
 
     /// <summary>
-    /// Tests that GetInfo returns firmware version.
+    /// Checks reported firmware against the test's accepted values only when the field is present.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -169,10 +172,10 @@ public class Ctap2GetInfoTests
                 Assert.True(isBetaKey || isProductionKey,
                     $"Expected firmware 5.0+ or 0.0.1 (beta), got {info.FirmwareVersion}");
             }
-        });
+        }, normalizePin: false);
 
     /// <summary>
-    /// Tests that GetInfo returns max message size.
+    /// Checks the reported message-size minimum only when the field is present.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -186,5 +189,5 @@ public class Ctap2GetInfoTests
                 Assert.True(info.MaxMsgSize.Value >= 1024,
                     "Max message size should be at least 1024 bytes");
             }
-        });
+        }, normalizePin: false);
 }

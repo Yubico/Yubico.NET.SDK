@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Extensions;
@@ -24,10 +25,31 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 /// <remarks>
 /// WARNING -- EXPERIMENTAL -- test only: ARKG previewSign derivation is not ready for production use and must not
 /// be treated as production cryptographic guidance.
+/// The point/vector comparisons do not assert algorithm propagation from either extraction accessor,
+/// signature verification, uniqueness for every context or full Internet-Draft conformance.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignGeneratedKeyTests
 {
-    // Reuse Phase B KAT vectors from Core
+    [Fact]
+    public void VerifySignature_RejectsBytesAfterTheDerSequenceOrItsComponents()
+    {
+        using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var point = ecdsa.ExportParameters(false).Q;
+        byte[] publicKey = [4, .. (point.X ?? throw new InvalidOperationException()), .. (point.Y ?? throw new InvalidOperationException())];
+        var derived = new PreviewSignDerivedKey(publicKey, default, default, default);
+        var message = "previewSign test message"u8;
+        byte[] signature = ecdsa.SignData(message, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
+        Assert.True(derived.VerifySignature(message, signature));
+        Assert.False(derived.VerifySignature("other message"u8, signature));
+        Assert.False(derived.VerifySignature(message, [.. signature, 0x05, 0x00]));
+
+        byte[] withExtraComponent = [.. signature, 0x02, 0x01, 0x01];
+        withExtraComponent[1] += 3;
+        Assert.False(derived.VerifySignature(message, withExtraComponent));
+    }
+
+    // Reuse fixed public-seed/derivation fixtures also used by Core; no device ceremony is involved.
     private static readonly byte[] PkBl = HexToBytes(
         "046d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df" +
         "65ed42169c69675f936ff7de5f9bd93adbc8ea73036b16e8d90adbfabdaddba7");
@@ -58,7 +80,7 @@ public class PreviewSignGeneratedKeyTests
 
         // Assert
         Assert.Equal(ExpectedDerivedA, derived.PublicKey.ToArray());
-        Assert.NotEmpty(derived.ArkgKeyHandle.ToArray()); // Should be 16+65 bytes
+        Assert.NotEmpty(derived.ArkgKeyHandle.ToArray()); // Presence only; exact 81-byte size is not asserted here.
         Assert.Equal(generatedKey.KeyHandle.ToArray(), derived.DeviceKeyHandle.ToArray());
         Assert.Equal(CtxA, derived.Context.ToArray());
     }

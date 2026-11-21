@@ -17,19 +17,21 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 /// <summary>
 /// Represents the authenticator's current PIN retry status.
 /// </summary>
+/// <remarks>A snapshot, not permission to retry. PIN_AUTH_BLOCKED requires a power cycle; PIN_BLOCKED means retries are exhausted and reset is required.</remarks>
 public sealed class PinRetryStatus
 {
     /// <summary>
-    /// Gets the number of PIN attempts remaining.
+    /// Gets the PIN retry count reported by the authenticator.
     /// </summary>
     public int RetriesRemaining { get; }
 
     /// <summary>
-    /// Gets whether the authenticator requires a power cycle before the next PIN attempt.
+    /// Gets the power-cycle indication, or <c>null</c> if the authenticator did not report it.
     /// </summary>
-    public bool PowerCycleRequired { get; }
+    /// <remarks>Use <c>is true</c> to act on an affirmative indication. A snapshot is not permission to retry.</remarks>
+    public bool? PowerCycleRequired { get; }
 
-    internal PinRetryStatus(int retriesRemaining, bool powerCycleRequired)
+    internal PinRetryStatus(int retriesRemaining, bool? powerCycleRequired)
     {
         RetriesRemaining = retriesRemaining;
         PowerCycleRequired = powerCycleRequired;

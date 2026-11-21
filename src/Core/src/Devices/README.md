@@ -25,6 +25,12 @@ normally, which the hosted-singleton pattern relies on) but not another disposal
 Each manager operation has one signature with optional arguments, not token-only convenience overloads.
 Generated record equality, copying, printing, and deconstruction are standard record value operations.
 
+Change records carry references to published device objects; their generated value operations do not
+freeze metadata at `Revision`. Snapshot replacement preserves earlier scalar values, while
+`DeviceInfo.ChallengeResponseTimeout` currently retains an input-TLV memory alias. The finder also distinguishes
+failed reads from cached successful serial-less metadata, and identity-cache PID validation from the
+metadata cache's member-ID keys. Keep these storage/freshness limits beside consumer snapshot claims.
+
 - `YubiKeyManager.FindAllAsync(interfaces, cancellationToken)`: fresh scoped discovery with no tracking.
 - `YubiKeyManager.FindFirstAsync(predicate, interfaces, cancellationToken)`: selection when absence is exceptional.
 - `YubiKeyManager.FindFirstOrDefaultAsync(predicate, interfaces, cancellationToken)`: selection when absence is expected.

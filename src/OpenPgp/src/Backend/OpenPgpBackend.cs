@@ -21,7 +21,6 @@ using Yubico.YubiKit.Core.Sessions;
 namespace Yubico.YubiKit.OpenPgp.Backend;
 
 
-internal readonly record struct OpenPgpInitialization(FirmwareVersion FirmwareVersion);
 
 internal sealed class OpenPgpBackend(ISmartCardProtocol protocol) : IOpenPgpBackend
 {
@@ -31,7 +30,7 @@ internal sealed class OpenPgpBackend(ISmartCardProtocol protocol) : IOpenPgpBack
     private readonly ISmartCardProtocol _protocol =
         protocol ?? throw new ArgumentNullException(nameof(protocol));
 
-    public async Task<OpenPgpInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default)
+    public async Task SelectForInitializationAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -48,8 +47,6 @@ internal sealed class OpenPgpBackend(ISmartCardProtocol protocol) : IOpenPgpBack
             await SelectAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        var firmwareVersion = await GetVersionAsync(cancellationToken).ConfigureAwait(false);
-        return new OpenPgpInitialization(firmwareVersion);
     }
 
     public Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken = default) =>
@@ -64,7 +61,7 @@ internal sealed class OpenPgpBackend(ISmartCardProtocol protocol) : IOpenPgpBack
             throwOnError: throwOnError,
             cancellationToken: cancellationToken);
 
-    private async Task<FirmwareVersion> GetVersionAsync(CancellationToken cancellationToken)
+    public async Task<FirmwareVersion?> ReadVersionAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -77,6 +74,9 @@ internal sealed class OpenPgpBackend(ISmartCardProtocol protocol) : IOpenPgpBack
             if (response.IsOK() && response.Data.Length >= 3)
             {
                 var data = response.Data.Span;
+                foreach (byte value in data[..3])
+                    if ((value >> 4) > 9 || (value & 0x0F) > 9)
+                        return null;
                 return new FirmwareVersion(
                     (byte)BcdHelper.DecodeByte(data[0]),
                     (byte)BcdHelper.DecodeByte(data[1]),
@@ -85,9 +85,9 @@ internal sealed class OpenPgpBackend(ISmartCardProtocol protocol) : IOpenPgpBack
         }
         catch (ApduException)
         {
-            // CONDITIONS_NOT_SATISFIED on very old firmware
+            // Version is advisory. Required selection, configuration and app data failures remain visible.
         }
 
-        return new FirmwareVersion(1, 0, 0);
+        return null;
     }
 }

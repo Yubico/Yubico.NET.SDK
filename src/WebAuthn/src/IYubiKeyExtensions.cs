@@ -41,9 +41,11 @@ public static class IYubiKeyExtensions
         /// Optional settings for the underlying CTAP2 session (SCP key parameters, protocol
         /// configuration, preferred transport, firmware override). When no preferred connection is
         /// specified, the CTAP2 default order applies (<see cref="ConnectionType.HidFido"/>, then
-        /// <see cref="ConnectionType.SmartCard"/>). To use SCP on a device that also exposes HID FIDO,
-        /// set <see cref="SessionCreationOptions.PreferredConnectionType"/> to
-        /// <see cref="ConnectionType.SmartCard"/>.
+        /// <see cref="ConnectionType.SmartCard"/>), except that SCP key parameters select SmartCard
+        /// automatically. Explicit SmartCard selection is also supported; explicit HID with SCP is not.
+        /// CTAP2 requires the FIDO AID for SmartCard and applies its USB firmware gate (5.8.0+);
+        /// NFC can use SmartCard without that USB restriction. SCP is available only on SmartCard.
+        /// Transport selection does not retry another connection after an opening failure.
         /// </param>
         /// <param name="cancellationToken">An optional token to cancel the operation.</param>
         /// <returns>A <see cref="WebAuthnClient"/> that owns the underlying CTAP2 session.</returns>

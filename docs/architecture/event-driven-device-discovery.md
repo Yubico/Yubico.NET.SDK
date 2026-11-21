@@ -65,6 +65,10 @@ Budgets bound callers' waits, not native execution or ownership. Already-dispatc
 and cleans up independently. A returned initialized monitor is not proof that every transport or
 metadata field was accessible.
 
+The monitor can reuse successful serial-less metadata. Its identity cache checks Product ID changes;
+its metadata cache currently does not perform that same check. Listener invalidation and observed
+absence still evict both. Treat cached metadata as last-known evidence rather than a periodic live read.
+
 ## Snapshot diff rules
 
 `SnapshotDiff.Apply(current, observed, revision)` builds a successor dictionary keyed by the physical
@@ -84,6 +88,10 @@ share the revision. Metadata lives on retained mutable device objects; a revisio
 Diffing and metadata refresh occur outside the feed gate, so atomic publication is a membership/change
 boundary, not transactional isolation of device properties.
 
+`DeviceInfo` scalar fields in a returned value survive snapshot replacement. Its `ChallengeResponseTimeout`
+memory currently aliases an input TLV, however, so read-only metadata is not a general independent-storage
+or post-disposal stability guarantee. See [cached metadata](../usage/device-discovery.md#cached-device-metadata).
+
 ## Publication and subscription
 
 Only the monitor loop calls `DeviceChangeFeed.Apply`. It computes the diff outside the gate, then
@@ -101,8 +109,10 @@ Each subscriber has a 256-change buffer. Publication uses `TryWrite`, never wait
 faults only the overflowing subscription with `InvalidOperationException` rather than dropping changes.
 Recovery clears the consumer projection and re-enumerates the same monitor. Cancellation or disposing
 an enumeration unregisters only that subscription. `Fault` records a terminal error and faults current
-and later subscriptions with a wrapped `InvalidOperationException`. `Complete` ends healthy subscriptions
-normally; later subscriptions end empty. Captured replay and buffered history can drain after termination.
+subscriptions with a wrapped `InvalidOperationException`; new subscriptions see that failure until
+`Complete` is reached. `Complete` ends remaining healthy subscriptions normally and makes later
+enumerations end empty. It does not erase a channel error already set by terminal failure or overflow:
+those existing subscriptions retain their error after any captured replay and buffered history drain.
 
 ## Why listeners are hints, not truth
 
@@ -116,36 +126,49 @@ events need not identify the physical key. Only discovery plus the snapshot diff
 membership changes. Windows HID uses configuration-manager notifications, macOS uses IOKit callbacks,
 Linux uses udev, and the desktop smart-card listener uses PC/SC status changes.
 
-`HotplugSignals` starts each listener independently. A thrown startup or status other than `Started`
-is logged and that listener is cleaned up without preventing the other from starting. With no listeners,
-interval scans still run. Unavailable services may enumerate empty; this is best-effort partial discovery.
+`HotplugSignals` tries each listener in turn. A startup exception or status other than `Started` is
+logged, followed by attempts to clear that listener's callback, stop it, and dispose it. Cleanup
+exceptions are caught and logged so later attempts can continue, provided logging itself returns.
+A throwing logger can interrupt startup or cleanup and prevent subsequent listener attempts. If
+construction completes without listeners, interval scans still run. Unavailable services may enumerate
+empty; this is best-effort partial discovery.
 
 <a id="single-lifetime-worker-and-shutdown"></a>
 ## Monitor lifecycle and disposal
 
 Creation starts listeners, launches the loop, and awaits its first publication. Empty success is ready.
-First-scan failure fails fast with the original error; initialization failure or cancellation disposes
-partial ownership. The creation token is independent of the monitor lifetime after return.
+A failed first scan prevents successful creation. If the first-publication wait fails or is canceled,
+the factory awaits disposal of the constructed monitor before rethrowing. A cleanup exception can
+replace the earlier failure; this path does not guarantee original-error preservation or completion of
+every cleanup stage. The creation token is independent of the monitor lifetime after return.
 
 Later scan/publication exceptions are logged and retried on the next trigger. Discovery failures before
 publication retain the last membership. Unexpected failures outside that retry path fault the feed before
 best-effort diagnostic logging. A new subscription does not restart a failed monitor: dispose and create
 a new instance. There is no pause, restart, manual rescan, interval replacement, or monitor generation.
 
-Disposal is idempotent and strictly sequential:
+`DisposeAsync` caches one disposal task. Its ordered cleanup path is:
 
-1. Clear callbacks, stop all listeners, dispose all listeners, and complete the signal channel.
+1. Attempt to clear listener callbacks, then stop listeners, then dispose listeners through the
+   best-effort cleanup helper, before completing the signal channel.
 2. Cancel the lifetime token and await the actual scan loop, including any in-flight scan/publication.
 3. Dispose the lifetime token source and retire discovery.
 4. Complete the change feed.
 
-There is no managed-loop abandonment or disposal timeout. In-flight scan waits are bounded by the
+Each later stage depends on preceding calls returning. In particular, listener teardown runs before
+loop cancellation; a logger exception during listener cleanup can interrupt its loops or signal-channel
+completion and prevent cancellation, loop join, discovery retirement, and feed completion. Diagnostic
+logging after feed completion can also fault disposal even though the earlier stages ran.
+
+The loop-await stage has no disposal timeout or fallback that abandons its wait. In-flight scan waits are bounded by the
 discovery budgets; listener cleanup and total disposal are not a hard wall-clock promise. No producer
-can publish after feed completion because the loop has already ended. Caller-owned connections and
-sessions are not disposed. Concurrent `WatchAsync` enumerations are supported, and `DisposeAsync` may
-overlap them: it ends each active enumeration normally. `DisposeAsync` must not be called concurrently
-with itself. Applications that want consumers to observe a final state before shutdown do so on their
-own terms; disposal does not wait for consumers.
+can publish after feed completion because reaching that stage follows the loop's exit. Caller-owned
+connections and sessions retain their own lifetimes. Concurrent `WatchAsync` enumerations are supported,
+and `DisposeAsync` may overlap them. When cleanup reaches feed completion, healthy uncanceled streams
+can drain and end normally; an existing terminal-failure or overflow error remains observable on its
+subscription. Later enumerations end empty. `DisposeAsync` must not be called concurrently with itself.
+Applications that want consumers to observe a final state before shutdown do so on their own terms;
+disposal does not wait for consumers.
 
 ### Finder evidence epochs are not monitor generations
 

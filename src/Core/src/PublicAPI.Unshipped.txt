@@ -66,6 +66,9 @@ Yubico.YubiKit.Core.Devices.YubiKeyMonitor
 Yubico.YubiKit.Core.Devices.YubiKeyMonitor.DisposeAsync() -> System.Threading.Tasks.ValueTask
 Yubico.YubiKit.Core.Devices.YubiKeyMonitor.WatchAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Yubico.YubiKit.Core.Devices.DeviceChange!>!
 
+Yubico.YubiKit.Core.Utilities.Base32
+static Yubico.YubiKit.Core.Utilities.Base32.Decode(System.ReadOnlySpan<char> encoded) -> byte[]!
+static Yubico.YubiKit.Core.Utilities.Base32.Decode(System.ReadOnlySpan<char> encoded, System.Span<byte> destination) -> int
 Yubico.YubiKit.Core.Protocols.SmartCard.Apdu.ApduResponse.Clear() -> void
 
 Yubico.YubiKit.Core.Abstractions.IApplicationSession
@@ -351,6 +354,8 @@ Yubico.YubiKit.Core.Devices.DeviceInfo.FirmwareVersion.get -> Yubico.YubiKit.Cor
 Yubico.YubiKit.Core.Devices.DeviceInfo.FirmwareVersion.init -> void
 Yubico.YubiKit.Core.Devices.DeviceInfo.FormFactor.get -> Yubico.YubiKit.Core.Devices.FormFactor
 Yubico.YubiKit.Core.Devices.DeviceInfo.FormFactor.init -> void
+Yubico.YubiKit.Core.Devices.DeviceInfo.RawFormFactor.get -> byte
+Yubico.YubiKit.Core.Devices.DeviceInfo.RawFormFactor.init -> void
 Yubico.YubiKit.Core.Devices.DeviceInfo.FpsVersion.get -> Yubico.YubiKit.Core.Devices.FirmwareVersion?
 Yubico.YubiKit.Core.Devices.DeviceInfo.FpsVersion.init -> void
 Yubico.YubiKit.Core.Devices.DeviceInfo.HasPinComplexity.get -> bool

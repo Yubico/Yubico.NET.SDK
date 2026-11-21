@@ -28,8 +28,11 @@ public static class FingerprintModality
 }
 
 /// <summary>
-/// Fingerprint capture sample status codes per CTAP2.1 specification.
+/// Fingerprint capture feedback.
 /// </summary>
+/// <remarks>
+/// The values follow CTAP 2.1 (2022-06-21 errata), Section 6.7, except for DatabaseFull.
+/// </remarks>
 public enum FingerprintSampleStatus
 {
     /// <summary>
@@ -88,26 +91,34 @@ public enum FingerprintSampleStatus
     MergeFailure = 0x0A,
 
     /// <summary>
-    /// Data storage full (0x0B).
+    /// Fingerprint already exists (0x0B).
     /// </summary>
-    StorageFull = 0x0B,
+    Exists = 0x0B,
 
     /// <summary>
-    /// No user activity (timeout) (0x0C).
+    /// Fingerprint database full (0x0C).
     /// </summary>
-    NoUserActivity = 0x0C,
+    /// <remarks>Matches python-fido2 FP_DATABASE_FULL; CTAP 2.1 leaves 0x0C unused.</remarks>
+    DatabaseFull = 0x0C,
 
     /// <summary>
-    /// No user presence detected (0x0D).
+    /// No touch or swipe activity (0x0D).
     /// </summary>
-    NoUserPresence = 0x0D
+    NoUserActivity = 0x0D,
+
+    /// <summary>
+    /// No user-presence transition, such as lifting the finger (0x0E).
+    /// </summary>
+    NoUpTransition = 0x0E
 }
 
 /// <summary>
 /// Information about the fingerprint sensor capabilities.
 /// </summary>
 /// <remarks>
-/// Returned by authenticatorBioEnrollment getFingerprintSensorInfo sub-command.
+/// Models selected sensor response fields. CTAP 2.1 (2022-06-21 errata), Section 6.7.3,
+/// also supplies maxTemplateFriendlyName at key 8, which is available only through RawData
+/// here. A decoded object does not establish physical sensor interoperability.
 /// </remarks>
 public sealed class FingerprintSensorInfo
 {
@@ -117,7 +128,7 @@ public sealed class FingerprintSensorInfo
     public ReadOnlyMemory<byte> RawData { get; private init; }
 
     /// <summary>
-    /// Gets the fingerprint kind (touch or swipe).
+    /// Gets the decoded fingerprint kind.
     /// </summary>
     public FingerprintKind FingerprintKind { get; private init; }
 
@@ -125,15 +136,10 @@ public sealed class FingerprintSensorInfo
     /// Gets the maximum number of samples required for enrollment.
     /// </summary>
     /// <remarks>
-    /// This is a hint to the platform about the expected number of captures.
-    /// Actual enrollment may complete with fewer samples.
+    /// This reports the maximum good samples, not a limit on total capture attempts:
+    /// rejected captures may not count.
     /// </remarks>
     public int MaxCaptureSamplesRequiredForEnroll { get; private init; }
-
-    /// <summary>
-    /// Gets the maximum number of templates that can be stored.
-    /// </summary>
-    public int? MaxTemplateCount { get; private init; }
 
     /// <summary>
     /// Decodes a FingerprintSensorInfo from a CBOR response.
@@ -143,11 +149,10 @@ public sealed class FingerprintSensorInfo
     public static FingerprintSensorInfo Decode(ReadOnlyMemory<byte> data)
     {
         ReadOnlyMemory<byte> rawData = data.ToArray();
-        var reader = new CborReader(rawData, CborConformanceMode.Lax);
+        var reader = new CborReader(rawData, CborConformanceMode.Ctap2Canonical);
 
-        var fingerprintKind = FingerprintKind.Touch;
-        var maxSamples = 0;
-        int? maxTemplates = null;
+        FingerprintKind? fingerprintKind = null;
+        int? maxSamples = null;
 
         var mapCount = reader.ReadStartMap() ?? 0;
 
@@ -165,10 +170,6 @@ public sealed class FingerprintSensorInfo
                     maxSamples = reader.ReadInt32();
                     break;
 
-                case 4: // maxTemplateCount (0x04) - vendor extension
-                    maxTemplates = reader.ReadInt32();
-                    break;
-
                 default:
                     reader.SkipValue();
                     break;
@@ -177,12 +178,14 @@ public sealed class FingerprintSensorInfo
 
         reader.ReadEndMap();
 
+        if (reader.BytesRemaining != 0 || fingerprintKind is null || maxSamples is null or < 0)
+            throw new CborContentException("Incomplete or invalid fingerprint sensor information.");
+
         return new FingerprintSensorInfo
         {
             RawData = rawData,
-            FingerprintKind = fingerprintKind,
-            MaxCaptureSamplesRequiredForEnroll = maxSamples,
-            MaxTemplateCount = maxTemplates
+            FingerprintKind = fingerprintKind.Value,
+            MaxCaptureSamplesRequiredForEnroll = maxSamples.Value
         };
     }
 }
@@ -203,94 +206,89 @@ public enum FingerprintKind
     Swipe = 0x02
 }
 
-/// <summary>
-/// Result of a fingerprint enrollment capture sample operation.
-/// </summary>
-public sealed class EnrollmentSampleResult
+/// <summary>Feedback from a fingerprint enrollment capture.</summary>
+public class EnrollmentSampleResult
 {
-    /// <summary>
-    /// Gets the complete original CBOR-encoded authenticator response.
-    /// </summary>
-    public ReadOnlyMemory<byte> RawData { get; private init; }
+    internal EnrollmentSampleResult(ReadOnlyMemory<byte> rawData, FingerprintSampleStatus status, int remainingSamples)
+    {
+        RawData = rawData;
+        LastSampleStatus = status;
+        RemainingSamples = remainingSamples;
+    }
 
-    /// <summary>
-    /// Gets the current template ID for this enrollment.
-    /// </summary>
-    public ReadOnlyMemory<byte> TemplateId { get; internal init; }
+    /// <summary>Gets the complete original CBOR-encoded authenticator response.</summary>
+    public ReadOnlyMemory<byte> RawData { get; }
 
-    /// <summary>
-    /// Gets the status of the last sample capture.
-    /// </summary>
-    public FingerprintSampleStatus LastSampleStatus { get; internal init; }
+    /// <summary>Gets the authenticator's sample feedback.</summary>
+    public FingerprintSampleStatus LastSampleStatus { get; }
 
-    /// <summary>
-    /// Gets the number of remaining samples needed to complete enrollment.
-    /// </summary>
-    /// <remarks>
-    /// A value of 0 indicates enrollment is complete.
-    /// </remarks>
-    public int RemainingSamples { get; internal init; }
+    /// <summary>Gets the authenticator's remaining sample count.</summary>
+    public int RemainingSamples { get; }
 
-    /// <summary>
-    /// Gets whether the enrollment is complete.
-    /// </summary>
+    /// <summary>Gets whether the authenticator reports zero remaining samples.</summary>
     public bool IsComplete => RemainingSamples == 0;
 
-    /// <summary>
-    /// Decodes an EnrollmentSampleResult from a CBOR response.
-    /// </summary>
-    /// <param name="data">The CBOR-encoded response data.</param>
-    /// <returns>The decoded enrollment result.</returns>
-    public static EnrollmentSampleResult Decode(ReadOnlyMemory<byte> data)
+    /// <summary>Decodes a continuation response, which does not require the begin template ID.</summary>
+    /// <param name="data">The borrowed CBOR response.</param>
+    /// <returns>Sample feedback with an owned copy of the response bytes.</returns>
+    /// <exception cref="CborContentException">The response lacks valid status or remaining-count fields.</exception>
+    public static EnrollmentSampleResult Decode(ReadOnlyMemory<byte> data) => DecodeSample(data, begin: false);
+
+    internal static EnrollmentSampleResult DecodeSample(ReadOnlyMemory<byte> data, bool begin)
     {
         ReadOnlyMemory<byte> rawData = data.ToArray();
-        var reader = new CborReader(rawData, CborConformanceMode.Lax);
+        var reader = new CborReader(rawData, CborConformanceMode.Ctap2Canonical);
+        byte[]? templateId = null;
+        int? status = null;
+        int? remaining = null;
 
-        ReadOnlyMemory<byte> templateId = default;
-        var lastStatus = FingerprintSampleStatus.Good;
-        var remaining = 0;
-
-        var mapCount = reader.ReadStartMap() ?? 0;
-
-        for (var i = 0; i < mapCount; i++)
+        int count = reader.ReadStartMap() ?? 0;
+        for (int i = 0; i < count; i++)
         {
-            var key = reader.ReadInt32();
-
-            switch (key)
-            {
-                case 4: // templateId (0x04)
-                    templateId = reader.ReadByteString();
-                    break;
-
-                case 5: // lastEnrollSampleStatus (0x05)
-                    lastStatus = (FingerprintSampleStatus)reader.ReadInt32();
-                    break;
-
-                case 6: // remainingSamples (0x06)
-                    remaining = reader.ReadInt32();
-                    break;
-
-                default:
-                    reader.SkipValue();
-                    break;
-            }
+            int key = reader.ReadInt32();
+            if (key == 4 && begin) templateId = reader.ReadByteString();
+            else if (key == 5) status = reader.ReadInt32();
+            else if (key == 6) remaining = reader.ReadInt32();
+            else reader.SkipValue();
         }
-
         reader.ReadEndMap();
+        if (reader.BytesRemaining != 0 || status is null or < 0 || remaining is null or < 0)
+            throw new CborContentException("Incomplete or invalid fingerprint capture response.");
 
-        return new EnrollmentSampleResult
-        {
-            RawData = rawData,
-            TemplateId = templateId,
-            LastSampleStatus = lastStatus,
-            RemainingSamples = remaining
-        };
+        return begin
+            ? new EnrollmentBeginResult(rawData, (FingerprintSampleStatus)status.Value, remaining.Value,
+                templateId is { Length: > 0 } ? templateId : throw new CborContentException("Missing enrollment template ID."))
+            : new EnrollmentSampleResult(rawData, (FingerprintSampleStatus)status.Value, remaining.Value);
     }
 }
 
+/// <summary>Initial capture feedback and the template ID assigned by the authenticator.</summary>
+public sealed class EnrollmentBeginResult : EnrollmentSampleResult
+{
+    internal EnrollmentBeginResult(ReadOnlyMemory<byte> rawData, FingerprintSampleStatus status,
+        int remainingSamples, ReadOnlyMemory<byte> templateId) : base(rawData, status, remainingSamples)
+    {
+        TemplateId = templateId;
+    }
+
+    /// <summary>Gets the template ID to pass to every continuation request.</summary>
+    public ReadOnlyMemory<byte> TemplateId { get; }
+
+    /// <summary>Decodes a begin response, including its required template ID.</summary>
+    /// <param name="data">The borrowed CBOR response.</param>
+    /// <returns>Sample feedback, template ID and an owned copy of the response bytes.</returns>
+    /// <exception cref="CborContentException">The response lacks a valid template ID, status or remaining count.</exception>
+    public new static EnrollmentBeginResult Decode(ReadOnlyMemory<byte> data) =>
+        (EnrollmentBeginResult)DecodeSample(data, begin: true);
+}
+
 /// <summary>
-/// Information about an enrolled fingerprint template.
+/// Metadata identifying and naming an enrolled fingerprint, not biometric template sample bytes.
 /// </summary>
+/// <remarks>
+/// CTAP 2.1 §6.7 defines a nested TemplateInfo with required ID key 1 and optional name key 2.
+/// Use <see cref="EnrollmentEnumerationResult.Decode"/> for the surrounding inventory envelope.
+/// </remarks>
 public sealed class TemplateInfo
 {
     /// <summary>
@@ -304,22 +302,25 @@ public sealed class TemplateInfo
     public string? FriendlyName { get; internal init; }
 
     /// <summary>
-    /// Gets the number of samples captured for this template.
+    /// Gets the legacy sample count property, which is not populated by the standard decoder.
     /// </summary>
     /// <remarks>
-    /// This is a vendor extension and may not be available on all authenticators.
+    /// Standard envelope key 8 is maxTemplateFriendlyName, not sample count.
     /// </remarks>
     public int? SampleCount { get; internal init; }
 
     /// <summary>
-    /// Decodes a TemplateInfo from a CBOR response.
+    /// Decodes one nested TemplateInfo map, not the surrounding CBOR response.
     /// </summary>
     /// <param name="data">The CBOR-encoded response data.</param>
     /// <returns>The decoded template info.</returns>
     public static TemplateInfo Decode(ReadOnlyMemory<byte> data)
     {
-        var reader = new CborReader(data, CborConformanceMode.Lax);
-        return DecodeFromReader(reader);
+        var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
+        var result = DecodeFromReader(reader);
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the template inventory entry.");
+        return result;
     }
 
     /// <summary>
@@ -327,44 +328,20 @@ public sealed class TemplateInfo
     /// </summary>
     internal static TemplateInfo DecodeFromReader(CborReader reader)
     {
-        ReadOnlyMemory<byte> templateId = default;
-        string? friendlyName = null;
-        int? sampleCount = null;
-
-        var mapCount = reader.ReadStartMap() ?? 0;
-
-        for (var i = 0; i < mapCount; i++)
+        byte[]? id = null;
+        string? name = null;
+        int fields = reader.ReadStartMap() ?? 0;
+        for (int i = 0; i < fields; i++)
         {
-            var key = reader.ReadInt32();
-
-            switch (key)
-            {
-                case 4: // templateId (0x04)
-                    templateId = reader.ReadByteString();
-                    break;
-
-                case 7: // templateFriendlyName (0x07)
-                    friendlyName = reader.ReadTextString();
-                    break;
-
-                case 8: // sampleCount (0x08) - vendor extension
-                    sampleCount = reader.ReadInt32();
-                    break;
-
-                default:
-                    reader.SkipValue();
-                    break;
-            }
+            int key = reader.ReadInt32();
+            if (key == 1) id = reader.ReadByteString();
+            else if (key == 2) name = reader.ReadTextString();
+            else reader.SkipValue();
         }
-
         reader.ReadEndMap();
-
-        return new TemplateInfo
-        {
-            TemplateId = templateId,
-            FriendlyName = friendlyName,
-            SampleCount = sampleCount
-        };
+        if (id is null || id.Length == 0)
+            throw new CborContentException("Template inventory entry lacks an ID.");
+        return new TemplateInfo { TemplateId = id, FriendlyName = name };
     }
 }
 
@@ -382,23 +359,30 @@ public sealed class EnrollmentEnumerationResult
     /// Decodes an EnrollmentEnumerationResult from a CBOR response.
     /// </summary>
     /// <param name="data">The CBOR-encoded response data.</param>
-    /// <returns>The decoded enumeration result containing the first template.</returns>
+    /// <returns>All entries in the key-7 templateInfos array (CTAP 2.1 §6.7.6).</returns>
     public static EnrollmentEnumerationResult Decode(ReadOnlyMemory<byte> data)
     {
-        // The response contains a single template info
-        var template = TemplateInfo.Decode(data);
-
-        return new EnrollmentEnumerationResult
+        var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
+        List<TemplateInfo>? results = null;
+        var mapCount = reader.ReadStartMap() ?? 0;
+        for (var i = 0; i < mapCount; i++)
         {
-            Templates = [template]
-        };
-    }
+            if (reader.ReadInt32() != 7)
+            {
+                reader.SkipValue();
+                continue;
+            }
 
-    /// <summary>
-    /// Creates an enumeration result from a list of templates.
-    /// </summary>
-    internal static EnrollmentEnumerationResult FromTemplates(IReadOnlyList<TemplateInfo> templates)
-    {
-        return new EnrollmentEnumerationResult { Templates = templates };
+            int count = reader.ReadStartArray() ?? throw new CborContentException("Template array must have a definite length.");
+            results = [];
+            for (int j = 0; j < count; j++)
+                results.Add(TemplateInfo.DecodeFromReader(reader));
+            reader.ReadEndArray();
+        }
+
+        reader.ReadEndMap();
+        if (reader.BytesRemaining != 0 || results is null)
+            throw new CborContentException("Expected a complete template inventory response with templateInfos.");
+        return new EnrollmentEnumerationResult { Templates = results };
     }
 }

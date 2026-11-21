@@ -30,6 +30,7 @@ internal static class YubiOtpConstants
     public const int HmacResponseSize = 20;
     public const int YubicoOtpChallengeSize = 6;
     public const int YubicoOtpResponseSize = 16;
+    // Static-password capacity is distinct from the 45-entry keyboard map.
     public const int ScanCodesSize = FixedSize + UidSize + KeySize; // 38
 
     /// <summary>

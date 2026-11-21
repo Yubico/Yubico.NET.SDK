@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Formats.Asn1;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.OpenPgp.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
@@ -29,6 +31,8 @@ public class OpenPgpSessionTests
     private static readonly byte[] DefaultUserPin = Encoding.UTF8.GetBytes("123456");
     private static readonly byte[] DefaultAdminPin = Encoding.UTF8.GetBytes("12345678");
 
+    // Reset coverage here checks three retry counters; full erasure/default/ATT preservation
+    // needs independent key, certificate, credential, KDF and policy readback.
     // ── Reset & Clean State ──────────────────────────────────────────
 
     [SkippableTheory]
@@ -208,12 +212,9 @@ public class OpenPgpSessionTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GenerateRsaKey_2048_Succeeds(YubiKeyTestState state)
     {
-        // Skip firmware 4.2.0–4.3.5 (RSA generation unreliable)
-        if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
-            state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
-        {
-            return;
-        }
+        Skip.If(state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
+            state.FirmwareVersion < new FirmwareVersion(4, 3, 5),
+            "On-card RSA generation is disabled by the OpenPGP ROCA policy.");
 
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -231,7 +232,7 @@ public class OpenPgpSessionTests
             });
     }
 
-    // ── Sign & Verify: EC ────────────────────────────────────────────
+    // ── Signature response shape: EC ─────────────────────────────────
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
@@ -249,24 +250,20 @@ public class OpenPgpSessionTests
                 await session.VerifyPinAsync(DefaultUserPin);
 
                 var signature = await session.SignAsync(message, HashAlgorithmName.SHA256);
-                Assert.True(signature.Length > 0);
-
-                // Verify the signature using the public key from the card
-                var pubKeyData = await session.GetPublicKeyAsync(KeyRef.Sig);
-                Assert.True(pubKeyData.Length > 0);
+                using var publicKey = await ReadP256SigningKeyAsync(session);
+                Assert.True(publicKey.VerifyData(message, signature.Span, HashAlgorithmName.SHA256,
+                    DSASignatureFormat.Rfc3279DerSequence));
             });
 
-    // ── Sign & Verify: RSA ───────────────────────────────────────────
+    // ── Signature response shape: RSA ────────────────────────────────
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task Sign_Rsa2048_ProducesSignature(YubiKeyTestState state)
     {
-        if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
-            state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
-        {
-            return;
-        }
+        Skip.If(state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
+            state.FirmwareVersion < new FirmwareVersion(4, 3, 5),
+            "On-card RSA generation is disabled by the OpenPGP ROCA policy.");
 
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -281,10 +278,14 @@ public class OpenPgpSessionTests
                 await session.VerifyPinAsync(DefaultUserPin);
 
                 var signature = await session.SignAsync(message, HashAlgorithmName.SHA256);
-                Assert.True(signature.Length > 0);
-
-                // RSA 2048 signature should be 256 bytes
-                Assert.Equal(256, signature.Length);
+                var fields = await ReadSigningKeyFieldsAsync(session);
+                using var publicKey = RSA.Create(new RSAParameters
+                {
+                    Modulus = fields[0x81].ToArray(),
+                    Exponent = fields[0x82].ToArray(),
+                });
+                Assert.True(publicKey.VerifyData(message, signature.Span, HashAlgorithmName.SHA256,
+                    RSASignaturePadding.Pkcs1));
             });
     }
 
@@ -350,7 +351,7 @@ public class OpenPgpSessionTests
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
-    public async Task AttestKey_ReturnsValidCertificate(YubiKeyTestState state) =>
+    public async Task AttestKey_BindsCertificateToGeneratedSigningKey(YubiKeyTestState state) =>
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
             action: async session =>
@@ -361,15 +362,21 @@ public class OpenPgpSessionTests
                 // Attest uses default PIN verification (extended=false, P2=0x81)
                 // per ykman canonical: verify_pin(pin) before attest_key(key)
                 await session.VerifyPinAsync(DefaultUserPin);
-                var attestCert = await session.AttestKeyAsync(KeyRef.Sig);
-                Assert.NotNull(attestCert);
-                Assert.True(attestCert.RawData.Length > 0);
+                using var attestCert = await session.AttestKeyAsync(KeyRef.Sig);
+                using var generatedKey = await ReadP256SigningKeyAsync(session);
+                using var certifiedKey = attestCert.GetECDsaPublicKey();
+                Assert.NotNull(certifiedKey);
+                Assert.Equal(generatedKey.ExportSubjectPublicKeyInfo(), certifiedKey.ExportSubjectPublicKeyInfo());
+
+                // This verifies the signature under the card's reported ATT key, not manufacturer trust.
+                using var issuer = await session.GetCertificateAsync(KeyRef.Att);
+                Assert.NotNull(issuer);
+                Assert.True(VerifyAttestationIssuerSignature(attestCert, issuer));
             });
 
     /// <summary>
-    ///     Pins the two facts the AttestKeyAsync docs state. GET_ATTESTATION needs
-    ///     User PIN verification (Admin alone is not enough), and the attestation statement replaces the
-    ///     cardholder certificate stored for that key.
+    ///     Checks rejection under Admin-only authorization, then ordinary User authorization and
+    ///     replacement of stored certificate bytes. This case leaves chain trust and key binding unverified.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
@@ -390,16 +397,62 @@ public class OpenPgpSessionTests
                 // Admin PIN is verified, User PIN is not: the device must refuse.
                 var withoutUserPin = await Record.ExceptionAsync(() => session.AttestKeyAsync(KeyRef.Sig));
                 Assert.IsType<ApduException>(withoutUserPin);
-                var stillStored = await session.GetCertificateAsync(KeyRef.Sig);
-                Assert.Equal(stored.RawData, stillStored!.RawData);
+                using var stillStored = await session.GetCertificateAsync(KeyRef.Sig);
+                Assert.NotNull(stillStored);
+                Assert.Equal(stored.RawData, stillStored.RawData);
 
                 await session.VerifyPinAsync(DefaultUserPin);
-                var attestation = await session.AttestKeyAsync(KeyRef.Sig);
+                using var attestation = await session.AttestKeyAsync(KeyRef.Sig);
 
-                var nowStored = await session.GetCertificateAsync(KeyRef.Sig);
-                Assert.Equal(attestation.RawData, nowStored!.RawData);
+                using var nowStored = await session.GetCertificateAsync(KeyRef.Sig);
+                Assert.NotNull(nowStored);
+                Assert.Equal(attestation.RawData, nowStored.RawData);
                 Assert.NotEqual(stored.RawData, nowStored.RawData);
             });
+
+    private static async Task<ECDsa> ReadP256SigningKeyAsync(IOpenPgpSession session)
+    {
+        var fields = await ReadSigningKeyFieldsAsync(session);
+        var point = fields[0x86].Span;
+        Assert.Equal(65, point.Length);
+        Assert.Equal(0x04, point[0]);
+        return ECDsa.Create(new ECParameters
+        {
+            Curve = ECCurve.NamedCurves.nistP256,
+            Q = new ECPoint { X = point[1..33].ToArray(), Y = point[33..].ToArray() },
+        });
+    }
+
+    private static bool VerifyAttestationIssuerSignature(X509Certificate2 certificate, X509Certificate2 issuer)
+    {
+        var reader = new AsnReader(certificate.RawData, AsnEncodingRules.DER);
+        var certificateSequence = reader.ReadSequence();
+        var tbs = certificateSequence.ReadEncodedValue();
+        var algorithm = certificateSequence.ReadSequence().ReadObjectIdentifier();
+        var signature = certificateSequence.ReadBitString(out int unusedBits);
+        Assert.Equal(0, unusedBits);
+        certificateSequence.ThrowIfNotEmpty();
+        reader.ThrowIfNotEmpty();
+
+        using var ecdsa = issuer.GetECDsaPublicKey();
+        using var rsa = issuer.GetRSAPublicKey();
+        return algorithm switch
+        {
+            "1.2.840.10045.4.3.2" when ecdsa is not null => ecdsa.VerifyData(tbs.Span, signature,
+                HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence),
+            "1.2.840.113549.1.1.11" when rsa is not null => rsa.VerifyData(tbs.Span, signature,
+                HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1),
+            _ => throw new NotSupportedException($"Unqualified OpenPGP attestation signature algorithm {algorithm}."),
+        };
+    }
+
+    private static async Task<IDictionary<int, ReadOnlyMemory<byte>>> ReadSigningKeyFieldsAsync(IOpenPgpSession session)
+    {
+        var bytes = await session.GetPublicKeyAsync(KeyRef.Sig);
+        using var outer = Tlv.Create(bytes.Span);
+        Assert.Equal(0x7F49, outer.Tag);
+        return TlvHelper.DecodeDictionary(outer.Value.Span);
+    }
 
     // ── UIF (Touch Policy) ───────────────────────────────────────────
 
@@ -457,7 +510,8 @@ public class OpenPgpSessionTests
                 var fingerprints = await session.GetKeyFingerprintsAsync();
                 Assert.NotNull(fingerprints);
 
-                // Verify all four key slots are present with 20-byte fingerprints
+                // This case expects a four-slot profile; historical three-slot cards need separate applicability.
+                // Fingerprint lengths establish field shape rather than key presence.
                 Assert.Contains(KeyRef.Sig, fingerprints.Keys);
                 Assert.Contains(KeyRef.Dec, fingerprints.Keys);
                 Assert.Contains(KeyRef.Aut, fingerprints.Keys);
@@ -479,7 +533,7 @@ public class OpenPgpSessionTests
                 var times = await session.GetGenerationTimesAsync();
                 Assert.NotNull(times);
 
-                // Verify all four key slots are present
+                // This case expects four reported slots; it leaves historical three-slot applicability open.
                 Assert.Contains(KeyRef.Sig, times.Keys);
                 Assert.Contains(KeyRef.Dec, times.Keys);
                 Assert.Contains(KeyRef.Aut, times.Keys);
@@ -569,7 +623,7 @@ public class OpenPgpSessionTests
 
                 Assert.Equal(16, challenge1.Length);
                 Assert.Equal(16, challenge2.Length);
-                // Two random challenges should almost certainly differ
+                // Unequal samples establish this pair differs; they provide no statistical RNG qualification.
                 Assert.False(challenge1.Span.SequenceEqual(challenge2.Span));
             });
 }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using NSubstitute;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
@@ -22,12 +23,68 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 namespace Yubico.YubiKit.YubiOtp.UnitTests;
 
 /// <summary>
-///     Phase 38: YubiOTP transport selection — app-specific smart default (SmartCard, then HID OTP) plus
-///     explicit caller override, validated over a fake probe that records the requested connection type.
+///     YubiOTP transport selection: SmartCard-first default and explicit override, checked by a fake
+///     probe recording the requested connection type. The probe does not initialize a device session.
 /// </summary>
 public class IYubiKeyExtensionsTransportTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CalculateAndDisposeAsync_DoesNotTransferBeforeTeardown(bool fail)
+    {
+        var session = Substitute.For<IYubiOtpSession>();
+        byte[] backing = [0xA5, .. new byte[19]];
+        session.CalculateHmacSha1Async(Slot.Two, ReadOnlyMemory<byte>.Empty, Ct)
+            .Returns(Task.FromResult(backing.AsMemory()));
+        var teardown = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        session.DisposeAsync().Returns(_ =>
+        {
+            entered.SetResult();
+            return new ValueTask(teardown.Task);
+        });
+        var failure = new InvalidOperationException("teardown failed");
+        var calculation = IYubiKeyExtensions.CalculateAndDisposeAsync(session, Slot.Two, ReadOnlyMemory<byte>.Empty, Ct);
+
+        try
+        {
+            await entered.Task.WaitAsync(Ct);
+            Assert.False(calculation.IsCompleted);
+            Assert.Equal(0xA5, backing[0]);
+        }
+        finally
+        {
+            if (fail)
+            {
+                teardown.SetException(failure);
+                Assert.Same(failure, await Assert.ThrowsAsync<InvalidOperationException>(() => calculation));
+            }
+            else
+            {
+                teardown.SetResult();
+                Assert.Equal(backing.AsMemory(), await calculation);
+            }
+        }
+
+        Assert.Equal(fail ? 0 : 0xA5, backing[0]);
+    }
+
+    [Fact]
+    public async Task CalculateAndDisposeAsync_CalculationFailureTakesPrecedenceOverTeardownFailure()
+    {
+        var session = Substitute.For<IYubiOtpSession>();
+        var primary = new InvalidOperationException("calculation failed");
+        session.CalculateHmacSha1Async(Slot.Two, ReadOnlyMemory<byte>.Empty, Ct)
+            .Returns(Task.FromException<Memory<byte>>(primary));
+        session.DisposeAsync().Returns(ValueTask.FromException(new InvalidOperationException("teardown failed")));
+
+        Assert.Same(primary, await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            IYubiKeyExtensions.CalculateAndDisposeAsync(session, Slot.Two, ReadOnlyMemory<byte>.Empty, Ct)));
+        await session.Received(1).DisposeAsync();
+    }
 
     // (a) default top-choice: both transports present -> SmartCard.
     [Fact]

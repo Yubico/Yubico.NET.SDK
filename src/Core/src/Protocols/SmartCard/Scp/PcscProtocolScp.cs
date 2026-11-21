@@ -20,7 +20,8 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 /// <summary>
 ///     Decorator that wraps an ISmartCardProtocol with SCP (Secure Channel Protocol) functionality.
-///     All APDU transmissions are encrypted and MACed through the SCP processor. Overlapping calls are refused
+///     Ordinary exchanges use the SCP processor; SelectAsync sends a plaintext SELECT and retains the local
+///     secure graph rather than reestablishing authentication. Overlapping calls are refused
 ///     by the same guard as the wrapped protocol (SCP MAC chaining makes
 ///     interleaving doubly fatal — each MAC depends on the previous command's MAC).
 /// </summary>

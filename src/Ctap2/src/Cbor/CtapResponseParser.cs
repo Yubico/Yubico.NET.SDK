@@ -20,6 +20,8 @@ namespace Yubico.YubiKit.Ctap2.Cbor;
 /// Utility class for parsing CTAP2 CBOR responses.
 /// Provides common deserialization patterns to reduce duplication across response models.
 /// </summary>
+/// <remarks>Optional readers inspect the current encoded value, not whether a map key was absent.
+/// The consuming model decides which fields are required and whether null/undefined is permitted.</remarks>
 internal static class CtapResponseParser
 {
     /// <summary>
@@ -32,7 +34,7 @@ internal static class CtapResponseParser
     /// <param name="reader">The CBOR reader positioned at the start of a map.</param>
     /// <param name="fieldHandler">
     /// Action invoked for each field. Parameters are (key, reader).
-    /// The handler should read exactly one value from the reader for the given key.
+    /// The handler must consume exactly one complete value, using SkipValue for an unknown key.
     /// </param>
     public static void ReadIntKeyMap(CborReader reader, Action<int, CborReader> fieldHandler)
     {
@@ -57,7 +59,7 @@ internal static class CtapResponseParser
     /// <param name="reader">The CBOR reader positioned at the start of a map.</param>
     /// <param name="fieldHandler">
     /// Action invoked for each field. Parameters are (key, reader).
-    /// The handler should read exactly one value from the reader for the given key.
+    /// The handler must consume exactly one complete value, using SkipValue for an unknown key.
     /// </param>
     public static void ReadTextKeyMap(CborReader reader, Action<string, CborReader> fieldHandler)
     {
@@ -77,7 +79,8 @@ internal static class CtapResponseParser
     /// Converts a nullable byte array to nullable ReadOnlyMemory.
     /// </summary>
     /// <param name="data">The byte array to convert, or null.</param>
-    /// <returns>ReadOnlyMemory wrapping the data, or null if data is null.</returns>
+    /// <returns>A view of the same array without copying or transferring ownership; null for null
+    /// input and a present empty view for an empty array.</returns>
     public static ReadOnlyMemory<byte>? ToNullableMemory(byte[]? data) =>
         data is not null ? new ReadOnlyMemory<byte>(data) : null;
 
@@ -126,7 +129,7 @@ internal static class CtapResponseParser
     }
 
     /// <summary>
-    /// Safely reads an optional integer value from the reader, returning null if not present.
+    /// Reads the current integer value, consuming CBOR null or undefined as null.
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The integer value, or null if the value is null/undefined.</returns>
@@ -141,7 +144,7 @@ internal static class CtapResponseParser
     }
 
     /// <summary>
-    /// Safely reads an optional boolean value from the reader, returning null if not present.
+    /// Reads the current boolean value, consuming CBOR null or undefined as null.
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The boolean value, or null if the value is null/undefined.</returns>
@@ -156,7 +159,7 @@ internal static class CtapResponseParser
     }
 
     /// <summary>
-    /// Safely reads an optional byte array from the reader, returning null if not present.
+    /// Reads the current byte string, consuming CBOR null or undefined as null.
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The byte array, or null if the value is null/undefined.</returns>
@@ -171,7 +174,7 @@ internal static class CtapResponseParser
     }
 
     /// <summary>
-    /// Safely reads an optional text string from the reader, returning null if not present.
+    /// Reads the current text string, consuming CBOR null or undefined as null.
     /// </summary>
     /// <param name="reader">The CBOR reader.</param>
     /// <returns>The text string, or null if the value is null/undefined.</returns>

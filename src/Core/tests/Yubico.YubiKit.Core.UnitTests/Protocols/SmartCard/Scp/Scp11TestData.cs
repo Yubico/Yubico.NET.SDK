@@ -55,7 +55,8 @@ internal static class Scp11TestData
         """);
 
     /// <summary>
-    ///     PKCS12 container with OCE private key and full certificate chain.
+    ///     PKCS12 fixture bytes intended to contain OCE material. The current unit test checks nonempty
+    ///     bytes and password text, rather than importing or validating the container and its key associations.
     ///     Password: "password"
     /// </summary>
     public static readonly Memory<byte> Oce = Convert.FromBase64String("""
@@ -106,12 +107,13 @@ internal static class Scp11TestData
     public static readonly ReadOnlyMemory<char> OcePassword = "password".AsMemory();
 
     /// <summary>
-    ///     Serial numbers from the OCE certificate chain.
-    ///     Used for allowlist testing in SCP11a/c.
+    ///     Serial-number fixtures for proposed allowlist tests. The listed root value differs from the PEM
+    ///     root serial (49FE7DC08A4228EACD18D73914C3D30FDCC31950); these values are not a verified chain allowlist.
+    ///     Intended for a future SCP11a/c allowlist test after fixture association is corrected.
     /// </summary>
     public static readonly string[] OceCertSerialNumbers =
     [
         "7F4971B0AD51F84C9DA9928B2D5FEF5E16B2920A", // Intermediate cert
-        "6B90028800909F9FFCD641346933242748FBE9AD" // Root CA cert
+        "6B90028800909F9FFCD641346933242748FBE9AD" // Legacy root label; does not match the PEM root serial.
     ];
 }

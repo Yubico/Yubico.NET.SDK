@@ -12,6 +12,11 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 /// <summary>
 ///     Generates a key on the YubiKey (openpgp keys generate).
 /// </summary>
+/// <remarks>
+///     Attribute writing precedes generation and can invalidate an existing key on later failure.
+///     Check slot/algorithm support before running; the session enforces the OpenPGP RSA generation guard.
+///     Replacing the factory ATT key irreversibly loses manufacturer attestation provenance.
+/// </remarks>
 public sealed class KeysGenerateCommand : OpenPgpCommand<KeysGenerateCommand.Settings>
 {
     public sealed class Settings : CommandSettings

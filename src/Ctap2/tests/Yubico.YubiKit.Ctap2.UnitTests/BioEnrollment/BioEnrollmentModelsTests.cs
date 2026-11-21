@@ -20,6 +20,13 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.BioEnrollment;
 /// <summary>
 /// Tests for BioEnrollment model parsing.
 /// </summary>
+/// <remarks>
+/// Synthetic fixtures check decoded values and selected raw-copy behavior, not sensor
+/// enrollment. Flat template maps below reflect the current decoder, not CTAP 2.1's
+/// key-7 template array with nested keys 1/2. Status-value assertions pin the wire
+/// mappings, including the python-fido2 status at 0x0C. No test
+/// here establishes rejection of missing sample fields or independent enrollment completion.
+/// </remarks>
 public class BioEnrollmentModelsTests
 {
     [Fact]
@@ -41,7 +48,6 @@ public class BioEnrollmentModelsTests
         // Assert
         Assert.Equal(FingerprintKind.Touch, info.FingerprintKind);
         Assert.Equal(5, info.MaxCaptureSamplesRequiredForEnroll);
-        Assert.Null(info.MaxTemplateCount);
     }
 
     [Fact]
@@ -66,17 +72,17 @@ public class BioEnrollmentModelsTests
     }
 
     [Fact]
-    public void FingerprintSensorInfo_Decode_ParsesMaxTemplateCount()
+    public void FingerprintSensorInfo_Decode_PreservesUnmodeledKeyFourWithoutInterpretingIt()
     {
-        // Arrange - CBOR map with vendor extension for max templates
+        // Key 4 is not a sensor-info field; it must not be interpreted as an integer capacity.
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
         writer.WriteInt32(2); // fingerprintKind key
         writer.WriteInt32(1); // Touch
         writer.WriteInt32(3); // maxCaptureSamplesRequiredForEnroll key
         writer.WriteInt32(5);
-        writer.WriteInt32(4); // maxTemplateCount key (vendor extension)
-        writer.WriteInt32(3);
+        writer.WriteInt32(4);
+        writer.WriteTextString("unmodeled");
         writer.WriteEndMap();
         var cbor = writer.Encode();
 
@@ -86,7 +92,7 @@ public class BioEnrollmentModelsTests
         // Assert
         Assert.Equal(FingerprintKind.Touch, info.FingerprintKind);
         Assert.Equal(5, info.MaxCaptureSamplesRequiredForEnroll);
-        Assert.Equal(3, info.MaxTemplateCount);
+        Assert.Equal(cbor, info.RawData.ToArray());
     }
 
     [Fact]
@@ -118,7 +124,7 @@ public class BioEnrollmentModelsTests
     }
 
     [Fact]
-    public void EnrollmentSampleResult_Decode_WithUnknownField_PreservesOwnedRawData()
+    public void EnrollmentBeginResult_Decode_WithUnknownField_PreservesOwnedRawData()
     {
         // Arrange - CBOR response from enrollBegin
         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
@@ -139,7 +145,7 @@ public class BioEnrollmentModelsTests
         byte[] expectedRawData = cbor.ToArray();
 
         // Act
-        var result = EnrollmentSampleResult.Decode(cbor);
+        var result = EnrollmentBeginResult.Decode(cbor);
         cbor.AsSpan().Clear();
 
         // Assert
@@ -150,10 +156,32 @@ public class BioEnrollmentModelsTests
         Assert.Equal(expectedRawData, result.RawData.ToArray());
     }
 
+    [Theory]
+    [InlineData("A205000600", true)] // missing ID
+    [InlineData("A20441010600", true)] // missing status
+    [InlineData("A20441010500", true)] // missing remaining
+    [InlineData("A10600", false)] // missing status
+    [InlineData("A10500", false)] // missing remaining
+    [InlineData("A205000620", false)] // negative remaining
+    [InlineData("A20500060000", false)] // trailing value
+    public void EnrollmentDecode_RejectsMalformedCapture(string encoded, bool begin)
+    {
+        byte[] response = Convert.FromHexString(encoded);
+        Assert.Throws<CborContentException>(() => begin
+            ? EnrollmentBeginResult.Decode(response)
+            : EnrollmentSampleResult.Decode(response));
+    }
+
+    [Theory]
+    [InlineData("A10305")]
+    [InlineData("A10201")]
+    public void FingerprintSensorInfo_RejectsMissingRequiredField(string encoded) =>
+        Assert.Throws<CborContentException>(() => FingerprintSensorInfo.Decode(Convert.FromHexString(encoded)));
+
     [Fact]
     public void EnrollmentSampleResult_Decode_ParsesCompletedEnrollment()
     {
-        // Arrange - CBOR response with remainingSamples = 0
+        // Arrange - supplied zero count exercises IsComplete equality, not actual enrolled-template persistence.
         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
@@ -186,7 +214,7 @@ public class BioEnrollmentModelsTests
         writer.WriteInt32(5); // lastEnrollSampleStatus key
         writer.WriteInt32(7); // PoorQuality = 0x07
         writer.WriteInt32(6); // remainingSamples key
-        writer.WriteInt32(3); // May not decrement on poor quality
+        writer.WriteInt32(3); // Supplied count; this single fixture does not compare successive samples.
         writer.WriteEndMap();
         var cbor = writer.Encode();
 
@@ -209,9 +237,10 @@ public class BioEnrollmentModelsTests
     [InlineData(FingerprintSampleStatus.TooSkewed, 8)]
     [InlineData(FingerprintSampleStatus.TooShort, 9)]
     [InlineData(FingerprintSampleStatus.MergeFailure, 10)]
-    [InlineData(FingerprintSampleStatus.StorageFull, 11)]
-    [InlineData(FingerprintSampleStatus.NoUserActivity, 12)]
-    [InlineData(FingerprintSampleStatus.NoUserPresence, 13)]
+    [InlineData(FingerprintSampleStatus.Exists, 11)]
+    [InlineData(FingerprintSampleStatus.DatabaseFull, 12)]
+    [InlineData(FingerprintSampleStatus.NoUserActivity, 13)]
+    [InlineData(FingerprintSampleStatus.NoUpTransition, 14)]
     public void EnrollmentSampleResult_Decode_ParsesAllStatusCodes(
         FingerprintSampleStatus expectedStatus,
         int cborValue)
@@ -243,7 +272,7 @@ public class BioEnrollmentModelsTests
         var templateId = new byte[] { 0xAB, 0xCD, 0xEF };
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(1);
-        writer.WriteInt32(4); // templateId key
+        writer.WriteInt32(1); // nested templateId key
         writer.WriteByteString(templateId);
         writer.WriteEndMap();
         var cbor = writer.Encode();
@@ -265,9 +294,9 @@ public class BioEnrollmentModelsTests
         var friendlyName = "Right Index";
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(2);
-        writer.WriteInt32(4); // templateId key
+        writer.WriteInt32(1); // nested templateId key
         writer.WriteByteString(templateId);
-        writer.WriteInt32(7); // templateFriendlyName key
+        writer.WriteInt32(2); // nested templateFriendlyName key
         writer.WriteTextString(friendlyName);
         writer.WriteEndMap();
         var cbor = writer.Encode();
@@ -280,72 +309,37 @@ public class BioEnrollmentModelsTests
         Assert.Equal(friendlyName, info.FriendlyName);
     }
 
-    [Fact]
-    public void TemplateInfo_Decode_ParsesWithSampleCount()
-    {
-        // Arrange
-        var templateId = new byte[] { 0xAB, 0xCD, 0xEF };
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(3);
-        writer.WriteInt32(4); // templateId key
-        writer.WriteByteString(templateId);
-        writer.WriteInt32(7); // templateFriendlyName key
-        writer.WriteTextString("Left Thumb");
-        writer.WriteInt32(8); // sampleCount key (vendor extension)
-        writer.WriteInt32(5);
-        writer.WriteEndMap();
-        var cbor = writer.Encode();
-
-        // Act
-        var info = TemplateInfo.Decode(cbor);
-
-        // Assert
-        Assert.Equal(templateId, info.TemplateId.ToArray());
-        Assert.Equal("Left Thumb", info.FriendlyName);
-        Assert.Equal(5, info.SampleCount);
-    }
+    [Theory]
+    [InlineData("A1044101")] // Legacy flat key 4 is not the nested ID.
+    [InlineData("A10140")] // Empty ID.
+    [InlineData("A101410100")] // Trailing bytes.
+    public void TemplateInfo_Decode_RejectsMalformedEntry(string hex) =>
+        Assert.Throws<CborContentException>(() => TemplateInfo.Decode(Convert.FromHexString(hex)));
 
     [Fact]
-    public void EnrollmentEnumerationResult_Decode_ParsesSingleTemplate()
+    public void EnrollmentEnumerationResult_Decode_ParsesAllTemplatesWithOptionalNames()
     {
-        // Arrange
-        var templateId = new byte[] { 0x01, 0x02, 0x03 };
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2);
-        writer.WriteInt32(4); // templateId key
-        writer.WriteByteString(templateId);
-        writer.WriteInt32(7); // templateFriendlyName key
-        writer.WriteTextString("My Finger");
-        writer.WriteEndMap();
-        var cbor = writer.Encode();
+        // {7: [{1: h'01', 2: "Left"}, {1: h'02'}], 8: 32}
+        var result = EnrollmentEnumerationResult.Decode(Convert.FromHexString("A20782A201410102644C656674A1014102081820"));
 
-        // Act
-        var result = EnrollmentEnumerationResult.Decode(cbor);
-
-        // Assert
-        Assert.Single(result.Templates);
-        Assert.Equal(templateId, result.Templates[0].TemplateId.ToArray());
-        Assert.Equal("My Finger", result.Templates[0].FriendlyName);
-    }
-
-    [Fact]
-    public void EnrollmentEnumerationResult_FromTemplates_CreatesResult()
-    {
-        // Arrange
-        var templates = new List<TemplateInfo>
+        Assert.Collection(result.Templates, first =>
         {
-            new() { TemplateId = new byte[] { 1, 2, 3 }, FriendlyName = "Finger 1" },
-            new() { TemplateId = new byte[] { 4, 5, 6 }, FriendlyName = "Finger 2" }
-        };
-
-        // Act
-        var result = EnrollmentEnumerationResult.FromTemplates(templates);
-
-        // Assert
-        Assert.Equal(2, result.Templates.Count);
-        Assert.Equal("Finger 1", result.Templates[0].FriendlyName);
-        Assert.Equal("Finger 2", result.Templates[1].FriendlyName);
+            Assert.Equal(new byte[] { 1 }, first.TemplateId.ToArray());
+            Assert.Equal("Left", first.FriendlyName);
+            Assert.Null(first.SampleCount);
+        }, second =>
+        {
+            Assert.Equal(new byte[] { 2 }, second.TemplateId.ToArray());
+            Assert.Null(second.FriendlyName);
+        });
     }
+
+    [Theory]
+    [InlineData("A0")] // Missing templateInfos.
+    [InlineData("A10781A1026141")] // Template name without ID.
+    [InlineData("A1078000")] // Trailing bytes.
+    public void EnrollmentEnumerationResult_Decode_RejectsMalformedInventory(string hex) =>
+        Assert.Throws<CborContentException>(() => EnrollmentEnumerationResult.Decode(Convert.FromHexString(hex)));
 
     [Fact]
     public void FingerprintKind_HasCorrectValues()

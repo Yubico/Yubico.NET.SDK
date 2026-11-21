@@ -44,6 +44,9 @@ internal static partial class NativeMethods
     // settings). It does not currently have any effect on platforms other
     // than Windows, but is included because of the analyzer and in the hope
     // that it will be supported by these platforms in the future.
+    // Dormant loader finding: LibraryImport requires exact LoadLibraryExW spelling; Utf16 does not add W.
+    // This declaration also lacks captured last-error semantics used by its caller. System32 restricts the
+    // imported kernel32 module, not the target library's dependency search. NativeShims uses another route.
     [LibraryImport(Kernel32Dll, StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static partial SafeWindowsLibraryHandle LoadLibraryEx(string libFilename, IntPtr reserved, int flags);

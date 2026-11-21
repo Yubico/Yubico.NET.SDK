@@ -50,12 +50,36 @@ public class ResetAuthenticatorTests
         }
     }
 
-    private sealed class ReaderWithReplacementCard : IYubiKey
+    [Theory]
+    [InlineData(7, 8, false, false)] // Live production version must gate even if GetInfo looks newer.
+    [InlineData(7, 7, true, true)] // A live beta qualifier permits the below-threshold numeric version.
+    [InlineData(0, 7, false, true)] // Live unknown firmware is optimistic, even with numeric GetInfo.
+    public async Task ResetAsync_UsesFirmwareFromTheSameLiveSerialCheck(byte managementMinor, byte appletMinor, bool beta, bool success)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var device = new ReaderWithReplacementCard(managementMinor, appletMinor, beta);
+        var target = new ResetAuthenticator.ResetPreflightInfo(device, ConnectionType.SmartCard, 42,
+            new AuthenticatorInfo { Versions = ["FIDO_2_0"], Aaguid = new byte[16] });
+
+        var result = await ResetAuthenticator.ResetAsync(target, ct);
+
+        Assert.Equal(success, result.Success);
+        if (!success)
+            Assert.Contains("FIDO2 over USB SmartCard requires firmware", result.ErrorMessage);
+        Assert.Equal(1, device.Opens);
+        Assert.Equal(2, device.First.ManagementReads);
+        Assert.Equal(success ? 2 : 1, device.First.FidoSelections);
+        Assert.Equal(success ? 1 : 0, device.First.Resets);
+        Assert.Equal(1, device.First.Disposals);
+        Assert.Equal(0, device.Replacement.Resets);
+    }
+
+    private sealed class ReaderWithReplacementCard(byte managementMinor = 8, byte appletMinor = 8, bool beta = false) : IYubiKey
     {
         public string DeviceId => "software-reset-reader";
         public ConnectionType AvailableConnections => ConnectionType.SmartCard;
         public int Opens { get; private set; }
-        public ScriptedCard First { get; } = new(42);
+        public ScriptedCard First { get; } = new(42, managementMinor, appletMinor, beta);
         public ScriptedCard Replacement { get; } = new(99);
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
@@ -64,7 +88,7 @@ public class ResetAuthenticatorTests
                 ?? throw new NotSupportedException("Only the scripted SmartCard reader is available."));
     }
 
-    private sealed class ScriptedCard(byte serial) : ISmartCardConnection
+    private sealed class ScriptedCard(byte serial, byte managementMinor = 8, byte appletMinor = 8, bool beta = false) : ISmartCardConnection
     {
         // GetInfo versions, AAGUID, and 5.8.0 firmware, with CTAP and ISO status bytes.
         private static readonly byte[] Info = Convert.FromHexString("00A30181684649444F5F325F300350000000000000000000000000000000000E1A000508009000");
@@ -87,7 +111,7 @@ public class ResetAuthenticatorTests
             {
                 0xA4 => Select(command.Span.Slice(5, command.Span[4])),
                 0x1D when _managementSelected => ReadConfig(),
-                0x10 when _fidoSelected && command.Span[5] == 0x04 => Info,
+                0x10 when _fidoSelected && command.Span[5] == 0x04 => ReadFidoInfo(),
                 0x10 when _fidoSelected && command.Span[5] == 0x07 => Reset(),
                 _ => throw new InvalidOperationException("Command was sent without selecting its applet.")
             };
@@ -111,9 +135,15 @@ public class ResetAuthenticatorTests
         private byte[] ReadConfig()
         {
             ManagementReads++;
-            // Length 11: SERIAL_NUMBER (02, four bytes), FIRMWARE_VERSION (05, three bytes).
-            return [11, 0x02, 4, 0, 0, 0, serial, 0x05, 3, 5, 8, 0, 0x90, 0x00];
+            byte major = managementMinor == 0 ? (byte)0 : (byte)5;
+            // SERIAL_NUMBER (02), FIRMWARE_VERSION (05), and optional beta VERSION_QUALIFIER (19).
+            return beta
+                ? [24, 0x02, 4, 0, 0, 0, serial, 0x05, 3, major, managementMinor, 0,
+                    0x19, 11, 1, 3, major, managementMinor, 0, 2, 1, 1, 3, 1, 1, 0x90, 0x00]
+                : [11, 0x02, 4, 0, 0, 0, serial, 0x05, 3, major, managementMinor, 0, 0x90, 0x00];
         }
+
+        private byte[] ReadFidoInfo() => [.. Info.AsSpan(0, Info.Length - 4), appletMinor, 0, 0x90, 0x00];
 
         private byte[] Reset()
         {

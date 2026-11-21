@@ -84,14 +84,20 @@ public static class ResetAuthenticator
 
             // Both sessions borrow this handle. Dispose Management before CTAP selects its applet.
             // Reopening the interface here could reset a different card than the one verified.
+            DeviceInfo? deviceInfo;
             if (target.SerialNumber is int serial)
             {
                 await using var management = await ManagementSession.CreateAsync(connection, options, cancellationToken);
-                if ((await management.GetDeviceInfoAsync(cancellationToken)).SerialNumber != serial)
+                deviceInfo = await management.GetDeviceInfoAsync(cancellationToken);
+                if (deviceInfo.Value.SerialNumber != serial)
                     return ResetResult.Failed("Reinserted device did not report the confirmed serial number. Reset not sent.");
             }
+            else
+            {
+                deviceInfo = target.Device.CachedDeviceInfo;
+            }
 
-            await using var session = await Ctap2Session.CreateAsync(connection, options, cancellationToken);
+            await using var session = await Ctap2Session.CreateAsync(connection, options, deviceInfo, cancellationToken);
             if (target.SerialNumber is null && !target.MatchesFingerprint(await session.GetInfoAsync(cancellationToken)))
                 return ResetResult.Failed("Reinserted GetInfo fingerprint differs from the confirmed device. Reset not sent.");
 

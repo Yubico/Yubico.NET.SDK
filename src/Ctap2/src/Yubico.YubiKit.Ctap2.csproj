@@ -14,6 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- The in-repo reset demo passes live metadata to a borrowed CTAP session without reopening the key. -->
+    <InternalsVisibleTo Include="FidoTool" />
     <!-- For NSubstitute to mock internal types in tests -->
     <InternalsVisibleTo Include="Yubico.YubiKit.Ctap2.UnitTests" />
     <InternalsVisibleTo Include="Yubico.YubiKit.WebAuthn" />

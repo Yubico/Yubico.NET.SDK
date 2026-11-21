@@ -21,13 +21,11 @@ library to provision the HSM, complete authentication, and exchange protected co
 | `GetChallengeAsync` with a credential password | 5.7.1 |
 | Credential password change | 5.8.0 |
 
-A session normally resolves feature support from the applet's three-byte SELECT version, falling back to
-5.4.3 when that value is absent or has another length. `FirmwareVersionOverride` supplies caller-selected
-policy instead. Choose an override that the actual applet supports: device metadata, a development-build
-label, and an override alone provide different evidence from successfully executing an operation.
-`ResetAsync` reselects the applet and retains the session's resolved version policy.
-An override does not skip SELECT, and malformed TLV framing can fail before fallback. Fixture/discovery
-metadata is a separate version source; it is not substituted by the HSM session factory.
+An explicit `FirmwareVersionOverride` wins. Otherwise the session uses cached device firmware when
+available, then the applet's three-byte version from SELECT. Unknown or prerelease version metadata
+admits applet feature gates optimistically; protocol framing uses a known numeric version when available,
+or the 5.4.3 floor. This policy does not prove command support. Required SELECT failures still propagate.
+After confirmed `ResetAsync`, the session reselects and resolves the policy again; an explicit override persists.
 
 A credential is identified by a public label of 1 to 64 UTF-8 bytes, represented as a plain `string`. A
 symmetric credential holds an AES-128 K-ENC and K-MAC pair, an asymmetric one an EC P-256 private key, and each is

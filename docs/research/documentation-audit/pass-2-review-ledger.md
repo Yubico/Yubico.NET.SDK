@@ -6,6 +6,10 @@ in `pass-2-review-classification.md` and `pass-2-review-classification/<applet>.
 pins, options and pseudocode. Agreement numbers (AG-n) point into `pass-2-review-decisions.md`; rule IDs point into
 `pass-2-review-policy.md`.
 
+OpenPGP implementation: [PR #796](https://github.com/Yubico/Yubico.NET.SDK/pull/796) tracks the delivered facets,
+the explicit IMP-009 deferral, SCP firmware admission, the #790 notification failure preservation check,
+and pending physical qualification.
+
 ## How to read this
 
 - **Auto:** cleared the policy (rules A1 to A6) without a gate. The fix is Sia's lean in the per-applet file. Veto

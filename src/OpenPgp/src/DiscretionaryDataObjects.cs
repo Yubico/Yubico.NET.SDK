@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers.Binary;
 using Yubico.YubiKit.Core.Utilities;
 
 namespace Yubico.YubiKit.OpenPgp;
@@ -72,9 +73,7 @@ public sealed class DiscretionaryDataObjects
     ///     Stored key generation times for reported slots; zero denotes an unspecified time.
     /// </summary>
     /// <remarks>
-    ///     Card time uses unsigned four-byte seconds since 1970-01-01 UTC. The current signed int carrier
-    ///     displays values above int.MaxValue as negative; preserve the original representation when
-    ///     inspecting those values. See <see cref="Yubico.YubiKit.OpenPgp.GenerationTimes" /> for interpretation guidance.
+    ///     Card time uses unsigned four-byte seconds since 1970-01-01 UTC.
     /// </remarks>
     public GenerationTimes GenerationTimes { get; init; } = new([]);
 
@@ -159,15 +158,13 @@ public sealed class DiscretionaryDataObjects
 
     private static GenerationTimes ParseGenerationTimes(ReadOnlySpan<byte> encoded)
     {
-        var entries = new Dictionary<KeyRef, int>();
+        if (encoded.Length % 4 != 0)
+            throw new ArgumentException("Generation times must be four-byte values.", nameof(encoded));
+
+        var entries = new Dictionary<KeyRef, uint>();
         for (var i = 0; i < KeySlots.Length && (i + 1) * 4 <= encoded.Length; i++)
         {
-            var offset = i * 4;
-            var timestamp = (encoded[offset] << 24)
-                            | (encoded[offset + 1] << 16)
-                            | (encoded[offset + 2] << 8)
-                            | encoded[offset + 3];
-            entries[KeySlots[i]] = timestamp;
+            entries[KeySlots[i]] = BinaryPrimitives.ReadUInt32BigEndian(encoded[(i * 4)..]);
         }
 
         return new GenerationTimes(entries);

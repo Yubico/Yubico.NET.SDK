@@ -37,10 +37,10 @@ public sealed class OpenPgpInvalidPinExceptionTests
     }
 
     [Fact]
-    public async Task VerifyPinAsync_WhenWrongPin_ExposesRetriesRemainingWithoutMessageParsing()
+    public async Task VerifyPinAsync_LegacyRetryStatus_ExposesRetriesRemainingWithoutMessageParsing()
     {
         // SW 63C4: standard wrong-PIN status word, 4 attempts remaining.
-        var connection = CreateInitializedConnection(KdfNotFoundResponse(), [0x63, 0xC4]);
+        var connection = CreateLegacyInitializedConnection(KdfNotFoundResponse(), [0x63, 0xC4]);
         await using var session = await OpenPgpSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -54,10 +54,10 @@ public sealed class OpenPgpInvalidPinExceptionTests
     }
 
     [Fact]
-    public async Task VerifyAdminAsync_WhenWrongPin_ExposesRetriesRemaining()
+    public async Task VerifyAdminAsync_LegacyRetryStatus_ExposesRetriesRemaining()
     {
         // SW 63C2: standard wrong-PIN status word, 2 attempts remaining.
-        var connection = CreateInitializedConnection(KdfNotFoundResponse(), [0x63, 0xC2]);
+        var connection = CreateLegacyInitializedConnection(KdfNotFoundResponse(), [0x63, 0xC2]);
         await using var session = await OpenPgpSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -138,11 +138,9 @@ public sealed class OpenPgpInvalidPinExceptionTests
     }
 
     [Fact]
-    public async Task VerifyPinAsync_ExtendedWhenSecurityStatusNotSatisfied_FallsBackToResetAttemptsFromPinStatusQuery()
+    public async Task VerifyPinAsync_ExtendedWhenSecurityStatusNotSatisfied_FallsBackToUserAttemptsFromPinStatusQuery()
     {
-        // Records the current extended-mode defect: VERIFY P2=82 still addresses User PIN,
-        // but the implementation queries AttemptsReset through Pw.Reset identity. This assertion
-        // preserves observed behavior for a later fix; the correct logical counter is AttemptsUser.
+        // P2=82 selects the other-operation state for PW1, not the Reset Code credential.
         var connection = CreateInitializedConnection(
             KdfNotFoundResponse(),
             [0x69, 0x82],
@@ -156,7 +154,7 @@ public sealed class OpenPgpInvalidPinExceptionTests
             extended: true,
             cancellationToken: TestContext.Current.CancellationToken));
 
-        Assert.Equal(6, exception.RetriesRemaining);
+        Assert.Equal(5, exception.RetriesRemaining);
         Assert.Equal(unchecked((short)0x6982), exception.SW);
     }
 
@@ -206,16 +204,97 @@ public sealed class OpenPgpInvalidPinExceptionTests
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(), .. trailingResponses]);
 
+    private static RecordingSmartCardConnection CreateLegacyInitializedConnection(params byte[][] trailingResponses) =>
+        new([OkResponse(), [0x03, 0x05, 0x00, 0x90, 0x00], ApplicationRelatedDataResponse(), .. trailingResponses]);
+
+    [Theory]
+    [InlineData(0x6988)] // Invalid secure-messaging data.
+    [InlineData(0x6A86)] // Incorrect P1/P2.
+    [InlineData(0x63C4)] // Not interpreted as a retry count on current firmware.
+    public async Task VerifyPinAsync_UnclassifiedStatus_PreservesApduErrorAndAllowsAnotherOperation(int sw)
+    {
+        var token = TestContext.Current.CancellationToken;
+        var connection = CreateInitializedConnection(KdfNotFoundResponse(), [(byte)(sw >> 8), (byte)sw],
+            KdfNotFoundResponse(), OkResponse());
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.VerifyPinAsync("123456"u8.ToArray(),
+            extended: true, cancellationToken: token));
+
+        Assert.Equal(unchecked((short)sw), error.SW);
+        Assert.Equal<byte?>(0x20, error.Ins);
+        Assert.Equal<byte?>(0x82, error.P2);
+        await session.VerifyAdminAsync("12345678"u8.ToArray(), token);
+        Assert.Equal(new byte[] { 0xA4, 0xF1, 0xCA, 0xCA, 0x20, 0xCA, 0x20 },
+            connection.TransmittedCommands.Select(command => command[1]));
+    }
+
+    [Theory]
+    [InlineData(0x6982, false, 7)]
+    [InlineData(0x6985, true, 7)]
+    [InlineData(0x6983, false, 0)]
+    public async Task ChangeAdminAsync_RecognizedStatus_RetainsPhaseAndAdminCount(int sw, bool legacy, int attempts)
+    {
+        var token = TestContext.Current.CancellationToken;
+        byte[][] responses = [KdfNotFoundResponse(), [(byte)(sw >> 8), (byte)sw], PwStatusResponse(5, 6, 7)];
+        var connection = legacy ? CreateLegacyInitializedConnection(responses) : CreateInitializedConnection(responses);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var error = await Assert.ThrowsAsync<OpenPgpInvalidPinException>(() =>
+            session.ChangeAdminAsync("12345678"u8.ToArray(), "87654321"u8.ToArray(), token));
+
+        Assert.Equal(unchecked((short)sw), error.SW);
+        Assert.Equal<byte?>(0x24, error.Ins);
+        Assert.Equal<byte?>(0x83, error.P2);
+        Assert.Equal(attempts, error.RetriesRemaining);
+        Assert.Equal(attempts == 0 ? 5 : 6, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
+    [InlineData(0x6982, 6)]
+    [InlineData(0x6983, 0)]
+    [InlineData(0x6A80, 0)]
+    public async Task ResetPinUsingResetCodeAsync_RecognizedStatus_UsesResetCodeCount(int sw, int attempts)
+    {
+        var token = TestContext.Current.CancellationToken;
+        var connection = CreateInitializedConnection(KdfNotFoundResponse(), [(byte)(sw >> 8), (byte)sw],
+            PwStatusResponse(5, 6, 7));
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var error = await Assert.ThrowsAsync<OpenPgpInvalidPinException>(() =>
+            session.ResetPinUsingResetCodeAsync("12345678"u8.ToArray(), "123456"u8.ToArray(), token));
+
+        Assert.Equal(unchecked((short)sw), error.SW);
+        Assert.Equal<byte?>(0x2C, error.Ins);
+        Assert.Equal<byte?>(0, error.P1);
+        Assert.Equal(attempts, error.RetriesRemaining);
+        Assert.Equal(attempts == 0 ? 5 : 6, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task ResetPinUsingAdminAuthenticationAsync_SecurityStatusFailure_IsNotAResetCodeFailure()
+    {
+        var token = TestContext.Current.CancellationToken;
+        var connection = CreateInitializedConnection(KdfNotFoundResponse(), [0x69, 0x82]);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() =>
+            session.ResetPinUsingAdminAuthenticationAsync("123456"u8.ToArray(), token));
+
+        Assert.Equal<short?>(0x6982, error.SW);
+        Assert.Equal<byte?>(0x2C, error.Ins);
+        Assert.Equal<byte?>(2, error.P1);
+        Assert.Equal(5, connection.TransmittedCommands.Count);
+    }
+
     // SW 9000: successful APDU response with no data.
     private static byte[] OkResponse() => [0x90, 0x00];
 
     // OpenPGP version response: BCD 5.8.0 followed by SW 9000.
     private static byte[] VersionResponse() => [0x05, 0x08, 0x00, 0x90, 0x00];
 
-    // Simulated F9 GET DATA returns 6A82: file or application not found (Card §7.9).
-    // The current broad APDU-error fallback caches KdfNone and sends raw PIN bytes;
-    // these response bytes establish that fallback behavior, rather than actual KDF absence.
-    private static byte[] KdfNotFoundResponse() => [0x6A, 0x82];
+    // Explicit no-KDF object; a rejected F9 read is not equivalent.
+    private static byte[] KdfNotFoundResponse() => [0x81, 0x01, 0x00, 0x90, 0x00];
 
     private static byte[] PwStatusResponse(int attemptsUser, int attemptsReset = 0, int attemptsAdmin = 3) =>
         [0x00, 0x7F, 0x7F, 0x7F, (byte)attemptsUser, (byte)attemptsReset, (byte)attemptsAdmin, 0x90, 0x00];

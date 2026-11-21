@@ -29,17 +29,21 @@ Core is installed transitively. The current SDK checks these version thresholds 
 Match these checks with the card's advertised capabilities, supported algorithms, slot and policy support.
 They describe this SDK's checks rather than a blanket availability guarantee. In particular, cached/ATT touch
 policies need additional device support, and retry/challenge commands leave some capability checks to the card.
-The version query falls back to 1.0.0 for every non-OK response, successful response shorter than three bytes,
-or caught APDU exception; transport and other exceptions propagate. This is a compatibility value, not a qualified
-minimum device version. NEO applet versions have a different history from physical firmware; NEO import,
-generation and deletion paths still need
-separate qualification. Development-device applet versions and device metadata can differ: retain both when
-diagnosing a feature check, and use an override only with a known device profile.
+Session configuration prefers an explicit override, then cached physical-device firmware, then the OpenPGP
+applet's own GET VERSION. Those last two sources can differ. Prerelease or unknown versions admit local
+feature checks without guaranteeing command support. Protocol framing uses a known numeric version when
+available; otherwise it starts with the legacy profile, not a qualified minimum firmware claim.
+Unknown or prerelease firmware and a present non-final cached qualifier admit an SCP attempt without changing
+numeric framing. An explicit firmware override supersedes cached qualifiers. Admission is not evidence that the
+device supports SCP or that the handshake succeeds.
+Required initialization and cancellation failures propagate. Old-family import and generation still require
+separate qualification; NEO deletion is unsupported.
 
 For RSA generation, follow [YSA-2017-01](https://www.yubico.com/support/security-advisories/ysa-2017-01/):
 the advisory identifies on-device OpenPGP RSA generation on 4.2.6–4.3.4 as affected by ROCA and 4.3.5 as corrected.
-Externally generated/imported keys are a mitigation. This SDK currently has no shipping ROCA generation guard;
-the Python SDK uses the broader conservative interval `[4.2.0, 4.3.5)`.
+Like the Python SDK, this SDK conservatively blocks on-card RSA generation in `[4.2.0, 4.3.5)` before
+writing algorithm attributes. This is not a claim that 4.2.0–4.2.5 are affected. Independently generated
+RSA keys can still be imported; the guard does not block corrected 4.3.5 firmware.
 
 ## Open and inspect a session
 
@@ -79,22 +83,24 @@ exchanges, including chaining and SCP processing, but a public method can span s
 cache changes and callbacks. For example, certificate occurrence selection and its read/write are separate exchanges.
 Keep borrowed keys, input buffers and prompt services alive through the complete task, not just its last transmit.
 
-Creation binds the session before device I/O, selects the applet and reads its version, then configures framing and
+Creation binds the session before device I/O, selects the applet and resolves firmware, then configures framing and
 optional SCP before parsing application data. A failed factory disposes/detaches the session; a direct factory leaves
 your connection open, while the device extension cleans up its hidden connection. `FirmwareVersionOverride` chooses
-the effective framing/feature version without skipping the version probe. Device metadata, the detected applet version,
+the effective framing/feature version and bypasses cached metadata. Cached NEO firmware retains its physical framing
+profile but uses the applet version for the PIN-attempt command. Device metadata, the detected applet version,
 the effective session version and the AID's Card specification version are separate diagnostic values.
 
 For SCP, supply `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile. Keep those parameters and
-their contained resources alive through actual factory completion. SCP03 parameter disposal clears its retained
+their contained resources alive through session disposal, including reset reauthentication. The session does not
+dispose those borrowed parameters. SCP03 parameter disposal clears its retained
 `StaticKeys`, not your original source arrays. SCP11 parameters retain the supplied key/certificate objects: disposal
 disposes the retained OCE private key and certificates, but not the SD public key. Avoid independently disposing shared
-aliases while creation uses them. These ownership rules do not establish device/profile support or trust. Generic Core
+aliases while the session uses them. These ownership rules do not establish device/profile support or trust. Generic Core
 SCP version checks alone do not identify the earliest supported OpenPGP firmware. `IsAuthenticated` records SCP setup;
 the card separately enforces User/Admin PIN authorization. See the [Core guide](../Core/README.md) for SCP configuration.
 
-`GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF, while KDF has a separate lazy cache. Typed
-initialization requires recognized mandatory algorithm attributes. After successful initialization, use `GetDataAsync`
+`GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF. Credential operations read F9 separately. Typed
+initialization preserves well-formed unmodeled algorithms and rejects malformed known fields. Use `GetDataAsync`
 for raw response inspection when a model omits a field. If typed initialization itself fails, dispose that attempt and
 use a separate [raw SmartCard session](../../docs/architecture/raw-access-tiers.md) for diagnosis.
 
@@ -111,12 +117,8 @@ Avoid creating immutable strings for production secrets, and clear owned credent
 distinct from card byte limits. The byte-taking PIN methods add no general credential-format/length validation.
 
 The same User PIN (PW1) authorizes two separate card states: `extended: false` selects signature mode (VERIFY P2=81),
-and `extended: true` selects decryption/authentication mode (P2=82). Both share the User retry counter. The Reset Code
+and `extended: true` selects decryption/authentication mode (P2=82). Both use the User KDF salt and retry counter. The Reset Code
 is a separate recovery credential, even though its `Pw.Reset` enum value also happens to be 82.
-
-**Current KDF limitation:** extended verification uses the Reset Code salt and, on status 6982, its retry counter.
-Distinct User/Reset salts can therefore reject a correct User PIN and consume a User retry. Use a qualified
-configuration for extended operations and treat that fallback count as uncertain until the implementation is corrected.
 
 Change a known PIN without prior verification; the command checks the current value. The following method also
 installs a recovery code under the new Admin PIN. All five credential inputs are borrowed buffers that the caller clears.
@@ -136,7 +138,7 @@ static async Task ChangeCredentialsAsync(
 ```
 
 These are separate persistent commands: retain the new User PIN if a later Admin change fails. With KDF active,
-change methods derive **both current and new** inputs using the cached KDF. Plan KDF transitions separately below.
+change methods derive **both current and new** inputs using the current KDF read from the card. Plan KDF transitions separately below.
 
 Recover a blocked User PIN through either the configured Reset Code or prior Admin authentication. The two methods
 below are alternatives; choose the credential your recovery process holds. Each restores the User retry counter.
@@ -160,13 +162,18 @@ static async Task RecoverWithAdminAsync(
 }
 ```
 
-`VerifyPinAsync` and `VerifyAdminAsync` currently map every unsuccessful VERIFY response to
-`OpenPgpInvalidPinException`. Inspect its `SW` as well as `RetriesRemaining`: 63Cx supplies a count, 6983 supplies
-zero, and 6982 triggers a status query. Other failures or a failed query can leave the count `null`. A 6982 response
-can have causes beyond a wrong PIN. Stop automatic retries and diagnose uncertain status before spending another
-attempt. For an extended-mode failure, read fresh `GetPinStatusAsync().AttemptsUser`: the typed count can reflect
-Reset Code attempts, so even typed zero alone fails to establish that the User PIN is blocked. Change/reset-code
-commands propagate general APDU exceptions rather than this retry-aware exception.
+VERIFY, CHANGE and Reset-Code recovery map only recognized credential statuses to `OpenPgpInvalidPinException`.
+Inspect its `SW` and command header as well as `RetriesRemaining`. Before firmware 4.0, VERIFY 63Cx supplies a
+count and CHANGE 6985 triggers a status query. SW 6983 reports a blocked credential, 6982 triggers a status
+query, and Reset-Code recovery also recognizes 6A80 as blocked. VERIFY with either User PIN reference queries
+the User PIN counter, not the Reset Code counter. A failed status query leaves the count `null`; even a known
+count does not establish that 6982 means a wrong PIN. Diagnose uncertain status before spending another attempt.
+Other statuses and failures during administrator-authenticated recovery retain their general APDU errors.
+
+The SDK checks the credential bytes sent to the card, after any KDF derivation: at least six bytes for
+User PIN, eight for Admin PIN and Reset Code, and no more than the maximum in application data. The
+typed credential methods do not encode PIN block format 2. Console presets count UTF-16 code units
+before UTF-8 encoding; a supplied option can bypass the reader's text limits, not the SDK's byte check.
 A blocked Admin PIN requires destructive application reset; a blocked User PIN has the two recovery routes above.
 
 ## Configure KDF before provisioning keys
@@ -186,9 +193,8 @@ before deployment; a successful same-PIN change alone establishes little about t
 This provisioning fragment configures distinct salts and initial default-PIN hashes on an authorized, empty,
 KDF-capable YubiKey. Supply the currently valid Admin PIN and the UTF-8 default User/Admin buffers (`123456` and
 `12345678`). It closes the provisioning session before fresh-session verification. Change default credentials and
-install a new Reset Code afterward, then provision keys. **Extended verification remains affected by the distinct-salt
-defect**, so this sequence establishes ordinary User/Admin access only; choose a qualified configuration before
-using decryption/authentication. A state-dependent refusal requires inspection rather than an automatic reset/retry.
+install a new Reset Code afterward, then provision keys. This sequence checks ordinary User/Admin access only.
+A state-dependent refusal requires inspection rather than an automatic reset/retry.
 
 ```csharp
 static async Task ConfigureInitialKdfAsync(
@@ -222,6 +228,14 @@ static async Task ConfigureInitialKdfAsync(
             await provisioning.SetKdfAsync(configured, cancellationToken);
         }
         await using var verification = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+        using var readback = await verification.GetKdfAsync(cancellationToken);
+        if (readback is not KdfIterSaltedS2k actual || actual.HashAlgorithm != configured.HashAlgorithm ||
+            actual.IterationCount != configured.IterationCount || !actual.SaltUser.Span.SequenceEqual(saltUser) ||
+            actual.SaltAdmin is not { } actualAdmin || !actualAdmin.Span.SequenceEqual(saltAdmin) ||
+            actual.SaltReset is not { } actualReset || !actualReset.Span.SequenceEqual(saltReset))
+        {
+            throw new InvalidOperationException("The device did not report the expected KDF configuration.");
+        }
         await verification.VerifyAdminAsync(defaultAdminPin, cancellationToken);
         await verification.VerifyPinAsync(defaultUserPin, cancellationToken: cancellationToken);
     }
@@ -236,22 +250,11 @@ static async Task ConfigureInitialKdfAsync(
 }
 ```
 
-The current cache retains the exact object passed to `SetKdfAsync`, and `GetKdfAsync` returns that same instance.
-Keep it undisposed while the session uses it. Session disposal clears its current KDF; replacement/reset currently
-drops the previous reference without disposing it. Keep an enclosing cleanup scope for each supplied object through
-session teardown, and clear separately owned initial hashes and serialized KDF bytes after use. Raw F9 writes require
-a fresh session to reload KDF; refreshing application data leaves the KDF cache unchanged. These lifetime constraints
-describe the current implementation rather than a general cloning/ownership policy.
-
-Synchronous session disposal clears the current KDF before draining the protocol. Asynchronous disposal awaits Core
-teardown first and then clears that KDF, including when teardown fails. Await the complete PIN/KDF workflow before
-either path: protocol drain alone does not cover host derivation or the intervals between exchanges.
-
-The example clears its caller-owned hashes/salts and keeps both KDF objects in enclosing disposal scopes. Internal
-F9 serialization and parsing still leave separate copies without explicit clearing scopes: an intermediate complete
-encoding, the `SetKdfAsync` payload, decoded fields and the read response. Clearing the KDF object or a caller-owned
-encoding does not clear those copies. Initial PIN hashes are authentication material; these cleanup gaps remain
-implementation work.
+`SetKdfAsync` borrows the configuration through the write; it does not retain or dispose it. `GetKdfAsync`
+returns an independent, caller-owned configuration to dispose. When KDF is advertised, each credential
+operation rereads F9; a read or parse error stops the operation instead of sending a raw PIN. Keep the
+fresh-session readback when validating a persistent transition. Await complete PIN/KDF operations before
+starting another operation or disposing the session.
 
 ## Inspect key representation metadata
 
@@ -297,11 +300,12 @@ static async Task GenerateSigningKeyAsync(
 
 Use `RsaAttributes.Create(RsaSize.Rsa2048)` for RSA, subject to the ROCA guidance above. Use `EcAttributes.Create`
 with Core's concrete `KeyType` identities for EC, subject to the SDK's 5.2.0 check and the card's advertised curve
-support. ATT provisioning currently uses malformed CRT encoding; ordinary target-key
-attestation below is a separate operation. Replacing the factory ATT private key would irreversibly lose manufacturer
+support. ATT uses the vendor extension's nested CRT; ordinary target-key attestation below is a separate
+operation. Replacing the factory ATT private key would irreversibly lose manufacturer
 attestation provenance, even if its public certificate had been saved.
 
-For import, supply an SDK `IPrivateKey` with a modeled OpenPGP representation: RSA 2048/3072/4096 with exponent
+Import overwrites any existing private key in the selected slot. There is no add-only mode or pre-read.
+Supply an SDK `IPrivateKey` with a modeled OpenPGP representation: RSA 2048/3072/4096 with exponent
 65537, NIST P-256/P-384/P-521, secp256k1, Brainpool P256r1/P384r1/P512r1, Ed25519 or X25519 as appropriate for
 the slot. Confirm host-provider and card support for the chosen key. This method accepts **borrowed PKCS#8 DER
 containing an RSA key**, creates its own disposable private-key object, and leaves the source DER for its caller to clear.
@@ -321,10 +325,7 @@ static async Task ImportRsaSigningKeyAsync(
 Generation/import manages the key, while certificates, fingerprints and timestamps are separate tasks.
 The host computes the card-profile fingerprint and writes exactly 20 bytes with `SetKeyFingerprintAsync`; use
 `SetGenerationTimeAsync` for unsigned four-byte seconds since 1970-01-01 UTC. Zero marks an unspecified time;
-pass zero to clear the date metadata. The current API stores/returns those four bytes through a signed `int`,
-so values above `int.MaxValue` appear negative. Preserve the original bytes or interpret the same 32 bits as
-unsigned seconds, rather than dates before 1970. The setter writes the supplied representation without date-range
-validation or special handling of zero. These host-written fields alone establish no provenance.
+pass zero to clear the date metadata. These host-written fields alone establish no provenance.
 `DeleteKeyAsync` destructively switches attributes to RSA 4096 then RSA 2048; NEO's vendor deletion strategy differs
 and remains separately unqualified. Delete certificates separately when that is your intent.
 
@@ -388,7 +389,6 @@ static async Task<bool> SignAndVerifyP256Async(
 `PinPolicy.Always` requires User PIN verification for each signature; `Once` retains authorization until the card
 access state ends. `UnverifyPinAsync` clears both User modes using the SDK's 5.6.0 check. For `AuthenticateAsync`,
 verify with `extended: true`, then pass your challenge and verify the result with the Authentication public key.
-Apply the current distinct-salt KDF limitation described above to that route.
 
 ## Decipher an RSA block or derive an ECDH secret
 
@@ -396,11 +396,13 @@ Apply the current distinct-salt KDF limitation described above to that route.
 ciphertext block; the card checks/removes padding and returns plaintext. For NIST-curve ECDH, supply the sender's
 uncompressed point `04 || X || Y`; the SDK adds `A6 { 7F49 { 86 point } }` and returns raw shared-secret material.
 The host performs shared-secret KDF, packet processing and content decryption. A complete `.gpg` file and an RSA OAEP
-block are outside this contract. The current X25519 branch omits the required EC wrapper; use a qualified RSA/NIST
-path until that implementation is corrected.
+block are outside this contract. For X25519, supply the raw 32-byte peer public key; the SDK adds the same
+EC wrapper. Wire tests establish encoding, not device agreement or firmware qualification.
 
 This composable raw-operation method accepts an application callback that consumes the result before cleanup.
 The callback must finish using the memory before returning; any retained secret copy needs its own clearing scope.
+When migrating from `Task<ReadOnlyMemory<byte>>`, use `Task<Memory<byte>>` for the operation and clear the
+returned `Memory<byte>.Span` directly. Read-only consumers can still borrow it as `ReadOnlyMemory<byte>`.
 
 ```csharp
 static async Task DecipherAndConsumeAsync(
@@ -410,19 +412,19 @@ static async Task DecipherAndConsumeAsync(
 {
     await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
     await session.VerifyPinAsync(userPin, extended: true, cancellationToken: cancellationToken);
-    ReadOnlyMemory<byte> result = await session.DecryptAsync(rawCiphertextOrPoint, cancellationToken);
+    Memory<byte> result = await session.DecryptAsync(rawCiphertextOrPoint, cancellationToken);
     try
     {
         await consume(result, cancellationToken);
     }
     finally
     {
-        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(result).Span);
+        CryptographicOperations.ZeroMemory(result.Span);
     }
 }
 ```
 
-The method owns this returned memory, so `MemoryMarshal.AsMemory` clears the actual backing storage.
+The caller owns this writable result; clear the actual backing storage with `CryptographicOperations.ZeroMemory(result.Span)`.
 Use that technique only for SDK outputs whose storage you own, rather than arbitrary borrowed read-only inputs.
 Clearing a `ToArray()` copy would leave the original secret intact. The SDK clears its raw decipher response after
 copying the successful result. RSA/EdDSA signatures instead transfer response storage to the caller; ECDSA returns
@@ -492,7 +494,7 @@ static async Task ConfigureSigningPolicyAsync(
 
 Choose fixed policy only with an explicit replacement/recovery plan. Ordinary fixed UIF clears on key
 replacement/deletion or application reset. **Fixed ATT UIF survives reset and needs ATT key replacement**,
-which loses factory private-key provenance; the current malformed ATT CRT also limits SDK provisioning.
+which loses factory private-key provenance.
 The SDK's general UIF gate is 4.2.0; cached/ATT policies need additional support (the Python vendor implementation
 uses 5.2.1 checks). `SetPinAttemptsAsync` likewise needs a device-specific plan: NEO can restore default PINs.
 `SetAlgorithmAttributesAsync` can invalidate a key and leaves cached algorithms stale; explicitly refresh
@@ -510,7 +512,7 @@ currently leaves OpenPGP statuses, including 6600, outside its `TimedOut` classi
 prompt alive until full operation and callback completion, and avoid reentering or disposing the session from a
 callback. Sign/authenticate resolve completion before transferring the signature; decrypt resolves before copying
 the caller's result and clears the raw response even if resolution fails. Attestation creates its certificate before
-the outer completion callback; a callback failure can currently abandon that disposable certificate.
+the outer completion callback and disposes that certificate if completion fails before transfer to the caller.
 
 Cancellation is checked before each logical exchange is admitted. After admission, constituent SmartCard work uses
 `CancellationToken.None`; a later exchange in the same public method can still reject the canceled token. Ending an
@@ -523,18 +525,15 @@ Authorize reset only when loss of ordinary keys/certificates and configuration i
 reset restores the application's ordinary defaults. **ATT key/certificate and fixed ATT policy survive.** Saving a
 public ATT certificate preserves that certificate, not a recoverable factory private key or manufacturer trust.
 
-`ResetAsync` attempts PIN blocking, TERMINATE, ACTIVATE and state refresh, using the SDK's 1.0.6 check. Its current
-implementation ignores TERMINATE/ACTIVATE statuses and checks no complete erasure postcondition. A normal return
+`ResetAsync` confirms PIN blocking, TERMINATE and ACTIVATE, using the SDK's 1.0.6 check. A normal return
 alone proves too little: independently inspect key status, certificates, PIN acceptance/retries, KDF and UIF afterward.
 Cancellation/failure can leave blocked PINs or partial state. `ResetAsync` refreshes the session's application-data
 cache without returning metadata. The `ResetAndInspectAsync` example below makes a separate application-data read
 and returns that result for part of the inspection; your application supplies authorization and full verification.
 
-Reset preserves the session's effective version, including any override. On an SCP-created session, reset commands
-use the existing secure graph; reselection sends a plain SELECT without discarding that graph or establishing new
-keys, and subsequent commands use its retained secure state. OpenPGP retains no creation parameters for a reset
-handshake. The inherited authentication flag therefore supplies no SCP-restoration evidence. Dispose/reopen after
-uncertain reset or recovery, and independently inspect persistent state before retrying.
+After confirmation, the same session reselects and rereads the applet using the original options. Configured SCP
+uses a fresh handshake; keep the caller-owned parameters alive for the life of the session. A refresh failure
+ends the session. After an uncertain reset, dispose/reopen and inspect persistent state before retrying.
 
 ```csharp
 static async Task<ApplicationRelatedData> ResetAndInspectAsync(
@@ -554,14 +553,11 @@ Run the interactive sample from the repository root:
 dotnet run --project src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj
 ```
 
-Treat OpenPgpTool as a sample with current limitations. Its attestation `--pin` option is declared but unused;
-use the direct SDK attestation method above to verify the User PIN explicitly. `info` infers key presence from
-fingerprint length, so use `ListKeyInformationAsync` for state inspection. Command-line PINs and PEM text live in
-immutable strings, even when temporary byte buffers are cleared. Noninteractive device selection takes the first
-SmartCard device, and the tool installs no touch-notification prompt. Certificate command results also need improved
-disposal. Use application-owned input buffers, explicit device selection, complete resource scopes and your UI with
-the direct SDK for those responsibilities. The sample's reset/fixed-policy help strings overstate reset scope;
-apply the ATT exception described above.
+**Demo only.** OpenPgpTool prioritizes readability, not production credential management. Attestation prompts for
+the User PIN (or accepts `--pin`), verifies it in signature mode, and replaces the target certificate. `info` displays
+key status separately from fingerprint bytes. Command-line PINs and PEM text can persist in immutable strings.
+Noninteractive device selection takes the first SmartCard device, and the tool installs no touch-notification prompt.
+Use the direct SDK with application-owned input buffers, explicit device selection, and your application UI in production.
 
 - [Core guide](../Core/README.md): discovery, connections, APDU and TLV.
 - [PIV guide](../Piv/README.md) and [Management guide](../Management/README.md).

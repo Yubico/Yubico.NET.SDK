@@ -71,27 +71,39 @@ public abstract class Kdf : IDisposable
     ///     Parses a KDF configuration from the encoded TLV data (DO 0xF9).
     /// </summary>
     /// <remarks>
-    ///     Algorithm 3 requires the modeled S2K fields; absent/other identifiers currently produce KdfNone.
-    ///     Malformed TLV or missing required S2K fields can fail parsing. Retain raw F9 data when inspecting
-    ///     identifiers beyond the model. The returned object is owned by the caller unless retained by a session.
-    ///     Parsing copies TLV fields and clones salts/initial hashes into the result. Result disposal clears
-    ///     its backing arrays, not the caller's encoding or the intermediate dictionary field copies, which
-    ///     currently have no explicit clearing scope.
+    ///     A disabled configuration (algorithm 0) produces KdfNone. Unknown algorithms cannot be used
+    ///     to derive credentials; use raw GET DATA to inspect them. The caller owns the returned object and
+    ///     the supplied encoding separately.
     /// </remarks>
     public static Kdf Parse(ReadOnlySpan<byte> encoded)
     {
-        var data = TlvHelper.DecodeDictionary(encoded);
-
-        if (data.TryGetValue(0x81, out var algorithmData) && algorithmData.Length > 0)
+        var data = new Dictionary<int, ReadOnlyMemory<byte>>();
+        var fields = new List<byte[]>();
+        try
         {
-            var algorithm = algorithmData.Span[0];
-            if (algorithm == KdfIterSaltedS2k.KdfAlgorithm)
+            while (!encoded.IsEmpty)
             {
-                return KdfIterSaltedS2k.ParseData(data);
+                var (tag, _, value) = Tlv.ParseData(ref encoded);
+                fields.Add(value);
+                if (!data.TryAdd(tag, value))
+                    throw new FormatException("Duplicate OpenPGP KDF field.");
             }
-        }
 
-        return new KdfNone();
+            if (!data.TryGetValue(0x81, out var algorithm) || algorithm.Length != 1)
+                throw new FormatException("Missing or malformed OpenPGP KDF algorithm.");
+
+            return algorithm.Span[0] switch
+            {
+                0 => new KdfNone(),
+                KdfIterSaltedS2k.KdfAlgorithm => KdfIterSaltedS2k.ParseData(data),
+                _ => throw new NotSupportedException("Unsupported OpenPGP KDF algorithm."),
+            };
+        }
+        finally
+        {
+            foreach (var field in fields)
+                CryptographicOperations.ZeroMemory(field);
+        }
     }
 }
 
@@ -321,9 +333,15 @@ public sealed class KdfIterSaltedS2k : Kdf
                 tlvs.Add(new Tlv(0x88, hashAdmin.Span));
             }
 
-            // Individual TLVs are disposed below. EncodeList's complete encoding is copied again here;
-            // that intermediate currently has no clearing scope, independently of the caller-owned result.
-            return TlvHelper.EncodeList([.. tlvs]).ToArray();
+            Memory<byte> encoded = TlvHelper.EncodeList([.. tlvs]);
+            try
+            {
+                return encoded.ToArray();
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(encoded.Span);
+            }
         }
         finally
         {
@@ -347,15 +365,43 @@ public sealed class KdfIterSaltedS2k : Kdf
         base.Dispose();
     }
 
-    internal static KdfIterSaltedS2k ParseData(IDictionary<int, ReadOnlyMemory<byte>> data) =>
-        new()
+    internal static KdfIterSaltedS2k ParseData(IDictionary<int, ReadOnlyMemory<byte>> data)
+    {
+        var hashId = ReadField(data, 0x82, 1, required: true).GetValueOrDefault();
+        var algorithm = (KdfHashAlgorithm)hashId.Span[0];
+        int digestLength = algorithm switch
         {
-            HashAlgorithm = (KdfHashAlgorithm)data[0x82].Span[0],
-            IterationCount = BinaryPrimitives.ReadUInt32BigEndian(data[0x83].Span),
-            SaltUser = data[0x84],                                                // init setter clones
-            SaltReset = data.TryGetValue(0x85, out var sr) ? sr : null,           // init setter clones
-            SaltAdmin = data.TryGetValue(0x86, out var sa) ? sa : null,           // init setter clones
-            InitialHashUser = data.TryGetValue(0x87, out var hu) ? hu : null,     // init setter clones
-            InitialHashAdmin = data.TryGetValue(0x88, out var ha) ? ha : null,    // init setter clones
+            KdfHashAlgorithm.Sha256 => 32,
+            KdfHashAlgorithm.Sha512 => 64,
+            _ => throw new NotSupportedException("Unsupported OpenPGP KDF hash algorithm."),
         };
+        var iterations = ReadField(data, 0x83, 4, required: true).GetValueOrDefault();
+        // RFC 4880 iterated-and-salted S2K uses eight salt octets. Optional per-PW salts
+        // may be omitted, in which case derivation uses the User salt.
+        var user = ReadField(data, 0x84, 8, required: true).GetValueOrDefault();
+        var reset = ReadField(data, 0x85, 8);
+        var admin = ReadField(data, 0x86, 8);
+        var userHash = ReadField(data, 0x87, digestLength);
+        var adminHash = ReadField(data, 0x88, digestLength);
+        return new()
+        {
+            HashAlgorithm = algorithm,
+            IterationCount = BinaryPrimitives.ReadUInt32BigEndian(iterations.Span),
+            SaltUser = user,
+            SaltReset = reset,
+            SaltAdmin = admin,
+            InitialHashUser = userHash,
+            InitialHashAdmin = adminHash,
+        };
+    }
+
+    private static ReadOnlyMemory<byte>? ReadField(
+        IDictionary<int, ReadOnlyMemory<byte>> data, int tag, int width, bool required = false)
+    {
+        if (data.TryGetValue(tag, out var value) && value.Length == width)
+            return value;
+        if (!required && !data.ContainsKey(tag))
+            return null;
+        throw new FormatException($"Missing or malformed OpenPGP KDF field 0x{tag:X2}.");
+    }
 }

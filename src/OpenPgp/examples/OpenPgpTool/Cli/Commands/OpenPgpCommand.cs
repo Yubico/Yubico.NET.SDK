@@ -4,6 +4,7 @@
 using Spectre.Console.Cli;
 using System.Buffers;
 using System.Text;
+using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.OpenPgp.Credentials;
@@ -24,7 +25,10 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     where TSettings : CommandSettings
 {
-    public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
+    public sealed override Task<int> ExecuteAsync(CommandContext context, TSettings settings) =>
+        WithSessionAsync(session => ExecuteCommandAsync(context, settings, session));
+
+    internal static async Task<int> WithSessionAsync(Func<IOpenPgpSession, Task<int>> executeAsync)
     {
         try
         {
@@ -38,7 +42,11 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
             OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
             await using var session = await selection.Device.CreateOpenPgpSessionAsync();
-            return await ExecuteCommandAsync(context, settings, session);
+            return await executeAsync(session);
+        }
+        catch (OperationCanceledException)
+        {
+            return ExitCode.UserCancelled;
         }
         catch (Exception ex)
         {
@@ -58,7 +66,7 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     /// <summary>
     ///     Parses a key argument string (sig/dec/aut/att) into a <see cref="KeyRef" />.
     /// </summary>
-    protected static KeyRef ParseKeyRef(string key) =>
+    protected internal static KeyRef ParseKeyRef(string key) =>
         key.ToLowerInvariant() switch
         {
             "sig" => KeyRef.Sig,
@@ -90,7 +98,7 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     ///     Disposing the result clears its byte storage. A supplied command-line option remains in an immutable
     ///     string and can be exposed through process arguments; prefer application-owned input buffers for secrets.
     ///     A supplied string bypasses reader length limits. The reader path counts UTF-16 code units before
-    ///     UTF-8 encoding; neither path adds card credential-format or encoded-byte-limit validation.
+    ///     UTF-8 encoding. Both paths are subject to the same SDK check of the card's credential profile.
     /// </remarks>
     protected static IMemoryOwner<byte>? GetCredential(string? provided, CredentialReaderOptions options)
     {
@@ -109,7 +117,7 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     /// <summary>
     ///     Gets User PIN input; the reader path permits 6–127 UTF-16 code units. Supplied strings bypass those limits.
     /// </summary>
-    protected static IMemoryOwner<byte>? GetPin(string? provided) =>
+    protected internal static IMemoryOwner<byte>? GetPin(string? provided) =>
         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpPin());
 
     /// <summary>

@@ -14,8 +14,8 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 /// </summary>
 /// <remarks>
 ///     Attribute writing precedes generation and can invalidate an existing key on later failure.
-///     Check slot/algorithm support and ROCA applicability before running; the command adds no ROCA guard.
-///     Use ordinary slots while ATT provisioning is affected by malformed CRT encoding.
+///     Check slot/algorithm support before running; the session enforces the OpenPGP RSA generation guard.
+///     Replacing the factory ATT key irreversibly loses manufacturer attestation provenance.
 /// </remarks>
 public sealed class KeysGenerateCommand : OpenPgpCommand<KeysGenerateCommand.Settings>
 {

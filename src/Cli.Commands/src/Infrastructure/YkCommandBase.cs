@@ -43,37 +43,39 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
                 return ExitCode.GenericError;
             }
 
-            // 1. Device selection
-            DeviceSelection? selection;
-            try
+            return await ExecuteWithSelectionAsync(context, settings, SelectAndRunAsync);
+
+            async Task<int> SelectAndRunAsync(Func<YkDeviceContext, Task<int>> run)
             {
-                selection = await SelectDeviceAsync(AppletTransports, settings.Serial, requestedTransport);
+                DeviceSelection? selection;
+                try
+                {
+                    selection = await SelectDeviceAsync(AppletTransports, settings.Serial, requestedTransport);
+                }
+                catch (ArgumentException ex)
+                {
+                    OutputHelpers.WriteError(ex.Message);
+                    return ExitCode.FeatureUnsupported;
+                }
+
+                if (selection is null)
+                {
+                    OutputHelpers.WriteError("No YubiKey detected. Insert a YubiKey and try again.");
+                    return ExitCode.DeviceNotFound;
+                }
+
+                // Reuse selection's display snapshot; commands read live metadata when their task requires it.
+                var deviceContext = new YkDeviceContext
+                {
+                    Device = selection.Device,
+                    Selection = selection,
+                    Info = selection.Info,
+                    PreferredConnection = requestedTransport
+                };
+
+                OutputHelpers.WriteActiveDevice(deviceContext.DisplayBanner);
+                return await run(deviceContext);
             }
-            catch (ArgumentException ex)
-            {
-                OutputHelpers.WriteError(ex.Message);
-                return ExitCode.FeatureUnsupported;
-            }
-
-            if (selection is null)
-            {
-                OutputHelpers.WriteError("No YubiKey detected. Insert a YubiKey and try again.");
-                return ExitCode.DeviceNotFound;
-            }
-
-            // Reuse selection's display snapshot; commands read live metadata when their task requires it.
-            var deviceContext = new YkDeviceContext
-            {
-                Device = selection.Device,
-                Selection = selection,
-                Info = selection.Info,
-                PreferredConnection = requestedTransport
-            };
-
-            OutputHelpers.WriteActiveDevice(deviceContext.DisplayBanner);
-
-            // 2. Execute the applet command
-            return await ExecuteCommandAsync(context, settings, deviceContext);
         }
         catch (OperationCanceledException)
         {
@@ -85,6 +87,14 @@ public abstract class YkCommandBase<TSettings> : AsyncCommand<TSettings>
             return ExitCode.GenericError;
         }
     }
+
+    /// <summary>
+    ///     Allows per-invocation preparation after transport validation but before device selection.
+    ///     Return without selecting, or invoke and await <paramref name="selectAndRun" /> once.
+    /// </summary>
+    protected virtual Task<int> ExecuteWithSelectionAsync(CommandContext context, TSettings settings,
+        Func<Func<YkDeviceContext, Task<int>>, Task<int>> selectAndRun) =>
+        selectAndRun(device => ExecuteCommandAsync(context, settings, device));
 
     /// <summary>
     ///     Executes command-specific logic with the selected device and its best-effort display metadata.

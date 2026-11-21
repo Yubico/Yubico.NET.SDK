@@ -29,13 +29,10 @@ public sealed partial class OpenPgpSession
         ThrowIfDisposed();
 
         // Card §7.2.2 uses P2=81/82 for two access states of the same User PIN.
-        // Current extended handling also selects Reset identity for KDF/retry lookup;
-        // distinct User/Reset salts expose that mismatch. Reset Code is a separate credential.
-        var p2 = extended ? (byte)Pw.Reset : (byte)Pw.User;
-        var pw = extended ? Pw.Reset : Pw.User;
+        byte p2 = extended ? (byte)0x82 : (byte)Pw.User;
 
         _logger.LogDebug("Verifying User PIN (P2=0x{P2:X2})", p2);
-        await VerifyPwAsync(pw, p2, pin, cancellationToken).ConfigureAwait(false);
+        await VerifyPwAsync(Pw.User, p2, pin, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -107,8 +104,10 @@ public sealed partial class OpenPgpSession
         byte[]? derivedBytes = null;
         try
         {
-            var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
-            derivedBytes = kdf.Process(Pw.Reset, resetCode.Span);
+            using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
+            // Empty PUT DATA removes the Reset Code when KDF is disabled; it is not a credential.
+            derivedBytes = resetCode.IsEmpty && kdf is KdfNone
+                ? [] : EncodeCredential(kdf, Pw.Reset, resetCode, nameof(resetCode));
 
             await PutDataAsync(DataObject.ResettingCode, derivedBytes, cancellationToken)
                 .ConfigureAwait(false);
@@ -156,8 +155,8 @@ public sealed partial class OpenPgpSession
         byte[]? data = null;
         try
         {
-            var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
-            newPinBytes = kdf.Process(Pw.User, newPin.Span);
+            using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
+            newPinBytes = EncodeCredential(kdf, Pw.User, newPin, nameof(newPin));
 
             // P1=0x02 (admin): Admin PIN (PW3) must have been verified beforehand
             //   by the caller via VerifyAdminAsync. Data = new PIN only.
@@ -170,7 +169,7 @@ public sealed partial class OpenPgpSession
             }
             else
             {
-                resetBytes = kdf.Process(Pw.Reset, resetCode.Span);
+                resetBytes = EncodeCredential(kdf, Pw.Reset, resetCode, nameof(resetCode));
                 data = new byte[resetBytes.Length + newPinBytes.Length];
                 resetBytes.CopyTo(data.AsSpan());
                 newPinBytes.CopyTo(data.AsSpan(resetBytes.Length));
@@ -178,7 +177,10 @@ public sealed partial class OpenPgpSession
 
             var command = new ApduCommand(0x00, (int)Ins.ResetRetryCounter, p1, (int)Pw.User, data);
 
-            await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            if (useAdmin)
+                await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            else
+                await TransmitCredentialAsync(command, Pw.Reset, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -208,6 +210,10 @@ public sealed partial class OpenPgpSession
         ArgumentOutOfRangeException.ThrowIfGreaterThan(resetAttempts, 255);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(adminAttempts, 255);
 
+        if (_appletGateVersion is { IsAlphaOrBeta: false } version &&
+            (version.Major == 1 ? version.IsLessThan(1, 0, 7) : version.IsLessThan(4, 3, 1)))
+            throw new NotSupportedException("Changing OpenPGP PIN attempts is not supported on this firmware.");
+
         _logger.LogDebug(
             "Setting PIN attempts (user={User}, reset={Reset}, admin={Admin})",
             userAttempts, resetAttempts, adminAttempts);
@@ -228,6 +234,8 @@ public sealed partial class OpenPgpSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        if (policy is not (PinPolicy.Once or PinPolicy.Always))
+            throw new ArgumentOutOfRangeException(nameof(policy));
 
         _logger.LogDebug("Setting signature PIN policy to {Policy}", policy);
 
@@ -247,28 +255,11 @@ public sealed partial class OpenPgpSession
         byte[]? derivedBytes = null;
         try
         {
-            var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
-            derivedBytes = kdf.Process(pw, pin.Span);
+            using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
+            derivedBytes = EncodeCredential(kdf, pw, pin, nameof(pin));
 
             var command = new ApduCommand(0x00, (int)Ins.Verify, 0x00, p2, derivedBytes);
-            var response = await TransmitNoThrowAsync(command, cancellationToken)
-                .ConfigureAwait(false);
-
-            if (!response.IsOK())
-            {
-                var remaining = await ResolveRemainingRetriesAsync(pw, response, cancellationToken)
-                    .ConfigureAwait(false);
-                int? retriesRemaining = remaining >= 0 ? remaining : null;
-
-                throw new OpenPgpInvalidPinException(
-                    retriesRemaining,
-                    retriesRemaining is { } r
-                        ? $"PIN verification failed ({r} attempt(s) remaining)"
-                        : "PIN verification failed")
-                {
-                    SW = response.SW,
-                };
-            }
+            await TransmitCredentialAsync(command, pw, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -279,47 +270,57 @@ public sealed partial class OpenPgpSession
         }
     }
 
-    // VERIFY failures include non-PIN errors. Extract explicit counts or query C4 for 6982;
-    // callers retain SW to diagnose other causes and an unknown count.
-    private async Task<int> ResolveRemainingRetriesAsync(
-        Pw pw,
-        ApduResponse response,
+    private async Task TransmitCredentialAsync(
+        ApduCommand command,
+        Pw credential,
         CancellationToken cancellationToken)
     {
-        // Standard wrong-PIN SW: 0x63Cx where x = remaining retries
-        var remaining = SWConstants.ExtractRetryCount(response.SW) ?? -1;
+        var response = await TransmitNoThrowAsync(command, cancellationToken).ConfigureAwait(false);
+        if (response.IsOK())
+            return;
 
-        if (remaining < 0 && response.SW == SWConstants.AuthenticationMethodBlocked)
+        // Family-specific status interpretations require a known production version.
+        bool legacy = _numericVersion is { IsAlphaOrBeta: false } version && version.IsLessThan(4, 0, 0);
+        int? remaining = (response.SW, (Ins)command.Ins) switch
         {
-            // 6983 reports a blocked credential. User PIN recovery still has Reset Code/Admin routes.
-            return 0;
-        }
+            (SWConstants.AuthenticationMethodBlocked, _) => 0,
+            (SWConstants.InvalidCommandDataParameter, Ins.ResetRetryCounter) => 0,
+            (SWConstants.SecurityStatusNotSatisfied, _) =>
+                await TryReadRetryCountAsync(credential, cancellationToken).ConfigureAwait(false),
+            (SWConstants.ConditionsNotSatisfied, Ins.ChangePin) when legacy =>
+                await TryReadRetryCountAsync(credential, cancellationToken).ConfigureAwait(false),
+            (var sw, Ins.Verify) when legacy && SWConstants.ExtractRetryCount(sw) is { } count => count,
+            _ => throw ApduException.FromResponse(response, command, "APDU command failed"),
+        };
 
-        if (remaining < 0 && response.SW == SWConstants.SecurityStatusNotSatisfied)
+        throw new OpenPgpInvalidPinException(
+            remaining,
+            remaining is { } retries
+                ? $"{credential} credential command failed ({retries} attempt(s) remaining)"
+                : $"{credential} credential command failed (attempts remaining unknown)")
         {
-            // 6982 can cover wrong/unverified PW or secure-messaging failure (Card §7.9).
-            // C4 provides counters, though the extended-mode caller currently selects Reset's counter.
-            try
-            {
-                var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
-                remaining = pw switch
-                {
-                    Pw.User => status.AttemptsUser,
-                    Pw.Admin => status.AttemptsAdmin,
-                    _ => status.AttemptsReset,
-                };
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch
-            {
-                // If status query fails, the retry count is genuinely unknown.
-            }
-        }
+            SW = response.SW,
+            Cla = command.Cla,
+            Ins = command.Ins,
+            P1 = command.P1,
+            P2 = command.P2,
+        };
+    }
 
-        return remaining;
+    private async Task<int?> TryReadRetryCountAsync(Pw credential, CancellationToken cancellationToken)
+    {
+        // 6982 can also mean unverified PW or a secure-messaging problem (Card §7.9).
+        // C4 only supplies the count; it cannot establish the cause of the original failure.
+        try
+        {
+            var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
+            return status.GetAttempts(credential);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return null;
+        }
     }
 
     private async Task ChangePwAsync(
@@ -333,9 +334,9 @@ public sealed partial class OpenPgpSession
         byte[]? combined = null;
         try
         {
-            var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
-            currentBytes = kdf.Process(pw, currentPin.Span);
-            newBytes = kdf.Process(pw, newPin.Span);
+            using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
+            currentBytes = EncodeCredential(kdf, pw, currentPin, nameof(currentPin));
+            newBytes = EncodeCredential(kdf, pw, newPin, nameof(newPin));
 
             combined = new byte[currentBytes.Length + newBytes.Length];
             currentBytes.CopyTo(combined.AsSpan());
@@ -349,7 +350,7 @@ public sealed partial class OpenPgpSession
             };
 
             var command = new ApduCommand(0x00, (int)Ins.ChangePin, 0x00, p2, combined);
-            await TransmitAsync(command, cancellationToken).ConfigureAwait(false);
+            await TransmitCredentialAsync(command, pw, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -360,5 +361,22 @@ public sealed partial class OpenPgpSession
             if (combined is not null)
                 CryptographicOperations.ZeroMemory(combined);
         }
+    }
+
+    private byte[] EncodeCredential(Kdf kdf, Pw credential, ReadOnlyMemory<byte> input, string parameterName)
+    {
+        var status = _appData.Discretionary.PwStatus;
+        bool usesPinBlock = credential == Pw.Admin ? status.AdminUsesPinBlock2 : status.UserUsesPinBlock2;
+        if (usesPinBlock)
+            throw new NotSupportedException("OpenPGP credential commands support UTF-8 and KDF, not PIN block format 2.");
+
+        int minimum = credential == Pw.User ? 6 : 8;
+        int maximum = status.GetMaxLen(credential);
+        var encoded = kdf.Process(credential, input.Span);
+        if (encoded.Length >= minimum && encoded.Length <= maximum)
+            return encoded;
+
+        CryptographicOperations.ZeroMemory(encoded);
+        throw new ArgumentException($"The encoded {credential} credential must be between {minimum} and {maximum} bytes.", parameterName);
     }
 }

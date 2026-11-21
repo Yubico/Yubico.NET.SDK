@@ -40,9 +40,12 @@ public sealed class InfoCommand : OpenPgpCommand<InfoCommand.Settings>
         AnsiConsole.WriteLine();
         OutputHelpers.WriteHeader("PIN Status");
         OutputHelpers.WriteKeyValue("Signature PIN Policy",
-            pinStatus.SignaturePinPolicy == PinPolicy.Always
-                ? "Verify every signature"
-                : "Verify once per session");
+            pinStatus.SignaturePinPolicy switch
+            {
+                PinPolicy.Always => "Verify every signature",
+                PinPolicy.Once => "Verify once per session",
+                var raw => $"Unknown (0x{(byte)raw:X2})",
+            });
 
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]Remaining Attempts[/]");
@@ -55,8 +58,6 @@ public sealed class InfoCommand : OpenPgpCommand<InfoCommand.Settings>
         AnsiConsole.WriteLine();
         OutputHelpers.WriteKeyValue("Signature Counter", sigCount.ToString());
 
-        // Current display infers status from fingerprint length, including zero-filled reset fields.
-        // Use ListKeyInformationAsync when key presence/status is needed for a decision.
         AnsiConsole.WriteLine();
         OutputHelpers.WriteHeader("Keys");
 
@@ -76,7 +77,14 @@ public sealed class InfoCommand : OpenPgpCommand<InfoCommand.Settings>
                 fpString = fpString[..40] + "...";
             }
 
-            var status = fingerprint.Length > 0 ? "[green]Present[/]" : "[grey]Empty[/]";
+            var status = (disc.KeyInformation.TryGetValue(slot, out var keyStatus) ? keyStatus : (KeyStatus?)null) switch
+            {
+                KeyStatus.None => "[grey]Empty[/]",
+                KeyStatus.Generated => "[green]Generated[/]",
+                KeyStatus.Imported => "[green]Imported[/]",
+                { } raw => $"[grey]Unknown (0x{(byte)raw:X2})[/]",
+                null => "[grey]Not reported[/]",
+            };
             table.AddRow(
                 Markup.Escape(FormatSlotShort(slot)),
                 Markup.Escape(algString),

@@ -28,7 +28,7 @@ public sealed class OpenPgpResetCommand : YkCommandBase<OpenPgpResetSettings>
         if (!settings.Force)
         {
             if (!ConfirmationPrompts.ConfirmDestructive(
-                    "factory reset the OpenPGP application, permanently destroying all keys and data"))
+                    "factory reset OpenPGP, destroying ordinary keys and certificates but preserving ATT material and fixed policy"))
             {
                 OutputHelpers.WriteInfo("Reset cancelled.");
                 return ExitCode.UserCancelled;
@@ -43,7 +43,7 @@ public sealed class OpenPgpResetCommand : YkCommandBase<OpenPgpResetSettings>
                 await session.ResetAsync();
             });
 
-        OutputHelpers.WriteSuccess("OpenPGP application has been reset.");
+        OutputHelpers.WriteSuccess("OpenPGP reset completed and the applet was reopened. Inspect persistent state to verify erasure.");
         OutputHelpers.WriteInfo("Default User PIN: 123456");
         OutputHelpers.WriteInfo("Default Admin PIN: 12345678");
         return ExitCode.Success;

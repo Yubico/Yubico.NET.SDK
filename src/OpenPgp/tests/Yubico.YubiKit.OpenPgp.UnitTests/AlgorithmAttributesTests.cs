@@ -122,11 +122,24 @@ public class AlgorithmAttributesTests
         Assert.Equal(EcImportFormat.StandardWithPubkey, ec.ImportFormat);
     }
 
-    [Fact]
-    public void Parse_UnknownAlgorithmId_Throws()
+    [Theory]
+    [InlineData("FF0102", 0xFF)]
+    [InlineData("132B06010401812A7FFF", 0x13)]
+    public void Parse_UnmodeledAlgorithmOrCurve_PreservesWireBytes(string hex, int id)
     {
-        byte[] wire = [0xFF, 0x00, 0x00];
-        Assert.Throws<ArgumentException>(() => AlgorithmAttributes.Parse(wire));
+        var wire = Convert.FromHexString(hex);
+        var parsed = AlgorithmAttributes.Parse(wire);
+        Assert.Equal(id, parsed.AlgorithmId);
+        Assert.Equal(wire, parsed.ToBytes());
+    }
+
+    [Theory]
+    [InlineData("132B81")]
+    [InlineData("132B807F")]
+    [InlineData("0108000011")]
+    public void Parse_MalformedKnownAttributes_RejectsRatherThanPreservingAsUnknown(string hex)
+    {
+        Assert.Throws<ArgumentException>(() => AlgorithmAttributes.Parse(Convert.FromHexString(hex)));
     }
 
     [Theory]

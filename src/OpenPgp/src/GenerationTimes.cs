@@ -20,29 +20,24 @@ namespace Yubico.YubiKit.OpenPgp;
 ///     Stored generation-time metadata for reported key slots; zero denotes an unspecified time.
 /// </summary>
 /// <remarks>
-///     The card stores unsigned four-byte seconds since 1970-01-01 UTC, in big-endian order. This
-///     collection currently exposes each value as a signed int, so values above int.MaxValue appear
-///     negative: for example, card bytes 80 00 00 00 become int.MinValue. They represent unsigned
-///     seconds, rather than dates before 1970. Preserve the original four-byte representation, or
-///     interpret the same 32 bits as an unsigned value, when inspecting that range. Raw application
-///     data provides the original bytes. Card specification 3.4.1 §4.4.1 defines zero as unspecified;
-///     RFC 4880 §3.5 defines the unsigned time field.
+///     Values are unsigned seconds since 1970-01-01 UTC. Card specification 3.4.1 §4.4.1
+///     defines zero as unspecified, not the epoch.
 /// </remarks>
-public sealed class GenerationTimes : IReadOnlyDictionary<KeyRef, int>
+public sealed class GenerationTimes : IReadOnlyDictionary<KeyRef, uint>
 {
-    private readonly Dictionary<KeyRef, int> _entries;
+    private readonly Dictionary<KeyRef, uint> _entries;
 
-    internal GenerationTimes(Dictionary<KeyRef, int> entries) =>
+    internal GenerationTimes(Dictionary<KeyRef, uint> entries) =>
         _entries = entries;
 
     /// <inheritdoc />
-    public int this[KeyRef key] => _entries[key];
+    public uint this[KeyRef key] => _entries[key];
 
     /// <inheritdoc />
     public IEnumerable<KeyRef> Keys => _entries.Keys;
 
     /// <inheritdoc />
-    public IEnumerable<int> Values => _entries.Values;
+    public IEnumerable<uint> Values => _entries.Values;
 
     /// <inheritdoc />
     public int Count => _entries.Count;
@@ -51,10 +46,10 @@ public sealed class GenerationTimes : IReadOnlyDictionary<KeyRef, int>
     public bool ContainsKey(KeyRef key) => _entries.ContainsKey(key);
 
     /// <inheritdoc />
-    public bool TryGetValue(KeyRef key, out int value) => _entries.TryGetValue(key, out value);
+    public bool TryGetValue(KeyRef key, out uint value) => _entries.TryGetValue(key, out value);
 
     /// <inheritdoc />
-    public IEnumerator<KeyValuePair<KeyRef, int>> GetEnumerator() => _entries.GetEnumerator();
+    public IEnumerator<KeyValuePair<KeyRef, uint>> GetEnumerator() => _entries.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

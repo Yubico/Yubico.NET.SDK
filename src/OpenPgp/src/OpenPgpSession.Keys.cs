@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Credentials;
@@ -35,12 +36,25 @@ public sealed partial class OpenPgpSession
         if (attributes is EcAttributes)
             EnsureSupports(FeatureEc);
 
+        // YSA-2017-01 lists 4.2.6–4.3.4; follow the conservative vendor SDK interval.
+        if (attributes is RsaAttributes &&
+            _numericVersion is { } numeric && numeric.IsAtLeast(4, 2, 0) && numeric.IsLessThan(4, 3, 5))
+        {
+            throw new NotSupportedException("On-card RSA generation is disabled on OpenPGP firmware 4.2.0 through 4.3.4 (ROCA policy). Import an independently generated key instead.");
+        }
+
         _logger.LogInformation(
             "Generating {AlgorithmType} key for {Slot}",
             attributes.GetType().Name,
             keyRef);
-        await SetAlgorithmAttributesAsync(keyRef, attributes, cancellationToken)
-            .ConfigureAwait(false);
+        if (_appData.Discretionary.ExtendedCapabilities.Flags.HasFlag(ExtendedCapabilityFlags.AlgorithmAttributesChangeable))
+        {
+            await SetAlgorithmAttributesAsync(keyRef, attributes, cancellationToken).ConfigureAwait(false);
+        }
+        else if (attributes is not RsaAttributes { NLen: (int)RsaSize.Rsa2048 })
+        {
+            throw new NotSupportedException("This YubiKey only supports RSA 2048 keys.");
+        }
 
         await GenerateKeyPairAsync(keyRef, cancellationToken).ConfigureAwait(false);
     }
@@ -56,7 +70,7 @@ public sealed partial class OpenPgpSession
 
         _logger.LogInformation("Importing {KeyType} key into {Slot}", privateKey.KeyType, keyRef);
 
-        using var import = PrivateKeyImport.Create(privateKey, keyRef, FirmwareVersion);
+        using var import = PrivateKeyImport.Create(privateKey, keyRef, _numericVersion ?? FirmwareVersion);
         if (import.Attributes is EcAttributes)
             EnsureSupports(FeatureEc);
 
@@ -106,12 +120,13 @@ public sealed partial class OpenPgpSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        if (_numericVersion is { Major: > 0 and < 4 })
+            throw new NotSupportedException("OpenPGP key deletion is not supported on YubiKey NEO.");
 
         _logger.LogInformation("Deleting key from {Slot}", keyRef);
 
         // Attribute switching is destructive and can leave partial state between writes.
-        // NEO's vendor deletion path instead overwrites a key; this sequence needs separate
-        // old-family qualification. Certificate and host metadata management remain separate.
+        // Certificate and host metadata management remain separate.
         var rsa4096 = RsaAttributes.Create(RsaSize.Rsa4096);
         var rsa2048 = RsaAttributes.Create(RsaSize.Rsa2048);
 
@@ -160,28 +175,30 @@ public sealed partial class OpenPgpSession
         // GET_ATTESTATION generates the attestation cert and writes it to the
         // certificate slot for the key. We then read it back with GetCertificateAsync.
         // The Python implementation uses the same send_apdu → get_certificate(key_ref) sequence.
-        // The outer notification helper resolves Completed after this callback returns its certificate.
-        // A resolution failure can abandon that disposable result; it has no local cleanup scope here.
         var command = new ApduCommand(0x80, (int)Ins.GetAttestation, (int)keyRef, 0x00);
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(KeyRef.Att, UserPresenceOperations.OpenPgp.AttestKey, cancellationToken).ConfigureAwait(false));
-        return await RunWithUserPresenceNotificationAsync(
+        X509Certificate2? ownedCertificate = null;
+        try
+        {
+            X509Certificate2 certificate = await RunWithUserPresenceNotificationAsync(
                 userPresenceNotification,
                 async token =>
                 {
                     await TransmitAsync(command, token).ConfigureAwait(false);
-
-                    var cert = await GetCertificateAsync(keyRef, token).ConfigureAwait(false);
-                    if (cert is null)
-                    {
-                        throw new InvalidOperationException(
+                    return ownedCertificate = await GetCertificateAsync(keyRef, token).ConfigureAwait(false)
+                        ?? throw new InvalidOperationException(
                             $"Attestation certificate was not found in slot {keyRef} after GET_ATTESTATION.");
-                    }
-
-                    return cert;
                 },
                 cancellationToken)
-            .ConfigureAwait(false);
+                .ConfigureAwait(false);
+            ownedCertificate = null;
+            return certificate;
+        }
+        finally
+        {
+            ownedCertificate?.Dispose();
+        }
     }
 
     /// <inheritdoc />
@@ -239,7 +256,7 @@ public sealed partial class OpenPgpSession
     /// <inheritdoc />
     public async Task SetGenerationTimeAsync(
         KeyRef keyRef,
-        int timestamp,
+        uint timestamp,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -247,10 +264,7 @@ public sealed partial class OpenPgpSession
         _logger.LogDebug("Setting generation time for {Slot} to {Timestamp}", keyRef, timestamp);
 
         var data = new byte[4];
-        data[0] = (byte)(timestamp >> 24);
-        data[1] = (byte)(timestamp >> 16);
-        data[2] = (byte)(timestamp >> 8);
-        data[3] = (byte)timestamp;
+        BinaryPrimitives.WriteUInt32BigEndian(data, timestamp);
 
         await PutDataAsync(keyRef.GenerationTimeDo(), data, cancellationToken)
             .ConfigureAwait(false);

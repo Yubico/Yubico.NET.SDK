@@ -53,6 +53,8 @@ public sealed partial class OpenPgpSession
         ThrowIfDisposed();
 
         EnsureSupports(FeatureUif);
+        if (keyRef is KeyRef.Att || uif is Uif.Cached or Uif.CachedFixed)
+            EnsureSupports(FeatureCachedAndAttestationUif);
 
         _logger.LogInformation("Setting UIF for {Slot} to {Uif}", keyRef, uif);
 
@@ -93,6 +95,15 @@ public sealed partial class OpenPgpSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(attributes);
+        bool supported = attributes switch
+        {
+            RsaAttributes rsa => rsa.AlgorithmId == RsaAttributes.RsaAlgorithmId && Enum.IsDefined(rsa.ImportFormat),
+            EcAttributes ec => Enum.IsDefined(ec.ImportFormat) && ec.AlgorithmId is
+                EcAttributes.EcdhAlgorithmId or EcAttributes.EcdsaAlgorithmId or EcAttributes.EddsaAlgorithmId,
+            _ => false,
+        };
+        if (!supported)
+            throw new NotSupportedException("Only modeled OpenPGP algorithm attributes can be written.");
 
         _logger.LogInformation("Setting algorithm attributes for {Slot}", keyRef);
 
@@ -106,7 +117,8 @@ public sealed partial class OpenPgpSession
     {
         ThrowIfDisposed();
 
-        EnsureSupports(FeatureAlgorithmInfo);
+        if (!IsSupported(FeatureAlgorithmInfo))
+            return GetLegacySupportedAlgorithms();
 
         _logger.LogDebug("Getting algorithm information");
 
@@ -121,49 +133,20 @@ public sealed partial class OpenPgpSession
         // Unwrap the outer 0xFA TLV to get the inner list.
         // Some firmware versions return malformed TLV — pad and retry (matches ykman pattern:
         // yubikit/openpgp.py Tlv.unpack(DO.ALGORITHM_INFORMATION, buf + b"\0\0")[:-2])
-        Tlv outerTlv;
-        bool padded = false;
-        try
-        {
-            outerTlv = Tlv.Create(rawData.Span);
-        }
-        catch (ArgumentException)
-        {
-            Span<byte> paddedData = new byte[rawData.Length + 2];
-            rawData.Span.CopyTo(paddedData);
-            outerTlv = Tlv.Create(paddedData);
-            padded = true;
-        }
-
-        using var _ = outerTlv;
-        var innerSpan = padded
-            ? outerTlv.Value.Span[..^2]
-            : outerTlv.Value.Span;
-
+        var innerSpan = UnwrapAlgorithmInformation(rawData.Span);
         var result = new List<SupportedAlgorithm>();
-        var offset = 0;
-
-        while (offset < innerSpan.Length)
+        while (!innerSpan.IsEmpty)
         {
-            using var tlv = Tlv.Create(innerSpan[offset..]);
-            offset += tlv.TotalLength;
+            var (tag, _, value) = Tlv.ParseData(ref innerSpan);
 
             // Tag is the DO (0xC1, 0xC2, 0xC3, 0xDA); value is algorithm attributes bytes
-            if (!Enum.IsDefined((DataObject)tlv.Tag) ||
-                !AlgoAttributeToKeyRef.TryGetValue((DataObject)tlv.Tag, out var keyRef))
+            if (!AlgoAttributeToKeyRef.TryGetValue((DataObject)tag, out var keyRef))
             {
                 continue;
             }
 
-            try
-            {
-                var attrs = AlgorithmAttributes.Parse(tlv.Value.Span);
-                result.Add(new SupportedAlgorithm(keyRef, attrs));
-            }
-            catch (ArgumentException)
-            {
-                // Skip unsupported algorithm attribute types
-            }
+            var attrs = AlgorithmAttributes.Parse(value);
+            result.Add(new SupportedAlgorithm(keyRef, attrs));
         }
 
         // Fix Curve25519 entries for firmware < 5.6.1
@@ -175,6 +158,33 @@ public sealed partial class OpenPgpSession
         return result.AsReadOnly();
     }
 
+    private static ReadOnlySpan<byte> UnwrapAlgorithmInformation(ReadOnlySpan<byte> encoded)
+    {
+        if (encoded.IsEmpty || encoded[0] != (byte)DataObject.AlgorithmInformation)
+            throw new ArgumentException("Expected OpenPGP algorithm information tag FA.", nameof(encoded));
+
+        var remainder = encoded;
+        byte[] value;
+        try
+        {
+            (_, _, value) = Tlv.ParseData(ref remainder);
+        }
+        catch (ArgumentException)
+        {
+            // Legacy firmware declares exactly two bytes more than it sends (ykman compatibility).
+            byte[] padded = [.. encoded, 0, 0];
+            remainder = padded;
+            (_, _, value) = Tlv.ParseData(ref remainder);
+            if (!remainder.IsEmpty || value.Length < 2)
+                throw;
+            return value.AsSpan(0, value.Length - 2);
+        }
+
+        if (!remainder.IsEmpty)
+            throw new ArgumentException("Trailing data after OpenPGP algorithm information.", nameof(encoded));
+        return value;
+    }
+
     /// <inheritdoc />
     public async Task<Kdf> GetKdfAsync(
         CancellationToken cancellationToken = default)
@@ -183,7 +193,7 @@ public sealed partial class OpenPgpSession
 
         _logger.LogDebug("Getting KDF configuration");
 
-        return await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
+        return await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -196,17 +206,31 @@ public sealed partial class OpenPgpSession
 
         _logger.LogInformation("Setting KDF configuration");
 
-        // ToBytes creates a separate encoding that may contain initial PIN hashes. This call currently
-        // retains no owner to clear that payload; disposing the KDF clears only its own backing arrays.
-        await PutDataAsync(DataObject.Kdf, kdf.ToBytes(), cancellationToken)
-            .ConfigureAwait(false);
-
-        // Retain the supplied instance: later PIN operations derive with this same object.
-        // Replacement currently drops the old reference without disposing it.
-        _kdf = kdf;
+        byte[] encoded = kdf.ToBytes();
+        try
+        {
+            await PutDataAsync(DataObject.Kdf, encoded, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            System.Security.Cryptography.CryptographicOperations.ZeroMemory(encoded);
+        }
     }
 
     // ── Private Helpers ───────────────────────────────────────────────
+
+    private IReadOnlyList<SupportedAlgorithm> GetLegacySupportedAlgorithms()
+    {
+        bool neo = FirmwareVersion.Major is > 0 and < 4;
+        var format = neo ? RsaImportFormat.CrtWithModulus : RsaImportFormat.Standard;
+        RsaSize[] sizes = neo || FirmwareVersion is { Major: 4, Minor: 4 }
+            ? [RsaSize.Rsa2048] : [RsaSize.Rsa2048, RsaSize.Rsa3072, RsaSize.Rsa4096];
+        List<SupportedAlgorithm> algorithms = [];
+        foreach (var slot in new[] { KeyRef.Sig, KeyRef.Dec, KeyRef.Aut })
+            foreach (var size in sizes)
+                algorithms.Add(new SupportedAlgorithm(slot, RsaAttributes.Create(size, format)));
+        return algorithms;
+    }
 
     /// <summary>
     ///     Fixes invalid Curve25519 entries in algorithm information for firmware &lt; 5.6.1.

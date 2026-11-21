@@ -47,6 +47,8 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     /// <summary>Current SDK UIF threshold (4.2.0); individual policies/slots need additional card support.</summary>
     public static readonly Feature FeatureUif = new("OpenPGP UIF", 4, 2, 0);
 
+    private static readonly Feature FeatureCachedAndAttestationUif = new("OpenPGP cached or attestation UIF", 5, 2, 1);
+
     /// <summary>Current SDK EC generation/import threshold (5.2.0); consult advertised algorithms.</summary>
     public static readonly Feature FeatureEc = new("OpenPGP EC Keys", 5, 2, 0);
 
@@ -71,16 +73,24 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     private readonly Dictionary<KeyRef, Uif> _updatedUifs = [];
     private IOpenPgpBackend? _backend;
     private ApplicationRelatedData _appData = null!;
-    private Kdf? _kdf;
+    private ProtocolConfiguration? _configuration;
+    private ScpKeyParameters? _scpKeyParameters;
+    private FirmwareVersion? _firmwareVersionOverride;
+    private readonly Func<DeviceInfo?>? _readCachedDeviceInfo;
+    private FirmwareVersion? _numericVersion;
+    private FirmwareVersion _appletGateVersion = FirmwareVersion.Default;
+    private bool _endingAfterResetFailure;
 
     // ── Constructor (private — use CreateAsync) ───────────────────────
 
     private OpenPgpSession(
         ISmartCardConnection connection,
-        IUserPresencePrompt? userPresencePrompt = null)
+        IUserPresencePrompt? userPresencePrompt = null,
+        Func<DeviceInfo?>? readCachedDeviceInfo = null)
         : base(connection, userPresencePrompt)
     {
         _logger = Logger;
+        _readCachedDeviceInfo = readCachedDeviceInfo;
     }
 
     // ── Factory ───────────────────────────────────────────────────────
@@ -100,17 +110,21 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     ///     The session binds to the connection before device I/O; failed initialization disposes and detaches
     ///     the session while leaving this caller-owned connection open. Selection and version discovery precede
     ///     optional SCP setup; application-data parsing uses the configured protocol before readiness is published.
-    ///     FirmwareVersionOverride selects the effective framing/feature version without skipping the version probe
-    ///     or consulting physical-device metadata. Keep borrowed SCP inputs alive through factory completion.
+    ///     An explicit firmware override bypasses discovery. Otherwise a device factory prefers cached device
+    ///     firmware and the connection factory reads the applet version. Keep borrowed SCP inputs alive for the session.
     /// </remarks>
     public static Task<OpenPgpSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default) => CreateWithDeviceInfoAsync(connection, options, null, cancellationToken);
+
+    internal static Task<OpenPgpSession> CreateWithDeviceInfoAsync(
+        ISmartCardConnection connection, SessionCreationOptions? options, Func<DeviceInfo?>? readCachedDeviceInfo,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
-            () => new OpenPgpSession(connection, options?.UserPresencePrompt),
+            () => new OpenPgpSession(connection, options?.UserPresencePrompt, readCachedDeviceInfo),
             (session, token) => session.InitializeAsync(
                 options?.ProtocolConfiguration, options?.ScpKeyParameters, options?.FirmwareVersionOverride, token),
             cancellationToken);
@@ -128,19 +142,24 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         if (IsInitialized)
             return;
 
+        _configuration = configuration;
+        _scpKeyParameters = scpKeyParams;
+        _firmwareVersionOverride = firmwareVersionOverride;
         var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
             .ConfigureAwait(false);
         IOpenPgpBackend backend = new OpenPgpBackend(protocol);
 
-        var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
-        var firmwareVersion = initialization.FirmwareVersion;
+        await backend.SelectForInitializationAsync(cancellationToken).ConfigureAwait(false);
+        var (framingVersion, featureVersion, scpEligibilityVersion) =
+            await ResolveFirmwareAsync(backend, cancellationToken).ConfigureAwait(false);
 
         var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
-                firmwareVersionOverride ?? firmwareVersion,
+                framingVersion,
                 configuration,
                 scpKeyParams,
-                cancellationToken)
+                cancellationToken,
+                scpEligibilityFirmwareVersion: scpEligibilityVersion)
             .ConfigureAwait(false);
 
         if (!ReferenceEquals(protocol, effectiveProtocol))
@@ -149,6 +168,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         }
 
         _backend = backend;
+        FirmwareVersion = featureVersion;
 
         // Cache capabilities, algorithms and UIF. F9/KDF is loaded separately on first use.
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
@@ -156,7 +176,32 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
         _logger.LogInformation(
             "OpenPGP session initialized (firmware {Version}, serial {Serial})",
-            firmwareVersion, _appData.Aid.Serial);
+            FirmwareVersion, _appData.Aid.Serial);
+    }
+
+    private async Task<(FirmwareVersion Framing, FirmwareVersion Features, FirmwareVersion ScpEligibility)> ResolveFirmwareAsync(
+        IOpenPgpBackend backend, CancellationToken cancellationToken)
+    {
+        var cachedInfo = _firmwareVersionOverride is null ? _readCachedDeviceInfo?.Invoke() : null;
+        var known = _firmwareVersionOverride ?? cachedInfo?.FirmwareVersion;
+        bool cachedNeo = cachedInfo?.FirmwareVersion is { Major: 3 };
+        var appletVersion = !cachedNeo && known is { IsAlphaOrBeta: false }
+            ? null : await backend.ReadVersionAsync(cancellationToken).ConfigureAwait(false);
+        var features = known ?? appletVersion;
+        _numericVersion = known is { IsAlphaOrBeta: false } ? known
+            : appletVersion is { IsAlphaOrBeta: false } ? appletVersion : null;
+        // Unknown framing uses the legacy profile, not a synthesized zero-major protocol version.
+        var featureVersion = cachedInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta
+            ? new FirmwareVersion() : features ?? new FirmwareVersion();
+        // NEO reset and retry command floors are applet versions, not physical firmware versions.
+        _appletGateVersion = cachedNeo && !featureVersion.IsAlphaOrBeta
+            ? appletVersion ?? FirmwareVersion.Default : featureVersion;
+        // A present, non-final qualifier (including unnamed values) is not production evidence.
+        // cachedInfo is intentionally absent when the caller supplied an override.
+        var scpEligibility = featureVersion.IsAlphaOrBeta ||
+            cachedInfo?.VersionQualifier is { Type: not VersionQualifierType.Final }
+            ? FirmwareVersion.Default : featureVersion;
+        return (_numericVersion ?? new FirmwareVersion(1, 0, 0), featureVersion, scpEligibility);
     }
 
     // ── Data Access ───────────────────────────────────────────────────
@@ -220,6 +265,11 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         ThrowIfDisposed();
 
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
+
+        var capabilities = _appData.Discretionary.ExtendedCapabilities;
+        if (!capabilities.Flags.HasFlag(ExtendedCapabilityFlags.GetChallenge))
+            throw new NotSupportedException("The OpenPGP applet does not advertise GET CHALLENGE.");
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(length, capabilities.ChallengeMaxLength);
 
         var command = new ApduCommand
         {
@@ -362,9 +412,15 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         }
         catch (Exception ex)
         {
-            // UIF is advisory metadata. If diagnostic logging succeeds, a failed read falls back to
-            // PolicyMayRequire so the cryptographic operation can proceed. Logging failures propagate.
-            _logger.LogDebug(ex, "Could not read UIF for {Slot}; user presence may be required", keyRef);
+            // Neither advisory metadata nor its diagnostics may prevent the requested operation.
+            try
+            {
+                _logger.LogDebug(ex, "Could not read UIF for {Slot}; user presence may be required", keyRef);
+            }
+            catch (Exception)
+            {
+                // Continue with the advisory fallback even when the logging provider fails.
+            }
             basis = UserPresenceBasis.PolicyMayRequire;
         }
 
@@ -378,48 +434,24 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     }
 
     /// <summary>
-    ///     Loads and caches the KDF configuration from the card.
+    ///     Reads the current KDF configuration without keeping an alias.
     /// </summary>
-    private async Task<Kdf> GetOrLoadKdfAsync(CancellationToken cancellationToken)
+    private async Task<Kdf> ReadKdfAsync(CancellationToken cancellationToken)
     {
-        if (_kdf is not null)
-            return _kdf;
+        if (!_appData.Discretionary.ExtendedCapabilities.Flags.HasFlag(ExtendedCapabilityFlags.Kdf))
+            return new KdfNone();
 
+        var command = new ApduCommand(0, (int)Ins.GetData, 0, (int)DataObject.Kdf);
+        var response = await TransmitNoThrowAsync(command, cancellationToken).ConfigureAwait(false);
         try
         {
-            var data = await GetDataCoreAsync(DataObject.Kdf, cancellationToken)
-                .ConfigureAwait(false);
-            _kdf = Kdf.Parse(data.Span);
-        }
-        catch (ApduException)
-        {
-            // Any F9 APDU error currently falls back to KdfNone, including errors beyond absence.
-            _kdf = new KdfNone();
-        }
-
-        return _kdf;
-    }
-
-    // ── Disposal ──────────────────────────────────────────────────────
-
-    // Synchronous disposal reaches this cleanup before base protocol drain. Asynchronous disposal awaits
-    // Core protocol/owned-connection teardown first, then invokes this override in finally, even on failure.
-    // Neither path waits for an entire multi-exchange public workflow: callers must await it before disposal.
-    protected override void Dispose(bool disposing)
-    {
-        Kdf? kdf = null;
-        try
-        {
-            if (disposing)
-            {
-                kdf = _kdf;
-                _kdf = null;
-                kdf?.Dispose();
-            }
+            if (!response.IsOK())
+                throw ApduException.FromResponse(response, command, "Reading OpenPGP KDF failed");
+            return Kdf.Parse(response.Data.Span);
         }
         finally
         {
-            base.Dispose(disposing);
+            response.Clear();
         }
     }
 }

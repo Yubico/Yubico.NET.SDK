@@ -12,8 +12,7 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 ///     Exports a certificate from a key slot (openpgp certificates export).
 /// </summary>
 /// <remarks>
-///     The sample currently leaves the returned certificate undisposed. Direct SDK callers should wrap it
-///     in a using scope through export. Reading/printing public certificate bytes supplies no trust decision.
+///     Reading/printing public certificate bytes supplies no trust decision.
 /// </remarks>
 public sealed class CertificatesExportCommand : OpenPgpCommand<CertificatesExportCommand.Settings>
 {
@@ -35,7 +34,7 @@ public sealed class CertificatesExportCommand : OpenPgpCommand<CertificatesExpor
         IOpenPgpSession session)
     {
         var keyRef = ParseKeyRef(settings.Key);
-        var cert = await session.GetCertificateAsync(keyRef);
+        using var cert = await session.GetCertificateAsync(keyRef);
 
         if (cert is null)
         {

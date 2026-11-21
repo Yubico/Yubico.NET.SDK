@@ -48,15 +48,6 @@ public class OpenPgpKeyImportTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ImportRsaKey_2048_ThenSign_VerifiesWithTheHostPublicKey(YubiKeyTestState state)
     {
-        // Current early return covers 4.2.0–4.3.5 inclusive before any setup/assertion.
-        // YSA-2017-01 concerns generated RSA, and recommends external import as a mitigation;
-        // this imported-key exclusion and corrected-4.3.5 boundary need separate applicability review.
-        if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
-            state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
-        {
-            return;
-        }
-
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
             action: async session =>
@@ -140,6 +131,27 @@ public class OpenPgpKeyImportTests
                 Assert.Equal(Ed25519TestPublicKey, await ReadEcPublicPointAsync(session, KeyRef.Sig));
             });
 
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
+    public async Task Sign_Ed25519_MatchesRfc8032Signature(YubiKeyTestState state) =>
+        await state.WithOpenPgpSessionAsync(
+            resetBeforeUse: true,
+            action: async session =>
+            {
+                // RFC 8032 §7.1, test 2: one-byte message and deterministic signature for this seed.
+                var seed = Convert.FromHexString("4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb");
+                var expected = Convert.FromHexString(
+                    "92a009a9f0d4cab8720e820b5f642540a2b27b5416503f8fb3762223ebdb69da" +
+                    "085ac1e43e15996e458f3613d0f11d8c387b2eaeb4302aeeb00d291612bb0c00");
+                await session.VerifyAdminAsync(DefaultAdminPin);
+                using var key = Curve25519PrivateKey.CreateFromValue(seed, KeyType.Ed25519);
+                await session.PutKeyAsync(KeyRef.Sig, key);
+                await session.VerifyPinAsync(DefaultUserPin);
+
+                var signature = await session.SignAsync(new byte[] { 0x72 }, HashAlgorithmName.SHA256);
+                Assert.Equal(expected, signature.ToArray());
+            });
+
     /// <summary>
     ///     Compares the card public key with the RFC 7748 vector after scalar-byte reversal for import.
     ///     This checks import/public-key correspondence; X25519 agreement requires a separate operation.
@@ -159,6 +171,25 @@ public class OpenPgpKeyImportTests
                 Assert.Equal(KeyStatus.Imported, (await session.ListKeyInformationAsync())[KeyRef.Dec]);
                 Assert.Equal(KeyType.X25519, Assert.IsType<EcAttributes>(await session.GetAlgorithmAttributesAsync(KeyRef.Dec)).KeyType);
                 Assert.Equal(X25519TestPublicKey, await ReadEcPublicPointAsync(session, KeyRef.Dec));
+            });
+
+    [SkippableTheory]
+    [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.2.0")]
+    public async Task X25519Decipher_MatchesRfc7748SharedSecret(YubiKeyTestState state) =>
+        await state.WithOpenPgpSessionAsync(
+            resetBeforeUse: true,
+            action: async session =>
+            {
+                // RFC 7748 §6.1: Alice's scalar, Bob's public key and their independently published secret.
+                var bobPublic = Convert.FromHexString("de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f");
+                var expected = Convert.FromHexString("4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742");
+                await session.VerifyAdminAsync(DefaultAdminPin);
+                using var key = Curve25519PrivateKey.CreateFromValue(X25519TestPrivateKey, KeyType.X25519);
+                await session.PutKeyAsync(KeyRef.Dec, key);
+
+                await session.VerifyPinAsync(DefaultUserPin, extended: true);
+                var actual = await session.DecryptAsync(bobPublic);
+                Assert.True(CryptographicOperations.FixedTimeEquals(expected, actual.Span));
             });
 
     [SkippableTheory]

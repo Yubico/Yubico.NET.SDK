@@ -49,7 +49,7 @@ internal sealed class PrivateKeyImport : IDisposable
     /// </summary>
     /// <remarks>
     ///     RSA uses the standard (e, p, q) form on firmware 4 and later. The older-family branch constructs
-    ///     CRT components including modulus, but advertises format 02 instead of vendor format 03; NEO
+    ///     CRT components including modulus and advertises vendor format 03; NEO
     ///     compatibility needs separate qualification. The slot picks ECDH or ECDSA for NIST curves; Ed25519 is EdDSA and
     ///     X25519 always ECDH. The X25519 scalar is sent big-endian, the reverse of its RFC 7748 encoding.
     /// </remarks>
@@ -102,7 +102,7 @@ internal sealed class PrivateKeyImport : IDisposable
 
                 return RsaAttributes.Create(
                     rsaSize,
-                    firmwareVersion.Major is > 0 and < 4 ? RsaImportFormat.Crt : RsaImportFormat.Standard);
+                    firmwareVersion.Major is > 0 and < 4 ? RsaImportFormat.CrtWithModulus : RsaImportFormat.Standard);
 
             case ECPrivateKey ec:
                 return EcAttributes.Create(keyRef, ec.KeyType);

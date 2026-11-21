@@ -46,8 +46,8 @@ public interface IOpenPgpSession : IApplicationSession
     /// </summary>
     /// <remarks>
     ///     Refreshes cached algorithm attributes and UIF values without requiring PIN verification.
-    ///     The KDF cache is separate and remains unchanged. Parsing requires recognized algorithms in
-    ///     mandatory fields; use raw data access to inspect response fields outside the model.
+    ///     Credential operations read F9 separately. Well-formed unmodeled algorithm attributes and
+    ///     raw application data remain available for inspection.
     /// </remarks>
     Task<ApplicationRelatedData> GetApplicationRelatedDataAsync(
         CancellationToken cancellationToken = default);
@@ -70,8 +70,8 @@ public interface IOpenPgpSession : IApplicationSession
     /// <remarks>
     ///     The caller supplies correctly encoded value bytes and any required authentication. This method
     ///     borrows <paramref name="data" /> until completion; clear sensitive input afterward. Writes can
-    ///     persistently change credentials, keys or configuration. Cached algorithms, UIF and KDF remain
-    ///     unchanged: refresh application data for algorithms/UIF, and open a fresh session after raw KDF writes.
+    ///     persistently change credentials, keys or configuration. Refresh the application data after
+    ///     writing algorithms or UIF, and use a fresh session to verify a raw KDF write.
     /// </remarks>
     Task PutDataAsync(
         DataObject dataObject,
@@ -84,8 +84,7 @@ public interface IOpenPgpSession : IApplicationSession
     /// <param name="length">Requested positive byte count, within the card's advertised challenge limit.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
-    ///     Check Extended Capabilities before requesting a challenge. The SDK validates positivity and
-    ///     sends the request; capability and maximum-length rejection are left to the card/protocol.
+    ///     The SDK checks positivity and the card's advertised challenge capability and maximum length.
     ///     The caller owns the returned bytes and clears them if used as secret material.
     /// </remarks>
     Task<ReadOnlyMemory<byte>> GetChallengeAsync(
@@ -116,13 +115,8 @@ public interface IOpenPgpSession : IApplicationSession
     /// </summary>
     /// <remarks>
     ///     Both modes verify the same User PIN (PW1), with separate signature (P2=81) and other-operation
-    ///     (P2=82) access states. The Reset Code is a separate recovery credential. The current extended-mode
-    ///     implementation incorrectly selects Reset Code KDF salt and, on SW 6982, its retry counter.
-    ///     With distinct User/Reset salts this can reject a correct PIN and consume a User retry; avoid
-    ///     extended-mode use with that configuration until corrected. Treat its 6982 retry count as uncertain.
-    ///     After an extended-mode failure, query fresh <see cref="GetPinStatusAsync" /> and inspect
-    ///     <see cref="PwStatus.AttemptsUser" />; a typed zero can describe Reset Code attempts instead of a
-    ///     blocked User PIN. Diagnose the cause before another verification attempt.
+    ///     (P2=82) access states. Both use the User PIN KDF salt and retry counter. The Reset Code is a
+    ///     separate recovery credential.
     /// </remarks>
     /// <param name="pin">
     ///     The borrowed UTF-8 encoded User PIN. The caller owns the buffer and must clear it after use.
@@ -133,12 +127,9 @@ public interface IOpenPgpSession : IApplicationSession
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <exception cref="OpenPgpInvalidPinException">
-    ///     Thrown for every unsuccessful VERIFY response, including failures unrelated to a wrong PIN.
+    ///     Thrown for recognized credential statuses. Other failures retain their APDU error.
     ///     <see cref="OpenPgpInvalidPinException.RetriesRemaining" /> reports the available extracted or
-    ///     queried count, or <c>null</c> when unavailable. Extended-mode 6982 fallback currently selects
-    ///     Reset Code attempts; query fresh <see cref="GetPinStatusAsync" /> and inspect
-    ///     <see cref="PwStatus.AttemptsUser" /> before deciding whether User PIN recovery is needed.
-    ///     Diagnose the failure before retrying; a reported zero alone does not establish User blocking.
+    ///     queried User PIN count, or <c>null</c> when unavailable. Diagnose the failure before retrying.
     /// </exception>
     Task VerifyPinAsync(
         ReadOnlyMemory<byte> pin,
@@ -153,7 +144,7 @@ public interface IOpenPgpSession : IApplicationSession
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <exception cref="OpenPgpInvalidPinException">
-    ///     Thrown for every unsuccessful VERIFY response, including failures unrelated to a wrong PIN.
+    ///     Thrown for recognized credential statuses. Other failures retain their APDU error.
     ///     <see cref="OpenPgpInvalidPinException.RetriesRemaining" /> reports the remaining
     ///     attempts (<c>0</c> if the PIN is now blocked), or <c>null</c> if the count could not
     ///     be determined.
@@ -293,12 +284,14 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>Generates a key pair with the supplied algorithm attributes in the specified slot.</summary>
     /// <remarks>
     ///     Verify the Admin PIN first and choose attributes advertised for the slot. Attribute writing precedes
-    ///     generation and can invalidate an existing key. Later failure/cancellation can leave partial changes;
+    ///     generation when supported and can invalidate an existing key. Fixed-attribute cards accept only
+    ///     RSA 2048. Later failure/cancellation can leave partial changes;
     ///     inspect fresh application data/public key before retrying. Successful generation refreshes the cache,
     ///     but refresh itself can fail after key creation. Manage certificates and fingerprint/time metadata separately.
-    ///     EC generation uses the SDK's 5.2.0 check. Avoid on-device RSA generation on ROCA-affected firmware
-    ///     (vendor advisory YSA-2017-01: 4.2.6–4.3.4); this method currently has no ROCA guard.
-    ///     ATT provisioning uses a malformed CRT in this release; use ordinary slots until that encoder is corrected.
+    ///     EC generation uses the SDK's 5.2.0 check. On-card RSA generation is refused before writing
+    ///     attributes for firmware in [4.2.0, 4.3.5). This deliberately starts earlier than the affected
+    ///     range in YSA-2017-01 (4.2.6–4.3.4); 4.3.5 and independent RSA imports are not blocked.
+    ///     Replacing the factory ATT key irreversibly loses manufacturer attestation provenance.
     /// </remarks>
     Task GenerateKeyAsync(
         KeyRef keyRef,
@@ -306,7 +299,8 @@ public interface IOpenPgpSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Imports a private key into the specified slot. Requires Admin PIN verification.
+    ///     Imports a private key into the specified slot, overwriting any key already in that slot.
+    ///     Requires Admin PIN verification.
     /// </summary>
     /// <remarks>
     ///     The algorithm attributes for the slot are derived from the key and written first (when the card
@@ -318,8 +312,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     The caller retains and disposes <paramref name="privateKey" />. Attribute writes can invalidate the
     ///     previous key before import succeeds; cancellation or refresh failure can follow a persistent change.
     ///     Inspect a fresh read before retrying. Certificates and fingerprint/time metadata are separate.
-    ///     EC uses the SDK's 5.2.0 check. Historical NEO import encoding remains unqualified; ATT CRT encoding
-    ///     is currently malformed, so this release provides no reliable ATT provisioning path.
+    ///     EC uses the SDK's 5.2.0 check. Historical NEO import encoding remains unqualified.
+    ///     Replacing the factory ATT key irreversibly loses manufacturer attestation provenance.
     /// </remarks>
     /// <param name="keyRef">The target key slot.</param>
     /// <param name="privateKey">The private key to import.</param>
@@ -354,8 +348,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Decode the template before importing it into a host cryptography API; it is not SubjectPublicKeyInfo.
     /// </returns>
     /// <remarks>
-    ///     Ordinary-slot reads need no PIN verification. ATT reads currently use a malformed CRT and can fail;
-    ///     this is independent of generating a target-key attestation certificate.
+    ///     Ordinary-slot reads need no PIN verification. ATT reads use the Yubico extension's nested CRT;
+    ///     generating a target-key attestation certificate is a separate operation.
     /// </remarks>
     Task<ReadOnlyMemory<byte>> GetPublicKeyAsync(
         KeyRef keyRef,
@@ -411,10 +405,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Refreshes application data and gets the card's stored generation-time metadata for reported slots.
     /// </summary>
     /// <remarks>
-    ///     Zero denotes an unspecified time. The card stores unsigned four-byte seconds since 1970-01-01 UTC;
-    ///     this API currently exposes those bytes as a signed int. Values above int.MaxValue therefore appear
-    ///     negative. Preserve the original four-byte representation when inspecting the full unsigned range,
-    ///     rather than interpreting negative API values as dates before 1970. See <see cref="GenerationTimes" />.
+    ///     Values are unsigned four-byte seconds since 1970-01-01 UTC. Zero denotes an unspecified time.
     /// </remarks>
     Task<GenerationTimes> GetGenerationTimesAsync(
         CancellationToken cancellationToken = default);
@@ -439,20 +430,15 @@ public interface IOpenPgpSession : IApplicationSession
     /// </summary>
     /// <param name="keyRef">The target slot.</param>
     /// <param name="timestamp">
-    ///     The signed int carrying the four bytes to write in big-endian order. Pass zero to mark the
-    ///     generation time unspecified. Card time uses unsigned seconds since 1970-01-01 UTC; preserve
-    ///     that four-byte representation when handling values above int.MaxValue, which appear negative here.
+    ///     Unsigned seconds since 1970-01-01 UTC. Pass zero to mark the generation time unspecified.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
-    ///     Verify the Admin PIN first. The method writes the supplied int's four-byte representation,
-    ///     including negative values, without validating a date range or applying a special zero policy.
-    ///     The card interprets zero as unspecified; other values are unsigned seconds, rather than dates
-    ///     before 1970. This host-supplied metadata is independent of key creation.
+    ///     Verify the Admin PIN first. This host-supplied metadata is independent of key creation.
     /// </remarks>
     Task SetGenerationTimeAsync(
         KeyRef keyRef,
-        int timestamp,
+        uint timestamp,
         CancellationToken cancellationToken = default);
 
     // ── Certificate Operations ────────────────────────────────────────
@@ -525,8 +511,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Verify the Admin PIN first. Updates persistent policy and the session's UIF override cache after
     ///     success. The SDK checks 4.2.0; cached and ATT policies require additional card support. A fixed
     ///     ordinary-slot policy clears on key replacement/deletion or application reset. Fixed ATT policy
-    ///     survives reset and requires ATT key replacement, which loses factory private-key provenance;
-    ///     ATT provisioning is currently affected by malformed CRT encoding.
+    ///     survives reset and requires ATT key replacement, which loses factory private-key provenance.
     /// </remarks>
     Task SetUifAsync(
         KeyRef keyRef,
@@ -563,12 +548,12 @@ public interface IOpenPgpSession : IApplicationSession
 
     /// <summary>
     ///     Gets the list of supported algorithm attributes per key slot.
-    ///     Requires firmware 5.2.0+.
     /// </summary>
     /// <remarks>
-    ///     Preserves order and repeated slots. Entries with unknown tags or algorithm encodings rejected by
-    ///     the parser are skipped; known Curve25519 entries receive a pre-5.6.1 workaround. Treat the result
-    ///     as the SDK's interpreted list and use raw FA bytes when inspecting omitted entries.
+    ///     Below 5.2.0, returns a built-in per-slot RSA list instead of querying the card. Otherwise
+    ///     preserves order and repeated slots. Unknown slot tags are omitted from this typed list;
+    ///     unmodeled algorithms for known slots are preserved, and malformed modeled fields are rejected.
+    ///     Known Curve25519 entries receive a pre-5.6.1 workaround. Use raw FA bytes to inspect omitted entries.
     /// </remarks>
     Task<IReadOnlyList<SupportedAlgorithm>> GetSupportedAlgorithmsAsync(
         CancellationToken cancellationToken = default);
@@ -577,11 +562,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Gets the current KDF configuration.
     /// </summary>
     /// <remarks>
-    ///     Lazily reads F9 and returns the same cached instance on later calls. An APDU read error currently
-    ///     caches KdfNone. Treat the result as session-retained: keep it undisposed while the session uses it.
-    ///     The session disposes its current cached KDF during disposal. Refreshing application data leaves it unchanged.
-    ///     Synchronous disposal clears that object before protocol drain; asynchronous disposal clears it after
-    ///     Core teardown, including on failure. Await complete PIN/KDF tasks before either disposal path.
+    ///     Reads F9 on each call when advertised; propagates read and parse errors. The caller owns and
+    ///     disposes the returned object. Credential operations read and dispose their own independent configuration.
     /// </remarks>
     Task<Kdf> GetKdfAsync(
         CancellationToken cancellationToken = default);
@@ -590,10 +572,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Sets the KDF configuration. Requires Admin PIN verification.
     /// </summary>
     /// <remarks>
-    ///     This persistent credential transition writes F9 and retains the supplied instance as the session's
-    ///     cache. Keep that object undisposed until session disposal. Replacement/reset currently drops the
-    ///     previous reference without disposing it; retain an explicit cleanup scope for such objects after
-    ///     the session ends. The card profile requires terminal software to align credentials and KDF data;
+    ///     Writes F9 without retaining the supplied object. Keep it alive through the call and dispose it
+    ///     yourself. The card profile requires terminal software to align credentials and KDF data;
     ///     YubiKey's vendor transition restores initial User/Admin values and invalidates the Reset Code.
     ///     Subsequent PIN changes derive both current and new inputs with this KDF. Qualify enable/change/disable
     ///     and recovery on a dedicated device before provisioning production credentials. Configure KDF before
@@ -633,15 +613,18 @@ public interface IOpenPgpSession : IApplicationSession
     ///     (04 || X || Y) for ECDH. The SDK supplies the RSA indicator or EC cipher-data wrapper.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
-    /// <returns>Caller-owned plaintext for RSA, or raw shared-secret material for ECDH; clear it after use.</returns>
+    /// <returns>
+    ///     Fresh writable caller-owned plaintext for RSA, or raw shared-secret material for ECDH.
+    ///     Zero the returned span with <c>CryptographicOperations.ZeroMemory</c> after use.
+    /// </returns>
     /// <remarks>
-    ///     Verify the User PIN in extended mode first, subject to that method's current distinct-salt KDF defect.
+    ///     Verify the User PIN in extended mode first.
     ///     The host handles OpenPGP packets, content encryption/decryption, ECDH KDF and protocol validation.
-    ///     A complete .gpg file or OAEP block is outside this input contract. Current X25519 formatting omits
-    ///     the required EC wrapper; use a qualified NIST-curve/RSA path until corrected. The method uses cached
-    ///     algorithm attributes, copies the successful result for the caller and clears the raw response.
+    ///     A complete .gpg file or OAEP block is outside this input contract. For X25519 supply the raw
+    ///     32-byte peer public key; the SDK adds the same EC wrapper as for NIST curves. The method uses
+    ///     cached algorithm attributes, copies the successful result for the caller and clears the raw response.
     /// </remarks>
-    Task<ReadOnlyMemory<byte>> DecryptAsync(
+    Task<Memory<byte>> DecryptAsync(
         ReadOnlyMemory<byte> ciphertext,
         CancellationToken cancellationToken = default);
 
@@ -649,7 +632,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Performs internal authentication using the Authentication key.
     /// </summary>
     /// <remarks>
-    ///     Verify the User PIN in extended mode first, subject to its distinct-salt KDF defect. RSA/ECDSA hash
+    ///     Verify the User PIN in extended mode first. RSA/ECDSA hash
     ///     the borrowed input; RSA uses PKCS#1 v1.5 DigestInfo. EdDSA sends the raw input and ignores the hash
     ///     parameter. Results are raw modulus-sized RSA, DER ECDSA (r,s), or raw 64-byte Ed25519 signatures.
     ///     The caller owns and clears the returned storage. RSA/EdDSA transfer response backing storage;
@@ -674,13 +657,10 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Successful device reset irreversibly removes ordinary keys/certificates and restores application
     ///     defaults. YubiKey ATT key/certificate survive, as does a fixed ATT touch policy. A public certificate
     ///     backup cannot recover a replaced factory ATT private key or its manufacturer trust.
-    ///     The current method ignores TERMINATE/ACTIVATE status words and checks no complete reset postcondition;
-    ///     normal return alone is insufficient to establish erasure. Read back keys, certificates, PIN/retry,
+    ///     The method checks TERMINATE and ACTIVATE and refreshes the same session, including a new SCP
+    ///     handshake when configured. If that refresh fails the session ends. Read back keys, certificates, PIN/retry,
     ///     KDF and policy state independently. Failure/cancellation can leave PINs blocked or state partly changed.
-    ///     The cached KDF reference is dropped without disposal; retain its cleanup scope through session teardown.
-    ///     Reset retains the effective version and any existing SCP processor graph. Reselection sends a plain
-    ///     SELECT through that graph, then uses its retained secure state for subsequent commands; it performs
-    ///     no fresh SCP handshake. The inherited authentication flag does not establish channel restoration.
+    ///     Keep caller-owned SCP parameters alive through session disposal; they are used again after reset.
     ///     After uncertain reset/recovery, dispose and reopen, then inspect persistent state before retrying.
     /// </remarks>
     Task ResetAsync(

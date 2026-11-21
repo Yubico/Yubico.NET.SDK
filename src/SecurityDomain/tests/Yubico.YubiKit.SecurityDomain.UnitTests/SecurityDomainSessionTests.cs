@@ -452,7 +452,7 @@ public class SecurityDomainSessionTests
     {
         var connection = new RecordingSmartCardConnection(
             OkResponse(),
-            [0xC0, 0x04, 0x01, 0xFF, 0x88, 0x10, 0x90, 0x00]);
+            [0xC0, 0x04, 0x01, 0xFF, 0xFE, 0x10, 0x90, 0x00]);
         using var session = await SecurityDomainSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -464,8 +464,24 @@ public class SecurityDomainSessionTests
         Assert.Equal(0x01, entry.KeyReference.Kid);
         Assert.Equal(0xFF, entry.KeyReference.Kvn);
         var component = Assert.Single(entry.Components);
-        Assert.Equal(0x88, component.Tag);
+        Assert.Equal(0xFE, component.Tag); // An unknown, well-formed descriptor is retained.
         Assert.Equal(0x10, component.Value);
+    }
+
+    [Theory]
+    [InlineData(new byte[] { 0xC0, 0x03, 0x01, 0xFF, 0x88 })]
+    [InlineData(new byte[] { 0xC0, 0x01, 0x01 })]
+    [InlineData(new byte[] { 0xC1, 0x02, 0x01, 0xFF })]
+    [InlineData(new byte[] { 0xC0, 0x04, 0x01, 0xFF })]
+    public async Task ListKeyInformationAsync_MalformedEntry_RejectsWholeListing(byte[] tail)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(),
+            [0xC0, 0x02, 0x13, 0x01, .. tail, 0x90, 0x00]);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<BadResponseException>(() => session.ListKeyInformationAsync(
+            TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -525,6 +541,39 @@ public class SecurityDomainSessionTests
         Assert.Equal([0xAA], identifiers[0].Identifier.ToArray());
         Assert.Equal(0x12, identifiers[1].KeyReference.Kid);
         Assert.Equal([0xBB], identifiers[1].Identifier.ToArray());
+    }
+
+    [Theory]
+    [InlineData(new byte[] { 0x42, 0x01, 0xAA })]
+    [InlineData(new byte[] { 0x42, 0x01, 0xAA, 0x83, 0x01, 0x13 })]
+    [InlineData(new byte[] { 0x83, 0x02, 0x13, 0x01, 0x42, 0x01, 0xAA })]
+    [InlineData(new byte[] { 0x42, 0x01, 0xAA, 0x83, 0x02, 0x13 })]
+    public async Task GetCaIdentifiersAsync_MalformedGroup_DoesNotPairAcrossResponses(byte[] malformed)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(),
+            [.. malformed, 0x90, 0x00], [0x83, 0x02, 0x23, 0x01, 0x90, 0x00]);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<BadResponseException>(() => session.GetCaIdentifiersAsync(
+            CaIdentifierType.Kloc | CaIdentifierType.Klcc, TestContext.Current.CancellationToken));
+        Assert.Equal(2, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task GetCaIdentifiersAsync_KlocAbsent_ParsesKlccWithUnknownKeyReference()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x6A, 0x88],
+            [0x42, 0x01, 0xAA, 0x83, 0x02, 0xFE, 0x12, 0x90, 0x00]);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var identifiers = await session.GetCaIdentifiersAsync(CaIdentifierType.Kloc | CaIdentifierType.Klcc,
+            TestContext.Current.CancellationToken);
+
+        var reference = Assert.Single(identifiers).KeyReference;
+        Assert.Equal(0xFE, reference.Kid);
+        Assert.Equal(0x12, reference.Kvn);
     }
 
     [Fact]

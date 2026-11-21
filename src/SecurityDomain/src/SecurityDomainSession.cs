@@ -63,6 +63,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
     private const byte TagControlReference = 0xA6;
     private const byte TagKidKvn = 0x83;
+    private const byte TagCaIssuerSki = 0x42;
 
     private const byte DeleteLastFlag = 0x01; // P2 flag for "delete last"
 
@@ -259,14 +260,12 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
         var keyInformation = new List<KeyInfo>();
 
-        using var tlvList = TlvHelper.DecodeList(response.Span);
+        using var tlvList = DecodeListing(response.Span);
         foreach (var tlv in tlvList)
         {
-            var value = TlvHelper.GetValue(TagKeyInformationData, tlv.AsSpan());
-            if (value.Length < 2)
-                throw new BadResponseException("Key information entry is shorter than expected.");
-
-            var valueSpan = value.Span;
+            var valueSpan = tlv.Value.Span;
+            if (tlv.Tag != TagKeyInformationData || valueSpan.Length < 2 || valueSpan.Length % 2 != 0)
+                throw new BadResponseException("Malformed key information entry.");
             var keyRef = new KeyReference(valueSpan[0], valueSpan[1]);
 
             var components = new List<SecurityDomainKeyInfoComponent>();
@@ -355,13 +354,13 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
         _logger.LogDebug("Getting CA identifier groups {IdentifierTypes}", identifierTypes);
 
-        var arrayBufferWriter = new ArrayBufferWriter<byte>();
+        var caIdentifiers = new List<CaIdentifier>();
         if (identifierTypes.HasFlag(CaIdentifierType.Kloc))
             try
             {
                 var kloc = await GetDataAsync(TagCaKlocIdentifiers, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-                arrayBufferWriter.Write(kloc.Span);
+                AppendCaIdentifiers(kloc.Span, caIdentifiers);
             }
             catch (ApduException e) when (e.SW == SWConstants.DataNotFound) // A kloc might not be present
             {
@@ -372,29 +371,51 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             {
                 var klcc = await GetDataAsync(TagCaKlccIdentifiers, cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
-                arrayBufferWriter.Write(klcc.Span);
+                AppendCaIdentifiers(klcc.Span, caIdentifiers);
             }
             catch (ApduException e) when (e.SW == SWConstants.DataNotFound) // A klcc might not be present
             {
             }
 
-        var caIdentifiers = new List<CaIdentifier>();
-        using var caTlvList = TlvHelper.DecodeList(arrayBufferWriter.WrittenSpan);
+        _logger.LogDebug("CA identifiers retrieved");
+        return caIdentifiers;
+    }
+
+    private static void AppendCaIdentifiers(ReadOnlySpan<byte> response, List<CaIdentifier> caIdentifiers)
+    {
+        using var caTlvList = DecodeListing(response);
         var caTlvObjects = caTlvList.AsSpan();
-        while (caTlvObjects.Length >= 2)
+        if (caTlvObjects.Length % 2 != 0)
+            throw new BadResponseException("CA identifier listing contains an incomplete pair.");
+
+        while (!caTlvObjects.IsEmpty)
         {
             var caIdentifierTlv = caTlvObjects[0];
             var keyReferenceTlv = caTlvObjects[1];
 
             var keyReferenceData = keyReferenceTlv.Value.Span;
+            if (caIdentifierTlv.Tag != TagCaIssuerSki || keyReferenceTlv.Tag != TagKidKvn ||
+                keyReferenceData.Length != 2)
+                throw new BadResponseException("Malformed CA identifier or key reference.");
+
             var keyReference = new KeyReference(keyReferenceData[0], keyReferenceData[1]);
             caIdentifiers.Add(new CaIdentifier(keyReference, caIdentifierTlv.Value.ToArray()));
 
             caTlvObjects = caTlvObjects[2..];
         }
 
-        _logger.LogDebug("CA identifiers retrieved");
-        return caIdentifiers;
+    }
+
+    private static DisposableTlvList DecodeListing(ReadOnlySpan<byte> response)
+    {
+        try
+        {
+            return TlvHelper.DecodeList(response);
+        }
+        catch (ArgumentException)
+        {
+            throw new BadResponseException("Malformed TLV in Security Domain listing.");
+        }
     }
 
     /// <inheritdoc />
@@ -768,7 +789,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
         // Create and serialize data
         using var klccTlv = new Tlv(ClaGlobalPlatform, [klcc]);
-        using var skiTlv = new Tlv(0x42, ski.Span); // GlobalPlatform tag for CA issuer SKI
+        using var skiTlv = new Tlv(TagCaIssuerSki, ski.Span);
         using var kidKvnTlv = new Tlv(TagKidKvn, keyReference.AsSpan());
         var encodedList = TlvHelper.EncodeList([klccTlv, skiTlv, kidKvnTlv]);
         using var caIssuerData = new Tlv(TagControlReference, encodedList.Span);

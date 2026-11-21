@@ -70,10 +70,10 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>Parsed key references and component descriptors, or an empty list for an empty response.</returns>
     /// <remarks>
-    ///     This is metadata, not key material or a complete raw response. The current parser reads component
-    ///     bytes in pairs and ignores an unmatched trailing byte; it does not validate every descriptor.
+    ///     This is metadata, not key material or a complete raw response. Unknown well-formed component
+    ///     descriptors are retained. Use GetDataAsync with object 0xE0 for the raw response bytes.
     /// </remarks>
-    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">A key-information value is shorter than its two-byte reference.</exception>
+    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The response has a malformed key-information entry.</exception>
     Task<IReadOnlyList<KeyInfo>> ListKeyInformationAsync(
         CancellationToken cancellationToken = default);
 
@@ -114,11 +114,12 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>Parsed key-reference/identifier pairs, with KLOC entries before KLCC entries.</returns>
     /// <remarks>
-    ///     A group reported as data-not-found contributes no entries. The current parser assumes paired
-    ///     identifier/reference TLVs and two-byte references; it does not validate every tag or length,
-    ///     and ignores an unmatched trailing TLV. The result is not a complete raw response.
+    ///     A group reported as data-not-found contributes no entries. Each group must contain complete
+    ///     identifier/reference pairs. Well-formed reference values and identifiers are retained as sent.
+    ///     Use GetDataAsync with object 0xFF33 or 0xFF34 for the raw response bytes of a group.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">The selection is None or contains unsupported flags.</exception>
+    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">A group has a malformed identifier/reference pair.</exception>
     Task<IReadOnlyList<CaIdentifier>> GetCaIdentifiersAsync(
         CaIdentifierType identifierTypes,
         CancellationToken cancellationToken = default);

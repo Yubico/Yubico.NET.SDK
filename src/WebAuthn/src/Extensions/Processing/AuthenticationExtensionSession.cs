@@ -39,7 +39,7 @@ internal sealed class AuthenticationExtensionSession : IDisposable
     /// <summary>
     /// Creates the session for the extensions the relying party asked for and the authenticator
     /// advertises; see <see cref="RegistrationExtensionSession.Create"/>.
-    /// LargeBlob writes currently lack the WebAuthn check that the original allow list has exactly one entry.
+    /// The client requires a nonempty original allow list for writes but deliberately accepts more than one entry.
     /// </summary>
     /// <param name="inputs">The relying party's extension inputs, or null.</param>
     /// <param name="allowCredentials">The relying party's allow list; per-credential inputs are validated against it.</param>

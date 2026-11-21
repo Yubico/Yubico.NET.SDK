@@ -125,6 +125,14 @@ public sealed partial class WebAuthnClient
                 "RP ID cannot be null or empty");
         }
 
+        // L3 §10.1.5 requires exactly one original entry. The SDK permits additional entries,
+        // but never a discoverable write: the silent probe must bind storage to one credential.
+        if (options.Extensions?.LargeBlob?.Write is not null && options.AllowCredentials is not { Count: > 0 })
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "A largeBlob write requires a nonempty allow list (WebAuthn L3 §10.1.5).");
+        }
+
         if (options.TopOrigin is not null && options.CrossOrigin != true)
         {
             // WebAuthn L3 §5.8.1: topOrigin "is set only if the call was made from a context that is not

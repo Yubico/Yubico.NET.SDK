@@ -89,6 +89,32 @@ public class LargeBlobProcessorTests
         await _storage.Received(1).SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
     }
 
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public async Task Authentication_WriteWithoutOriginalAllowEntriesFailsBeforeIo(bool absent, bool supported)
+    {
+        var info = Context(supported).Info;
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey));
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(new()
+        {
+            Challenge = new byte[32],
+            RpId = "example.com",
+            AllowCredentials = absent ? null : [],
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Write = new byte[] { 1 } })
+        }, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+        await _backend.DidNotReceive().GetCachedInfoAsync(Arg.Any<CancellationToken>());
+        await _backend.DidNotReceive().GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+        await _storage.DidNotReceive().SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+    }
+
     private static readonly byte[] LargeBlobKey = Enumerable.Repeat((byte)0x4B, 32).ToArray();
     private static readonly byte[] StoredBlob = "stored blob"u8.ToArray();
 

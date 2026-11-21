@@ -128,8 +128,14 @@ public interface ICtap2Session : IApplicationSession
     /// seconds. Meet the product's transport and any enabled long-touch requirements; inspect
     /// <see cref="AuthenticatorInfo.TransportsForReset"/> and <see cref="AuthenticatorInfo.LongTouchForReset"/>
     /// where advertised. The authenticator enforces these conditions; this method does not arrange
-    /// power cycling, enforce a local clock, refresh session state or roll back an attempted reset.
+    /// power cycling, enforce a local clock or roll back an attempted reset.
     /// Reset is destructive and cannot be undone.
+    /// </para>
+    /// <para>
+    /// After a confirmed reset the same session refreshes GetInfo and its request limits, reselects
+    /// on SmartCard and reestablishes any configured SCP channel. The refresh is not cancelled by
+    /// the request token; if refresh fails, the session ends but the reset is not undone. Previous
+    /// PIN/UV tokens are no longer valid. Keep borrowed SCP key parameters alive through reset.
     /// </para>
     /// <para>
     /// Product procedure: https://docs.yubico.com/yesdk/users-manual/application-fido2/fido2-reset.html

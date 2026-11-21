@@ -371,7 +371,11 @@ neither keep-alive cancellation nor async disposal imposes a completion deadline
 after uncertain framing, transport or teardown state rather than promising universal reuse.
 
 Selection and Reset carry null-scope context for an authoritative HID keep-alive, but do not predict
-touch on SmartCard. Generic `SendCborRequestAsync` calls do not infer touch semantics. Bio enrollment
+touch on SmartCard. Once typed Reset observes a successful status, it rebuilds the protocol, reselects
+on SmartCard, refreshes GetInfo-derived limits and reestablishes any configured SCP channel on the same
+session. FIDO reset does not reset Security Domain keys; keep caller-owned SCP parameters alive through
+reset. A refresh failure ends the session without undoing the reset. Generic `SendCborRequestAsync`
+calls do not infer touch semantics or run typed reset recovery. Bio enrollment
 and other helpers that currently route through that generic API remain silent until their individual
 user-presence behavior is modeled explicitly.
 

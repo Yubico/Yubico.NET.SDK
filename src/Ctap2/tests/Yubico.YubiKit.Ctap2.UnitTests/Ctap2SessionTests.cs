@@ -519,6 +519,92 @@ public class Ctap2SessionTests
         Assert.Same(requested, Assert.Single(prompt.Resolved).Context);
     }
 
+    [Fact]
+    public async Task ResetAsync_ConfirmedResetReselectsAndUsesRefreshedLimitsOnSameSession()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] before = [0x00, .. MinimalGetInfoResponse(maxMsgSize: 2048, firmwareVersion: 0x050800), 0x90, 0x00];
+        byte[] after = [0x00, .. MinimalGetInfoResponse(firmwareVersion: 0x050801), 0x90, 0x00];
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], before, [0x00, 0x90, 0x00], [0x90, 0x00], after, [0x00, 0x90, 0x00]);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+
+        await session.ResetAsync(ct);
+
+        Assert.True(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(new FirmwareVersion(5, 8, 1), session.FirmwareVersion);
+        await Assert.ThrowsAsync<ArgumentException>(() => session.SendCborRequestAsync(new byte[1025], ct));
+        await session.SelectionAsync(ct);
+        Assert.Equal(new byte[] { 0xA4, 0x10, 0x10, 0xA4, 0x10, 0x10 },
+            connection.TransmittedCommands.Select(command => command[1]).ToArray());
+        Assert.Equal(CtapCommand.Reset, connection.TransmittedCommands[2][5]);
+        Assert.Equal(CtapCommand.GetInfo, connection.TransmittedCommands[4][5]);
+        Assert.Equal(CtapCommand.Selection, connection.TransmittedCommands[5][5]);
+        Assert.Equal(0, connection.DisposeAsyncCount);
+    }
+
+    [Fact]
+    public async Task ResetAsync_RefusedResetDoesNotReselectOrEndSession()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] info = [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00];
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], info, [(byte)CtapStatus.NotAllowed, 0x90, 0x00], info);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+
+        Assert.Equal(CtapStatus.NotAllowed, (await Assert.ThrowsAsync<CtapException>(() => session.ResetAsync(ct))).Status);
+
+        Assert.True(session.IsInitialized);
+        Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+        Assert.Equal(new byte[] { 0xA4, 0x10, 0x10, 0x10 },
+            connection.TransmittedCommands.Select(command => command[1]).ToArray());
+    }
+
+    [Fact]
+    public async Task ResetAsync_HidConfirmationRefreshesEvenWhenPresenceResolutionThrows()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse(), resetSucceeds: true);
+        var expected = new InvalidOperationException("presence resolution failed after success");
+        var prompt = new RecordingUserPresencePrompt(resolutionException: expected);
+        await using var session = await Ctap2Session.CreateAsync(connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt }, ct);
+
+        Assert.Same(expected, await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetAsync(ct)));
+
+        Assert.True(session.IsInitialized);
+        Assert.Equal(2, connection.InitCount);
+        Assert.Equal(UserPresenceOutcome.Completed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+    }
+
+    [Fact]
+    public async Task ResetAsync_FailedRefreshIsTerminalAndDisposalDoesNotReplaceIt()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var secondary = new InvalidOperationException("owned connection teardown failed");
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00], [0x00, 0x90, 0x00],
+            [0x90, 0x00], [0x00, 0xA0, 0x90, 0x00]) // Malformed refresh GetInfo.
+        {
+            DisposeAsyncException = secondary
+        };
+        var device = new SingleConnectionYubiKey(connection);
+        await using var session = await device.CreateCtap2SessionAsync(
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }, ct);
+
+        var primary = await Assert.ThrowsAsync<CborContentException>(() => session.ResetAsync(ct));
+
+        Assert.Same(secondary, primary.Data["ResetRefreshCleanupException"]);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetInfoAsync(ct));
+        await session.DisposeAsync();
+        Assert.Equal(1, connection.DisposeAsyncCount);
+        Assert.Equal(5, connection.TransmittedCommands.Count);
+    }
+
     [Theory]
     [InlineData(null, 1024)]
     [InlineData(1200, 1200)]
@@ -641,17 +727,21 @@ public class Ctap2SessionTests
         Scope = "example.com"
     };
 
-    private sealed class TouchWaitingHidConnection(byte[] getInfo) : IFidoHidConnection
+    private sealed class TouchWaitingHidConnection(byte[] getInfo, bool resetSucceeds = false) : IFidoHidConnection
     {
         private byte[]? _init;
         private int _responseCount;
         public int PacketSize => CtapConstants.PacketSize;
         public ConnectionType Type => ConnectionType.HidFido;
+        public int InitCount { get; private set; }
 
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default)
         {
             if ((packet.Span[4] & 0x7F) == CtapConstants.CtapHidInit)
+            {
+                InitCount++;
                 _init = packet.ToArray();
+            }
             return Task.CompletedTask;
         }
 
@@ -662,6 +752,9 @@ public class Ctap2SessionTests
                 0 => InitResponse(),
                 1 => Packet(0x01020304, CtapConstants.CtapHidCbor, [0x00, .. getInfo]),
                 2 => Packet(0x01020304, CtapConstants.CtapHidKeepAlive, [0x02]),
+                3 when resetSucceeds => Packet(0x01020304, CtapConstants.CtapHidCbor, [0x00]),
+                4 when resetSucceeds => InitResponse(),
+                5 or 6 when resetSucceeds => Packet(0x01020304, CtapConstants.CtapHidCbor, [0x00, .. getInfo]),
                 _ => Packet(0x01020304, CtapConstants.CtapHidCbor, [(byte)CtapStatus.UserActionTimeout])
             };
             return Task.FromResult<ReadOnlyMemory<byte>>(response);

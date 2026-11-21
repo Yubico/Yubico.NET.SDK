@@ -46,7 +46,8 @@ internal sealed class HidBackend : ICtap2Backend
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,
         UserPresenceNotification userPresenceNotification,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Action? onSuccess = null)
     {
         ArgumentNullException.ThrowIfNull(userPresenceNotification);
 
@@ -87,6 +88,7 @@ internal sealed class HidBackend : ICtap2Backend
                 _ => UserPresenceOutcome.Failed
             };
             CtapException.ThrowIfError(status);
+            onSuccess?.Invoke();
 
             _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
                 status, response.Length - 1);

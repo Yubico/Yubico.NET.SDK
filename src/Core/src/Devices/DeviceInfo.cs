@@ -419,6 +419,6 @@ internal static class CapabilityMapper
 
         return appData.Length == 1
             ? (DeviceCapabilities)appData.Span[0]
-            : (DeviceCapabilities)BinaryPrimitives.ReadInt16BigEndian(appData.Span);
+            : (DeviceCapabilities)BinaryPrimitives.ReadUInt16BigEndian(appData.Span);
     }
 }

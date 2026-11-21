@@ -39,6 +39,18 @@ public sealed class ManagementAuditReproTests
         Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { DeviceFlags = (DeviceFlags)flags }.GetBytes());
 
     [Fact]
+    public void ReportedCapabilityMasks_RoundTripThroughConfigurationWithoutLosingHighBit()
+    {
+        using var usb = new Yubico.YubiKit.Core.Utilities.Tlv(0x03, [0x80, 0x01]);
+        using var nfc = new Yubico.YubiKit.Core.Utilities.Tlv(0x0E, [0x80, 0x20]);
+        var info = DeviceInfo.CreateFromTlvs([usb, nfc], new FirmwareVersion(5, 7, 0));
+        var config = new DeviceConfig { UsbEnabled = info.UsbEnabled, NfcEnabled = info.NfcEnabled };
+
+        byte[] expected = [8, 0x03, 2, 0x80, 0x01, 0x0E, 2, 0x80, 0x20];
+        Assert.Equal(expected, config.GetBytes().Span);
+    }
+
+    [Fact]
     public void GetBytes_PreservesInWidthUnknownMaskAndFlagBits()
     {
         var config = new DeviceConfig

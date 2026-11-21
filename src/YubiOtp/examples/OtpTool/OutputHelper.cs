@@ -122,4 +122,20 @@ public static class OutputHelper
 
         return ParseHex(hex, paramName) ?? throw new ArgumentException($"--{paramName} is required.");
     }
+
+    internal static void ValidateAccessCode(ReadOnlySpan<byte> accessCode)
+    {
+        if (!accessCode.IsEmpty)
+        {
+            RequireByteLength(accessCode, "access-code", 6);
+        }
+    }
+
+    internal static void RequireByteLength(ReadOnlySpan<byte> bytes, string option, int expectedLength)
+    {
+        if (bytes.Length != expectedLength)
+        {
+            throw new ArgumentException($"--{option} must be exactly {expectedLength} bytes.");
+        }
+    }
 }

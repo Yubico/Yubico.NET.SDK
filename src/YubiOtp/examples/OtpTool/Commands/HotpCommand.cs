@@ -37,11 +37,6 @@ public static class HotpCommand
         if (options.Generate)
         {
             hmacKey = RandomNumberGenerator.GetBytes(20);
-
-            if (!options.Json)
-            {
-                OutputHelper.WriteHex("Generated HMAC key", hmacKey);
-            }
         }
         else
         {
@@ -52,7 +47,13 @@ public static class HotpCommand
 
         try
         {
+            OutputHelper.ValidateAccessCode(accessCode);
             using var config = new HotpSlotConfiguration(hmacKey, options.Imf ?? 0);
+            if (options.Generate && !options.Json)
+            {
+                OutputHelper.WriteHex("Generated HMAC key", hmacKey);
+            }
+
             if (!options.Force && !options.Json)
             {
                 if (!AnsiConsole.Confirm(

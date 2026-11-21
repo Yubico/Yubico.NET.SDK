@@ -24,11 +24,15 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// Public-ID hex is decoded to raw bytes; the key emits modhex characters. Generated key/private-ID
 /// output in human mode is intentional provisioning output, not safe logging, and differs from JSON.
 /// A supplied current code is retained unless removal is explicitly requested.
-/// Parsed secret strings are immutable and parser diagnostics can echo input. The command's finally
+/// Parsed secret strings are immutable. The command's finally
 /// clears its acquired AES-key, private-ID and access-code arrays, not those strings or captured output.
 /// </remarks>
 public static class YubiOtpCommand
 {
+    private const int PublicIdMaxLength = 16;
+    private const int PrivateIdLength = 6;
+    private const int AesKeyLength = 16;
+
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
     {
         var slot = options.Slot
@@ -41,6 +45,7 @@ public static class YubiOtpCommand
 
         try
         {
+            OutputHelper.ValidateAccessCode(accessCode);
             // Public ID
             if (options.SerialPublicId)
             {
@@ -56,40 +61,47 @@ public static class YubiOtpCommand
                     throw new ArgumentException(
                         "--public-id or --serial-public-id is required for yubiotp command.");
                 }
+
+                if (publicId.Length > PublicIdMaxLength)
+                {
+                    throw new ArgumentException($"--public-id must be at most {PublicIdMaxLength} bytes.");
+                }
             }
 
             // Private ID
             if (options.GeneratePrivateId)
             {
-                privateId = RandomNumberGenerator.GetBytes(6);
-
-                if (!options.Json)
-                {
-                    OutputHelper.WriteHex("Generated private ID", privateId);
-                }
+                privateId = RandomNumberGenerator.GetBytes(PrivateIdLength);
             }
             else
             {
                 privateId = OutputHelper.ParseHex(options.PrivateId, "private-id")
                             ?? throw new ArgumentException(
                                 "--private-id or --generate-private-id is required for yubiotp command.");
+                OutputHelper.RequireByteLength(privateId, "private-id", PrivateIdLength);
             }
 
             // AES Key
             if (options.GenerateKey)
             {
-                aesKey = RandomNumberGenerator.GetBytes(16);
-
-                if (!options.Json)
-                {
-                    OutputHelper.WriteHex("Generated AES key", aesKey);
-                }
+                aesKey = RandomNumberGenerator.GetBytes(AesKeyLength);
             }
             else
             {
                 aesKey = OutputHelper.ParseHex(options.Key, "key")
                          ?? throw new ArgumentException(
                              "--key or --generate-key is required for yubiotp command.");
+                OutputHelper.RequireByteLength(aesKey, "key", AesKeyLength);
+            }
+
+            if (options.GeneratePrivateId && !options.Json)
+            {
+                OutputHelper.WriteHex("Generated private ID", privateId);
+            }
+
+            if (options.GenerateKey && !options.Json)
+            {
+                OutputHelper.WriteHex("Generated AES key", aesKey);
             }
 
             if (!options.Force && !options.Json)

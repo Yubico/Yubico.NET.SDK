@@ -1,4 +1,5 @@
 using NSubstitute;
+using System.Security.Cryptography;
 using System.Reflection;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
@@ -824,6 +825,35 @@ public class SecurityDomainSessionTests
     }
 
     private static byte[] OkResponse() => [0x90, 0x00];
+
+    [Theory]
+    [InlineData(9, 0x19, -1, false)]
+    [InlineData(11, 0x19, -1, false)]
+    [InlineData(10, 0x18, -1, false)]
+    [InlineData(10, 0x19, 1, false)]
+    [InlineData(10, 0x19, 4, false)]
+    [InlineData(10, 0x19, 7, false)]
+    [InlineData(10, 0x19, -1, true)]
+    public void Scp03Kcv_RequiresExactVersionAndAllThreeValues(int responseLength, byte version, int mismatch, bool valid)
+    {
+        using var keys = StaticKeys.GetDefaultKeys(); // Public factory test material.
+        using var aes = Aes.Create();
+        aes.SetKey(keys.Enc);
+        Span<byte> input = stackalloc byte[16];
+        input.Fill(1);
+        byte[] kcv = aes.EncryptEcb(input, PaddingMode.None);
+        byte[] response = [version, .. kcv[..3], .. kcv[..3], .. kcv[..3], 0];
+        if (mismatch >= 0)
+            response[mismatch] ^= 0xFF;
+
+        var exception = Record.Exception(() =>
+            SecurityDomainKeyMaterial.ValidateKcv(keys, 0x19, response.AsSpan(0, responseLength)));
+
+        if (valid)
+            Assert.Null(exception);
+        else
+            Assert.IsType<InvalidOperationException>(exception);
+    }
 
     [Fact]
     public async Task ResetAsync_WithIncompleteReferences_ReportsAllOutcomesWithoutReselecting()

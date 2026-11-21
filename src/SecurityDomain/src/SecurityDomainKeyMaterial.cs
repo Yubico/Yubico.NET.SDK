@@ -60,10 +60,13 @@ internal static class SecurityDomainKeyMaterial
         }
     }
 
-    internal static void ValidateKcv(StaticKeys staticKeys, ReadOnlySpan<byte> response)
+    internal static void ValidateKcv(StaticKeys staticKeys, byte expectedKvn, ReadOnlySpan<byte> response)
     {
-        if (response.Length < 10)
-            throw new InvalidOperationException("Response too short for KCV validation");
+        if (response.Length != 10)
+            throw new InvalidOperationException("Expected the returned KVN and exactly three key check values.");
+
+        if (response[0] != expectedKvn)
+            throw new InvalidOperationException("Returned key version does not match the imported key version.");
 
         Span<byte> expectedKcvEnc = stackalloc byte[3];
         Span<byte> expectedKcvMac = stackalloc byte[3];

@@ -155,7 +155,7 @@ public interface ISecurityDomainSession : IApplicationSession
     ///     sets already installed, 0 adds a version; a nonzero value requests replacement. Escrow secrets
     ///     before import and verify a fresh session with the new keys before deleting any retained old set.
     ///     The SDK does not enforce every device range: replaceKvn is currently cast to one byte.
-    ///     Response validation compares the three KCVs, not the returned version or all trailing data.
+    ///     Response validation requires the requested KVN followed by exactly three matching KCVs.
     /// </remarks>
     /// <exception cref="ArgumentNullException">The static key set is null.</exception>
     /// <exception cref="ArgumentException">The reference does not use KID 0x01.</exception>

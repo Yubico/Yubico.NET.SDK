@@ -503,7 +503,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
             try
             {
-                SecurityDomainKeyMaterial.ValidateKcv(staticKeys, response.Data.Span);
+                SecurityDomainKeyMaterial.ValidateKcv(staticKeys, keyReference.Kvn, response.Data.Span);
             }
             finally
             {

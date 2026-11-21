@@ -25,6 +25,7 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management.Backend;
@@ -428,7 +429,8 @@ public class ManagementSessionTests
         public bool RejectReset { get; init; }
         public bool FailReselect { get; init; }
         public bool UnknownSelectVersion { get; init; }
-        public bool ReportsBeta { get; init; }
+        public VersionQualifierType? ReportedQualifier { get; init; }
+        public int? InitializeUpdateFrameLength { get; private set; }
         public bool ExtendedCapable { get; init; }
         public byte[] ConfigurationCommand { get; private set; } = [];
         public Exception? DisposalFailure { get; init; }
@@ -445,6 +447,7 @@ public class ManagementSessionTests
                 0x1D => ReadInfo(),
                 0x1C => WriteConfig(command),
                 0x1F => Reset(command),
+                0x50 => RejectInitializeUpdate(command.Length),
                 _ => throw new InvalidOperationException("Unexpected Management command."),
             };
             return Task.FromResult<ReadOnlyMemory<byte>>(response);
@@ -469,9 +472,9 @@ public class ManagementSessionTests
         private byte[] ReadInfo()
         {
             Reads++;
-            if (ReportsBeta)
+            if (ReportedQualifier is { } qualifier)
                 return [21, 0x05, 3, major, minor, 0, 0x19, 14,
-                    0x01, 3, major, minor, 0, 0x02, 1, 1, 0x03, 4, 0, 0, 0, 1, 0x90, 0];
+                    0x01, 3, major, minor, 0, 0x02, 1, (byte)qualifier, 0x03, 4, 0, 0, 0, 1, 0x90, 0];
             return (major, minor) == (4, 0) ? [0x6D, 0] : [5, 0x05, 3, major, minor, (byte)(Selects - 1), 0x90, 0];
         }
 
@@ -479,6 +482,12 @@ public class ManagementSessionTests
         {
             ConfigurationCommand = command.ToArray();
             return [0x90, 0];
+        }
+
+        private byte[] RejectInitializeUpdate(int frameLength)
+        {
+            InitializeUpdateFrameLength = frameLength;
+            return [0x6A, 0x88];
         }
 
         public IDisposable BeginTransaction(CancellationToken cancellationToken) => throw new NotSupportedException();
@@ -502,7 +511,7 @@ public class ManagementSessionTests
         var ct = TestContext.Current.CancellationToken;
         await using var connection = new VersionedSmartCardConnection(unknown ? (byte)4 : (byte)5, unknown ? (byte)0 : (byte)7)
         {
-            ReportsBeta = beta,
+            ReportedQualifier = beta ? VersionQualifierType.Beta : null,
             UnknownSelectVersion = unknown,
             ExtendedCapable = true,
         };
@@ -516,6 +525,47 @@ public class ManagementSessionTests
             ? [0, 0x1C, 0, 0, 0, 0, 4, 3, 0x17, 1, 1, 0, 0]
             : [0, 0x1C, 0, 0, 4, 3, 0x17, 1, 1, 0];
         Assert.Equal(expected, connection.ConfigurationCommand);
+    }
+
+    [Theory]
+    [InlineData(VersionQualifierType.Final, false, false, false, null)]
+    [InlineData(VersionQualifierType.Beta, false, false, false, 14)]
+    [InlineData((VersionQualifierType)0xFE, false, false, false, 14)]
+    [InlineData(VersionQualifierType.Beta, false, false, true, null)]
+    [InlineData(VersionQualifierType.Beta, true, false, false, null)]
+    [InlineData(null, false, true, false, 17)]
+    public async Task CreateAsync_ScpEligibilityUsesEffectiveFirmwareWithoutChangingFraming(
+        VersionQualifierType? qualifier, bool cachedWithoutQualifier, bool unknown, bool overrideWithRelease,
+        int? expectedFrameLength)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var lowFirmware = new FirmwareVersion(5, 2, 0);
+        await using var connection = new VersionedSmartCardConnection(unknown ? (byte)4 : (byte)5, unknown ? (byte)0 : (byte)2)
+        {
+            ReportedQualifier = qualifier,
+            UnknownSelectVersion = unknown,
+            ExtendedCapable = true,
+        };
+        // Simulate external metadata with an absent qualifier despite the required initializer.
+        DeviceInfo? cached = cachedWithoutQualifier
+            ? DeviceInfo.CreateFromTlvs([], lowFirmware) with { VersionQualifier = null! }
+            : null;
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            FirmwareVersionOverride = overrideWithRelease ? lowFirmware : null,
+            ProtocolConfiguration = new() { ForceShortApdus = true },
+            ScpKeyParameters = keys,
+        };
+
+        var create = ManagementSession.CreateWithCachedDeviceInfoAsync(connection, options, cached, ct);
+        if (expectedFrameLength is null)
+            await Assert.ThrowsAsync<NotSupportedException>(() => create);
+        else
+            Assert.Equal(unchecked((short)0x6A88), (await Assert.ThrowsAsync<ApduException>(() => create)).SW);
+
+        Assert.Equal(expectedFrameLength, connection.InitializeUpdateFrameLength);
+        Assert.Equal(1, connection.Reads);
     }
 
     [Fact]

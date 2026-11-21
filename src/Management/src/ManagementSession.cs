@@ -148,15 +148,17 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             ? await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false)
             : await TryReadInitialDeviceInfoAsync(protocol, cancellationToken).ConfigureAwait(false);
         _version = liveInfo?.FirmwareVersion ?? fallbackVersion;
+        var featureFirmware = GetFeatureFirmware(cachedDeviceInfo ?? liveInfo, fallbackVersion);
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
                 GetTransportFirmware(cachedDeviceInfo),
                 _configuration,
                 _scpKeyParameters,
-                cancellationToken)
+                cancellationToken,
+                admitUnverifiedScpFirmware: featureFirmware.IsAlphaOrBeta)
             .ConfigureAwait(false);
 
-        FirmwareVersion = _firmwareVersionOverride ?? GetFeatureFirmware(cachedDeviceInfo ?? liveInfo, fallbackVersion);
+        FirmwareVersion = featureFirmware;
         _backend = CreateBackend(effectiveProtocol);
 
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
@@ -293,10 +295,11 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         (_version is { Major: > 0 } ? _version : cachedDeviceInfo?.FirmwareVersion ?? _version) ??
         new FirmwareVersion();
 
-    private static FirmwareVersion GetFeatureFirmware(DeviceInfo? info, FirmwareVersion? fallback) =>
-        info?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta
+    private FirmwareVersion GetFeatureFirmware(DeviceInfo? info, FirmwareVersion? fallback) =>
+        _firmwareVersionOverride ??
+        (info?.VersionQualifier is { Type: not VersionQualifierType.Final }
             ? new FirmwareVersion()
-            : info?.FirmwareVersion ?? fallback ?? new FirmwareVersion();
+            : info?.FirmwareVersion ?? fallback ?? new FirmwareVersion());
 
     private static IManagementBackend CreateBackend(IProtocol protocol) =>
         protocol switch

@@ -643,7 +643,7 @@ public class SecurityDomainSessionTests
     }
 
     [Fact]
-    public async Task GenerateKeyAsync_TransmitsGenerateKeyWithCurveParameters()
+    public async Task GenerateAndImportEcKey_TransmitExplicitP256CurveParameters()
     {
         byte[] publicPoint =
         [
@@ -663,7 +663,7 @@ public class SecurityDomainSessionTests
         publicPoint.CopyTo(response.AsSpan(2));
         response[^2] = 0x90;
 
-        var connection = new RecordingSmartCardConnection(OkResponse(), response);
+        var connection = new RecordingSmartCardConnection(OkResponse(), response, [0x03, 0x90, 0x00]);
         using var session = await SecurityDomainSession.CreateAsync(
             connection,
             new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 7, 2) },
@@ -676,6 +676,12 @@ public class SecurityDomainSessionTests
         Assert.NotNull(generatedKey);
         Assert.Equal([0x80, 0xF1, 0x00, 0x13, 0x04, 0x02, 0xF0, 0x01, 0x00, 0x00],
             connection.TransmittedCommands[1]);
+
+        await session.PutKeyAsync(new KeyReference(0x10, 0x03), generatedKey,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal([0x80, 0xD8, 0x00, 0x10, 0x48, 0x03, 0xB0, 0x41, .. publicPoint,
+            0xF0, 0x01, 0x00, 0x00, 0x00], connection.TransmittedCommands[2]);
     }
 
     [Fact]

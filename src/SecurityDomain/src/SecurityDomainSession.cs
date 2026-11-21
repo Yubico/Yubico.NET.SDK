@@ -678,7 +678,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             buffer.Write(keyTlv.AsSpan());
 
             // Write the EC parameters
-            using var paramsTlv = new Tlv(KeyTypeEccKeyParams, stackalloc byte[1]);
+            using var paramsTlv = new Tlv(KeyTypeEccKeyParams, (ReadOnlySpan<byte>)[0x00]); // NIST P-256
             buffer.Write(paramsTlv.AsSpan());
             buffer.Write((ReadOnlySpan<byte>)[0]);
 

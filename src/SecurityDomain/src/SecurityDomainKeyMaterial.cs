@@ -72,22 +72,27 @@ internal static class SecurityDomainKeyMaterial
         Span<byte> expectedKcvMac = stackalloc byte[3];
         Span<byte> expectedKcvDek = stackalloc byte[3];
 
-        CalculateKcv(staticKeys.Enc, expectedKcvEnc);
-        CalculateKcv(staticKeys.Mac, expectedKcvMac);
-        CalculateKcv(staticKeys.Dek, expectedKcvDek);
+        try
+        {
+            CalculateKcv(staticKeys.Enc, expectedKcvEnc);
+            CalculateKcv(staticKeys.Mac, expectedKcvMac);
+            CalculateKcv(staticKeys.Dek, expectedKcvDek);
 
-        var actualKcvEnc = response.Slice(1, 3);
-        var actualKcvMac = response.Slice(4, 3);
-        var actualKcvDek = response.Slice(7, 3);
+            if (!CryptographicOperations.FixedTimeEquals(expectedKcvEnc, response.Slice(1, 3)))
+                throw new InvalidOperationException("ENC key check value mismatch");
 
-        if (!CryptographicOperations.FixedTimeEquals(expectedKcvEnc, actualKcvEnc))
-            throw new InvalidOperationException("ENC key check value mismatch");
+            if (!CryptographicOperations.FixedTimeEquals(expectedKcvMac, response.Slice(4, 3)))
+                throw new InvalidOperationException("MAC key check value mismatch");
 
-        if (!CryptographicOperations.FixedTimeEquals(expectedKcvMac, actualKcvMac))
-            throw new InvalidOperationException("MAC key check value mismatch");
-
-        if (!CryptographicOperations.FixedTimeEquals(expectedKcvDek, actualKcvDek))
-            throw new InvalidOperationException("DEK key check value mismatch");
+            if (!CryptographicOperations.FixedTimeEquals(expectedKcvDek, response.Slice(7, 3)))
+                throw new InvalidOperationException("DEK key check value mismatch");
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(expectedKcvEnc);
+            CryptographicOperations.ZeroMemory(expectedKcvMac);
+            CryptographicOperations.ZeroMemory(expectedKcvDek);
+        }
     }
 
     private static void CalculateKcv(ReadOnlySpan<byte> key, Span<byte> output)
@@ -105,8 +110,14 @@ internal static class SecurityDomainKeyMaterial
         iv.Clear();
 
         Span<byte> encrypted = stackalloc byte[16];
-        aes.EncryptCbc(kcvInput, iv, encrypted, PaddingMode.None);
-
-        encrypted[..3].CopyTo(output);
+        try
+        {
+            aes.EncryptCbc(kcvInput, iv, encrypted, PaddingMode.None);
+            encrypted[..3].CopyTo(output);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(encrypted);
+        }
     }
 }

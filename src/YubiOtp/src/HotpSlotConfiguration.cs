@@ -30,8 +30,7 @@ namespace Yubico.YubiKit.YubiOtp;
 /// before any device I/O is attempted; they are never hashed or padded to fit.
 /// The configuration owns a copy of the key; dispose it and separately clear the source.
 /// HOTP is keyboard output; synchronize the initial counter with your verifier. Nonzero counter
-/// presets require firmware 2.2 or later; the configuration's type-level check is not sufficient
-/// to establish that support.
+/// presets still require physical qualification on the target firmware.
 /// </remarks>
 public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
 {
@@ -61,7 +60,7 @@ public sealed class HotpSlotConfiguration : KeyboardSlotConfiguration
         _tktFlags |= TicketFlag.OathHotp;
     }
 
-    public override FirmwareVersion MinimumFirmwareVersion => new(2, 1, 0);
+    public override FirmwareVersion MinimumFirmwareVersion => new(2, 2, 0);
 
     /// <summary>
     /// Configures the OTP output to use 8 digits instead of the default 6.

@@ -135,9 +135,10 @@ public static class IYubiKeyExtensions
                     async (connection, ct) =>
                     {
                         var session = await YubiOtpSession
-                            .CreateAsync(
+                            .CreateUsingCachedInfoAsync(
                                 connection,
                                 sessionOptions,
+                                yubiKey.CachedDeviceInfo,
                                 ct)
                             .ConfigureAwait(false);
 

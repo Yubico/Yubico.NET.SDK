@@ -108,6 +108,43 @@ public class YubiOtpSessionTests
         Assert.Equal(9, programmingSequence);
     }
 
+    [Theory]
+    [InlineData(2, VersionQualifierType.Final, false)]
+    [InlineData(2, VersionQualifierType.Beta, true)]
+    [InlineData(0, VersionQualifierType.Final, true)]
+    public async Task CreateUsingCachedInfoAsync_SeparatesAdmissionFromNumericFraming(
+        int cachedMajor, VersionQualifierType qualifier, bool admit)
+    {
+        var metadataVersion = new FirmwareVersion(cachedMajor, 1, 0);
+        var info = DeviceInfo.CreateFromTlvs([], metadataVersion) with
+        {
+            VersionQualifier = new VersionQualifier(metadataVersion, qualifier, 0)
+        };
+        var ct = TestContext.Current.CancellationToken;
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Type.Returns(ConnectionType.SmartCard);
+        connection.Transport.Returns(Transport.Usb);
+        byte[] rawStatus = [2, 1, 7, 9, 0, 0, 0x90, 0x00];
+        byte[] writtenStatus = [2, 1, 7, 10, 0, 0, 0x90, 0x00];
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<ReadOnlyMemory<byte>>(rawStatus), Task.FromResult<ReadOnlyMemory<byte>>(writtenStatus));
+
+        await using var session = await YubiOtpSession.CreateUsingCachedInfoAsync(connection, null, info, ct);
+        Assert.Equal(cachedMajor == 0 ? new FirmwareVersion(2, 1, 7) : metadataVersion, session.FirmwareVersion);
+        Assert.Equal(new FirmwareVersion(2, 1, 7), session.GetConfigState().FirmwareVersion);
+        using var config = new HotpSlotConfiguration(new byte[20], 16);
+        if (admit)
+        {
+            await session.PutConfigurationAsync(Slot.Two, config, cancellationToken: ct);
+            await connection.Received(2).TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.PutConfigurationAsync(Slot.Two, config, cancellationToken: ct));
+            await connection.Received(1).TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+    }
+
     [Fact]
     public async Task CalculateHmacSha1Async_TouchConfiguredSmartCard_DoesNotNotify()
     {

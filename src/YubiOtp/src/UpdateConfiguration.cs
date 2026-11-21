@@ -33,7 +33,7 @@ namespace Yubico.YubiKit.YubiOtp;
 /// </remarks>
 public sealed class UpdateConfiguration : SlotConfiguration
 {
-    public override FirmwareVersion MinimumFirmwareVersion => new(2, 3, 0);
+    public override FirmwareVersion MinimumFirmwareVersion => new(2, 2, 0);
 
     /// <summary>
     /// Appends a carriage return after the OTP output.

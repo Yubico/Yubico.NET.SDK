@@ -52,22 +52,12 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
     public static async ValueTask<YubiOtpInitialization> ReadInitialStateAsync(
         ISmartCardProtocol protocol,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        FirmwareVersion? cachedVersion = null)
     {
-        FirmwareVersion? managementVersion = null;
-
-        try
-        {
-            var mgmtResponse = await protocol
-                .SelectAsync(ApplicationIds.Management, cancellationToken)
-                .ConfigureAwait(false);
-
-            managementVersion = FirmwareVersion.FromSelectResponse(mgmtResponse.Span);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            Logger.LogDebug(ex, "Could not get version from Management SELECT, continuing with OTP SELECT.");
-        }
+        var managementVersion = cachedVersion is null
+            ? await TryReadManagementVersionAsync(protocol, cancellationToken).ConfigureAwait(false)
+            : null;
 
         var status = await protocol
             .SelectAsync(ApplicationIds.Otp, cancellationToken)
@@ -86,6 +76,22 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
             : managementVersion ?? otpVersion;
 
         return new YubiOtpInitialization(firmwareVersion, status);
+    }
+
+    private static async Task<FirmwareVersion?> TryReadManagementVersionAsync(
+        ISmartCardProtocol protocol, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await protocol.SelectAsync(ApplicationIds.Management, cancellationToken).ConfigureAwait(false);
+            return FirmwareVersion.FromSelectResponse(response.Span);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Logger.LogDebug(ex, "Could not get version from Management SELECT, continuing with OTP SELECT.");
+            return null;
+        }
     }
 
     public async ValueTask<ReadOnlyMemory<byte>> WriteUpdateAsync(

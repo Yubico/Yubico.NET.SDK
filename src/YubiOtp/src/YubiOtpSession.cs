@@ -37,7 +37,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     private static readonly Feature FeatureSerial = new("Serial Number Read", 2, 2, 0);
     private static readonly Feature FeatureHmacSha1 = new("HMAC-SHA1 Challenge-Response", 2, 2, 0);
     private static readonly Feature FeatureYubicoOtpChallengeResponse = new("Yubico OTP Challenge-Response", 2, 2, 0);
-    private static readonly Feature FeatureUpdate = new("Slot Update", 2, 3, 0);
+    private static readonly Feature FeatureUpdate = new("Slot Update", 2, 2, 0);
     private static readonly Feature FeatureSwap = new("Slot Swap", 2, 3, 0);
     private static readonly Feature FeatureNdef = new("NDEF Configuration", 3, 0, 0);
 
@@ -89,6 +89,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
     private IYubiOtpBackend _backend = null!;
     private ReadOnlyMemory<byte> _status;
+    private bool _admitAllFirmwareGates;
 
     private YubiOtpSession(
         IConnection connection,
@@ -125,18 +126,24 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         IConnection connection,
         SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default) =>
+        CreateUsingCachedInfoAsync(connection, options, null, cancellationToken);
+
+    internal static Task<YubiOtpSession> CreateUsingCachedInfoAsync(
+        IConnection connection,
+        SessionCreationOptions? options,
+        DeviceInfo? cachedDeviceInfo,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
             () => new YubiOtpSession(connection, options?.UserPresencePrompt),
             (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+                options, cachedDeviceInfo, token),
             cancellationToken);
 
     private async Task InitializeAsync(
-        ProtocolConfiguration? configuration,
-        FirmwareVersion? firmwareVersionOverride,
-        ScpKeyParameters? scpKeyParams,
+        SessionCreationOptions? options,
+        DeviceInfo? cachedDeviceInfo,
         CancellationToken cancellationToken)
     {
         if (IsInitialized)
@@ -144,21 +151,31 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             return;
         }
 
+        var scpKeyParams = options?.ScpKeyParameters;
+        var cachedVersion = cachedDeviceInfo?.FirmwareVersion;
         var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
         var initialization = protocol switch
         {
             ISmartCardProtocol smartCard =>
-                await SmartCardBackend.ReadInitialStateAsync(smartCard, cancellationToken).ConfigureAwait(false),
+                await SmartCardBackend.ReadInitialStateAsync(smartCard, cancellationToken, cachedVersion).ConfigureAwait(false),
             IOtpHidProtocol otp =>
                 await HidBackend.ReadInitialStateAsync(otp, cancellationToken).ConfigureAwait(false),
             _ => throw new NotSupportedException("Unsupported OTP protocol.")
         };
         _status = initialization.Status;
 
+        var firmwareForAdmission = options?.FirmwareVersionOverride ?? cachedVersion ?? initialization.FirmwareVersion;
+        _admitAllFirmwareGates = firmwareForAdmission.IsAlphaOrBeta ||
+                                 (options?.FirmwareVersionOverride is null && cachedDeviceInfo is { } info &&
+                                  info.VersionQualifier.Type != VersionQualifierType.Final);
+        // A major-zero cache is an admission sentinel, not a reason to discard known applet framing.
+        var firmwareForProtocol = options?.FirmwareVersionOverride ??
+                                  (cachedVersion is { IsAlphaOrBeta: false } ? cachedVersion : initialization.FirmwareVersion);
+
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
-                firmwareVersionOverride ?? initialization.FirmwareVersion,
-                configuration,
+                firmwareForProtocol,
+                options?.ProtocolConfiguration,
                 scpKeyParams,
                 cancellationToken)
             .ConfigureAwait(false);
@@ -172,7 +189,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     public Task<int> GetSerialNumberAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureSerial);
+        EnsureOtpSupports(FeatureSerial);
 
         return GetSerialCoreAsync(cancellationToken);
     }
@@ -210,7 +227,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(config);
 
-        if (!config.IsSupportedBy(FirmwareVersion))
+        if (!_admitAllFirmwareGates && !config.IsSupportedBy(FirmwareVersion))
         {
             throw new NotSupportedException(
                 $"This configuration requires firmware {config.MinimumFirmwareVersion}+, " +
@@ -231,9 +248,9 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(config);
-        EnsureSupports(FeatureUpdate);
+        EnsureOtpSupports(FeatureUpdate);
 
-        if (!config.IsSupportedBy(FirmwareVersion))
+        if (!_admitAllFirmwareGates && !config.IsSupportedBy(FirmwareVersion))
         {
             throw new NotSupportedException(
                 $"This configuration requires firmware {config.MinimumFirmwareVersion}+, " +
@@ -248,7 +265,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     public async Task SwapSlotsAsync(CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureSwap);
+        EnsureOtpSupports(FeatureSwap);
 
         _status = await _backend.WriteUpdateAsync(
                 ConfigSlot.Swap,
@@ -317,7 +334,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(uri);
-        EnsureSupports(FeatureNdef);
+        EnsureOtpSupports(FeatureNdef);
 
         return WriteNdefAsync(slot.Map(SlotOperation.Ndef), BuildNdefPayload(uri, ndefType), currentAccessCode,
             cancellationToken);
@@ -330,7 +347,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureNdef);
+        EnsureOtpSupports(FeatureNdef);
         return WriteNdefAsync(slot.Map(SlotOperation.Ndef), new byte[YubiOtpConstants.NdefDataSize + 2],
             currentAccessCode, cancellationToken);
     }
@@ -358,7 +375,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureHmacSha1);
+        EnsureOtpSupports(FeatureHmacSha1);
 
         if (challenge.Length > YubiOtpConstants.HmacChallengeSize)
         {
@@ -403,7 +420,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        EnsureSupports(FeatureYubicoOtpChallengeResponse);
+        EnsureOtpSupports(FeatureYubicoOtpChallengeResponse);
 
         if (challenge.Length != YubiOtpConstants.YubicoOtpChallengeSize)
         {
@@ -590,6 +607,14 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         data.Span.CopyTo(result);
         currentAccessCode.Span.CopyTo(result.AsSpan(data.Length));
         return result;
+    }
+
+    private void EnsureOtpSupports(Feature feature)
+    {
+        if (!_admitAllFirmwareGates)
+        {
+            EnsureSupports(feature);
+        }
     }
 
     private byte GetProgSeq()

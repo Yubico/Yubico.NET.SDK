@@ -18,7 +18,8 @@ challenge-response, and sets the NFC NDEF record. Stored TOTP and HOTP credentia
   | Serial number read | 2.2.0 |
   | HMAC-SHA1 challenge-response | 2.2.0 |
   | Yubico OTP challenge-response | 2.2.0 |
-  | Slot update | 2.3.0 |
+  | HOTP and static-password configurations | 2.2.0 |
+  | Slot update | 2.2.0 |
   | Slot swap | 2.3.0 |
   | NDEF configuration | 3.0.0 |
   | `ConfigState.IsTouchTriggered` | 3.0.0 |
@@ -36,11 +37,11 @@ examples below explicitly select OTP HID; this is the supported USB recipe, not 
 Session creation discovers firmware and slot status before constructing its operational backend. SmartCard
 programming-sequence validation starts from the value returned by OTP selection, including when SCP is enabled.
 On OTP HID, Core reads a first report for protocol firmware, performs the NEO refresh when needed, then
-reads a second report for cached status. SmartCard probes Management on both USB CCID and NFC, then
-selects OTP; when OTP's major version is three it uses the higher Management/OTP version. A caller override
-is applied afterward to session policy. Cached `ConfigState` still uses raw OTP status, so its gates
-can differ from effective session feature checks. Major-zero acceptance
-is optimistic SDK policy, not proof of device/command support.
+reads a second report for cached status. Applet commands use cached device-info firmware first, then the applet's
+version if no cache is available. SmartCard still selects OTP for required status; with no cache it probes Management
+first and retains the NEO version fallback. A caller override takes precedence. Major-zero and cached prerelease
+firmware bypass command preflight without replacing a known numeric protocol version. Required initialization still
+fails on transport errors or malformed status. `ConfigState` uses raw OTP status, not session command admission.
 
 ## Installation
 

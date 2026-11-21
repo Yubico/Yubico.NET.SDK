@@ -487,13 +487,13 @@ public class SlotConfigurationTests
     }
 
     [Fact]
-    public void Hotp_MinimumFirmware_Is210()
+    public void Hotp_MinimumFirmware_Is220()
     {
         byte[] hmacKey = new byte[20];
         using var config = new HotpSlotConfiguration(hmacKey);
 
-        Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 1, 0)));
-        Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 0, 9)));
+        Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 2, 0)));
+        Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 1, 9)));
     }
 
 
@@ -865,12 +865,12 @@ public class SlotConfigurationTests
     }
 
     [Fact]
-    public void Update_MinimumFirmware_Is230()
+    public void Update_MinimumFirmware_Is220()
     {
         using var config = new UpdateConfiguration();
 
-        Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 3, 0)));
-        Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 2, 9)));
+        Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 2, 0)));
+        Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 1, 9)));
     }
 
 

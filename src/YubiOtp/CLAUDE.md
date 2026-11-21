@@ -41,7 +41,7 @@ Static `ReadInitialStateAsync` helpers on each concrete backend perform discover
 `IYubiOtpBackend` exposes only operational commands, not initialization.
 
 SmartCard path:
-1. SELECT `AID.MANAGEMENT` (for NEO version reliability)
+1. Without cached device info, SELECT `AID.MANAGEMENT` (for NEO version reliability)
 2. SELECT `AID.OTP` → store status bytes
 3. Use Management's version when available; when OTP major is 3, use the higher Management/OTP version.
    This Management probe runs for both USB CCID and NFC. Cached ConfigState still exposes raw OTP status.
@@ -55,8 +55,10 @@ OTP HID path:
 3. `ConfigureProtocolAsync` → configure protocol
 4. Construct the HID backend with the effective protocol
 
-The override is applied after discovery. ConfigState gates still use
-raw status. Core's local readiness/touch windows are checked between awaited native calls, not hard
+An explicit override takes precedence; otherwise cached device info wins over the applet version for admission.
+Unknown or prerelease firmware bypasses command preflight, without discarding a known numeric framing version.
+Required status and cancellation failures still propagate. ConfigState gates still use raw status.
+Core's local readiness/touch windows are checked between awaited native calls, not hard
 call-duration bounds. Custom IOtpHidConnection providers must supply eight-byte reports; built-in length
 checks do not establish central defensive handling for malformed custom input. Keep Core report/NEO
 failure classification and polling policy separate from applet sequence/CRC interpretation.

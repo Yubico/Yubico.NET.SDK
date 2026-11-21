@@ -170,14 +170,17 @@ public class PreviewSignCodecTests
             Assert.Throws<CborContentException>(() => ExtractWebAuthn());
     }
 
-    [Fact(Timeout = 5000)]
-    public void PreviewSign_Registration_OutputPopulatedFromUnsignedAttObj()
+    [Theory(Timeout = 5000)]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PreviewSign_Registration_OutputPopulatedFromUnsignedAttObj(bool includeExtraInnerAlgorithm)
     {
         // Arrange - mock authenticator data with previewSign extension containing algorithm + flags in authData
         // and the inner generated-key attestation object in unsignedExtensionOutputs.
         var innerCredentialId = RandomNumberGenerator.GetBytes(32);
         var publicKeyBytes = BuildCoseEc2PublicKey(CoseAlgorithm.Es256);
-        var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, innerCredentialId);
+        var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification,
+            innerCredentialId, includeExtraInnerAlgorithm);
 
         // Build authData.extensions["previewSign"] = {3: alg, 4: flags}
         var authDataExtension = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -218,6 +221,16 @@ public class PreviewSignCodecTests
         Assert.Equal(innerCredentialId, output.GeneratedKey.KeyHandle.ToArray());
         Assert.NotNull(output.GeneratedKey.AttestationObject);
         Assert.Equal(innerCredentialId, output.GeneratedKey.AttestationObject.AuthenticatorData.AttestedCredentialData!.CredentialId.ToArray());
+        var inner = new CborReader(output.GeneratedKey.AttestationObject.AuthenticatorData.ParsedExtensions["previewSign"]);
+        Assert.Equal(includeExtraInnerAlgorithm ? 2 : 1, inner.ReadStartMap());
+        if (includeExtraInnerAlgorithm)
+        {
+            Assert.Equal(3, inner.ReadInt32());
+            Assert.Equal(-7, inner.ReadInt32());
+        }
+        Assert.Equal(4, inner.ReadInt32());
+        Assert.Equal((byte)WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, inner.ReadInt32());
+        inner.ReadEndMap();
     }
 
     [Fact(Timeout = 5000)]
@@ -282,7 +295,8 @@ public class PreviewSignCodecTests
     private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags) =>
         BuildAttestationObject(publicKey, flags, RandomNumberGenerator.GetBytes(32));
 
-    private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags, byte[] credId)
+    private static byte[] BuildAttestationObject(byte[] publicKey, WebAuthnPreviewSign.PreviewSignFlags flags, byte[] credId,
+        bool includeExtraInnerAlgorithm = true)
     {
         // Build an inner attestation fixture with the previewSign extension in authData, in the
         // on-the-wire shape: the previewSign unsigned-extension-output wraps an attestation object whose
@@ -314,17 +328,17 @@ public class PreviewSignCodecTests
         // publicKey (COSE_Key)
         authDataList.AddRange(publicKey);
 
-        // This inner fixture contains flags and an extra algorithm field. Draft v4 describes flags
-        // here and the algorithm in the outer registration output; both are not required here by the
-        // decoder. A minimal flags-only inner fixture remains a separate test-coverage gap.
+        // Draft v4 puts policy flags here and the selected algorithm in the outer registration output.
         var extensionWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
         extensionWriter.WriteStartMap(1);
         extensionWriter.WriteTextString("previewSign");
 
-        // Write algorithm (key 3) + flags (key 4)
-        extensionWriter.WriteStartMap(2);
-        extensionWriter.WriteInt32(3);  // alg
-        extensionWriter.WriteInt32(-7);  // ES256
+        extensionWriter.WriteStartMap(includeExtraInnerAlgorithm ? 2 : 1);
+        if (includeExtraInnerAlgorithm)
+        {
+            extensionWriter.WriteInt32(3);
+            extensionWriter.WriteInt32(-7);
+        }
         extensionWriter.WriteInt32(4);   // flags
         extensionWriter.WriteInt32((byte)flags);
         extensionWriter.WriteEndMap();

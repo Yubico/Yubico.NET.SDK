@@ -27,10 +27,6 @@ on:
       - '**.csproj'
       - '**.sln'
       - '.github/workflows/build.yml'
-      - 'docfx*.json'
-      - 'docs/**'
-      - 'build/build-docs.py'
-      - 'build/docfx.targets'
 
   workflow_dispatch:
     inputs:

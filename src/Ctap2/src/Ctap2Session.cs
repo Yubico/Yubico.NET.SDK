@@ -190,7 +190,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
                 _configuration,
                 _scpKeyParameters,
                 cancellationToken,
-                admitUnverifiedScpFirmware: ShouldAdmitUnverifiedScpFirmware(detectedFirmwareVersion))
+                scpEligibilityFirmwareVersion: GetScpEligibilityFirmwareVersion(detectedFirmwareVersion))
             .ConfigureAwait(false);
 
         if (!ReferenceEquals(protocol, effectiveProtocol))
@@ -220,11 +220,12 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             : detected;
     }
 
-    private bool ShouldAdmitUnverifiedScpFirmware(FirmwareVersion detected) =>
+    private FirmwareVersion GetScpEligibilityFirmwareVersion(FirmwareVersion detected) =>
         // An explicit firmware override still governs SCP configuration, but not the USB gate.
-        _firmwareVersionOverride is { } configured
-            ? configured.IsAlphaOrBeta
-            : detected.IsAlphaOrBeta || HasNonFinalQualifier(_cachedDeviceInfo?.VersionQualifier);
+        _firmwareVersionOverride ??
+        (detected.IsAlphaOrBeta || HasNonFinalQualifier(_cachedDeviceInfo?.VersionQualifier)
+            ? FirmwareVersion.Default
+            : detected);
 
     private static bool HasNonFinalQualifier(VersionQualifier? qualifier) =>
         qualifier is { Type: not VersionQualifierType.Final };

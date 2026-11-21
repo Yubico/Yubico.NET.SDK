@@ -844,21 +844,23 @@ public class Ctap2SessionTests
     }
 
     [Theory]
-    [InlineData(VersionQualifierType.Final, false, false, false)]
-    [InlineData(null, false, false, false)]
-    [InlineData(null, true, false, true)]
-    [InlineData(VersionQualifierType.Beta, false, false, true)]
-    [InlineData((VersionQualifierType)42, false, false, true)]
-    [InlineData(VersionQualifierType.Beta, false, true, false)]
+    [InlineData(VersionQualifierType.Final, 2, null, false)]
+    [InlineData(VersionQualifierType.Final, 3, null, true)]
+    [InlineData(null, 2, null, false)]
+    [InlineData(null, null, null, true)]
+    [InlineData(VersionQualifierType.Beta, 2, null, true)]
+    [InlineData((VersionQualifierType)42, 2, null, true)]
+    [InlineData(VersionQualifierType.Beta, 2, 2, false)]
+    [InlineData(VersionQualifierType.Final, 2, 3, true)]
     public async Task NfcSmartCard_ScpAdmissionDoesNotChangeNumericFraming(
-        VersionQualifierType? qualifier, bool unknown, bool overrideWithOldVersion, bool attemptsScp)
+        VersionQualifierType? qualifier, int? cachedMinor, int? overrideMinor, bool attemptsScp)
     {
         var ct = TestContext.Current.CancellationToken;
         using var connection = new DisposeTrackingSmartCardConnection(
             [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(firmwareVersion: 0x050200), 0x90, 0x00],
             [0x90, 0x00]) // Too short to establish SCP, but sufficient to observe INITIALIZE UPDATE.
         { ExtendedApdu = true, Transport = Transport.Nfc };
-        var cachedVersion = unknown ? new FirmwareVersion() : new FirmwareVersion(5, 2, 0);
+        var cachedVersion = cachedMinor is { } minor ? new FirmwareVersion(5, minor, 0) : FirmwareVersion.Default;
         var device = new SingleConnectionYubiKey(connection)
         {
             CachedDeviceInfo = DeviceInfo.CreateFromTlvs([], cachedVersion) with
@@ -870,7 +872,7 @@ public class Ctap2SessionTests
         var options = new SessionCreationOptions
         {
             ScpKeyParameters = keys,
-            FirmwareVersionOverride = overrideWithOldVersion ? new FirmwareVersion(5, 2, 0) : null,
+            FirmwareVersionOverride = overrideMinor is { } configuredMinor ? new FirmwareVersion(5, configuredMinor, 0) : null,
             ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true }
         };
 

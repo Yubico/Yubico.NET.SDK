@@ -54,27 +54,7 @@ internal static class BioProtocol
                 return null;
             if (!response.IsOK())
                 throw ApduException.FromStatusWord(response.SW, "Biometric operation failed");
-            // Python YubiKit 4ca60f7 piv.py:1111-1133: retries are required; the two flags are optional.
-            using var tlvs = TlvHelper.DecodeList(response.Data);
-            var fields = new Dictionary<int, ReadOnlyMemory<byte>>();
-            foreach (var tlv in tlvs)
-            {
-                if (tlv.Tag is not (TagRetries or TagConfigured or TagTemporaryPinActive))
-                    continue;
-                if (!fields.TryAdd(tlv.Tag, tlv.Value))
-                {
-                    if (forReset)
-                        throw new ApduException($"Duplicate biometric metadata field 0x{tlv.Tag:X2}.");
-                    fields[tlv.Tag] = tlv.Value;
-                }
-            }
-            byte retries = ReadByte(fields, TagRetries, required: true);
-            byte configured = ReadByte(fields, TagConfigured);
-            byte temporaryPin = ReadByte(fields, TagTemporaryPinActive);
-            if (configured > 1 || temporaryPin > 1)
-                throw new ApduException("Invalid biometric metadata flag.");
-            Logger.LogDebug("PIV: Biometric metadata configured={Configured}, retries={Retries}, temporary PIN active={Active}", configured == 1, retries, temporaryPin == 1);
-            return new BioMetadata(configured == 1, retries, temporaryPin == 1);
+            return ParseBioMetadata(response.Data, rejectDuplicates: forReset);
         }
         catch (Exception ex) when (ex is ArgumentException or IndexOutOfRangeException)
         {
@@ -84,6 +64,29 @@ internal static class BioProtocol
         {
             response.Clear();
         }
+    }
+
+    private static BioMetadata ParseBioMetadata(ReadOnlyMemory<byte> data, bool rejectDuplicates)
+    {
+        // Python YubiKit 4ca60f7 piv.py:1111-1133: retries are required; the two flags are optional.
+        using var tlvs = TlvHelper.DecodeList(data);
+        var fields = new Dictionary<int, ReadOnlyMemory<byte>>();
+        foreach (var tlv in tlvs)
+        {
+            if (tlv.Tag is not (TagRetries or TagConfigured or TagTemporaryPinActive))
+                continue;
+            if (rejectDuplicates && fields.ContainsKey(tlv.Tag))
+                throw new ApduException($"Duplicate biometric metadata field 0x{tlv.Tag:X2}.");
+            fields[tlv.Tag] = tlv.Value;
+        }
+
+        byte retries = ReadByte(fields, TagRetries, required: true);
+        byte configured = ReadByte(fields, TagConfigured);
+        byte temporaryPin = ReadByte(fields, TagTemporaryPinActive);
+        if (configured > 1 || temporaryPin > 1)
+            throw new ApduException("Invalid biometric metadata flag.");
+        Logger.LogDebug("PIV: Biometric metadata configured={Configured}, retries={Retries}, temporary PIN active={Active}", configured == 1, retries, temporaryPin == 1);
+        return new BioMetadata(configured == 1, retries, temporaryPin == 1);
     }
 
     private static byte ReadByte(IDictionary<int, ReadOnlyMemory<byte>> fields, byte tag, bool required = false)

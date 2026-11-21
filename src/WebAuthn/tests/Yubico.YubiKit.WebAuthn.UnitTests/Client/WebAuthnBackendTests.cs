@@ -71,6 +71,9 @@ public class WebAuthnBackendTests
             .Returns(new ReadOnlyMemory<byte>(response.Encode()));
 
         await using var backend = new WebAuthnBackend(_session);
+        _session.GetInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            new AuthenticatorInfo { PinUvAuthProtocols = [2] });
+        await backend.GetCachedInfoAsync(TestContext.Current.CancellationToken);
         using var secret = await backend.EncapsulateAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(2, secret.KeyAgreement[1]);                 // the platform key sent back is EC2
@@ -83,12 +86,22 @@ public class WebAuthnBackendTests
     }
 
     /// <summary>The backend exposes its protocol-2 object without acquiring a token; this does not prove protocol-1 compatibility.</summary>
-    [Fact]
-    public async Task Protocol_IsAvailableWithoutAToken()
+    [Theory]
+    [InlineData(new[] { 1 }, 1)]
+    [InlineData(new[] { 2 }, 2)]
+    [InlineData(new[] { 1, 2 }, 2)]
+    [InlineData(new[] { 3 }, 0)]
+    public async Task Protocol_IsNegotiatedFromGetInfo(int[] advertised, int expected)
     {
+        _session.GetInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            new AuthenticatorInfo { PinUvAuthProtocols = advertised });
         await using var backend = new WebAuthnBackend(_session);
+        await backend.GetCachedInfoAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(2, backend.Protocol.Version);
+        if (expected == 0)
+            Assert.Equal(WebAuthnClientErrorCode.NotSupported, Assert.Throws<WebAuthnClientError>(() => backend.Protocol).Code);
+        else
+            Assert.Equal(expected, backend.Protocol.Version);
     }
 
     [Fact]

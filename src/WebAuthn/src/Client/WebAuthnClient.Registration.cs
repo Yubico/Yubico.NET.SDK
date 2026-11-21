@@ -122,8 +122,9 @@ public sealed partial class WebAuthnClient
         };
 
         // Extension processors are created per attempt; their permissions join the token request.
-        var context = new ExtensionContext(info, _backend.Protocol, _backend);
-        var permissions = MakeCredentialCeremonyPermissions
+        var context = new ExtensionContext(info, null, _backend);
+        var permissions = PinUvAuthTokenPermissions.MakeCredential
+            | (options.ExcludeCredentials is { Count: > 0 } ? PinUvAuthTokenPermissions.GetAssertion : PinUvAuthTokenPermissions.None)
             | RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context).Permissions;
         bool hasPreviewSign = options.Extensions?.PreviewSign is not null;
 

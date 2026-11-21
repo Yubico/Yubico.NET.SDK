@@ -52,7 +52,7 @@ public class WebAuthnAuditReproTests
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
-                clientPinSupported: !builtInUv, uvSupported: builtInUv));
+                clientPinSupported: !builtInUv, uvSupported: builtInUv, pinUvAuthToken: builtInUv));
         backend.GetPinUvTokenAsync(Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(),
                 Arg.Any<string>(), Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
@@ -83,7 +83,7 @@ public class WebAuthnAuditReproTests
         var backend = Substitute.For<IWebAuthnBackend>();
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
-                clientPinSupported: !builtInUv, uvSupported: builtInUv));
+                clientPinSupported: !builtInUv, uvSupported: builtInUv, pinUvAuthToken: builtInUv));
         backend.GetPinUvTokenAsync(Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(),
                 Arg.Any<string>(), Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
             .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));

@@ -28,9 +28,6 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </content>
 public sealed partial class WebAuthnClient
 {
-    private static readonly PinUvAuthTokenPermissions MakeCredentialCeremonyPermissions =
-        PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion;
-
     /// <summary>
     /// Owns the PIN/UV token and the prompted PIN for one ceremony. The token is replaced on escalation
     /// and on re-mint; the pinUvAuthParam it signs is zeroed when superseded or on dispose; the prompted
@@ -129,6 +126,8 @@ public sealed partial class WebAuthnClient
         while (true)
         {
             var decision = UvDecisionLogic.Decide(info, preference, auth.PinAvailable, permissions);
+            if (decision.UseToken)
+                _ = _backend.Protocol;
             try
             {
                 await auth.AcquireAsync(decision, cancellationToken).ConfigureAwait(false);

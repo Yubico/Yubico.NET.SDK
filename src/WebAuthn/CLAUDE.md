@@ -272,10 +272,9 @@ as "verification is available" on a key that has none.
 WebAuthn L2 [§5.8.6](https://www.w3.org/TR/2021/REC-webauthn-2-20210408/#enumdef-userverificationrequirement)
 defines preference intent. The enabled-option checks, PIN-first method choice and availability fallback
 are SDK policy, not a quotation of that section. Configured `clientPin` without PIN bytes/prompt is not
-an obtainable method. The backend currently hard-codes PIN/UV protocol 2 for token acquisition and PRF
-key agreement; legacy command fallback does not negotiate protocol 1. PINless operations that need
-neither may still work. Built-in UV selection currently lacks a full token-capability check, so do not
-promise that advertised `uv` alone guarantees token acquisition.
+an obtainable method. The backend uses GetInfo to prefer protocol 2 over 1 for tokens and key agreement.
+Built-in UV needs `pinUvAuthToken` for token acquisition; ordinary commands can use `uv: true` without it.
+Extra permissions require a permission token. See the CTAP module for current-PIN and legacy token rules.
 
 Backstop: if the client's model of the authenticator is wrong and the key answers
 `CTAP2_ERR_PUAT_REQUIRED` (0x36), `ShouldRetryWithRequiredUv` escalates to `Required` and retries the

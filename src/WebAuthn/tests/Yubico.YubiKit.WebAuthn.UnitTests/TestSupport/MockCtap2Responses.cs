@@ -131,7 +131,8 @@ internal static class MockCtap2Responses
         int? minPinLength = null,
         bool residentKeySupported = false,
         IReadOnlyList<string>? extensions = null,
-        bool largeBlobsSupported = false)
+        bool largeBlobsSupported = false,
+        bool pinUvAuthToken = false)
     {
         extensions ??= DefaultExtensions;
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -141,6 +142,7 @@ internal static class MockCtap2Responses
         if (uvSupported) optionsCount++;
         if (residentKeySupported) optionsCount++;
         if (largeBlobsSupported) optionsCount++;
+        if (pinUvAuthToken) optionsCount++;
 
         var mapSize = (optionsCount > 0 ? 4 : 3) + (minPinLength.HasValue ? 1 : 0);
         writer.WriteStartMap(mapSize);
@@ -196,6 +198,11 @@ internal static class MockCtap2Responses
                 writer.WriteBoolean(true);
             }
 
+            if (pinUvAuthToken)
+            {
+                writer.WriteTextString("pinUvAuthToken");
+                writer.WriteBoolean(true);
+            }
             writer.WriteEndMap();
         }
 

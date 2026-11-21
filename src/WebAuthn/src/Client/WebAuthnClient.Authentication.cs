@@ -109,7 +109,7 @@ public sealed partial class WebAuthnClient
         var info = await GetCeremonyInfoAsync(cancellationToken).ConfigureAwait(false);
 
         // Extension processors are created per attempt; their permissions join the token request.
-        var context = new ExtensionContext(info, _backend.Protocol, _backend);
+        var context = new ExtensionContext(info, null, _backend);
         var permissions = PinUvAuthTokenPermissions.GetAssertion
             | AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context).Permissions;
         bool hasPreviewSign = options.Extensions?.PreviewSign is not null;

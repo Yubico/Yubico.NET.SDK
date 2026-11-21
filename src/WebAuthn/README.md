@@ -26,9 +26,9 @@ the transport name.
   CTAP2 SDK's 5.8.0+ gate. NFC capability metadata alone does not establish the current transport.
 - The supported origin representation is HTTPS, or HTTP on `localhost` / `*.localhost`; this parser is not
   a complete browser Secure Contexts evaluation. Native/opaque/custom-scheme origins are not supported.
-- PIN/UV token acquisition and PRF key agreement currently use PIN/UV protocol 2, without protocol-1
-  negotiation. This restriction applies to those operations, not every PINless ceremony. Built-in UV
-  token acquisition also depends on the authenticator's token capabilities.
+- PIN/UV tokens and PRF key agreement prefer advertised protocol 2, then 1. Ceremonies that need
+  neither can proceed without a mutual protocol. Built-in UV uses a token only with `pinUvAuthToken`;
+  ordinary commands can otherwise request internal UV directly. See [CTAP2 PIN guidance](../Ctap2/README.md).
 
 ## Installation
 

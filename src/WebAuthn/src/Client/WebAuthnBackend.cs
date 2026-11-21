@@ -24,13 +24,12 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// Concrete implementation of IWebAuthnBackend that wraps ICtap2Session.
 /// </summary>
 /// <remarks>
-/// This adapter owns the Ctap2Session lifetime and manages the PinUvAuthProtocolV2 instance.
-/// It does not negotiate protocol 1 from GetInfo. Legacy token-command fallback still uses protocol 2.
+/// This adapter owns the CTAP session and the PIN/UV protocol selected from GetInfo.
 /// </remarks>
 internal sealed class WebAuthnBackend : IWebAuthnBackend
 {
     private readonly ICtap2Session _session;
-    private PinUvAuthProtocolV2? _protocol;
+    private IPinUvAuthProtocol? _protocol;
     private AuthenticatorInfo? _cachedInfo;
     private bool _disposed;
 
@@ -51,6 +50,9 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         if (_cachedInfo is null)
         {
             _cachedInfo = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+            _protocol = _cachedInfo.PinUvAuthProtocols.Contains(2) ? new PinUvAuthProtocolV2()
+                : _cachedInfo.PinUvAuthProtocols.Contains(1) ? new PinUvAuthProtocolV1()
+                : null;
         }
 
         return _cachedInfo;
@@ -62,8 +64,8 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         get
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            EnsureProtocolInitialized();
-            return _protocol!;
+            return _protocol ?? throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "The authenticator does not advertise a supported PIN/UV protocol.");
         }
     }
 
@@ -72,10 +74,10 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol!);
+        var protocol = Protocol;
+        var clientPin = new ClientPin(_session, protocol);
         var authenticatorKey = await clientPin.GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
-        var (keyAgreement, sharedSecret) = _protocol!.Encapsulate(authenticatorKey);
+        var (keyAgreement, sharedSecret) = protocol.Encapsulate(authenticatorKey);
         return new PinUvSharedSecret(keyAgreement, sharedSecret);
     }
 
@@ -93,8 +95,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol!);
+        var clientPin = new ClientPin(_session, Protocol);
 
         var status = await clientPin.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
         return status.RetriesRemaining;
@@ -110,8 +111,8 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol!);
+        var protocol = Protocol;
+        var clientPin = new ClientPin(_session, protocol);
 
         // ClientPin allocates and returns the decrypted token to this single caller and keeps no
         // reference to it, so ownership passes straight to the session below. Copying it here (or
@@ -133,7 +134,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         };
 
         // Ownership transfer: the session zeroes this array when the caller disposes it.
-        return new PinUvAuthTokenSession(_protocol!, token);
+        return new PinUvAuthTokenSession(protocol, token);
     }
 
     /// <inheritdoc/>
@@ -283,13 +284,4 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         }
     }
 
-    private void EnsureProtocolInitialized()
-    {
-        if (_protocol is null)
-        {
-            _protocol = new PinUvAuthProtocolV2();
-            // The protocol object is stateless. ClientPin performs key agreement per operation;
-            // constructing this object does not start asynchronous authenticator initialization.
-        }
-    }
 }

@@ -341,9 +341,10 @@ length, send an empty RP list or send explicit false. minPinLength disclosure is
 
 Standard bio requests authenticate modality, subcommand and the exact encoded parameter map when present.
 The opt-in prototype command retains its previous wire profile; it is not a fallback.
-Do not claim interoperable enrollment from fake fixtures or sensor metadata. Retain the begin template
-ID for continuation; sample `IsComplete` is only decoded remaining-count equality, including unsafe
-missing-field defaults. .NET cancellation does not automatically send enrollment cancel. Blob updates
+Do not claim interoperable enrollment from fake fixtures or sensor metadata. Retain the template ID from
+`EnrollmentBeginResult` for continuation; `EnrollmentSampleResult` contains feedback without an ID.
+`IsComplete` means that the authenticator reports zero remaining samples. .NET cancellation does not
+automatically send enrollment cancel. Blob updates
 are shared-array read-modify-write operations without whole-sequence conflict protection or rollback;
 the SDK requires protocol/token authorization for writes, stricter than CTAP's conditional rule.
 

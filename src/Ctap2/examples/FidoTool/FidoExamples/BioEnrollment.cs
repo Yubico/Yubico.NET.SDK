@@ -170,13 +170,14 @@ public static class BioEnrollmentExample
             var bio = new FingerprintBioEnrollment(session, protocol, pinToken);
 
             // Begin enrollment - first sample
-            var result = await bio.EnrollBeginAsync(cancellationToken: cancellationToken);
-            var templateId = result.TemplateId;
+            var begin = await bio.EnrollBeginAsync(cancellationToken: cancellationToken);
+            var templateId = begin.TemplateId;
+            EnrollmentSampleResult result = begin;
             var sampleNumber = 1;
 
             onSampleCaptured?.Invoke(sampleNumber, result.RemainingSamples, result.LastSampleStatus);
 
-            // Continue using the begin ID, not result.TemplateId from a later sample.
+            // Continue using the ID from begin, regardless of later sample feedback.
             while (!result.IsComplete && !cancellationToken.IsCancellationRequested)
             {
                 try

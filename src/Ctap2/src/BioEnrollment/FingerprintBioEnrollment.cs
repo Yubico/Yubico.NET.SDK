@@ -51,8 +51,7 @@ namespace Yubico.YubiKit.Ctap2.BioEnrollment;
 /// <para>
 /// For a valid enrollment response, retain the template ID from begin independently
 /// of later results. Continue captures using that same ID until the device reports zero
-/// remaining samples, an unrecoverable error occurs or the user cancels. The current decoder
-/// defaults missing fields, so IsComplete alone is not proof of successful enrollment.
+/// remaining samples, an unrecoverable error occurs or the user cancels.
 /// </para>
 /// </remarks>
 public sealed class FingerprintBioEnrollment
@@ -128,17 +127,17 @@ public sealed class FingerprintBioEnrollment
     /// Retain the begin TemplateId for every <see cref="EnrollCaptureNextSampleAsync"/> call.
     /// Standard next responses need not repeat it. Use sample status and remaining count
     /// as device feedback, not a fixed SDK capture budget. Stop on unrecoverable error or
-    /// user cancellation; missing response fields can currently produce IsComplete=true.
+    /// user cancellation. Responses missing required fields fail decoding.
     /// </para>
     /// </remarks>
-    public async Task<EnrollmentSampleResult> EnrollBeginAsync(
+    public async Task<EnrollmentBeginResult> EnrollBeginAsync(
         int? timeout = null,
         CancellationToken cancellationToken = default)
     {
         var response = await SendBioEnrollmentCommandAsync(BioEnrollmentSubCommand.EnrollBegin, cancellationToken, timeout: timeout)
             .ConfigureAwait(false);
 
-        return EnrollmentSampleResult.Decode(response);
+        return EnrollmentBeginResult.Decode(response);
     }
 
     /// <summary>
@@ -153,7 +152,7 @@ public sealed class FingerprintBioEnrollment
     /// <returns>The result of this capture, including remaining samples.</returns>
     /// <remarks>
     /// <para>
-    /// Retain and reuse the ID from begin, not this result's potentially empty TemplateId.
+    /// Retain and reuse the ID from begin; this result contains only sample feedback.
     /// A standard capture requires sensor interaction and reports status/remaining count
     /// (CTAP 2.1 Section 6.7.4). IsComplete is only a decoded-count projection,
     /// not independently verified persistence.

@@ -124,7 +124,7 @@ public class BioEnrollmentModelsTests
     }
 
     [Fact]
-    public void EnrollmentSampleResult_Decode_WithUnknownField_PreservesOwnedRawData()
+    public void EnrollmentBeginResult_Decode_WithUnknownField_PreservesOwnedRawData()
     {
         // Arrange - CBOR response from enrollBegin
         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
@@ -145,7 +145,7 @@ public class BioEnrollmentModelsTests
         byte[] expectedRawData = cbor.ToArray();
 
         // Act
-        var result = EnrollmentSampleResult.Decode(cbor);
+        var result = EnrollmentBeginResult.Decode(cbor);
         cbor.AsSpan().Clear();
 
         // Assert
@@ -155,6 +155,28 @@ public class BioEnrollmentModelsTests
         Assert.False(result.IsComplete);
         Assert.Equal(expectedRawData, result.RawData.ToArray());
     }
+
+    [Theory]
+    [InlineData("A205000600", true)] // missing ID
+    [InlineData("A20441010600", true)] // missing status
+    [InlineData("A20441010500", true)] // missing remaining
+    [InlineData("A10600", false)] // missing status
+    [InlineData("A10500", false)] // missing remaining
+    [InlineData("A205000620", false)] // negative remaining
+    [InlineData("A20500060000", false)] // trailing value
+    public void EnrollmentDecode_RejectsMalformedCapture(string encoded, bool begin)
+    {
+        byte[] response = Convert.FromHexString(encoded);
+        Assert.Throws<CborContentException>(() => begin
+            ? EnrollmentBeginResult.Decode(response)
+            : EnrollmentSampleResult.Decode(response));
+    }
+
+    [Theory]
+    [InlineData("A10305")]
+    [InlineData("A10201")]
+    public void FingerprintSensorInfo_RejectsMissingRequiredField(string encoded) =>
+        Assert.Throws<CborContentException>(() => FingerprintSensorInfo.Decode(Convert.FromHexString(encoded)));
 
     [Fact]
     public void EnrollmentSampleResult_Decode_ParsesCompletedEnrollment()

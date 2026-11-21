@@ -678,8 +678,9 @@ public sealed class FidoFingerprintsAddCommand : YkCommandBase<FidoFingerprintsA
 
             AnsiConsole.MarkupLine("[yellow]Touch your YubiKey now...[/]");
 
-            var result = await bio.EnrollBeginAsync();
-            var templateId = result.TemplateId;
+            var begin = await bio.EnrollBeginAsync();
+            var templateId = begin.TemplateId;
+            EnrollmentSampleResult result = begin;
             var sampleNumber = 1;
 
             FidoHelpers.DisplaySampleStatus(sampleNumber, result.RemainingSamples, result.LastSampleStatus);

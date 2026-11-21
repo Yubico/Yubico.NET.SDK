@@ -67,15 +67,15 @@ Yubico.YubiKit.Ctap2.AuthenticatorInfo.Versions.init -> void
 Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentEnumerationResult
 Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentEnumerationResult.EnrollmentEnumerationResult() -> void
 Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentEnumerationResult.Templates.get -> System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Ctap2.BioEnrollment.TemplateInfo!>!
+Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentBeginResult
+Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentBeginResult.TemplateId.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult
-Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult.EnrollmentSampleResult() -> void
 Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult.IsComplete.get -> bool
 Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult.LastSampleStatus.get -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSampleStatus
 Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult.RawData.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult.RemainingSamples.get -> int
-Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult.TemplateId.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintBioEnrollment
-Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintBioEnrollment.EnrollBeginAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult!>!
+Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintBioEnrollment.EnrollBeginAsync(int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentBeginResult!>!
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintBioEnrollment.EnrollCancelAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintBioEnrollment.EnrollCaptureNextSampleAsync(System.ReadOnlyMemory<byte> templateId, int? timeout = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult!>!
 Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintBioEnrollment.EnumerateEnrollmentsAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Collections.Generic.IReadOnlyList<Yubico.YubiKit.Ctap2.BioEnrollment.TemplateInfo!>!>!
@@ -800,6 +800,7 @@ override sealed Yubico.YubiKit.Ctap2.Credentials.UnknownAttestationStatement.Equ
 override sealed Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Equals(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? other) -> bool
 static Yubico.YubiKit.Ctap2.AuthenticatorInfo.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.AuthenticatorInfo!
 static Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentEnumerationResult.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentEnumerationResult!
+static Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentBeginResult.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentBeginResult!
 static Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.BioEnrollment.EnrollmentSampleResult!
 static Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSensorInfo.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintSensorInfo!
 static Yubico.YubiKit.Ctap2.BioEnrollment.TemplateInfo.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.BioEnrollment.TemplateInfo!

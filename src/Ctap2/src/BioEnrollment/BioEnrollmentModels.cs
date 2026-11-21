@@ -128,7 +128,7 @@ public sealed class FingerprintSensorInfo
     public ReadOnlyMemory<byte> RawData { get; private init; }
 
     /// <summary>
-    /// Gets the decoded fingerprint kind, defaulting to Touch when key 2 is missing.
+    /// Gets the decoded fingerprint kind.
     /// </summary>
     public FingerprintKind FingerprintKind { get; private init; }
 
@@ -137,8 +137,7 @@ public sealed class FingerprintSensorInfo
     /// </summary>
     /// <remarks>
     /// This reports the maximum good samples, not a limit on total capture attempts:
-    /// rejected captures may not count. Missing key 3 currently defaults to zero, so zero
-    /// is not evidence that no samples are required. This decoder does not validate field presence.
+    /// rejected captures may not count.
     /// </remarks>
     public int MaxCaptureSamplesRequiredForEnroll { get; private init; }
 
@@ -150,10 +149,10 @@ public sealed class FingerprintSensorInfo
     public static FingerprintSensorInfo Decode(ReadOnlyMemory<byte> data)
     {
         ReadOnlyMemory<byte> rawData = data.ToArray();
-        var reader = new CborReader(rawData, CborConformanceMode.Lax);
+        var reader = new CborReader(rawData, CborConformanceMode.Ctap2Canonical);
 
-        var fingerprintKind = FingerprintKind.Touch;
-        var maxSamples = 0;
+        FingerprintKind? fingerprintKind = null;
+        int? maxSamples = null;
 
         var mapCount = reader.ReadStartMap() ?? 0;
 
@@ -179,11 +178,14 @@ public sealed class FingerprintSensorInfo
 
         reader.ReadEndMap();
 
+        if (reader.BytesRemaining != 0 || fingerprintKind is null || maxSamples is null or < 0)
+            throw new CborContentException("Incomplete or invalid fingerprint sensor information.");
+
         return new FingerprintSensorInfo
         {
             RawData = rawData,
-            FingerprintKind = fingerprintKind,
-            MaxCaptureSamplesRequiredForEnroll = maxSamples
+            FingerprintKind = fingerprintKind.Value,
+            MaxCaptureSamplesRequiredForEnroll = maxSamples.Value
         };
     }
 }
@@ -204,99 +206,80 @@ public enum FingerprintKind
     Swipe = 0x02
 }
 
-/// <summary>
-/// Result of a fingerprint enrollment capture sample operation.
-/// </summary>
-public sealed class EnrollmentSampleResult
+/// <summary>Feedback from a fingerprint enrollment capture.</summary>
+public class EnrollmentSampleResult
 {
-    /// <summary>
-    /// Gets the complete original CBOR-encoded authenticator response.
-    /// </summary>
-    public ReadOnlyMemory<byte> RawData { get; private init; }
+    internal EnrollmentSampleResult(ReadOnlyMemory<byte> rawData, FingerprintSampleStatus status, int remainingSamples)
+    {
+        RawData = rawData;
+        LastSampleStatus = status;
+        RemainingSamples = remainingSamples;
+    }
 
-    /// <summary>
-    /// Gets the template ID decoded from key 4, or empty memory if it is absent.
-    /// </summary>
-    /// <remarks>Retain the begin-response ID separately. CTAP 2.1 Section 6.7.4 does not
-    /// require next-sample responses to repeat it; this decoder does not preserve earlier IDs.</remarks>
-    public ReadOnlyMemory<byte> TemplateId { get; internal init; }
+    /// <summary>Gets the complete original CBOR-encoded authenticator response.</summary>
+    public ReadOnlyMemory<byte> RawData { get; }
 
-    /// <summary>
-    /// Gets decoded sample feedback, defaulting to Good when key 5 is missing.
-    /// </summary>
-    public FingerprintSampleStatus LastSampleStatus { get; internal init; }
+    /// <summary>Gets the authenticator's sample feedback.</summary>
+    public FingerprintSampleStatus LastSampleStatus { get; }
 
-    /// <summary>
-    /// Gets the number of remaining samples needed to complete enrollment.
-    /// </summary>
-    /// <remarks>
-    /// In a valid sample response, zero reports completion. This decoder also defaults
-    /// missing key 6 to zero and does not validate operation-specific required fields.
-    /// The value is device feedback, not a verified persistence result or an SDK sample budget.
-    /// </remarks>
-    public int RemainingSamples { get; internal init; }
+    /// <summary>Gets the authenticator's remaining sample count.</summary>
+    public int RemainingSamples { get; }
 
-    /// <summary>
-    /// Gets whether RemainingSamples equals zero, including its missing-field default.
-    /// </summary>
-    /// <remarks>An empty map currently produces true; this property alone is not proof of successful enrollment.</remarks>
+    /// <summary>Gets whether the authenticator reports zero remaining samples.</summary>
     public bool IsComplete => RemainingSamples == 0;
 
-    /// <summary>
-    /// Decodes an EnrollmentSampleResult from a CBOR response.
-    /// </summary>
-    /// <param name="data">The CBOR-encoded response data.</param>
-    /// <returns>The decoded enrollment result.</returns>
-    /// <remarks>
-    /// Copies the complete borrowed response and reads keys 4/5/6. Missing fields retain
-    /// empty ID, Good status and zero remaining count; required-field validation is absent.
-    /// These defaults must not be treated as valid standard operation responses.
-    /// </remarks>
-    public static EnrollmentSampleResult Decode(ReadOnlyMemory<byte> data)
+    /// <summary>Decodes a continuation response, which does not require the begin template ID.</summary>
+    /// <param name="data">The borrowed CBOR response.</param>
+    /// <returns>Sample feedback with an owned copy of the response bytes.</returns>
+    /// <exception cref="CborContentException">The response lacks valid status or remaining-count fields.</exception>
+    public static EnrollmentSampleResult Decode(ReadOnlyMemory<byte> data) => DecodeSample(data, begin: false);
+
+    internal static EnrollmentSampleResult DecodeSample(ReadOnlyMemory<byte> data, bool begin)
     {
         ReadOnlyMemory<byte> rawData = data.ToArray();
-        var reader = new CborReader(rawData, CborConformanceMode.Lax);
+        var reader = new CborReader(rawData, CborConformanceMode.Ctap2Canonical);
+        byte[]? templateId = null;
+        int? status = null;
+        int? remaining = null;
 
-        ReadOnlyMemory<byte> templateId = default;
-        var lastStatus = FingerprintSampleStatus.Good;
-        var remaining = 0;
-
-        var mapCount = reader.ReadStartMap() ?? 0;
-
-        for (var i = 0; i < mapCount; i++)
+        int count = reader.ReadStartMap() ?? 0;
+        for (int i = 0; i < count; i++)
         {
-            var key = reader.ReadInt32();
-
-            switch (key)
-            {
-                case 4: // templateId (0x04)
-                    templateId = reader.ReadByteString();
-                    break;
-
-                case 5: // lastEnrollSampleStatus (0x05)
-                    lastStatus = (FingerprintSampleStatus)reader.ReadInt32();
-                    break;
-
-                case 6: // remainingSamples (0x06)
-                    remaining = reader.ReadInt32();
-                    break;
-
-                default:
-                    reader.SkipValue();
-                    break;
-            }
+            int key = reader.ReadInt32();
+            if (key == 4 && begin) templateId = reader.ReadByteString();
+            else if (key == 5) status = reader.ReadInt32();
+            else if (key == 6) remaining = reader.ReadInt32();
+            else reader.SkipValue();
         }
-
         reader.ReadEndMap();
+        if (reader.BytesRemaining != 0 || status is null or < 0 || remaining is null or < 0)
+            throw new CborContentException("Incomplete or invalid fingerprint capture response.");
 
-        return new EnrollmentSampleResult
-        {
-            RawData = rawData,
-            TemplateId = templateId,
-            LastSampleStatus = lastStatus,
-            RemainingSamples = remaining
-        };
+        return begin
+            ? new EnrollmentBeginResult(rawData, (FingerprintSampleStatus)status.Value, remaining.Value,
+                templateId is { Length: > 0 } ? templateId : throw new CborContentException("Missing enrollment template ID."))
+            : new EnrollmentSampleResult(rawData, (FingerprintSampleStatus)status.Value, remaining.Value);
     }
+}
+
+/// <summary>Initial capture feedback and the template ID assigned by the authenticator.</summary>
+public sealed class EnrollmentBeginResult : EnrollmentSampleResult
+{
+    internal EnrollmentBeginResult(ReadOnlyMemory<byte> rawData, FingerprintSampleStatus status,
+        int remainingSamples, ReadOnlyMemory<byte> templateId) : base(rawData, status, remainingSamples)
+    {
+        TemplateId = templateId;
+    }
+
+    /// <summary>Gets the template ID to pass to every continuation request.</summary>
+    public ReadOnlyMemory<byte> TemplateId { get; }
+
+    /// <summary>Decodes a begin response, including its required template ID.</summary>
+    /// <param name="data">The borrowed CBOR response.</param>
+    /// <returns>Sample feedback, template ID and an owned copy of the response bytes.</returns>
+    /// <exception cref="CborContentException">The response lacks a valid template ID, status or remaining count.</exception>
+    public new static EnrollmentBeginResult Decode(ReadOnlyMemory<byte> data) =>
+        (EnrollmentBeginResult)DecodeSample(data, begin: true);
 }
 
 /// <summary>

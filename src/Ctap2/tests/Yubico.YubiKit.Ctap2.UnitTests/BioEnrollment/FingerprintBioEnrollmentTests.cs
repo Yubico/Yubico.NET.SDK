@@ -405,17 +405,17 @@ public class FingerprintBioEnrollmentTests
     [Fact]
     public async Task EnrollmentWorkflow_CompletesSuccessfully()
     {
-        // Arrange a queue-driven simulation; every next reply repeats the ID, so standard-permitted omission is untested.
+        // Begin supplies the ID; subsequent responses only supply feedback.
         var templateId = new byte[] { 0x01, 0x02, 0x03, 0x04 };
 
         var responses = new Queue<byte[]>(
         [
             CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 4),
-            CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 3),
-            CreateEnrollmentResponse(templateId, FingerprintSampleStatus.TooFast, 3), // Rejected sample
-            CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 2),
-            CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 1),
-            CreateEnrollmentResponse(templateId, FingerprintSampleStatus.Good, 0) // Decoded zero, not sensor persistence proof.
+            [0xA2, 5, 0, 6, 3],
+            [0xA2, 5, (byte)FingerprintSampleStatus.TooFast, 6, 3],
+            [0xA2, 5, 0, 6, 2],
+            [0xA2, 5, 0, 6, 1],
+            [0xA2, 5, 0, 6, 0]
         ]);
 
         _mockSession.SendCborRequestAsync(
@@ -425,20 +425,21 @@ public class FingerprintBioEnrollmentTests
 
         var bioEnroll = CreateBioEnrollment();
 
-        // Simulated loop reuses each reply's ID. Real callers must retain begin's ID separately:
-        // standard next replies need not repeat it, a case this fixture does not cover.
-        var result = await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
+        var begin = await bioEnroll.EnrollBeginAsync(cancellationToken: TestContext.Current.CancellationToken);
+        EnrollmentSampleResult result = begin;
         Assert.False(result.IsComplete);
         Assert.Equal(4, result.RemainingSamples);
 
         while (!result.IsComplete)
         {
-            result = await bioEnroll.EnrollCaptureNextSampleAsync(result.TemplateId, cancellationToken: TestContext.Current.CancellationToken);
+            result = await bioEnroll.EnrollCaptureNextSampleAsync(begin.TemplateId, cancellationToken: TestContext.Current.CancellationToken);
+            Assert.Equal("0102A1014401020304", Convert.ToHexString(_fakeProtocol.LastAuthenticationMessage));
         }
 
         // Assert
         Assert.True(result.IsComplete);
         Assert.Equal(0, result.RemainingSamples);
+        Assert.Empty(responses);
     }
 
     // Synthetic selected-field replies; the template helper emits the current flat, nonstandard inventory shape.

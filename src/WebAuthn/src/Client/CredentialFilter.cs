@@ -30,7 +30,8 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <para>
 /// Descriptors are probed with <c>authenticatorGetAssertion</c>, <c>up: false</c> and a zero client
 /// data hash, in chunks of <c>maxCredentialCountInList</c> (CTAP 2.1-2.3 §6.4). A chunk the
-/// authenticator rejects with CTAP2_ERR_REQUEST_TOO_LARGE is retried smaller; CTAP2_ERR_NO_CREDENTIALS
+/// authenticator rejects with CTAP2_ERR_REQUEST_TOO_LARGE or the session refuses before sending due
+/// to its encoded size is retried smaller; CTAP2_ERR_NO_CREDENTIALS
 /// moves to the next chunk; any other status propagates. Descriptors longer than
 /// <c>maxCredentialIdLength</c> are skipped: the authenticator cannot have issued them.
 /// </para>
@@ -145,6 +146,12 @@ internal static class CredentialFilter
             catch (CtapException ex) when (ex.Status == CtapStatus.RequestTooLarge && chunk.Count > 1)
             {
                 limit = chunk.Count - 1; // Retry from the same offset without losing any candidates.
+                continue;
+            }
+            catch (Ctap2Session.GetAssertionSizeException) when (chunk.Count > 1)
+            {
+                // The encoded command did not reach the device. Retry the same offset with fewer IDs.
+                limit = chunk.Count - 1;
                 continue;
             }
 

@@ -323,8 +323,8 @@ Raw PIN/key/retry changes leave these recovery objects unchanged, so coordinate 
 Use the typed CHUID, CCC, ADMIN DATA and Key History methods for the SDK's modeled provisioning shapes.
 CHUID fixes FASC-N/expiration/signature fields; CCC fixes its surrounding fields. Other valid vendor/profile
 encodings may need `GetObjectAsync`/`PutObjectAsync`. Raw methods exchange inner object bytes, with the
-outer `53` wrapper handled by the SDK. Use defined `DataObject` identifiers; keep request IDs within the
-intended PIV range because arbitrary integers currently reach the encoder without a range guard.
+outer `53` wrapper handled by the SDK. Prefer defined `DataObject` identifiers; raw request IDs outside
+`0..0xFFFFFF` are rejected rather than truncated to another identifier.
 
 CHUID/CCC constructors borrow supplied identifier memory; decoding copies it and encoding returns a new
 nonsecret buffer. Key History counts describe retired keys with on-/off-card certificates. Maintain it

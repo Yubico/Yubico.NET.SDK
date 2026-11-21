@@ -498,22 +498,22 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Read PIV data object.
     /// </summary>
-    /// <param name="objectId">PIV object identifier. Prefer defined DataObject values;
-    /// arbitrary integer requests currently reach the encoder without a range guard.</param>
+    /// <param name="objectId">PIV object identifier, from 0 to 0xFFFFFF. Prefer defined DataObject values.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Caller-owned mutable inner object bytes, excluding the outer 53 wrapper, or empty
     /// if absent. Clear sensitive contents after use; public provisioning data needs no secret cleanup.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The object identifier is outside the three-byte range.</exception>
     Task<Memory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Write PIV data object.
     /// </summary>
     /// <remarks>Requires management-key authentication. Pass null data to delete an object.
-    /// The caller retains the input buffer through the awaited operation and clears sensitive contents afterward.
-    /// Prefer defined DataObject identifiers; the current encoder has no arbitrary-integer range guard.</remarks>
-    /// <param name="objectId">PIV data object identifier.</param>
+    /// The caller retains the input buffer through the awaited operation and clears sensitive contents afterward.</remarks>
+    /// <param name="objectId">PIV object identifier, from 0 to 0xFFFFFF. Prefer defined DataObject values.</param>
     /// <param name="data">Object data or null to delete.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The object identifier is outside the three-byte range.</exception>
     Task PutObjectAsync(int objectId, ReadOnlyMemory<byte>? data, CancellationToken cancellationToken = default);
 
     // Typed data objects

@@ -118,6 +118,9 @@ internal static class DataObjectProtocol
     /// </summary>
     private static byte[] EncodeObjectId(int objectId)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(objectId);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(objectId, 0xFFFFFF);
+
         if (objectId <= byte.MaxValue)
         {
             return [TagObjectId, 0x01, (byte)objectId];

@@ -147,26 +147,24 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="keyReference">SCP03 KID 0x01 and a custom KVN in the YubiKey range 0x01–0xFE.</param>
     /// <param name="staticKeys">AES-128 ENC/MAC/DEK values to load. The caller retains ownership.</param>
-    /// <param name="replaceKvn">0 to import a new version, or the existing KVN to replace, in 0x01–0xFE.</param>
+    /// <param name="replace"><see cref="KeyReplacement.New"/> to add, or <see cref="KeyReplacement.Of"/> to replace an existing version.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
     ///     Requires a session data encryptor and device-accepted administrative authority. On a factory
-    ///     YubiKey, the first SCP03 import replaces the default set even when replaceKvn is 0. With custom
-    ///     sets already installed, 0 adds a version; a nonzero value requests replacement. Escrow secrets
+    ///     YubiKey, the first SCP03 import replaces the default set even with <see cref="KeyReplacement.New"/>.
+    ///     With custom sets already installed, New adds a version; Of requests replacement. Escrow secrets
     ///     before import and verify a fresh session with the new keys before deleting any retained old set.
-    ///     The SDK rejects replaceKvn outside 0–255 before sending; it does not enforce every device-specific version range.
     ///     Response validation requires the requested KVN followed by exactly three matching KCVs.
     /// </remarks>
     /// <exception cref="ArgumentNullException">The static key set is null.</exception>
     /// <exception cref="ArgumentException">The reference does not use KID 0x01.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">The replacement version is outside 0–255.</exception>
     /// <exception cref="InvalidOperationException">No data encryptor is available, or KCV validation fails.</exception>
     // The overloads represent distinct SCP03, EC public-key, and EC private-key payloads.
 #pragma warning disable RS0026
     Task PutKeyAsync(
         KeyReference keyReference,
         StaticKeys staticKeys,
-        int replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -174,20 +172,19 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="keyReference">The key reference identifying where to store the key.</param>
     /// <param name="publicKey">The EC public key parameters to store.</param>
-    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+    /// <param name="replace"><see cref="KeyReplacement.New"/> to add, or <see cref="KeyReplacement.Of"/> to replace an existing version.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
     ///     Use a NIST P-256 CA-KLOC public key reference when provisioning host authentication for SCP11a/c.
     ///     Device-accepted administrative authority is required; this overload does not check it locally.
-    ///     The SDK rejects replaceKvn outside 0–255 before sending. The caller retains responsibility for the supplied key.
+    ///     The caller retains responsibility for the supplied key.
     /// </remarks>
     /// <exception cref="ArgumentException">The public key is not NIST P-256.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">The replacement version is outside 0–255.</exception>
     /// <exception cref="InvalidOperationException">The response checksum does not match the requested version.</exception>
     Task PutKeyAsync(
         KeyReference keyReference,
         ECPublicKey publicKey,
-        int replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -195,20 +192,19 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="keyReference">The key reference identifying where to store the key.</param>
     /// <param name="privateKey">The EC private key parameters to store.</param>
-    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+    /// <param name="replace"><see cref="KeyReplacement.New"/> to add, or <see cref="KeyReplacement.Of"/> to replace an existing version.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
     ///     Imports a NIST P-256 Security Domain private key using the session's data encryptor.
     ///     Device-accepted administrative authority is also required. The caller retains responsibility
-    ///     for the private key; keep it in a using scope. The SDK rejects replaceKvn outside 0–255 before sending.
+    ///     for the private key; keep it in a using scope.
     /// </remarks>
     /// <exception cref="ArgumentException">The private key is not NIST P-256.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">The replacement version is outside 0–255.</exception>
     /// <exception cref="InvalidOperationException">No data encryptor is available, or the response checksum does not match.</exception>
     Task PutKeyAsync(
         KeyReference keyReference,
         ECPrivateKey privateKey,
-        int replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default);
 #pragma warning restore RS0026
 
@@ -216,7 +212,7 @@ public interface ISecurityDomainSession : IApplicationSession
     ///     Generates a NIST P-256 SCP11 key pair on the device and returns its public key.
     /// </summary>
     /// <param name="keyReference">SCP11 device-key reference that will receive the generated pair.</param>
-    /// <param name="replaceKvn">0 for a new version, or an existing version to replace.</param>
+    /// <param name="replace"><see cref="KeyReplacement.New"/> to add, or <see cref="KeyReplacement.Of"/> to replace an existing version.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>An ECPublicKey whose PublicPoint is the uncompressed point (0x04 || X || Y).</returns>
     /// <remarks>
@@ -230,7 +226,7 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The response is empty.</exception>
     Task<ECPublicKey> GenerateKeyAsync(
         KeyReference keyReference,
-        byte replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default);
 
     /// <summary>

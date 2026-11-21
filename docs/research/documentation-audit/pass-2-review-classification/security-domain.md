@@ -78,6 +78,9 @@ Sibling pins: yubikey-manager @ 4ca60f70; yubikit-android @ f4626856; yubikey-ma
 - Evidence: .NET `SecurityDomainSession.cs:148-150`, `:175-176`, `:795-803`; `ISecurityDomainSession.cs:339-343`. Python `py:yubikit/securitydomain.py:103-108`, `:185-221 @4ca60f70` (no reinitialization). Android `SecurityDomainSession.java:519-565 @f4626856`. Rust `crates/yubikit/src/securitydomain.rs:599-643 @90940e9b`. PIV `src/Piv/src/PivSession.cs:207-208`.
 
 ### SD-IMP-006: Wire ranges and import response identity
+
+Historical range proposal below: [AG-30](../pass-2-review-decisions.md#ag-30-q11-keyreplacement-exact-shape)
+supersedes the public integer replacement argument with required `KeyReplacement` on all four overloads.
 - Gate(s) and why: G3, on three facets. (1) GET DATA identifier truncation: C# (`SecurityDomainSession.cs:227-228`) and Rust (`securitydomain.rs:468-471`) truncate silently; Python rejects through `struct.pack` (`py:yubikit/core/smartcard/__init__.py:158 @4ca60f70`). (2) GENERATE forwards the caller KID unchecked in all four implementations (`SecurityDomainSession.cs:551-558`; `py:yubikit/securitydomain.py:319-322 @4ca60f70`; `SecurityDomainSession.java:368 @f4626856`; `securitydomain.rs:783 @90940e9b`). (3) A negative replaceKvn wraps in C# (`(byte)` cast at `SecurityDomainSession.cs:477`) and in Android (`core/src/main/java/com/yubico/yubikit/core/smartcard/Apdu.java:101-106` accepts -128 to -1); Python and Rust reject it.
 - Severity / certainty: Medium. Casts and admission paths are source-confirmed; no misprovisioned device has been demonstrated.
 - Decision: Should GENERATE accept only the SCP11 key references 0x11, 0x13 and 0x15, rejected before transmission?

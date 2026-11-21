@@ -125,7 +125,7 @@ public async Task GeneratedKey_IsListedInNextSession(YubiKeyTestState state)
     {
         await state.WithSecurityDomainSessionAsync(
             resetBeforeUse: true,
-            async session => { await session.GenerateKeyAsync(keyRef, cancellationToken: ct); },
+            async session => { await session.GenerateKeyAsync(keyRef, KeyReplacement.New, cancellationToken: ct); },
             scpKeyParams: parameters,
             cancellationToken: ct);
 

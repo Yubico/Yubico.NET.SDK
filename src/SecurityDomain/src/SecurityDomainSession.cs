@@ -485,12 +485,11 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task PutKeyAsync(
         KeyReference keyReference,
         StaticKeys staticKeys,
-        int replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(staticKeys);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)replaceKvn, (uint)byte.MaxValue, nameof(replaceKvn));
 
         if (keyReference.Kid != 0x01)
             throw new ArgumentException("SCP03 keys must use KID 0x01", nameof(keyReference));
@@ -513,7 +512,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
             // Build and send PUT KEY command
             // P2: 0x80 | KID (0x80 flag required by GlobalPlatform)
-            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, replaceKvn,
+            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, replace.Kvn,
                 (byte)(0x80 | keyReference.Kid),
                 buffer.WrittenMemory);
             EnsureInitializedBackend();
@@ -570,7 +569,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <inheritdoc />
     public async Task<ECPublicKey> GenerateKeyAsync(
         KeyReference keyReference,
-        byte replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -582,11 +581,11 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         if (!_admitUnverifiedFirmware)
             EnsureSupports(FeatureScp11);
 
-        if (replaceKvn == 0)
+        if (replace.IsNew)
             _logger.LogDebug("Generating EC key for {KeyRef}", keyReference);
         else
             _logger.LogDebug("Generating EC key for {KeyRef}, replacing KVN=0x{ReplaceKvn:X2}", keyReference,
-                replaceKvn);
+                replace.Kvn);
 
         Span<byte> parameters = stackalloc byte[3];
         parameters[0] = KeyTypeEccKeyParams;
@@ -601,7 +600,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         {
             Cla = ClaGlobalPlatform,
             Ins = InsGenerateKey,
-            P1 = replaceKvn,
+            P1 = replace.Kvn,
             P2 = keyReference.Kid,
             Data = commandData
         };
@@ -632,17 +631,16 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <inheritdoc />
     // The EC public-key import overload has distinct key ownership and wire encoding.
 #pragma warning disable RS0026
-    public async Task PutKeyAsync(KeyReference keyReference, ECPublicKey publicKey, int replaceKvn = 0,
+    public async Task PutKeyAsync(KeyReference keyReference, ECPublicKey publicKey, KeyReplacement replace,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)replaceKvn, (uint)byte.MaxValue, nameof(replaceKvn));
 
         var pkParams = publicKey.Parameters;
         if (pkParams.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
             throw new ArgumentException("Public key must be of type NIST P-256");
 
-        await PutEcKeyAsync(keyReference, KeyTypeEccPublicKey, publicKey.PublicPoint, replaceKvn,
+        await PutEcKeyAsync(keyReference, KeyTypeEccPublicKey, publicKey.PublicPoint, replace,
             cancellationToken).ConfigureAwait(false);
     }
 #pragma warning restore RS0026
@@ -653,11 +651,10 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     public async Task PutKeyAsync(
         KeyReference keyReference,
         ECPrivateKey privateKey,
-        int replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)replaceKvn, (uint)byte.MaxValue, nameof(replaceKvn));
 
         var parameters = privateKey.Parameters;
         if (parameters.Curve.Oid.Value != ECCurve.NamedCurves.nistP256.Oid.Value)
@@ -667,7 +664,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         // Do not clear the supplied key's private parameters here. The caller retains responsibility
         // for the ECPrivateKey and should keep it in a using scope.
 
-        await PutEcKeyAsync(keyReference, KeyTypeEccPrivateKey, (ReadOnlyMemory<byte>)encryptedKey, replaceKvn,
+        await PutEcKeyAsync(keyReference, KeyTypeEccPrivateKey, (ReadOnlyMemory<byte>)encryptedKey, replace,
             cancellationToken).ConfigureAwait(false);
     }
 #pragma warning restore RS0026
@@ -678,13 +675,13 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <param name="keyReference">The key reference identifying where to store the key.</param>
     /// <param name="keyType">The GlobalPlatform key type byte (e.g. 0xB0 for public, 0xB1 for private).</param>
     /// <param name="keyData">The key data to embed in the TLV payload (already encrypted for private keys).</param>
-    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+    /// <param name="replace">The version to replace, or an explicit request to add a version.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     private async Task PutEcKeyAsync(
         KeyReference keyReference,
         byte keyType,
         ReadOnlyMemory<byte> keyData,
-        int replaceKvn,
+        KeyReplacement replace,
         CancellationToken cancellationToken)
     {
         var keyKindLabel = keyType == KeyTypeEccPublicKey ? "public" : "private";
@@ -706,7 +703,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             buffer.Write((ReadOnlySpan<byte>)[0]);
 
             // Create and send the command
-            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, replaceKvn, keyReference.Kid,
+            var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, replace.Kvn, keyReference.Kid,
                 buffer.WrittenMemory);
             var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
 

@@ -648,10 +648,10 @@ public class SecurityDomainSessionTests
     }
 
     [Theory]
-    [InlineData(0x11)]
-    [InlineData(0x13)]
-    [InlineData(0x15)]
-    public async Task GenerateAndImportEcKey_TransmitExplicitP256CurveParameters(byte kid)
+    [InlineData(0x11, 0x00)]
+    [InlineData(0x13, 0x01)]
+    [InlineData(0x15, 0xFE)]
+    public async Task GenerateAndImportEcKey_TransmitReplacementAndExplicitCurve(byte kid, byte oldKvn)
     {
         byte[] publicPoint =
         [
@@ -677,18 +677,20 @@ public class SecurityDomainSessionTests
             new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 7, 2) },
             cancellationToken: TestContext.Current.CancellationToken);
 
+        var replace = oldKvn == 0 ? KeyReplacement.New : KeyReplacement.Of(oldKvn);
+        Assert.Equal(oldKvn == 0, replace.IsNew);
         var generatedKey = await session.GenerateKeyAsync(
-            new KeyReference(kid, 0x02),
+            new KeyReference(kid, 0x03), replace,
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotNull(generatedKey);
-        Assert.Equal([0x80, 0xF1, 0x00, kid, 0x04, 0x02, 0xF0, 0x01, 0x00, 0x00],
+        Assert.Equal([0x80, 0xF1, oldKvn, kid, 0x04, 0x03, 0xF0, 0x01, 0x00, 0x00],
             connection.TransmittedCommands[1]);
 
-        await session.PutKeyAsync(new KeyReference(0x10, 0x03), generatedKey,
+        await session.PutKeyAsync(new KeyReference(0x10, 0x03), generatedKey, replace,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal([0x80, 0xD8, 0x00, 0x10, 0x48, 0x03, 0xB0, 0x41, .. publicPoint,
+        Assert.Equal([0x80, 0xD8, oldKvn, 0x10, 0x48, 0x03, 0xB0, 0x41, .. publicPoint,
             0xF0, 0x01, 0x00, 0x00, 0x00], connection.TransmittedCommands[2]);
     }
 
@@ -703,7 +705,7 @@ public class SecurityDomainSessionTests
         await using var session = await SecurityDomainSession.CreateAsync(connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        await Assert.ThrowsAsync<ArgumentException>(() => session.GenerateKeyAsync(new KeyReference(kid, 0x02),
+        await Assert.ThrowsAsync<ArgumentException>(() => session.GenerateKeyAsync(new KeyReference(kid, 0x02), KeyReplacement.New,
             cancellationToken: TestContext.Current.CancellationToken));
         Assert.Single(connection.TransmittedCommands);
     }
@@ -973,9 +975,9 @@ public class SecurityDomainSessionTests
     }
 
     [Theory]
-    [InlineData(-1)]
-    [InlineData(256)]
-    public async Task PutScp03KeyAsync_RejectsOutOfRangeReplacementBeforeUsingChannel(int replaceKvn)
+    [InlineData(0x00)]
+    [InlineData(0xFF)]
+    public async Task PutScp03KeyAsync_RejectsReservedReplacementBeforeUsingChannel(byte existingKvn)
     {
         using var keys = StaticKeys.GetDefaultKeys();
         var connection = new RecordingSmartCardConnection(OkResponse());
@@ -983,10 +985,44 @@ public class SecurityDomainSessionTests
             cancellationToken: TestContext.Current.CancellationToken);
 
         var failure = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.PutKeyAsync(
-            new KeyReference(0x01, 0x09), keys, replaceKvn, TestContext.Current.CancellationToken));
+            new KeyReference(0x01, 0x09), keys, KeyReplacement.Of(existingKvn), TestContext.Current.CancellationToken));
 
-        Assert.Equal(nameof(replaceKvn), failure.ParamName);
+        Assert.Equal(nameof(existingKvn), failure.ParamName);
         Assert.Single(connection.TransmittedCommands);
+    }
+
+    [Theory]
+    [InlineData(false, 0x00, 0x02)]
+    [InlineData(false, 0x02, 0x03)]
+    [InlineData(true, 0x00, 0x02)]
+    [InlineData(true, 0x02, 0x03)]
+    public async Task PutWrappedKeys_UseReplacementInP1AndSeparateTargetInData(bool ec, byte oldKvn, byte newKvn)
+    {
+        using var connection = new Scp03HandshakeFakeConnection { CaptureFirstPutKey = true };
+        using var parameters = Scp03KeyParameters.Default;
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = parameters }, TestContext.Current.CancellationToken);
+
+        // The default struct value and New are intentionally identical wire requests.
+        Assert.Equal(KeyReplacement.New, default);
+        var replace = oldKvn == 0 ? default : KeyReplacement.Of(oldKvn);
+        var error = await Assert.ThrowsAsync<ApduException>(async () =>
+        {
+            if (ec)
+            {
+                using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+                using var key = ECPrivateKey.CreateFromEcdh(ecdh);
+                await session.PutKeyAsync(new KeyReference(0x13, newKvn), key, replace, TestContext.Current.CancellationToken);
+            }
+            else
+            {
+                await session.PutKeyAsync(new KeyReference(0x01, newKvn), parameters.Keys, replace, TestContext.Current.CancellationToken);
+            }
+        });
+
+        Assert.Equal(unchecked((short)0x6982), error.SW);
+        Assert.Equal([0x84, 0xD8, oldKvn, ec ? (byte)0x13 : (byte)0x81], connection.TransmittedCommands[3][..4]);
+        Assert.Equal(newKvn, connection.PutKeyTargetVersion);
     }
 
     [Fact]

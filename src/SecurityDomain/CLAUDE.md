@@ -118,6 +118,10 @@ SecurityDomainSession public method
 
 Do not introduce operation-specific command classes such as `PutKeyCommand`, `GetDataCommand`, `DeleteKeyCommand`, or `ResetCommand`. Do not hide the reset raw connection bypass behind a helper.
 
+`PutKeyAsync` and `GenerateKeyAsync` require `KeyReplacement.New` or `KeyReplacement.Of(existingKvn)`.
+The selector supplies P1; the target KVN remains the first data byte. Keep the existing P2 KID and the
+static PUT KEY multi-key flag. Do not query existing keys to infer replacement intent.
+
 Use `CaIdentifierType` flags to select KLOC, KLCC, or both; preserve KLOC-before-KLCC result ordering.
 
 ### SCP Parameter Types

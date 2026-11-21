@@ -83,6 +83,8 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
     public short ReinitRejectionStatusWord { get; set; } = unchecked((short)0x6982);
 
     public bool AcceptReinitialization { get; init; }
+    public bool CaptureFirstPutKey { get; init; }
+    public byte? PutKeyTargetVersion { get; private set; }
 
     public Transport Transport { get; } = Transport.Usb;
     public ConnectionType Type { get; } = ConnectionType.SmartCard;
@@ -130,6 +132,7 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
             (0, InsSelect) => Ok(),
             (1, InsInitializeUpdate) => HandleInitializeUpdate(wire),
             (2, InsExternalAuthenticate) => HandleExternalAuthenticate(wire),
+            (3, 0xD8) when CaptureFirstPutKey => CapturePutKey(wire),
             (3, InsGetData) => HandleGetData(wire),
             (4, InsInitializeUpdate) => Rejected(SWConstants.AuthenticationMethodBlocked),
             (5, InsSelect) => Ok(),
@@ -140,6 +143,28 @@ internal sealed class Scp03HandshakeFakeConnection : ISmartCardConnection
             _ => throw new InvalidOperationException(
                 $"Unexpected command at step {step}: INS=0x{ins:X2}, wire={Convert.ToHexString(wire)}")
         };
+    }
+
+    private byte[] CapturePutKey(byte[] wire)
+    {
+        if (_senc is null)
+            throw new InvalidOperationException("SCP03 setup did not derive an encryption key.");
+
+        using var aes = Aes.Create();
+        aes.SetKey(_senc);
+        var iv = DeriveIv(aes, counter: 1, ivPrefix: 0);
+        var ciphertext = wire.AsSpan(5, wire[4] - 8); // Ignore the command MAC; this is a wire capture only.
+        Span<byte> plaintext = stackalloc byte[ciphertext.Length]; // Fixture receives a single short APDU.
+        try
+        {
+            aes.DecryptCbc(ciphertext, iv, plaintext, PaddingMode.None);
+            PutKeyTargetVersion = plaintext[0];
+            return Rejected(SWConstants.SecurityStatusNotSatisfied);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(plaintext);
+        }
     }
 
     private byte[] HandleInitializeUpdate(byte[] wire)

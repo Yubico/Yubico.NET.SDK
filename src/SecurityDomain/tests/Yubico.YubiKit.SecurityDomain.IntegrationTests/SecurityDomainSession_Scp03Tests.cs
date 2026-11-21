@@ -86,7 +86,7 @@ public class SecurityDomainSession_Scp03Tests : SecurityDomainStateRestoringTest
             await state.WithSecurityDomainSessionAsync(true,
                 async session =>
                 {
-                    await session.PutKeyAsync(newKeyReference, newStaticKeys, 0,
+                    await session.PutKeyAsync(newKeyReference, newStaticKeys, KeyReplacement.New,
                         CancellationTokenSource.Token);
                 }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: CancellationTokenSource.Token);
 

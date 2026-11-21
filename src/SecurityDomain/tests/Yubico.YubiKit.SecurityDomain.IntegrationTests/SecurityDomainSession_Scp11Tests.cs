@@ -37,7 +37,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
             // Act - Generate a new EC key on the YubiKey
             var publicKey = await session.GenerateKeyAsync(
                 keyReference,
-                0,
+                KeyReplacement.New,
                 CancellationTokenSource.Token);
 
             var publicKeyBytes = publicKey.PublicPoint;
@@ -143,7 +143,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
 
             keyParameters = new Scp11KeyParameters(keyReference, publicKey);
 
-            await session.PutKeyAsync(keyReference, privateKey);
+            await session.PutKeyAsync(keyReference, privateKey, KeyReplacement.New);
         }, scpKeyParams: Scp03KeyParameters.Default);
 
 
@@ -193,7 +193,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
             SecurityDomainSession session, CancellationToken cancellationToken = default)
         {
             var keyRef = new KeyReference(ScpKid.SCP11b, 0x7f);
-            await session.GenerateKeyAsync(keyRef, 0, cancellationToken);
+            await session.GenerateKeyAsync(keyRef, KeyReplacement.New, cancellationToken);
             await session.DeleteKeyAsync(keyRef, cancellationToken: cancellationToken);
         }
     }
@@ -252,7 +252,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
     {
         var sessionRef = new KeyReference(scpKid, kvn);
         var oceRef = new KeyReference(OceKid, kvn);
-        var newPublicKey = await session.GenerateKeyAsync(sessionRef, 0, CancellationTokenSource.Token);
+        var newPublicKey = await session.GenerateKeyAsync(sessionRef, KeyReplacement.New, CancellationTokenSource.Token);
 
         var oceCerts = GetOceCertificates(Scp11TestData.OceCerts);
         ArgumentNullException.ThrowIfNull(oceCerts.Ca);
@@ -262,7 +262,7 @@ public class SecurityDomainSession_Scp11Tests : SecurityDomainStateRestoringTest
             oceCerts.Ca.PublicKey.GetECDsaPublicKey()!.ExportParameters(false)
         );
 
-        await session.PutKeyAsync(oceRef, ocePublicKey, 0, CancellationTokenSource.Token);
+        await session.PutKeyAsync(oceRef, ocePublicKey, KeyReplacement.New, CancellationTokenSource.Token);
 
         // Get the CA's Subject Key Identifier.
         var ski = GetSki(oceCerts.Ca);

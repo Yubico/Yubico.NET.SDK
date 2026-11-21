@@ -99,7 +99,7 @@ try
 {
     // Escrow keyMaterial before you send it: the device will not give it back.
     using var newKeys = new StaticKeys(keyMaterial.AsSpan(0, 16), keyMaterial.AsSpan(16, 16), keyMaterial.AsSpan(32, 16));
-    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, replaceKvn: 0);
+    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, KeyReplacement.New);
 }
 finally
 {
@@ -110,10 +110,10 @@ finally
 Use three AES-128 keys and a custom KVN from 0x01 to 0xFE; 0xFF is reserved for the factory set. Yubico
 documents three distinct cases:
 
-- On a factory device, the first import replaces the factory set, even with `replaceKvn: 0`. There is no
+- On a factory device, the first import replaces the factory set, even with `KeyReplacement.New`. There is no
   retained factory version to delete afterward.
-- With custom sets already installed, `replaceKvn: 0` adds a version alongside them.
-- A nonzero `replaceKvn` requests replacement of that existing version. The overwritten secrets cannot be
+- With custom sets already installed, `KeyReplacement.New` adds a version alongside them.
+- `KeyReplacement.Of(existingKvn)` requests replacement of that existing version. The overwritten secrets cannot be
   recovered from the device.
 
 Before removing any retained old set, dispose the importing session and verify a fresh session with
@@ -125,14 +125,16 @@ KVN 0. `deleteLast: true` permits last-key deletion on the device; it is not a h
 check. Yubico documents deletion of the last SCP03 set as restoring factory defaults, not leaving the
 device protected without keys.
 
-The SDK rejects integer `replaceKvn` values outside the wire byte range before transmission. It does not
-enforce every device-specific version restriction.
+All three `PutKeyAsync` overloads and `GenerateKeyAsync` require a `KeyReplacement`. A target reference
+with KVN `0x03` and `KeyReplacement.Of(0x02)` requests replacing version 2 with version 3. `Of` accepts an
+existing version from `0x01` to `0xFE`; it rejects `0x00` and `0xFF`. This range does not change validation
+of the target `KeyReference`. Migrate an omitted or zero replacement argument to `KeyReplacement.New`.
 
 ### Set up SCP11b
 
 ```csharp
 var keyReference = new KeyReference(ScpKid.SCP11b, Kvn: 0x01);
-ECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, replaceKvn: 0);
+ECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, KeyReplacement.New);
 ```
 
 Persist `devicePublicKey` through this trusted provisioning session. End that session before opening

@@ -71,15 +71,15 @@ public class WebAuthnBackendTests
             .Returns(new ReadOnlyMemory<byte>(response.Encode()));
 
         await using var backend = new WebAuthnBackend(_session);
-        var secret = await backend.EncapsulateAsync(TestContext.Current.CancellationToken);
+        using var secret = await backend.EncapsulateAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(2, secret.KeyAgreement[1]);                 // the platform key sent back is EC2
         Assert.Equal(SharedSecretLengthV2, secret.SharedSecret.Length);
-        Assert.Contains(secret.SharedSecret.ToArray(), b => b != 0);
-        var copy = secret.SharedSecret.ToArray();
+        var retained = secret.SharedSecret;
+        Assert.True(retained.Span.ContainsAnyExcept((byte)0));
         secret.Dispose();
         Assert.Throws<ObjectDisposedException>(() => secret.SharedSecret);
-        Assert.NotEqual(copy, new byte[copy.Length]); // Checks the pre-disposal copy, not the owner's cleared storage.
+        Assert.False(retained.Span.ContainsAnyExcept((byte)0));
     }
 
     /// <summary>The backend exposes its protocol-2 object without acquiring a token; this does not prove protocol-1 compatibility.</summary>

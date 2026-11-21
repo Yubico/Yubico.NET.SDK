@@ -82,18 +82,17 @@ Located in [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs), the reset
    - SCP11b (KID=0x13): `INTERNAL AUTHENTICATE`
    - Others: `PERFORM SECURITY OPERATION`
 3. **Sends at most 65 raw attempts** per processed reference with `ResetAttemptPayload`, bypassing SCP
-4. **Stops that reference** on `AuthenticationMethodBlocked` or `SecurityStatusNotSatisfied`; ordinary
-   transmission errors are retried, cancellation is rethrown, and exhaustion itself does not throw
-5. **Reselects/reinitializes**, without verifying factory contents afterward
+4. **Stops that reference** on `AuthenticationMethodBlocked` or `SecurityStatusNotSatisfied`; transport
+   failures, unexpected statuses, and exhaustion are collected across references and thrown; cancellation propagates immediately
+5. **Reselects and authenticates with default SCP03** on the same session, preserving firmware policy and protocol configuration
 
 Return alone is not proof of restoration, and cancellation/failure can leave partial persistent changes.
 Yubico documents factory SCP03 restoration after last-set deletion; do not extend that to a verified
-mixed-key/firmware guarantee. Retained SCP parameters can fail reauthentication. Reinitialization currently
-omits the original configuration/version and clears the explicit-version indicator; a fresh session with
-the required options is the workaround, not a claim that losing them is intended policy.
-SCP11 can fail Core's local 5.7.2 gate during reinitialization because the omitted override becomes 5.3.0.
-Raw attempts bypass the guard and can mutate state before flags clear. Await the entire reset, then
-dispose/reopen after uncertainty; old readiness/authentication values are not recovery evidence.
+mixed-key/firmware guarantee. A fresh handshake with public factory SCP03 keys only proves acceptance
+of those keys, not peer identity. The SDK disposes the reset's default parameters after derivation because
+Core's session keys independently own their DEK; do not dispose the caller's initial parameters.
+Raw attempts bypass the guard and begin only after readiness/authentication clears. A failure during or
+after the attempt phase ends the session; cleanup failures must not replace the primary failure.
 
 #### Writing Tests
 
@@ -119,6 +118,10 @@ SecurityDomainSession public method
 
 Do not introduce operation-specific command classes such as `PutKeyCommand`, `GetDataCommand`, `DeleteKeyCommand`, or `ResetCommand`. Do not hide the reset raw connection bypass behind a helper.
 
+`PutKeyAsync` and `GenerateKeyAsync` require `KeyReplacement.New` or `KeyReplacement.Of(existingKvn)`.
+The selector supplies P1; the target KVN remains the first data byte. Keep the existing P2 KID and the
+static PUT KEY multi-key flag. Do not query existing keys to infer replacement intent.
+
 Use `CaIdentifierType` flags to select KLOC, KLCC, or both; preserve KLOC-before-KLCC result ordering.
 
 ### SCP Parameter Types
@@ -141,12 +144,12 @@ final SCP11 1.4 and the complete YubiKey profile remain unverified.
 ### Session Initialization Pattern
 
 `CreateAsync(ISmartCardConnection, SessionCreationOptions?, CancellationToken)` combines construction and
-asynchronous initialization. The constructor retains the connection and SCP parameters. `InitializeAsync`
-takes configuration, firmware version, then cancellation token. It prepares the protocol, selects the SD
-through `SecurityDomainBackend.SelectApplicationAsync`, and configures it with the supplied version or
-5.3.0 fallback. If configuration returns a different protocol, the backend is rebuilt for that protocol.
-SCP11 creation therefore requires a known supported override (normally 5.7.2+), independently of the
-optional local GenerateKey gate. An override does not skip SELECT or establish actual device support.
+asynchronous initialization. The constructor retains protocol configuration, framing version and eligibility
+policy. `InitializeAsync` prepares the protocol, selects the SD, then configures framing and establishes SCP.
+An explicit override takes precedence over cached device info; SD has no version-read command. Unknown
+firmware uses the 5.3.0 framing fallback. Unknown and development firmware admit gated attempts without
+changing numeric framing. If SCP returns a different protocol, the backend is rebuilt for it. No version
+source skips SELECT or establishes actual device support.
 
 `ProtocolFactory`, `IProtocol`, and `ISmartCardProtocol` are not consumer extension points. External low-level
 code should use `RawSmartCardSession`; SecurityDomain uses these types only as friend-assembly implementation
@@ -157,15 +160,15 @@ machinery for its applet session.
 Initialization wraps `ApduException`, `BadResponseException`, or `NotSupportedException` from
 `ConfigureProtocolAsync` only when SCP parameters were supplied. Preparation and app selection precede
 that catch; cancellation is rethrown unchanged. Later operation failures retain their original types.
-`SecureChannelException.StatusWord` copies only an immediate `ApduException` status, not a nested one.
-A local version-gate failure is not a card rejection. Core's CLA-not-supported translation can put an
-APDU status inside a nested NotSupportedException, leaving the immediate StatusWord null. Provider and
+`SecureChannelException.StatusWord` copies the first `ApduException` status in the inner chain, including
+Core's CLA-not-supported translation. A local version-gate failure is not a card rejection. Provider and
 missing-DEK InvalidOperationException failures are outside this selected catch. Inspect provenance before
-deciding recovery; logged exception text can include provider-defined detail and is not universally redacted.
+deciding recovery. The SDK's wrapper message is fixed, but formatting or logging the whole exception can
+still include provider-defined details from the intact inner chain.
 
 The facade returns response.Data without exposing the ApduResponse owner. The view survives session
 disposal, but caller-copy cleanup cannot reach that owner. Core's supported Clear method also clears
-status bytes, so inspect status first if a future owned-response path adopts it. Earlier transport,
+status bytes. Static PUT KEY instead retains the APDU response and clears it in a finally after checking KCVs. Earlier transport,
 fragment and decrypted temporaries have separate lifetimes. Public metadata alone needs no secret zeroing.
 
 ## GlobalPlatform Command Structure
@@ -222,7 +225,7 @@ foreach (var entry in keyInfo)
 - **5.7.2**: SCP11 support; existing factory-state tests expect four entries rather than three
 
 These count assertions describe the tested factory-state expectation, not a universal count after key
-management. `GenerateKeyAsync` locally gates SCP11 only when an exact version was supplied at creation.
+management. `GenerateKeyAsync` rejects known unsupported production firmware, not unknown or prerelease builds.
 
 ## Known Gotchas
 

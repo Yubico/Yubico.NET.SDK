@@ -99,7 +99,7 @@ try
 {
     // Escrow keyMaterial before you send it: the device will not give it back.
     using var newKeys = new StaticKeys(keyMaterial.AsSpan(0, 16), keyMaterial.AsSpan(16, 16), keyMaterial.AsSpan(32, 16));
-    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, replaceKvn: 0);
+    await session.PutKeyAsync(new KeyReference(ScpKid.SCP03, Kvn: 0x02), newKeys, KeyReplacement.New);
 }
 finally
 {
@@ -110,35 +110,37 @@ finally
 Use three AES-128 keys and a custom KVN from 0x01 to 0xFE; 0xFF is reserved for the factory set. Yubico
 documents three distinct cases:
 
-- On a factory device, the first import replaces the factory set, even with `replaceKvn: 0`. There is no
+- On a factory device, the first import replaces the factory set, even with `KeyReplacement.New`. There is no
   retained factory version to delete afterward.
-- With custom sets already installed, `replaceKvn: 0` adds a version alongside them.
-- A nonzero `replaceKvn` requests replacement of that existing version. The overwritten secrets cannot be
+- With custom sets already installed, `KeyReplacement.New` adds a version alongside them.
+- `KeyReplacement.Of(existingKvn)` requests replacement of that existing version. The overwritten secrets cannot be
   recovered from the device.
 
 Before removing any retained old set, dispose the importing session and verify a fresh session with
 `Scp03KeyParameters` built from the new reference and escrowed keys. Only then delete the old set, if it is
 still present. `DeleteKeyAsync` takes a filter: zero KID or KVN omits that condition, so multiple keys can
 match. SCP03 component KIDs 0x01/0x02/0x03 become a **KVN-only filter**; always supply a nonzero KVN and
-review all matching keys. The SDK does not reject the empty filter produced by SCP03 with KVN 0; do not
-use that combination. `deleteLast: true` permits last-key deletion on the device; it is not a host safety
+review all matching keys. The SDK rejects empty filters before sending DELETE, including SCP03 with
+KVN 0. `deleteLast: true` permits last-key deletion on the device; it is not a host safety
 check. Yubico documents deletion of the last SCP03 set as restoring factory defaults, not leaving the
 device protected without keys.
 
-The SDK does not enforce every device range: integer `replaceKvn` values are currently cast to one byte.
+All three `PutKeyAsync` overloads and `GenerateKeyAsync` require a `KeyReplacement`. A target reference
+with KVN `0x03` and `KeyReplacement.Of(0x02)` requests replacing version 2 with version 3. `Of` accepts an
+existing version from `0x01` to `0xFE`; it rejects `0x00` and `0xFF`. This range does not change validation
+of the target `KeyReference`. Migrate an omitted or zero replacement argument to `KeyReplacement.New`.
 
 ### Set up SCP11b
 
 ```csharp
 var keyReference = new KeyReference(ScpKid.SCP11b, Kvn: 0x01);
-ECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, replaceKvn: 0);
+ECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, KeyReplacement.New);
 ```
 
 Persist `devicePublicKey` through this trusted provisioning session. End that session before opening
-another. SCP11 creation also needs a known supported firmware version, normally 5.7.2 or later, in
-`FirmwareVersionOverride`: Security Domain's default 5.3.0 fails Core's SCP11 setup gate locally, even
-if the preceding generation request succeeded on a newer device. An override supplies policy; it does
-not detect firmware or prove hardware support.
+another. SCP11 requires device support (production firmware 5.7.2 or later). Known unsupported production
+firmware is rejected locally; with unknown or development firmware, setup is attempted. An override
+supplies policy; it does not detect firmware or prove hardware support.
 
 This complete composable method uses the directives above plus System.Collections.Generic,
 System.Threading and System.Threading.Tasks. The caller supplies the intended device, an SCP11b reference,
@@ -182,9 +184,9 @@ An allowlist restricts the certificate directly signed by the CA-KLOC: the OCE c
 intermediate when a chain is used, rather than every leaf serial. This scope is described in the
 [SCP11 v1.3.0.13 Public Review draft](https://globalplatform.org/wp-content/uploads/2023/08/GPC_2.3_F_SCP11_v1.3.0.13_PublicRvw.pdf)
 (August 2023, §§4.3, 7.5.1 and 7.9). This draft is not a final specification or a complete YubiKey profile.
-`StoreAllowListAsync` replaces the restriction and rejects an empty collection; supply nonempty hexadecimal
-serial byte sequences in device order. Malformed hex throws `FormatException`; the SDK currently permits
-an empty individual string. `ClearAllowListAsync` deliberately removes the restriction, allowing all
+`StoreAllowListAsync` replaces the restriction. Supply nonempty hexadecimal serials in caller order.
+The SDK normalizes each unsigned big-endian serial to the minimal nonnegative DER INTEGER value encoding.
+Malformed hex throws `FormatException`; empty lists and entries are rejected. `ClearAllowListAsync` deliberately removes the restriction, allowing all
 CA-signed certificates subject to other authentication checks. It is not "deny all"; to stop trusting a CA,
 delete its key. These writes require host-authenticated administrative authority. The SDK emits no SCP11c
 allowlist counter, so do not assume these updates are supported over SCP11c without checking the device profile.
@@ -201,15 +203,24 @@ to exhaust key retry counters using at most 65 raw attempts per processed refere
 SCP03 components. Custom state can be lost permanently. Yubico documents factory SCP03 restoration when
 the last SCP03 set is deleted; that does not prove restoration for every mixed-key/firmware state.
 
-The SDK does not verify factory contents after reset. It retries ordinary transmission failures, does not
-throw merely because the attempt limit is reached, and skips reset for an empty key listing. Return alone
-therefore does not prove complete restoration. Failure or cancellation can leave partial persistent changes.
-Use an unauthenticated reset session as above: retained SCP parameters may no longer work during reselection
-and reauthentication. Currently reset reinitialization also omits the original protocol configuration and
-firmware override. Dispose the reset session and create a fresh session with your required options afterward.
-SCP11 reinitialization can fail at the local version gate before a new handshake because reset falls
-back to 5.3.0. After any failed or cancelled reset, await its terminal task, dispose the session and
-reopen; retained readiness/authentication values do not prove that the old graph survived raw attempts.
+The SDK does not verify factory contents after reset. For each reference, the first transport failure or
+unexpected status stops attempts, as does reaching the limit. Incomplete outcomes are raised together after
+processing the other references. With no actionable keys, reset is skipped. Return alone does not prove
+complete restoration. Failure or cancellation during reset attempts ends the session and can leave partial changes.
+After all actionable references reach a stopping status, the same session reselects using the original
+protocol configuration and firmware policy and establishes a fresh channel with the public default SCP03
+keys, regardless of the previous channel. Success confirms acceptance of those keys, not peer identity or
+complete factory restoration. The channel can be used to reprovision the Security Domain. Recovery failure
+ends the session; reopen rather than relying on the old channel or assuming the reset was rolled back.
+
+### Protected empty-command qualification
+
+For SCP03, Core currently sends an encrypted padding block for empty command data, as pinned Python
+does. GlobalPlatform SCP03 Amendment D v1.1.2 Public Release §6.2.6 instead calls for advancing the
+counter without encrypting an absent command data field under C-DECRYPTION and C-MAC. The SDK has not
+changed that wire behavior pending device qualification. Empty GET DATA, Le handling, and protected
+response continuation across the SCP03/SCP11 profiles are separate qualification cases; this SCP03
+citation does not establish SCP11 requirements or actual device acceptance.
 
 ## User interaction
 
@@ -234,12 +245,11 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
   admits one session. Disjoint scoped views remain uncoordinated. Whoever creates a connection disposes
   it with `await using`; a session from `CreateSecurityDomainSessionAsync` owns the one it opened.
   See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
-- The Security Domain cannot detect firmware. `SessionCreationOptions.FirmwareVersionOverride` is its only
-  exact version source; without it the session assumes 5.3.0 for protocol configuration. Supply the version
-  from a Management session so the SCP11 gate can be evaluated.
-- `GenerateKeyAsync` locally checks for firmware 5.7.2 only when you supplied
-  `FirmwareVersionOverride` at creation. Without it, the request reaches the device and may fail with an
-  `ApduException`. Reset currently clears this explicit-version indicator; use a fresh session afterward.
+- Without an explicit `FirmwareVersionOverride`, the device factory uses cached device info. The Security
+  Domain has no version read of its own. Without either source, the protocol uses 5.3.0 framing and admits
+  firmware-gated attempts. Major-zero versions and cached, present non-final qualifiers (including unnamed
+  values) also admit them. Known numeric versions
+  still determine PC/SC framing independently of feature eligibility. Reset preserves both decisions.
 - Key generation/import/deletion, certificate/CA/allowlist storage and clearing, raw `StoreDataAsync`, and
   reset change persistent state. Review the target reference and recovery plan before sending them.
 - With SCP parameters supplied, selected secure-channel configuration failures (`ApduException`,
@@ -252,7 +262,8 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
 - `StaticKeys` holds the ENC, MAC, and DEK values and implements `IDisposable`. Wrap it in `using` so the key
   bytes are zeroed; `Scp03KeyParameters` and `Scp11KeyParameters` do the same for what they own.
 - Session creation borrows the key parameters you pass. You keep ownership and remain responsible for
-  disposing them after every session using them is gone. Security Domain retains the exact object for reset.
+  disposing them after every session using them is gone. After confirmed reset, the session uses its own
+  default SCP03 parameters; the SDK does not reuse or dispose the original caller-owned parameters.
 - `GetCertificatesAsync` returns caller-owned certificates. Dispose each certificate when no longer needed;
   disposing the session does not dispose them. If any certificate cannot be loaded, the SDK disposes those
   already loaded and throws instead of returning a partial bundle.
@@ -265,7 +276,7 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
 | Parameter content | Ownership action |
 | --- | --- |
 | `StaticKeys` | Copies the original arrays. Clear those sources separately; `Scp03KeyParameters` retains and disposes that same `StaticKeys` object. |
-| SCP11 private key and certificates | Parameters copy the collection, not the contained objects. Disposing parameters disposes the retained private-key wrapper and certificates; arrange one owner and keep them alive through every session/reset. The SD public-key object is not disposed by parameters. |
+| SCP11 private key and certificates | Parameters copy the collection, not the contained objects. Disposing parameters disposes the retained private-key wrapper and certificates; arrange one owner and keep them alive through session disposal. Security Domain reset does not reuse them. The SD public-key object is not disposed by parameters. |
 | Record clones | Share contained owners; cloning parameters is not an independent secret/certificate lifetime. |
 
 `GetDataAsync` returns a view into a response array, not a pooled loan. That view survives session disposal,

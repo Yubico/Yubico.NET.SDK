@@ -139,8 +139,9 @@ and Security Domain exception translation remain in the applet. Raw FIDO session
 Protocol configuration does not mark the session ready. `ConstructInitializedAsync` delegates to
 `InitializeSessionAsync`, which publishes `IsInitialized` only after the entire applet callback succeeds.
 Security Domain reset clears readiness and uses this same completion boundary for reinitialization. Pass
-creation-only SCP parameters to the callback rather than retaining them on the session; Security Domain keeps
-its parameters for reset. Base `Protocol` remains the disposal owner even while applet setup is incomplete.
+creation-only SCP parameters to the callback rather than retaining them on the session. Security Domain uses
+its own default SCP03 parameters after confirmed reset, not the caller's original parameters. Base `Protocol`
+remains the disposal owner even while applet setup is incomplete.
 
 ### Built-in macOS FIDO lifetime
 
@@ -832,8 +833,7 @@ consumers do not need to preflight them. Major-zero development versions retain 
 
 Applet factories snapshot `SessionCreationOptions` without retaining the options object. Secure-channel parameters
 remain borrowed. A session retains the caller-owned `UserPresencePrompt` service reference for its lifetime but
-never disposes it. Actual applet adoption still matters: Security Domain retains SCP parameters for
-reset; Management and Security Domain do not retain their unused presence prompt. Do not infer the same retained state from the
+never disposes it. Management and Security Domain do not retain their unused presence prompt. Do not infer the same retained state from the
 shared options shape for every applet.
 
 ## Test Infrastructure

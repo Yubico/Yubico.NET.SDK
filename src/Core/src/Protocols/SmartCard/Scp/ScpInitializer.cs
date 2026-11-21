@@ -43,6 +43,9 @@ internal static class ScpInitializer
     /// <param name="keyParams">SCP key parameters (SCP03 or SCP11)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <param name="onRecoveryRequired">Notifies the owning protocol when a secure exchange requires recovery.</param>
+    /// <param name="admitUnverifiedScpFirmware">
+    ///     Admits the SCP attempt when the applet cannot verify production firmware, without changing framing.
+    /// </param>
     /// <returns>Tuple of (SCP-wrapped processor, data encryptor)</returns>
     /// <exception cref="ArgumentException">Thrown when keyParams type is unsupported</exception>
     /// <exception cref="NotSupportedException">Thrown when device doesn't support SCP</exception>
@@ -53,7 +56,8 @@ internal static class ScpInitializer
         byte insSendRemaining,
         ScpKeyParameters keyParams,
         CancellationToken cancellationToken = default,
-        Action<Exception>? onRecoveryRequired = null)
+        Action<Exception>? onRecoveryRequired = null,
+        bool admitUnverifiedScpFirmware = false)
     {
         if (initializationProcessor is not ChainedResponseReceiver { FirmwareVersion: not null } mainProcessor)
             throw new ArgumentException("Initialization processor must be a ChainedResponseReceiver",
@@ -63,7 +67,8 @@ internal static class ScpInitializer
         {
             return keyParams switch
             {
-                Scp03KeyParameters scp03Parameters => Supports(mainProcessor.FirmwareVersion, FeatureScp03)
+                Scp03KeyParameters scp03Parameters =>
+                    admitUnverifiedScpFirmware || FeatureScp03.IsSupportedByFirmware(mainProcessor.FirmwareVersion)
                     ? await InitScp03Async(
                             mainProcessor,
                             commandProcessor,
@@ -73,7 +78,8 @@ internal static class ScpInitializer
                             onRecoveryRequired)
                         .ConfigureAwait(false)
                     : throw new NotSupportedException("SCP03 only supported on YubiKey 5.3.0 and later"),
-                Scp11KeyParameters scp11Parameters => Supports(mainProcessor.FirmwareVersion, FeatureScp11)
+                Scp11KeyParameters scp11Parameters =>
+                    admitUnverifiedScpFirmware || FeatureScp11.IsSupportedByFirmware(mainProcessor.FirmwareVersion)
                     ? await InitScp11Async(
                             mainProcessor,
                             commandProcessor,
@@ -91,9 +97,6 @@ internal static class ScpInitializer
             throw new NotSupportedException("SCP is not supported by this YubiKey", ex);
         }
     }
-
-    private static bool Supports(FirmwareVersion firmwareVersion, Feature feature) =>
-        feature.IsSupportedByFirmware(firmwareVersion);
 
     internal static IApduProcessor CreateSecureProcessor(
         IApduProcessor commandProcessor,

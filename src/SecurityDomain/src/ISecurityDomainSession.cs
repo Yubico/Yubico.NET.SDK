@@ -70,10 +70,10 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>Parsed key references and component descriptors, or an empty list for an empty response.</returns>
     /// <remarks>
-    ///     This is metadata, not key material or a complete raw response. The current parser reads component
-    ///     bytes in pairs and ignores an unmatched trailing byte; it does not validate every descriptor.
+    ///     This is metadata, not key material or a complete raw response. Unknown well-formed component
+    ///     descriptors are retained. Use GetDataAsync with object 0xE0 for the raw response bytes.
     /// </remarks>
-    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">A key-information value is shorter than its two-byte reference.</exception>
+    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The response has a malformed key-information entry.</exception>
     Task<IReadOnlyList<KeyInfo>> ListKeyInformationAsync(
         CancellationToken cancellationToken = default);
 
@@ -114,11 +114,12 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>Parsed key-reference/identifier pairs, with KLOC entries before KLCC entries.</returns>
     /// <remarks>
-    ///     A group reported as data-not-found contributes no entries. The current parser assumes paired
-    ///     identifier/reference TLVs and two-byte references; it does not validate every tag or length,
-    ///     and ignores an unmatched trailing TLV. The result is not a complete raw response.
+    ///     A group reported as data-not-found contributes no entries. Each group must contain complete
+    ///     identifier/reference pairs. Well-formed reference values and identifiers are retained as sent.
+    ///     Use GetDataAsync with object 0xFF33 or 0xFF34 for the raw response bytes of a group.
     /// </remarks>
     /// <exception cref="ArgumentOutOfRangeException">The selection is None or contains unsupported flags.</exception>
+    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">A group has a malformed identifier/reference pair.</exception>
     Task<IReadOnlyList<CaIdentifier>> GetCaIdentifiersAsync(
         CaIdentifierType identifierTypes,
         CancellationToken cancellationToken = default);
@@ -146,15 +147,14 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="keyReference">SCP03 KID 0x01 and a custom KVN in the YubiKey range 0x01–0xFE.</param>
     /// <param name="staticKeys">AES-128 ENC/MAC/DEK values to load. The caller retains ownership.</param>
-    /// <param name="replaceKvn">0 to import a new version, or the existing KVN to replace, in 0x01–0xFE.</param>
+    /// <param name="replace"><see cref="KeyReplacement.New"/> to add, or <see cref="KeyReplacement.Of"/> to replace an existing version.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
     ///     Requires a session data encryptor and device-accepted administrative authority. On a factory
-    ///     YubiKey, the first SCP03 import replaces the default set even when replaceKvn is 0. With custom
-    ///     sets already installed, 0 adds a version; a nonzero value requests replacement. Escrow secrets
+    ///     YubiKey, the first SCP03 import replaces the default set even with <see cref="KeyReplacement.New"/>.
+    ///     With custom sets already installed, New adds a version; Of requests replacement. Escrow secrets
     ///     before import and verify a fresh session with the new keys before deleting any retained old set.
-    ///     The SDK does not enforce every device range: replaceKvn is currently cast to one byte.
-    ///     Response validation compares the three KCVs, not the returned version or all trailing data.
+    ///     Response validation requires the requested KVN followed by exactly three matching KCVs.
     /// </remarks>
     /// <exception cref="ArgumentNullException">The static key set is null.</exception>
     /// <exception cref="ArgumentException">The reference does not use KID 0x01.</exception>
@@ -164,7 +164,7 @@ public interface ISecurityDomainSession : IApplicationSession
     Task PutKeyAsync(
         KeyReference keyReference,
         StaticKeys staticKeys,
-        int replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -172,20 +172,19 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="keyReference">The key reference identifying where to store the key.</param>
     /// <param name="publicKey">The EC public key parameters to store.</param>
-    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+    /// <param name="replace"><see cref="KeyReplacement.New"/> to add, or <see cref="KeyReplacement.Of"/> to replace an existing version.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
     ///     Use a NIST P-256 CA-KLOC public key reference when provisioning host authentication for SCP11a/c.
     ///     Device-accepted administrative authority is required; this overload does not check it locally.
-    ///     Supply a one-byte replacement version: the current implementation casts replaceKvn to byte
-    ///     without range validation. The caller retains responsibility for the supplied key.
+    ///     The caller retains responsibility for the supplied key.
     /// </remarks>
     /// <exception cref="ArgumentException">The public key is not NIST P-256.</exception>
     /// <exception cref="InvalidOperationException">The response checksum does not match the requested version.</exception>
     Task PutKeyAsync(
         KeyReference keyReference,
         ECPublicKey publicKey,
-        int replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -193,20 +192,19 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="keyReference">The key reference identifying where to store the key.</param>
     /// <param name="privateKey">The EC private key parameters to store.</param>
-    /// <param name="replaceKvn">The key version number to replace, or 0 for a new key.</param>
+    /// <param name="replace"><see cref="KeyReplacement.New"/> to add, or <see cref="KeyReplacement.Of"/> to replace an existing version.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
     ///     Imports a NIST P-256 Security Domain private key using the session's data encryptor.
     ///     Device-accepted administrative authority is also required. The caller retains responsibility
-    ///     for the private key; keep it in a using scope. Supply a one-byte replacement version: the
-    ///     current implementation casts replaceKvn to byte without range validation.
+    ///     for the private key; keep it in a using scope.
     /// </remarks>
     /// <exception cref="ArgumentException">The private key is not NIST P-256.</exception>
     /// <exception cref="InvalidOperationException">No data encryptor is available, or the response checksum does not match.</exception>
     Task PutKeyAsync(
         KeyReference keyReference,
         ECPrivateKey privateKey,
-        int replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default);
 #pragma warning restore RS0026
 
@@ -214,20 +212,21 @@ public interface ISecurityDomainSession : IApplicationSession
     ///     Generates a NIST P-256 SCP11 key pair on the device and returns its public key.
     /// </summary>
     /// <param name="keyReference">SCP11 device-key reference that will receive the generated pair.</param>
-    /// <param name="replaceKvn">0 for a new version, or an existing version to replace.</param>
+    /// <param name="replace"><see cref="KeyReplacement.New"/> to add, or <see cref="KeyReplacement.Of"/> to replace an existing version.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <returns>An ECPublicKey whose PublicPoint is the uncompressed point (0x04 || X || Y).</returns>
     /// <remarks>
     ///     Requires device-accepted administrative authority. Persist the public key through a trusted
-    ///     provisioning path; the private key stays on the device. The method does not locally validate
-    ///     the SCP11 KID. It checks firmware support only when an explicit version was supplied at creation;
-    ///     reset currently clears that explicit-version indicator.
+    ///     provisioning path; the private key stays on the device. Only SCP11a (0x11), SCP11b (0x13)
+    ///     and SCP11c (0x15) KIDs are accepted. Unknown and prerelease firmware admit the attempt;
+    ///     known unsupported production firmware is rejected locally.
     /// </remarks>
-    /// <exception cref="NotSupportedException">An explicitly supplied firmware version is below 5.7.2.</exception>
+    /// <exception cref="NotSupportedException">The known production firmware version is below 5.7.2.</exception>
+    /// <exception cref="ArgumentException">The key reference does not specify an SCP11 KID.</exception>
     /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The response is empty.</exception>
     Task<ECPublicKey> GenerateKeyAsync(
         KeyReference keyReference,
-        byte replaceKvn = 0,
+        KeyReplacement replace,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -239,12 +238,12 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <remarks>
     ///     Requires device-accepted administrative authority. A filter may match multiple keys. SCP03
     ///     component KIDs 0x01, 0x02 and 0x03 are normalized to a KVN-only filter, so supply a nonzero KVN:
-    ///     deletion affects the whole matching set, not just one component. Do not use SCP03 with KVN 0;
-    ///     the current implementation does not reject the resulting empty filter.
+    ///     deletion affects the whole matching set, not just one component. The SDK rejects empty
+    ///     filters before sending DELETE, including an SCP03 component with KVN 0.
     ///     Yubico documents last-SCP03-set deletion as restoring the default set. This is destructive,
     ///     not a way to leave the device protected with no keys.
     /// </remarks>
-    /// <exception cref="ArgumentException">Both supplied filter fields are zero.</exception>
+    /// <exception cref="ArgumentException">Both filter fields are zero, or the KID is an SCP03 component and KVN is zero.</exception>
     Task DeleteKeyAsync(
         KeyReference keyReference,
         bool deleteLast = false,
@@ -255,8 +254,8 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="keyReference">The CA-KLOC public-key reference whose serial restriction will be replaced.</param>
     /// <param name="serials">
-    ///     Nonempty collection of certificate serials as hexadecimal byte sequences in the required
-    ///     device order. Supply nonempty entries; the SDK currently permits an empty individual string.
+    ///     Nonempty collection of nonempty hexadecimal serials in caller order. Each is interpreted as
+    ///     an unsigned big-endian integer and sent in the minimal nonnegative DER INTEGER value encoding.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
@@ -269,7 +268,7 @@ public interface ISecurityDomainSession : IApplicationSession
     ///     against the device profile. This is not a claim of final-specification conformance.
     /// </remarks>
     /// <exception cref="ArgumentNullException">The collection or a serial is null.</exception>
-    /// <exception cref="ArgumentException">The collection is empty.</exception>
+    /// <exception cref="ArgumentException">The collection or a serial is empty.</exception>
     /// <exception cref="FormatException">A serial has odd length or contains a non-hexadecimal character.</exception>
     Task StoreAllowListAsync(
         KeyReference keyReference,
@@ -324,27 +323,27 @@ public interface ISecurityDomainSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Attempts a destructive Security Domain reset through failed authentication, then reselects the application.
+    ///     Attempts a destructive Security Domain reset, then reselects and establishes a default SCP03 channel.
     /// </summary>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
-    ///     Use an unauthenticated session so retained keys do not prevent post-reset reinitialization.
     ///     The operation targets Security Domain keys and associated data, not other applets' credentials.
     ///     It sends at most 65 raw attempts per processed reference, skipping SCP03 component duplicates.
     ///     Device reset is intended to remove custom state; Yubico documents restoration of factory SCP03
-    ///     defaults when the last SCP03 set is deleted. The SDK does not verify factory contents afterward:
-    ///     ordinary transmission errors are retried, reaching the attempt limit does not throw, and an
-    ///     empty key listing skips reset. Return alone therefore does not prove complete restoration.
+    ///     defaults when the last SCP03 set is deleted. Transmission errors, unexpected statuses and
+    ///     exhaustion are reported together after attempting the remaining references. A listing with
+    ///     no actionable keys skips reset and leaves the existing channel unchanged.
+    ///     After confirmed stopping outcomes, the same session reselects with its configuration and
+    ///     firmware version and authenticates with the public default SCP03 keys, independent of its prior
+    ///     channel. The handshake shows those keys were accepted, not peer identity or complete restoration.
     ///     Failure or cancellation can leave persistent partial changes and cannot roll them back.
-    ///     Currently reinitialization omits the original protocol configuration and firmware override.
-    ///     Dispose this session and create a fresh one with those options when they are required after reset.
-    ///     SCP11 reinitialization can fail at the local version gate before a new handshake. After a
-    ///     failed/cancelled reset, await completion and dispose/reopen rather than relying on retained
-    ///     readiness/authentication flags; raw attempts can have changed device/channel state before flags clear.
+    ///     Once the reset attempt phase starts, a failure or cancellation ends the session; reopen rather
+    ///     than reusing it. Serialize whole operations and await each operation before starting another or disposing.
     /// </remarks>
     /// <exception cref="SecureChannelException">
-    ///     Retained SCP parameters cause a selected secure-channel configuration failure during reinitialization.
+    ///     The default SCP03 handshake failed during post-reset reinitialization.
     ///     The original failure is preserved as InnerException.
     /// </exception>
+    /// <exception cref="AggregateException">One or more key references did not reach a stopping status.</exception>
     Task ResetAsync(CancellationToken cancellationToken = default);
 }

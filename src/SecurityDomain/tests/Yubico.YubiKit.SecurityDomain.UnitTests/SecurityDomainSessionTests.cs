@@ -1,7 +1,10 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System.Reflection;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -216,18 +219,24 @@ public class SecurityDomainSessionTests
     [Fact]
     public async Task CreateAsync_WithConnectionAndConfiguration_Succeeds()
     {
-        // Arrange
         var connection = CreateMockConnection();
-        var configuration = new ProtocolConfiguration();
+        var commands = new List<byte[]>();
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                commands.Add(call.Arg<ReadOnlyMemory<byte>>().ToArray());
+                return new ReadOnlyMemory<byte>(OkResponse());
+            });
+        var configuration = new ProtocolConfiguration { ForceShortApdus = true };
 
-        // Act
-        var session = await SecurityDomainSession.CreateAsync(
+        await using var session = await SecurityDomainSession.CreateAsync(
             connection,
             new SessionCreationOptions { ProtocolConfiguration = configuration },
             TestContext.Current.CancellationToken);
 
-        // Assert
-        AssertSessionAndDispose(session);
+        await session.GetDataAsync(0x66, new byte[] { 0xAA }, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal([0x00, 0xCA, 0x00, 0x66, 0x01, 0xAA, 0x00], commands[1]);
     }
 
     [Fact]
@@ -420,18 +429,15 @@ public class SecurityDomainSessionTests
     [Fact]
     public async Task IYubiKeyExtensions_ListKeyInformationAsync_DisposesSession()
     {
-        // Arrange
-        var yubiKey = CreateMockYubiKey(out var connection);
-        SetupGetKeyInfoMock(connection);
+        var yubiKey = CreateMockYubiKey(out _);
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0xC0, 0x02, 0x01, 0xFF, 0x90, 0x00]);
+        yubiKey.ConnectAsync<ISmartCardConnection>(Arg.Any<CancellationToken>()).Returns(
+            Task.FromResult<ISmartCardConnection>(connection));
 
-        // Act
         var keyInfo = await yubiKey.ListKeyInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        // Assert
-        Assert.NotNull(keyInfo);
-        // Verify the connection was used; this assertion does not observe session or connection disposal.
-        await connection.Received()
-            .TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        Assert.Equal(0xFF, Assert.Single(keyInfo).KeyReference.Kvn);
+        Assert.Equal(1, connection.DisposeCount);
     }
 
     [Fact]
@@ -452,7 +458,7 @@ public class SecurityDomainSessionTests
     {
         var connection = new RecordingSmartCardConnection(
             OkResponse(),
-            [0xC0, 0x04, 0x01, 0xFF, 0x88, 0x10, 0x90, 0x00]);
+            [0xC0, 0x04, 0x01, 0xFF, 0xFE, 0x10, 0x90, 0x00]);
         using var session = await SecurityDomainSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -464,8 +470,24 @@ public class SecurityDomainSessionTests
         Assert.Equal(0x01, entry.KeyReference.Kid);
         Assert.Equal(0xFF, entry.KeyReference.Kvn);
         var component = Assert.Single(entry.Components);
-        Assert.Equal(0x88, component.Tag);
+        Assert.Equal(0xFE, component.Tag); // An unknown, well-formed descriptor is retained.
         Assert.Equal(0x10, component.Value);
+    }
+
+    [Theory]
+    [InlineData(new byte[] { 0xC0, 0x03, 0x01, 0xFF, 0x88 })]
+    [InlineData(new byte[] { 0xC0, 0x01, 0x01 })]
+    [InlineData(new byte[] { 0xC1, 0x02, 0x01, 0xFF })]
+    [InlineData(new byte[] { 0xC0, 0x04, 0x01, 0xFF })]
+    public async Task ListKeyInformationAsync_MalformedEntry_RejectsWholeListing(byte[] tail)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(),
+            [0xC0, 0x02, 0x13, 0x01, .. tail, 0x90, 0x00]);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<BadResponseException>(() => session.ListKeyInformationAsync(
+            TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -527,6 +549,39 @@ public class SecurityDomainSessionTests
         Assert.Equal([0xBB], identifiers[1].Identifier.ToArray());
     }
 
+    [Theory]
+    [InlineData(new byte[] { 0x42, 0x01, 0xAA })]
+    [InlineData(new byte[] { 0x42, 0x01, 0xAA, 0x83, 0x01, 0x13 })]
+    [InlineData(new byte[] { 0x83, 0x02, 0x13, 0x01, 0x42, 0x01, 0xAA })]
+    [InlineData(new byte[] { 0x42, 0x01, 0xAA, 0x83, 0x02, 0x13 })]
+    public async Task GetCaIdentifiersAsync_MalformedGroup_DoesNotPairAcrossResponses(byte[] malformed)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(),
+            [.. malformed, 0x90, 0x00], [0x83, 0x02, 0x23, 0x01, 0x90, 0x00]);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<BadResponseException>(() => session.GetCaIdentifiersAsync(
+            CaIdentifierType.Kloc | CaIdentifierType.Klcc, TestContext.Current.CancellationToken));
+        Assert.Equal(2, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task GetCaIdentifiersAsync_KlocAbsent_ParsesKlccWithUnknownKeyReference()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x6A, 0x88],
+            [0x42, 0x01, 0xAA, 0x83, 0x02, 0xFE, 0x12, 0x90, 0x00]);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var identifiers = await session.GetCaIdentifiersAsync(CaIdentifierType.Kloc | CaIdentifierType.Klcc,
+            TestContext.Current.CancellationToken);
+
+        var reference = Assert.Single(identifiers).KeyReference;
+        Assert.Equal(0xFE, reference.Kid);
+        Assert.Equal(0x12, reference.Kvn);
+    }
+
     [Fact]
     public async Task DeleteKeyAsync_TransmitsDeleteWithKeyReferenceFilter()
     {
@@ -560,8 +615,43 @@ public class SecurityDomainSessionTests
             connection.TransmittedCommands[1]);
     }
 
-    [Fact]
-    public async Task GenerateKeyAsync_TransmitsGenerateKeyWithCurveParameters()
+    [Theory]
+    [InlineData(0x01)]
+    [InlineData(0x02)]
+    [InlineData(0x03)]
+    public async Task DeleteKeyAsync_ForScp03WithZeroVersion_DoesNotTransmitDelete(byte kid)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => session.DeleteKeyAsync(
+            new KeyReference(kid, 0), deleteLast: true, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Single(connection.TransmittedCommands);
+    }
+
+    [Theory]
+    [InlineData(0x11, 0, 0xD0, 0x11)]
+    [InlineData(0, 0x21, 0xD2, 0x21)]
+    public async Task DeleteKeyAsync_WithOneWildcard_TransmitsRemainingFilter(byte kid, byte kvn, byte tag, byte value)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.DeleteKeyAsync(new KeyReference(kid, kvn), cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal([0x80, 0xE4, 0x00, 0x00, 0x03, tag, 0x01, value, 0x00], connection.TransmittedCommands[1]);
+    }
+
+    [Theory]
+    [InlineData(0x11, 0x00)]
+    [InlineData(0x13, 0x01)]
+    [InlineData(0x15, 0xFE)]
+    public async Task GenerateAndImportEcKey_TransmitReplacementAndExplicitCurve(byte kid, byte oldKvn)
     {
         byte[] publicPoint =
         [
@@ -581,19 +671,43 @@ public class SecurityDomainSessionTests
         publicPoint.CopyTo(response.AsSpan(2));
         response[^2] = 0x90;
 
-        var connection = new RecordingSmartCardConnection(OkResponse(), response);
+        var connection = new RecordingSmartCardConnection(OkResponse(), response, [0x03, 0x90, 0x00]);
         using var session = await SecurityDomainSession.CreateAsync(
             connection,
             new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 7, 2) },
             cancellationToken: TestContext.Current.CancellationToken);
 
+        var replace = oldKvn == 0 ? KeyReplacement.New : KeyReplacement.Of(oldKvn);
+        Assert.Equal(oldKvn == 0, replace.IsNew);
         var generatedKey = await session.GenerateKeyAsync(
-            new KeyReference(0x13, 0x02),
+            new KeyReference(kid, 0x03), replace,
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotNull(generatedKey);
-        Assert.Equal([0x80, 0xF1, 0x00, 0x13, 0x04, 0x02, 0xF0, 0x01, 0x00, 0x00],
+        Assert.Equal([0x80, 0xF1, oldKvn, kid, 0x04, 0x03, 0xF0, 0x01, 0x00, 0x00],
             connection.TransmittedCommands[1]);
+
+        await session.PutKeyAsync(new KeyReference(0x10, 0x03), generatedKey, replace,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal([0x80, 0xD8, oldKvn, 0x10, 0x48, 0x03, 0xB0, 0x41, .. publicPoint,
+            0xF0, 0x01, 0x00, 0x00, 0x00], connection.TransmittedCommands[2]);
+    }
+
+    [Theory]
+    [InlineData(0x01)]
+    [InlineData(0x10)]
+    [InlineData(0x12)]
+    [InlineData(0x20)]
+    public async Task GenerateKeyAsync_ForNonScp11Key_DoesNotTransmitGenerate(byte kid)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x6A, 0x86]);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => session.GenerateKeyAsync(new KeyReference(kid, 0x02), KeyReplacement.New,
+            cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Single(connection.TransmittedCommands);
     }
 
     [Fact]
@@ -622,19 +736,34 @@ public class SecurityDomainSessionTests
 
         await session.StoreAllowListAsync(
             new KeyReference(0x11, 0x01),
-            ["010203", "0A0B"],
+            ["A1B2", "0001", "00"],
             TestContext.Current.CancellationToken);
 
         Assert.Equal(
             [
-                0x00, 0xE2, 0x90, 0x00, 0x11,
+                0x00, 0xE2, 0x90, 0x00, 0x13,
                 0xA6, 0x04, 0x83, 0x02, 0x11, 0x01,
-                0x70, 0x09,
-                0x93, 0x03, 0x01, 0x02, 0x03,
-                0x93, 0x02, 0x0A, 0x0B,
+                0x70, 0x0B,
+                0x93, 0x03, 0x00, 0xA1, 0xB2,
+                0x93, 0x01, 0x01,
+                0x93, 0x01, 0x00,
                 0x00
             ],
             connection.TransmittedCommands[1]);
+    }
+
+    [Fact]
+    public async Task StoreAllowListAsync_WithEmptySerial_DoesNotTransmitStoreData()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => session.StoreAllowListAsync(
+            new KeyReference(0x11, 0x01), ["01", ""], TestContext.Current.CancellationToken));
+
+        Assert.Single(connection.TransmittedCommands);
     }
 
     [Fact]
@@ -700,12 +829,15 @@ public class SecurityDomainSessionTests
             [0x69, 0x83],
             [0x69, 0x83],
             [0x69, 0x83],
-            OkResponse());
+            OkResponse(),
+            [0x69, 0x82]); // Even a previously plain session must attempt default SCP03.
         using var session = await SecurityDomainSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        await session.ResetAsync(TestContext.Current.CancellationToken);
+        var refreshError = await Assert.ThrowsAsync<SecureChannelException>(() => session.ResetAsync(
+            TestContext.Current.CancellationToken));
+        Assert.Equal(unchecked((short)0x6982), refreshError.StatusWord);
 
         Assert.Equal(SelectSecurityDomainCommand(), connection.TransmittedCommands[0]);
         Assert.Equal(GetDataCommand(0xE0), connection.TransmittedCommands[1]);
@@ -718,11 +850,264 @@ public class SecurityDomainSessionTests
         Assert.Equal([0x80, 0x2A, 0x03, 0x22, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
             connection.TransmittedCommands[5]);
         Assert.Equal(SelectSecurityDomainCommand(), connection.TransmittedCommands[6]);
-        Assert.True(session.IsInitialized);
+        Assert.Equal(0x50, connection.TransmittedCommands[7][1]);
+        Assert.Equal(KeyReference.Default.Kvn, connection.TransmittedCommands[7][2]);
+        Assert.False(session.IsInitialized);
         Assert.False(session.IsAuthenticated);
     }
 
     private static byte[] OkResponse() => [0x90, 0x00];
+
+    [Fact]
+    public async Task CreateSecurityDomainSessionAsync_ExplicitOverrideDoesNotReadCache()
+    {
+        var yubiKey = CreateMockYubiKey(out _);
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x69, 0x82]);
+        yubiKey.ConnectAsync<ISmartCardConnection>(Arg.Any<CancellationToken>()).Returns(
+            Task.FromResult<ISmartCardConnection>(connection));
+        yubiKey.CachedDeviceInfo.Returns(_ => throw new InvalidOperationException("Cache must not be read."));
+        using var keys = Scp03KeyParameters.Default;
+
+        var failure = await Assert.ThrowsAsync<SecureChannelException>(() => yubiKey.CreateSecurityDomainSessionAsync(
+            new SessionCreationOptions { FirmwareVersionOverride = new(5, 3, 0), ScpKeyParameters = keys },
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(unchecked((short)0x6982), failure.StatusWord);
+        Assert.Equal(0x50, connection.TransmittedCommands[1][1]);
+    }
+
+    [Fact]
+    public async Task ResetAsync_PreflightTransportFailureSurvivesThrowingWarningLogger()
+    {
+        var connection = CreateMockConnection();
+        var transportFailure = new IOException("Test key listing failed.");
+        int transmissions = 0;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(_ => ++transmissions == 1
+                ? Task.FromResult<ReadOnlyMemory<byte>>(OkResponse())
+                : Task.FromException<ReadOnlyMemory<byte>>(transportFailure));
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        // Change only this fixture's logger; do not mutate the process-wide logger factory.
+        var logger = new ThrowingWarningLogger();
+        var loggerField = typeof(SecurityDomainSession).GetField("_logger", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(loggerField);
+        loggerField.SetValue(session, logger);
+
+        var failure = await Assert.ThrowsAsync<IOException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
+
+        Assert.Same(transportFailure, failure);
+        Assert.Equal(1, logger.WarningCount);
+        Assert.Equal(2, transmissions);
+        Assert.True(session.IsInitialized);
+    }
+
+    private sealed class ThrowingWarningLogger : ILogger
+    {
+        public int WarningCount { get; private set; }
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => logLevel == LogLevel.Warning;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel == LogLevel.Warning)
+            {
+                WarningCount++;
+                throw new InvalidOperationException("Test warning failed.");
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(5, VersionQualifierType.Beta, true)]
+    [InlineData(5, (VersionQualifierType)3, true)]
+    [InlineData(5, VersionQualifierType.Final, false)]
+    [InlineData(5, null, false)]
+    [InlineData(0, VersionQualifierType.Final, true)]
+    [InlineData(null, VersionQualifierType.Final, true)]
+    public async Task CreateSecurityDomainSessionAsync_UsesFirmwareEligibilityWithoutChangingNumericFraming(
+        int? major, VersionQualifierType? qualifier, bool expectHandshake)
+    {
+        var yubiKey = CreateMockYubiKey(out var connection);
+        if (major is int numericMajor)
+        {
+            var version = new FirmwareVersion(numericMajor, 7, 0);
+            var info = default(DeviceInfo) with { FirmwareVersion = version };
+            if (qualifier is { } type)
+                info = info with { VersionQualifier = new VersionQualifier(version, type, 0) };
+            yubiKey.CachedDeviceInfo.Returns(info);
+        }
+
+        var commands = new List<byte[]>();
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                commands.Add(call.Arg<ReadOnlyMemory<byte>>().ToArray());
+                return new ReadOnlyMemory<byte>(commands.Count == 1 ? OkResponse() : [0x69, 0x82]);
+            });
+
+        var point = Convert.FromHexString("046B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296" +
+            "4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5");
+        using var keys = new Scp11KeyParameters(new KeyReference(0x13, 0xFF),
+            ECPublicKey.CreateFromValue(point, KeyType.P256));
+        var options = new SessionCreationOptions
+        {
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true },
+            ScpKeyParameters = keys
+        };
+
+        var error = await Assert.ThrowsAsync<SecureChannelException>(() => yubiKey.CreateSecurityDomainSessionAsync(
+            options, TestContext.Current.CancellationToken));
+        if (expectHandshake)
+        {
+            Assert.Equal(2, commands.Count);
+            Assert.Equal(unchecked((short)0x6982), error.StatusWord);
+            Assert.Equal(0x88, commands[1][1]);
+            if (major != 0) // The existing genuine major-zero PC/SC mode is not being changed here.
+                Assert.Equal(commands[1].Length - 6, commands[1][4]);
+        }
+        else
+        {
+            Assert.Single(commands);
+            Assert.IsType<NotSupportedException>(error.InnerException);
+        }
+    }
+
+    [Theory]
+    [InlineData(0x00)]
+    [InlineData(0xFF)]
+    public async Task PutScp03KeyAsync_RejectsReservedReplacementBeforeUsingChannel(byte existingKvn)
+    {
+        using var keys = StaticKeys.GetDefaultKeys();
+        var connection = new RecordingSmartCardConnection(OkResponse());
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var failure = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.PutKeyAsync(
+            new KeyReference(0x01, 0x09), keys, KeyReplacement.Of(existingKvn), TestContext.Current.CancellationToken));
+
+        Assert.Equal(nameof(existingKvn), failure.ParamName);
+        Assert.Single(connection.TransmittedCommands);
+    }
+
+    [Theory]
+    [InlineData(false, 0x00, 0x02)]
+    [InlineData(false, 0x02, 0x03)]
+    [InlineData(true, 0x00, 0x02)]
+    [InlineData(true, 0x02, 0x03)]
+    public async Task PutWrappedKeys_UseReplacementInP1AndSeparateTargetInData(bool ec, byte oldKvn, byte newKvn)
+    {
+        using var connection = new Scp03HandshakeFakeConnection { CaptureFirstPutKey = true };
+        using var parameters = Scp03KeyParameters.Default;
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = parameters }, TestContext.Current.CancellationToken);
+
+        // The default struct value and New are intentionally identical wire requests.
+        Assert.Equal(KeyReplacement.New, default);
+        var replace = oldKvn == 0 ? default : KeyReplacement.Of(oldKvn);
+        var error = await Assert.ThrowsAsync<ApduException>(async () =>
+        {
+            if (ec)
+            {
+                using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+                using var key = ECPrivateKey.CreateFromEcdh(ecdh);
+                await session.PutKeyAsync(new KeyReference(0x13, newKvn), key, replace, TestContext.Current.CancellationToken);
+            }
+            else
+            {
+                await session.PutKeyAsync(new KeyReference(0x01, newKvn), parameters.Keys, replace, TestContext.Current.CancellationToken);
+            }
+        });
+
+        Assert.Equal(unchecked((short)0x6982), error.SW);
+        Assert.Equal([0x84, 0xD8, oldKvn, ec ? (byte)0x13 : (byte)0x81], connection.TransmittedCommands[3][..4]);
+        Assert.Equal(newKvn, connection.PutKeyTargetVersion);
+    }
+
+    [Fact]
+    public async Task ResetAsync_FailedRefreshAndTeardown_PreservesRefreshErrorThroughAwaitUsing()
+    {
+        var yubiKey = CreateMockYubiKey(out var connection);
+        var responses = new RecordingSmartCardConnection(OkResponse(),
+            [0xC0, 0x02, 0x01, 0xFF, 0x90, 0x00], [0x69, 0x83], OkResponse(), [0x69, 0x82]);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call => responses.TransmitAndReceiveAsync(call.Arg<ReadOnlyMemory<byte>>(),
+                call.Arg<CancellationToken>()));
+        connection.DisposeAsync().Returns(_ => ValueTask.FromException(new IOException("Test teardown failed.")));
+
+        var failure = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+        {
+            await using var session = await yubiKey.CreateSecurityDomainSessionAsync(
+                cancellationToken: TestContext.Current.CancellationToken);
+            await session.ResetAsync(TestContext.Current.CancellationToken);
+        });
+
+        Assert.Equal(unchecked((short)0x6982), failure.StatusWord);
+        await connection.Received(1).DisposeAsync();
+    }
+
+    [Theory]
+    [InlineData(9, 0x19, -1, false)]
+    [InlineData(11, 0x19, -1, false)]
+    [InlineData(10, 0x18, -1, false)]
+    [InlineData(10, 0x19, 1, false)]
+    [InlineData(10, 0x19, 4, false)]
+    [InlineData(10, 0x19, 7, false)]
+    [InlineData(10, 0x19, -1, true)]
+    public void Scp03Kcv_RequiresExactVersionAndAllThreeValues(int responseLength, byte version, int mismatch, bool valid)
+    {
+        using var keys = StaticKeys.GetDefaultKeys(); // Public factory test material.
+        using var aes = Aes.Create();
+        aes.SetKey(keys.Enc);
+        Span<byte> input = stackalloc byte[16];
+        input.Fill(1);
+        byte[] kcv = aes.EncryptEcb(input, PaddingMode.None);
+        byte[] response = [version, .. kcv[..3], .. kcv[..3], .. kcv[..3], 0];
+        if (mismatch >= 0)
+            response[mismatch] ^= 0xFF;
+
+        var exception = Record.Exception(() =>
+            SecurityDomainKeyMaterial.ValidateKcv(keys, 0x19, response.AsSpan(0, responseLength)));
+
+        if (valid)
+            Assert.Null(exception);
+        else
+            Assert.IsType<InvalidOperationException>(exception);
+    }
+
+    [Fact]
+    public async Task ResetAsync_WithIncompleteReferences_ReportsAllOutcomesWithoutReselecting()
+    {
+        byte[][] responses =
+        [
+            OkResponse(),
+            [0xC0, 0x02, 0x11, 0x01, 0xC0, 0x02, 0x13, 0x02,
+                0xC0, 0x02, 0x02, 0x03, 0xC0, 0x02, 0x15, 0x04, 0x90, 0x00],
+            .. Enumerable.Repeat(OkResponse(), 65),
+            [0x6A, 0x86],
+            [0x69, 0x82]
+        ];
+        var connection = new RecordingSmartCardConnection(responses);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var failure = await Assert.ThrowsAsync<AggregateException>(() => session.ResetAsync(
+            TestContext.Current.CancellationToken));
+
+        Assert.Collection(failure.InnerExceptions,
+            exhausted => Assert.IsType<InvalidOperationException>(exhausted.InnerException),
+            unexpected => Assert.Equal(unchecked((short)0x6A86),
+                Assert.IsType<ApduException>(unexpected.InnerException).SW));
+        Assert.Contains("skipped", failure.Message);
+        Assert.Contains("0x6982", failure.Message);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(responses.Length, connection.TransmittedCommands.Count);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListKeyInformationAsync(
+            TestContext.Current.CancellationToken));
+    }
 
     private static byte[] SelectSecurityDomainCommand() =>
     [

@@ -44,6 +44,8 @@ card or per approved, independently scoped facet of a split card, with `Audit-Ca
 One draft PR per applet against `--base yubikit-pass2-base`, starting with OATH, with the Copilot review-fix loop.
 The withdrawn C1 guard is not a shared prerequisite.
 
+Security Domain delivery: [draft PR #792](https://github.com/Yubico/Yubico.NET.SDK/pull/792). Hardware qualification remains pending.
+
 ## Cards
 
 | Card | Applet | Severity | Classified as | Status | Final call | Recorded in |
@@ -155,7 +157,7 @@ The withdrawn C1 guard is not a shared prerequisite.
 | SD-IMP-003 | Security Domain | Medium | A2 (secondary A6) | Auto | Serials are not normalized to positive DER INTEGER, as all three siblings do; SCP11c counter stays documented as unsupported. Veto pass: no veto | AG-25 |
 | SD-IMP-004 | Security Domain | Medium | Interview (G3) | Auto (AG-19) | M1 | AG-19 |
 | SD-IMP-005 | Security Domain | Medium | Interview (G5) | Dennis | Continue after reset (X2), re-authenticating with the restored default SCP03 keys; Q12 (a): always, whatever channel was used before | AG-22; AG-23 (Q12) |
-| SD-IMP-006 | Security Domain | Medium | Interview (G3) | Split: facet auto (AG-19), rest Dennis | A: restrict GENERATE to 0x11, 0x13, 0x15 before sending; named-intent KeyReplacement API in this pass (Q11: required parameter, four overloads), Security Domain only (AG-23) | AG-20; amended in AG-21; exact Q11 shape in [AG-30](pass-2-review-decisions.md#ag-30-q11-keyreplacement-exact-shape) |
+| SD-IMP-006 | Security Domain | Medium | Interview (G3) | Split: facet auto (AG-19), rest Dennis | A: restrict GENERATE to 0x11, 0x13, 0x15 before sending and require exact SCP03 KCV response/KVN. Q11 (AG-23): Security Domain-only `KeyReplacement.New` or `Of(0x01–0xFE)` is required on four overloads; it supersedes the numeric argument. | AG-19–23 (AG-20 amended in AG-21); exact Q11 shape in [AG-30](pass-2-review-decisions.md#ag-30-q11-keyreplacement-exact-shape) |
 | SD-IMP-007 | Security Domain | Low test debt, Medium assurance | A5 | Auto | Unit-level oracles follow in-repo specific-exception, status and disposal-probe tests; device facets move to T1. Veto pass: no veto | AG-25 |
 | SD-IMP-008 | Security Domain | Medium (real secrets), Low (fixtures) | A5 (secondary A2) | Auto | Local KCV and AES temporaries zeroed as the repo already does; explicit P-256 curve byte matches all siblings. Fixture cleanup excluded. Veto pass: no veto | AG-25 |
 | SD-DEP-001 | Security Domain | Qualification, no defect severity | T1 | T1 hardware | No code decision; device qualification | classification only |

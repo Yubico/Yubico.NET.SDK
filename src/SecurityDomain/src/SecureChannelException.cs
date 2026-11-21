@@ -29,15 +29,16 @@ namespace Yubico.YubiKit.SecurityDomain;
 ///         not a wrapper for every session-creation failure or for later per-operation failures.
 ///     </para>
 ///     <para>
-///         The wrapped exception is preserved as <see cref="Exception.InnerException" />. If that
-///         immediate exception is an ApduException, its status word is copied to StatusWord;
-///         nested inner exceptions are not searched.
+///         The wrapped exception is preserved as <see cref="Exception.InnerException" />. The first
+///         ApduException in the inner exception chain supplies <see cref="StatusWord" />. The SDK's
+///         wrapper message does not copy inner details, but exception formatting or logging can
+///         still include the inner exception and is not guaranteed to redact it.
 ///     </para>
 /// </remarks>
 public class SecureChannelException : Exception
 {
     /// <summary>
-    ///     Gets the status word of the immediate wrapped ApduException, or null for other exception types.
+    ///     Gets the first wrapped APDU status word, or null if the inner exception chain has none.
     /// </summary>
     public short? StatusWord { get; }
 
@@ -51,7 +52,7 @@ public class SecureChannelException : Exception
     ///     <see cref="NotSupportedException" />.
     /// </param>
     public SecureChannelException(Exception innerException)
-        : this(GetMessage(innerException), innerException)
+        : this("Failed to establish a secure channel (SCP) with the Security Domain.", innerException)
     {
     }
 
@@ -64,12 +65,13 @@ public class SecureChannelException : Exception
     public SecureChannelException(string message, Exception innerException)
         : base(message, innerException ?? throw new ArgumentNullException(nameof(innerException)))
     {
-        StatusWord = (innerException as ApduException)?.SW;
-    }
-
-    private static string GetMessage(Exception innerException)
-    {
-        ArgumentNullException.ThrowIfNull(innerException);
-        return $"Failed to establish a secure channel (SCP) with the Security Domain: {innerException.Message}";
+        for (Exception? failure = innerException; failure is not null; failure = failure.InnerException)
+        {
+            if (failure is ApduException apduFailure)
+            {
+                StatusWord = apduFailure.SW;
+                break;
+            }
+        }
     }
 }

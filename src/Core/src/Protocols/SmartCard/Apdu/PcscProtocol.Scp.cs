@@ -20,7 +20,8 @@ internal partial class PcscProtocol
 {
     internal async Task<PcscProtocolScp> InitializeScpAsync(
         ScpKeyParameters keyParams,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool admitUnverifiedScpFirmware = false)
     {
         ArgumentNullException.ThrowIfNull(keyParams);
 
@@ -34,7 +35,8 @@ internal partial class PcscProtocol
                         InsSendRemaining,
                         keyParams,
                         exchangeToken,
-                        MarkRecoveryRequired);
+                        MarkRecoveryRequired,
+                        admitUnverifiedScpFirmware);
                 },
                 cancellationToken)
             .ConfigureAwait(false);

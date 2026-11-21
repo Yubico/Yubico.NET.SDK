@@ -47,7 +47,7 @@ public class SecurityDomainSession_NegativeTests : SecurityDomainStateRestoringT
         await state.WithSecurityDomainSessionAsync(true,
             async session =>
             {
-                await session.GenerateKeyAsync(keyReference, 0, ct);
+                await session.GenerateKeyAsync(keyReference, KeyReplacement.New, ct);
             }, scpKeyParams: Scp03KeyParameters.Default, cancellationToken: ct);
 
         // Create a random EC key pair that does NOT match the device's key

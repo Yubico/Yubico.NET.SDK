@@ -899,7 +899,17 @@ policy is advisory and may not result in a device wait.
 
 Use `Yubico.YubiKit.SecurityDomain` for SCP03/SCP11 key and associated-data management. SCP11b establishes a device-authenticated channel, not host authority for key management. Treat all secure channel, cryptographic key, and diversification migrations as manual until a specific high-confidence mapping exists.
 
-With SCP parameters supplied, session creation and post-reset reinitialization wrap selected secure-channel configuration failures (`ApduException`, `BadResponseException`, or `NotSupportedException`) in `SecureChannelException`, preserving the original failure as `InnerException`. `StatusWord` is copied only from an immediate `ApduException`. Earlier protocol preparation/application selection failures and cancellation are not wrapped by this catch; later per-operation failures retain their original types. See `securitydomain-exception` in `v1-to-v2-map.yml`.
+All Security Domain `PutKeyAsync` overloads and `GenerateKeyAsync` require explicit replacement intent.
+Replace an omitted or zero `replaceKvn` with `KeyReplacement.New`, or a custom existing version with
+`KeyReplacement.Of(existingKvn)` (`0x01`–`0xFE`). The target reference still supplies the new version:
+for example, target KVN `0x03` with `Of(0x02)` requests replacement of version 2 with version 3.
+`New` still replaces a factory SCP03 set on first import. See the [key-management guide](../../src/SecurityDomain/README.md).
+
+Session creation with SCP parameters and post-reset default SCP03 setup wrap selected configuration failures
+(`ApduException`, `BadResponseException`, or `NotSupportedException`) in `SecureChannelException`, preserving
+the original failure as `InnerException`. `StatusWord` comes from the first `ApduException` in that chain.
+Earlier protocol preparation/application selection failures and cancellation are not wrapped by this catch;
+later per-operation failures retain their original types. See `securitydomain-exception` in `v1-to-v2-map.yml`.
 
 ### YubiHSM
 

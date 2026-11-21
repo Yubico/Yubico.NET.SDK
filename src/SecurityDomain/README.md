@@ -211,6 +211,15 @@ keys, regardless of the previous channel. Success confirms acceptance of those k
 complete factory restoration. The channel can be used to reprovision the Security Domain. Recovery failure
 ends the session; reopen rather than relying on the old channel or assuming the reset was rolled back.
 
+### Protected empty-command qualification
+
+For SCP03, Core currently sends an encrypted padding block for empty command data, as pinned Python
+does. GlobalPlatform SCP03 Amendment D v1.1.2 Public Release §6.2.6 instead calls for advancing the
+counter without encrypting an absent command data field under C-DECRYPTION and C-MAC. The SDK has not
+changed that wire behavior pending device qualification. Empty GET DATA, Le handling, and protected
+response continuation across the SCP03/SCP11 profiles are separate qualification cases; this SCP03
+citation does not establish SCP11 requirements or actual device acceptance.
+
 ## User interaction
 
 The Security Domain needs no PIN and no physical touch. The only credential is the SCP key material you

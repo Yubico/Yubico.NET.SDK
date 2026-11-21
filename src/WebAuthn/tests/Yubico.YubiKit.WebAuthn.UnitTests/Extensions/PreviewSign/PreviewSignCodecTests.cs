@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using NSubstitute;
 using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Extensions;
+using Yubico.YubiKit.WebAuthn.Client;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Codec;
 using Yubico.YubiKit.WebAuthn.Preferences;
+using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 using WebAuthnPreviewSign = Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
@@ -173,11 +178,11 @@ public class PreviewSignCodecTests
     [Theory(Timeout = 5000)]
     [InlineData(false)]
     [InlineData(true)]
-    public void PreviewSign_Registration_OutputPopulatedFromUnsignedAttObj(bool includeExtraInnerAlgorithm)
+    public async Task PreviewSign_GeneratedHandleReachesSelectedCredentialsAssertion(bool includeExtraInnerAlgorithm)
     {
         // Arrange - mock authenticator data with previewSign extension containing algorithm + flags in authData
         // and the inner generated-key attestation object in unsignedExtensionOutputs.
-        var innerCredentialId = RandomNumberGenerator.GetBytes(32);
+        byte[] innerCredentialId = includeExtraInnerAlgorithm ? [0xA1, 0xA2] : [];
         var publicKeyBytes = BuildCoseEc2PublicKey(CoseAlgorithm.Es256);
         var attestationObject = BuildAttestationObject(publicKeyBytes, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification,
             innerCredentialId, includeExtraInnerAlgorithm);
@@ -231,6 +236,51 @@ public class PreviewSignCodecTests
         Assert.Equal(4, inner.ReadInt32());
         Assert.Equal((byte)WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, inner.ReadInt32());
         inner.ReadEndMap();
+
+        var absent = new PublicKeyCredentialDescriptor(new byte[] { 0x10 });
+        var selected = new PublicKeyCredentialDescriptor(new byte[] { 0x20 });
+        byte[] tbs = [0xB1, 0xB2];
+        var backend = Substitute.For<IWebAuthnBackend>();
+        backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: ["previewSign"]));
+        backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            if (request.Options?.GetValueOrDefault("up") == false)
+            {
+                if (request.AllowList?.Any(d => d.Id.Span.SequenceEqual(selected.Id.Span)) != true)
+                    throw new Yubico.YubiKit.Ctap2.CtapException(Yubico.YubiKit.Ctap2.CtapStatus.NoCredentials);
+            }
+            else
+            {
+                Assert.Equal(selected.Id.ToArray(), Assert.Single(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(request.AllowList)).Id.ToArray());
+                var encoded = Assert.IsType<ReadOnlyMemory<byte>>(request.Extensions);
+                // {"previewSign": {2: h'...' (40 if empty), 6: h'B1B2'}}; key 7 is absent.
+                string handleEncoding = includeExtraInnerAlgorithm ? "42A1A2" : "40";
+                Assert.Equal(Convert.FromHexString($"A16B707265766965775369676EA202{handleEncoding}0642B1B2"), encoded.ToArray());
+            }
+            return MockCtap2Responses.CreateMockGetAssertionResponse(selected.Id.ToArray());
+        });
+
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
+            new WebAuthnClientOptions { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = new byte[32],
+            RpId = "example.com",
+            AllowCredentials = [absent, selected],
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new AuthenticationExtensionInputs(PreviewSign: new WebAuthnPreviewSign.PreviewSignAuthenticationInput(
+                new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>
+                {
+                    [absent.Id] = new(new byte[] { 0xF1 }, new byte[] { 0xF2 }),
+                    [selected.Id] = new(output.GeneratedKey.KeyHandle, tbs)
+                }))
+        };
+        var ct = TestContext.Current.CancellationToken;
+        var match = Assert.Single(await client.GetAssertionAsync(options, cancellationToken: ct));
+        Assert.Equal(selected.Id.ToArray(), (await match.SelectAsync(ct)).CredentialId.ToArray());
     }
 
     [Fact(Timeout = 5000)]

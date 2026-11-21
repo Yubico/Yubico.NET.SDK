@@ -39,8 +39,8 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// Inputs are borrowed until encoding and awaited transmission complete; keep storage unchanged.
 /// Encoders make independent copies without a disposable cleanup owner. Clear caller-owned
 /// application-sensitive data after use. This preview is experimental and not production guidance.
-/// The nonempty keyHandle/Tbs guards are SDK restrictions, not universal draft rules
-/// (the draft permits an empty handle).
+/// A generated handle may be empty when the authenticator stores equivalent information internally.
+/// Key 2 is still encoded as a byte string. The nonempty TBS requirement is an SDK restriction.
 /// </para>
 /// </remarks>
 [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
@@ -49,11 +49,7 @@ public sealed class PreviewSignSigningParams
     /// <summary>
     /// Gets the key handle from registration output.
     /// </summary>
-    public ReadOnlyMemory<byte> KeyHandle
-    {
-        get;
-        init => field = RequireNonEmpty(value, "keyHandle");
-    }
+    public ReadOnlyMemory<byte> KeyHandle { get; init; }
 
     /// <summary>
     /// Gets the algorithm-specific to-be-signed bytes, which may already be a digest.

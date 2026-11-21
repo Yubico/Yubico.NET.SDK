@@ -59,8 +59,9 @@ Software changes and checks are ready for independent review. CTAP-IMP-030 stays
 CTAP-IMP-022 and CTAP-DEC-003 are not hardware-qualified by this PR.
 
 WebAuthn delivery: [draft PR #798](https://github.com/Yubico/Yubico.NET.SDK/pull/798) against `yubikit-pass2-base`.
-WA-IMP-019 signing remains open: #790 permits empty generated handles in responses, but CTAP-IMP-040
-still rejects them as signing inputs. Hardware, attended ceremonies, and platform qualification remain pending.
+WA-IMP-019 signing follows [AG-32](pass-2-review-decisions.md#ag-32-previewsign-empty-generated-handle):
+empty but present generated handles are accepted as input; this amends only the nonempty-handle facet of
+CTAP-IMP-040/AG-11. Hardware, attended ceremonies, and platform qualification remain pending.
 
 OATH delivery: [draft PR #789](https://github.com/Yubico/Yubico.NET.SDK/pull/789) carries the approved software and
 documentation, including the OATH policy adoptions. OATH-DEC-004/006/007 and secure-reset qualification remain pending;

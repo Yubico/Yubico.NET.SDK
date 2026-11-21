@@ -412,7 +412,7 @@ not CTAP v4 or an adopted W3C signing standard.
 - Registration flags derive from the ceremony UV preference: Required selects UP+UV, other preferences select UP. The public flags enum is not a request setter.
 - `FullCeremony_RegisterWithPreviewSign_ThenSign_ReturnsSignature` exercises registration, ARKG derivation, signing and offline verification when run on suitable hardware. Do not infer device/firmware qualification from the test's existence.
 - Present `additionalArgs` must be an algorithm-appropriate CBOR `COSE_Sign_Args` map; TBS/prehashing is algorithm-specific. Raw pass-through does not validate semantics. Selected signing `Algorithm` may differ from the public key's `alg`.
-- Generated inner attestation is parsed/repacked, not trust-verified. The RP must verify it when required by its policy. Empty generated handles are permitted by the draft but rejected by the current signing-params constructor.
+- Generated inner attestation is parsed/repacked, not trust-verified. The RP must verify it when required by its policy. An empty generated handle is still sent as a byte string for the selected credential; it is not a default-key selector.
 - ARKG helpers: **WARNING -- EXPERIMENTAL --** public experimental conveniences; not the generic previewSign API contract; not ready for production use and must not be treated as production cryptographic guidance
 
 **Key Files:**

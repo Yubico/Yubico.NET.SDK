@@ -50,14 +50,21 @@ public class AuthenticatorConfigTests
     /// </summary>
     private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
     {
-        public int Version => 2;
+        public int Version => WriteFailure is { } failure ? throw failure : 2;
         public int AuthenticationTagLength => 16;
         public byte[]? LastAuthenticateMessage { get; private set; }
+        public byte[]? Tag { get; private set; }
+        public Exception? AuthenticateFailure { get; set; }
+        public Exception? WriteFailure { get; set; }
 
         public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
         {
             LastAuthenticateMessage = message.ToArray();
-            return new byte[16]; // Return 16-byte auth param
+            if (AuthenticateFailure is { } failure)
+                throw failure;
+            Tag = new byte[16];
+            Tag.AsSpan().Fill(0xAB);
+            return Tag;
         }
 
         public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
@@ -76,6 +83,40 @@ public class AuthenticatorConfigTests
             => true;
 
         public void Dispose() { }
+    }
+
+    [Theory]
+    [InlineData("success")]
+    [InlineData("authenticate")]
+    [InlineData("build")]
+    [InlineData("send")]
+    public async Task SetMinPinLength_ClearsOwnedTagAndRequestWithoutClearingBorrowedToken(string stage)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var failure = new InvalidOperationException(stage);
+        if (stage == "authenticate") _testProtocol.AuthenticateFailure = failure;
+        if (stage == "build") _testProtocol.WriteFailure = failure;
+
+        ReadOnlyMemory<byte> request = default;
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct).Returns(call =>
+        {
+            request = call.Arg<ReadOnlyMemory<byte>>();
+            Assert.Equal(CtapCommand.Config, request.Span[0]);
+            Assert.Equal(0xAB, request.Span[^1]);
+            return stage == "send"
+                ? Task.FromException<ReadOnlyMemory<byte>>(failure)
+                : Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        });
+
+        Task Send() => _config.SetMinPinLengthAsync(6, cancellationToken: ct);
+        if (stage == "success") await Send();
+        else Assert.Same(failure, await Assert.ThrowsAsync<InvalidOperationException>(Send));
+
+        if (stage == "authenticate") Assert.Null(_testProtocol.Tag);
+        else Assert.All(Assert.IsType<byte[]>(_testProtocol.Tag), b => Assert.Equal(0, b));
+        Assert.Equal(stage is "build" or "authenticate", request.IsEmpty);
+        Assert.All(request.ToArray(), b => Assert.Equal(0, b));
+        Assert.Equal(new byte[] { 1, 2, 3, 4 }, _pinUvAuthToken);
     }
 
     [Fact]

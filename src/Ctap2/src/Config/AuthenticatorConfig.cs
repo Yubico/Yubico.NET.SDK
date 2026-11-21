@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Ctap2.Cbor;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Config;
@@ -46,9 +48,9 @@ namespace Yubico.YubiKit.Ctap2.Config;
 /// not dispose the protocol. Keep both objects alive and token bytes unchanged through
 /// awaited calls, then clear the caller-owned token with CryptographicOperations.ZeroMemory,
 /// including on failure. No token acquisition, refresh, permission or expiry validation is
-/// performed locally. Request and authentication-tag copies are not comprehensively cleared
-/// by this helper. Device changes persist beyond the helper's lifetime; failure or
-/// cancellation is not rollback, and the helper performs no verification read or restoration.
+/// performed locally. This helper clears the temporary request and authentication buffers it owns.
+/// Device changes persist beyond the helper's lifetime; failure or cancellation is not rollback,
+/// and the helper performs no verification read or restoration.
 /// </para>
 /// </remarks>
 public sealed class AuthenticatorConfig
@@ -98,8 +100,8 @@ public sealed class AuthenticatorConfig
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
     public async Task EnableEnterpriseAttestationAsync(CancellationToken cancellationToken = default)
     {
-        var payload = BuildCommandPayload(ConfigSubCommand.EnableEnterpriseAttestation);
-        await SendConfigCommandAsync(payload, cancellationToken).ConfigureAwait(false);
+        var request = BuildRequest(ConfigSubCommand.EnableEnterpriseAttestation);
+        await SendConfigCommandAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -136,8 +138,8 @@ public sealed class AuthenticatorConfig
             return;
         }
 
-        var payload = BuildCommandPayload(ConfigSubCommand.ToggleAlwaysUv);
-        await SendConfigCommandAsync(payload, cancellationToken).ConfigureAwait(false);
+        var request = BuildRequest(ConfigSubCommand.ToggleAlwaysUv);
+        await SendConfigCommandAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -201,54 +203,60 @@ public sealed class AuthenticatorConfig
                 "Minimum PIN length cannot exceed 63 characters.");
         }
 
-        var payload = BuildSetMinPinLengthPayload(newMinPinLength, rpIds, forceChangePin);
-        await SendConfigCommandAsync(payload, cancellationToken).ConfigureAwait(false);
+        var request = BuildSetMinPinLengthRequest(newMinPinLength, rpIds, forceChangePin);
+        await SendConfigCommandAsync(request, cancellationToken).ConfigureAwait(false);
     }
 
-    private async Task SendConfigCommandAsync(
-        ReadOnlyMemory<byte> payload,
-        CancellationToken cancellationToken)
+    private async Task SendConfigCommandAsync(byte[] request, CancellationToken cancellationToken)
     {
-        // Build full request: command byte + payload. This request and auth-tag copies are not cleared here.
-        var request = new byte[1 + payload.Length];
-        request[0] = CtapCommand.Config;
-        payload.CopyTo(request.AsMemory(1));
-
-        await _session.SendCborRequestAsync(request, cancellationToken)
-            .ConfigureAwait(false);
+        try
+        {
+            await _session.SendCborRequestAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(request);
+        }
     }
 
-    private ReadOnlyMemory<byte> BuildCommandPayload(byte subCommand)
+    private byte[] BuildRequest(byte subCommand, byte[]? parameters = null)
     {
-        // Build PIN/UV auth param: authenticate(pinUvAuthToken, 32*0xff || 0x0D || subCommand)
-        // CTAP 2.1 (2022-06-21 errata), Section 6.11; not the credential-management transcript.
-        Span<byte> message = stackalloc byte[32 + 1 + 1];
-        message[..32].Fill(0xff);
-        message[32] = CtapCommand.Config; // 0x0D
-        message[33] = subCommand;
-        var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, message);
+        byte[]? tag = null;
+        try
+        {
+            // CTAP 2.1 §6.11: authenticate(32*0xff || 0x0D || subCommand || parameters).
+            Span<byte> transcript = parameters is null
+                ? stackalloc byte[34]
+                : new byte[34 + parameters.Length];
+            try
+            {
+                transcript[..32].Fill(0xff);
+                transcript[32] = CtapCommand.Config;
+                transcript[33] = subCommand;
+                if (parameters is not null) parameters.AsSpan().CopyTo(transcript[34..]);
+                tag = _protocol.Authenticate(_pinUvAuthToken.Span, transcript);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(transcript);
+            }
 
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(3);
-
-        // 0x01: subCommand
-        writer.WriteInt32(1);
-        writer.WriteInt32(subCommand);
-
-        // 0x03: pinUvAuthProtocol
-        writer.WriteInt32(3);
-        writer.WriteInt32(_protocol.Version);
-
-        // 0x04: pinUvAuthParam
-        writer.WriteInt32(4);
-        writer.WriteByteString(pinUvAuthParam);
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
+            using var request = CtapRequestBuilder.Create(CtapCommand.Config)
+                .WithInt(1, subCommand)
+                .WithInt(3, _protocol.Version)
+                .WithBytes(4, tag.AsSpan());
+            if (parameters is not null)
+                request.WithEncodedValue(2, parameters);
+            return request.Build();
+        }
+        finally
+        {
+            if (parameters is not null) CryptographicOperations.ZeroMemory(parameters);
+            if (tag is not null) CryptographicOperations.ZeroMemory(tag);
+        }
     }
 
-    private ReadOnlyMemory<byte> BuildSetMinPinLengthPayload(
+    private byte[] BuildSetMinPinLengthRequest(
         int? newMinPinLength,
         IReadOnlyList<string>? rpIds,
         bool? forceChangePin)
@@ -289,42 +297,6 @@ public sealed class AuthenticatorConfig
         }
 
         paramsWriter.WriteEndMap();
-        var subCommandParams = paramsWriter.Encode();
-
-        // Build PIN/UV auth param: authenticate(pinUvAuthToken, 32*0xff || 0x0D || subCommand || subCommandParams)
-        // CTAP 2.1 (2022-06-21 errata), Section 6.11; parameters are part of the authenticated bytes.
-        var subCommand = ConfigSubCommand.SetMinPinLength;
-        var messageLength = 32 + 1 + 1 + subCommandParams.Length;
-        var message = new byte[messageLength];
-        message.AsSpan(0, 32).Fill(0xff);
-        message[32] = CtapCommand.Config; // 0x0D
-        message[33] = subCommand;
-        subCommandParams.CopyTo(message.AsMemory(34));
-
-        var pinUvAuthParam = _protocol.Authenticate(_pinUvAuthToken.Span, message);
-
-        // Build main payload
-        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(4);
-
-        // 0x01: subCommand
-        writer.WriteInt32(1);
-        writer.WriteInt32(subCommand);
-
-        // 0x02: subCommandParams
-        writer.WriteInt32(2);
-        writer.WriteEncodedValue(subCommandParams);
-
-        // 0x03: pinUvAuthProtocol
-        writer.WriteInt32(3);
-        writer.WriteInt32(_protocol.Version);
-
-        // 0x04: pinUvAuthParam
-        writer.WriteInt32(4);
-        writer.WriteByteString(pinUvAuthParam);
-
-        writer.WriteEndMap();
-
-        return writer.Encode();
+        return BuildRequest(ConfigSubCommand.SetMinPinLength, paramsWriter.Encode());
     }
 }

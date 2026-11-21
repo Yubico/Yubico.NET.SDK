@@ -88,9 +88,26 @@ public readonly record struct KeyHistory
         string text = url.OriginalString;
         string prefix = $"http://{url.Host}/";
         return text.Length <= MaximumUrlLength && text.Length == prefix.Length + 64
-            && text.AsSpan().IndexOfAnyInRange('\u0080', char.MaxValue) == -1
             && text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            && IsAsciiDnsName(text.AsSpan(7, url.Host.Length))
             && text.AsSpan(prefix.Length).IndexOfAnyExcept("0123456789abcdefABCDEF") == -1;
+    }
+
+    private static bool IsAsciiDnsName(ReadOnlySpan<char> host)
+    {
+        foreach (var range in host.Split('.'))
+        {
+            var label = host[range];
+            if (label.Length is 0 or > 63 || label[0] == '-' || label[^1] == '-')
+                return false;
+            foreach (char character in label)
+            {
+                if (!char.IsAsciiLetterOrDigit(character) && character != '-')
+                    return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>

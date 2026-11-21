@@ -332,6 +332,22 @@ public class PivDataObjectsTests
         Assert.True(value.IsEmpty);
     }
 
+    [Theory]
+    [InlineData("cert-host.example", true)]
+    [InlineData("cert_host.example", false)]
+    [InlineData("cert-.example", false)]
+    [InlineData("-cert.example", false)]
+    [InlineData("cert..example", false)]
+    [InlineData("cert.example.", false)]
+    public void KeyHistory_ReadsOnlyAsciiDnsLabelsInProfileUrl(string host, bool accepted)
+    {
+        byte[] url = System.Text.Encoding.ASCII.GetBytes($"http://{host}/{new string('a', 64)}");
+        byte[] raw = [0xC1, 0x01, 0, 0xC2, 0x01, 1, 0xF3, (byte)url.Length, .. url, 0xFE, 0];
+        Assert.Equal(accepted, KeyHistory.TryDecode(raw, out var value));
+        if (accepted)
+            Assert.Equal(raw, value.Encode().ToArray());
+    }
+
     // === ISC-22 / ISC-22.1: typed read/write match raw GetObjectAsync/PutObjectAsync ===
 
     [Fact]

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
@@ -75,10 +76,8 @@ public static class IYubiKeyExtensions
         /// challenge-length convention per slot. Explicit OTP HID is the USB recipe; default SmartCard
         /// selection does not establish challenge-command parity. Output ownership transfers to the caller.
         /// Transfer occurs only when this outer task returns successfully, after hidden-session teardown.
-        /// If teardown throws after calculation succeeds, the task faults without exposing the result to
-        /// clear; the current helper does not clear that stranded result. Keep caller input cleanup in
-        /// finally even when creation or teardown fails. Use an explicit session when result ownership
-        /// must be visible before teardown; lower-layer copy cleanup remains a separate limitation.
+        /// If teardown throws after calculation succeeds, the helper clears the retained result and faults.
+        /// Keep caller input cleanup in finally even when creation or teardown fails.
         /// </remarks>
         /// <returns>A fresh caller-owned writable 20-byte response. Zero it with
         /// <see cref="System.Security.Cryptography.CryptographicOperations.ZeroMemory"/> after use.</returns>
@@ -92,10 +91,10 @@ public static class IYubiKeyExtensions
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            await using var session = await yubiKey
+            var session = await yubiKey
                 .CreateYubiOtpSessionAsync(options, cancellationToken)
                 .ConfigureAwait(false);
-            return await session.CalculateHmacSha1Async(slot, challenge, cancellationToken)
+            return await CalculateAndDisposeAsync(session, slot, challenge, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -151,6 +150,41 @@ public static class IYubiKeyExtensions
                 .ConfigureAwait(false);
         }
 
+    }
+
+    // The one-shot producer owns both the session and the result until teardown succeeds.
+    internal static async Task<Memory<byte>> CalculateAndDisposeAsync(
+        IYubiOtpSession session, Slot slot, ReadOnlyMemory<byte> challenge, CancellationToken cancellationToken)
+    {
+        Memory<byte> result;
+        try
+        {
+            result = await session.CalculateHmacSha1Async(slot, challenge, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            try
+            {
+                await session.DisposeAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                // A secondary teardown failure must not mask the calculation error.
+            }
+
+            throw;
+        }
+
+        try
+        {
+            await session.DisposeAsync().ConfigureAwait(false);
+            return result;
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(result.Span);
+            throw;
+        }
     }
 
     // YubiOTP is dual-transport (SmartCard or OTP HID). On a physical (possibly multi-connection) device

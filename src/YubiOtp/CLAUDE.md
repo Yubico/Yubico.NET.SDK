@@ -139,8 +139,8 @@ guarantee; prefer 1–63 bytes in short mode and verify empty/64-byte boundaries
 
 - Configurations copy inputs; Dispose clears private fixed/UID/key fields, not source buffers or GetConfig results.
 - Caller owns source buffers, every GetConfig array, and successful calculation output. Clear them separately.
-- One-shot HMAC returns only after hidden-session disposal. A teardown exception after calculation can
-  strand the transferred backend result without exposing it to the caller; no runtime fix is implied.
+- One-shot HMAC transfers output only after hidden-session disposal; it clears the retained output on
+  teardown failure. A calculation failure remains primary if teardown also fails.
 - Clearing returned prefixes/owned encodings does not clear every incoming report, Windows report-ID
   staging array, APDU owner, fragment or decrypted temporary. Ordinary callback-failure cleanup is narrower
   than all-path erasure when a logging provider itself throws.

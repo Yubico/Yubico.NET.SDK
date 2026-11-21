@@ -375,9 +375,8 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
   The AES example uses `MemoryMarshal.AsMemory` only for its documented caller-owned ticket, not for
   arbitrary borrowed read-only memory.
   The one-shot HMAC helper transfers only after hidden-session teardown succeeds. If teardown throws
-  after calculation, its task faults without exposing or clearing that result. An explicit session lets
-  you retain the calculation result before teardown and clear it in an enclosing `finally`; this does
-  not erase separate incoming-report, APDU, decrypted-response or transport staging copies.
+  after calculation, it clears the retained result and faults. This does not erase separate incoming-report,
+  APDU, decrypted-response or transport staging copies.
 - Normal write cleanup clears assembled configuration/payload copies, but invalid access-code preflight
   currently has cleanup gaps. No-I/O validation does not imply erasure of every temporary allocation.
   None of these measures promises erasure of all heap copies. Never log keys, passwords, codes, or responses.

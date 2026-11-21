@@ -374,10 +374,12 @@ public dictionary is sufficient; the input normalizes credential-ID comparison b
 Unsupported previewSign requests are omitted, so inspect the optional result before treating signing
 as performed. Some explicit output errors propagate while CBOR/invalid-operation parsing failures
 can omit the result. Supply the selected algorithm's TBS representation (including prehashing if
-required), and encode present `additionalArgs` as its CBOR `COSE_Sign_Args` map; pass-through does not
-validate algorithm semantics. Verify generated-key attestation under your RP policy before trusting
-it. The selected signing algorithm can differ from the public key's algorithm identifier. The draft
-permits empty generated handles, but the current signing-params constructor rejects them. ARKG helper
+required). TBS must be nonempty, and present `additionalArgs` must encode one complete CBOR
+`COSE_Sign_Args` map; pass-through does not validate algorithm semantics. Verify generated-key
+attestation under your RP policy before trusting
+it. The selected signing algorithm can differ from the public key's algorithm identifier. The required
+handle is sent as a byte string under CTAP key 2, even when empty. An empty generated handle relies on
+the selected credential and authenticator-held state; it does not select a global default key. ARKG helper
 conveniences are experimental and not production cryptographic guidance or the generic signing contract.
 
 ## RP authorization belongs to the application

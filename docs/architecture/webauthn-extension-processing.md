@@ -231,9 +231,12 @@ from WebAuthn L3 §10.1.5. Callers own and clear the writable PRF and largeBlob 
 The previewSign processor follows the [vendor draft v4 §10.2.1](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension),
 including multi-credential map coverage and selected-credential lookup. Its generated key is separate
 from the credential key; inner attestation parsing is not trust verification. Explicit missing-output
-client errors can propagate, while decoder CBOR/invalid-operation failures may omit results. The draft's
-permitted empty handles cannot currently pass the signing-params constructor. MinPinLength requests
-disclosure only with Requested=true on an authenticator that advertises it.
+client errors can propagate, while decoder CBOR/invalid-operation failures may omit results. The
+experimental signing API requires the handle argument and sends it as a byte string under CTAP key 2,
+including when empty. An empty handle relies on the selected credential and authenticator-held state,
+not a global default key. Nonempty TBS and one complete CBOR `COSE_Sign_Args` map when args are present
+are still required. MinPinLength requests disclosure only with Requested=true on an authenticator
+that advertises it.
 
 GetInfo and token CTAP statuses use the general mapper, separately from the main command's retry
 and previewSign policy. Outputs deliberately run outside UV escalation so a failed read/parse cannot trigger

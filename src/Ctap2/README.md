@@ -377,8 +377,10 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
   `FingerprintSensorInfo.MaxTemplateCount` was an unqualified interpretation of key 4; that key
   remains available through `RawData` but is not advertised as a capacity.
 - hmac-secret derives from credential-scoped random secrets, with distinct verified/unverified modes.
-  WebAuthn PRF adds client-side input hashing and requires the verified variant; the current WebAuthn
-  adapter's UV-override and result-cleanup limitations remain disclosed in its guide.
+  WebAuthn PRF adds client-side input hashing and requires the verified variant when supported
+  evaluation applies. At authentication the selected credential's entry or fallback input determines
+  whether PRF requires UV. See the [WebAuthn PRF guide](../WebAuthn/README.md#evaluate-prf-inputs-deliberately)
+  for result ownership and cleanup.
 - previewSign is the experimental Yubico sign-extension draft v4, not CTAP v4. Public ARKG helpers are
   **WARNING -- EXPERIMENTAL --**, not ready for production or production cryptographic guidance; their
   actual SDK profile and limited P-256/SHA-256 raw-message verifier are not full draft conformance.

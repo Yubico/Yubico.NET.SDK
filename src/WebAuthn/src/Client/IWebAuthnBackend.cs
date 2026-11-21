@@ -89,6 +89,7 @@ internal interface IWebAuthnBackend : IAsyncDisposable
     /// <summary>
     /// Performs CTAP2 GetAssertion to authenticate with a credential.
     /// </summary>
+    /// <remarks>Transfers ownership of the decoded response's writable buffers to the ceremony.</remarks>
     Task<GetAssertionResponse> GetAssertionAsync(
         BackendGetAssertionRequest request,
         CancellationToken cancellationToken);

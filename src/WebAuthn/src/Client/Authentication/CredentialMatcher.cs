@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Credentials;
 
@@ -26,6 +27,8 @@ namespace Yubico.YubiKit.WebAuthn.Client.Authentication;
 /// </remarks>
 internal sealed class CredentialMatcher
 {
+    private const uint MaxAssertionsPerCeremony = 1024;
+
     /// <summary>
     /// Matches credentials for an authentication request.
     /// </summary>
@@ -56,13 +59,14 @@ internal sealed class CredentialMatcher
 
         var results = new List<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
 
+        uint? numberOfCredentials = CheckAssertionCount(firstResponse);
+
         // Known limitation: an omitted descriptor is not recovered from the narrowed request.
         var firstCredId = firstResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
         results.Add((firstCredId, firstResponse.User, firstResponse));
 
         // Check if there are more credentials to enumerate
-        uint? numberOfCredentials = firstResponse.NumberOfCredentials;
-        if (numberOfCredentials.HasValue && numberOfCredentials.Value > 1)
+        if (numberOfCredentials is > 1)
         {
             // Enumerate remaining credentials via GetNextAssertion
             uint remaining = numberOfCredentials.Value - 1;
@@ -76,6 +80,20 @@ internal sealed class CredentialMatcher
         }
 
         return results;
+    }
+
+    private static uint? CheckAssertionCount(GetAssertionResponse response)
+    {
+        uint? count = response.NumberOfCredentials;
+        if (count is not > MaxAssertionsPerCeremony)
+            return count;
+
+        // These decoded buffers belong to this ceremony and won't be returned to the caller.
+        CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
+        if (response.LargeBlobKey is { } key)
+            CryptographicOperations.ZeroMemory(key.Span);
+        throw new WebAuthnClientError(WebAuthnClientErrorCode.Constraint,
+            $"Authenticator reported {count} assertions; the SDK supports at most {MaxAssertionsPerCeremony} per ceremony.");
     }
 
     private static bool IsNoCredentialsError(CtapStatus status)

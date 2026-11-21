@@ -412,6 +412,34 @@ public class WebAuthnClientCeremonyFrameTests
             .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo()); // no clientPin: ceremony runs without a token
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
+    public async Task GetAssertion_PreviewSignDoesNotPublishAnUnknownOrUnassociatedId(bool omitted)
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: ["previewSign"]));
+        ReadOnlyMemory<byte> allowed = new byte[] { 1 };
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(call => call.Arg<BackendGetAssertionRequest>().Options?.GetValueOrDefault("up") == false
+                ? throw new CtapException(CtapStatus.NoCredentials)
+                : MockCtap2Responses.CreateMockGetAssertionResponse([7], omitCredential: omitted));
+        var input = new WebAuthn.Extensions.PreviewSign.PreviewSignAuthenticationInput(
+            new Dictionary<ReadOnlyMemory<byte>, WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams>
+            {
+                [allowed] = new(new byte[] { 2 }, new byte[] { 3 })
+            });
+        await using var client = _client;
+        var options = WithAllowList(new PublicKeyCredentialDescriptor(allowed)) with
+        {
+            Extensions = new AuthenticationExtensionInputs(PreviewSign: input)
+        };
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(options,
+            cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task GetAssertion_FinalCredentialIdUsesOnlyTheProbedSingleton(bool wrongId)

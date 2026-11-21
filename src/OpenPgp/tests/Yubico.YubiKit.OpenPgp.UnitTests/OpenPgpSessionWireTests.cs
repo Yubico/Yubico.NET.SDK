@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Buffers.Binary;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -27,10 +29,15 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.OpenPgp.Backend;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.OpenPgp.UnitTests;
 
+[CollectionDefinition("GlobalLogging", DisableParallelization = true)]
+public sealed class GlobalLoggingCollection;
+
+[Collection("GlobalLogging")]
 public sealed class OpenPgpSessionWireTests
 {
     [Theory]
@@ -1177,6 +1184,54 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
+    public async Task DecryptAsync_WhenCardResolutionAndLoggingFail_PreservesExactApduErrorAndClearsBuffers()
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnectionWithUifs(sig: null, dec: Uif.On, aut: null, att: null);
+        var callbackFailure = new InvalidOperationException("Resolution callback failed.");
+        var loggerFailure = new InvalidOperationException("Resolution logger failed.");
+        var prompt = new RecordingUserPresencePrompt(connection, resolutionException: callbackFailure);
+        await using var session = await OpenPgpSession.CreateAsync(connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt }, token);
+        var backend = new DecipherRejectionBackend();
+        var field = typeof(OpenPgpSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("Missing session backend.");
+        field.SetValue(session, backend);
+
+        // Observe the instance at the throw site before notification cleanup can replace it.
+        ApduException? original = null;
+        void Capture(object? sender, FirstChanceExceptionEventArgs args)
+        {
+            if (args.Exception is ApduException { SW: 0x6982, Ins: 0x2A, P1: 0x80, P2: 0x86 } decipher)
+                Interlocked.CompareExchange(ref original, decipher, null);
+        }
+
+        using var factory = new FailingResolutionLoggerFactory(loggerFailure);
+        using var logging = YubiKitLogging.UseTemporary(factory);
+        byte[] ciphertext = [0x12, 0x34];
+        AppDomain.CurrentDomain.FirstChanceException += Capture;
+        ApduException actual;
+        try
+        {
+            actual = await Assert.ThrowsAsync<ApduException>(() => session.DecryptAsync(ciphertext, token));
+        }
+        finally
+        {
+            AppDomain.CurrentDomain.FirstChanceException -= Capture;
+        }
+
+        Assert.NotNull(original);
+        Assert.Same(original, actual); // The captured exception matched the SW and DECIPHER header above.
+        Assert.Equal<byte?>(0x00, actual.Cla);
+        Assert.Same(callbackFailure, actual.Data["UserPresenceResolutionException"]);
+        Assert.Same(loggerFailure, actual.Data["UserPresenceLoggingException"]);
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.All(backend.Response.RawData.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal(new byte[3], backend.CommandData.ToArray());
+        Assert.Equal(new byte[] { 0x12, 0x34 }, ciphertext);
+    }
+
+    [Fact]
     public async Task SignAsync_WhenOperationAndResolutionFail_PreservesOperationException()
     {
         var connection = CreateInitializedConnectionWithUifs(
@@ -1610,6 +1665,37 @@ public sealed class OpenPgpSessionWireTests
         public override byte[] ToBytes() => encoding;
 
         public override void Dispose() => Disposed = true;
+    }
+
+    private sealed class DecipherRejectionBackend : IOpenPgpBackend
+    {
+        public ApduResponse Response { get; } = new(new byte[] { 0x56, 0x78, 0x69, 0x82 });
+        public ReadOnlyMemory<byte> CommandData { get; private set; }
+        public Task SelectForInitializationAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<FirmwareVersion?> ReadVersionAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError = true,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Assert.False(throwOnError);
+            Assert.True(CryptographicOperations.FixedTimeEquals([0x00, 0x12, 0x34], command.Data.Span));
+            CommandData = command.Data;
+            return Task.FromResult(Response);
+        }
+    }
+
+    private sealed class FailingResolutionLoggerFactory(Exception failure) : ILoggerFactory, ILogger
+    {
+        public ILogger CreateLogger(string categoryName) =>
+            categoryName.EndsWith(".UserPresenceNotification", StringComparison.Ordinal)
+                ? this : NullLogger.Instance;
+        public void AddProvider(ILoggerProvider provider) { }
+        public void Dispose() { }
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter) => throw failure;
     }
 
     private sealed class ThrowingUifLogger : ILogger

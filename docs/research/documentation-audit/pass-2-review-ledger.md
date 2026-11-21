@@ -7,8 +7,8 @@ pins, options and pseudocode. Agreement numbers (AG-n) point into `pass-2-review
 `pass-2-review-policy.md`.
 
 OpenPGP implementation: [PR #796](https://github.com/Yubico/Yubico.NET.SDK/pull/796) tracks the delivered facets,
-the explicit IMP-009 deferral, adoption of #792 SCP firmware admission, the pending #790 notification failure
-preservation check, and physical qualification.
+the explicit IMP-009 deferral, SCP firmware admission, the #790 notification failure preservation check,
+and pending physical qualification.
 
 ## How to read this
 

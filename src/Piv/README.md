@@ -75,7 +75,8 @@ SELECT and publish readiness after management-type discovery. Failed direct crea
 without closing your connection; failed convenience creation also cleans up its hidden connection.
 
 For SCP, pass `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile and keep its inputs alive
-through actual factory completion. The session owns the effective protocol; its backend borrows it. The caller owns
+through actual factory completion and any reset, which reuses the same parameters. The session owns the effective
+protocol; its backend borrows it. The caller owns
 the SCP parameters: SCP03 parameter disposal disposes the retained `StaticKeys` owner, whose arrays are copies of
 the original inputs. SCP11 parameters copy certificate-list membership but retain the supplied objects; disposal
 disposes the OCE private key and certificates, not the SD public key. Record copies can share these contained owners.
@@ -347,17 +348,19 @@ certificate request, while device signing needs an external `X509SignatureGenera
 
 ### Reset PIV deliberately
 
-`ResetAsync` consumes PIN and PUK retries until both are blocked, then sends Yubico RESET without requiring
+`ResetAsync` checks Bio metadata before consuming PIN or PUK retries. If biometrics are configured,
+it refuses without blocking either credential; use the product's device-reset procedure. Only a response
+indicating Bio metadata is unsupported allows the legacy path to proceed without metadata.
+The method consumes PIN and PUK retries until both are blocked, then sends Yubico RESET without requiring
 management authentication. Normal private-key slots, their certificates, provisioning objects and
 credentials return to factory state. **The F9 attestation key and certificate survive normal PIV reset.**
 Failure or cancellation can leave retry counters partly consumed before RESET. After a successful device
 reset the session clears management authentication and refreshes the management-key type; refresh can
-still throw after the reset has applied. Inspect fresh state before retrying. Bio MPE uses a Management
-device-reset route; the PIV implementation's Bio preflight remains unfinished. Consult the product's reset
-procedure before invoking this workflow on Bio hardware.
+still throw after the reset has applied. Inspect fresh state before retrying.
 
-Reset keeps the current backend/protocol and performs no reselection or fresh SCP handshake. The inherited channel
-authentication flag therefore supplies no post-reset restoration evidence. After uncertain reset or recovery, await
+After confirmed reset, the same session reselects PIV, refreshes the applet version, and reestablishes SCP
+if configured. PIV reset does not reset Security Domain; the handshake uses the original caller-owned parameters.
+If selection or the handshake fails, the session ends. After uncertain reset or recovery, await
 actual work and teardown, reopen and inspect persistent state before retrying; retain independent key/recovery backups.
 
 ## User interaction
@@ -498,8 +501,8 @@ and hotplug tests need separate human coordination; multi-key contention tests n
 
 Interpret each assertion at its actual boundary. Actual-array observers in crypto/raw-object tests reach managed
 command/response owners, not the full native/chaining/SCP/provider copy graph. Request-callback cancellation is
-pre-wire; it does not demonstrate interruption of an admitted operation. Reset command-membership assertions check
-neither a complete sequence nor erasure. Hotplug tokens/windows do not bound admitted native work, and uncertain
+pre-wire; it does not demonstrate interruption of an admitted operation. Fake reset command sequences do not prove
+device erasure. Hotplug tokens/windows do not bound admitted native work, and uncertain
 release can retain a claim. Physical PIN/power, separate-process isolation, touch, hotplug and touch-dependent
 cancellation/recovery remain separately qualified/deferred; historical test outcomes do not cover another device,
 firmware, transport or OS.

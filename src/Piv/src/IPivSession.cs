@@ -81,7 +81,7 @@ public interface IPivSession : IApplicationSession
     /// The SDK blocks the PIN and PUK, then resets normal key slots, certificates, objects and
     /// credentials. The F9 attestation key and certificate survive normal PIV reset. Management
     /// authentication is unnecessary. Failure or cancellation before RESET can leave retries consumed.
-    /// Bio MPE requires its device-reset procedure; the PIV Bio preflight is unfinished.
+    /// Configured biometrics are detected before consuming retries. Use the product's device-reset procedure instead.
     /// </para>
     /// <para>
     /// A successful reset clears management-key authentication and refreshes
@@ -89,8 +89,8 @@ public interface IPivSession : IApplicationSession
     /// session uses detected firmware (not a compatibility override): AES-192 for 5.7+ and development
     /// versions, or Triple-DES for older released versions. Unexpected metadata errors propagate,
     /// including after the physical reset has succeeded. Inspect fresh device state before retrying.
-    /// The method retains the existing backend/protocol, without reselection or a new SCP handshake;
-    /// its authentication flag alone establishes no post-reset secure-channel restoration.
+    /// The same session reselects PIV and, if originally configured, reestablishes SCP using the same
+    /// caller-owned parameters. Keep them alive through reset. Failure to restore selection or SCP ends the session.
     /// </para>
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>

@@ -50,6 +50,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
     private IBackend? _backend;
     private bool _isAuthenticated;
     private FirmwareVersion _detectedFirmwareVersion = new(0, 0, 0);
+    private ProtocolConfiguration? _protocolConfiguration;
+    private FirmwareVersion? _firmwareVersionOverride;
+    private ScpKeyParameters? _scpKeyParameters;
 
     /// <inheritdoc />
     public KeyType? ManagementKeyType { get; private set; } = KeyType.TripleDes;
@@ -102,7 +105,8 @@ public sealed class PivSession : ApplicationSession, IPivSession
     /// SELECT and registers protocol disposal before setup. It reads the PIV version, configures the effective
     /// override-or-detected version and optional SCP, then resolves the management-key type before publishing
     /// readiness. Failed initialization disposes/detaches the session without closing this borrowed connection.
-    /// Keep borrowed SCP inputs alive through factory completion. The session owns its protocol; its backend
+    /// Keep borrowed SCP inputs alive through factory completion and any reset, which reuses them.
+    /// The session owns its protocol; its backend
     /// borrows that protocol, and its user-presence prompt remains caller-owned.
     /// </remarks>
     /// <exception cref="ArgumentNullException">If connection is null.</exception>
@@ -161,6 +165,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
             // Detect management key type from device metadata (firmware 5.3+)
             // This is critical for YubiKey 5.7+ which defaults to AES-192 instead of 3DES
             ManagementKeyType = await ResolveManagementKeyTypeAsync(backend, cancellationToken).ConfigureAwait(false);
+            _protocolConfiguration = configuration;
+            _firmwareVersionOverride = firmwareVersionOverride;
+            _scpKeyParameters = scpKeyParams;
 
             Logger.LogInformation("PIV session initialized successfully. Version: {Version}", detectedFirmwareVersion);
         }
@@ -186,7 +193,9 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         Logger.LogDebug("PIV: Resetting PIV application");
 
-        // TODO: Add Bio preflight before consuming retries; Bio MPE requires its device-reset route.
+        var bio = await BioProtocol.TryGetBioMetadataAsync(_backend, cancellationToken).ConfigureAwait(false);
+        if (bio is { IsConfigured: true })
+            throw new InvalidOperationException("PIV reset is unavailable while biometrics are configured. Follow the device-reset procedure for this product.");
 
         // Step 1: Block PIN by verifying with empty PIN until blocked
         // Empty PIN encodes as 8 bytes of 0xFF per PIV spec
@@ -204,8 +213,6 @@ public sealed class PivSession : ApplicationSession, IPivSession
             throw ApduException.FromStatusWord(response.SW, "PIV reset failed");
         }
 
-        // Reset management authentication state. This workflow retains its backend/protocol and performs
-        // no terminal session disposal, applet reselection or fresh SCP handshake.
         SetManagementKeyAuthenticationState(false);
 
         // RESET changed the physical applet even if the metadata refresh below fails. Establish a
@@ -213,10 +220,54 @@ public sealed class PivSession : ApplicationSession, IPivSession
         // major-zero development version follows the SDK's modern-default compatibility convention.
         ManagementKeyType = GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
 
+        await RestoreProtocolAfterResetAsync(cancellationToken).ConfigureAwait(false);
+
         // Update management key type from metadata (firmware 5.3+)
         ManagementKeyType = await ResolveManagementKeyTypeAsync(_backend, cancellationToken).ConfigureAwait(false);
 
         Logger.LogDebug("PIV: Reset completed successfully");
+    }
+
+    private async Task RestoreProtocolAfterResetAsync(CancellationToken cancellationToken)
+    {
+        IsAuthenticated = false;
+        IsInitialized = false;
+        _backend = null;
+        var previousProtocol = Protocol;
+        Protocol = null;
+
+        try
+        {
+            if (previousProtocol is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+            else
+                previousProtocol?.Dispose();
+
+            var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(_scpKeyParameters, cancellationToken)
+                .ConfigureAwait(false);
+            var backend = new SmartCardBackend(protocol);
+            var state = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+            _detectedFirmwareVersion = state.FirmwareVersion;
+            ManagementKeyType = GetConservativeDefaultManagementKeyType(_detectedFirmwareVersion);
+
+            var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(protocol,
+                _firmwareVersionOverride ?? _detectedFirmwareVersion, _protocolConfiguration, _scpKeyParameters,
+                cancellationToken).ConfigureAwait(false);
+            _backend = ReferenceEquals(protocol, effectiveProtocol) ? backend : new SmartCardBackend(effectiveProtocol);
+            IsInitialized = true;
+        }
+        catch
+        {
+            try
+            {
+                await DisposeAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                // Cleanup must not replace the error that prevented the confirmed reset from restoring the session.
+            }
+            throw;
+        }
     }
 
     /// <summary>
@@ -916,6 +967,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
     protected override void Dispose(bool disposing)
     {
         SetManagementKeyAuthenticationState(false);
+        _scpKeyParameters = null;
         base.Dispose(disposing);
     }
 

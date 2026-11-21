@@ -36,12 +36,18 @@ internal static class BioProtocol
     private const int ShortTlvHeaderLength = 2;
     private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(BioProtocol));
 
-    internal static async Task<BioMetadata> GetBioMetadataAsync(IBackend backend, CancellationToken cancellationToken = default)
+    internal static async Task<BioMetadata> GetBioMetadataAsync(IBackend backend, CancellationToken cancellationToken = default) =>
+        await TryGetBioMetadataAsync(backend, cancellationToken).ConfigureAwait(false)
+        ?? throw new NotSupportedException("Biometric verification is not supported by this YubiKey.");
+
+    internal static async Task<BioMetadata?> TryGetBioMetadataAsync(IBackend backend, CancellationToken cancellationToken)
     {
         var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Bio);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
         try
         {
+            if (response.SW is SWConstants.FileOrApplicationNotFound or SWConstants.DataNotFound or SWConstants.InsNotSupported)
+                return null;
             EnsureAvailable(response);
             // Python YubiKit 4ca60f7 piv.py:1111-1133: retries are required; the two flags are optional.
             var fields = TlvHelper.DecodeDictionary(response.Data);

@@ -503,22 +503,61 @@ public class PivSessionTests
     [Fact]
     public async Task ResetAsync_BlocksPinAndPukThenResets()
     {
-        // The queued responses model PIN metadata/blocking, PUK blocking, RESET and metadata refresh.
-        // Assertions below check membership of VERIFY, RESET RETRY P2=80 and RESET commands,
-        // not equality of the complete command sequence or a device erasure postcondition.
         var connection = CreateInitializedConnection(
+            [0x06, 0x01, 0x05, 0x07, 0x01, 0x00, 0x90, 0x00], // Bio supported, not configured
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata: 1 retry remaining
             [0x63, 0xC0], // VERIFY empty PIN -> blocked (0 retries)
             [0x63, 0xC0], // RESET RETRY empty PUK/PIN -> blocked (0 retries)
             [0x90, 0x00], // RESET
+            OkResponse(), VersionResponse(),
             ManagementKeyMetadataResponse());
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        int before = connection.TransmittedCommands.Count;
 
         await session.ResetAsync(TestContext.Current.CancellationToken);
 
-        Assert.Contains(connection.TransmittedCommands, c => c[1] == 0x20 && c[3] == 0x80); // VERIFY PIN
-        Assert.Contains(connection.TransmittedCommands, c => c[1] == 0x2C && c[3] == 0x80); // RESET RETRY, PUK-blocking quirk
-        Assert.Contains(connection.TransmittedCommands, c => c[1] == 0xFB); // RESET
+        Assert.Equal<byte>([0xF7, 0xF7, 0x20, 0x2C, 0xFB, 0xA4, 0xFD, 0xF7],
+            connection.TransmittedCommands.Skip(before).Select(c => c[1]));
+        Assert.True(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+    }
+
+    [Theory]
+    [InlineData("0601050701019000", typeof(InvalidOperationException))]
+    [InlineData("0701009000", typeof(ApduException))]
+    [InlineData("6982", typeof(ApduException))]
+    public async Task ResetAsync_WhenBioPreflightRefusesOrFails_DoesNotConsumeRetries(string response, Type error)
+    {
+        var connection = CreateInitializedConnection(Convert.FromHexString(response));
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: token);
+        int before = connection.TransmittedCommands.Count;
+
+        await Assert.ThrowsAsync(error, () => session.ResetAsync(token));
+
+        var command = Assert.Single(connection.TransmittedCommands.Skip(before));
+        Assert.Equal(0xF7, command[1]);
+        Assert.Equal(0x96, command[3]);
+    }
+
+    [Fact]
+    public async Task ResetAsync_WhenReselectFails_EndsSessionAndPreservesSelectError()
+    {
+        var connection = CreateInitializedConnection(
+            [0x6D, 0x00], // Bio unavailable
+            PinMetadataResponse(), [0x63, 0xC0], [0x63, 0xC0],
+            OkResponse(), [0x6A, 0x82]); // RESET succeeds; SELECT fails
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: token);
+        MarkAuthenticated(session);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(token));
+
+        Assert.Equal((short)0x6A82, error.SW);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        Assert.False(session.IsManagementKeyAuthenticated);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetPinMetadataAsync(token));
     }
 
     [Fact]
@@ -526,10 +565,12 @@ public class PivSessionTests
     {
         var connection = CreateInitializedConnection(
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x6A, 0x88], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET
+            OkResponse(), VersionResponse(),
             ManagementKeyMetadataResponse(KeyType.Aes128)); // authoritative post-reset metadata
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -554,10 +595,12 @@ public class PivSessionTests
     {
         var connection = CreateInitializedConnection(
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES128
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET
+            OkResponse(), VersionResponse(),
             [0x6D, 0x00]); // GET METADATA unsupported
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -578,10 +621,12 @@ public class PivSessionTests
     {
         var connection = CreateInitializedConnectionWithVersion(
             [0x05, 0x06, 0x00, 0x90, 0x00], // PIV applet version 5.6.0
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET
+            OkResponse(), [0x05, 0x06, 0x00, 0x90, 0x00],
             [0x6D, 0x00]); // GET METADATA unsupported
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -598,10 +643,12 @@ public class PivSessionTests
         var connection = CreateInitializedConnectionWithVersion(
             [0x05, 0x07, 0x00, 0x90, 0x00],
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET
+            OkResponse(), [0x05, 0x07, 0x00, 0x90, 0x00],
             [0x6D, 0x00]); // GET METADATA unsupported
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -621,10 +668,12 @@ public class PivSessionTests
         var connection = CreateInitializedConnectionWithVersion(
             [0x05, 0x07, 0x00, 0x90, 0x00],
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET succeeded
+            OkResponse(), [0x05, 0x07, 0x00, 0x90, 0x00],
             [(byte)(statusWord >> 8), (byte)statusWord]); // unexpected metadata refresh failure
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -643,10 +692,12 @@ public class PivSessionTests
     {
         var connection = CreateInitializedConnection(
             [0x90, 0x00], // SET MANAGEMENT KEY -> AES256
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata
             [0x63, 0xC0], // PIN blocked
             [0x63, 0xC0], // PUK blocked
             [0x90, 0x00], // RESET succeeded
+            OkResponse(), VersionResponse(),
             [0x6A, 0x80]); // unexpected metadata refresh failure
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         MarkAuthenticated(session);
@@ -662,6 +713,7 @@ public class PivSessionTests
     public async Task ResetAsync_WhenPinBlockingReturnsUnexpectedStatus_ThrowsAndDoesNotSendReset()
     {
         var connection = CreateInitializedConnection(
+            [0x6D, 0x00], // Bio unavailable
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata: 1 retry remaining
             [0x6A, 0x80], // VERIFY empty PIN -> unexpected status
             [0x63, 0xC0], // Would block PUK if ResetAsync continued

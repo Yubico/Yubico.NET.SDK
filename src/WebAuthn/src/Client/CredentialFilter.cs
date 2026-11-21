@@ -15,6 +15,7 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -65,90 +66,29 @@ internal static class CredentialFilter
         ArgumentNullException.ThrowIfNull(candidates);
         ArgumentNullException.ThrowIfNull(info);
 
-        if (candidates.Count == 0)
-        {
+        var eligible = Eligible(candidates, info);
+        if (eligible.Count == 0)
             return null;
-        }
-
-        // CTAP 2.1-2.3 §6.4 maxCredentialIdLength: an id longer than the authenticator can produce
-        // cannot match, and sending it risks CTAP2_ERR_REQUEST_TOO_LARGE.
-        IReadOnlyList<PublicKeyCredentialDescriptor> remaining = info.MaxCredentialIdLength is { } maxIdLength
-            ? candidates.Where(descriptor => descriptor.Id.Length <= maxIdLength).ToList()
-            : candidates;
-        if (remaining.Count == 0)
-        {
-            return null;
-        }
-
-        // CTAP 2.1-2.3 §6.4: maxCredentialCountInList "MUST be greater than zero if present." A
-        // non-positive value would make the chunk empty: the loop would never advance, or an empty
-        // allowList probe could succeed against a discoverable credential. Refuse it instead of
-        // clamping so faulty firmware stays visible.
-        int maxCreds = info.MaxCredentialCountInList ?? 1;
-        if (maxCreds <= 0)
-        {
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.NotSupported,
-                $"Authenticator reported maxCredentialCountInList = {maxCreds}; CTAP §6.4 requires a value greater than zero, so the credential list cannot be checked.");
-        }
 
         byte[] zeroClientDataHash = new byte[ClientDataHashLength];
         byte[]? pinUvAuthParam = token is null ? null : token.Protocol.Authenticate(token.Token.Span, zeroClientDataHash);
 
         try
         {
-            int offset = 0;
-            while (offset < remaining.Count)
+            var result = await FindAsync(eligible, info, requireUvAndUp: false, chunk =>
+                backend.GetAssertionAsync(new BackendGetAssertionRequest
+                {
+                    ClientDataHash = zeroClientDataHash,
+                    RpId = rpId,
+                    AllowList = chunk,
+                    Options = new Dictionary<string, bool> { ["up"] = false },
+                    PinUvAuthParam = pinUvAuthParam is null ? null : (ReadOnlyMemory<byte>?)pinUvAuthParam,
+                    PinUvAuthProtocol = token is null ? null : (byte)token.Protocol.Version
+                }, cancellationToken), cancellationToken).ConfigureAwait(false);
+            if (result is { } match)
             {
-                int chunkSize = Math.Min(maxCreds, remaining.Count - offset);
-                var chunk = remaining.Skip(offset).Take(chunkSize).ToList();
-
-                GetAssertionResponse response;
-                try
-                {
-                    response = await backend.GetAssertionAsync(new BackendGetAssertionRequest
-                    {
-                        ClientDataHash = zeroClientDataHash,
-                        RpId = rpId,
-                        AllowList = chunk,
-                        Options = new Dictionary<string, bool> { ["up"] = false },
-                        PinUvAuthParam = pinUvAuthParam is null ? null : (ReadOnlyMemory<byte>?)pinUvAuthParam,
-                        PinUvAuthProtocol = token is null ? null : (byte)token.Protocol.Version
-                    }, cancellationToken).ConfigureAwait(false);
-                }
-                catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
-                {
-                    offset += chunkSize;
-                    continue;
-                }
-                catch (CtapException ex) when (ex.Status == CtapStatus.RequestTooLarge && maxCreds > 1)
-                {
-                    // The message was too large for this authenticator; try smaller chunks at the same offset.
-                    maxCreds--;
-                    continue;
-                }
-
-                // A one-descriptor chunk is its own answer. CTAP2.0 §5.2 permits credential omission
-                // for a singleton allowList; CTAP2.1/2.3 §6.2.2 require the descriptor.
-                try
-                {
-                    if (response.Credential is null && chunk.Count == 1)
-                        return chunk[0];
-
-                    var matchedId = response.GetCredentialId();
-                    if (!matchedId.IsEmpty
-                        && chunk.FirstOrDefault(descriptor => descriptor.Id.Span.SequenceEqual(matchedId.Span)) is { } matched)
-                        return matched;
-
-                    throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
-                        "The successful credential probe did not identify a credential in the submitted list.");
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
-                    if (response.LargeBlobKey is { } key)
-                        CryptographicOperations.ZeroMemory(key.Span);
-                }
+                CredentialMatcher.ClearUnreturnedAssertion(match.Response);
+                return match.Selected;
             }
 
             return null;
@@ -159,6 +99,92 @@ internal static class CredentialFilter
             {
                 CryptographicOperations.ZeroMemory(pinUvAuthParam);
             }
+        }
+    }
+
+    // CTAP §6.4: IDs larger than the authenticator can issue cannot match.
+    internal static IReadOnlyList<PublicKeyCredentialDescriptor> Eligible(
+        IReadOnlyList<PublicKeyCredentialDescriptor> candidates, AuthenticatorInfo info) =>
+        info.MaxCredentialIdLength is { } max
+            ? candidates.Where(descriptor => descriptor.Id.Length <= max).ToList()
+            : candidates;
+
+    internal static int MaxListCount(AuthenticatorInfo info)
+    {
+        // CTAP §6.4 requires a positive count if present. Never send an empty chunk by clamping it.
+        int maxCreds = info.MaxCredentialCountInList ?? 1;
+        return maxCreds > 0 ? maxCreds : throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+            $"Authenticator reported maxCredentialCountInList = {maxCreds}; CTAP §6.4 requires a value greater than zero, so the credential list cannot be checked.");
+    }
+
+    /// <summary>Checks eligible chunks in order and transfers ownership of only an associated success.</summary>
+    internal static async Task<(PublicKeyCredentialDescriptor Selected, GetAssertionResponse Response)?> FindAsync(
+        IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info, bool requireUvAndUp,
+        Func<IReadOnlyList<PublicKeyCredentialDescriptor>, Task<GetAssertionResponse>> getAssertion, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        if (eligible.Count == 0)
+            return null;
+
+        int limit = MaxListCount(info);
+        int offset = 0;
+        while (offset < eligible.Count)
+        {
+            ct.ThrowIfCancellationRequested();
+            var chunk = eligible.Skip(offset).Take(limit).ToList();
+            GetAssertionResponse response;
+            try
+            {
+                response = await getAssertion(chunk).ConfigureAwait(false);
+            }
+            catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
+            {
+                offset += chunk.Count;
+                continue;
+            }
+            catch (CtapException ex) when (ex.Status == CtapStatus.RequestTooLarge && chunk.Count > 1)
+            {
+                limit = chunk.Count - 1; // Retry from the same offset without losing any candidates.
+                continue;
+            }
+
+            return (Associate(response, chunk, requireUvAndUp, ct), response);
+        }
+
+        ct.ThrowIfCancellationRequested();
+        return null;
+    }
+
+    internal static PublicKeyCredentialDescriptor Associate(GetAssertionResponse response,
+        IReadOnlyList<PublicKeyCredentialDescriptor> chunk, bool requireUvAndUp, CancellationToken ct)
+    {
+        try
+        {
+            ct.ThrowIfCancellationRequested();
+            if (requireUvAndUp && (!response.AuthenticatorData.UserVerified || !response.AuthenticatorData.UserPresent))
+                throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
+                    "The authenticator did not return the requested user verification and presence.");
+
+            // CTAP 2.0 §5.2 selects one credential; 2.1–2.3 §6.2.2 omit the count.
+            if (response.NumberOfCredentials is > 1)
+                throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
+                    "The authenticator reported multiple assertions for a nonempty allow list.");
+
+            // Only a wire singleton allows omission repair (CTAP 2.0 §5.2).
+            if (response.Credential is null && chunk.Count == 1)
+                return chunk[0];
+
+            var id = response.GetCredentialId();
+            if (!id.IsEmpty && chunk.FirstOrDefault(descriptor => descriptor.Id.Span.SequenceEqual(id.Span)) is { } matched)
+                return matched;
+
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
+                "The successful assertion did not identify a credential in the submitted list.");
+        }
+        catch
+        {
+            CredentialMatcher.ClearUnreturnedAssertion(response);
+            throw;
         }
     }
 }

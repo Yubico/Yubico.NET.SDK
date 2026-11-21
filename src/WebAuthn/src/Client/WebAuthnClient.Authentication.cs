@@ -38,16 +38,22 @@ public sealed partial class WebAuthnClient
     /// </returns>
     /// <remarks>
     /// <para>
-    /// With a nonempty allow list, the client probes for a matching credential and narrows the final
-    /// request to one descriptor; it does not return every allowed credential held by the authenticator.
-    /// A reported count greater than one for that final singleton request is rejected before any
-    /// continuation or extension processing.
+    /// With a nonempty allow list, the client probes for a matching credential and keeps the first
+    /// successful selection; it does not enumerate every allowed credential. If built-in verification
+    /// is already in effect without a token, a silent miss is checked with real, verified assertions
+    /// against the eligible list. A reported count greater than one for a final allow-list request is
+    /// rejected before any continuation or extension processing.
     /// If that probe misses and PRF applies to every eligible entry, a configured, caller-supplied PIN
     /// can be used for one additional silent selection pass to find a verification-protected credential.
     /// Without an allow list, the authenticator can return multiple discoverable credentials for the RP,
     /// subject to its own selection behavior. No match produces an empty list rather than an exception.
     /// A reported assertion count above the SDK's 1024-per-ceremony limit raises a Constraint error
     /// before requesting continuations. This host resource limit is not a CTAP validity rule.
+    /// </para>
+    /// <para>
+    /// When verified selection cannot supply a selected-credential extension input in the first
+    /// assertion, the client can request one more assertion for that same credential. This can require
+    /// another user gesture and advance the signature counter again; gestures are not cached by the SDK.
     /// </para>
     /// <para>
     /// Assertions and extension output processing, including extension writes, finish before this method
@@ -57,7 +63,7 @@ public sealed partial class WebAuthnClient
     /// <para>
     /// CTAP2.0 §5.2 permits omission of the final credential descriptor for a singleton allow list;
     /// CTAP2.1/2.3 §6.2.2 require the descriptor. For compatibility, the client recovers an omitted ID
-    /// from the single real descriptor sent after probing, not from the first original list entry.
+    /// only from the single real descriptor sent in that request, never from a multi-entry list.
     /// Unassociated or inconsistent responses fail with InvalidState. The RP must still
     /// verify the response and its credential/account binding.
     /// </para>
@@ -159,6 +165,12 @@ public sealed partial class WebAuthnClient
             {
                 selected ??= await ProbeCredentialsAsync(options.RpId, candidates, info, auth, decision, remintPermissions: null, ct)
                     .ConfigureAwait(false);
+                if (selected is null && decision.UvOption is true && auth.Token is null)
+                {
+                    var verified = await GetTokenlessUvAssertionAsync(options.RpId, clientData, candidates, info, extensions, ct)
+                        .ConfigureAwait(false);
+                    return (verified, extensions);
+                }
                 if (selected is null && CanReprobeForPrf(options, context, candidates, auth, callerPinBytes))
                 {
                     // A UV-protected credential may be invisible to the first silent probe. Only
@@ -191,6 +203,77 @@ public sealed partial class WebAuthnClient
             var matches = first is null ? [] : await CredentialMatcher.MatchAsync(_backend, first, allowList is not null, selected, ct)
                 .ConfigureAwait(false);
             return (matches, extensions);
+        }
+    }
+
+    private async Task<IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)>>
+        GetTokenlessUvAssertionAsync(string rpId, WebAuthnClientData clientData,
+            IReadOnlyList<PublicKeyCredentialDescriptor> candidates, AuthenticatorInfo info,
+            AuthenticationExtensionSession extensions, CancellationToken ct)
+    {
+        bool deferPrf = false;
+        bool deferPreviewSign = false;
+        var match = await FindTokenlessUvCredentialAsync(CredentialFilter.Eligible(candidates, info), info, SendChunkAsync, ct)
+            .ConfigureAwait(false);
+        if (match is not { } found)
+            return [];
+
+        var (selected, response) = found;
+        bool needsSecond;
+        try
+        {
+            needsSecond = deferPreviewSign || (deferPrf && extensions.HasPrfInput(selected));
+        }
+        catch
+        {
+            CredentialMatcher.ClearUnreturnedAssertion(response);
+            throw;
+        }
+
+        if (needsSecond)
+        {
+            // Never publish the provisional assertion, even if the second command fails or is cancelled.
+            CredentialMatcher.ClearUnreturnedAssertion(response);
+            IReadOnlyList<PublicKeyCredentialDescriptor> singleton = [selected];
+            response = await SendTokenlessUvAssertionAsync(
+                rpId, clientData, singleton, extensions, deferPrf: false, deferPreviewSign: false, allowChunkStatus: false, ct)
+                .ConfigureAwait(false);
+            _ = CredentialFilter.Associate(response, singleton, requireUvAndUp: true, ct);
+        }
+
+        return await CredentialMatcher.MatchAsync(_backend, response, hasAllowList: true, selected, ct).ConfigureAwait(false);
+
+        Task<GetAssertionResponse> SendChunkAsync(IReadOnlyList<PublicKeyCredentialDescriptor> chunk)
+        {
+            // The first descriptor is a representative only for PRF inputs common to the entire wire
+            // chunk. It is not a selection, and previewSign must wait for the actual credential ID.
+            deferPrf = extensions.PrfInputsDiffer(chunk);
+            deferPreviewSign = chunk.Count > 1 && extensions.HasPreviewSign;
+            return SendTokenlessUvAssertionAsync(rpId, clientData, chunk, extensions,
+                deferPrf, deferPreviewSign, allowChunkStatus: true, ct);
+        }
+    }
+
+    private async Task<GetAssertionResponse> SendTokenlessUvAssertionAsync(string rpId, WebAuthnClientData clientData,
+        IReadOnlyList<PublicKeyCredentialDescriptor> chunk, AuthenticationExtensionSession extensions,
+        bool deferPrf, bool deferPreviewSign, bool allowChunkStatus, CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        await extensions.PrepareAsync(ct, chunk[0], deferPrf).ConfigureAwait(false);
+        var encoded = extensions.PrepareInputs(chunk[0], token: null, out bool hasPreviewSign, deferPrf, deferPreviewSign);
+        try
+        {
+            ct.ThrowIfCancellationRequested();
+            return await _backend.GetAssertionAsync(BuildTokenlessUvAssertion(rpId, clientData, chunk, encoded), ct)
+                .ConfigureAwait(false);
+        }
+        catch (CtapException ex) when (!allowChunkStatus || ex.Status is not (CtapStatus.NoCredentials or CtapStatus.RequestTooLarge))
+        {
+            throw MapCeremonyCtapException(ex, hasPreviewSign);
+        }
+        finally
+        {
+            Util.SensitiveMemory.Zero(encoded);
         }
     }
 
@@ -266,12 +349,16 @@ public sealed partial class WebAuthnClient
         IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> matches,
         IReadOnlyList<AuthenticationResponse> prepared, bool published)
     {
-        foreach (var (_, _, response) in matches)
+        foreach (var (id, _, response) in matches)
         {
-            if (response.LargeBlobKey is { } key)
-                System.Security.Cryptography.CryptographicOperations.ZeroMemory(key.Span);
             if (!published)
-                System.Security.Cryptography.CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
+            {
+                CredentialMatcher.ClearUnreturnedAssertion(response);
+                if (response.Credential is null)
+                    Util.SensitiveMemory.Zero(id); // The matcher copied the wire singleton's ID for the response.
+            }
+            else if (response.LargeBlobKey is { } key)
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(key.Span);
         }
         if (published)
             return;

@@ -221,6 +221,31 @@ public sealed partial class WebAuthnClient
         }
     }
 
+    private static BackendGetAssertionRequest BuildTokenlessUvAssertion(string rpId, WebAuthnClientData clientData,
+        IReadOnlyList<PublicKeyCredentialDescriptor> chunk, ReadOnlyMemory<byte>? extensions = null) => new()
+        {
+            RpId = rpId,
+            ClientDataHash = clientData.Hash,
+            AllowList = chunk,
+            Options = new Dictionary<string, bool> { ["uv"] = true, ["up"] = true },
+            Extensions = extensions
+        };
+
+    private static async Task<(PublicKeyCredentialDescriptor Selected, GetAssertionResponse Response)?> FindTokenlessUvCredentialAsync(
+        IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info,
+        Func<IReadOnlyList<PublicKeyCredentialDescriptor>, Task<GetAssertionResponse>> getAssertion, CancellationToken ct)
+    {
+        try
+        {
+            return await CredentialFilter.FindAsync(eligible, info, requireUvAndUp: true, getAssertion, ct).ConfigureAwait(false);
+        }
+        catch (CtapException ex)
+        {
+            // This branch already requested built-in UV: failure cannot cause UV escalation or PIN acquisition.
+            throw MapCeremonyCtapException(ex, hasPreviewSign: false);
+        }
+    }
+
     /// <summary>CTAP "uv" option key from the decision, plus "rk" for registration; null when neither applies.</summary>
     private static IReadOnlyDictionary<string, bool>? CtapOptions(UvDecision decision, bool requireResidentKey = false)
     {

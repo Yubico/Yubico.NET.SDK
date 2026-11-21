@@ -69,12 +69,17 @@ internal sealed class AuthenticationExtensionSession : IDisposable
         _processors.Aggregate(PinUvAuthTokenPermissions.None, (acc, p) => acc | p.Permissions);
 
     /// <summary>Runs every processor's authenticator-dependent preparation (key agreement etc.).</summary>
-    public async ValueTask PrepareAsync(CancellationToken cancellationToken, PublicKeyCredentialDescriptor? selected = null)
+    public async ValueTask PrepareAsync(CancellationToken cancellationToken, PublicKeyCredentialDescriptor? selected = null,
+        bool deferPrf = false)
     {
         try
         {
             foreach (var processor in _processors)
+            {
+                if (deferPrf && processor is PrfProcessor)
+                    continue;
                 await processor.PrepareAsync(selected, cancellationToken).ConfigureAwait(false);
+            }
         }
         catch (CtapException ex)
         {
@@ -86,17 +91,34 @@ internal sealed class AuthenticationExtensionSession : IDisposable
     public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token) =>
         PrepareInputs(selected, token, out _);
 
-    public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token, out bool hasPreviewSign)
+    public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token,
+        out bool hasPreviewSign, bool deferPrf = false, bool deferPreviewSign = false)
     {
         var builder = new ExtensionBuilder();
         foreach (var processor in _processors)
         {
-            processor.PrepareInputs(builder, selected, token);
+            if (processor is PrfProcessor prf && deferPrf)
+                prf.PrepareAssertionInputs(builder, selected, omit: true);
+            else if (!(deferPreviewSign && IsPreviewSign(processor)))
+                processor.PrepareInputs(builder, selected, token);
         }
 
         hasPreviewSign = builder.HasPreviewSign;
         return builder.Build();
     }
+
+    internal bool PrfInputsDiffer(IReadOnlyList<PublicKeyCredentialDescriptor> chunk) =>
+        _processors.OfType<PrfProcessor>().Any(p => p.InputsDiffer(chunk));
+
+    internal bool HasPrfInput(PublicKeyCredentialDescriptor selected) =>
+        _processors.OfType<PrfProcessor>().Any(p => p.HasInput(selected));
+
+    // The previewSign processor validates that each allow-list entry has signing parameters.
+    internal bool HasPreviewSign => _processors.Any(IsPreviewSign);
+
+#pragma warning disable YKEXP001 // Only processors created for an explicitly requested previewSign input.
+    private static bool IsPreviewSign(IAuthenticationExtensionProcessor processor) => processor is PreviewSignProcessor;
+#pragma warning restore YKEXP001
 
     /// <summary>
     /// Derives the client extension outputs for one assertion, or null when the relying party requested

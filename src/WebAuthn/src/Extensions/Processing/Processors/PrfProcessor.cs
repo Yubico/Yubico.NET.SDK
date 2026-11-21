@@ -137,6 +137,29 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
     public ValueTask PrepareAsync(PublicKeyCredentialDescriptor? selected, CancellationToken cancellationToken) =>
         PrepareSecretAsync(SelectInputs(_input, selected) is not null, cancellationToken);
 
+    internal bool InputsDiffer(IReadOnlyList<PublicKeyCredentialDescriptor> chunk)
+    {
+        var first = SelectInputs(_input, chunk[0]);
+        for (int i = 1; i < chunk.Count; i++)
+        {
+            if (!SameInputs(first, SelectInputs(_input, chunk[i])))
+                return true;
+        }
+        return false;
+    }
+
+    internal bool HasInput(PublicKeyCredentialDescriptor selected) => SelectInputs(_input, selected) is not null;
+
+    private static bool SameInputs(PrfInputValues? left, PrfInputValues? right)
+    {
+        if (left is null || right is null)
+            return left is null && right is null;
+
+        return CryptographicOperations.FixedTimeEquals(left.First.Span, right.First.Span)
+            && left.Second.HasValue == right.Second.HasValue
+            && CryptographicOperations.FixedTimeEquals(left.Second.GetValueOrDefault().Span, right.Second.GetValueOrDefault().Span);
+    }
+
     private async ValueTask PrepareSecretAsync(bool needsSecret, CancellationToken cancellationToken)
     {
         if (needsSecret && _sharedSecret is null)
@@ -160,9 +183,19 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
     }
 
     public void PrepareInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token)
+        => PrepareAssertionInputs(builder, selected, omit: false);
+
+    internal void PrepareAssertionInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, bool omit)
     {
-        var ev = SelectInputs(_input, selected);
-        if (ev is null || _sharedSecret is null)
+        var ev = omit ? null : SelectInputs(_input, selected);
+        if (ev is null)
+        {
+            // A previous rejected chunk may have needed key agreement. An assertion that carries no
+            // PRF input must not use that secret to process an unsolicited hmac-secret output.
+            Dispose();
+            return;
+        }
+        if (_sharedSecret is null)
         {
             return;
         }

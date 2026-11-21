@@ -111,22 +111,25 @@ internal sealed class CredentialMatcher
                 $"Authenticator reported {count} assertions; the SDK supports at most {MaxAssertionsPerCeremony} per ceremony.");
         }
 
-        // The WebAuthn client sends exactly one descriptor on the wire, even if the original list
-        // had more. A continuation cannot represent another eligible credential for that request.
+        // CTAP selects one credential for a nonempty allow list, without continuations.
         if (hasAllowList && count is > 1)
         {
             ClearUnreturnedAssertion(response);
             throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
-                "The authenticator reported multiple assertions for a singleton allow list.");
+                "The authenticator reported multiple assertions for a nonempty allow list.");
         }
         return count;
     }
 
-    private static void ClearUnreturnedAssertion(GetAssertionResponse response)
+    internal static void ClearUnreturnedAssertion(GetAssertionResponse response)
     {
         CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
         if (response.LargeBlobKey is { } key)
             CryptographicOperations.ZeroMemory(key.Span);
+        // These views are independently owned by the decoded response, not the request descriptors.
+        Util.SensitiveMemory.Zero(response.Signature);
+        Util.SensitiveMemory.Zero(response.Credential?.Id);
+        Util.SensitiveMemory.Zero(response.User?.Id);
     }
 
     internal static bool IsNoCredentialsError(CtapStatus status)

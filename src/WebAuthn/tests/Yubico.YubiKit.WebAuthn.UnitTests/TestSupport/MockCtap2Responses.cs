@@ -40,7 +40,8 @@ internal static class MockCtap2Responses
         byte[]? authDataExtensionsCbor = null,
         byte[]? largeBlobKey = null,
         bool omitCredential = false,
-        bool userVerified = true)
+        bool userVerified = true,
+        bool userPresent = true)
     {
         credentialId ??= RandomNumberGenerator.GetBytes(32);
         signature ??= RandomNumberGenerator.GetBytes(64);
@@ -70,7 +71,7 @@ internal static class MockCtap2Responses
 
         // 0x02: authData
         writer.WriteInt32(2);
-        writer.WriteByteString(BuildAuthData(authDataExtensionsCbor, userVerified));
+        writer.WriteByteString(BuildAuthData(authDataExtensionsCbor, userVerified, userPresent));
 
         // 0x03: signature
         writer.WriteInt32(3);
@@ -109,11 +110,11 @@ internal static class MockCtap2Responses
     /// Bare authenticator data: rpIdHash (32) + flags UP|UV (1) + signCount (4), with no attested
     /// credential data.
     /// </summary>
-    public static byte[] BuildAuthData(byte[]? extensionsCbor = null, bool userVerified = true)
+    public static byte[] BuildAuthData(byte[]? extensionsCbor = null, bool userVerified = true, bool userPresent = true)
     {
         var authData = new byte[37 + (extensionsCbor?.Length ?? 0)];
         SHA256.HashData("example.com"u8, authData.AsSpan(0, 32));
-        authData[32] = (byte)(0x01 | (userVerified ? 0x04 : 0) | (extensionsCbor is null ? 0 : 0x80));
+        authData[32] = (byte)((userPresent ? 0x01 : 0) | (userVerified ? 0x04 : 0) | (extensionsCbor is null ? 0 : 0x80));
         authData[36] = 0x01;
         extensionsCbor?.CopyTo(authData.AsSpan(37));
         return authData;
@@ -133,7 +134,9 @@ internal static class MockCtap2Responses
         bool residentKeySupported = false,
         IReadOnlyList<string>? extensions = null,
         bool largeBlobsSupported = false,
-        bool pinUvAuthToken = false)
+        bool pinUvAuthToken = false,
+        int? maxCredentialCountInList = null,
+        int? maxMsgSize = null)
     {
         extensions ??= DefaultExtensions;
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -146,6 +149,8 @@ internal static class MockCtap2Responses
         if (pinUvAuthToken) optionsCount++;
 
         var mapSize = (optionsCount > 0 ? 4 : 3) + (minPinLength.HasValue ? 1 : 0);
+        if (maxCredentialCountInList.HasValue) mapSize++;
+        if (maxMsgSize.HasValue) mapSize++;
         writer.WriteStartMap(mapSize);
 
         // 0x01: versions
@@ -205,6 +210,18 @@ internal static class MockCtap2Responses
                 writer.WriteBoolean(true);
             }
             writer.WriteEndMap();
+        }
+
+        if (maxMsgSize is { } size)
+        {
+            writer.WriteInt32(5);
+            writer.WriteInt32(size);
+        }
+
+        if (maxCredentialCountInList is { } count)
+        {
+            writer.WriteInt32(7);
+            writer.WriteInt32(count);
         }
 
         // 0x0D: minimum PIN length in Unicode code points (optional)

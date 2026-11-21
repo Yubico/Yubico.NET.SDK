@@ -20,7 +20,6 @@ using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -168,13 +167,9 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         };
         _status = initialization.Status;
 
-        var firmwareForAdmission = options?.FirmwareVersionOverride ?? cachedVersion ?? initialization.FirmwareVersion;
-        _admitAllFirmwareGates = firmwareForAdmission.IsAlphaOrBeta ||
-                                 (options?.FirmwareVersionOverride is null && cachedDeviceInfo is { } info &&
-                                  info.VersionQualifier.Type != VersionQualifierType.Final);
-        // A major-zero cache is an admission sentinel, not a reason to discard known applet framing.
-        var firmwareForProtocol = options?.FirmwareVersionOverride ??
-                                  (cachedVersion is { IsAlphaOrBeta: false } ? cachedVersion : initialization.FirmwareVersion);
+        var (firmwareForProtocol, admitAllFirmwareGates) = ResolveFirmware(
+            options?.FirmwareVersionOverride, cachedDeviceInfo, initialization.FirmwareVersion);
+        _admitAllFirmwareGates = admitAllFirmwareGates;
 
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
@@ -187,6 +182,25 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         _backend = CreateBackend(effectiveProtocol, FirmwareVersion, GetProgSeq());
 
         _logger.LogDebug("YubiOTP session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
+    }
+
+    private static (FirmwareVersion ProtocolVersion, bool AdmitAllPreflight) ResolveFirmware(
+        FirmwareVersion? firmwareOverride, DeviceInfo? cachedDeviceInfo, FirmwareVersion appletVersion)
+    {
+        if (firmwareOverride is not null)
+        {
+            return (firmwareOverride, firmwareOverride.IsAlphaOrBeta);
+        }
+
+        if (cachedDeviceInfo is not { } info)
+        {
+            return (appletVersion, appletVersion.IsAlphaOrBeta);
+        }
+
+        // A major-zero cache is an admission sentinel, not a reason to discard known applet framing.
+        var version = info.FirmwareVersion;
+        return (version.IsAlphaOrBeta ? appletVersion : version,
+            version.IsAlphaOrBeta || info.VersionQualifier.Type != VersionQualifierType.Final);
     }
 
     /// <inheritdoc />

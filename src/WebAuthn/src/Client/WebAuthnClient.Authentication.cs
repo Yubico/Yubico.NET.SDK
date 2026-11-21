@@ -270,9 +270,10 @@ public sealed partial class WebAuthnClient
         {
             ct.ThrowIfCancellationRequested();
             var result = await CredentialFilter.SendChunkIfFitsAsync(_backend, BuildTokenlessUvAssertion(rpId, clientData, chunk, encoded),
-                info, ct, useSelectionStatus: allowChunkStatus)
+                info, ct, allowFakeChunkStatuses: allowChunkStatus)
                 .ConfigureAwait(false);
-            if (result.Status == CtapStatus.RequestTooLarge && chunk.Count == 1)
+            // A deferred command is pinned to one credential and cannot be retried or replaced.
+            if (!allowChunkStatus || (result.Status == CtapStatus.RequestTooLarge && chunk.Count == 1))
                 CtapException.ThrowIfError(result.Status);
             return result;
         }
@@ -336,15 +337,13 @@ public sealed partial class WebAuthnClient
     private async Task<GetAssertionResponse?> GetFirstAssertionAsync(
         BackendGetAssertionRequest request, UserVerificationPreference preference, bool hasPreviewSign, CancellationToken ct)
     {
+        if (request.AllowList is { Count: 1 } sent && request.Options?.GetValueOrDefault("uv") == true
+            && request.PinUvAuthParam is null)
+            return await GetVerifiedSingletonAssertionAsync(request, sent, hasPreviewSign, ct).ConfigureAwait(false);
+
         try
         {
-            var response = await _backend.GetAssertionAsync(request, ct).ConfigureAwait(false);
-            // A positive silent probe pins selection, but does not prove that the real assertion
-            // performed the explicitly requested tokenless UV and default UP.
-            if (request.AllowList is { Count: > 0 } sent && request.Options?.GetValueOrDefault("uv") == true
-                && request.PinUvAuthParam is null)
-                _ = CredentialFilter.Associate(response, sent, requireUvAndUp: true, ct);
-            return response;
+            return await _backend.GetAssertionAsync(request, ct).ConfigureAwait(false);
         }
         catch (CtapException ex) when (CredentialMatcher.IsNoCredentialsError(ex.Status))
         {
@@ -352,6 +351,32 @@ public sealed partial class WebAuthnClient
         }
         catch (CtapException ex) when (!ShouldRetryWithRequiredUv(ex, preference))
         {
+            throw MapCeremonyCtapException(ex, hasPreviewSign);
+        }
+        finally
+        {
+            Util.SensitiveMemory.Zero(request.Extensions);
+        }
+    }
+
+    private async Task<GetAssertionResponse?> GetVerifiedSingletonAssertionAsync(BackendGetAssertionRequest request,
+        IReadOnlyList<PublicKeyCredentialDescriptor> sent, bool hasPreviewSign, CancellationToken ct)
+    {
+        try
+        {
+            var (status, response) = await CredentialFilter.SendSelectionAsync(_backend, request, ct).ConfigureAwait(false);
+            if (status == CtapStatus.NoCredentials)
+                return null;
+
+            CtapException.ThrowIfError(status);
+            var assertion = response ?? throw new InvalidOperationException("The backend did not return an assertion.");
+            _ = CredentialFilter.Associate(assertion, sent, requireUvAndUp: true, ct);
+            return assertion;
+        }
+        catch (CtapException ex)
+        {
+            // UV was already requested even when the RP preference was Preferred. Never escalate
+            // here, including when a callback reports another exchange's PUAT_REQUIRED.
             throw MapCeremonyCtapException(ex, hasPreviewSign);
         }
         finally

@@ -135,12 +135,16 @@ public class TokenlessUvMessageSizeTests
     [InlineData(CtapStatus.NoCredentials, CtapStatus.Success)]
     [InlineData(CtapStatus.RequestTooLarge, CtapStatus.Success)]
     [InlineData(CtapStatus.NoCredentials, CtapStatus.NoCredentials)]
-    public async Task TokenlessUv_ResolutionFailureFromAnotherSessionDoesNotReplayAssertion(CtapStatus? innerStatus, CtapStatus outerStatus)
+    [InlineData(CtapStatus.NoCredentials, CtapStatus.Success, true)]
+    [InlineData(CtapStatus.PuatRequired, CtapStatus.Success, true)]
+    public async Task TokenlessUv_ResolutionFailureFromAnotherSessionDoesNotReplayAssertion(
+        CtapStatus? innerStatus, CtapStatus outerStatus, bool silentHit = false)
     {
         var (a, b) = Descriptors(16);
         var outerWire = new List<byte[]>();
         var innerWire = new List<byte[]>();
-        using var outerConnection = FakeConnection(outerWire, Miss, outerStatus == CtapStatus.Success ? AssertionSuccess() : Status(outerStatus));
+        using var outerConnection = FakeConnection(outerWire, silentHit ? AssertionSuccess(b.Id) : Miss,
+            outerStatus == CtapStatus.Success ? AssertionSuccess() : Status(outerStatus));
         using var innerConnection = FakeConnection(innerWire, innerStatus is { } status ? [Status(status)] : []);
         var ct = TestContext.Current.CancellationToken;
         await using var innerSession = await Ctap2Session.CreateAsync(innerConnection, cancellationToken: ct);
@@ -158,7 +162,7 @@ public class TokenlessUvMessageSizeTests
             Challenge = new byte[32],
             RpId = RpId,
             AllowCredentials = [a, b],
-            UserVerification = UserVerificationPreference.Required
+            UserVerification = silentHit ? UserVerificationPreference.Preferred : UserVerificationPreference.Required
         }, cancellationToken: ct));
 
         Assert.NotNull(innerFailure);
@@ -172,10 +176,10 @@ public class TokenlessUvMessageSizeTests
             Assert.Same(innerFailure, error);
             Assert.Empty(innerWire);
         }
-        Assert.Equal(2, outerWire.Count); // One silent miss, one completed real assertion; no retry or reselection.
+        Assert.Equal(2, outerWire.Count); // One probe and one real assertion; no retry or reselection.
         var sent = ReadAssertion(outerWire[1]);
         Assert.Contains(sent.Hash, value => value != 0);
-        AssertChunk(sent, sent.Hash, a, b);
+        AssertChunk(sent, sent.Hash, silentHit ? [b] : [a, b]);
 
         async ValueTask ResolveAsync()
         {
@@ -192,6 +196,41 @@ public class TokenlessUvMessageSizeTests
     }
 
     private static byte[] Status(CtapStatus status) => [(byte)status, 0x90, 0x00];
+
+    [Fact]
+    public async Task TokenlessUv_CustomLegacyProbeLeavesUnadvertisedMessageSizeToProvider()
+    {
+        var (credential, _) = Descriptors(MessageLimit + 1);
+        var custom = Substitute.For<ICtap2Session>();
+        custom.GetInfoAsync(Arg.Any<CancellationToken>()).Returns(MockCtap2Responses.CreateMockAuthenticatorInfo());
+        int silent = 0, real = 0;
+        custom.GetAssertionAsync(RpId, Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<GetAssertionOptions>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                var options = call.Arg<GetAssertionOptions>();
+                var sent = Assert.Single(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(options.AllowList));
+                Assert.Equal(credential.Id.ToArray(), sent.Id.ToArray());
+                if (options.UserPresence is false)
+                    silent++;
+                else
+                    real++;
+                return MockCtap2Responses.CreateMockGetAssertionResponse(credential.Id.ToArray());
+            });
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(custom, origin, new() { RpIdValidator = (_, rp) => rp == RpId });
+        var ct = TestContext.Current.CancellationToken;
+        var match = Assert.Single(await client.GetAssertionAsync(new PublicKeyCredentialRequestOptions
+        {
+            Challenge = new byte[32],
+            RpId = RpId,
+            AllowCredentials = [credential],
+            UserVerification = UserVerificationPreference.Discouraged
+        }, cancellationToken: ct));
+
+        Assert.Equal(credential.Id.ToArray(), (await match.SelectAsync(ct)).CredentialId.ToArray());
+        Assert.Equal(1, silent);
+        Assert.Equal(1, real);
+    }
 
     [Theory]
     [InlineData("valid")]
@@ -327,10 +366,20 @@ public class TokenlessUvMessageSizeTests
         }
     }
 
-    private static byte[] AssertionSuccess()
+    private static byte[] AssertionSuccess(ReadOnlyMemory<byte>? id = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(2); // CTAP 2.0 singleton credential omission.
+        writer.WriteStartMap(id.HasValue ? 3 : 2); // CTAP 2.0 singleton credential omission.
+        if (id is { } credential)
+        {
+            writer.WriteInt32(1);
+            writer.WriteStartMap(2);
+            writer.WriteTextString("id");
+            writer.WriteByteString(credential.Span);
+            writer.WriteTextString("type");
+            writer.WriteTextString("public-key");
+            writer.WriteEndMap();
+        }
         writer.WriteInt32(2);
         writer.WriteByteString(MockCtap2Responses.BuildAuthData());
         writer.WriteInt32(3);

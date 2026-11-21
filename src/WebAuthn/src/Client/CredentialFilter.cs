@@ -121,27 +121,35 @@ internal static class CredentialFilter
     /// <summary>Returns a preflight refusal without dispatching, or sends the fitting request.</summary>
     internal static async Task<(bool Fits, CtapStatus Status, GetAssertionResponse? Response)> SendChunkIfFitsAsync(
         IWebAuthnBackend backend, BackendGetAssertionRequest request, AuthenticatorInfo info, CancellationToken ct,
-        bool useSelectionStatus = true, bool allowLegacyStatuses = false)
+        bool allowFakeChunkStatuses = true, bool allowLegacyStatuses = false)
     {
-        if (!WebAuthnBackend.FitsGetAssertion(request, info))
+        // A legacy silent probe on a custom session stays subject to the provider's own wire limits.
+        bool legacyCustomProbe = allowLegacyStatuses && backend is WebAuthnBackend { HasConcreteSession: false };
+        if (!legacyCustomProbe && !WebAuthnBackend.FitsGetAssertion(request, info))
             return (false, default, null);
 
-        if (useSelectionStatus && backend is WebAuthnBackend { HasConcreteSession: true } sdk)
-        {
-            var (status, response) = await sdk.GetAssertionForSelectionAsync(request, ct).ConfigureAwait(false);
-            return (true, status, response);
-        }
+        var (status, response) = await SendSelectionAsync(backend, request, ct, allowFakeChunkStatuses, allowLegacyStatuses)
+            .ConfigureAwait(false);
+        return (true, status, response);
+    }
+
+    internal static async Task<(CtapStatus Status, GetAssertionResponse? Response)> SendSelectionAsync(
+        IWebAuthnBackend backend, BackendGetAssertionRequest request, CancellationToken ct,
+        bool allowFakeChunkStatuses = false, bool allowLegacyStatuses = false)
+    {
+        if (backend is WebAuthnBackend { HasConcreteSession: true } sdk)
+            return await sdk.GetAssertionForSelectionAsync(request, ct).ConfigureAwait(false);
 
         try
         {
-            return (true, CtapStatus.Success, await backend.GetAssertionAsync(request, ct).ConfigureAwait(false));
+            return (CtapStatus.Success, await backend.GetAssertionAsync(request, ct).ConfigureAwait(false));
         }
-        catch (CtapException ex) when (useSelectionStatus && (allowLegacyStatuses || backend is not WebAuthnBackend)
+        catch (CtapException ex) when ((allowLegacyStatuses || (allowFakeChunkStatuses && backend is not WebAuthnBackend))
             && ex.Status is CtapStatus.NoCredentials or CtapStatus.RequestTooLarge)
         {
             // Legacy silent/custom probes retain their existing contract. The SDK's internal fake
             // backend seam also simulates statuses this way; a public custom session never enters it.
-            return (true, ex.Status, null);
+            return (ex.Status, null);
         }
     }
 

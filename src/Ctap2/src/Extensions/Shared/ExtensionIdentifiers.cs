@@ -102,5 +102,6 @@ public static class ExtensionIdentifiers
     /// See https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension.
     /// This is not CTAP version 4. Preview algorithms and identifiers may change; do not use in production.
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public const string PreviewSign = "previewSign";
 }

@@ -25,6 +25,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 /// previewSign (Yubico draft v4 §10.2.1): generates a signing key at registration; at authentication
 /// signs with the <c>signByCredential</c> entry of the credential the client selected.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 internal sealed class PreviewSignProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor
 {
     private readonly PreviewSign.PreviewSignRegistrationInput? _registration;

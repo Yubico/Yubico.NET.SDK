@@ -427,8 +427,8 @@ Yubico.YubiKit.Ctap2.CtapStatus.VendorLast = 255 -> Yubico.YubiKit.Ctap2.CtapSta
 [YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Context.get -> System.ReadOnlyMemory<byte>
 [YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Equals(Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? other) -> bool
 [YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.KeyHandle.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs
-Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.CoseSignArgs(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs! original) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.CoseSignArgs(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs! original) -> void
 Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput
 Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput.Blob.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput.Blob.init -> void
@@ -460,8 +460,8 @@ Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithHmacSecretMakeCredential(Yu
 Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithHmacSecretMakeCredential(Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlySpan<byte> sharedSecret, System.Collections.Generic.IReadOnlyDictionary<int, object?>! keyAgreement, System.ReadOnlySpan<byte> salt1, System.ReadOnlySpan<byte> salt2 = default(System.ReadOnlySpan<byte>)) -> Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithLargeBlobKey() -> Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithMinPinLength() -> Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder!
-Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput! input) -> Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder!
-Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams! signingParams) -> Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder!
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput! input) -> Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder!
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithPreviewSign(Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams! signingParams) -> Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Ctap2.Extensions.ExtensionIdentifiers
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput
 Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.ExtensionIds.get -> System.Collections.Generic.IEnumerable<string!>!
@@ -500,67 +500,67 @@ Yubico.YubiKit.Ctap2.Extensions.MinPinLengthOutput
 Yubico.YubiKit.Ctap2.Extensions.MinPinLengthOutput.MinPinLength.get -> int
 Yubico.YubiKit.Ctap2.Extensions.MinPinLengthOutput.MinPinLength.init -> void
 Yubico.YubiKit.Ctap2.Extensions.MinPinLengthOutput.MinPinLengthOutput() -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignAuthenticationOutput
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignAuthenticationOutput.PreviewSignAuthenticationOutput(System.ReadOnlyMemory<byte> signature) -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignAuthenticationOutput.Signature.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignAuthenticationOutput.Signature.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.AttStmtRawCbor.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.AttStmtRawCbor.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.AuthData.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.AuthData.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Deconstruct(out string! Fmt, out System.ReadOnlyMemory<byte> AuthData, out System.ReadOnlyMemory<byte> AttStmtRawCbor) -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Equals(Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject other) -> bool
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Fmt.get -> string!
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Fmt.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.InnerAttestationObject() -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.InnerAttestationObject(string! Fmt, System.ReadOnlyMemory<byte> AuthData, System.ReadOnlyMemory<byte> AttStmtRawCbor) -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.ArkgKeyHandle.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.ArkgKeyHandle.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.Context.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.Context.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.DeviceKeyHandle.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.DeviceKeyHandle.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.PublicKey.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.PublicKey.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.VerifySignature(System.ReadOnlySpan<byte> message, System.ReadOnlySpan<byte> signature) -> bool
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.BlindingPublicKey.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.BlindingPublicKey.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.DerivePublicKey(System.ReadOnlySpan<byte> ikm, System.ReadOnlySpan<byte> ctx) -> Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey!
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.DerivedKeyAlgorithm.get -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.DerivedKeyAlgorithm.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.KemPublicKey.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.KemPublicKey.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.KeyHandle.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.KeyHandle.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.Algorithms.get -> System.Collections.Generic.IReadOnlyList<int>!
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.Algorithms.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.Flags.get -> byte
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.Flags.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.PreviewSignRegistrationInput(System.Collections.Generic.IReadOnlyList<int>! algorithms, byte flags = 1) -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.Algorithm.get -> int
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.Algorithm.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.AttestationObject.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.AttestationObject.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.KeyHandle.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.KeyHandle.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.PreviewSignRegistrationOutput(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> publicKey, int algorithm, System.ReadOnlyMemory<byte>? attestationObject = null) -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.PublicKey.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.PublicKey.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.TryGetGeneratedKey() -> Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey?
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.AdditionalArgs.get -> System.ReadOnlyMemory<byte>?
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.AdditionalArgs.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.KeyHandle.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.KeyHandle.init -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.PreviewSignSigningParams(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> tbs, System.ReadOnlyMemory<byte>? additionalArgs = null) -> void
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.Tbs.get -> System.ReadOnlyMemory<byte>
-Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.Tbs.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignAuthenticationOutput
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignAuthenticationOutput.PreviewSignAuthenticationOutput(System.ReadOnlyMemory<byte> signature) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignAuthenticationOutput.Signature.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignAuthenticationOutput.Signature.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.AttStmtRawCbor.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.AttStmtRawCbor.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.AuthData.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.AuthData.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Deconstruct(out string! Fmt, out System.ReadOnlyMemory<byte> AuthData, out System.ReadOnlyMemory<byte> AttStmtRawCbor) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Equals(Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject other) -> bool
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Fmt.get -> string!
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Fmt.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.InnerAttestationObject() -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.InnerAttestationObject(string! Fmt, System.ReadOnlyMemory<byte> AuthData, System.ReadOnlyMemory<byte> AttStmtRawCbor) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.ArkgKeyHandle.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.ArkgKeyHandle.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.Context.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.Context.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.DeviceKeyHandle.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.DeviceKeyHandle.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.PublicKey.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.PublicKey.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey.VerifySignature(System.ReadOnlySpan<byte> message, System.ReadOnlySpan<byte> signature) -> bool
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.BlindingPublicKey.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.BlindingPublicKey.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.DerivePublicKey(System.ReadOnlySpan<byte> ikm, System.ReadOnlySpan<byte> ctx) -> Yubico.YubiKit.Ctap2.Extensions.PreviewSignDerivedKey!
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.DerivedKeyAlgorithm.get -> Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.DerivedKeyAlgorithm.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.KemPublicKey.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.KemPublicKey.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.KeyHandle.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey.KeyHandle.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.Algorithms.get -> System.Collections.Generic.IReadOnlyList<int>!
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.Algorithms.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.Flags.get -> byte
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.Flags.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput.PreviewSignRegistrationInput(System.Collections.Generic.IReadOnlyList<int>! algorithms, byte flags = 1) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.Algorithm.get -> int
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.Algorithm.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.AttestationObject.get -> System.ReadOnlyMemory<byte>?
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.AttestationObject.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.KeyHandle.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.KeyHandle.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.PreviewSignRegistrationOutput(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> publicKey, int algorithm, System.ReadOnlyMemory<byte>? attestationObject = null) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.PublicKey.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.PublicKey.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput.TryGetGeneratedKey() -> Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey?
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.AdditionalArgs.get -> System.ReadOnlyMemory<byte>?
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.AdditionalArgs.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.KeyHandle.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.KeyHandle.init -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.PreviewSignSigningParams(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> tbs, System.ReadOnlyMemory<byte>? additionalArgs = null) -> void
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.Tbs.get -> System.ReadOnlyMemory<byte>
+[YKEXP001]Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams.Tbs.init -> void
 Yubico.YubiKit.Ctap2.Ctap2Session
 Yubico.YubiKit.Ctap2.Ctap2Session.GetAssertionAsync(string! rpId, System.ReadOnlyMemory<byte> clientDataHash, Yubico.YubiKit.Ctap2.Credentials.GetAssertionOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Ctap2.Credentials.GetAssertionResponse!>!
 Yubico.YubiKit.Ctap2.Ctap2Session.GetInfoAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Ctap2.AuthenticatorInfo!>!
@@ -670,8 +670,8 @@ abstract Yubico.YubiKit.Ctap2.Cose.CoseKey.KeyType.get -> int
 abstract Yubico.YubiKit.Ctap2.Credentials.AttestationStatement.<Clone>$() -> Yubico.YubiKit.Ctap2.Credentials.AttestationStatement!
 abstract Yubico.YubiKit.Ctap2.Credentials.AttestationStatement.Format.get -> Yubico.YubiKit.Ctap2.Credentials.AttestationFormat
 abstract Yubico.YubiKit.Ctap2.Credentials.AttestationStatement.RawCbor.get -> System.ReadOnlyMemory<byte>
-abstract Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.<Clone>$() -> Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs!
-abstract Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.Algorithm.get -> int
+[YKEXP001]abstract Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.<Clone>$() -> Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs!
+[YKEXP001]abstract Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.Algorithm.get -> int
 const Yubico.YubiKit.Ctap2.BioEnrollment.FingerprintModality.Fingerprint = 1 -> int
 const Yubico.YubiKit.Ctap2.Credentials.PublicKeyCredentialDescriptor.PublicKeyType = "public-key" -> string!
 const Yubico.YubiKit.Ctap2.CtapCommand.BioEnrollment = 9 -> byte
@@ -694,7 +694,7 @@ const Yubico.YubiKit.Ctap2.Extensions.ExtensionIdentifiers.HmacSecretMakeCredent
 const Yubico.YubiKit.Ctap2.Extensions.ExtensionIdentifiers.LargeBlob = "largeBlob" -> string!
 const Yubico.YubiKit.Ctap2.Extensions.ExtensionIdentifiers.LargeBlobKey = "largeBlobKey" -> string!
 const Yubico.YubiKit.Ctap2.Extensions.ExtensionIdentifiers.MinPinLength = "minPinLength" -> string!
-const Yubico.YubiKit.Ctap2.Extensions.ExtensionIdentifiers.PreviewSign = "previewSign" -> string!
+[YKEXP001]const Yubico.YubiKit.Ctap2.Extensions.ExtensionIdentifiers.PreviewSign = "previewSign" -> string!
 const Yubico.YubiKit.Ctap2.Pin.ClientPinSubCommand.ChangePin = 4 -> int
 const Yubico.YubiKit.Ctap2.Pin.ClientPinSubCommand.GetKeyAgreement = 2 -> int
 const Yubico.YubiKit.Ctap2.Pin.ClientPinSubCommand.GetPinToken = 5 -> int
@@ -783,10 +783,10 @@ override Yubico.YubiKit.Ctap2.Credentials.UnknownAttestationStatement.ToString()
 [YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.Equals(object? obj) -> bool
 [YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.GetHashCode() -> int
 [YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.ToString() -> string!
-override Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.Equals(object? obj) -> bool
-override Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.GetHashCode() -> int
-override Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.ToString() -> string!
-override Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.Equals(object? obj) -> bool
+[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.GetHashCode() -> int
+[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.ToString() -> string!
+[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.GetHashCode() -> int
 [YKEXP001]override sealed Yubico.YubiKit.Ctap2.Cose.CoseArkgP256SeedKey.Equals(Yubico.YubiKit.Ctap2.Cose.CoseKey? other) -> bool
 override sealed Yubico.YubiKit.Ctap2.Cose.CoseEc2Key.Equals(Yubico.YubiKit.Ctap2.Cose.CoseKey? other) -> bool
 override sealed Yubico.YubiKit.Ctap2.Cose.CoseOkpKey.Equals(Yubico.YubiKit.Ctap2.Cose.CoseKey? other) -> bool
@@ -861,8 +861,8 @@ static Yubico.YubiKit.Ctap2.CtapException.ThrowIfError(byte status) -> void
 [YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.operator !=(Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? left, Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? right) -> bool
 [YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs.operator ==(Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? left, Yubico.YubiKit.Ctap2.Extensions.ArkgP256SignArgs? right) -> bool
 [YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.ArkgP256(System.ReadOnlyMemory<byte> keyHandle, System.ReadOnlyMemory<byte> context) -> Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs!
-static Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.operator !=(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? left, Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? right) -> bool
-static Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.operator ==(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? left, Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? right) -> bool
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.operator !=(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? left, Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? right) -> bool
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.operator ==(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? left, Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? right) -> bool
 static Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Ctap2.Extensions.CredBlobAssertionOutput!
 static Yubico.YubiKit.Ctap2.Extensions.CredBlobMakeCredentialOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Ctap2.Extensions.CredBlobMakeCredentialOutput!
 static Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput!
@@ -871,16 +871,16 @@ static Yubico.YubiKit.Ctap2.Extensions.ExtensionOutput.DecodeWithRawData(System.
 static Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput!
 static Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput.Decode(System.ReadOnlyMemory<byte> data) -> Yubico.YubiKit.Ctap2.Extensions.HmacSecretOutput!
 static Yubico.YubiKit.Ctap2.Extensions.MinPinLengthOutput.Decode(System.Formats.Cbor.CborReader! reader) -> Yubico.YubiKit.Ctap2.Extensions.MinPinLengthOutput!
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeAuthenticationOutput(System.ReadOnlyMemory<byte> cbor) -> System.ReadOnlyMemory<byte>
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(System.Formats.Cbor.CborReader! reader) -> (int Algorithm, int? Flags)
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(System.ReadOnlyMemory<byte> cbor) -> Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.EncodeAdditionalArgs(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs! args) -> byte[]!
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.EncodeAuthenticationInput(Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams! signingParams) -> byte[]!
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.EncodeCoseSignArgs(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs! args) -> byte[]!
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.EncodeRegistrationInput(Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput! input) -> byte[]!
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.operator !=(Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject left, Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject right) -> bool
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.operator ==(Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject left, Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject right) -> bool
-static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.TryExtractGeneratedKey(Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse! response, out Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey? generatedKey) -> bool
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeAuthenticationOutput(System.ReadOnlyMemory<byte> cbor) -> System.ReadOnlyMemory<byte>
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(System.Formats.Cbor.CborReader! reader) -> (int Algorithm, int? Flags)
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeUnsignedRegistrationOutput(System.ReadOnlyMemory<byte> cbor) -> Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.EncodeAdditionalArgs(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs! args) -> byte[]!
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.EncodeAuthenticationInput(Yubico.YubiKit.Ctap2.Extensions.PreviewSignSigningParams! signingParams) -> byte[]!
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.EncodeCoseSignArgs(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs! args) -> byte[]!
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.EncodeRegistrationInput(Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationInput! input) -> byte[]!
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.operator !=(Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject left, Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject right) -> bool
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.operator ==(Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject left, Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject right) -> bool
+[YKEXP001]static Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.TryExtractGeneratedKey(Yubico.YubiKit.Ctap2.Credentials.MakeCredentialResponse! response, out Yubico.YubiKit.Ctap2.Extensions.PreviewSignGeneratedKey? generatedKey) -> bool
 static Yubico.YubiKit.Ctap2.Ctap2Session.CreateAsync(Yubico.YubiKit.Core.Abstractions.IConnection! connection, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Ctap2.Ctap2Session!>!
 static Yubico.YubiKit.Ctap2.IYubiKeyExtensions.CreateCtap2SessionAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Ctap2.Ctap2Session!>!
 static Yubico.YubiKit.Ctap2.IYubiKeyExtensions.GetCtap2InfoAsync(this Yubico.YubiKit.Core.Abstractions.IYubiKey! yubiKey, Yubico.YubiKit.Core.Sessions.SessionCreationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Yubico.YubiKit.Ctap2.AuthenticatorInfo!>!
@@ -918,13 +918,13 @@ virtual Yubico.YubiKit.Ctap2.Cose.CoseKey.PrintMembers(System.Text.StringBuilder
 virtual Yubico.YubiKit.Ctap2.Credentials.AttestationStatement.EqualityContract.get -> System.Type!
 virtual Yubico.YubiKit.Ctap2.Credentials.AttestationStatement.Equals(Yubico.YubiKit.Ctap2.Credentials.AttestationStatement? other) -> bool
 virtual Yubico.YubiKit.Ctap2.Credentials.AttestationStatement.PrintMembers(System.Text.StringBuilder! builder) -> bool
-virtual Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.EqualityContract.get -> System.Type!
-virtual Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.Equals(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? other) -> bool
-virtual Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.PrintMembers(System.Text.StringBuilder! builder) -> bool
+[YKEXP001]virtual Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.EqualityContract.get -> System.Type!
+[YKEXP001]virtual Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.Equals(Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs? other) -> bool
+[YKEXP001]virtual Yubico.YubiKit.Ctap2.Extensions.CoseSignArgs.PrintMembers(System.Text.StringBuilder! builder) -> bool
 ~override Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.Equals(object obj) -> bool
 ~override Yubico.YubiKit.Ctap2.Credentials.AttestationFormat.Equals(object obj) -> bool
-~override Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Equals(object obj) -> bool
-~override Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.ToString() -> string
+~[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.Equals(object obj) -> bool
+~[YKEXP001]override Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.InnerAttestationObject.ToString() -> string
 
 Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder.WithHmacSecret() -> Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder!
 Yubico.YubiKit.Ctap2.LargeBlobs.LargeBlobEntry.LargeBlobEntry(System.ReadOnlyMemory<byte> ciphertext, System.ReadOnlyMemory<byte> nonce, ulong originalSize) -> void

@@ -35,6 +35,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 /// outputs are translated back into WebAuthn-level previewSign outputs.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 internal static class PreviewSignCodec
 {
     private const string ExtensionId = "previewSign";

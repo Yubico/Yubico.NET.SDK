@@ -30,6 +30,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// return independent arrays; they do not validate negotiation, attestation or algorithm-specific
 /// Tbs/args semantics. Decoded byte strings are copies without a disposable cleanup owner.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public static class PreviewSignCbor
 {
     /// <summary>
@@ -103,9 +104,7 @@ public static class PreviewSignCbor
 
         return args switch
         {
-#pragma warning disable YKEXP001 // This encoder explicitly handles the ARKG variant.
             ArkgP256SignArgs arkg => EncodeArkgP256SignArgs(arkg),
-#pragma warning restore YKEXP001
             _ => throw new ArgumentOutOfRangeException(
                 nameof(args),
                 $"COSE_Sign_Args subtype '{args.GetType().FullName}' is not supported by this SDK build."),
@@ -133,9 +132,7 @@ public static class PreviewSignCbor
     /// ordering at map completion. This experimental signing-op profile is not proof of full ARKG
     /// draft conformance; encoded output is a new copy of the supplied handle/context.
     /// </remarks>
-#pragma warning disable YKEXP001 // This encoder explicitly handles the ARKG variant.
     private static byte[] EncodeArkgP256SignArgs(ArkgP256SignArgs arkg)
-#pragma warning restore YKEXP001
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
@@ -507,9 +504,7 @@ public static class PreviewSignCbor
             }
 
             var coseKey = Cose.CoseKey.Decode(authData.AttestedCredentialData.CredentialPublicKey);
-#pragma warning disable YKEXP001 // This decoder explicitly handles the ARKG variant.
             if (coseKey is not Cose.CoseArkgP256SeedKey arkgSeedKey)
-#pragma warning restore YKEXP001
             {
                 return false;
             }

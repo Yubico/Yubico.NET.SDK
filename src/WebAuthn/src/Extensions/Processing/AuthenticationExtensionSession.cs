@@ -57,7 +57,9 @@ internal sealed class AuthenticationExtensionSession : IDisposable
         if (inputs.GetCredBlob && context.Supports(ExtensionIdentifiers.CredBlob)) processors.Add(new CredBlobProcessor(input: null));
         if (inputs.LargeBlob is not null && LargeBlobProcessor.ForAuthentication(inputs.LargeBlob, context) is { } largeBlob) processors.Add(largeBlob);
         if (inputs.Prf is not null && context.Supports(ExtensionIdentifiers.HmacSecret)) processors.Add(PrfProcessor.ForAuthentication(inputs.Prf, allowCredentials, context));
+#pragma warning disable YKEXP001 // Bridge only explicitly requested previewSign inputs.
         if (inputs.PreviewSign is not null && context.Supports(ExtensionIdentifiers.PreviewSign)) processors.Add(PreviewSignProcessor.ForAuthentication(inputs.PreviewSign, allowCredentials));
+#pragma warning restore YKEXP001
         return new AuthenticationExtensionSession(processors, requested: true);
     }
 

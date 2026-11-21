@@ -45,6 +45,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// owner. Public points are not secrets; application-sensitive contexts/handles need caller policy.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed class PreviewSignDerivedKey
 {
     /// <summary>

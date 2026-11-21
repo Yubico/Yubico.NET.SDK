@@ -37,6 +37,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// pattern-matches the known subtypes and throws on unknown runtime types.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public abstract record class CoseSignArgs
 {
     /// <summary>
@@ -57,7 +58,6 @@ public abstract record class CoseSignArgs
     /// 65-byte SEC1 uncompressed P-256 ephemeral public key).</param>
     /// <param name="context">The ARKG context (≤64 bytes) bound to the derivation.</param>
     /// <returns>A typed <see cref="ArkgP256SignArgs"/>.</returns>
-    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public static CoseSignArgs ArkgP256(ReadOnlyMemory<byte> keyHandle, ReadOnlyMemory<byte> context)
         => new ArkgP256SignArgs(keyHandle, context);
 }

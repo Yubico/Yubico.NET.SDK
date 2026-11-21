@@ -43,6 +43,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// should not be logged and must follow the application's lifetime policy.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed class PreviewSignGeneratedKey
 {
     /// <summary>

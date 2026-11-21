@@ -24,6 +24,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// policy before trusting it. The constructor borrows memory; decoders may allocate independent copies.
 /// This DTO supplies no disposal/zeroing boundary.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed class PreviewSignRegistrationOutput
 {
     /// <summary>
@@ -91,9 +92,7 @@ public sealed class PreviewSignRegistrationOutput
         {
             var coseKey = Cose.CoseKey.Decode(PublicKey);
 
-#pragma warning disable YKEXP001 // This decoder explicitly handles the ARKG variant.
             if (coseKey is Cose.CoseArkgP256SeedKey arkgKey)
-#pragma warning restore YKEXP001
             {
                 return new PreviewSignGeneratedKey(
                     KeyHandle,

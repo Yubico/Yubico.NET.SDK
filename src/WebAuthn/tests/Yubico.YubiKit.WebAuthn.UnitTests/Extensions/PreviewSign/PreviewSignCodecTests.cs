@@ -27,6 +27,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 /// <summary>
 /// Tests previewSign draft v4 §10.2.1 input translation and output extraction through PreviewSignCodec.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignCodecTests
 {
     [Fact(Timeout = 5000)]

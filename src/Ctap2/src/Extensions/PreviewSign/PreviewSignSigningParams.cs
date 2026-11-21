@@ -43,6 +43,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// (the draft permits an empty handle).
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed class PreviewSignSigningParams
 {
     /// <summary>

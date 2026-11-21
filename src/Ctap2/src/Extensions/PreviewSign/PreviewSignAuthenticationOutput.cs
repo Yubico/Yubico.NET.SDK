@@ -23,6 +23,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// The constructor borrows storage, while PreviewSignCbor decoding creates an independent byte-string
 /// copy. Keep borrowed storage stable during use; this DTO has no disposal/zeroing boundary.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed class PreviewSignAuthenticationOutput
 {
     /// <summary>

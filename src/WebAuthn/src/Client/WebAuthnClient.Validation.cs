@@ -93,8 +93,7 @@ public sealed partial class WebAuthnClient
 
         if (options.Timeout is { } timeout && timeout <= TimeSpan.Zero)
         {
-            // WebAuthn L3 §5.1.3 corrects an out-of-range timeout; this client does not clamp, so a
-            // value that could never be waited for is a malformed request (null means no deadline).
+            // A nonpositive timeout is malformed. Only oversized positive values are clamped.
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,
                 "Timeout must be positive, or null for no deadline");

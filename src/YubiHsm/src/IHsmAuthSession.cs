@@ -227,6 +227,7 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
     /// <exception cref="ArgumentException"><paramref name="context" /> is not exactly 130 bytes.</exception>
+    /// <exception cref="ArgumentException"><paramref name="publicKey" /> is not an uncompressed P-256 point.</exception>
     /// <remarks>The session takes the keys from the first 48 response bytes and ignores any suffix.</remarks>
     /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The CALCULATE response has fewer than 48 data bytes.</exception>
     /// <exception cref="HsmAuthRetryException">
@@ -325,9 +326,10 @@ public interface IHsmAuthSession : IApplicationSession
     /// <returns>The 65-byte uncompressed EC point (0x04 + x[32] + y[32]).</returns>
     /// <remarks>
     ///     This is the credential's long-lived PK-OCE for enrollment in the HSM authentication object.
-    ///     The session checks response length; the integration layer validates point encoding as needed.
+    ///     The session validates that the response encodes an uncompressed point on P-256.
     ///     Obtain the HSM's own trusted static public key separately for asymmetric calculation.
     /// </remarks>
+    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The response is not an uncompressed P-256 point.</exception>
     Task<ReadOnlyMemory<byte>> GetPublicKeyAsync(
         string label,
         CancellationToken cancellationToken = default);

@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -494,6 +495,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ThrowIfDisposed();
         EnsureSupports(FeatureAsymmetric);
         ValidateContextLength(context, AsymmetricContextLength);
+        try
+        {
+            ValidateP256Point(publicKey.Span);
+        }
+        catch (CryptographicException ex)
+        {
+            throw new ArgumentException("The HSM public key must be an uncompressed P-256 point.", nameof(publicKey), ex);
+        }
         var labelBytes = ValidateAndEncodeLabel(label);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
@@ -673,11 +682,27 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             .ConfigureAwait(false);
 
         var publicKey = response.Data;
-        if (publicKey.Length != EcP256PublicKeyLength)
-            throw new InvalidOperationException(
-                $"Expected {EcP256PublicKeyLength}-byte public key, got {publicKey.Length}");
+        try
+        {
+            ValidateP256Point(publicKey.Span);
+        }
+        catch (CryptographicException)
+        {
+            throw new BadResponseException("GET PUBLIC KEY did not return an uncompressed P-256 point.");
+        }
 
         return publicKey;
+    }
+
+    private static void ValidateP256Point(ReadOnlySpan<byte> point)
+    {
+        const int coordinateLength = (EcP256PublicKeyLength - 1) / 2;
+        AsnUtilities.ValidateDecodedEcPoint(point, "1.2.840.10045.3.1.7");
+        using var key = ECDiffieHellman.Create(new ECParameters
+        {
+            Curve = ECCurve.NamedCurves.nistP256,
+            Q = new ECPoint { X = point.Slice(1, coordinateLength).ToArray(), Y = point[(1 + coordinateLength)..].ToArray() }
+        });
     }
 
     /// <inheritdoc />

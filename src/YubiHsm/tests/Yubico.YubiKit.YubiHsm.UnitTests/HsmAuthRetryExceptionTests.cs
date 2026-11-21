@@ -202,7 +202,7 @@ public class HsmAuthRetryExceptionTests
         var exception = await Assert.ThrowsAsync<HsmAuthRetryException>(() => session.CalculateSessionKeysAsymmetricAsync(
             "cred",
             Sequence(0x40, 130),
-            Sequence(0x60, 65),
+            HsmAuthSessionByteLevelTests.P256Point(),
             password,
             Sequence(0x70, 8),
             TestContext.Current.CancellationToken));

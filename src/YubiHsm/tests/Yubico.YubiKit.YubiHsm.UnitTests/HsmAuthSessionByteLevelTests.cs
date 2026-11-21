@@ -23,6 +23,44 @@ namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 public class HsmAuthSessionByteLevelTests
 {
+    // P-256 base point (SEC 2, section 2.4.2), encoded as 04 || X || Y.
+    internal static byte[] P256Point() => Convert.FromHexString(
+        "046B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296" +
+        "4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5");
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task GetPublicKeyAsync_RequiresAnOnCurvePoint(bool onCurve)
+    {
+        byte[] point = onCurve ? P256Point() : [0x04, .. new byte[64]];
+        using var connection = CreateInitializedConnection([.. point, 0x90, 0x00]);
+        await using var session = await HsmAuthSession.CreateAsync(connection,
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        if (onCurve)
+            Assert.Equal(point, (await session.GetPublicKeyAsync("cred", TestContext.Current.CancellationToken)).ToArray());
+        else
+            await Assert.ThrowsAsync<BadResponseException>(() => session.GetPublicKeyAsync("cred", TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysAsymmetricAsync_RejectsOffCurveHsmKeyBeforeAnyAppletCommand()
+    {
+        using var connection = CreateInitializedConnection();
+        await using var session = await HsmAuthSession.CreateAsync(connection,
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) },
+            cancellationToken: TestContext.Current.CancellationToken);
+        using var password = CredentialPassword.FromUtf8("pass"u8);
+        byte[] offCurve = [0x04, .. new byte[64]];
+
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => session.CalculateSessionKeysAsymmetricAsync(
+            "cred", new byte[130], offCurve, password, new byte[8], TestContext.Current.CancellationToken));
+
+        Assert.Equal("publicKey", exception.ParamName);
+        Assert.Single(connection.TransmittedCommands);
+    }
     [Fact]
     public async Task ListCredentialsAsync_PreservesUnknownAlgorithmAndTouchPolicy()
     {

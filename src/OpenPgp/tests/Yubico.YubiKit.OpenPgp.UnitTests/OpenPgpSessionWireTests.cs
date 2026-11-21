@@ -294,6 +294,31 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal(before, connection.TransmittedCommands.Count);
     }
 
+    [Fact]
+    public async Task AttestationKey_ReadAndGenerate_SendNestedCrt()
+    {
+        var connection = CreateInitializedConnection(
+            OkResponse(), OkResponse(), OkResponse(), ApplicationRelatedDataResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.GetPublicKeyAsync(KeyRef.Att, token);
+        await session.GenerateKeyAsync(KeyRef.Att, RsaAttributes.Create(RsaSize.Rsa2048), token);
+
+        byte[][] commands = connection.TransmittedCommands.Where(command => command[1] == 0x47).ToArray();
+        Assert.Collection(commands,
+            command =>
+            {
+                Assert.Equal(0x81, command[2]);
+                Assert.Equal([0xB6, 0x03, 0x84, 0x01, 0x81], CommandData(command).ToArray());
+            },
+            command =>
+            {
+                Assert.Equal(0x80, command[2]);
+                Assert.Equal([0xB6, 0x03, 0x84, 0x01, 0x81], CommandData(command).ToArray());
+            });
+    }
+
     [Theory]
     [InlineData(Uif.On, UserPresenceBasis.PolicyRequires)]
     [InlineData(Uif.Fixed, UserPresenceBasis.PolicyRequires)]

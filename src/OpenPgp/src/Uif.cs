@@ -56,7 +56,7 @@ public static class UifExtensions
     /// <remarks>
     ///     Ordinary-slot fixed policy clears on key deletion/replacement or application reset. YubiKey ATT
     ///     policy survives reset and requires replacement of the ATT private key, irreversibly losing factory
-    ///     key provenance. The current SDK ATT CRT encoding also limits that provisioning path.
+    ///     key provenance.
     /// </remarks>
     public static bool IsFixed(this Uif uif) =>
         uif is Uif.Fixed or Uif.CachedFixed;

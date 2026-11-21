@@ -298,8 +298,8 @@ static async Task GenerateSigningKeyAsync(
 
 Use `RsaAttributes.Create(RsaSize.Rsa2048)` for RSA, subject to the ROCA guidance above. Use `EcAttributes.Create`
 with Core's concrete `KeyType` identities for EC, subject to the SDK's 5.2.0 check and the card's advertised curve
-support. ATT provisioning currently uses malformed CRT encoding; ordinary target-key
-attestation below is a separate operation. Replacing the factory ATT private key would irreversibly lose manufacturer
+support. ATT uses the vendor extension's nested CRT; ordinary target-key attestation below is a separate
+operation. Replacing the factory ATT private key would irreversibly lose manufacturer
 attestation provenance, even if its public certificate had been saved.
 
 For import, supply an SDK `IPrivateKey` with a modeled OpenPGP representation: RSA 2048/3072/4096 with exponent
@@ -493,7 +493,7 @@ static async Task ConfigureSigningPolicyAsync(
 
 Choose fixed policy only with an explicit replacement/recovery plan. Ordinary fixed UIF clears on key
 replacement/deletion or application reset. **Fixed ATT UIF survives reset and needs ATT key replacement**,
-which loses factory private-key provenance; the current malformed ATT CRT also limits SDK provisioning.
+which loses factory private-key provenance.
 The SDK's general UIF gate is 4.2.0; cached/ATT policies need additional support (the Python vendor implementation
 uses 5.2.1 checks). `SetPinAttemptsAsync` likewise needs a device-specific plan: NEO can restore default PINs.
 `SetAlgorithmAttributesAsync` can invalidate a key and leaves cached algorithms stale; explicitly refresh

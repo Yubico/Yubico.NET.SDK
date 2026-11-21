@@ -8,7 +8,7 @@ For overall repo conventions, see the repository root [CLAUDE.md](../../CLAUDE.m
 OpenPGP implements host access to the OpenPGP card application for YubiKey devices. The referenced
 functional specification is Version 3.4.1, March 18, 2020, despite its URL's 3.4 filename. It provides:
 - **Key Management**: Generate/import/delete ordinary-slot keys and attest generated Sig/Dec/Aut keys;
-  ATT is a vendor extension whose provisioning currently uses malformed CRT encoding
+  ATT is a vendor extension that uses a nested CRT, `B6 03 84 01 81`
 - **Cryptographic Operations**: Sign, raw RSA decipher/ECDH agreement, and authentication using on-device keys;
   host applications handle packet/content processing and trust decisions
 - **PIN Management**: Verify, change, and reset User PINs, Admin PINs, and Reset Codes with KDF support

@@ -299,7 +299,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     EC generation uses the SDK's 5.2.0 check. On-card RSA generation is refused before writing
     ///     attributes for firmware in [4.2.0, 4.3.5). This deliberately starts earlier than the affected
     ///     range in YSA-2017-01 (4.2.6–4.3.4); 4.3.5 and independent RSA imports are not blocked.
-    ///     ATT provisioning uses a malformed CRT in this release; use ordinary slots until that encoder is corrected.
+    ///     Replacing the factory ATT key irreversibly loses manufacturer attestation provenance.
     /// </remarks>
     Task GenerateKeyAsync(
         KeyRef keyRef,
@@ -319,8 +319,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     The caller retains and disposes <paramref name="privateKey" />. Attribute writes can invalidate the
     ///     previous key before import succeeds; cancellation or refresh failure can follow a persistent change.
     ///     Inspect a fresh read before retrying. Certificates and fingerprint/time metadata are separate.
-    ///     EC uses the SDK's 5.2.0 check. Historical NEO import encoding remains unqualified; ATT CRT encoding
-    ///     is currently malformed, so this release provides no reliable ATT provisioning path.
+    ///     EC uses the SDK's 5.2.0 check. Historical NEO import encoding remains unqualified.
+    ///     Replacing the factory ATT key irreversibly loses manufacturer attestation provenance.
     /// </remarks>
     /// <param name="keyRef">The target key slot.</param>
     /// <param name="privateKey">The private key to import.</param>
@@ -355,8 +355,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Decode the template before importing it into a host cryptography API; it is not SubjectPublicKeyInfo.
     /// </returns>
     /// <remarks>
-    ///     Ordinary-slot reads need no PIN verification. ATT reads currently use a malformed CRT and can fail;
-    ///     this is independent of generating a target-key attestation certificate.
+    ///     Ordinary-slot reads need no PIN verification. ATT reads use the Yubico extension's nested CRT;
+    ///     generating a target-key attestation certificate is a separate operation.
     /// </remarks>
     Task<ReadOnlyMemory<byte>> GetPublicKeyAsync(
         KeyRef keyRef,
@@ -526,8 +526,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Verify the Admin PIN first. Updates persistent policy and the session's UIF override cache after
     ///     success. The SDK checks 4.2.0; cached and ATT policies require additional card support. A fixed
     ///     ordinary-slot policy clears on key replacement/deletion or application reset. Fixed ATT policy
-    ///     survives reset and requires ATT key replacement, which loses factory private-key provenance;
-    ///     ATT provisioning is currently affected by malformed CRT encoding.
+    ///     survives reset and requires ATT key replacement, which loses factory private-key provenance.
     /// </remarks>
     Task SetUifAsync(
         KeyRef keyRef,

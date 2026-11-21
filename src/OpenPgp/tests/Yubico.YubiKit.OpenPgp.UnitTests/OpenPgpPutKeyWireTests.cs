@@ -43,6 +43,7 @@ public sealed class OpenPgpPutKeyWireTests
     [InlineData(KeyRef.Sig)]
     [InlineData(KeyRef.Dec)]
     [InlineData(KeyRef.Aut)]
+    [InlineData(KeyRef.Att)]
     public async Task Rsa2048_OnFirmware5_SetsStandardAttributesThenImportsEPQIntoTheRequestedSlot(KeyRef keyRef)
     {
         using var rsa = RSA.Create(2048);
@@ -202,6 +203,7 @@ public sealed class OpenPgpPutKeyWireTests
     {
         KeyRef.Sig => CrtSig,
         KeyRef.Dec => CrtDec,
+        KeyRef.Att => [0xB6, 0x03, 0x84, 0x01, 0x81],
         _ => CrtAut,
     };
 
@@ -261,9 +263,9 @@ public sealed class OpenPgpPutKeyWireTests
         using var outer = Tlv.Create(data);
         Assert.Equal(0x4D, outer.Tag);
         var inner = outer.Value.Span;
-        byte[] crt = inner[..2].ToArray();
-        var dict = TlvHelper.DecodeDictionary(inner[2..]);
-        return (crt, dict[0x7F48].ToArray(), dict[0x5F48].ToArray());
+        using var crt = Tlv.Create(inner);
+        var dict = TlvHelper.DecodeDictionary(inner[crt.TotalLength..]);
+        return (crt.AsSpan().ToArray(), dict[0x7F48].ToArray(), dict[0x5F48].ToArray());
     }
 
     private static ReadOnlyMemory<byte> ApduData(byte[] apdu) =>

@@ -329,6 +329,19 @@ public class YubiOtpSessionTests
     public class NdefUriEncoding
     {
         [Fact]
+        public async Task SetNdefConfigurationAsync_UndefinedType_DoesNotSendWrite()
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            await using var lease = session;
+            var ct = TestContext.Current.CancellationToken;
+
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("ndefType", () =>
+                session.SetNdefConfigurationAsync(Slot.Two, "payload", ndefType: (NdefType)0x56, cancellationToken: ct));
+
+            await connection.DidNotReceive().TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct);
+        }
+
+        [Fact]
         public void BuildNdefPayload_HttpsWwwUri_CompressesPrefix()
         {
             var payload = YubiOtpSession.BuildNdefPayload("https://www.yubico.com/products", NdefType.Uri);

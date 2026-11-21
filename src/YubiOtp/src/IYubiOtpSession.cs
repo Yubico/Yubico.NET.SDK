@@ -221,7 +221,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// case-sensitive ordinal table prefix and allows 53 UTF-8 bytes after that prefix. Text mode allows
     /// 51 UTF-8 text bytes with a fixed English (en) header. The 56-byte programming block is not the final
     /// on-tap NDEF message; legacy device documentation describes a URI prefix followed by generated OTP.
-    /// There is no NFC read-back here. Only pass defined enum values; URI syntax is not validated.
+    /// There is no NFC read-back here. URI syntax is not validated.
     /// </remarks>
     /// <param name="slot">The slot to configure NDEF for.</param>
     /// <param name="uri">
@@ -236,7 +236,9 @@ public interface IYubiOtpSession : IApplicationSession
     /// language header) exceeds the maximum NDEF data size, or <paramref name="currentAccessCode"/>
     /// is non-empty and not exactly 6 bytes. No device I/O is performed when this is thrown.
     /// </exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="slot"/> is not a defined value.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Thrown when <paramref name="slot"/> or <paramref name="ndefType"/> is not a defined value.
+    /// </exception>
     /// <exception cref="NotSupportedException">
     /// Thrown when the device firmware does not support NDEF configuration (requires 3.0.0+).
     /// </exception>

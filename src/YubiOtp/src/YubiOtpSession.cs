@@ -435,6 +435,11 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     /// </summary>
     internal static byte[] BuildNdefPayload(string? content, NdefType ndefType)
     {
+        if (ndefType is not (NdefType.Uri or NdefType.Text))
+        {
+            throw new ArgumentOutOfRangeException(nameof(ndefType), ndefType, "Expected URI or text NDEF type.");
+        }
+
         const int payloadSize = YubiOtpConstants.NdefDataSize + 2; // 56 bytes total
         var payload = new byte[payloadSize];
 

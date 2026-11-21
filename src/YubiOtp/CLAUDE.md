@@ -106,7 +106,7 @@ Null sends an all-zero disable request, distinct from an empty URI/text configur
 need target-device verification. URI remainder allows 53 UTF-8 bytes after longest ordinal/case-sensitive
 prefix matching; text allows 51 UTF-8 bytes. The block configures an existing compatible slot on NFC hardware,
 not a complete NDEF record; legacy URI output can append OTP. There is no NFC read-back or arbitrary language/
-UTF-16 option. Undefined enum values are not validated; do not describe the encoder as full URI validation.
+UTF-16 option. Undefined enum values are rejected, but the encoder does not validate URI syntax.
 
 ## HMAC-SHA1 Challenge Padding
 

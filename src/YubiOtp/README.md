@@ -287,7 +287,7 @@ prefix**. Text mode allows **51 UTF-8 text bytes**, with a fixed English (`en`) 
 limits, not character counts. The 56-byte programming payload is not a complete on-tap NDEF message;
 legacy YubiKey documentation describes a URI prefix followed by a generated OTP.
 
-Pass only `NdefType.Uri` or `NdefType.Text`; the SDK does not validate undefined enum values or URI syntax.
+Only `NdefType.Uri` and `NdefType.Text` are accepted; the SDK does not validate URI syntax.
 `null` sends an all-zero disable request, while `""` sends an empty URI/text configuration with its header.
 There is no NFC read-back API here: verify the resulting on-tap behavior on your target key, including disable.
 

@@ -1649,6 +1649,27 @@ Append accepted evidence to this master acceptance document under the stable ISC
 
 **Reproduce the `.3` comparison, not `.7`:** runner `verification/MacOSHidBoundaryComparison/Program.cs` freezes two fresh-child warmups, ten fresh-child lifecycle samples and one no-input child per checkout with a 10-second per-child watchdog. The older pair is `comparison-before-20260923T212640783Z.json` (SHA-256 `36852b85c6d0a2f7170da3b62c7625ecaffc02e0fcd7fbbbba1c586963b2fd01`) under `/Users/Dennis.Dyall/Code/y/worktrees/yubikit-async-baseline-65964966-async3/artifacts/measurements/` and `artifacts/measurements/comparison-after-20260923T212725515Z.json` (SHA-256 `218016c00bac31fb1e364f5ec4b88a0e9754c7cb8b510043d7711a7f1d3fdb21`) in this worktree. Those are **version-1 datasets**; the newer runner emits `comparison-v2-*` and enforces a fixed `.3` package SHA, so do not claim it generated the old pair. Its exact hardware-free validation entry points, from the worktree containing the runner, are `dotnet run --project verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj -- --self-test` and `dotnet run --project verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj -- --compare <before.json> <after.json>`. To collect **new** v2 data, build each pinned checkout with `.3` via an explicit local feed and its own `RestoreConfigFile`, set `YUBIKIT_BOUNDARY_SOURCE_ROOT` to that checkout and `YUBIKIT_BOUNDARY_RUNNER_ROOT` to this worktree, run `dotnet run --project verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj -- --check` before hardware, then `--measure before`/`--measure after` on the respective checkouts. With the current `.7` pin or untracked source this runner deliberately rejects measurement; preserve/reconcile the checkout first. The datasets record package/native asset and source/runner hashes at measurement time; the before binary was later rebuilt with a different hash, not interchangeable proof. Performance acceptance remains pending due to tails and missing metrics; no arbitrary 15–30% target is adopted.
 
+**Current runner, historical replay only:** The `.3` commands above are historical, not instructions
+for the current [comparison runner](verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj).
+A default restore uses public NativeShims `1.18.1`; `--self-test`, `--check`, and `--measure` still
+require the exact `1.18.1-async.8` preview. NuGet.org does not carry it. To replay, supply your own
+external NuGet configuration with a source that has the archived preview and sources for the other
+dependencies. From the runner checkout, point `core_checkout` at the selected checkout with an
+existing Release Core build:
+
+```bash
+project=verification/MacOSHidBoundaryComparison/MacOSHidBoundaryComparison.csproj
+core_checkout=/absolute/path/to/core-checkout
+dotnet restore "$project" --configfile /absolute/path/to/replay.nuget.config \
+  -p:Configuration=Release -p:BoundaryNativeVersion=1.18.1-async.8 \
+  -p:BoundarySourceRoot="$core_checkout" &&
+dotnet run --project "$project" --configuration Release --no-restore \
+  -p:BoundaryNativeVersion=1.18.1-async.8 -p:BoundarySourceRoot="$core_checkout" \
+  -- --self-test
+```
+
+The public release is not a substitute for the archived preview in this replay.
+
 All verification entries below this paragraph are dated historical checkpoints. In particular, their “current” package, absent-touch/removal/comparison and pre-replug sharing statements describe only those earlier runs; they do not supersede the current table above.
 
 **Accepted atomic evidence — 2026-09-23, uncommitted source over `db7a1bf6`, local

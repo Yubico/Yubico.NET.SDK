@@ -102,9 +102,7 @@ public sealed class OpenPgpKeysSetTouchCommand : YkCommandBase<KeysSetTouchSetti
                 $"Invalid policy: {settings.Policy}. Must be on, off, fixed, cached, or cached-fixed.")
         };
 
-        var fixedPolicyEffect = keyRef == KeyRef.Att
-            ? "Fixed ATT policy survives reset; clearing it requires irreversible ATT key replacement."
-            : "Fixed policy clears only on ordinary key replacement, deletion, or reset.";
+        var fixedPolicyEffect = DescribeFixedPolicy(keyRef);
         var current = await session.GetUifAsync(keyRef);
         if (current.IsFixed())
         {
@@ -133,6 +131,10 @@ public sealed class OpenPgpKeysSetTouchCommand : YkCommandBase<KeysSetTouchSetti
         OutputHelpers.WriteSuccess($"Touch policy for {FormatKeyRef(keyRef)} set to {settings.Policy}.");
         return ExitCode.Success;
     }
+
+    private static string DescribeFixedPolicy(KeyRef keyRef) => keyRef == KeyRef.Att
+        ? "Fixed ATT policy survives reset; clearing it requires irreversible ATT key replacement."
+        : "Fixed policy clears only on ordinary key replacement, deletion, or reset.";
 }
 
 public sealed class OpenPgpKeysImportCommand : YkCommandBase<KeysImportSettings>

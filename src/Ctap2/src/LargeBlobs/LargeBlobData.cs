@@ -387,6 +387,8 @@ public sealed class LargeBlobArray
         }
 
         reader.ReadEndArray();
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the large-blob array.");
         return new LargeBlobArray { Entries = entries };
     }
 

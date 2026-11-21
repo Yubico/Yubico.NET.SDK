@@ -346,8 +346,11 @@ Do not claim interoperable enrollment from fake fixtures or sensor metadata. Ret
 `EnrollmentBeginResult` for continuation; `EnrollmentSampleResult` contains feedback without an ID.
 `IsComplete` means that the authenticator reports zero remaining samples. .NET cancellation does not
 automatically send enrollment cancel. Blob updates
-are shared-array read-modify-write operations without whole-sequence conflict protection or rollback;
-the SDK requires protocol/token authorization for writes, stricter than CTAP's conditional rule.
+are shared-array read-modify-write operations without whole-sequence conflict protection or rollback.
+The SDK requires protocol/token authorization for writes, stricter than CTAP's conditional rule. The
+SDK enforces a symmetric 1 MiB plaintext cap and bounds the serialized array by the device limit (when
+present), 16 MiB, and the capacity of 32768 reads including the terminating short/empty fragment.
+A bad array hash is treated as empty; malformed CBOR behind a valid hash throws.
 
 ### User-presence notifications
 

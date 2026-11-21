@@ -167,7 +167,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
         }
     }
 
-    private async Task<ReadOnlyMemory<byte>?> ReadBlobAsync(GetAssertionResponse response, CancellationToken cancellationToken)
+    private async Task<Memory<byte>?> ReadBlobAsync(GetAssertionResponse response, CancellationToken cancellationToken)
     {
         if (response.LargeBlobKey is not { } key)
             return null;
@@ -176,7 +176,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
         {
             var storage = _context.Backend.CreateLargeBlobStorage(token: null);
             var blob = await storage.GetBlobAsync(key, cancellationToken).ConfigureAwait(false);
-            return blob is null ? (ReadOnlyMemory<byte>?)null : blob.AsMemory();
+            return blob is null ? (Memory<byte>?)null : blob.AsMemory();
         }
         catch (Exception ex) when (ex is CtapException or CborContentException or InvalidOperationException)
         {

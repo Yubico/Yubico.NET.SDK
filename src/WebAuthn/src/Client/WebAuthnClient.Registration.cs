@@ -140,8 +140,21 @@ public sealed partial class WebAuthnClient
         // Outputs are prepared outside the escalation scope, while the token is still live.
         using (extensions)
         {
-            return await BuildRegistrationResponseAsync(ctapResponse, info, clientData, options, extensions, auth.Token, cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                return await BuildRegistrationResponseAsync(ctapResponse, info, clientData, options, extensions, auth.Token, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(ctapResponse.AuthenticatorDataRaw.Span);
+                throw;
+            }
+            finally
+            {
+                if (ctapResponse.LargeBlobKey is { } key)
+                    System.Security.Cryptography.CryptographicOperations.ZeroMemory(key.Span);
+            }
         }
 
         async Task<(MakeCredentialResponse Response, RegistrationExtensionSession Extensions)> AttemptAsync(
@@ -183,8 +196,15 @@ public sealed partial class WebAuthnClient
 
             var request = BuildMakeCredentialRequest(options, clientData, auth, decision, excludeList,
                 requireResidentKey, info, extensions);
-            var response = await _backend.MakeCredentialAsync(request, ct).ConfigureAwait(false);
-            return (response, extensions);
+            try
+            {
+                var response = await _backend.MakeCredentialAsync(request, ct).ConfigureAwait(false);
+                return (response, extensions);
+            }
+            finally
+            {
+                Util.SensitiveMemory.Zero(request.Extensions);
+            }
         }
     }
 

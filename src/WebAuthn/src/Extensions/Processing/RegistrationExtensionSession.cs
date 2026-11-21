@@ -127,21 +127,26 @@ internal sealed class RegistrationExtensionSession : IDisposable
         }
 
         var outputs = new RegistrationExtensionOutputsBuilder();
-        foreach (var processor in _processors)
+        try
         {
-            try
+            foreach (var processor in _processors)
             {
-                await processor.PrepareOutputsAsync(response, authData, token, outputs, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await processor.PrepareOutputsAsync(response, authData, token, outputs, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
+                {
+                    // SDK policy: omit malformed optional processor output, not cancellation or explicit client errors.
+                }
             }
-            catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
-            {
-                // SDK isolation policy: omit this processor's output for these exception categories.
-                // This covers malformed CBOR and wrong types, but can also catch other invalid-operation
-                // failures. WebAuthn §9.4 does not prescribe this catch policy. Other errors propagate.
-            }
+            return outputs.Build();
         }
-
-        return outputs.Build();
+        catch
+        {
+            Util.SensitiveMemory.ZeroPrf(outputs.Prf?.Results);
+            throw;
+        }
     }
 
     /// <summary>Releases per-attempt secrets held by processors (shared secrets).</summary>

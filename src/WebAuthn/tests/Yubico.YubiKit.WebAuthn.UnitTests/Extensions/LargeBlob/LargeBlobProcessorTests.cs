@@ -212,6 +212,41 @@ public class LargeBlobProcessorTests
         await _storage.Received(scenario == 0 ? 0 : 1).GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task Authentication_ReadTransfersWritablePlaintextWithoutClearingVerificationBytes()
+    {
+        var info = Context().Info;
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
+        var assertion = MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: LargeBlobKey);
+        byte[] raw = assertion.AuthenticatorDataRaw.ToArray();
+        byte[] plaintext = [0x6B];
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(assertion);
+        _storage.GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()).Returns(plaintext);
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        var ct = TestContext.Current.CancellationToken;
+        var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        LargeBlobAuthenticationOutput output;
+        await using (client)
+        {
+            var matches = await client.GetAssertionAsync(new()
+            {
+                Challenge = new byte[32], RpId = "example.com",
+                Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
+            }, cancellationToken: ct);
+            var response = await Assert.Single(matches).SelectAsync(ct);
+            output = Assert.IsType<LargeBlobAuthenticationOutput>(response.ClientExtensionResults?.LargeBlob);
+            Assert.Equal(raw, response.RawAuthenticatorData.Span);
+            Assert.False(assertion.LargeBlobKey.GetValueOrDefault().Span.ContainsAnyExcept((byte)0));
+        }
+
+        var copy = output with { };
+        Memory<byte> actual = Assert.IsType<Memory<byte>>(output.Blob);
+        Assert.Equal(0x6B, actual.Span[0]);
+        System.Security.Cryptography.CryptographicOperations.ZeroMemory(actual.Span);
+        Assert.Equal(0, copy.Blob.GetValueOrDefault().Span[0]);
+        Assert.Equal(0, plaintext[0]);
+    }
+
     /// <summary>L3 §10.1.5 authentication: "If support is present, or if both read and write are present, return ... NotSupportedError".</summary>
     [Theory]
     [InlineData(true, false, false)]

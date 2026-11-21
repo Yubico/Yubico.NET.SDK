@@ -175,13 +175,13 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
     private delegate void SaltAction(ReadOnlySpan<byte> salt1, ReadOnlySpan<byte> salt2);
 
     /// <summary>L3 §10.1.4: salt = SHA-256("WebAuthn PRF" || 0x00 || input); these salt arrays are zeroed after use.</summary>
-    /// <remarks>This does not clear ComputeSalt's input concatenation or copies retained by the CTAP builder.</remarks>
     private static void WithSalts(ReadOnlyMemory<byte> first, ReadOnlyMemory<byte>? second, SaltAction action)
     {
         var salt1 = PrfInput.ComputeSalt(first.Span);
-        var salt2 = second is { } s ? PrfInput.ComputeSalt(s.Span) : null;
+        byte[]? salt2 = null;
         try
         {
+            salt2 = second is { } s ? PrfInput.ComputeSalt(s.Span) : null;
             action(salt1, salt2);
         }
         finally
@@ -250,7 +250,15 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
             return null;
         }
 
-        return PrfCodec.DecryptResults(_context.Protocol, _sharedSecret.SharedSecret.Span, reader.ReadByteString());
+        var ciphertext = reader.ReadByteString();
+        try
+        {
+            return PrfCodec.DecryptResults(_context.Protocol, _sharedSecret.SharedSecret.Span, ciphertext);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(ciphertext);
+        }
     }
 
     public void Dispose()

@@ -54,8 +54,7 @@ internal static class PrfCodec
     /// not a malformed-output rule prescribed by WebAuthn §9.4.
     /// </summary>
     /// <remarks>
-    /// The aggregate plaintext is cleared, but the array-range temporaries and returned result arrays
-    /// are not. Returned read-only views have no disposal or zeroing guarantee.
+    /// Clears the aggregate plaintext and copies each value directly into its result buffer.
     /// </remarks>
     public static PrfEvaluationResults? DecryptResults(
         IPinUvAuthProtocol protocol,
@@ -76,10 +75,10 @@ internal static class PrfCodec
         {
             return plaintext.Length switch
             {
-                OutputLength => new PrfEvaluationResults(plaintext[..OutputLength].ToArray()),
+                OutputLength => new PrfEvaluationResults(plaintext.AsSpan(0, OutputLength).ToArray()),
                 2 * OutputLength => new PrfEvaluationResults(
-                    plaintext[..OutputLength].ToArray(),
-                    plaintext[OutputLength..].ToArray()),
+                    plaintext.AsSpan(0, OutputLength).ToArray(),
+                    plaintext.AsSpan(OutputLength).ToArray()),
                 _ => null
             };
         }

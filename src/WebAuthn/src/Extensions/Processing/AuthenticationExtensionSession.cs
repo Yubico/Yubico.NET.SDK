@@ -106,22 +106,28 @@ internal sealed class AuthenticationExtensionSession : IDisposable
         }
 
         var outputs = new AuthenticationExtensionOutputsBuilder();
-        foreach (var processor in _processors)
+        try
         {
-            try
+            foreach (var processor in _processors)
             {
-                await processor.PrepareOutputsAsync(response, authData, token, outputs, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await processor.PrepareOutputsAsync(response, authData, token, outputs, cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
+                {
+                    // SDK policy: omit malformed optional processor output, not cancellation or explicit client errors.
+                }
             }
-            catch (Exception ex) when (ex is CborContentException or InvalidOperationException)
-            {
-                // SDK isolation policy: omit this processor's output for these exception categories.
-                // This covers malformed CBOR and wrong types, but can also catch storage failures
-                // expressed as InvalidOperationException. WebAuthn §9.4 does not prescribe this policy;
-                // CTAP storage errors, explicit client errors, and cancellation are not caught here.
-            }
+            return outputs.Build();
         }
-
-        return outputs.Build();
+        catch
+        {
+            Util.SensitiveMemory.ZeroPrf(outputs.Prf?.Results);
+            if (outputs.LargeBlob?.Blob is { } blob)
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(blob.Span);
+            throw;
+        }
     }
 
     /// <summary>Releases per-attempt secrets held by processors (shared secrets).</summary>

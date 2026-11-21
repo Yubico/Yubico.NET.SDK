@@ -63,24 +63,26 @@ internal sealed class CredentialMatcher
 
         uint? numberOfCredentials = CheckAssertionCount(firstResponse);
 
-        var firstCredId = ResolveCredentialId(firstResponse, selected, request.AllowList is { Count: > 0 });
-        results.Add((firstCredId, firstResponse.User, firstResponse));
-
-        // Check if there are more credentials to enumerate
-        if (numberOfCredentials is > 1)
+        try
         {
-            // Enumerate remaining credentials via GetNextAssertion
-            uint remaining = numberOfCredentials.Value - 1;
+            bool hasAllowList = request.AllowList is { Count: > 0 };
+            var firstCredId = ResolveCredentialId(firstResponse, selected, hasAllowList);
+            results.Add((firstCredId, firstResponse.User, firstResponse));
 
-            for (uint i = 0; i < remaining; i++)
+            for (uint i = 1; i < numberOfCredentials; i++)
             {
                 var nextResponse = await backend.GetNextAssertionAsync(cancellationToken);
-                var nextCredId = ResolveCredentialId(nextResponse, selected, request.AllowList is { Count: > 0 }, allowOmission: false);
+                var nextCredId = ResolveCredentialId(nextResponse, selected, hasAllowList, allowOmission: false);
                 results.Add((nextCredId, nextResponse.User, nextResponse));
             }
+            return results;
         }
-
-        return results;
+        catch
+        {
+            foreach (var (_, _, response) in results)
+                ClearUnreturnedAssertion(response);
+            throw;
+        }
     }
 
     private static ReadOnlyMemory<byte> ResolveCredentialId(
@@ -93,9 +95,7 @@ internal sealed class CredentialMatcher
             && (!hasAllowList || (selected is not null && descriptor.Id.Span.SequenceEqual(selected.Id.Span))))
             return descriptor.Id;
 
-        CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
-        if (response.LargeBlobKey is { } key)
-            CryptographicOperations.ZeroMemory(key.Span);
+        ClearUnreturnedAssertion(response);
         throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
             "The assertion did not identify a credential matching the request.");
     }
@@ -107,11 +107,16 @@ internal sealed class CredentialMatcher
             return count;
 
         // These decoded buffers belong to this ceremony and won't be returned to the caller.
+        ClearUnreturnedAssertion(response);
+        throw new WebAuthnClientError(WebAuthnClientErrorCode.Constraint,
+            $"Authenticator reported {count} assertions; the SDK supports at most {MaxAssertionsPerCeremony} per ceremony.");
+    }
+
+    private static void ClearUnreturnedAssertion(GetAssertionResponse response)
+    {
         CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
         if (response.LargeBlobKey is { } key)
             CryptographicOperations.ZeroMemory(key.Span);
-        throw new WebAuthnClientError(WebAuthnClientErrorCode.Constraint,
-            $"Authenticator reported {count} assertions; the SDK supports at most {MaxAssertionsPerCeremony} per ceremony.");
     }
 
     private static bool IsNoCredentialsError(CtapStatus status)

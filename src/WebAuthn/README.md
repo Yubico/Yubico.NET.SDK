@@ -327,11 +327,10 @@ requires the hmac-secret-backed PRF to use the verified variant. Supported evalu
 ceremony's UV preference to Required; registration enablement alone does not. The client omits the
 evaluation output if the authenticator did not report verification.
 
-PRF outputs are derived secrets: never log them. SDK-produced results expose read-only memory without
-a disposal/zeroing guarantee for returned arrays or intermediate copies; disposing the client does not
-clear them. Clearing a copy you made does not clear the SDK's originals. Treat PRF inputs according to
-their application sensitivity as well. This lifetime limitation matters when evaluating suitability
-for secret-handling applications; there is no writable-result-span API to use for guaranteed cleanup.
+PRF outputs are derived secrets: never log them. `First` and an optional `Second` are writable,
+caller-owned `Memory<byte>` buffers. Clear each with `CryptographicOperations.ZeroMemory(value.Span)`
+after its last use. Disposing the client does not clear returned buffers. Record copies alias those
+buffers; direct constructors retain the memory you supply.
 
 ### Request protection and blob storage
 
@@ -353,8 +352,8 @@ assertion for the selected credential. The SDK requires a PIN/UV token for write
 exception. Storage work runs after the assertion, before `GetAssertionAsync` returns. A supported read
 with no stored data, no key, or a storage status/decoding failure returns `LargeBlob` with `Blob = null`.
 A stored empty blob returns a present, zero-length value. Cancellation still propagates.
-Decrypted blob and credential-blob outputs may contain sensitive application data
-and share the lack of an SDK-owned cleanup contract described above.
+The returned writable `LargeBlob.Blob` is caller-owned; clear its span after last use if it contains
+sensitive data. This does not change `credBlob` or the authenticator data needed for RP verification.
 
 `MinPinLength` reports the existing policy in Unicode code points only when the RP is authorized on
 the authenticator; it does not set a PIN policy. Null and `Requested = false` both omit the request.

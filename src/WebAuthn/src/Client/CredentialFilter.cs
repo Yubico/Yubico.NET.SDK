@@ -129,13 +129,20 @@ internal static class CredentialFilter
 
                 // A one-descriptor chunk is its own answer. CTAP2.0 §5.2 permits credential omission
                 // for a singleton allowList; CTAP2.1/2.3 §6.2.2 require the descriptor.
-                if (chunk.Count == 1)
+                try
                 {
-                    return chunk[0];
-                }
+                    if (response.Credential is null && chunk.Count == 1)
+                        return chunk[0];
 
-                var matchedId = response.GetCredentialId();
-                return chunk.FirstOrDefault(descriptor => descriptor.Id.Span.SequenceEqual(matchedId.Span));
+                    var matchedId = response.GetCredentialId();
+                    return chunk.FirstOrDefault(descriptor => descriptor.Id.Span.SequenceEqual(matchedId.Span));
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
+                    if (response.LargeBlobKey is { } key)
+                        CryptographicOperations.ZeroMemory(key.Span);
+                }
             }
 
             return null;

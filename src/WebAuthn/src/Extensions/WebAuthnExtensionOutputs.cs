@@ -57,10 +57,9 @@ public sealed record class RegistrationExtensionOutputs
 /// </para>
 /// <para>
 /// PRF results are derived secrets; credential blobs and decrypted large blobs can contain sensitive
-/// application data. SDK-produced outputs have no disposal or zeroing guarantee, and client disposal
-/// does not clear them. Clearing a caller-created copy does not clear the SDK-created storage.
-/// Directly constructed results may wrap caller-owned memory; the caller retains its lifetime and
-/// cleanup responsibilities. Do not log sensitive result contents.
+/// application data. Callers own the writable PRF and largeBlob plaintext buffers and clear them
+/// after last use; client disposal does not clear them. Record copies alias those buffers. Do not log
+/// sensitive result contents.
 /// </para>
 /// </remarks>
 public sealed record class AuthenticationExtensionOutputs

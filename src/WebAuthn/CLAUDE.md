@@ -428,9 +428,9 @@ Generic signing params carry raw `additionalArgs`; ARKG helpers can be converted
 
 Keep these conditions attached to public guidance when changing extension flow:
 
-- PRF requires verification for supported evaluation. Its SDK-produced read-only results and
-  intermediate copies have no disposal/zeroing guarantee; clearing a caller copy or disposing the
-  client does not clear them. PRF results are derived secrets, not public metadata.
+- PRF requires verification for supported evaluation. Its result spans and the decrypted largeBlob
+  span are caller-owned on success. Clear SDK-owned unpublished buffers, not verification bytes
+  handed to the caller. Record copies alias the same writable memory; no result type is disposable.
 - Enforced credProtect requires advertised support before creation (CTAP2.3 §12.1). Optional requests
   are omitted on unsupported authenticators. Advertisement is not independent proof of enforcement.
 - LargeBlob uses largeBlobKey/storage-array operations, not the alternative direct extension.
@@ -440,7 +440,6 @@ Keep these conditions attached to public guidance when changing extension flow:
   credential-bound key, never the first original entry. A supported read preserves the extension with
   a null Blob on missing key/data or a storage status/decoding failure. Empty stored data is present;
   cancellation propagates.
-  Decrypted blob outputs lack an owned cleanup contract.
 - Only a minPinLength input with `Requested = true` requests the extension on a supporting key.
   The value reports existing policy only for authorized RP IDs, not a policy-setting operation.
 - Null input containers yield null result containers; requested containers can yield records with null

@@ -127,14 +127,24 @@ public sealed partial class WebAuthnClient
         using (extensions)
         {
             var results = new List<MatchedCredential>(matches.Count);
-            foreach (var (credentialId, user, response) in matches)
+            var prepared = new List<AuthenticationResponse>(matches.Count);
+            bool published = false;
+            try
             {
-                var authenticationResponse = await BuildAuthenticationResponseAsync(
-                    response, credentialId, clientData, extensions, auth.Token, cancellationToken).ConfigureAwait(false);
-                results.Add(new MatchedCredential(credentialId, user, _ => Task.FromResult(authenticationResponse)));
+                foreach (var (credentialId, user, response) in matches)
+                {
+                    var authenticationResponse = await BuildAuthenticationResponseAsync(
+                        response, credentialId, clientData, extensions, auth.Token, cancellationToken).ConfigureAwait(false);
+                    prepared.Add(authenticationResponse);
+                    results.Add(new MatchedCredential(credentialId, user, _ => Task.FromResult(authenticationResponse)));
+                }
+                published = true;
+                return results;
             }
-
-            return results;
+            finally
+            {
+                ClearAssertionBuffers(matches, prepared, published);
+            }
         }
 
         async Task<(IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> Matches,
@@ -172,8 +182,36 @@ public sealed partial class WebAuthnClient
             }
 
             var request = BuildGetAssertionRequest(options, clientData, auth, decision, extensions, selected, allowList);
-            var matches = await CredentialMatcher.MatchAsync(_backend, request, selected, ct).ConfigureAwait(false);
-            return (matches, extensions);
+            try
+            {
+                var matches = await CredentialMatcher.MatchAsync(_backend, request, selected, ct).ConfigureAwait(false);
+                return (matches, extensions);
+            }
+            finally
+            {
+                Util.SensitiveMemory.Zero(request.Extensions);
+            }
+        }
+    }
+
+    private static void ClearAssertionBuffers(
+        IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> matches,
+        IReadOnlyList<AuthenticationResponse> prepared, bool published)
+    {
+        foreach (var (_, _, response) in matches)
+        {
+            if (response.LargeBlobKey is { } key)
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(key.Span);
+            if (!published)
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
+        }
+        if (published)
+            return;
+        foreach (var response in prepared)
+        {
+            Util.SensitiveMemory.ZeroPrf(response.ClientExtensionResults?.Prf?.Results);
+            if (response.ClientExtensionResults?.LargeBlob?.Blob is { } blob)
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(blob.Span);
         }
     }
 

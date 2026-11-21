@@ -191,11 +191,11 @@ Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredProtectOutput.Policy.get -> Yubic
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.CredProtectOutput.Policy.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput!
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Blob.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Blob.get -> System.Memory<byte>?
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Blob.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Deconstruct(out System.ReadOnlyMemory<byte>? Blob, out bool? Written) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Deconstruct(out System.Memory<byte>? Blob, out bool? Written) -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Equals(Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.LargeBlobAuthenticationOutput(System.ReadOnlyMemory<byte>? Blob = null, bool? Written = null) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.LargeBlobAuthenticationOutput(System.Memory<byte>? Blob = null, bool? Written = null) -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Written.get -> bool?
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobAuthenticationOutput.Written.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.LargeBlobRegistrationOutput
@@ -214,12 +214,12 @@ Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfAuthenticationOutput.Results.get -
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfAuthenticationOutput.Results.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults!
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Deconstruct(out System.ReadOnlyMemory<byte> First, out System.ReadOnlyMemory<byte>? Second) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Deconstruct(out System.Memory<byte> First, out System.Memory<byte>? Second) -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Equals(Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults? other) -> bool
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.First.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.First.get -> System.Memory<byte>
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.First.init -> void
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.PrfEvaluationResults(System.ReadOnlyMemory<byte> First, System.ReadOnlyMemory<byte>? Second = null) -> void
-Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Second.get -> System.ReadOnlyMemory<byte>?
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.PrfEvaluationResults(System.Memory<byte> First, System.Memory<byte>? Second = null) -> void
+Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Second.get -> System.Memory<byte>?
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfEvaluationResults.Second.init -> void
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput
 Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput.<Clone>$() -> Yubico.YubiKit.WebAuthn.Extensions.Outputs.PrfRegistrationOutput!

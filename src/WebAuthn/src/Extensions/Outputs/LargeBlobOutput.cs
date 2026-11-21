@@ -34,10 +34,9 @@ public sealed record class LargeBlobRegistrationOutput(bool Supported);
 /// is present with length zero. Cancellation is not treated as a read result.
 /// </para>
 /// <para>
-/// Retrieved data is decrypted application plaintext and may be sensitive. SDK-produced results have
-/// no disposal or zeroing guarantee; disposing the client or clearing a caller-created copy does not
-/// clear the SDK-created array. Directly constructed results may wrap caller-owned memory, whose
-/// lifetime and cleanup remain the caller's responsibility. Do not log sensitive blob contents.
+/// Retrieved data is decrypted application plaintext. The client transfers the fresh writable buffer
+/// to the caller, who must zero sensitive data after last use. Disposing the client does not clear it.
+/// Record copies share the buffer; direct construction retains supplied memory without copying.
 /// </para>
 /// </remarks>
 /// <param name="Blob">Read data when supplied. Null is not a reliable diagnostic of why data is unavailable.</param>
@@ -46,5 +45,5 @@ public sealed record class LargeBlobRegistrationOutput(bool Supported);
 /// when no write result was produced. Cancellation propagates rather than becoming false.
 /// </param>
 public sealed record class LargeBlobAuthenticationOutput(
-    ReadOnlyMemory<byte>? Blob = null,
+    Memory<byte>? Blob = null,
     bool? Written = null);

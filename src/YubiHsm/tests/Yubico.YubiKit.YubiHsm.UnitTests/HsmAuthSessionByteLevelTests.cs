@@ -15,8 +15,10 @@
 using System.Reflection;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Tests.Shared;
@@ -84,6 +86,74 @@ public class HsmAuthSessionByteLevelTests
         Assert.True(session.IsSupported(HsmAuthSession.FeaturePasswordChange));
         Assert.Equal(36, connection.Recorder.TransmittedCommands[^1][4]); // Short Lc, two 18-byte TLVs.
     }
+
+    [Theory]
+    [InlineData(VersionQualifierType.Beta)]
+    [InlineData((VersionQualifierType)0x7F)]
+    [InlineData(null)] // No cached version and no applet version.
+    public async Task CreateAsync_UnverifiedFirmwareAttemptsScp11WithShortFraming(VersionQualifierType? qualifier)
+    {
+        var version = new FirmwareVersion(5, 6, 0);
+        DeviceInfo? cached = qualifier is { } type ? default(DeviceInfo) with
+        {
+            FirmwareVersion = version,
+            VersionQualifier = new VersionQualifier(version, type, 1)
+        } : null;
+        using var connection = new ExtendedCardConnection(OkResponse(), [0x6A, 0x88]);
+        using var scp = CreateScp11Parameters();
+        var options = new SessionCreationOptions
+        {
+            ScpKeyParameters = scp,
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true }
+        };
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => HsmAuthSession.CreateAsync(connection, options,
+            () => cached, TestContext.Current.CancellationToken));
+
+        Assert.Equal(0x6A88, (ushort)error.SW.GetValueOrDefault());
+        Assert.Collection(connection.Recorder.TransmittedCommands,
+            select => Assert.Equal(0xA4, select[1]),
+            authenticate =>
+            {
+                Assert.Equal(0x88, authenticate[1]);
+                Assert.NotEqual(0, authenticate[4]); // Short Lc; extended framing puts a zero marker here.
+            });
+    }
+
+    [Theory]
+    [InlineData(VersionQualifierType.Final)]
+    [InlineData(null)] // A missing qualifier must not make a known numeric version optimistic.
+    public async Task CreateAsync_KnownUnsupportedFirmwareStopsBeforeScp11(VersionQualifierType? qualifier)
+    {
+        var version = new FirmwareVersion(5, 6, 0);
+        var cached = default(DeviceInfo) with { FirmwareVersion = version };
+        if (qualifier is { } type)
+            cached = cached with { VersionQualifier = new VersionQualifier(version, type, 0) };
+        using var connection = new ExtendedCardConnection(OkResponse());
+        using var scp = CreateScp11Parameters();
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => HsmAuthSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = scp }, () => cached, TestContext.Current.CancellationToken));
+
+        Assert.Equal(0xA4, Assert.Single(connection.Recorder.TransmittedCommands)[1]);
+    }
+
+    [Fact]
+    public async Task CreateAsync_CachedInfoWithoutFirmwareUsesAppletVersionForScp11Gate()
+    {
+        using var connection = new ExtendedCardConnection([0x79, 3, 5, 6, 0, 0x90, 0]);
+        using var scp = CreateScp11Parameters();
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => HsmAuthSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = scp }, () => default(DeviceInfo),
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(0xA4, Assert.Single(connection.Recorder.TransmittedCommands)[1]);
+    }
+
+    private static Scp11KeyParameters CreateScp11Parameters() =>
+        new(new KeyReference(0x13, 0xFF), ECPublicKey.CreateFromValue(P256Point(), KeyType.P256));
+
     // P-256 base point (SEC 2, section 2.4.2), encoded as 04 || X || Y.
     internal static byte[] P256Point() => Convert.FromHexString(
         "046B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296" +

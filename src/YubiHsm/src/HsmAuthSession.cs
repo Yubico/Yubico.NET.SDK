@@ -174,7 +174,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 framingVersion,
                 _configuration,
                 _scpKeyParameters,
-                cancellationToken)
+                cancellationToken,
+                admitUnverifiedScpFirmware: featureVersion.IsAlphaOrBeta)
             .ConfigureAwait(false);
 
         if (!ReferenceEquals(protocol, effectiveProtocol))
@@ -205,7 +206,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         _firmwareOverride is null ? _readCachedDeviceInfo?.Invoke() : null;
 
     private static bool IsPrerelease(DeviceInfo? deviceInfo) =>
-        deviceInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta;
+        deviceInfo?.VersionQualifier is { Type: not VersionQualifierType.Final };
 
     /// <summary>
     ///     Validates and encodes a credential label to UTF-8 bytes.

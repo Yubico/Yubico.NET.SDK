@@ -23,7 +23,7 @@ library to provision the HSM, complete authentication, and exchange protected co
 
 An explicit `FirmwareVersionOverride` wins. Otherwise the session uses cached device firmware when
 available, then the applet's three-byte version from SELECT. Unknown or prerelease version metadata
-admits applet feature gates optimistically; protocol framing uses a known numeric version when available,
+admits applet and SCP version gates optimistically; protocol framing uses a known numeric version when available,
 or the 5.4.3 floor. This policy does not prove command support. Required SELECT failures still propagate.
 After confirmed `ResetAsync`, the session reselects and resolves the policy again; an explicit override persists.
 

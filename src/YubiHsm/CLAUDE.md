@@ -37,7 +37,8 @@ enrollment and calculation paths handle management keys, credential passwords an
 
 Asymmetric, challenge and password-change operations use feature gates; base operations rely on successful
 applet selection. An explicit override wins, else cached device firmware if available, else the applet version
-from SELECT. Major-zero, prerelease and missing/malformed version metadata admit applet gates optimistically.
+from SELECT. Major-zero, a present non-final qualifier, or missing/malformed version metadata admit applet
+and SCP version gates optimistically. A missing qualifier is not evidence that a known version is non-final.
 The protocol uses the known numeric version for framing, or the 5.4.3 applet floor when it is unknown.
 This feature policy does not prove availability. A failed or cancelled required SELECT still propagates.
 A confirmed reset retires

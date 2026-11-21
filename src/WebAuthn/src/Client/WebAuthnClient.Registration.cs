@@ -171,7 +171,8 @@ public sealed partial class WebAuthnClient
                 excludeList = probedExcludeList = matched is null ? [] : [matched];
             }
 
-            var request = BuildMakeCredentialRequest(options, clientData, auth, decision, excludeList, requireResidentKey, extensions);
+            var request = BuildMakeCredentialRequest(options, clientData, auth, decision, excludeList,
+                requireResidentKey, info, extensions);
             var response = await _backend.MakeCredentialAsync(request, ct).ConfigureAwait(false);
             return (response, extensions);
         }
@@ -184,6 +185,7 @@ public sealed partial class WebAuthnClient
         UvDecision decision,
         IReadOnlyList<PublicKeyCredentialDescriptor>? excludeList,
         bool requireResidentKey,
+        AuthenticatorInfo info,
         RegistrationExtensionSession extensions)
     {
         var pubKeyCredParams = options.PubKeyCredParams
@@ -203,6 +205,8 @@ public sealed partial class WebAuthnClient
             ExcludeList = excludeList,
             Extensions = extensionsCbor,
             Options = CtapOptions(decision, requireResidentKey),
+            EnterpriseAttestation = options.Attestation == Preferences.AttestationPreference.Enterprise
+                && info.Options.TryGetValue("ep", out var ep) && ep ? 1 : null,
             PinUvAuthParam = pinUvAuthParam,
             PinUvAuthProtocol = pinUvAuthProtocol
         };
@@ -227,8 +231,7 @@ public sealed partial class WebAuthnClient
         // client replaces any statement that is not a self attestation with fmt "none" and an empty
         // attStmt, so the RP never sees the attestation certificate chain it declined. The AAGUID is
         // kept as the authenticator returned it, as L3 specifies. Indirect, Direct and
-        // Enterprise pass the authenticator's statement through. Indirect has no anonymization service,
-        // and Enterprise does not send the CTAP enterpriseAttestation request parameter.
+        // Enterprise pass the authenticator's statement through. Indirect has no anonymization service.
         var webAuthnStatement = ctapResponse.AttestationStatement;
         if (options.Attestation == Preferences.AttestationPreference.None
             && !IsSelfAttestation(attestedCred.Aaguid, webAuthnStatement))

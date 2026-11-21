@@ -75,8 +75,8 @@ public sealed record class PublicKeyCredentialCreationOptions
     /// </summary>
     /// <remarks>
     /// None removes non-self attestation statements. Other preferences pass the returned statement
-    /// through: Indirect does not use an anonymization service, and Enterprise does not currently
-    /// send a CTAP enterprise-attestation request. See <see cref="AttestationPreference"/>.
+    /// through: Indirect does not use an anonymization service; Enterprise requests vendor-facilitated
+    /// attestation when enabled on the authenticator. See <see cref="AttestationPreference"/>.
     /// </remarks>
     public AttestationPreference Attestation { get; init; } = AttestationPreference.None;
 

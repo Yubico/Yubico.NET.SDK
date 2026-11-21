@@ -157,7 +157,8 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
             // Absent stays absent, as in GetAssertionAsync: an explicit "uv": false is still the uv
             // option key, which CTAP §6.1 forbids next to pinUvAuthParam.
             ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true ? rk : null,
-            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true ? uv : null
+            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true ? uv : null,
+            EnterpriseAttestation = request.EnterpriseAttestation
         };
 
         // Add PIN/UV auth if provided

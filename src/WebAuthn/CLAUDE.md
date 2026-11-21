@@ -474,7 +474,8 @@ Keep these conditions attached to public guidance when changing extension flow:
 
 **Other public boundaries:** Default None attestation removes non-self statements while retaining the
 packed/zero-AAGUID/no-certificate self-attestation exception and leaving the returned AAGUID unchanged.
-Indirect has no anonymization service; Enterprise does not send the CTAP enterprise-attestation request.
+Indirect passes through the statement without anonymization. Enterprise sends CTAP vendor-facilitated
+mode (1) only with GetInfo `ep: true`, leaving the enterprise decision to the authenticator.
 Client-data escaping follows CCDToString. Attestation Decode
 borrows outer CBOR/statement slices: keep caller input unchanged; parsing is not verification.
 `default(Aaguid)` is the 16-byte all-zero value. Final descriptor omission can expose an empty ID: CTAP2.0 §5.2 permits

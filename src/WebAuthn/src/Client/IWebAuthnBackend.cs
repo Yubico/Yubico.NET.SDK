@@ -121,6 +121,8 @@ internal enum PinUvAuthMethod
 /// </summary>
 internal sealed record class BackendMakeCredentialRequest
 {
+    public int? EnterpriseAttestation { get; init; }
+
     /// <summary>
     /// Hash of the client data JSON.
     /// </summary>

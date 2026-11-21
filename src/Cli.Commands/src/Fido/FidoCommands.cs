@@ -350,7 +350,14 @@ public sealed class FidoConfigToggleAlwaysUvCommand : YkCommandBase<FidoConfigSe
                 pin.Memory, PinUvAuthTokenPermissions.AuthenticatorConfig);
 
             var config = new AuthenticatorConfig(session, protocol, pinToken);
-            await config.ToggleAlwaysUvAsync();
+            var info = await session.GetInfoAsync();
+            if (!info.Options.TryGetValue("alwaysUv", out bool current))
+            {
+                OutputHelpers.WriteError("The authenticator does not advertise always-UV support.");
+                return ExitCode.GenericError;
+            }
+
+            await config.SetAlwaysUvAsync(!current);
 
             OutputHelpers.WriteSuccess("Always-UV setting toggled.");
             return ExitCode.Success;

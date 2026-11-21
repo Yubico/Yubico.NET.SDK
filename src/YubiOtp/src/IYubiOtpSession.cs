@@ -121,7 +121,8 @@ public interface IYubiOtpSession : IApplicationSession
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="slot"/> is not a defined value.</exception>
     /// <exception cref="NotSupportedException">
-    /// Thrown when the device firmware does not support slot updates (requires 2.2.0+), or when
+    /// Thrown when the device firmware does not support slot updates (requires 2.2.0+), when changing
+    /// the access code on firmware 4.3.2–4.3.5, or when
     /// <paramref name="config"/> requires a firmware version newer than the device has.
     /// </exception>
     /// <exception cref="InvalidOperationException">

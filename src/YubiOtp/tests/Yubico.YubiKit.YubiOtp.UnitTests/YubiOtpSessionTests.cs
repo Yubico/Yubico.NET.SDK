@@ -313,7 +313,8 @@ public class YubiOtpSessionTests
     /// </summary>
     private static async Task<(ISmartCardConnection Connection, YubiOtpSession Session)> CreateFakeSessionAsync(
         byte touchLow = 0,
-        IUserPresencePrompt? userPresencePrompt = null)
+        IUserPresencePrompt? userPresencePrompt = null,
+        FirmwareVersion? firmware = null)
     {
         var connection = Substitute.For<ISmartCardConnection>();
         connection.Type.Returns(ConnectionType.SmartCard);
@@ -327,9 +328,7 @@ public class YubiOtpSessionTests
 
         var session = await YubiOtpSession.CreateAsync(
             connection,
-            userPresencePrompt is null
-                ? null
-                : new SessionCreationOptions { UserPresencePrompt = userPresencePrompt },
+            new SessionCreationOptions { UserPresencePrompt = userPresencePrompt, FirmwareVersionOverride = firmware },
             cancellationToken: TestContext.Current.CancellationToken);
 
         connection.ClearReceivedCalls();
@@ -342,6 +341,42 @@ public class YubiOtpSessionTests
         var response = new byte[responseLength + 2];
         response[^2] = 0x90;
         return response;
+    }
+
+    [Theory]
+    [InlineData(1, false)]
+    [InlineData(2, true)]
+    [InlineData(5, true)]
+    [InlineData(6, false)]
+    public async Task UpdateConfigurationAsync_OnlyBlocksCodeChangesOnRestrictedFirmware(int patch, bool restricted)
+    {
+        var (connection, session) = await CreateFakeSessionAsync(firmware: new FirmwareVersion(4, 3, patch));
+        await using var lease = session;
+        using var configuration = new UpdateConfiguration();
+        var ct = TestContext.Current.CancellationToken;
+        byte[] currentCode = [1, 2, 3, 4, 5, 6];
+        byte[] newCode = [6, 5, 4, 3, 2, 1];
+        byte[] reply = [4, 3, (byte)patch, 10, 0, 0, 0x90, 0x00];
+        byte[]? sent = null;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                sent = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                return Task.FromResult<ReadOnlyMemory<byte>>(reply);
+            });
+
+        if (restricted)
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() =>
+                session.UpdateConfigurationAsync(Slot.Two, configuration, newCode, currentCode, ct));
+            Assert.Null(sent);
+            newCode = (byte[])currentCode.Clone();
+        }
+
+        await session.UpdateConfigurationAsync(Slot.Two, configuration, newCode, currentCode, ct);
+        Assert.NotNull(sent);
+        Assert.Equal(newCode, sent[43..49]);
+        Assert.Equal(currentCode, sent[57..63]);
     }
 
     public class KeyLengthPreflightValidation

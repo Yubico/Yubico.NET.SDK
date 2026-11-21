@@ -40,6 +40,8 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     private static readonly Feature FeatureUpdate = new("Slot Update", 2, 2, 0);
     private static readonly Feature FeatureSwap = new("Slot Swap", 2, 3, 0);
     private static readonly Feature FeatureNdef = new("NDEF Configuration", 3, 0, 0);
+    private static readonly FirmwareVersion AccessCodeUpdateRestrictedFrom = new(4, 3, 2);
+    private static readonly FirmwareVersion AccessCodeUpdateRestrictedUntil = new(4, 3, 6);
 
     /// <summary>
     /// NFC Forum URI prefix table (36 entries). Index 0 means no prefix compression.
@@ -258,6 +260,13 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         }
 
         var configSlot = slot.Map(SlotOperation.Update);
+        if (!_admitAllFirmwareGates && FirmwareVersion >= AccessCodeUpdateRestrictedFrom &&
+            FirmwareVersion < AccessCodeUpdateRestrictedUntil &&
+            !CryptographicOperations.FixedTimeEquals(accessCode.Span, currentAccessCode.Span))
+        {
+            throw new NotSupportedException("Updating the access code is not supported on firmware 4.3.2–4.3.5.");
+        }
+
         return WriteConfigAsync(configSlot, config, accessCode, currentAccessCode, cancellationToken);
     }
 

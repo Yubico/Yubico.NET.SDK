@@ -350,9 +350,8 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
 - Firmware-gated operations throw `NotSupportedException`; `ConfigState` accessors throw `InvalidOperationException`.
 - Nonzero HOTP `imf` presets require firmware 2.2 or later. Wire encoding is tested; keyboard output
   and counter synchronization at those presets still require device qualification.
-- `SetScanMapAsync` currently requires 38 bytes, whereas the tagged vendor personalization tool specifies
-  a 45-entry map for firmware 3+. This is an implementation limitation, not a supported full-map recipe;
-  do not truncate a vendor map to make it fit.
+- `SetScanMapAsync` takes all 45 entries on firmware 3.0.0+. `ResetScanMapAsync` requests the default map.
+  Both affect keyboard output across slots. Verify output on the intended hardware and host layout.
 - Keyboard pacing flags select 10 ms and 20 ms (30 ms combined). Mode-specific aliases share flag bits;
   the update mask's pacing bits do not grant permission to change challenge touch/short mode. Legacy
   delay, fast-trigger, numeric-keypad, and serial-visibility flags have firmware-specific applicability.

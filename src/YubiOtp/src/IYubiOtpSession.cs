@@ -189,15 +189,14 @@ public interface IYubiOtpSession : IApplicationSession
     /// Sets a custom keyboard scan code map.
     /// </summary>
     /// <remarks>
-    /// The current API enforces 38 bytes, whereas the tagged vendor personalization tool specifies a
-    /// 45-entry map for firmware 3+. This mismatch is an implementation limitation, not supported full-map
-    /// programming. Do not truncate a vendor map to fit. This method has no scan-map firmware gate.
+    /// Requires firmware 3.0.0+. The map applies across slots. Use <see cref="ResetScanMapAsync"/>
+    /// to request the device default.
     /// </remarks>
-    /// <param name="scanMap">The payload, currently required to be 38 bytes by the SDK.</param>
+    /// <param name="scanMap">The complete 45-byte vendor scan map.</param>
     /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <exception cref="ArgumentException">
-    /// Thrown when <paramref name="scanMap"/> is not exactly 38 bytes, or
+    /// Thrown when <paramref name="scanMap"/> is not exactly 45 bytes, or
     /// <paramref name="currentAccessCode"/> is non-empty and not exactly 6 bytes. No device I/O
     /// is performed when this is thrown.
     /// </exception>
@@ -213,6 +212,12 @@ public interface IYubiOtpSession : IApplicationSession
         ReadOnlyMemory<byte> scanMap,
         ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default);
+
+    /// <summary>Requests restoration of the device's default keyboard scan map.</summary>
+    /// <remarks>Requires firmware 3.0.0+. This changes the map across slots, not the slot configurations.</remarks>
+    /// <param name="currentAccessCode">Optional current 6-byte access code.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task ResetScanMapAsync(ReadOnlyMemory<byte> currentAccessCode = default, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Configures URI/text content for NFC output from an existing compatible OTP slot.

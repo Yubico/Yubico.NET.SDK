@@ -882,8 +882,9 @@ trigger is not challenge-response `RequireTouch`. Static-password strings have t
 translated scan codes, not UTF-8. OtpTool's static command translates with the selected keyboard layout
 (default `ModHex`). Its `--totp` flag does not generate TOTP codes. HOTP accepts initial counters from 0
 through 1,048,560 in steps of 16;
-nonzero presets require firmware 2.2 or later. Full scan-map programming has current limitations;
-see the [YubiOTP guide](../../src/YubiOtp/README.md#constraints).
+nonzero presets require firmware 2.2 or later. Scan-map writes require a complete 45-entry map, or call
+`ResetScanMapAsync` to request the default; both require firmware 3.0.0 or later.
+See the [YubiOTP guide](../../src/YubiOtp/README.md#constraints).
 
 ### OpenPGP
 

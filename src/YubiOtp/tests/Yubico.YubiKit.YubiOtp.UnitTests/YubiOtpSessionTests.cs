@@ -344,6 +344,49 @@ public class YubiOtpSessionTests
     }
 
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ScanMap_WritesFullMapAndOptionalCode(bool reset)
+    {
+        var (connection, session) = await CreateFakeSessionAsync(firmware: new FirmwareVersion(3));
+        await using var lease = session;
+        byte[] code = [1, 2, 3, 4, 5, 6];
+        byte[] map = reset ? new byte[45] : [.. Enumerable.Range(1, 45).Select(i => (byte)i)];
+        byte[]? sent = null;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                sent = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                return Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 3, 0, 0, 10, 0, 0, 0x90, 0x00 });
+            });
+        var ct = TestContext.Current.CancellationToken;
+        if (reset)
+        {
+            await session.ResetScanMapAsync(code, ct);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => session.SetScanMapAsync(map.AsMemory(0, 38), code, ct));
+            Assert.Null(sent);
+            await session.SetScanMapAsync(map, code, ct);
+        }
+
+        byte[] expected = [0x00, 0x01, 0x12, 0x00, 51, .. map, .. code, 0x00];
+        Assert.Equal(expected, sent);
+    }
+
+    [Fact]
+    public async Task ScanMap_OlderFirmwareRejectsBothOperationsWithoutIO()
+    {
+        var (connection, session) = await CreateFakeSessionAsync(firmware: new FirmwareVersion(2, 9, 9));
+        await using var lease = session;
+        var ct = TestContext.Current.CancellationToken;
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.SetScanMapAsync(new byte[45], cancellationToken: ct));
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.ResetScanMapAsync(cancellationToken: ct));
+        await connection.DidNotReceive().TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
     [InlineData(1, false)]
     [InlineData(2, true)]
     [InlineData(5, true)]

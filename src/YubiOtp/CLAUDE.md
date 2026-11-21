@@ -159,7 +159,7 @@ and limited to overlapping known member IDs.
 - Updates send complete masked values, not patches. Defaults are SerialApiVisible/AllowUpdate, other update
   flags clear. New code omission sends zeros; repeat current code in both code arguments to retain protection.
 - HOTP stores `imf / 16` as a big-endian `ushort`. Nonzero preset output still needs physical qualification.
-- Scan-map API enforces 38 bytes versus the vendor 45-entry map; do not recommend truncation/full-map programming.
+- Scan-map programming takes 45 bytes at firmware 3.0.0 or later. The separate reset sends 45 zeros.
 - Type/operation minimums do not validate every legacy flag, password length, preset counter, or hardware feature.
 - SmartCard rejects write status shorter than six bytes after fallback. It accepts a sequence increment
   or a reset from a positive sequence when empty or in the effective [5.0.0, 5.4.3) window.

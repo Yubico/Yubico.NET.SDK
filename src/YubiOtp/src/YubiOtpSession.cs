@@ -40,6 +40,8 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     private static readonly Feature FeatureUpdate = new("Slot Update", 2, 2, 0);
     private static readonly Feature FeatureSwap = new("Slot Swap", 2, 3, 0);
     private static readonly Feature FeatureNdef = new("NDEF Configuration", 3, 0, 0);
+    private static readonly Feature FeatureScanMap = new("Keyboard scan map", 3, 0, 0);
+    private const int ScanMapSize = 45;
     private static readonly FirmwareVersion AccessCodeUpdateRestrictedFrom = new(4, 3, 2);
     private static readonly FirmwareVersion AccessCodeUpdateRestrictedUntil = new(4, 3, 6);
 
@@ -306,20 +308,37 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public async Task SetScanMapAsync(
+    public Task SetScanMapAsync(
         ReadOnlyMemory<byte> scanMap,
         ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        EnsureOtpSupports(FeatureScanMap);
 
-        if (scanMap.Length != YubiOtpConstants.ScanCodesSize)
+        if (scanMap.Length != ScanMapSize)
         {
             throw new ArgumentException(
-                $"Scan map must be exactly {YubiOtpConstants.ScanCodesSize} bytes, got {scanMap.Length}.",
+                $"Scan map must be exactly {ScanMapSize} bytes, got {scanMap.Length}.",
                 nameof(scanMap));
         }
 
+        return WriteScanMapAsync(scanMap, currentAccessCode, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task ResetScanMapAsync(ReadOnlyMemory<byte> currentAccessCode = default,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        EnsureOtpSupports(FeatureScanMap);
+        // Personalization v1.20.0's -S without an argument sends 45 zero bytes.
+        return WriteScanMapAsync(new byte[ScanMapSize], currentAccessCode, cancellationToken);
+    }
+
+    private async Task WriteScanMapAsync(ReadOnlyMemory<byte> scanMap, ReadOnlyMemory<byte> currentAccessCode,
+        CancellationToken cancellationToken)
+    {
         var data = BuildPayloadWithAccessCode(scanMap, currentAccessCode);
 
         try

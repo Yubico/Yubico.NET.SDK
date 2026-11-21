@@ -654,19 +654,34 @@ public class SecurityDomainSessionTests
 
         await session.StoreAllowListAsync(
             new KeyReference(0x11, 0x01),
-            ["010203", "0A0B"],
+            ["A1B2", "0001", "00"],
             TestContext.Current.CancellationToken);
 
         Assert.Equal(
             [
-                0x00, 0xE2, 0x90, 0x00, 0x11,
+                0x00, 0xE2, 0x90, 0x00, 0x13,
                 0xA6, 0x04, 0x83, 0x02, 0x11, 0x01,
-                0x70, 0x09,
-                0x93, 0x03, 0x01, 0x02, 0x03,
-                0x93, 0x02, 0x0A, 0x0B,
+                0x70, 0x0B,
+                0x93, 0x03, 0x00, 0xA1, 0xB2,
+                0x93, 0x01, 0x01,
+                0x93, 0x01, 0x00,
                 0x00
             ],
             connection.TransmittedCommands[1]);
+    }
+
+    [Fact]
+    public async Task StoreAllowListAsync_WithEmptySerial_DoesNotTransmitStoreData()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => session.StoreAllowListAsync(
+            new KeyReference(0x11, 0x01), ["01", ""], TestContext.Current.CancellationToken));
+
+        Assert.Single(connection.TransmittedCommands);
     }
 
     [Fact]

@@ -255,8 +255,8 @@ public interface ISecurityDomainSession : IApplicationSession
     /// </summary>
     /// <param name="keyReference">The CA-KLOC public-key reference whose serial restriction will be replaced.</param>
     /// <param name="serials">
-    ///     Nonempty collection of certificate serials as hexadecimal byte sequences in the required
-    ///     device order. Supply nonempty entries; the SDK currently permits an empty individual string.
+    ///     Nonempty collection of nonempty hexadecimal serials in caller order. Each is interpreted as
+    ///     an unsigned big-endian integer and sent in the minimal nonnegative DER INTEGER value encoding.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
@@ -269,7 +269,7 @@ public interface ISecurityDomainSession : IApplicationSession
     ///     against the device profile. This is not a claim of final-specification conformance.
     /// </remarks>
     /// <exception cref="ArgumentNullException">The collection or a serial is null.</exception>
-    /// <exception cref="ArgumentException">The collection is empty.</exception>
+    /// <exception cref="ArgumentException">The collection or a serial is empty.</exception>
     /// <exception cref="FormatException">A serial has odd length or contains a non-hexadecimal character.</exception>
     Task StoreAllowListAsync(
         KeyReference keyReference,

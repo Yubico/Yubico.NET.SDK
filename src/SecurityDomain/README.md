@@ -182,9 +182,9 @@ An allowlist restricts the certificate directly signed by the CA-KLOC: the OCE c
 intermediate when a chain is used, rather than every leaf serial. This scope is described in the
 [SCP11 v1.3.0.13 Public Review draft](https://globalplatform.org/wp-content/uploads/2023/08/GPC_2.3_F_SCP11_v1.3.0.13_PublicRvw.pdf)
 (August 2023, §§4.3, 7.5.1 and 7.9). This draft is not a final specification or a complete YubiKey profile.
-`StoreAllowListAsync` replaces the restriction and rejects an empty collection; supply nonempty hexadecimal
-serial byte sequences in device order. Malformed hex throws `FormatException`; the SDK currently permits
-an empty individual string. `ClearAllowListAsync` deliberately removes the restriction, allowing all
+`StoreAllowListAsync` replaces the restriction. Supply nonempty hexadecimal serials in caller order.
+The SDK normalizes each unsigned big-endian serial to the minimal nonnegative DER INTEGER value encoding.
+Malformed hex throws `FormatException`; empty lists and entries are rejected. `ClearAllowListAsync` deliberately removes the restriction, allowing all
 CA-signed certificates subject to other authentication checks. It is not "deny all"; to stop trusting a CA,
 delete its key. These writes require host-authenticated administrative authority. The SDK emits no SCP11c
 allowlist counter, so do not assume these updates are supported over SCP11c without checking the device profile.

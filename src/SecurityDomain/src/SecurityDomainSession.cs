@@ -694,7 +694,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         var buffer = new ArrayBufferWriter<byte>();
         foreach (var serial in serials)
         {
-            using var serialTlv = new Tlv(TagSerial, Convert.FromHexString(serial));
+            using var serialTlv = EncodeAllowListSerial(serial);
             buffer.Write(serialTlv.AsSpan());
         }
 
@@ -706,6 +706,21 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         await StoreDataAsync(serialsDataTl, cancellationToken).ConfigureAwait(false);
 
         _logger.LogInformation("Allow list stored (KeyReference: {KeyReference})", keyReference);
+    }
+
+    private static Tlv EncodeAllowListSerial(string serial)
+    {
+        ReadOnlySpan<byte> value = Convert.FromHexString(serial);
+        if (value.IsEmpty)
+            throw new ArgumentException("An allowlist serial cannot be empty.", nameof(serial));
+
+        // Keep one byte for zero; add a sign byte only for a high-bit unsigned value.
+        while (value.Length > 1 && value[0] == 0)
+            value = value[1..];
+
+        return (value[0] & 0x80) == 0
+            ? new Tlv(TagSerial, value)
+            : new Tlv(TagSerial, (ReadOnlySpan<byte>)[0x00, .. value]);
     }
 
     /// <inheritdoc />

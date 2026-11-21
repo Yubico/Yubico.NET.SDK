@@ -68,9 +68,12 @@ internal sealed class PinOnlyMetadata : IDisposable
             if (!response.IsOK())
                 throw ApduException.FromStatusWord(response.SW, "Could not read PIN-only metadata.");
 
+            // GET DATA framing is independent of PIN-only content. Never fall back to another
+            // recovery candidate (and potentially verify a PIN) after a malformed envelope.
+            data = UnwrapGetData(data);
             try
             {
-                return new PinOnlyMetadata(response, wrapper, ReadContents(data, wrapper));
+                return new PinOnlyMetadata(response, wrapper, data.IsEmpty ? data : Unwrap(data, wrapper));
             }
             catch (ApduException) when (ignoreMalformed)
             {
@@ -85,12 +88,8 @@ internal sealed class PinOnlyMetadata : IDisposable
         }
     }
 
-    private static ReadOnlyMemory<byte> ReadContents(ReadOnlyMemory<byte> data, byte wrapper)
-    {
-        if (!data.IsEmpty && data.Span[0] == 0x53)
-            data = Unwrap(data, 0x53);
-        return data.IsEmpty ? data : Unwrap(data, wrapper);
-    }
+    private static ReadOnlyMemory<byte> UnwrapGetData(ReadOnlyMemory<byte> data) =>
+        !data.IsEmpty && data.Span[0] == 0x53 ? Unwrap(data, 0x53) : data;
 
     internal void SetFlags(byte flags) => Set(FlagsTag, new byte[] { flags });
     internal void SetSalt(ReadOnlyMemory<byte> salt) => Set(SaltTag, salt);

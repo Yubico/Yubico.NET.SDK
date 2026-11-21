@@ -94,7 +94,7 @@ public sealed class CommandMetadataTests
     }
 
     [Fact]
-    public async Task ManagementReset_UsesLiveFirmwarePrerequisite_BeforeAnyResetOrConfirmation()
+    public async Task ManagementReset_UnsupportedSessionFirmware_ReportsBeforeConfirmationWithoutExtraRead()
     {
         using var output = new CommandOutput();
         var device = new LiveKey();
@@ -103,17 +103,17 @@ public sealed class CommandMetadataTests
             SelectDeviceAsync = (_, _, _) => Task.FromResult<DeviceSelection?>(Selection(device))
         };
 
-        int exitCode = await command.ExecuteAsync(Context, new ManagementResetSettings { Force = true });
+        int exitCode = await command.ExecuteAsync(Context, new ManagementResetSettings());
 
         Assert.Equal(ExitCode.FeatureUnsupported, exitCode);
         Assert.Equal([typeof(ISmartCardConnection)], device.OpenedTypes);
-        Assert.True(device.Connection.InfoReads > 0);
-        Assert.DoesNotContain((byte)0x1F, device.Connection.Instructions);
+        Assert.Equal(new byte[] { 0xA4, 0x1D }, device.Connection.Instructions);
+        Assert.True(device.Connection.Disposed);
         Assert.Contains("5.4.0", output.Console.Output, StringComparison.Ordinal);
     }
 
     [Fact]
-    public async Task ManagementReset_LiveReadUnavailable_DoesNotUseCachedPrerequisite()
+    public async Task ManagementReset_SessionOpenFails_ReportsOriginalFailureWithoutRetry()
     {
         using var output = new CommandOutput();
         var device = new LiveKey { FailOpen = true };
@@ -126,7 +126,8 @@ public sealed class CommandMetadataTests
 
         Assert.Equal(ExitCode.GenericError, exitCode);
         Assert.Single(device.OpenedTypes);
-        Assert.Contains("Could not retrieve device information", output.Console.Output, StringComparison.Ordinal);
+        Assert.Contains("Live read unavailable", output.Console.Output, StringComparison.Ordinal);
+        Assert.Empty(device.Connection.Instructions);
     }
 
     [Fact]

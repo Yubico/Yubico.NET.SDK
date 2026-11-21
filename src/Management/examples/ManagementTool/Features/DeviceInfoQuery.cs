@@ -61,7 +61,7 @@ public static class DeviceInfoQuery
             var deviceInfo = await session.GetDeviceInfoAsync(cancellationToken);
             return DeviceInfoResult.Succeeded(deviceInfo);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return DeviceInfoResult.Failed($"Failed to get device info: {ex.Message}");
         }

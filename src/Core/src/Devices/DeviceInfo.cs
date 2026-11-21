@@ -53,9 +53,10 @@ public readonly record struct DeviceInfo
     /// <summary>Whether the reported form-factor byte has the FIPS product flag (0x80).</summary>
     /// <remarks>This manufacturing flag is separate from application approval or operation-specific FIPS requirements.</remarks>
     public required bool IsFips { get; init; }
-    /// <summary>The reported form-factor byte, including any product flags and unnamed numeric values.</summary>
-    /// <remarks>For example, 0x81 remains an unnamed value rather than <see cref="FormFactor.UsbAKeychain"/>.</remarks>
+    /// <summary>The low nibble of the form-factor byte, preserving unnamed base values.</summary>
     public required FormFactor FormFactor { get; init; }
+    /// <summary>The complete form-factor byte, including known and unknown product flags.</summary>
+    public byte RawFormFactor { get; init; }
     /// <summary>The serial decoded from four big-endian bytes, or null when the response omits it.</summary>
     public int? SerialNumber { get; init; }
     /// <summary>Whether the configuration-lock field equals 1; false when absent.</summary>
@@ -121,6 +122,7 @@ public readonly record struct DeviceInfo
         IsSky == other.IsSky &&
         IsFips == other.IsFips &&
         FormFactor == other.FormFactor &&
+        RawFormFactor == other.RawFormFactor &&
         SerialNumber == other.SerialNumber &&
         IsLocked == other.IsLocked &&
         UsbEnabled == other.UsbEnabled &&
@@ -148,6 +150,7 @@ public readonly record struct DeviceInfo
         hash.Add(IsSky);
         hash.Add(IsFips);
         hash.Add(FormFactor);
+        hash.Add(RawFormFactor);
         hash.Add(SerialNumber);
         hash.Add(IsLocked);
         hash.Add(UsbEnabled);
@@ -194,15 +197,15 @@ public readonly record struct DeviceInfo
         int formFactorTagData = ReadByte(tlvDict, TAG_FORMFACTOR);
         var isFips = (formFactorTagData & 0x80) != 0;
         var isSky = (formFactorTagData & 0x40) != 0;
-        var formFactor = (FormFactor)formFactorTagData;
+        var formFactor = (FormFactor)(formFactorTagData & 0x0F);
 
         var resetBlocked = ReadCapabilities(tlvDict, TAG_RESET_BLOCKED);
         var usbEnabled = ReadCapabilities(tlvDict, TAG_USB_ENABLED);
         var usbSupported = ReadCapabilities(tlvDict, TAG_USB_SUPPORTED);
         var nfcEnabled = ReadCapabilities(tlvDict, TAG_NFC_ENABLED);
         var nfcSupported = ReadCapabilities(tlvDict, TAG_NFC_SUPPORTED);
-        var fipsCapabilities = ReadCapabilities(tlvDict, TAG_FIPS_CAPABLE);
-        var fipsApprovedCapabilities = ReadCapabilities(tlvDict, TAG_FIPS_APPROVED);
+        var fipsCapabilities = ReadFipsCapabilities(tlvDict, TAG_FIPS_CAPABLE);
+        var fipsApprovedCapabilities = ReadFipsCapabilities(tlvDict, TAG_FIPS_APPROVED);
 
         var isNfcRestricted = ReadByte(tlvDict, TAG_NFC_RESTRICTED) == 1;
         var hasPinComplexity = ReadByte(tlvDict, TAG_PIN_COMPLEXITY) == 1;
@@ -228,6 +231,7 @@ public readonly record struct DeviceInfo
             IsLocked = isLocked,
             SerialNumber = serialNumber,
             FormFactor = formFactor,
+            RawFormFactor = (byte)formFactorTagData,
             IsFips = isFips,
             IsSky = isSky,
             ResetBlocked = resetBlocked,
@@ -288,6 +292,15 @@ public readonly record struct DeviceInfo
         if (value.IsEmpty)
             throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length 0; expected a capability value.");
         return CapabilityMapper.FromApp(value);
+    }
+
+    private static DeviceCapabilities ReadFipsCapabilities(IDictionary<int, ReadOnlyMemory<byte>> data, int tag)
+    {
+        if (!data.TryGetValue(tag, out var value))
+            return DeviceCapabilities.None;
+        if (value.Length is not (1 or 2))
+            throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length {value.Length}; expected 1 or 2 bytes.");
+        return CapabilityMapper.FromFips(value);
     }
 
     private static (FirmwareVersion, VersionQualifier) DetermineFirmwareVersion(
@@ -387,10 +400,10 @@ internal static class CapabilityMapper
 
     public static DeviceCapabilities FromFips(ReadOnlyMemory<byte> value)
     {
-        if (value.IsEmpty) return 0;
-        if (value.Length == 1 && value.Span[0] == 0) return DeviceCapabilities.None;
+        if (value.IsEmpty)
+            return DeviceCapabilities.None;
 
-        int fips = BinaryPrimitives.ReadInt16BigEndian(value.Span);
+        int fips = value.Length == 1 ? value.Span[0] : BinaryPrimitives.ReadUInt16BigEndian(value.Span);
         DeviceCapabilities capabilities = 0;
 
         foreach (var (bit, cap) in FipsMapping)
@@ -406,6 +419,6 @@ internal static class CapabilityMapper
 
         return appData.Length == 1
             ? (DeviceCapabilities)appData.Span[0]
-            : (DeviceCapabilities)BinaryPrimitives.ReadInt16BigEndian(appData.Span);
+            : (DeviceCapabilities)BinaryPrimitives.ReadUInt16BigEndian(appData.Span);
     }
 }

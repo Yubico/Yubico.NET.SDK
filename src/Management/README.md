@@ -28,8 +28,13 @@ rejected without sending a reset command.
 | Write device configuration | 5.0.0 | SmartCard, HID FIDO, HID OTP |
 | Bio Multi-protocol Edition combined reset (`ResetDeviceAsync`) | 5.6.0 SDK gate | SmartCard (CCID) only |
 
-The read minimum is a support requirement, not a host-side preflight check: the SDK can send a read to an
-older key and propagate a device or parsing error. Writes and reset check the effective session firmware;
+Public reads check the 4.1 firmware minimum before sending a command; the factory's best-effort metadata
+probe does not use this gate. Reads, writes and reset check the effective session firmware;
+the device extension uses cached device information first, then the applet's firmware read or transport
+version. Unknown and prerelease firmware admit the gates optimistically. SmartCard framing still uses the
+known numeric version (including for prereleases), so a numeric 5.7 beta respects `ForceShortApdus`.
+Live reads are not served from that cache, and required transport-setup errors and cancellation still
+propagate. Separately,
 passing those generic checks does not establish support for every field or device family. In particular,
 NFC restriction needs NFC-capable hardware with firmware 5.7 or later.
 
@@ -87,10 +92,10 @@ can replace it. A firmware override changes session policy, not this returned va
 do not refresh `IYubiKey.CachedDeviceInfo` or a test fixture's initial snapshot. The current `DeviceInfo`
 also contains memory-backed timeout data; copying the record or a result wrapper does not clone those bytes.
 
-The current Core decoder has two metadata limitations: FIPS capability/approval tags use the wrong bit
-mapping, so `FipsCapabilities`, `FipsApproved` and derived filters must not be used to establish application
-approval. `IsFips` is a separate manufacturing indicator, not an operating mode. Also, product flag bits
-can remain in `FormFactor`, so equality with a named base value can miss a flagged device.
+Core decodes the reported FIPS capability and approval masks separately from ordinary application masks.
+These are metadata, not proof that a particular operation ran in an approved configuration. `IsFips` is
+a separate manufacturing indicator, not an operating mode. `FormFactor` holds the base form factor;
+`RawFormFactor` preserves the complete byte, including unknown product flags.
 
 ### Enable or disable applications
 
@@ -122,9 +127,10 @@ order and a fixed delay do not establish device identity or readiness.
 `ChallengeResponseTimeout`, `DeviceFlags` and `NfcRestricted`. Leave a property `null` to keep the device's
 current value, so deriving from what the key reports is a one-liner:
 `new DeviceConfig { UsbEnabled = info.UsbEnabled & ~DeviceCapabilities.Otp }`. At least one USB capability must
-remain enabled. The SDK rejects exactly `DeviceCapabilities.None` for USB, but does not check the requested
-mask against this key's supported applications or comprehensively validate arbitrary cast values. NFC
-`None` is accepted and clears that transport's enabled application set.
+remain enabled. The SDK rejects `DeviceCapabilities.None` for USB and values outside the wire widths
+(16 bits for capability masks, 8 bits for flags). It preserves unknown bits within those widths and does
+not check whether the device supports the requested applications. NFC `None` clears that transport's
+enabled application set.
 
 ### Timeouts, flags and NFC restriction
 
@@ -139,7 +145,7 @@ NFC restriction. The configured NDEF URL remains readable. To remove the restric
 three seconds; a charger is sufficient, with no touch or authenticated USB operation required. This differs
 from changing `NfcEnabled`. `null` omits the restriction field; `false` encodes a zero-valued request, but
 must not be relied on as a verified recovery procedure. Use the documented USB-power procedure. The SDK
-does not preflight the field's firmware or NFC-hardware requirements.
+checks the 5.7 firmware minimum for `true` only; it leaves NFC hardware support to the device.
 
 ### Lock the configuration
 
@@ -208,9 +214,11 @@ If SmartCard is not exposed, session creation throws `NotSupportedException`. On
 Passing the check does not guarantee that the device implements whole-device reset; a device rejection
 propagates as `ApduException` rather than `NotSupportedException`.
 
-The current reset path does not invalidate managed readiness, refresh metadata, or perform a fresh SCP
-handshake. After reset or an uncertain outcome, end old scopes and rediscover/reopen the intended key;
-unchanged readiness/authentication flags do not establish device or channel recovery.
+After confirmed reset, the same session reselects Management, refreshes metadata and, if configured,
+establishes a new SCP channel with the original caller-owned parameters. Keep those parameters alive
+through any reset. If refresh fails, the session ends and reports that reset was confirmed while
+preserving the refresh error. If the exchange outcome itself is uncertain, close the old scopes and
+rediscover the intended key before further use; an exchange failure does not establish completion.
 
 ## User interaction
 
@@ -296,7 +304,7 @@ This standalone tool accepts SmartCard devices only, including for its reset men
 [shared CLI selection flow](../../docs/usage/device-discovery.md#selection-in-the-cli-examples);
 multiple devices require an interactive choice, so a noninteractive invocation returns no selection.
 The SDK and unified `yk management` also support HID FIDO and HID OTP. Selection labels are last-known
-metadata; info/config output and reset prerequisites still use explicit live Management reads.
+metadata; the standalone info/config output and reset prompt use explicit live Management reads.
 
 ## Related
 

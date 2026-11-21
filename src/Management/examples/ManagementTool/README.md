@@ -9,8 +9,12 @@ ManagementTool demonstrates device-information queries and persistent configurat
 `config` commands below. These commands still prompt for device selection; this is not an unattended
 or serial-selectable command-line client.
 
-The active selector currently lists only SmartCard-capable devices. The SDK itself also supports
-device-info/configuration operations over HID FIDO and HID OTP. Reset remains SmartCard-only.
+This example is for demonstration, not production credential management. Interactive lock-code entry
+uses the SDK's masked hex reader; type exactly 32 hexadecimal digits without separators.
+
+The tool selects SmartCard (CCID) devices only because its combined reset menu requires SmartCard.
+HID-only keys are not offered, even though the SDK supports device-information and configuration
+operations over FIDO HID and OTP HID.
 
 ## Features
 
@@ -74,10 +78,9 @@ dotnet run --project src/Management/examples/ManagementTool/ManagementTool.cspro
 dotnet run --project src/Management/examples/ManagementTool/ManagementTool.csproj -- config
 ```
 
-The data commands are `info` and `config`. Top-level `-h`, `--help` and `help` print usage. Dispatch uses
-only the first token and ignores extra command arguments, so do not rely on the printed `command --help`
-suggestion: `info --help` can query a device instead of displaying command-specific help. Use the menu
-for configuration changes. Selection uses fresh one-shot discovery; top-level help returns before discovery.
+The data commands are `info` and `config`. Top-level `-h`, `--help` and `help` print usage. Use
+`info --help` or `config --help` for command-specific help. Help and invalid arguments return before
+device discovery. Use the interactive menu for configuration changes.
 
 ## Configuration tasks and recovery
 
@@ -107,30 +110,27 @@ The tool's reset eligibility display checks firmware only. The documented combin
 **Bio Multi-protocol Edition**, not every 5.6+ key or every Bio key. It deletes FIDO credentials,
 fingerprints, the shared PIN and PIV keys/certificates/user data, except the F9 attestation slot. It
 cannot be undone and is not a documented way to recover a lost Management configuration lock code.
-The menu's broader erasure/default-PIN wording must not be used as a product-support check.
+The menu reports success only after the device confirms the reset and the session refresh finishes.
 
 ## Security Considerations
 
-- The sample masks lock-code input and clears returned mutable byte arrays in the callers' `finally`
-  blocks. Confirmation uses a fixed-time byte comparison. The input and normalized copies are immutable
-  strings and cannot be erased by clearing the arrays. If the confirmation prompt throws before returning,
-  the first parsed array can also escape cleanup. Do not use this prompt as a production secret-input primitive.
+- The sample uses the SDK's hex credential reader and clears the returned mutable arrays in the callers'
+  `finally` blocks. Confirmation uses a fixed-time comparison and disposes unreturned entries. Redirected
+  input uses line-based console input and does not provide the same string-lifetime guarantees.
 - Keep borrowed lock-code buffers valid and unchanged until the awaited write completes; clear owned
   secrets even when a write fails or is cancelled. Never log codes. Authorizing one write with the
   current code does not remove the lock; removal sends the current code and sixteen zero replacement bytes.
 - Configuration menus ask for confirmation; reset asks twice (yes/no and typing `RESET`). The feature
   helpers themselves do not prompt, so direct callers must authorize the operation first.
-- Cancellation is not consistent end to end: menu callbacks discard the console token, and feature
-  wrappers/metadata lookup can turn cancellation exceptions into ordinary failure results. This is a
-  sample limitation, not the SDK session's cancellation contract. Cancellation never rolls back a sent write.
+- Ctrl+C requests cancellation and exits with status 5 when observed. The tool awaits the active
+  operation; cancellation never rolls back a write already sent. Some console input and transport
+  operations can only observe cancellation at their own boundaries.
 
 ## Metadata display limits
 
-The current UI labels the manufacturing `IsFips` indicator as “FIPS Mode”; it is not an active operating
-mode. Core also currently decodes FIPS capability/approval tags with the wrong bit mapping, so displayed
-masks and derived filters cannot establish application approval. Product flag bits can remain in
-`FormFactor`, so base-enum equality and formatting may miss flagged devices. These limitations are about
-metadata interpretation, not a claim about a device's certification status.
+The UI labels `IsFips` as the FIPS manufacturing indicator, not an active operating mode. Reported
+capability and approval metadata is not proof of approved operation. The displayed form factor is
+the base form factor; callers can inspect `DeviceInfo.RawFormFactor` for the original byte.
 
 ## Supported Transports
 

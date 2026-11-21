@@ -117,7 +117,7 @@ public static class CapabilitiesMenu
         if (info.IsLocked)
         {
             AnsiConsole.WriteLine();
-            lockCode = LockCodePrompt.PromptForLockCode("Device is locked. Enter lock code to proceed:");
+            lockCode = LockCodePrompt.PromptForLockCode("Device is locked. Enter lock code to proceed", cancellationToken);
             if (lockCode is null)
             {
                 return;

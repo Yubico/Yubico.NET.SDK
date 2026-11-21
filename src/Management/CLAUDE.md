@@ -39,7 +39,7 @@ The active standalone `examples/ManagementTool/Cli/Prompts/DeviceSelector.cs` is
 concrete selector in `Cli.Shared`, configured with SmartCard and `RequireChoice`. Do not widen it to HID
 because the SDK supports HID: this preserves the actual tool's eligibility, including its reset menu.
 Full All discovery already groups composite views; the old three-entries-per-key rationale is obsolete.
-Unified `YkCommandBase` reuses selection metadata for its context/banner, while Management info/config/reset
+Unified `YkCommandBase` reuses selection metadata for its context/banner, while Management info/config
 explicitly call `ReadLiveInfoAsync`, carrying `SessionOptions` and never substituting stale context info on failure.
 See [CLI selection policies](../../docs/usage/device-discovery.md#selection-in-the-cli-examples).
 
@@ -103,10 +103,10 @@ public async Task MultiFormFactor_Test(YubiKeyTestState state)
 }
 ```
 
-Current Core parsing can retain product flag bits in `FormFactor`, so exact base-enum filters can miss
-flagged devices. The enum itself is not a flags enum. FIPS capability/approval tags also currently use
-the wrong bit mapping; `FipsCapable`/`FipsApproved` filters and their derived helpers cannot establish
-application approval. `IsFips` is a distinct manufacturing indicator, not an operating mode. Do not
+Core parses the low nibble into `FormFactor`, so base-enum filters also match flagged devices. The full
+byte remains in `RawFormFactor`. `FipsCapable`/`FipsApproved` filters describe
+reported applet metadata; they do not establish approved operation. `IsFips` is a distinct manufacturing
+indicator, not an operating mode. Do not
 use these fields to identify Bio MPE reset eligibility.
 
 ## YubiKeyTestState - Device Context
@@ -511,10 +511,9 @@ public async Task PivCapability_EnabledDevices_Accessible(YubiKeyTestState state
 
 ### 5. FIPS Metadata Tests
 
-The shared harness exposes `FipsCapable` and `FipsApproved` filters, but the current Core decoder uses
-the application-bit mapping for the distinct FIPS-tag encoding. The derived masks and filters are not
-reliable evidence of application approval. Comparing a filter result with the same decoded property
-only checks consistency of that interpretation; it does not validate the mapping or approved operations.
+The shared harness exposes `FipsCapable` and `FipsApproved` filters over Core's decoded FIPS-tag mapping.
+Comparing a filter result with the same decoded property checks consistency of that interpretation; it
+does not validate the mapping or approved operations. The FIPS tags accept one or two big-endian bytes.
 Keep decoder/filter fixture work separate from hardware operation tests. `IsFips` comes from a distinct
 manufacturing flag and must not be relabeled as an active FIPS mode.
 
@@ -679,8 +678,8 @@ await session.SetDeviceConfigAsync(
 Timeout setters validate 0–3600 auto-eject seconds and 0–60 challenge-response seconds at assignment.
 Those are SDK limits, not firmware maxima. Zero disables auto-eject or requests the challenge-response
 default (normally 15 seconds), respectively. Auto-eject is an inactivity timer; assigning it does not
-implicitly set TouchEject. `Validate()` only rejects exact USB `None`; it does not validate supported
-device applications or all arbitrary enum widths. Check supported masks before writing.
+implicitly set TouchEject. `Validate()` rejects exact USB `None` and out-of-width request values before
+encoding; in-width unknown bits are preserved. Check device-supported masks before writing.
 
 `CurrentLockCode` authorizes each protected command. `NewLockCode` sets/replaces the code, or removes
 it when all sixteen bytes are zero; an empty memory value is invalid. The session borrows both buffers
@@ -732,15 +731,19 @@ for Final, whereas `VersionQualifier.ToString()` itself includes the qualifier t
 
 Operations call inherited `EnsureSupports(FeatureSetConfig)` (5.0.0) or
 `EnsureSupports(FeatureDeviceReset)` (5.6.0). Do not replace these with a local `_version` comparison:
-the inherited check uses effective `FirmwareVersion`, including overrides and major-zero development
-version policy. Alpha/Beta display qualifiers are not that major-zero bypass.
+the inherited check uses effective `FirmwareVersion`, including overrides and the optimistic development
+policy. Management passes the same effective version for SCP admission, including major zero for a
+present non-final qualifier unless firmware was explicitly overridden. Protocol setup still receives the numeric
+version from the live probe when known, otherwise the available
+cached version, unless the caller overrides it. Do not pass synthetic feature firmware to the formatter.
 
-`FeatureDeviceInfo` declares the supported 4.1.0 read minimum, but current read/factory paths do not
-enforce it. Do not promise `NotSupportedException` before an unsupported read. Likewise the generic
-write check does not enforce NFC restriction's 5.7/NFC-hardware conditions or device-supported masks.
+`FeatureDeviceInfo` enforces the 4.1.0 minimum before public reads, not during the factory's best-effort
+probe. The generic write check does not enforce device-supported masks. A separate 5.7 feature gate applies to
+`NfcRestricted = true` only; do not infer NFC hardware support or add a read before a write.
 Reset's firmware check is not a family check: the documented operation resets Bio MPE's FIDO/PIV
 applications and shared PIN, retaining the F9 attestation slot. It does not establish Management lock
-recovery. Do not add a family policy or reset-success lifecycle policy as a documentation-only change.
+recovery. After a confirmed response retire the old protocol, clear ready/authenticated state, reselect,
+read fresh metadata and re-establish optional SCP on the same connection. A failed refresh ends the session.
 
 ## Session Initialization Pattern
 
@@ -754,23 +757,26 @@ public static Task<ManagementSession> CreateAsync(
     ConstructInitializedAsync(
         connection,
         options,
-        () => new ManagementSession(connection),
-        (session, token) => session.InitializeAsync(
-            options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+    () => new ManagementSession(connection, options),
+    (session, token) => session.InitializeAsync(token),
         cancellationToken);
 ```
 
 The applet callback calls `PrepareProtocolAsync`, then explicitly dispatches discovery: SmartCard uses
 `SmartCardBackend.SelectApplicationAsync`, OTP HID uses `OtpBackend.ReadStatusVersionAsync`, and FIDO HID
 reads firmware from the prepared protocol. These static probes do not require an operational backend.
-Firmware resolution prefers DeviceInfo and falls back to the discovered version. After `ConfigureProtocolAsync`,
+Feature firmware prefers the discovery snapshot supplied by the device extension, then the applet's own
+metadata probe and transport version; absent or prerelease firmware admits gates optimistically. Cache
+values never stand in for live metadata or feed the post-reset refresh. After `ConfigureProtocolAsync`,
 the session constructs its backend with the effective protocol. The shared factory marks the session ready only
-after this callback completes. SCP parameters are callback inputs, not session fields.
+after this callback completes. The session snapshots settings needed for a refresh, including the borrowed
+SCP parameters. The owner must keep those parameters alive through any later reset.
 
 The metadata probe occurs before optional SCP establishment; an SCP-authenticated return does not imply
 that every initialization exchange used SCP. A firmware override does not skip probes. It configures
 the protocol and feature checks, while `_version` retains discovered metadata for subsequent reads.
-Non-cancellation metadata-probe failures fall back to the transport version; cancellation propagates.
+Non-cancellation metadata-probe failures fall back to the transport version if available. Mandatory
+initialization exchange failures and cancellation propagate, not as fabricated device metadata.
 
 Public reads pass captured `_version` as the decoder default: it wins over tag 05, while non-final
 qualifier firmware can win again. Initial probing passes null. Neither public reads nor configuration
@@ -811,7 +817,6 @@ private IManagementBackend _backend = null!;
 internal interface IManagementBackend
 {
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
-    ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
 }
 ```
 
@@ -832,7 +837,8 @@ dispatching reset or rejecting HID; HID backends do not expose unsupported reset
 1. **Backend owns nothing**: it borrows the protocol and holds no disposable state, so it is not `IDisposable`. Ownership rule is Core's — see [Core CLAUDE.md](../Core/CLAUDE.md) gotcha #2 and the `IProtocol` doc comment: the session disposes the protocol, and whoever created the connection disposes it.
 2. **SCP wrapping works**: the backend can be recreated over an SCP-wrapped protocol without disposing anything.
 3. **Narrow delegation**: writes share one backend contract; info reads use Core and reset is SmartCard-only.
-   There is no current public legacy `SetMode` surface, even though the backend retains that primitive.
+    There is no public legacy `SetMode` surface. The dormant SmartCard primitive packs `<BBH` and
+    uses P1 `0x11`. For firmware 5.0 and up or development firmware, use DeviceConfig, never legacy SET_MODE.
 
 `ManagementBackendLifecycleTests` pins the non-disposable invariant. It does not prove zero branching,
 hardware feature support, or correctness of Core's multi-page reader.
@@ -909,10 +915,10 @@ var yubiKey = devices.SingleOrDefault(device => device.SerialNumber == 12345678)
    reset-based recovery; retain it securely until a replacement/removal write succeeds.
 2. **Reboot**: A reboot request is not factory reset. End old scopes and rediscover/reopen afterwards;
    neither three seconds nor a discovery result's position proves the intended key is ready.
-3. **USB reachability**: Exact USB `None` is rejected; device-supported-mask and arbitrary-width validation
-   are not comprehensive. Preserve a supported application and a recovery route.
-4. **Metadata interpretation**: Flagged form factors can miss equality filters; current FIPS masks use the
-   wrong mapping. Do not derive approval, active mode or product-family eligibility from these filters.
+3. **USB reachability**: Exact USB `None` and out-of-width masks are rejected, but device support is not
+   checked. Preserve a supported application and a recovery route.
+4. **Metadata interpretation**: Base form factors exclude product flags. Do not derive approved operation,
+   active mode or product-family eligibility from metadata filters.
 5. **NFC**: Check hardware and 5.7+ support for restriction; false encoding alone is not verified recovery.
 6. **Test proof**: Readback checks persisted metadata, not necessarily active interfaces. A broad
    `ThrowsAnyAsync<Exception>` does not isolate authentication or lock enforcement. Existing restoration

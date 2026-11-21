@@ -14,6 +14,7 @@
 
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
@@ -35,35 +36,33 @@ public class ManagementLockCodeTests
     [WithYubiKey(MinFirmware = "5.0.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task LockCode_SetAndClear_ProtectsConfigurationChanges(YubiKeyTestState state)
     {
-        await state.WithManagementAsync(async (mgmt, deviceInfo) =>
+        await state.WithManagementAsync(async (mgmt, _) =>
         {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
             // Skip if device is already locked (we cannot set a new lock code without the current one)
             Skip.If(deviceInfo.IsLocked,
                 "Device already has a lock code set; cannot test lock code lifecycle.");
 
-            // Generate a 16-byte lock code
-            byte[] lockCode = new byte[16];
-            RandomNumberGenerator.Fill(lockCode);
-
-            // All-zero code is used to clear the lock
-            byte[] clearCode = new byte[16];
-
+            byte[] lockCode = CreateFixtureCode();
+            bool confirmed = false;
+            Exception? primary = null;
             try
             {
                 // Set a lock code on the device
                 var configToLock = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
                 await mgmt.SetDeviceConfigAsync(configToLock, new SetDeviceConfigOptions { NewLockCode = lockCode });
+                confirmed = true;
 
                 // Verify the device is now locked
                 var lockedInfo = await mgmt.GetDeviceInfoAsync();
                 Assert.True(lockedInfo.IsLocked);
 
-                // Expect rejection without the code. Any exception satisfies this assertion,
-                // so unrelated failures can pass it; the device error/status is not pinned.
+                // Require a SmartCard command rejection, not a validation or transport failure.
+                // The exact device status remains a hardware qualification question.
                 var configWithoutCode = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
-                await Assert.ThrowsAnyAsync<Exception>(async () =>
+                await Assert.ThrowsAsync<ApduException>(async () =>
                     await mgmt.SetDeviceConfigAsync(configWithoutCode));
 
                 // Verify that a config change WITH the lock code succeeds
@@ -71,45 +70,39 @@ public class ManagementLockCodeTests
 
                 await mgmt.SetDeviceConfigAsync(configWithCode, new SetDeviceConfigOptions { CurrentLockCode = lockCode });
             }
+            catch (Exception exception)
+            {
+                primary = exception;
+                throw;
+            }
             finally
             {
-                // Clear the lock code by setting it to all zeros
-                var unlockConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
-
-                await mgmt.SetDeviceConfigAsync(
-                    unlockConfig,
-                    new SetDeviceConfigOptions { CurrentLockCode = lockCode, NewLockCode = clearCode });
-
-                // Verify the device is no longer locked
-                var unlockedInfo = await mgmt.GetDeviceInfoAsync();
-                Assert.False(unlockedInfo.IsLocked);
-
-                // A preceding cleanup failure skips this zeroing; it needs an independent finally.
-                CryptographicOperations.ZeroMemory(lockCode);
+                await RestoreAsync(mgmt, lockCode, confirmed, null, primary);
             }
-        });
+        }, preferredConnection: ConnectionType.SmartCard);
     }
 
     /// <summary>
     ///     Verifies that the auto-eject timeout can be changed while
     ///     a lock code is active, provided the lock code is supplied.
-    ///     Teardown sends the cached timeout and requests lock removal without readback; it does not verify restoration.
+    ///     Restores the original live timeout and removes the test code; checks both on readback.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "5.0.0", ConnectionType = ConnectionType.SmartCard)]
     public async Task LockCode_ConfigChangeWithLockCode_Succeeds(YubiKeyTestState state)
     {
-        await state.WithManagementAsync(async (mgmt, deviceInfo) =>
+        await state.WithManagementAsync(async (mgmt, _) =>
         {
+            var deviceInfo = await mgmt.GetDeviceInfoAsync();
             Skip.If(deviceInfo.IsLocked,
                 "Device already has a lock code set; cannot test lock code lifecycle.");
 
-            byte[] lockCode = new byte[16];
-            RandomNumberGenerator.Fill(lockCode);
-            byte[] clearCode = new byte[16];
-
             var originalAutoEject = deviceInfo.AutoEjectTimeout;
+            Assert.InRange(originalAutoEject, (ushort)0, (ushort)3600);
             ushort newAutoEject = originalAutoEject == 10 ? (ushort)20 : (ushort)10;
+            byte[] lockCode = CreateFixtureCode();
+            bool confirmed = false;
+            Exception? primary = null;
 
             try
             {
@@ -117,6 +110,7 @@ public class ManagementLockCodeTests
                 var lockConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled };
 
                 await mgmt.SetDeviceConfigAsync(lockConfig, new SetDeviceConfigOptions { NewLockCode = lockCode });
+                confirmed = true;
 
                 // Change auto-eject timeout with lock code
                 var changeConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = newAutoEject };
@@ -127,18 +121,46 @@ public class ManagementLockCodeTests
                 var updatedInfo = await mgmt.GetDeviceInfoAsync();
                 Assert.Equal(newAutoEject, updatedInfo.AutoEjectTimeout);
             }
+            catch (Exception exception)
+            {
+                primary = exception;
+                throw;
+            }
             finally
             {
-                // Attempt to restore the cached timeout and clear the code; no restoration readback follows.
-                var restoreConfig = new DeviceConfig { UsbEnabled = deviceInfo.UsbEnabled, AutoEjectTimeout = originalAutoEject };
-
-                await mgmt.SetDeviceConfigAsync(
-                    restoreConfig,
-                    new SetDeviceConfigOptions { CurrentLockCode = lockCode, NewLockCode = clearCode });
-
-                // A preceding cleanup failure skips this zeroing; it needs an independent finally.
-                CryptographicOperations.ZeroMemory(lockCode);
+                await RestoreAsync(mgmt, lockCode, confirmed, originalAutoEject, primary);
             }
-        });
+        }, preferredConnection: ConnectionType.SmartCard);
+    }
+
+    // Dedicated, allow-listed keys only. Keep the fixture credential reproducible for a human recovery
+    // if a write has an uncertain outcome; do not generate or log a code that cannot be recovered later.
+    private static byte[] CreateFixtureCode() => "YK-MGMT-LOCKTEST"u8.ToArray();
+
+    private static async Task RestoreAsync(
+        IManagementSession session, byte[] code, bool confirmed, ushort? originalTimeout, Exception? primary)
+    {
+        try
+        {
+            if (!confirmed)
+                return;
+
+            await session.SetDeviceConfigAsync(
+                new DeviceConfig { AutoEjectTimeout = originalTimeout },
+                new SetDeviceConfigOptions { CurrentLockCode = code, NewLockCode = new byte[16] });
+            var restored = await session.GetDeviceInfoAsync();
+            Assert.False(restored.IsLocked);
+            if (originalTimeout is { } timeout)
+                Assert.Equal(timeout, restored.AutoEjectTimeout);
+        }
+        catch (Exception cleanup) when (primary is not null)
+        {
+            throw new AggregateException("Management fixture operation and restoration both failed.", primary, cleanup);
+        }
+        finally
+        {
+            // The test fixture code remains reconstructible for recovery; this operation's buffer does not.
+            CryptographicOperations.ZeroMemory(code);
+        }
     }
 }

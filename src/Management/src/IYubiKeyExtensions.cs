@@ -88,7 +88,7 @@ public static class IYubiKeyExtensions
         /// </returns>
         /// <exception cref="ArgumentNullException"><paramref name="config" /> is null.</exception>
         /// <exception cref="ArgumentException">A lock code is not 16 bytes, or the transport preference is invalid.</exception>
-        /// <exception cref="InvalidOperationException">The USB mask is explicitly None, or initialization cannot determine firmware.</exception>
+        /// <exception cref="InvalidOperationException">The USB mask is explicitly None.</exception>
         /// <exception cref="NotSupportedException">Firmware, transport, or SCP settings are unsupported.</exception>
         /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
         /// <exception cref="ApduException">The device rejects a configuration command over SmartCard.</exception>
@@ -115,6 +115,7 @@ public static class IYubiKeyExtensions
         ///     without trying another interface. SCP requires SmartCard; an explicit HID preference with
         ///     SCP is rejected before initialization I/O.
         ///     Firmware probing and a best-effort device-information read precede optional SCP establishment.
+        ///     Cached device information takes precedence for firmware checks, not for the metadata returned by live reads.
         ///     A firmware override affects protocol configuration and feature checks, not discovery or
         ///     reported hardware metadata. See <see cref="ManagementSession.CreateAsync" /> for initialization
         ///     details and <see cref="IManagementSession" /> for operation sequencing and cancellation.
@@ -134,7 +135,6 @@ public static class IYubiKeyExtensions
         /// <exception cref="ConnectionInUseException">The physical YubiKey already has a live connection.</exception>
         /// <exception cref="ArgumentException">The preferred connection type is not one supported concrete transport.</exception>
         /// <exception cref="NotSupportedException">The selected transport is not exposed, no supported transport is exposed, or SCP is requested over HID.</exception>
-        /// <exception cref="InvalidOperationException">Initialization cannot determine a firmware version.</exception>
         public async Task<ManagementSession> CreateManagementSessionAsync(
             SessionCreationOptions? options = null,
             CancellationToken cancellationToken = default)
@@ -155,9 +155,10 @@ public static class IYubiKeyExtensions
                     async (connection, ct) =>
                     {
                         var session = await ManagementSession
-                            .CreateAsync(
+                            .CreateWithCachedDeviceInfoAsync(
                                 connection,
                                 sessionOptions,
+                                yubiKey.CachedDeviceInfo,
                                 ct)
                             .ConfigureAwait(false);
 

@@ -70,11 +70,12 @@ public class ManagementSessionAdvancedTests
         // This test only runs on devices with firmware 5.3.0 or newer
         Assert.True(state.FirmwareVersion.IsAtLeast(5, 3, 0));
 
+        using var scpKeyParams = Scp03KeyParameters.Default;
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
             var info = await mgmt.GetDeviceInfoAsync();
             Assert.True(info.FirmwareVersion.IsAtLeast(5, 0, 0));
-        }, scpKeyParams: Scp03KeyParameters.Default);
+        }, scpKeyParams: scpKeyParams);
     }
 
     /// <summary>
@@ -391,24 +392,19 @@ public class ManagementSessionAdvancedTests
     }
 
     /// <summary>
-    ///     Reads a device that exposes SmartCard using default Management selection.
-    ///     The row filter is asserted, but the session's actual connection type is not.
+    ///     Reads live metadata over SmartCard; the selected device may also expose other interfaces.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-    public async Task GetDeviceInfo_CcidOnly_UsesSmartCardConnection(YubiKeyTestState state)
+    public async Task GetDeviceInfo_PinnedToSmartCard_UsesSmartCardConnection(YubiKeyTestState state)
     {
-        // This is the requested row filter, not an assertion of the session's connection type.
-        Assert.Equal(ConnectionType.SmartCard, state.ConnectionType);
-
-        await state.WithManagementAsync(async (mgmt, cachedDeviceInfo) =>
+        await state.WithManagementAsync(async (mgmt, _) =>
         {
+            Assert.Equal(ConnectionType.SmartCard, mgmt.ConnectionType);
             var deviceInfo = await mgmt.GetDeviceInfoAsync();
-
-            // Compare serial and firmware using the helper's unpinned default session.
             Assert.Equal(state.SerialNumber, deviceInfo.SerialNumber);
             Assert.Equal(state.FirmwareVersion, deviceInfo.FirmwareVersion);
-        });
+        }, preferredConnection: ConnectionType.SmartCard);
     }
 
     /// <summary>

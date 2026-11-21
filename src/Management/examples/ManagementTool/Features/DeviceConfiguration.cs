@@ -81,7 +81,7 @@ public static class DeviceConfiguration
                 cancellationToken);
             return ConfigResult.Succeeded(reboot);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ConfigResult.Failed($"Failed to set capabilities: {ex.Message}");
         }
@@ -122,7 +122,7 @@ public static class DeviceConfiguration
                 cancellationToken);
             return ConfigResult.Succeeded(reboot);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ConfigResult.Failed($"Failed to set timeouts: {ex.Message}");
         }
@@ -156,7 +156,7 @@ public static class DeviceConfiguration
                 cancellationToken);
             return ConfigResult.Succeeded(reboot);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ConfigResult.Failed($"Failed to set device flags: {ex.Message}");
         }
@@ -192,7 +192,7 @@ public static class DeviceConfiguration
                 cancellationToken);
             return ConfigResult.Succeeded(reboot);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ConfigResult.Failed($"Failed to set NFC restricted: {ex.Message}");
         }
@@ -250,7 +250,7 @@ public static class DeviceConfiguration
                 cancellationToken);
             return ConfigResult.Succeeded(rebootRequired: false);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ConfigResult.Failed($"Failed to set lock code: {ex.Message}");
         }
@@ -287,7 +287,7 @@ public static class DeviceConfiguration
                 cancellationToken);
             return ConfigResult.Succeeded(rebootRequired: false);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ConfigResult.Failed($"Failed to remove lock code: {ex.Message}");
         }

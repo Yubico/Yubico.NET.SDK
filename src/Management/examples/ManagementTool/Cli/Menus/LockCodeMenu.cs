@@ -100,7 +100,7 @@ public static class LockCodeMenu
         byte[]? newLockCode = null;
         try
         {
-            newLockCode = LockCodePrompt.PromptForNewLockCode("Enter new lock code:");
+            newLockCode = LockCodePrompt.PromptForNewLockCode("Enter new lock code", cancellationToken);
             if (newLockCode is null)
             {
                 return;
@@ -148,14 +148,14 @@ public static class LockCodeMenu
         byte[]? newLockCode = null;
         try
         {
-            currentLockCode = LockCodePrompt.PromptForLockCode("Enter current lock code:");
+            currentLockCode = LockCodePrompt.PromptForLockCode("Enter current lock code", cancellationToken);
             if (currentLockCode is null)
             {
                 return;
             }
 
             AnsiConsole.WriteLine();
-            newLockCode = LockCodePrompt.PromptForNewLockCode("Enter new lock code:");
+            newLockCode = LockCodePrompt.PromptForNewLockCode("Enter new lock code", cancellationToken);
             if (newLockCode is null)
             {
                 return;
@@ -206,7 +206,7 @@ public static class LockCodeMenu
         byte[]? currentLockCode = null;
         try
         {
-            currentLockCode = LockCodePrompt.PromptForLockCode("Enter current lock code:");
+            currentLockCode = LockCodePrompt.PromptForLockCode("Enter current lock code", cancellationToken);
             if (currentLockCode is null)
             {
                 return;

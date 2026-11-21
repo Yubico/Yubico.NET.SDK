@@ -35,9 +35,8 @@ public interface IManagementSession : IApplicationSession
     /// <summary>Queries the device's current metadata, capabilities, and configuration.</summary>
     /// <remarks>
     ///     Each call queries the device rather than returning cached session metadata. Fields such as the
-    ///     serial number are optional and depend on the device and transport. Firmware 4.1.0 or later is
-    ///     supported; this method does not enforce that minimum before sending the request. Unsupported
-    ///     devices can instead fail during communication or response parsing.
+    ///     serial number are optional and depend on the device and transport. Public reads require
+    ///     effective firmware 4.1.0 or later, with the usual optimistic check for development firmware.
     ///     Later reads use the firmware captured during initialization as the decoder's default, which
     ///     takes precedence over the ordinary firmware tag; a non-final version qualifier can replace it.
     ///     A firmware override controls session policy, not this returned value. Neither this read nor a
@@ -47,6 +46,7 @@ public interface IManagementSession : IApplicationSession
     /// </remarks>
     /// <param name="cancellationToken">A token requesting cancellation, subject to the transport's exchange boundaries.</param>
     /// <returns>The device information reported by the key.</returns>
+    /// <exception cref="NotSupportedException">The effective firmware is below the public read minimum.</exception>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
     /// <exception cref="InvalidOperationException">The session is not initialized, or another exchange is in progress.</exception>
     /// <exception cref="OperationCanceledException">Cancellation is observed at a transport-supported boundary.</exception>
@@ -58,7 +58,8 @@ public interface IManagementSession : IApplicationSession
     ///     Null configuration properties are omitted. Non-null application masks and flags replace their
     ///     respective sets, rather than adding bits. Preserve at least one supported USB application.
     ///     The SDK rejects an explicit USB mask of None, but does not check the mask against this device's
-    ///     supported applications or enforce each field's firmware requirements.
+    ///     supported applications. Masks must fit sixteen bits and flags must fit eight bits. Enabling NFC
+    ///     restriction requires effective firmware 5.7.0; the device determines hardware support.
     ///     The effective session firmware must be at least 5.0.0; major-zero development versions bypass
     ///     this check, and the session's firmware override applies. Passing the check does not guarantee
     ///     that the device supports every requested setting.
@@ -85,7 +86,8 @@ public interface IManagementSession : IApplicationSession
     /// <returns>A task representing the configuration write.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="config" /> is null.</exception>
     /// <exception cref="ArgumentException">A supplied lock code is not 16 bytes.</exception>
-    /// <exception cref="NotSupportedException">The effective session firmware does not support configuration writes.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A mask or flags value exceeds its wire width.</exception>
+    /// <exception cref="NotSupportedException">The effective firmware does not support configuration writes or enabling NFC restriction.</exception>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
     /// <exception cref="InvalidOperationException">The USB mask is explicitly None, or another exchange is in progress.</exception>
     /// <exception cref="OperationCanceledException">Cancellation is observed; configuration already sent is not rolled back.</exception>
@@ -106,8 +108,10 @@ public interface IManagementSession : IApplicationSession
     ///     <see cref="Yubico.YubiKit.Core.Sessions.SessionCreationOptions.FirmwareVersionOverride" /> applies.
     ///     The SDK does not check the product family; passing the firmware check does not establish support.
     ///     HID FIDO and HID OTP sessions are rejected without sending a reset command.
-    ///     Success does not refresh metadata, invalidate the managed session, or establish a new secure
-    ///     channel. End the old session/connection scopes and rediscover the intended key before further use.
+    ///     After confirmed success, this session reselects Management, refreshes metadata and, if configured,
+    ///     establishes a fresh secure channel using the original caller-owned parameters. Renewed setup
+    ///     failure ends the session and preserves its cause. An exchange failure before confirmation is not
+    ///     evidence that reset completed; if its outcome is uncertain, rediscover before further use.
     /// </remarks>
     /// <param name="cancellationToken">A token checked before exchange admission; it does not interrupt an admitted SmartCard reset or undo it.</param>
     /// <returns>A task representing the asynchronous reset operation.</returns>
@@ -118,7 +122,7 @@ public interface IManagementSession : IApplicationSession
     ///     The device rejects the reset command, including when whole-device reset is not implemented.
     /// </exception>
     /// <exception cref="ObjectDisposedException">The session has been disposed.</exception>
-    /// <exception cref="InvalidOperationException">Another exchange is in progress.</exception>
+    /// <exception cref="InvalidOperationException">Another exchange is in progress, or confirmed reset was followed by a failed session refresh.</exception>
     /// <exception cref="OperationCanceledException">Cancellation is observed before the reset exchange is admitted.</exception>
     /// <example>
     ///     For a discovered Bio MPE <see cref="IYubiKey" /> named <c>device</c> and a

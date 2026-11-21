@@ -140,27 +140,37 @@ public sealed record DeviceConfig
     ///     <para>
     ///         A <see langword="null" /> value omits the restriction setting. A <see langword="false" />
     ///         value sends an explicit zero byte for the setting. Use USB power to remove the restriction.
-    ///         The SDK does not check this property's firmware or NFC-support requirements before sending it.
+    ///         The SDK checks the 5.7 firmware minimum for <see langword="true" /> only. The device
+    ///         determines whether the hardware supports restriction.
     ///     </para>
     /// </remarks>
     public bool? NfcRestricted { get; init; }
 
     /// <summary>
-    ///     Checks that <see cref="UsbEnabled" /> is not explicitly set to <see cref="DeviceCapabilities.None" />.
+    ///     Checks request-field widths and rejects an explicitly empty USB capability mask.
     ///     Called by <see cref="ManagementSession.SetDeviceConfigAsync" /> before anything is sent to the key.
     /// </summary>
     /// <remarks>
     ///     A <see langword="null" /> USB mask leaves the current setting unchanged and passes this check.
-    ///     This method does not check mask widths, supported applications or firmware requirements.
+    ///     Unknown bits within the wire width are preserved. This method does not check supported
+    ///     applications or firmware requirements.
     ///     Timeout ranges are checked separately when their properties are assigned.
     /// </remarks>
     /// <exception cref="InvalidOperationException">
     ///     <see cref="UsbEnabled" /> is <see cref="DeviceCapabilities.None" />.
     /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException">A mask or flags value exceeds its wire width.</exception>
     public void Validate()
     {
         if (UsbEnabled == DeviceCapabilities.None)
             throw new InvalidOperationException("At least one USB capability must be enabled.");
+
+        if (UsbEnabled is { } usb)
+            ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)usb, ushort.MaxValue, nameof(UsbEnabled));
+        if (NfcEnabled is { } nfc)
+            ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)nfc, ushort.MaxValue, nameof(NfcEnabled));
+        if (DeviceFlags is { } flags)
+            ArgumentOutOfRangeException.ThrowIfGreaterThan((uint)flags, byte.MaxValue, nameof(DeviceFlags));
     }
 
     /// <summary>

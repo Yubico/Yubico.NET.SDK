@@ -2,38 +2,60 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
+using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Cli.Shared.Cli;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 using Yubico.YubiKit.Management.Examples.ManagementTool.Commands;
 
-if (args.Length > 0)
+using var cts = CommandHelper.CreateConsoleCts();
+try
 {
-    // CLI dispatch mode
-    return await DispatchCliAsync(args);
+    return args.Length > 0
+        ? await DispatchCliAsync(args, cts.Token)
+        : await RunInteractiveAsync(cts.Token);
 }
-
-// Interactive selection performs fresh one-shot discovery on each retry; no tracking is needed.
-return await RunInteractiveAsync();
+catch (OperationCanceledException)
+{
+    Console.Error.WriteLine("Operation cancelled. Cancellation does not roll back a write already sent.");
+    return ExitCode.UserCancelled;
+}
 
 // --- CLI dispatch ---
 
-static async Task<int> DispatchCliAsync(string[] args)
+static async Task<int> DispatchCliAsync(string[] args, CancellationToken cancellationToken)
 {
     var command = args[0].ToLowerInvariant();
+    if (args.Length != 1)
+    {
+        if (args.Length == 2 && IsHelp(args[1]) && command is "info" or "config")
+        {
+            Console.WriteLine($"Usage: managementtool {command}");
+            Console.WriteLine(command == "info"
+                ? "Select a SmartCard YubiKey and display its device information."
+                : "Select a SmartCard YubiKey and display its current configuration.");
+            return 0;
+        }
+
+        Console.Error.WriteLine("Invalid arguments.");
+        PrintUsage();
+        return 1;
+    }
 
     return command switch
     {
-        "info" => await InfoCommand.ExecuteAsync(),
-        "config" => await ConfigCommand.ExecuteAsync(),
+        "info" => await InfoCommand.ExecuteAsync(cancellationToken),
+        "config" => await ConfigCommand.ExecuteAsync(cancellationToken),
         "-h" or "--help" or "help" => PrintUsageAndReturn(),
         _ => PrintUnknownCommand(command)
     };
 }
 
+static bool IsHelp(string argument) => argument is "-h" or "--help";
+
 // --- Interactive mode ---
 
-static async Task<int> RunInteractiveAsync()
+static async Task<int> RunInteractiveAsync(CancellationToken cancellationToken)
 {
     // Application banner
     AnsiConsole.Write(
@@ -44,24 +66,31 @@ static async Task<int> RunInteractiveAsync()
     AnsiConsole.MarkupLine("[grey]YubiKey Management Tool - SDK Example Application[/]");
     AnsiConsole.WriteLine();
 
-    using var cts = CommandHelper.CreateConsoleCts();
+    var result = await InteractiveMenuBuilder.Create("What would you like to do?")
+        .AddItem("Device Info", DeviceInfoMenu.RunAsync)
+        .AddItem("USB Capabilities", ct => CapabilitiesMenu.RunAsync(Transport.Usb, ct))
+        .AddItem("NFC Capabilities", ct => CapabilitiesMenu.RunAsync(Transport.Nfc, ct))
+        .AddItem("Timeouts", TimeoutsMenu.RunAsync)
+        .AddItem("Device Flags", DeviceFlagsMenu.RunAsync)
+        .AddItem("Lock Code", LockCodeMenu.RunAsync)
+        .AddItem("Factory Reset", ResetMenu.RunAsync)
+        .WithErrorHandler(ex =>
+        {
+            if (ex is OperationCanceledException)
+                System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw(ex);
+            AnsiConsole.MarkupLine($"[red]Error: {Markup.Escape(ex.Message)}[/]");
+        })
+        .RunAsync(cancellationToken);
 
-    return await InteractiveMenuBuilder.Create("What would you like to do?")
-        .AddItem("Device Info", ct => DeviceInfoMenu.RunAsync())
-        .AddItem("USB Capabilities", ct => CapabilitiesMenu.RunAsync(Transport.Usb))
-        .AddItem("NFC Capabilities", ct => CapabilitiesMenu.RunAsync(Transport.Nfc))
-        .AddItem("Timeouts", ct => TimeoutsMenu.RunAsync())
-        .AddItem("Device Flags", ct => DeviceFlagsMenu.RunAsync())
-        .AddItem("Lock Code", ct => LockCodeMenu.RunAsync())
-        .AddItem("Factory Reset", ct => ResetMenu.RunAsync())
-        .RunAsync(cts.Token);
+    cancellationToken.ThrowIfCancellationRequested();
+    return result;
 }
 
 // --- Usage strings ---
 
 static void PrintUsage()
 {
-    Console.Error.WriteLine("Usage: managementtool <command> [[options]]");
+    Console.Error.WriteLine("Usage: managementtool <command> [--help]");
     Console.Error.WriteLine();
     Console.Error.WriteLine("Commands:");
     Console.Error.WriteLine("  info        Display device information (firmware, serial, capabilities)");

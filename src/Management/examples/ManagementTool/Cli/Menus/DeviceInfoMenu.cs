@@ -62,11 +62,11 @@ public static class DeviceInfoMenu
 
         if (info.IsFips)
         {
-            OutputHelpers.WriteKeyValueMarkup("FIPS Mode", "[green]Yes[/]");
+            OutputHelpers.WriteKeyValueMarkup("FIPS manufacturing indicator", "[green]Yes[/]");
         }
         else
         {
-            OutputHelpers.WriteKeyValue("FIPS Mode", "No");
+            OutputHelpers.WriteKeyValue("FIPS manufacturing indicator", "No");
         }
 
         if (info.IsSky)

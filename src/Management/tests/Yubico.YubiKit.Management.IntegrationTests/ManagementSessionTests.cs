@@ -135,7 +135,7 @@ public class ManagementSessionTests
     ///     below can therefore fail on an older device that is not reported as a USB-A keychain.
     /// </summary>
     [SkippableTheory]
-    [WithYubiKey(MinFirmware = "5.0")]
+    [WithYubiKey(MinFirmware = "5.0.0")]
     [WithYubiKey(FormFactor = FormFactor.UsbAKeychain)]
     public async Task MultipleConfigurations_TestRunsOnMatchingDevices(YubiKeyTestState state) =>
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>

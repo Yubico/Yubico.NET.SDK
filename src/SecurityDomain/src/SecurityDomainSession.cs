@@ -193,7 +193,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
                     _configuration,
                     scpKeyParameters,
                     cancellationToken,
-                    admitUnverifiedScpFirmware: _admitUnverifiedFirmware)
+                    scpEligibilityFirmwareVersion: _admitUnverifiedFirmware ? FirmwareVersion.Default : null)
                 .ConfigureAwait(false);
         }
         catch (OperationCanceledException)

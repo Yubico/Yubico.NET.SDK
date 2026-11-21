@@ -14,8 +14,10 @@
 
 namespace Yubico.YubiKit.Management.UnitTests;
 
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
@@ -23,10 +25,15 @@ using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management.Backend;
 
+[CollectionDefinition(nameof(ManagementSessionLoggingCollection), DisableParallelization = true)]
+public sealed class ManagementSessionLoggingCollection;
+
+[Collection(nameof(ManagementSessionLoggingCollection))]
 public class ManagementSessionTests
 {
     [Fact]
@@ -45,12 +52,16 @@ public class ManagementSessionTests
     }
 
     [Fact]
-    public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
+    public async Task CreateAsync_AppletProbeFailure_ReleasesGuardWithoutDisposingBorrowedConnection()
     {
         var connection = new FailingSmartCardConnection();
+        var cancellationToken = TestContext.Current.CancellationToken;
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            ManagementSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
+            ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken));
+        // The exact type excludes ConnectionInUseException from a stale factory attachment.
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            ManagementSession.CreateAsync(connection, cancellationToken: cancellationToken));
 
         // Borrowed: a failed CreateAsync must not dispose a connection it did not create.
         Assert.Equal(0, connection.DisposeCount);
@@ -103,19 +114,6 @@ public class ManagementSessionTests
 
         Assert.True(backend.SawNonZeroConfig);
         Assert.True(backend.CapturedConfig.Span.ToArray().All(static b => b == 0));
-    }
-
-    [Fact]
-    public async Task ResetDeviceAsync_SmartCard_SendsDeviceResetApdu()
-    {
-        var protocol = new RecordingSmartCardProtocol();
-        var backend = new SmartCardBackend(protocol);
-        var session = CreateSessionForBackend(backend, new FirmwareVersion(5, 6, 0));
-
-        await session.ResetDeviceAsync(TestContext.Current.CancellationToken);
-
-        var command = Assert.Single(protocol.Commands);
-        Assert.Equal(0x1F, command.Ins);
     }
 
     [Theory]
@@ -183,7 +181,7 @@ public class ManagementSessionTests
             typeof(ManagementSession),
             BindingFlags.Instance | BindingFlags.NonPublic,
             binder: null,
-            [new InertSmartCardConnection()],
+            [new InertSmartCardConnection(), null],
             culture: null)!;
 
         typeof(ApplicationSession)
@@ -222,8 +220,126 @@ public class ManagementSessionTests
             return ValueTask.CompletedTask;
         }
 
-        public ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
+    }
+
+    [Fact]
+    public async Task LegacySmartCardMode_SendsSetModeWithDeviceSelector()
+    {
+        using var protocol = new RecordingSmartCardProtocol();
+        var backend = new SmartCardBackend(protocol);
+        await backend.SetModeAsync(new FirmwareVersion(4, 3, 0), 0x02, 0x0F, 0x1234, TestContext.Current.CancellationToken);
+
+        var command = Assert.Single(protocol.Commands);
+        Assert.Equal(0x16, command.Ins);
+        Assert.Equal(0x11, command.P1);
+        Assert.Equal(0, command.P2);
+        Assert.Equal(new byte[] { 0x02, 0x0F, 0x34, 0x12 }, protocol.CommandData);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(5)]
+    [InlineData(6)]
+    public async Task LegacySmartCardMode_DoesNotReachModernOrDevelopmentFirmware(int major)
+    {
+        using var protocol = new RecordingSmartCardProtocol();
+        var backend = new SmartCardBackend(protocol);
+        await Assert.ThrowsAsync<NotSupportedException>(() => backend.SetModeAsync(
+            new FirmwareVersion(major, 0, 0), 0x02, 0x0F, 0x1234, TestContext.Current.CancellationToken).AsTask());
+        Assert.Empty(protocol.Commands);
+    }
+
+    [Theory]
+    [InlineData(5, 6, true, false)]
+    [InlineData(5, 6, false, true)]
+    [InlineData(5, 6, null, true)]
+    [InlineData(5, 7, true, true)]
+    [InlineData(0, 0, true, true)]
+    public async Task SetDeviceConfigAsync_NfcRestriction_PreflightsOnlyTrue(
+        int major, int minor, bool? request, bool reachesBackend)
+    {
+        var protocol = new RecordingSmartCardProtocol();
+        var session = CreateSessionForBackend(new SmartCardBackend(protocol), new FirmwareVersion(major, minor, 0));
+        var config = new DeviceConfig { NfcRestricted = request };
+        var cancellationToken = TestContext.Current.CancellationToken;
+        if (!reachesBackend)
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.SetDeviceConfigAsync(config, cancellationToken: cancellationToken));
+            Assert.Empty(protocol.Commands);
+            return;
+        }
+
+        await session.SetDeviceConfigAsync(config, cancellationToken: cancellationToken);
+        Assert.Equal(0x1C, Assert.Single(protocol.Commands).Ins);
+        byte[] expected = request is { } restriction ? [3, 0x17, 1, restriction ? (byte)1 : (byte)0] : [0];
+        Assert.Equal(expected, protocol.CommandData);
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task SetDeviceConfigAsync_HeldWrite_ClearsOnlyItsEncodingAfterTermination(bool cancel, bool replacement)
+    {
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var backend = new HoldingBackend();
+        var session = CreateSessionForBackend(backend);
+        byte[] code = [0xA5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        try
+        {
+            await VerifyHeldWriteAsync(session, backend, code, replacement, cancel, cancellation);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(code);
+        }
+    }
+
+    private static async Task VerifyHeldWriteAsync(
+        ManagementSession session, HoldingBackend backend, byte[] code, bool replacement, bool cancel,
+        CancellationTokenSource cancellation)
+    {
+        var options = replacement
+            ? new SetDeviceConfigOptions { NewLockCode = code }
+            : new SetDeviceConfigOptions { CurrentLockCode = code };
+
+        var write = session.SetDeviceConfigAsync(new DeviceConfig(), options, cancellation.Token);
+        try
+        {
+            Assert.False(write.IsCompleted);
+            Assert.Equal(code, backend.Encoding.Span[3..]);
+        }
+        finally
+        {
+            if (cancel)
+                cancellation.Cancel();
+            else
+                backend.Fail();
+
+            if (cancel)
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => write);
+            else
+                Assert.Same(backend.Failure, await Assert.ThrowsAsync<InvalidOperationException>(() => write));
+        }
+
+        Assert.False(backend.Encoding.Span.ContainsAnyExcept((byte)0));
+        Assert.Equal(new byte[] { 0xA5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }, code);
+    }
+
+    private sealed class HoldingBackend : IManagementBackend
+    {
+        private readonly TaskCompletionSource _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public InvalidOperationException Failure { get; } = new("Scripted backend failure.");
+        public ReadOnlyMemory<byte> Encoding { get; private set; }
+
+        public ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken)
+        {
+            Encoding = config;
+            return new ValueTask(_completion.Task.WaitAsync(cancellationToken));
+        }
+
+        public void Fail() => _completion.SetException(Failure);
 
     }
 
@@ -266,11 +382,321 @@ public class ManagementSessionTests
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 
+    [Theory]
+    [InlineData(4, 0, false, false)]
+    [InlineData(4, 1, false, true)]
+    [InlineData(4, 1, true, false)]
+    [InlineData(0, 0, false, true)]
+    public async Task GetDeviceInfoAsync_AppliesEffectiveFirmwareFloorOnlyToPublicReads(
+        int major, int minor, bool useOverride, bool supported)
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection((byte)major, (byte)minor);
+        var options = new SessionCreationOptions { FirmwareVersionOverride = useOverride ? new FirmwareVersion(4, 0, 9) : null };
+        await using var session = await ManagementSession.CreateAsync(connection, options, cancellationToken);
+
+        Assert.Equal(1, connection.Reads);
+        if (supported)
+        {
+            var info = await session.GetDeviceInfoAsync(cancellationToken);
+            Assert.Equal(new FirmwareVersion(major, minor, 0), info.FirmwareVersion);
+            Assert.Equal(2, connection.Reads);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.GetDeviceInfoAsync(cancellationToken));
+            Assert.Equal(1, connection.Reads);
+        }
+    }
+
+    [Fact]
+    public async Task CreateAsync_UnknownFirmwareAfterSuccessfulSelect_AllowsGatesButDoesNotFabricateMetadata()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(4, 0) { UnknownSelectVersion = true };
+        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+
+        Assert.True(session.IsSupported(new Feature("configuration", 5, 0, 0)));
+        _ = await Assert.ThrowsAsync<ApduException>(() => session.GetDeviceInfoAsync(ct));
+        Assert.Equal(2, connection.Reads);
+    }
+
+    internal sealed class VersionedSmartCardConnection(byte major, byte minor) : ISmartCardConnection
+    {
+        public int Reads { get; private set; }
+        public int Selects { get; private set; }
+        public byte[] ResetCommand { get; private set; } = [];
+        public bool RejectReset { get; init; }
+        public bool FailReselect { get; init; }
+        public bool UnknownSelectVersion { get; init; }
+        public VersionQualifierType? ReportedQualifier { get; init; }
+        public int? InitializeUpdateFrameLength { get; private set; }
+        public bool ExtendedCapable { get; init; }
+        public byte[] ConfigurationCommand { get; private set; } = [];
+        public Exception? DisposalFailure { get; init; }
+        public int DisposeAttempts { get; private set; }
+        public Transport Transport => Transport.Usb;
+        public ConnectionType Type => ConnectionType.SmartCard;
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            byte[] response = command.Span[1] switch
+            {
+                0xA4 => Select(),
+                0x1D => ReadInfo(),
+                0x1C => WriteConfig(command),
+                0x1F => Reset(command),
+                0x50 => RejectInitializeUpdate(command.Length),
+                _ => throw new InvalidOperationException("Unexpected Management command."),
+            };
+            return Task.FromResult<ReadOnlyMemory<byte>>(response);
+        }
+
+        private byte[] Select()
+        {
+            Selects++;
+            if (UnknownSelectVersion)
+                return [0x90, 0];
+            return FailReselect && Selects > 1
+                ? [0x6A, 0x82]
+                : [.. System.Text.Encoding.UTF8.GetBytes($"{major}.{minor}.0"), 0x90, 0];
+        }
+
+        private byte[] Reset(ReadOnlyMemory<byte> command)
+        {
+            ResetCommand = command.ToArray();
+            return RejectReset ? [0x69, 0x85] : [0x90, 0];
+        }
+
+        private byte[] ReadInfo()
+        {
+            Reads++;
+            if (ReportedQualifier is { } qualifier)
+                return [21, 0x05, 3, major, minor, 0, 0x19, 14,
+                    0x01, 3, major, minor, 0, 0x02, 1, (byte)qualifier, 0x03, 4, 0, 0, 0, 1, 0x90, 0];
+            return (major, minor) == (4, 0) ? [0x6D, 0] : [5, 0x05, 3, major, minor, (byte)(Selects - 1), 0x90, 0];
+        }
+
+        private byte[] WriteConfig(ReadOnlyMemory<byte> command)
+        {
+            ConfigurationCommand = command.ToArray();
+            return [0x90, 0];
+        }
+
+        private byte[] RejectInitializeUpdate(int frameLength)
+        {
+            InitializeUpdateFrameLength = frameLength;
+            return [0x6A, 0x88];
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken) => throw new NotSupportedException();
+        public bool SupportsExtendedApdu() => ExtendedCapable;
+        public void Dispose() { }
+        public ValueTask DisposeAsync()
+        {
+            DisposeAttempts++;
+            return DisposalFailure is { } failure ? ValueTask.FromException(failure) : default;
+        }
+    }
+
+    [Theory]
+    [InlineData(true, false, true, false)]
+    [InlineData(true, false, false, true)]
+    [InlineData(false, false, true, false)]
+    [InlineData(false, true, true, true)]
+    public async Task SetDeviceConfigAsync_UsesNumericApduFramingIndependentlyOfFeatureAdmission(
+        bool beta, bool unknown, bool forceShort, bool extended)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(unknown ? (byte)4 : (byte)5, unknown ? (byte)0 : (byte)7)
+        {
+            ReportedQualifier = beta ? VersionQualifierType.Beta : null,
+            UnknownSelectVersion = unknown,
+            ExtendedCapable = true,
+        };
+        var options = new SessionCreationOptions { ProtocolConfiguration = new() { ForceShortApdus = forceShort } };
+        await using var session = await ManagementSession.CreateAsync(connection, options, ct);
+
+        Assert.Equal(beta || unknown, session.IsSupported(new Feature("future feature", 99, 0, 0)));
+        await session.SetDeviceConfigAsync(new DeviceConfig { NfcRestricted = true }, cancellationToken: ct);
+
+        byte[] expected = extended
+            ? [0, 0x1C, 0, 0, 0, 0, 4, 3, 0x17, 1, 1, 0, 0]
+            : [0, 0x1C, 0, 0, 4, 3, 0x17, 1, 1, 0];
+        Assert.Equal(expected, connection.ConfigurationCommand);
+    }
+
+    [Theory]
+    [InlineData(VersionQualifierType.Final, false, false, false, null)]
+    [InlineData(VersionQualifierType.Beta, false, false, false, 14)]
+    [InlineData((VersionQualifierType)0xFE, false, false, false, 14)]
+    [InlineData(VersionQualifierType.Beta, false, false, true, null)]
+    [InlineData(VersionQualifierType.Beta, true, false, false, null)]
+    [InlineData(null, false, true, false, 17)]
+    public async Task CreateAsync_ScpEligibilityUsesEffectiveFirmwareWithoutChangingFraming(
+        VersionQualifierType? qualifier, bool cachedWithoutQualifier, bool unknown, bool overrideWithRelease,
+        int? expectedFrameLength)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var lowFirmware = new FirmwareVersion(5, 2, 0);
+        await using var connection = new VersionedSmartCardConnection(unknown ? (byte)4 : (byte)5, unknown ? (byte)0 : (byte)2)
+        {
+            ReportedQualifier = qualifier,
+            UnknownSelectVersion = unknown,
+            ExtendedCapable = true,
+        };
+        // Simulate external metadata with an absent qualifier despite the required initializer.
+        DeviceInfo? cached = cachedWithoutQualifier
+            ? DeviceInfo.CreateFromTlvs([], lowFirmware) with { VersionQualifier = null! }
+            : null;
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            FirmwareVersionOverride = overrideWithRelease ? lowFirmware : null,
+            ProtocolConfiguration = new() { ForceShortApdus = true },
+            ScpKeyParameters = keys,
+        };
+
+        var create = ManagementSession.CreateWithCachedDeviceInfoAsync(connection, options, cached, ct);
+        if (expectedFrameLength is null)
+            await Assert.ThrowsAsync<NotSupportedException>(() => create);
+        else
+            Assert.Equal(unchecked((short)0x6A88), (await Assert.ThrowsAsync<ApduException>(() => create)).SW);
+
+        Assert.Equal(expectedFrameLength, connection.InitializeUpdateFrameLength);
+        Assert.Equal(1, connection.Reads);
+    }
+
+    [Theory]
+    [InlineData(2, 3, null)]
+    [InlineData(3, 2, 14)]
+    public async Task CreateAsync_ScpReleaseFloorUsesCachedFirmwareWhenLiveVersionDisagrees(
+        int cachedMinor, byte liveMinor, int? expectedFrameLength)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(5, liveMinor) { ExtendedCapable = true };
+        var cached = DeviceInfo.CreateFromTlvs([], new FirmwareVersion(5, cachedMinor, 0));
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            ProtocolConfiguration = new() { ForceShortApdus = true },
+            ScpKeyParameters = keys,
+        };
+
+        var create = ManagementSession.CreateWithCachedDeviceInfoAsync(connection, options, cached, ct);
+        if (expectedFrameLength is null)
+            await Assert.ThrowsAsync<NotSupportedException>(() => create);
+        else
+            Assert.Equal(unchecked((short)0x6A88), (await Assert.ThrowsAsync<ApduException>(() => create)).SW);
+
+        Assert.Equal(expectedFrameLength, connection.InitializeUpdateFrameLength);
+        Assert.Equal(1, connection.Reads);
+    }
+
+    [Fact]
+    public async Task ResetDeviceAsync_RefreshAndCleanupLoggingFail_PreservesRefreshErrorThroughImplicitDisposal()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var cleanupFailure = new InvalidOperationException("Scripted owned connection disposal failure.");
+        var provider = new ThrowOnCleanupLogProvider(cleanupFailure);
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Debug).AddProvider(provider));
+        using var logging = YubiKitLogging.UseTemporary(factory);
+        var connection = new VersionedSmartCardConnection(5, 6) { FailReselect = true, DisposalFailure = cleanupFailure };
+
+        var failure = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+            session.OwnConnection();
+            await session.ResetDeviceAsync(ct);
+        });
+
+        Assert.Contains("reset was confirmed", failure.Message, StringComparison.Ordinal);
+        Assert.Equal(unchecked((short)0x6A82), Assert.IsType<ApduException>(failure.InnerException).SW);
+        Assert.Equal(1, connection.DisposeAttempts);
+        Assert.Equal(1, provider.FailedLogs);
+    }
+
+    [Fact]
+    public async Task DisposeAsync_OutsideResetRefreshFailure_StillPropagatesOwnedConnectionFailure()
+    {
+        var cleanupFailure = new InvalidOperationException("Scripted owned connection disposal failure.");
+        var connection = new VersionedSmartCardConnection(5, 6) { DisposalFailure = cleanupFailure };
+        var session = await ManagementSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        session.OwnConnection();
+
+        Assert.Same(cleanupFailure, await Assert.ThrowsAsync<InvalidOperationException>(() => session.DisposeAsync().AsTask()));
+        Assert.Same(cleanupFailure, await Assert.ThrowsAsync<InvalidOperationException>(() => session.DisposeAsync().AsTask()));
+        Assert.Equal(1, connection.DisposeAttempts);
+    }
+
+    private sealed class ThrowOnCleanupLogProvider(Exception cleanupFailure) : ILoggerProvider, ILogger
+    {
+        public int FailedLogs { get; private set; }
+        public ILogger CreateLogger(string categoryName) => this;
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Dispose() { }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (!ReferenceEquals(exception, cleanupFailure))
+                return;
+
+            FailedLogs++;
+            throw new InvalidOperationException("Scripted logging provider failure.");
+        }
+    }
+
+    [Fact]
+    public async Task ResetDeviceAsync_ConfirmedReset_ReselectsAndContinuesOnSameSession()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(5, 6);
+        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+
+        await session.ResetDeviceAsync(ct);
+
+        Assert.Equal(new byte[] { 0, 0x1F, 0, 0, 0 }, connection.ResetCommand);
+        Assert.Equal(2, connection.Selects);
+        Assert.Equal(2, connection.Reads);
+        var info = await session.GetDeviceInfoAsync(ct);
+        Assert.Equal(new FirmwareVersion(5, 6, 1), info.FirmwareVersion);
+    }
+
+    [Fact]
+    public async Task ResetDeviceAsync_RejectedReset_PreservesStatusAndDoesNotRefresh()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(5, 6) { RejectReset = true };
+        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+        _ = await Assert.ThrowsAsync<ApduException>(() => session.ResetDeviceAsync(ct));
+        Assert.Single(connection.ResetCommand, b => b == 0x1F);
+        Assert.Equal(1, connection.Selects);
+        Assert.Equal(new FirmwareVersion(5, 6, 0), (await session.GetDeviceInfoAsync(ct)).FirmwareVersion);
+    }
+
+    [Fact]
+    public async Task ResetDeviceAsync_ConfirmedResetWithFailedReselect_EndsSessionAndPreservesCause()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(5, 6) { FailReselect = true };
+        await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+
+        var failure = await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetDeviceAsync(ct));
+        _ = Assert.IsType<ApduException>(failure.InnerException);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetDeviceInfoAsync(ct));
+    }
+
     private sealed class ProbeSession(IConnection connection) : ApplicationSession(connection);
 
     private sealed class RecordingSmartCardProtocol : ISmartCardProtocol
     {
         public List<ApduCommand> Commands { get; } = [];
+        public byte[] CommandData { get; private set; } = [];
 
         public Task<ApduResponse> TransmitAndReceiveAsync(
             ApduCommand command,
@@ -278,6 +704,7 @@ public class ManagementSessionTests
             CancellationToken cancellationToken = default)
         {
             Commands.Add(command);
+            CommandData = command.Data.ToArray();
             return Task.FromResult(new ApduResponse([], unchecked((short)0x9000)));
         }
 

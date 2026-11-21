@@ -23,6 +23,47 @@ namespace Yubico.YubiKit.Management.UnitTests.AuditV2;
 /// </summary>
 public sealed class ManagementAuditReproTests
 {
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0x10001)]
+    public void GetBytes_DoesNotTruncateCapabilityRequests(int mask)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { UsbEnabled = (DeviceCapabilities)mask }.GetBytes());
+        Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { NfcEnabled = (DeviceCapabilities)mask }.GetBytes());
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0x101)]
+    public void GetBytes_DoesNotTruncateDeviceFlags(int flags) =>
+        Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { DeviceFlags = (DeviceFlags)flags }.GetBytes());
+
+    [Fact]
+    public void ReportedCapabilityMasks_RoundTripThroughConfigurationWithoutLosingHighBit()
+    {
+        using var usb = new Yubico.YubiKit.Core.Utilities.Tlv(0x03, [0x80, 0x01]);
+        using var nfc = new Yubico.YubiKit.Core.Utilities.Tlv(0x0E, [0x80, 0x20]);
+        var info = DeviceInfo.CreateFromTlvs([usb, nfc], new FirmwareVersion(5, 7, 0));
+        var config = new DeviceConfig { UsbEnabled = info.UsbEnabled, NfcEnabled = info.NfcEnabled };
+
+        byte[] expected = [8, 0x03, 2, 0x80, 0x01, 0x0E, 2, 0x80, 0x20];
+        Assert.Equal(expected, config.GetBytes().Span);
+    }
+
+    [Fact]
+    public void GetBytes_PreservesInWidthUnknownMaskAndFlagBits()
+    {
+        var config = new DeviceConfig
+        {
+            UsbEnabled = (DeviceCapabilities)0x8001,
+            NfcEnabled = DeviceCapabilities.None,
+            DeviceFlags = (DeviceFlags)0x80,
+        };
+
+        byte[] expected = [0x0B, 0x03, 0x02, 0x80, 0x01, 0x0E, 0x02, 0, 0, 0x08, 0x01, 0x80];
+        Assert.Equal(expected, config.GetBytes().Span);
+    }
+
     [Fact]
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1634_DerivedConfiguration_DoesNotAffectOriginal()

@@ -135,6 +135,9 @@ disposal, rejects SCP on non-PC/SC protocols before device I/O, and initializes 
 After applet selection and firmware discovery, `ConfigureProtocolAsync` configures the protocol and establishes
 optional SCP. Backends do not initialize HID channels themselves. Applet firmware gates, backend rebinding,
 and Security Domain exception translation remain in the applet. Raw FIDO sessions retain lazy initialization.
+An applet can pass its effective firmware as `scpEligibilityFirmwareVersion` for the SCP feature floors
+alone. Null uses the processor firmware, and major zero admits an optimistic attempt. Framing and the
+secure protocol graph always retain the configured transport firmware.
 
 Protocol configuration does not mark the session ready. `ConstructInitializedAsync` delegates to
 `InitializeSessionAsync`, which publishes `IsInitialized` only after the entire applet callback succeeds.

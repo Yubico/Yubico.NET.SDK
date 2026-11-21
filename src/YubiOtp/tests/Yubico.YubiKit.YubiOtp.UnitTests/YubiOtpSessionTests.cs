@@ -338,7 +338,8 @@ public class YubiOtpSessionTests
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>("ndefType", () =>
                 session.SetNdefConfigurationAsync(Slot.Two, "payload", ndefType: (NdefType)0x56, cancellationToken: ct));
 
-            await connection.DidNotReceive().TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct);
+            await connection.DidNotReceive().TransmitAndReceiveAsync(
+                Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -372,11 +373,11 @@ public class YubiOtpSessionTests
         public void BuildNdefPayload_HttpWwwUri_CompressesLongestPrefix()
         {
             // "http://www." (index 1) is longer than "http://" (index 3)
-            var payload = YubiOtpSession.BuildNdefPayload("http://www.example.com", NdefType.Uri);
+            var payload = YubiOtpSession.BuildNdefPayload("HTTP://WWW.Example.com", NdefType.Uri);
 
             Assert.Equal(1, payload[2]); // index 1 = "http://www."
 
-            var remaining = Encoding.UTF8.GetBytes("example.com");
+            var remaining = Encoding.UTF8.GetBytes("Example.com");
             Assert.Equal(remaining, payload[3..(3 + remaining.Length)]);
         }
 
@@ -427,12 +428,38 @@ public class YubiOtpSessionTests
         }
 
         [Fact]
-        public void BuildNdefPayload_NullUri_ReturnsAllZeros()
+        public async Task SetNdefConfigurationAsync_NullContent_DoesNotSendWrite()
         {
-            var payload = YubiOtpSession.BuildNdefPayload(null, NdefType.Uri);
+            var (connection, session) = await CreateFakeSessionAsync();
+            await using var lease = session;
+            var ct = TestContext.Current.CancellationToken;
 
-            Assert.Equal(56, payload.Length);
-            Assert.All(payload, b => Assert.Equal(0, b));
+            await Assert.ThrowsAsync<ArgumentNullException>("uri", () =>
+                session.SetNdefConfigurationAsync(Slot.Two, null!, cancellationToken: ct)); // Deliberate runtime null.
+
+            await connection.DidNotReceive().TransmitAndReceiveAsync(
+                Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task DisableNdefAsync_WritesZeroBlockFollowedByCurrentCode()
+        {
+            var (connection, session) = await CreateFakeSessionAsync();
+            await using var lease = session;
+            var ct = TestContext.Current.CancellationToken;
+            byte[] currentCode = [1, 2, 3, 4, 5, 6];
+            byte[]? sent = null;
+            connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+                .Returns(call =>
+                {
+                    sent = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                    return Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 5, 7, 0, 10, 0, 0, 0x90, 0x00 });
+                });
+
+            await session.DisableNdefAsync(Slot.Two, currentCode, ct);
+
+            byte[] expected = [0x00, 0x01, 0x09, 0x00, 62, .. new byte[56], .. currentCode, 0x00];
+            Assert.Equal(expected, sent);
         }
 
         [Fact]
@@ -465,14 +492,6 @@ public class YubiOtpSessionTests
 
             // Length = 1 (lang length byte) + 2 (lang code) + text length
             Assert.Equal(1 + 2 + textBytes.Length, payload[0]);
-        }
-
-        [Fact]
-        public void BuildNdefPayload_NullText_ReturnsAllZeros()
-        {
-            var payload = YubiOtpSession.BuildNdefPayload(null, NdefType.Text);
-
-            Assert.All(payload, b => Assert.Equal(0, b));
         }
     }
 

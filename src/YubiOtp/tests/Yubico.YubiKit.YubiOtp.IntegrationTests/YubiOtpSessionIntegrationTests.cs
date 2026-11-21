@@ -128,6 +128,6 @@ public class YubiOtpSessionIntegrationTests
 
         // Send the all-zero disable request. This test has no NFC read-back and does not establish
         // the resulting on-tap output or disable effect.
-        await session.SetNdefConfigurationAsync(Slot.Two);
+        await session.DisableNdefAsync(Slot.Two);
     }
 }

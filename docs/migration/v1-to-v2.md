@@ -872,6 +872,9 @@ Read device information through Management/Core. V2 has no typed OTP FIPS-mode q
 mutator. FIPS capability and approval metadata is not OTP FIPS-mode state, and modern Management TLV writes are
 not a replacement for the legacy mode command.
 
+For NFC configuration, pass non-null URI or text content to `SetNdefConfigurationAsync`. Use `DisableNdefAsync`
+for the all-zero disable request; an empty string is a configuration with an empty content field, not disable.
+
 A keyboard-layout-aware `StaticPasswordSlotConfiguration(string, KeyboardLayout)` constructor and Yubico-OTP-algorithm challenge-response (`YubicoOtpChallengeResponseSlotConfiguration`/`CalculateYubicoOtpAsync`) were restored after an initial v2 gap; see `yubiotp-static-password-keyboard` and `yubiotp-yubico-otp-challenge-response` in `v1-to-v2-map.yml`. HMAC-SHA1 and Yubico OTP key inputs of invalid length now fail before any device I/O instead of being silently hashed or padded.
 
 Migrate v1 `UseTouchNotifier` to `SessionCreationOptions.UserPresencePrompt`. OTP HID reports a live

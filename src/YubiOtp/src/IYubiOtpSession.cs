@@ -218,19 +218,20 @@ public interface IYubiOtpSession : IApplicationSession
     /// </summary>
     /// <remarks>
     /// Requires NFC-capable hardware as well as firmware support. URI mode chooses the longest
-    /// case-sensitive ordinal table prefix and allows 53 UTF-8 bytes after that prefix. Text mode allows
+    /// case-insensitive ordinal table prefix and allows 53 UTF-8 bytes after that prefix. Text mode allows
     /// 51 UTF-8 text bytes with a fixed English (en) header. The 56-byte programming block is not the final
     /// on-tap NDEF message; legacy device documentation describes a URI prefix followed by generated OTP.
     /// There is no NFC read-back here. URI syntax is not validated.
     /// </remarks>
     /// <param name="slot">The slot to configure NDEF for.</param>
     /// <param name="uri">
-    /// URI or text content. Null sends an all-zero disable request; verify on-tap behavior on the target
-    /// key. An empty string sends an empty content configuration with its URI/text header, not that request.
+    /// URI or text content. An empty string sends its URI/text header. Use <see cref="DisableNdefAsync"/>
+    /// to send an all-zero disable request.
     /// </param>
     /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
     /// <param name="ndefType">The type of NDEF record (URI or Text).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="uri"/> is null.</exception>
     /// <exception cref="ArgumentException">
     /// Thrown when <paramref name="uri"/> (after URI prefix compression, or with the text
     /// language header) exceeds the maximum NDEF data size, or <paramref name="currentAccessCode"/>
@@ -252,9 +253,17 @@ public interface IYubiOtpSession : IApplicationSession
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SetNdefConfigurationAsync(
         Slot slot,
-        string? uri = null,
+        string uri,
         ReadOnlyMemory<byte> currentAccessCode = default,
         NdefType ndefType = NdefType.Uri,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Sends an all-zero NDEF configuration block to disable NFC output for the slot.</summary>
+    /// <remarks>Requires firmware 3.0.0+ and NFC-capable hardware. Verify on-tap behavior on the target key.</remarks>
+    /// <param name="slot">The slot whose NDEF configuration is disabled.</param>
+    /// <param name="currentAccessCode">Optional current 6-byte access code if the slot is protected.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task DisableNdefAsync(Slot slot, ReadOnlyMemory<byte> currentAccessCode = default,
         CancellationToken cancellationToken = default);
 
     /// <summary>

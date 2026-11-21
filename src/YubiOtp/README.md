@@ -282,13 +282,14 @@ to allow updates). `ProtectSlot2` is a separate protection flag, not an access c
 ### Configure NFC output
 
 Call `SetNdefConfigurationAsync` for an existing compatible slot on an NFC-capable key. URI mode chooses
-the longest case-sensitive ordinal prefix in the NFC URI table and allows **53 UTF-8 bytes after that
+the longest case-insensitive ordinal prefix in the NFC URI table and allows **53 UTF-8 bytes after that
 prefix**. Text mode allows **51 UTF-8 text bytes**, with a fixed English (`en`) UTF-8 header. These are byte
 limits, not character counts. The 56-byte programming payload is not a complete on-tap NDEF message;
 legacy YubiKey documentation describes a URI prefix followed by a generated OTP.
 
 Only `NdefType.Uri` and `NdefType.Text` are accepted; the SDK does not validate URI syntax.
-`null` sends an all-zero disable request, while `""` sends an empty URI/text configuration with its header.
+`DisableNdefAsync` sends a separate all-zero disable request. `SetNdefConfigurationAsync` rejects `null`;
+`""` sends an empty URI/text configuration with its header.
 There is no NFC read-back API here: verify the resulting on-tap behavior on your target key, including disable.
 
 ## User interaction
@@ -345,7 +346,7 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
   memory and prompt resources alive. Write/status fallback, CRC validation and notification callbacks
   extend beyond Core's individual guarded exchanges.
 - `PutConfigurationAsync`, `UpdateConfigurationAsync`, `SwapSlotsAsync`, `DeleteSlotAsync`, `SetScanMapAsync`, and
-  `SetNdefConfigurationAsync` overwrite device state irreversibly. Access codes are exactly 6 bytes.
+  `SetNdefConfigurationAsync` and `DisableNdefAsync` overwrite device state irreversibly. Access codes are exactly 6 bytes.
 - Firmware-gated operations throw `NotSupportedException`; `ConfigState` accessors throw `InvalidOperationException`.
 - Nonzero HOTP `imf` presets require firmware 2.2 or later. Wire encoding is tested; keyboard output
   and counter synchronization at those presets still require device qualification.

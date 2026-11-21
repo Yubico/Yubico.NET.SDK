@@ -308,19 +308,37 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     }
 
     /// <inheritdoc />
-    public async Task SetNdefConfigurationAsync(
+    public Task SetNdefConfigurationAsync(
         Slot slot,
-        string? uri = null,
+        string uri,
         ReadOnlyMemory<byte> currentAccessCode = default,
         NdefType ndefType = NdefType.Uri,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(uri);
         EnsureSupports(FeatureNdef);
 
-        var configSlot = slot.Map(SlotOperation.Ndef);
-        var ndefPayload = BuildNdefPayload(uri, ndefType);
-        var data = BuildPayloadWithAccessCode(ndefPayload, currentAccessCode);
+        return WriteNdefAsync(slot.Map(SlotOperation.Ndef), BuildNdefPayload(uri, ndefType), currentAccessCode,
+            cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task DisableNdefAsync(
+        Slot slot,
+        ReadOnlyMemory<byte> currentAccessCode = default,
+        CancellationToken cancellationToken = default)
+    {
+        ThrowIfDisposed();
+        EnsureSupports(FeatureNdef);
+        return WriteNdefAsync(slot.Map(SlotOperation.Ndef), new byte[YubiOtpConstants.NdefDataSize + 2],
+            currentAccessCode, cancellationToken);
+    }
+
+    private async Task WriteNdefAsync(ConfigSlot configSlot, byte[] payload, ReadOnlyMemory<byte> currentAccessCode,
+        CancellationToken cancellationToken)
+    {
+        var data = BuildPayloadWithAccessCode(payload, currentAccessCode);
 
         try
         {
@@ -433,7 +451,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
     /// <summary>
     /// Builds the 56-byte NDEF payload: [length][type][data (54 bytes, zero-padded)].
     /// </summary>
-    internal static byte[] BuildNdefPayload(string? content, NdefType ndefType)
+    internal static byte[] BuildNdefPayload(string content, NdefType ndefType)
     {
         if (ndefType is not (NdefType.Uri or NdefType.Text))
         {
@@ -442,12 +460,6 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
 
         const int payloadSize = YubiOtpConstants.NdefDataSize + 2; // 56 bytes total
         var payload = new byte[payloadSize];
-
-        if (content is null)
-        {
-            // All-zero disable request; this differs from an empty URI/text configuration with its header.
-            return payload;
-        }
 
         payload[1] = (byte)ndefType;
 
@@ -472,7 +484,7 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         for (int i = 1; i < NdefUriPrefixes.Length; i++)
         {
             var prefix = NdefUriPrefixes[i];
-            if (uri.StartsWith(prefix, StringComparison.Ordinal) && prefix.Length > bestPrefixLength)
+            if (uri.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && prefix.Length > bestPrefixLength)
             {
                 bestPrefixIndex = i;
                 bestPrefixLength = prefix.Length;

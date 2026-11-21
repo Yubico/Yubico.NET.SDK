@@ -743,7 +743,14 @@ public sealed class OtpNdefCommand : YkCommandBase<OtpNdefSettings>
             await using var session = await deviceContext.Device.CreateYubiOtpSessionAsync(
                 deviceContext.SessionOptions);
 
-            await session.SetNdefConfigurationAsync(slot, settings.Prefix, accessCode, ndefType);
+            if (settings.Prefix is { } content)
+            {
+                await session.SetNdefConfigurationAsync(slot, content, accessCode, ndefType);
+            }
+            else
+            {
+                await session.DisableNdefAsync(slot, accessCode);
+            }
 
             OutputHelpers.WriteSuccess($"Slot {OtpHelpers.FormatSlot(slot)} NDEF configured.");
             return ExitCode.Success;

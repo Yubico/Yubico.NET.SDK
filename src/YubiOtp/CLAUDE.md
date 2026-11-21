@@ -100,10 +100,10 @@ Configuration hierarchy:
 `SetNdefConfigurationAsync` builds a 56-byte NDEF payload:
 - URI type (`0x55`): Compresses prefixes using 36-entry NFC Forum URI prefix table
 - Text type (`0x54`): Language header `[0x02]["en"]` + content
-- Null content sends an all-zero disable request
+- `DisableNdefAsync` sends an all-zero disable request
 
-Null sends an all-zero disable request, distinct from an empty URI/text configuration; on-tap effects
-need target-device verification. URI remainder allows 53 UTF-8 bytes after longest ordinal/case-sensitive
+Null content is rejected; empty URI/text configuration is distinct from disable. On-tap effects
+need target-device verification. URI remainder allows 53 UTF-8 bytes after longest ordinal/case-insensitive
 prefix matching; text allows 51 UTF-8 bytes. The block configures an existing compatible slot on NFC hardware,
 not a complete NDEF record; legacy URI output can append OTP. There is no NFC read-back or arbitrary language/
 UTF-16 option. Undefined enum values are rejected, but the encoder does not validate URI syntax.

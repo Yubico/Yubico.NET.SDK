@@ -248,13 +248,14 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal([(byte)PinPolicy.Once], CommandData(command).ToArray());
     }
 
-    [Fact]
-    public async Task GenerateKeyAsync_SetsAlgorithmAttributesBeforeGeneratingKeyPair()
+    [Theory]
+    [InlineData(0x01, 0x09)] // 4.1.9, just below the conservative policy
+    [InlineData(0x03, 0x05)] // corrected 4.3.5
+    public async Task GenerateKeyAsync_OutsideRocaPolicy_WritesAttributesBeforeGeneration(byte minor, byte patch)
     {
-        var connection = CreateInitializedConnection(
-            OkResponse(),
-            [0x90, 0x00],
-            ApplicationRelatedDataResponse());
+        var connection = new RecordingSmartCardConnection(
+            [OkResponse(), [0x04, minor, patch, 0x90, 0x00], ApplicationRelatedDataResponse(),
+                OkResponse(), OkResponse(), ApplicationRelatedDataResponse()]);
         await using var session = await OpenPgpSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -272,6 +273,25 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal(0x80, operationCommands[1][2]);
         Assert.Equal(0xCA, operationCommands[2][1]);
         Assert.Equal(0x6E, operationCommands[2][3]);
+    }
+
+    [Theory]
+    [InlineData(0x02, 0x00)]
+    [InlineData(0x02, 0x06)]
+    [InlineData(0x03, 0x04)]
+    public async Task GenerateKeyAsync_InsideRocaPolicy_SendsNoOperationApdu(byte minor, byte patch)
+    {
+        var connection = new RecordingSmartCardConnection(
+            [OkResponse(), [0x04, minor, patch, 0x90, 0x00], ApplicationRelatedDataResponse()]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        int before = connection.TransmittedCommands.Count;
+
+        var error = await Assert.ThrowsAsync<NotSupportedException>(() =>
+            session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa2048), token));
+
+        Assert.Contains("ROCA", error.Message, StringComparison.Ordinal);
+        Assert.Equal(before, connection.TransmittedCommands.Count);
     }
 
     [Theory]

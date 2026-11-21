@@ -38,8 +38,9 @@ diagnosing a feature check, and use an override only with a known device profile
 
 For RSA generation, follow [YSA-2017-01](https://www.yubico.com/support/security-advisories/ysa-2017-01/):
 the advisory identifies on-device OpenPGP RSA generation on 4.2.6–4.3.4 as affected by ROCA and 4.3.5 as corrected.
-Externally generated/imported keys are a mitigation. This SDK currently has no shipping ROCA generation guard;
-the Python SDK uses the broader conservative interval `[4.2.0, 4.3.5)`.
+Like the Python SDK, this SDK conservatively blocks on-card RSA generation in `[4.2.0, 4.3.5)` before
+writing algorithm attributes. This is not a claim that 4.2.0–4.2.5 are affected. Independently generated
+RSA keys can still be imported; the guard does not block corrected 4.3.5 firmware.
 
 ## Open and inspect a session
 

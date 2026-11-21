@@ -170,9 +170,9 @@ qualification. Vendor commercial-version wording and development-source gates ha
 
 Cached/ATT UIF and retry/challenge capability checks remain incomplete. NEO RSA import advertises CRT 02
 while including modulus (vendor uses 03), and vendor NEO deletion differs from attribute switching. Preserve
-those compatibility qualifications. RSA generation lacks a shipping ROCA guard: YSA-2017-01 identifies
-4.2.6–4.3.4 as affected and 4.3.5 as corrected; imported keys are a mitigation. Existing tests early-return
-through 4.3.5 inclusive, including imported-key tests, so runner success there establishes no executed body.
+those compatibility qualifications. On-card RSA generation is refused before writing attributes on
+`[4.2.0, 4.3.5)` as a conservative policy; YSA-2017-01 identifies 4.2.6–4.3.4 as affected and
+4.3.5 as corrected. Independently generated imports are not subject to this gate.
 
 ## Security Requirements
 

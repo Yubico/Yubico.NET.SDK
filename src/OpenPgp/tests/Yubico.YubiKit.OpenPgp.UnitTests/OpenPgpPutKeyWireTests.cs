@@ -67,6 +67,24 @@ public sealed class OpenPgpPutKeyWireTests
     }
 
     [Fact]
+    public async Task RsaImport_InsideRocaGenerationPolicy_SendsPrivateKeyTemplate()
+    {
+        using var rsa = RSA.Create(2048);
+        using var key = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
+        var connection = CreateConnection(afterAttributeWrite: true, importChunks: 2,
+            versionResponse: [0x04, 0x02, 0x06, 0x90, 0x00]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.PutKeyAsync(KeyRef.Sig, key, token);
+
+        var (crt, headers, _) = ParseImport(connection);
+        Assert.Equal(CrtSig, crt);
+        Assert.Equal([0x91, 0x03, 0x92, 0x81, 0x80, 0x93, 0x81, 0x80], headers);
+        Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0x47);
+    }
+
+    [Fact]
     public async Task Rsa_WithExponentOtherThan65537_IsRejectedBeforeAnythingIsSent()
     {
         using var key = RSAPrivateKey.CreateFromPkcs8(Convert.FromBase64String(RsaExponent3Pkcs8Base64));
@@ -259,10 +277,11 @@ public sealed class OpenPgpPutKeyWireTests
     }
 
     /// <summary>SELECT, version, application data; then one OK per attribute write and per import chunk; then the refresh.</summary>
-    private static RecordingSmartCardConnection CreateConnection(bool afterAttributeWrite, int importChunks = 1, byte capabilityFlags = 0x75)
+    private static RecordingSmartCardConnection CreateConnection(bool afterAttributeWrite, int importChunks = 1,
+        byte capabilityFlags = 0x75, byte[]? versionResponse = null)
     {
         byte[] appData = ApplicationData(capabilityFlags);
-        List<byte[]> responses = [[0x90, 0x00], [0x05, 0x08, 0x00, 0x90, 0x00], appData];
+        List<byte[]> responses = [[0x90, 0x00], versionResponse ?? [0x05, 0x08, 0x00, 0x90, 0x00], appData];
         if (afterAttributeWrite) responses.Add([0x90, 0x00]);
         for (int i = 0; i < importChunks; i++) responses.Add([0x90, 0x00]);
         responses.Add(appData);

@@ -296,8 +296,9 @@ public interface IOpenPgpSession : IApplicationSession
     ///     generation and can invalidate an existing key. Later failure/cancellation can leave partial changes;
     ///     inspect fresh application data/public key before retrying. Successful generation refreshes the cache,
     ///     but refresh itself can fail after key creation. Manage certificates and fingerprint/time metadata separately.
-    ///     EC generation uses the SDK's 5.2.0 check. Avoid on-device RSA generation on ROCA-affected firmware
-    ///     (vendor advisory YSA-2017-01: 4.2.6–4.3.4); this method currently has no ROCA guard.
+    ///     EC generation uses the SDK's 5.2.0 check. On-card RSA generation is refused before writing
+    ///     attributes for firmware in [4.2.0, 4.3.5). This deliberately starts earlier than the affected
+    ///     range in YSA-2017-01 (4.2.6–4.3.4); 4.3.5 and independent RSA imports are not blocked.
     ///     ATT provisioning uses a malformed CRT in this release; use ordinary slots until that encoder is corrected.
     /// </remarks>
     Task GenerateKeyAsync(

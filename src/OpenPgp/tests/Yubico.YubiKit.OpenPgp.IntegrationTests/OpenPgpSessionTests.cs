@@ -210,14 +210,9 @@ public class OpenPgpSessionTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task GenerateRsaKey_2048_Succeeds(YubiKeyTestState state)
     {
-        // This current condition returns before setup/assertions on 4.2.0–4.3.5 inclusive.
-        // ROCA advisory YSA-2017-01 identifies generated RSA on 4.2.6–4.3.4; 4.3.5 is corrected.
-        // Preserve the executable boundary here while its applicability/reporting is reviewed separately.
-        if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
-            state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
-        {
-            return;
-        }
+        Skip.If(state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
+            state.FirmwareVersion < new FirmwareVersion(4, 3, 5),
+            "On-card RSA generation is disabled by the OpenPGP ROCA policy.");
 
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
@@ -266,13 +261,9 @@ public class OpenPgpSessionTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task Sign_Rsa2048_ProducesSignature(YubiKeyTestState state)
     {
-        // Early-return range is inclusive of corrected 4.3.5; the body performs no assertions there.
-        // ROCA concerns on-device RSA generation, rather than signature-output length.
-        if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
-            state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
-        {
-            return;
-        }
+        Skip.If(state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
+            state.FirmwareVersion < new FirmwareVersion(4, 3, 5),
+            "On-card RSA generation is disabled by the OpenPGP ROCA policy.");
 
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,

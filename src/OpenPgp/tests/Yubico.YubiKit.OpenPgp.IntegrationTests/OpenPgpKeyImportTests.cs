@@ -48,15 +48,6 @@ public class OpenPgpKeyImportTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task ImportRsaKey_2048_ThenSign_VerifiesWithTheHostPublicKey(YubiKeyTestState state)
     {
-        // Current early return covers 4.2.0–4.3.5 inclusive before any setup/assertion.
-        // YSA-2017-01 concerns generated RSA, and recommends external import as a mitigation;
-        // this imported-key exclusion and corrected-4.3.5 boundary need separate applicability review.
-        if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
-            state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
-        {
-            return;
-        }
-
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
             action: async session =>

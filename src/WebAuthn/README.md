@@ -180,11 +180,9 @@ Assertions and extension outputs are computed **before** `GetAssertionAsync` ret
 retrieves a cached response, is idempotent and supports cancellation while waiting; it performs no
 further device I/O. Cancelling a picker does not undo an assertion or an extension write.
 
-The current client can expose an empty ID if the final response omits its credential descriptor.
-CTAP2.0 §5.2 permits omission for a singleton allow list; CTAP2.1/2.3 §6.2.2 require the descriptor.
-This is a client recovery limitation, not a usable empty credential ID. Only an **original single-entry**
-request gives the application an unambiguous requested ID to retain for its RP protocol. Never guess
-from the first entry of a multi-entry list, and always require RP verification and account binding.
+For CTAP2.0 singleton omission compatibility, the client recovers an omitted ID only from the
+single real descriptor in the final request after probing. It rejects missing IDs without that
+association and IDs that contradict selection. This does not replace RP verification or account binding.
 
 `RegistrationExtensionOutputs` and `AuthenticationExtensionOutputs` are non-positional records. Their init
 properties are optional and default to null; construct them with named object initializers.

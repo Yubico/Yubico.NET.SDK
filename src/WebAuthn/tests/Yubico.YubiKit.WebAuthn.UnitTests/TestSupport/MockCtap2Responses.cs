@@ -38,7 +38,8 @@ internal static class MockCtap2Responses
         byte[]? signature = null,
         PublicKeyCredentialUserEntity? user = null,
         byte[]? authDataExtensionsCbor = null,
-        byte[]? largeBlobKey = null)
+        byte[]? largeBlobKey = null,
+        bool omitCredential = false)
     {
         credentialId ??= RandomNumberGenerator.GetBytes(32);
         signature ??= RandomNumberGenerator.GetBytes(64);
@@ -47,7 +48,7 @@ internal static class MockCtap2Responses
 
         // credential (1) + authData (2) + signature (3) + optional user (4) + optional
         // numberOfCredentials (5) + optional largeBlobKey (7)
-        var keyCount = 3;
+        var keyCount = omitCredential ? 2 : 3;
         if (user is not null) keyCount++;
         if (numberOfCredentials is not null) keyCount++;
         if (largeBlobKey is not null) keyCount++;
@@ -55,13 +56,16 @@ internal static class MockCtap2Responses
         writer.WriteStartMap(keyCount);
 
         // 0x01: credential
-        writer.WriteInt32(1);
-        writer.WriteStartMap(2);
-        writer.WriteTextString("id");
-        writer.WriteByteString(credentialId);
-        writer.WriteTextString("type");
-        writer.WriteTextString("public-key");
-        writer.WriteEndMap();
+        if (!omitCredential)
+        {
+            writer.WriteInt32(1);
+            writer.WriteStartMap(2);
+            writer.WriteTextString("id");
+            writer.WriteByteString(credentialId);
+            writer.WriteTextString("type");
+            writer.WriteTextString("public-key");
+            writer.WriteEndMap();
+        }
 
         // 0x02: authData
         writer.WriteInt32(2);

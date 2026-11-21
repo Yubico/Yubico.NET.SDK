@@ -374,6 +374,44 @@ public class WebAuthnClientCeremonyFrameTests
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo()); // no clientPin: ceremony runs without a token
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetAssertion_FinalCredentialIdUsesOnlyTheProbedSingleton(bool wrongId)
+    {
+        ArrangeNoTokenAuthenticator();
+        await using var client = _client;
+        byte[] first = [1];
+        byte[] selected = [2];
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                var request = call.Arg<BackendGetAssertionRequest>();
+                Assert.NotNull(request.AllowList);
+                if (request.Options?.GetValueOrDefault("up") == false)
+                    return request.AllowList[0].Id.Span.SequenceEqual(selected)
+                        ? MockCtap2Responses.CreateMockGetAssertionResponse(selected)
+                        : throw new CtapException(CtapStatus.NoCredentials);
+                Assert.Equal(selected, Assert.Single(request.AllowList).Id.Span);
+                return MockCtap2Responses.CreateMockGetAssertionResponse(first, omitCredential: !wrongId);
+            });
+        var options = WithAllowList(new PublicKeyCredentialDescriptor(first), new PublicKeyCredentialDescriptor(selected));
+        var ct = TestContext.Current.CancellationToken;
+
+        if (wrongId)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(options, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+        }
+        else
+        {
+            var match = Assert.Single(await client.GetAssertionAsync(options, cancellationToken: ct));
+            Assert.Equal(selected, match.Id.Span);
+            var response = await match.SelectAsync(ct);
+            Assert.Equal(selected, response.CredentialId.Span);
+        }
+    }
+
     /// <summary>
     ///     With an allow list the client first finds the credential with an up:false probe, then asserts with
     ///     exactly that one descriptor.

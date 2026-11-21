@@ -49,10 +49,9 @@ public sealed partial class WebAuthnClient
     /// </para>
     /// <para>
     /// CTAP2.0 §5.2 permits omission of the final credential descriptor for a singleton allow list;
-    /// CTAP2.1/2.3 §6.2.2 require the descriptor. The client currently exposes an empty credential ID
-    /// when it is omitted instead of recovering the selected ID.
-    /// Only an original single-entry allow list gives the application an unambiguous requested ID;
-    /// never infer the selected ID from the first of multiple allowed credentials. The RP must still
+    /// CTAP2.1/2.3 §6.2.2 require the descriptor. For compatibility, the client recovers an omitted ID
+    /// from the single real descriptor sent after probing, not from the first original list entry.
+    /// Unassociated or inconsistent responses fail with InvalidState. The RP must still
     /// verify the response and its credential/account binding.
     /// </para>
     /// <para>
@@ -129,7 +128,7 @@ public sealed partial class WebAuthnClient
             foreach (var (credentialId, user, response) in matches)
             {
                 var authenticationResponse = await BuildAuthenticationResponseAsync(
-                    response, clientData, extensions, auth.Token, cancellationToken).ConfigureAwait(false);
+                    response, credentialId, clientData, extensions, auth.Token, cancellationToken).ConfigureAwait(false);
                 results.Add(new MatchedCredential(credentialId, user, _ => Task.FromResult(authenticationResponse)));
             }
 
@@ -171,7 +170,7 @@ public sealed partial class WebAuthnClient
             }
 
             var request = BuildGetAssertionRequest(options, clientData, auth, decision, extensions, selected, allowList);
-            var matches = await CredentialMatcher.MatchAsync(_backend, request, ct).ConfigureAwait(false);
+            var matches = await CredentialMatcher.MatchAsync(_backend, request, selected, ct).ConfigureAwait(false);
             return (matches, extensions);
         }
     }
@@ -207,6 +206,7 @@ public sealed partial class WebAuthnClient
 
     private static async Task<AuthenticationResponse> BuildAuthenticationResponseAsync(
         GetAssertionResponse ctapResponse,
+        ReadOnlyMemory<byte> credentialId,
         WebAuthnClientData clientData,
         AuthenticationExtensionSession extensions,
         PinUvAuthTokenSession? tokenSession,
@@ -214,9 +214,6 @@ public sealed partial class WebAuthnClient
     {
         // Wrap authenticator data
         var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
-
-        // Known limitation: descriptor omission (permitted by CTAP2.0 §5.2) loses the selected ID here.
-        var credentialId = ctapResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
 
         // User from CTAP response can be used directly
         var user = ctapResponse.User;

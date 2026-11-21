@@ -478,9 +478,8 @@ Indirect passes through the statement without anonymization. Enterprise sends CT
 mode (1) only with GetInfo `ep: true`, leaving the enterprise decision to the authenticator.
 Client-data escaping follows CCDToString. Attestation Decode
 borrows outer CBOR/statement slices: keep caller input unchanged; parsing is not verification.
-`default(Aaguid)` is the 16-byte all-zero value. Final descriptor omission can expose an empty ID: CTAP2.0 §5.2 permits
-singleton omission, whereas 2.1/2.3 §6.2.2 require it. Never recover an ID by guessing the first of a
-multi-entry allow list; an original singleton is unambiguous but still needs RP verification.
+`default(Aaguid)` is the 16-byte all-zero value. For CTAP2.0 singleton omission compatibility, recover
+an omitted final descriptor only from the probed singleton, never a dummy or an original list guess.
 
 ## Test Infrastructure
 

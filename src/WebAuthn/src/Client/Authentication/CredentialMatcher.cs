@@ -34,6 +34,7 @@ internal sealed class CredentialMatcher
     /// </summary>
     /// <param name="backend">The WebAuthn backend to use.</param>
     /// <param name="request">The backend GetAssertion request.</param>
+    /// <param name="selected">The real descriptor selected by probing, never the dummy descriptor.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
     /// A list of tuples containing credential ID, optional user, and the GetAssertionResponse.
@@ -43,6 +44,7 @@ internal sealed class CredentialMatcher
         MatchAsync(
             IWebAuthnBackend backend,
             BackendGetAssertionRequest request,
+            PublicKeyCredentialDescriptor? selected,
             CancellationToken cancellationToken)
     {
         GetAssertionResponse firstResponse;
@@ -61,8 +63,7 @@ internal sealed class CredentialMatcher
 
         uint? numberOfCredentials = CheckAssertionCount(firstResponse);
 
-        // Known limitation: an omitted descriptor is not recovered from the narrowed request.
-        var firstCredId = firstResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
+        var firstCredId = ResolveCredentialId(firstResponse, selected, request.AllowList is { Count: > 0 });
         results.Add((firstCredId, firstResponse.User, firstResponse));
 
         // Check if there are more credentials to enumerate
@@ -74,12 +75,29 @@ internal sealed class CredentialMatcher
             for (uint i = 0; i < remaining; i++)
             {
                 var nextResponse = await backend.GetNextAssertionAsync(cancellationToken);
-                var nextCredId = nextResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
+                var nextCredId = ResolveCredentialId(nextResponse, selected, request.AllowList is { Count: > 0 }, allowOmission: false);
                 results.Add((nextCredId, nextResponse.User, nextResponse));
             }
         }
 
         return results;
+    }
+
+    private static ReadOnlyMemory<byte> ResolveCredentialId(
+        GetAssertionResponse response, PublicKeyCredentialDescriptor? selected, bool hasAllowList, bool allowOmission = true)
+    {
+        if (response.Credential is null && allowOmission && selected is not null)
+            return selected.Id;
+
+        if (response.Credential is { Id.IsEmpty: false } descriptor
+            && (!hasAllowList || (selected is not null && descriptor.Id.Span.SequenceEqual(selected.Id.Span))))
+            return descriptor.Id;
+
+        CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
+        if (response.LargeBlobKey is { } key)
+            CryptographicOperations.ZeroMemory(key.Span);
+        throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
+            "The assertion did not identify a credential matching the request.");
     }
 
     private static uint? CheckAssertionCount(GetAssertionResponse response)

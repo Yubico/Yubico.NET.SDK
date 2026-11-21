@@ -26,10 +26,8 @@ namespace Yubico.YubiKit.YubiHsm;
 ///     after disposal throws <see cref="ObjectDisposedException" />. The caller clears the original
 ///     <see cref="Parse" /> input and any additional copies it makes separately.
 ///     Parsing accepts exactly the 48-byte key region. A full applet CALCULATE response can contain
-///     additional bytes: vendor host code has handled 56-byte responses since 2023, and a supplied
-///     symmetric cryptogram produced that length on a tested development YubiKey. The session currently
-///     passes the full response here, so that path raises <see cref="ArgumentException" />. This parser
-///     leaves the additional bytes' meaning and firmware applicability to a separately verified response contract.
+///     additional bytes. Session calculation passes only the leading key region here and clears its
+///     entire owned response. This parser does not interpret any additional data.
 /// </remarks>
 public sealed class SessionKeys : IDisposable
 {

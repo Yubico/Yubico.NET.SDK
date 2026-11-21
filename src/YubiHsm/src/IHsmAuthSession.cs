@@ -143,17 +143,12 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
     /// <remarks>
-    ///     Successful result parsing requires exactly 48 response bytes. Supplying a symmetric card
-    ///     cryptogram can produce a 56-byte response that this calculation path rejects with
-    ///     <see cref="ArgumentException" />. Vendor host code has handled 56-byte responses since 2023;
-    ///     the affected firmware range and additional bytes' meaning remain unqualified here. The
-    ///     rejection was observed on a development YubiKey. Verify the complete HSM authentication flow
-    ///     on your target applet before relying on this path. Omitting the cryptogram skips applet
-    ///     verification and is not an authenticated HSM workaround; the HSM integration must verify
-    ///     its peer and complete the handshake.
+    ///     The first 48 response bytes supply the three session keys. Additional bytes are ignored;
+    ///     their meaning and firmware applicability are not qualified here. The HSM integration must
+    ///     still verify its peer and complete the handshake.
     /// </remarks>
     /// <exception cref="ArgumentException"><paramref name="context" /> is not exactly 16 bytes.</exception>
-    /// <exception cref="ArgumentException">The CALCULATE response is not exactly 48 bytes.</exception>
+    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The CALCULATE response has fewer than 48 data bytes.</exception>
     /// <exception cref="HsmAuthRetryException">
     ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining credential password attempts.
@@ -234,7 +229,8 @@ public interface IHsmAuthSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Session keys that must be disposed after use.</returns>
     /// <exception cref="ArgumentException"><paramref name="context" /> is not exactly 130 bytes.</exception>
-    /// <exception cref="ArgumentException">The CALCULATE response is not exactly 48 bytes.</exception>
+    /// <remarks>The session takes the keys from the first 48 response bytes and ignores any suffix.</remarks>
+    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The CALCULATE response has fewer than 48 data bytes.</exception>
     /// <exception cref="HsmAuthRetryException">
     ///     The credential password is incorrect. <see cref="HsmAuthRetryException.RetriesRemaining" />
     ///     reports the remaining credential password attempts.

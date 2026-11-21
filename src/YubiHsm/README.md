@@ -138,20 +138,11 @@ cryptogram; the connector relays them. Supply the actual HSM response to CALCULA
 cryptogram asks the applet to verify the HSM cryptogram; omitting it yields keys without that verification.
 Your HSM library still completes host authentication and manages protected command/response state.
 
-The current calculation path passes the full applet response to a parser that accepts exactly 48 bytes.
-A supplied symmetric cryptogram can produce a 56-byte response and fail with `ArgumentException` during
-`SessionKeys.Parse`, as observed on a tested development YubiKey. This is a response-format compatibility
-gap: [vendor Python code](https://github.com/Yubico/yubikey-manager/commit/31d39f64b73e534787382dab4675c0274616627b)
-already handled 56-byte input in July 2023, and its
-[current parser](https://github.com/Yubico/yubikey-manager/blob/296cb587ba15f57672356d8445393a96b41803fb/yubikit/hsmauth.py#L203-L220)
-takes three 16-byte key slices while ignoring any suffix. The
-[vendor C implementation](https://github.com/Yubico/yubihsm-shell/blob/6195c1b687aab56308e9598a0d66941813c94ae5/ykhsmauth/ykhsmauth.c#L561-L631)
-instead withholds an 8-byte symmetric cryptogram and requires a 48-byte response. These host-code choices
-establish neither the extra bytes' meaning nor an
-affected firmware range. Verify the complete HSM authentication flow on your target applet before relying
-on the supplied-cryptogram path. Omitting the cryptogram supports isolated key-calculation tests, rather
-than a safe workaround for authenticated HSM use; your HSM integration must verify its peer and complete
-the handshake.
+The session takes three 16-byte keys from the first 48 CALCULATE data bytes, ignores any suffix,
+and clears the entire final response it owns. Fewer than 48 data bytes raise `BadResponseException`.
+Standalone `SessionKeys.Parse` still accepts exactly the 48-byte key region. A 56-byte response was
+previously observed on a development YubiKey; this software contract neither assigns meaning to the
+extra bytes nor qualifies a firmware range. Verify the complete authenticated HSM flow on the target applet.
 
 The following **application-dependent sketch** declares the application adapter contract explicitly.
 Implement `ISymmetricHsmExchange` against your HSM library. `BeginAsync` opens the intended enrolled

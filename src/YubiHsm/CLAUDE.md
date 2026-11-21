@@ -118,15 +118,12 @@ Keep the returned `SessionKeys` in a `using` scope through the host's HSM task. 
 and rejects later property access. The Parse input and any additional caller/connector copies require
 separate clearing. Calculation returns key material; the HSM library completes host authentication.
 The calculation helper's final-response cleanup reaches the actual raw owner, including status bytes,
-after Parse/callback success or failure. Core's supported owner API is ApduResponse.Clear(); the legacy
-write-through helper is source-functional. Earlier transport/fragment/decrypted arrays remain independent,
+after Parse/callback success or failure, using `ApduResponse.Clear()`. Earlier transport/fragment/decrypted arrays remain independent,
 and retry/backend errors before that try have a different scope. Keep standalone Parse input cleanup separate.
-The session passes the full CALCULATE response to the strict 48-byte key parser. A supplied symmetric
-cryptogram can yield 56 bytes and fail parsing, as observed on a development key. Vendor Python has
-handled 56-byte input since 2023 and now ignores the suffix; vendor C withholds an 8-byte symmetric
-cryptogram and keeps strict 48-byte parsing. Preserve this request/response distinction without assigning
-the extra bytes a meaning or firmware boundary. Qualify supplied-cryptogram examples until the response
-contract is verified; omitted-cryptogram KDF checks establish no authenticated HSM handshake.
+The session passes the leading 48 CALCULATE data bytes to the strict key-region parser. It rejects
+short responses with `BadResponseException`, logs only the data length for longer responses, and
+clears the entire final owner including the suffix. Do not assign the extra bytes a meaning or firmware
+boundary; software key extraction establishes no authenticated HSM handshake.
 
 For symmetric and asymmetric CALCULATE operations, a listed credential with
 `TouchRequired=true` maps to `PolicyRequires`; `false` is silent. A missing credential is also silent;

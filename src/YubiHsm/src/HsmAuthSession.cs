@@ -15,6 +15,7 @@
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -921,7 +922,15 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                     // decrypted copies, and errors before the send returns, are outside this scope.
                     try
                     {
-                        SessionKeys sessionKeys = SessionKeys.Parse(response.Data.Span);
+                        int length = response.Data.Length;
+                        if (length < SessionKeys.ExpectedResponseLength)
+                            throw new BadResponseException(
+                                $"CALCULATE returned {length} bytes; expected at least {SessionKeys.ExpectedResponseLength}.");
+
+                        if (length > SessionKeys.ExpectedResponseLength)
+                            Logger.LogDebug("CALCULATE returned {Length} bytes", length);
+
+                        SessionKeys sessionKeys = SessionKeys.Parse(response.Data.Span[..SessionKeys.ExpectedResponseLength]);
                         try
                         {
                             await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)

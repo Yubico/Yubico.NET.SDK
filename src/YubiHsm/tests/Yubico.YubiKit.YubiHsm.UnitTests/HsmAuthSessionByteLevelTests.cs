@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Reflection;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
@@ -100,18 +101,18 @@ public class HsmAuthSessionByteLevelTests
         ], CommandData(command).ToArray());
     }
 
-    [Fact]
-    public async Task CalculateSessionKeysSymmetricAsync_ClearsFinalResponseNotItsSource()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(8)]
+    [InlineData(17)]
+    public async Task CalculateSessionKeysSymmetricAsync_ReadsKeyPrefixAndClearsEntireFinalResponse(int suffixLength)
     {
-        var source = SessionKeyResponse();
+        byte[] source = [.. SessionKeyResponse()[..^2], .. Sequence(0xE0, suffixLength), 0x90, 0x00];
         var response = new ApduResponse(source);
         using var connection = CreateInitializedConnection();
         await using var session = await HsmAuthSession.CreateAsync(connection,
             cancellationToken: TestContext.Current.CancellationToken);
-        // The raw connection cannot witness the final response: ApduResponse clones the transport array.
-        var backend = typeof(HsmAuthSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
-            ?? throw new InvalidOperationException("Missing applet backend.");
-        backend.SetValue(session, new CalculateBackend(response));
+        SetCalculateBackend(session, response);
 
         using var keys = await session.CalculateSessionKeysSymmetricAsync("cred", new byte[16], "pass"u8.ToArray(),
             cancellationToken: TestContext.Current.CancellationToken);
@@ -120,7 +121,33 @@ public class HsmAuthSessionByteLevelTests
         Assert.Equal(Sequence(0xB0, 16), keys.SMac.ToArray());
         Assert.Equal(Sequence(0xC0, 16), keys.SRmac.ToArray());
         Assert.All(response.RawData.ToArray(), value => Assert.Equal(0, value));
-        Assert.Equal(SessionKeyResponse(), source);
+        Assert.Equal((byte)0x90, source[^2]);
+        Assert.Equal(Sequence(0xE0, suffixLength), source[48..^2]);
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_RejectsShortResponseAndClearsIt()
+    {
+        byte[] source = [.. Sequence(0xA0, 47), 0x90, 0x00];
+        var response = new ApduResponse(source);
+        using var connection = CreateInitializedConnection();
+        await using var session = await HsmAuthSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        SetCalculateBackend(session, response);
+
+        var exception = await Assert.ThrowsAsync<BadResponseException>(() => session.CalculateSessionKeysSymmetricAsync(
+            "cred", new byte[16], "pass"u8.ToArray(), cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Contains("47 bytes", exception.Message);
+        Assert.All(response.RawData.ToArray(), value => Assert.Equal(0, value));
+    }
+
+    private static void SetCalculateBackend(HsmAuthSession session, ApduResponse response)
+    {
+        // The raw connection cannot witness the final response: ApduResponse clones the transport array.
+        var backend = typeof(HsmAuthSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("Missing applet backend.");
+        backend.SetValue(session, new CalculateBackend(response));
     }
 
     [Theory]

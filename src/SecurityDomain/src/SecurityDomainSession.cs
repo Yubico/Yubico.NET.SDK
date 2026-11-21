@@ -85,6 +85,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     private ISmartCardProtocol? _protocol;
     private ISecurityDomainBackend? _backend;
     private bool _hasExplicitFirmwareVersion;
+    private bool _endingAfterResetFailure;
 
     // Per-session test seam for observing real certificate lifetimes without replacing the loader.
     internal Action<X509Certificate2>? CertificateLoadedObserver { get; set; }
@@ -803,40 +804,65 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <inheritdoc />
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
-        await InitializeSessionAsync(token => InitializeAsync(cancellationToken: token), cancellationToken)
-            .ConfigureAwait(false);
-
         var keyInfo = await ListKeyInformationAsync(cancellationToken).ConfigureAwait(false);
-        if (keyInfo.Count == 0)
+        if (!keyInfo.Any(static entry => entry.KeyReference.Kid is not (0x02 or 0x03)))
         {
-            _logger.LogInformation("Security Domain reset skipped: no keys reported");
+            _logger.LogInformation("Security Domain reset skipped: no actionable key references reported");
             return;
         }
 
-        foreach (var keyReference in keyInfo.Select(static entry => entry.KeyReference))
+        cancellationToken.ThrowIfCancellationRequested();
+        try
         {
+            // A raw attempt can invalidate the selected secure channel and mutate device state.
+            var oldProtocol = Protocol;
+            Protocol = null;
+            _protocol = null;
+            _backend = null;
+            IsAuthenticated = false;
+            IsInitialized = false;
+            oldProtocol?.Dispose();
+
+            await BlockResetReferencesAsync(keyInfo, cancellationToken).ConfigureAwait(false);
+            await InitializeSessionAsync(token => InitializeAsync(cancellationToken: token), cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch
+        {
+            _endingAfterResetFailure = true;
+            await DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    private async Task BlockResetReferencesAsync(IReadOnlyList<KeyInfo> keyInfo, CancellationToken cancellationToken)
+    {
+        var outcomes = new List<string>(keyInfo.Count);
+        var failures = new List<Exception>();
+        foreach (var entry in keyInfo)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var keyReference = entry.KeyReference;
             if (!TryGetResetParameters(keyReference, out var instruction, out var overrideKeyRef))
             {
-                _logger.LogTrace("Reset skipping unsupported key reference {KeyRef}", keyReference);
+                outcomes.Add($"{keyReference}: skipped");
                 continue;
             }
 
-            await BlockKeyAsync(instruction, overrideKeyRef, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                var status = await BlockKeyAsync(instruction, overrideKeyRef, cancellationToken).ConfigureAwait(false);
+                outcomes.Add($"{keyReference}: stopped with SW=0x{status:X4}");
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                outcomes.Add($"{keyReference}: incomplete");
+                failures.Add(new InvalidOperationException($"Reset did not complete for {keyReference}.", ex));
+            }
         }
 
-        // All configured attempts finished; this does not verify restoration. Reinitialization below
-        // reuses parameters but omits the original configuration/version, including SCP11's prerequisite.
-        _logger.LogInformation("Security Domain reset complete; reinitializing session");
-
-        Protocol?.Dispose();
-        Protocol = null;
-        _protocol = null;
-        _backend = null;
-        IsAuthenticated = false;
-        IsInitialized = false;
-
-        await InitializeSessionAsync(token => InitializeAsync(cancellationToken: token), cancellationToken)
-            .ConfigureAwait(false);
+        if (failures.Count != 0)
+            throw new AggregateException($"Security Domain reset incomplete: {string.Join("; ", outcomes)}.", failures);
     }
 
     [MemberNotNull(nameof(_protocol), nameof(_backend))]
@@ -894,48 +920,23 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     }
 
 
-    private async Task BlockKeyAsync(byte instruction, KeyReference keyReference, CancellationToken cancellationToken)
+    private async Task<short> BlockKeyAsync(byte instruction, KeyReference keyReference, CancellationToken cancellationToken)
     {
         for (var attempt = 1; attempt <= ResetAttemptLimit; attempt++)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            short statusWord;
-            try
-            {
-                statusWord = await TransmitResetAttemptAsync(instruction, keyReference, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Reset attempt {Attempt} for key {KeyRef} failed to transmit", attempt,
-                    keyReference);
-                continue;
-            }
+            var statusWord = await TransmitResetAttemptAsync(instruction, keyReference, cancellationToken)
+                .ConfigureAwait(false);
 
             if (statusWord is SWConstants.AuthenticationMethodBlocked or SWConstants.SecurityStatusNotSatisfied)
-            {
-                _logger.LogDebug(
-                    "Key {KeyRef} blocked after {AttemptCount} attempts (SW=0x{Status:X4})",
-                    keyReference,
-                    attempt,
-                    statusWord);
-                break;
-            }
+                return statusWord;
 
-            if (statusWord is SWConstants.InvalidCommandDataParameter or SWConstants.Success)
-                continue;
-
-            _logger.LogTrace(
-                "Reset attempt {Attempt} for key {KeyRef} returned SW=0x{Status:X4}",
-                attempt,
-                keyReference,
-                statusWord);
+            if (statusWord is not (SWConstants.InvalidCommandDataParameter or SWConstants.Success))
+                throw ApduException.FromStatusWord(statusWord, "Unexpected Security Domain reset status");
         }
+
+        throw new InvalidOperationException($"No stopping status after {ResetAttemptLimit} reset attempts.");
     }
 
     private async Task<short> TransmitResetAttemptAsync(
@@ -975,6 +976,19 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         {
             if (rented is not null)
                 ArrayPool<byte>.Shared.Return(rented, true);
+        }
+    }
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        catch when (_endingAfterResetFailure)
+        {
+            // Do not cache a cleanup failure in the disposal gate: an enclosing await using
+            // must not replay it over the primary reset or refresh failure.
         }
     }
 

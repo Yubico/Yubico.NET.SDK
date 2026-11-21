@@ -334,18 +334,19 @@ public interface ISecurityDomainSession : IApplicationSession
     ///     It sends at most 65 raw attempts per processed reference, skipping SCP03 component duplicates.
     ///     Device reset is intended to remove custom state; Yubico documents restoration of factory SCP03
     ///     defaults when the last SCP03 set is deleted. The SDK does not verify factory contents afterward:
-    ///     ordinary transmission errors are retried, reaching the attempt limit does not throw, and an
-    ///     empty key listing skips reset. Return alone therefore does not prove complete restoration.
+    ///     transmission errors, unexpected statuses and exhaustion are reported together after attempting
+    ///     the remaining references. A listing with no actionable keys skips reset. Return alone does not
+    ///     prove complete restoration.
     ///     Failure or cancellation can leave persistent partial changes and cannot roll them back.
     ///     Currently reinitialization omits the original protocol configuration and firmware override.
     ///     Dispose this session and create a fresh one with those options when they are required after reset.
-    ///     SCP11 reinitialization can fail at the local version gate before a new handshake. After a
-    ///     failed/cancelled reset, await completion and dispose/reopen rather than relying on retained
-    ///     readiness/authentication flags; raw attempts can have changed device/channel state before flags clear.
+    ///     SCP11 reinitialization can fail at the local version gate before a new handshake. Once the reset
+    ///     attempt phase starts, a failure or cancellation ends the session; reopen rather than reusing it.
     /// </remarks>
     /// <exception cref="SecureChannelException">
     ///     Retained SCP parameters cause a selected secure-channel configuration failure during reinitialization.
     ///     The original failure is preserved as InnerException.
     /// </exception>
+    /// <exception cref="AggregateException">One or more key references did not reach a stopping status.</exception>
     Task ResetAsync(CancellationToken cancellationToken = default);
 }

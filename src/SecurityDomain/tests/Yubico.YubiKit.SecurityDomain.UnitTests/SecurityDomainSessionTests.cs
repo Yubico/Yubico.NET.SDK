@@ -820,6 +820,38 @@ public class SecurityDomainSessionTests
 
     private static byte[] OkResponse() => [0x90, 0x00];
 
+    [Fact]
+    public async Task ResetAsync_WithIncompleteReferences_ReportsAllOutcomesWithoutReselecting()
+    {
+        byte[][] responses =
+        [
+            OkResponse(),
+            [0xC0, 0x02, 0x11, 0x01, 0xC0, 0x02, 0x13, 0x02,
+                0xC0, 0x02, 0x02, 0x03, 0xC0, 0x02, 0x15, 0x04, 0x90, 0x00],
+            .. Enumerable.Repeat(OkResponse(), 65),
+            [0x6A, 0x86],
+            [0x69, 0x82]
+        ];
+        var connection = new RecordingSmartCardConnection(responses);
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var failure = await Assert.ThrowsAsync<AggregateException>(() => session.ResetAsync(
+            TestContext.Current.CancellationToken));
+
+        Assert.Collection(failure.InnerExceptions,
+            exhausted => Assert.IsType<InvalidOperationException>(exhausted.InnerException),
+            unexpected => Assert.Equal(unchecked((short)0x6A86),
+                Assert.IsType<ApduException>(unexpected.InnerException).SW));
+        Assert.Contains("skipped", failure.Message);
+        Assert.Contains("0x6982", failure.Message);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(responses.Length, connection.TransmittedCommands.Count);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.ListKeyInformationAsync(
+            TestContext.Current.CancellationToken));
+    }
+
     private static byte[] SelectSecurityDomainCommand() =>
     [
         0x00, 0xA4, 0x04, 0x00, 0x08,

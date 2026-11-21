@@ -201,15 +201,16 @@ to exhaust key retry counters using at most 65 raw attempts per processed refere
 SCP03 components. Custom state can be lost permanently. Yubico documents factory SCP03 restoration when
 the last SCP03 set is deleted; that does not prove restoration for every mixed-key/firmware state.
 
-The SDK does not verify factory contents after reset. It retries ordinary transmission failures, does not
-throw merely because the attempt limit is reached, and skips reset for an empty key listing. Return alone
-therefore does not prove complete restoration. Failure or cancellation can leave partial persistent changes.
+The SDK does not verify factory contents after reset. For each reference, the first transport failure or
+unexpected status stops attempts, as does reaching the limit. Incomplete outcomes are raised together after
+processing the other references. With no actionable keys, reset is skipped. Return alone does not prove
+complete restoration. Failure or cancellation during reset attempts ends the session and can leave partial changes.
 Use an unauthenticated reset session as above: retained SCP parameters may no longer work during reselection
 and reauthentication. Currently reset reinitialization also omits the original protocol configuration and
 firmware override. Dispose the reset session and create a fresh session with your required options afterward.
 SCP11 reinitialization can fail at the local version gate before a new handshake because reset falls
 back to 5.3.0. After any failed or cancelled reset, await its terminal task, dispose the session and
-reopen; retained readiness/authentication values do not prove that the old graph survived raw attempts.
+reopen; raw attempts can invalidate the original channel and change persistent state.
 
 ## User interaction
 

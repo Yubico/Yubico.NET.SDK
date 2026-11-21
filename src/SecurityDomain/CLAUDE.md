@@ -82,8 +82,8 @@ Located in [`SecurityDomainSession.cs`](src/SecurityDomainSession.cs), the reset
    - SCP11b (KID=0x13): `INTERNAL AUTHENTICATE`
    - Others: `PERFORM SECURITY OPERATION`
 3. **Sends at most 65 raw attempts** per processed reference with `ResetAttemptPayload`, bypassing SCP
-4. **Stops that reference** on `AuthenticationMethodBlocked` or `SecurityStatusNotSatisfied`; ordinary
-   transmission errors are retried, cancellation is rethrown, and exhaustion itself does not throw
+4. **Stops that reference** on `AuthenticationMethodBlocked` or `SecurityStatusNotSatisfied`; transport
+   failures, unexpected statuses, and exhaustion are collected across references and thrown; cancellation propagates immediately
 5. **Reselects/reinitializes**, without verifying factory contents afterward
 
 Return alone is not proof of restoration, and cancellation/failure can leave partial persistent changes.
@@ -92,8 +92,8 @@ mixed-key/firmware guarantee. Retained SCP parameters can fail reauthentication.
 omits the original configuration/version and clears the explicit-version indicator; a fresh session with
 the required options is the workaround, not a claim that losing them is intended policy.
 SCP11 can fail Core's local 5.7.2 gate during reinitialization because the omitted override becomes 5.3.0.
-Raw attempts bypass the guard and can mutate state before flags clear. Await the entire reset, then
-dispose/reopen after uncertainty; old readiness/authentication values are not recovery evidence.
+Raw attempts bypass the guard and begin only after readiness/authentication clears. A failure during or
+after the attempt phase ends the session; cleanup failures must not replace the primary failure.
 
 #### Writing Tests
 

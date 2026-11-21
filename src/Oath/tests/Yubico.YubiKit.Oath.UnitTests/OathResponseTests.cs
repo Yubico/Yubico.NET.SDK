@@ -72,16 +72,22 @@ public sealed class OathResponseTests
         await using var session = await CreateAsync(backend);
         var credential = CredentialFor(session);
         byte[] challenge = [1, 2, 3];
-        ReadOnlyMemory<byte> result = await session.CalculateAsync(credential, challenge, TestContext.Current.CancellationToken);
+        IOathSession consumer = session;
+        Memory<byte> result = await consumer.CalculateAsync(credential, challenge, TestContext.Current.CancellationToken);
+        Memory<byte> second = default;
         try
         {
             Assert.True(CryptographicOperations.FixedTimeEquals(hmac, result.Span));
+            second = await consumer.CalculateAsync(credential, challenge, TestContext.Current.CancellationToken);
+            CryptographicOperations.ZeroMemory(result.Span);
+            Assert.True(CryptographicOperations.FixedTimeEquals(hmac, second.Span));
             Assert.Equal(new byte[] { 1, 2, 3 }, challenge);
             AssertCleared(backend.LastResponse);
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(System.Runtime.InteropServices.MemoryMarshal.AsMemory(result).Span);
+            CryptographicOperations.ZeroMemory(result.Span);
+            CryptographicOperations.ZeroMemory(second.Span);
             CryptographicOperations.ZeroMemory(hmac);
         }
     }
@@ -111,10 +117,23 @@ public sealed class OathResponseTests
     {
         byte[] key = new byte[16];
         Array.Fill(key, (byte)0xA5);
+        byte[] firstClientChallenge = [];
+        byte[] deviceChallenge = [1, 2, 3, 4, 5, 6, 7, 8];
+        byte[] hostProof = HMACSHA1.HashData(key, deviceChallenge);
         var backend = new ResponseBackend(command =>
         {
+            // Deliberately script a LIST rejection to exercise status mapping, not device lock behavior.
+            if (command.Ins == 0xA1)
+                throw ApduException.FromStatusWord(0x6982);
+
             using var tlvs = TlvHelper.DecodeList(command.Data.Span);
-            byte[] hmac = HMACSHA1.HashData(key, tlvs.Single(tlv => tlv.Tag == 0x74).Value.Span);
+            Assert.True(CryptographicOperations.FixedTimeEquals(hostProof, tlvs.Single(tlv => tlv.Tag == 0x75).Value.Span));
+            var clientChallenge = tlvs.Single(tlv => tlv.Tag == 0x74).Value.Span;
+            if (mode == "mismatch")
+                firstClientChallenge = clientChallenge.ToArray();
+            else if (firstClientChallenge.Length > 0)
+                Assert.False(clientChallenge.SequenceEqual(firstClientChallenge));
+            byte[] hmac = HMACSHA1.HashData(key, clientChallenge);
             try
             {
                 return Response(mode switch
@@ -139,6 +158,16 @@ public sealed class OathResponseTests
             {
                 await Assert.ThrowsAsync<BadResponseException>(() => session.ValidateAsync(key, TestContext.Current.CancellationToken));
                 Assert.True(session.IsLocked);
+                AssertCleared(backend.LastResponse);
+                int sendsBeforeList = backend.SendCount;
+                var listRejection = await Assert.ThrowsAsync<OathException>(() => session.ListCredentialsAsync(TestContext.Current.CancellationToken));
+                Assert.Equal(sendsBeforeList + 1, backend.SendCount);
+                Assert.Equal(OathFailureReason.Locked, listRejection.Reason);
+                Assert.Equal((short)0x6982, listRejection.StatusWord);
+
+                mode = "retry";
+                await session.ValidateAsync(key, TestContext.Current.CancellationToken);
+                Assert.False(session.IsLocked);
             }
             else
             {
@@ -148,7 +177,12 @@ public sealed class OathResponseTests
             Assert.All(key, value => Assert.Equal(0xA5, value));
             AssertCleared(backend.LastResponse);
         }
-        finally { CryptographicOperations.ZeroMemory(key); }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+            CryptographicOperations.ZeroMemory(hostProof);
+            CryptographicOperations.ZeroMemory(firstClientChallenge);
+        }
     }
 
     [Theory]

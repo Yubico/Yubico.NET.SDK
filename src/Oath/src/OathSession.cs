@@ -37,10 +37,14 @@ public sealed class OathSession : ApplicationSession, IOathSession
     private static readonly Feature FeatureScp03 = new("SCP03 for OATH", 5, 6, 3);
 
     private readonly ILogger _logger;
+    private readonly ProtocolConfiguration _configuration;
+    private readonly FirmwareVersion? _firmwareVersionOverride;
+    private readonly ScpKeyParameters? _scpKeyParameters;
 
     private IOathBackend _backend = null!;
     private byte[] _salt = [];
     private byte[] _challenge = [];
+    private bool _endingAfterResetFailure;
 
     /// <inheritdoc />
     public string DeviceId { get; private set; } = string.Empty;
@@ -56,12 +60,15 @@ public sealed class OathSession : ApplicationSession, IOathSession
 
     private OathSession(
         ISmartCardConnection connection,
-        IUserPresencePrompt? userPresencePrompt = null)
-        : base(connection, userPresencePrompt)
+        SessionCreationOptions? options)
+        : base(connection, options?.UserPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
 
         _logger = Logger;
+        _configuration = (options?.ProtocolConfiguration ?? default) with { InsSendRemaining = OathConstants.InsSendRemaining };
+        _firmwareVersionOverride = options?.FirmwareVersionOverride;
+        _scpKeyParameters = options?.ScpKeyParameters;
     }
 
     /// <summary>
@@ -78,6 +85,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
     ///     Disposing the session leaves the borrowed connection open. Dispose the connection separately with
     ///     <c>await using</c>, after the session. Only one live session may use a connection; dispose it before
     ///     creating the next session on that connection.
+    ///     SCP parameters are borrowed through the session lifetime so RESET can re-establish SCP.
+    ///     Keep them alive and unchanged until the session is disposed.
     /// </remarks>
     /// <exception cref="BadResponseException">
     ///     SELECT lacks required version or nonempty device-ID metadata, the version is not three bytes,
@@ -90,34 +99,23 @@ public sealed class OathSession : ApplicationSession, IOathSession
         ConstructInitializedAsync(
             connection,
             options,
-            () => new OathSession(connection, options?.UserPresencePrompt),
-            (session, token) => session.InitializeAsync(
-                CreateOathProtocolConfiguration(options?.ProtocolConfiguration),
-                options?.FirmwareVersionOverride,
-                options?.ScpKeyParameters,
-                token),
+            () => new OathSession(connection, options),
+            (session, token) => session.InitializeAsync(token),
             cancellationToken);
 
-    private static ProtocolConfiguration CreateOathProtocolConfiguration(ProtocolConfiguration? configuration) =>
-        (configuration ?? default) with { InsSendRemaining = OathConstants.InsSendRemaining };
-
-    private async Task InitializeAsync(
-        ProtocolConfiguration? configuration,
-        FirmwareVersion? firmwareVersionOverride,
-        ScpKeyParameters? scpKeyParams,
-        CancellationToken cancellationToken)
+    private async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(_scpKeyParameters, cancellationToken)
             .ConfigureAwait(false);
         IOathBackend backend = new OathBackend(protocol);
 
         var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
-        ApplyInitialization(initialization, firmwareVersionOverride);
+        ApplyInitialization(initialization, _firmwareVersionOverride);
 
-        if (scpKeyParams is not null)
+        if (_scpKeyParameters is not null)
         {
             if (!IsSupported(FeatureScp03))
             {
@@ -130,8 +128,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
                 FirmwareVersion,
-                configuration,
-                scpKeyParams,
+                _configuration,
+                _scpKeyParameters,
                 cancellationToken)
             .ConfigureAwait(false);
 
@@ -394,7 +392,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
     }
 
     /// <inheritdoc />
-    public async Task<ReadOnlyMemory<byte>> CalculateAsync(
+    public async Task<Memory<byte>> CalculateAsync(
         Credential credential,
         ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default)
@@ -674,12 +672,34 @@ public sealed class OathSession : ApplicationSession, IOathSession
         var command = new ApduCommand(0x00, OathConstants.InsReset, 0xDE, 0xAD);
         await SendAsync(command, cancellationToken).ConfigureAwait(false);
 
-        // Confirmed RESET success is terminal for plain and SCP sessions. DisposeAsync clears
-        // readiness immediately, then drains/disposes the protocol, derived keys and applet secrets.
-        // It intentionally does not observe caller cancellation after this destructive exchange.
-        // Cancellation/overlap refusal before admission never reaches this boundary.
-        await DisposeAsync().ConfigureAwait(false);
-        _logger.LogInformation("OATH application reset; session ended. Reopen the connection before creating a new session.");
+        // Once RESET is confirmed, finish reinitialization even if the caller cancelled during the exchange.
+        // Retire the original protocol before SELECT so SELECT cannot use the old secure channel.
+        IsInitialized = false;
+        IsAuthenticated = false;
+        IsLocked = false;
+        IsPasswordProtected = false;
+        FirmwareVersion = new FirmwareVersion();
+        DeviceId = string.Empty;
+        CryptographicOperations.ZeroMemory(_salt);
+        CryptographicOperations.ZeroMemory(_challenge);
+        _salt = [];
+        _challenge = [];
+
+        try
+        {
+            if (Protocol is IAsyncDisposable asyncProtocol)
+                await asyncProtocol.DisposeAsync().ConfigureAwait(false);
+            else
+                Protocol?.Dispose();
+            Protocol = null;
+            await InitializeSessionAsync(InitializeAsync, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            _endingAfterResetFailure = true;
+            await DisposeAsync().ConfigureAwait(false);
+            throw new InvalidOperationException("OATH reset succeeded, but reinitialization failed and the session ended.", exception);
+        }
     }
 
     /// <inheritdoc />
@@ -692,7 +712,7 @@ public sealed class OathSession : ApplicationSession, IOathSession
             _salt,
             iterations: 1000,
             HashAlgorithmName.SHA1,
-            outputLength: 16);
+            outputLength: OathConstants.AccessKeyLength);
     }
 
     /// <inheritdoc />
@@ -700,8 +720,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
 
-        if (key.Length == 0)
-            throw new ArgumentException("Key must not be empty.", nameof(key));
+        if (key.Length != OathConstants.AccessKeyLength)
+            throw new ArgumentException("Access key must be 16 bytes.", nameof(key));
 
         if (_challenge.Length == 0)
             throw new InvalidOperationException("Device is not locked; no challenge to validate against.");
@@ -783,8 +803,8 @@ public sealed class OathSession : ApplicationSession, IOathSession
     {
         ThrowIfDisposed();
 
-        if (key.Length == 0)
-            throw new ArgumentException("Key must not be empty.", nameof(key));
+        if (key.Length != OathConstants.AccessKeyLength)
+            throw new ArgumentException("Access key must be 16 bytes.", nameof(key));
 
         byte[] clientChallenge = new byte[OathConstants.ChallengeLength];
         byte[]? clientResponse = null;
@@ -910,6 +930,19 @@ public sealed class OathSession : ApplicationSession, IOathSession
             cancellationToken).ConfigureAwait(false);
     }
 #pragma warning restore RS0026
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        catch when (_endingAfterResetFailure)
+        {
+            // ResetAsync already has a primary failure. Keep the disposal gate from replaying a
+            // secondary failure when the caller's await using disposes the terminal session again.
+        }
+    }
 
     protected override void Dispose(bool disposing)
     {

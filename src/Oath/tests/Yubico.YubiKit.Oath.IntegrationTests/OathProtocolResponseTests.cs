@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Xunit.Abstractions;
 using Yubico.YubiKit.Core;
@@ -57,7 +56,7 @@ public sealed class OathProtocolResponseTests(ITestOutputHelper output)
                     };
                     await session.PutCredentialAsync(data, token);
                     var credential = Assert.Single(await session.ListCredentialsAsync(token));
-                    ReadOnlyMemory<byte> actual = await session.CalculateAsync(credential, "Hi There"u8.ToArray(), token);
+                    Memory<byte> actual = await session.CalculateAsync(credential, "Hi There"u8.ToArray(), token);
                     byte[] expected = Convert.FromHexString(algorithm switch
                     {
                         OathHashAlgorithm.Sha1 => "B617318655057264E28BC0B6FB378C8EF146BE00",
@@ -72,7 +71,7 @@ public sealed class OathProtocolResponseTests(ITestOutputHelper output)
                     finally
                     {
                         CryptographicOperations.ZeroMemory(expected);
-                        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(actual).Span);
+                        CryptographicOperations.ZeroMemory(actual.Span);
                     }
                     var single = await session.CalculateCodeAsync(credential, 30, token);
                     var aggregate = Assert.Single(await session.CalculateAllAsync(30, token));

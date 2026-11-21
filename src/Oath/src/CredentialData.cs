@@ -96,11 +96,15 @@ public sealed class CredentialData : IDisposable
     ///     Parses an <c>otpauth://</c> URI into a <see cref="CredentialData" /> instance.
     /// </summary>
     /// <param name="uri">
-    ///     An otpauth URI as defined by the Google Authenticator Key URI Format,
+    ///     An otpauth URI based on the Google Authenticator Key URI Format,
     ///     e.g., <c>otpauth://totp/GitHub:user@example.com?secret=JBSWY3DPEHPK3PXP&amp;issuer=GitHub</c>.
     /// </param>
     /// <returns>A populated <see cref="CredentialData" /> instance whose owned secret must be disposed.</returns>
-    /// <remarks>The URI string contains secret material and cannot be cleared by this method.</remarks>
+    /// <remarks>
+    ///     The SDK accepts a missing HOTP counter as zero, uses the query issuer when it conflicts with the
+    ///     label issuer, and accepts seven digits as well as six or eight. Numeric fields must fit an Int32.
+    ///     The URI string contains secret material and cannot be cleared by this method.
+    /// </remarks>
     /// <exception cref="ArgumentException">
     ///     The URI scheme/type, algorithm, numeric fields, identity, or Base32 secret is invalid,
     ///     or the secret parameter is absent or decodes to no material. Digits must be 6 through 8,
@@ -122,8 +126,9 @@ public sealed class CredentialData : IDisposable
     /// <remarks>
     ///     Dispose the returned instance after use. Decoded temporary bytes are cleared on success and failure;
     ///     the URI string and encoded secret strings cannot be cleared by this method.
-    ///     Non-secret request fields are validated before decoding. Missing HOTP counter defaults to zero;
-    ///     query issuer continues to take precedence over the label issuer.
+    ///     Non-secret request fields are validated before decoding. The SDK accepts a missing HOTP counter as
+    ///     zero, uses the query issuer when it conflicts with the label issuer, and accepts seven digits as
+    ///     well as six or eight. Numeric fields must fit an Int32.
     /// </remarks>
     /// <exception cref="ArgumentException">
     ///     The URI scheme/type, algorithm, numeric fields, identity, or Base32 secret is invalid,

@@ -19,6 +19,7 @@ namespace Yubico.YubiKit.Oath;
 /// </summary>
 internal static class OathConstants
 {
+    internal const int AccessKeyLength = 16;
     // TLV tags for credential data
     internal const byte TagName = 0x71;
     internal const byte TagNameList = 0x72;

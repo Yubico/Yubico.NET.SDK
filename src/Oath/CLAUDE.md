@@ -138,22 +138,19 @@ chosen protocol edition/profile separately, especially for Core SCP empty comman
 
 ## Reset and timestamp boundaries
 
-`ResetAsync` is always terminal after confirmed RESET success, for plain and SCP sessions. Keep the RESET
-APDU visible and await Core's `DisposeAsync` immediately after its successful exchange. Do not SELECT,
-refresh metadata, retain creation keys or rehandshake. Disposal clears readiness/authentication, protocol
-and derived SCP state, salt and challenge; it ignores later caller cancellation. Teardown errors propagate
-with the session still terminal and RESET already completed. Pre-admission cancellation/overlap refusal
-must not tear down a healthy session or another admitted operation. A send/device error is not confirmed
-success and does not prove no mutation. Borrowed connections remain caller-owned: callers close/reopen
-them before creating a fresh session; convenience-owned connections are disposed by Core. Do not poison
-connections globally. This deliberate OATH-only policy differs from Python's same-connection reselect/SCP
-rehandshake; it is not a request to change other applets.
+`ResetAsync` continues the same session after confirmed RESET. Clear cached state and retire the old protocol
+and derived SCP keys before plain SELECT. Reread applet state and establish a new SCP channel if configured,
+borrowing the original caller-owned parameters through disposal because OATH reset leaves Security Domain
+keys alone. Failure to reinitialize ends the session without masking the reinitialization error. Post-confirmation
+reinitialization does not take caller cancellation. A send/device error is not confirmed success and does not
+prove no mutation. Callers must await the entire public operation before another operation or disposal;
+the existing protocol guard protects individual logical exchanges, not the reset workflow.
 
 Cached IsLocked/IsPasswordProtected/DeviceId/FirmwareVersion observations can remain after disposal;
 operations are terminal, and Salt views reference cleared session storage. Inherited IsAuthenticated
 records Core setup, independently of OATH password unlock and secure-channel recovery state.
 
-`WithOathSessionAsync` uses a separate reset session/owned connection, completes teardown, then opens a
+For fixture isolation, `WithOathSessionAsync` uses a separate reset session/owned connection, completes teardown, then opens a
 fresh session/connection for the body. Preserve the first failure if later disposal/independent cleanup
 also fails; do not combine explicit disposal with an implicit owner that can replay a failed completion.
 
@@ -176,7 +173,7 @@ Successful, cancelled, and failed operations resolve as `Completed`, `Cancelled`
 words do not currently provide verified evidence for mapping a failure to `TimedOut`. `CalculateCodeAsync`
 validates the truncated response before successful resolution; `CalculateAsync` requires the full-response
 tag, a digit header, and a nonempty HMAC payload. This is structural validation, not verification of a
-particular digest length. It returns an independent copy of the HMAC only, without the digit header,
+particular digest length. It returns a fresh, writable `Memory<byte>` copy of the HMAC only, without the digit header,
 after the callback succeeds. The caller owns and clears that returned storage; caller inputs remain unchanged.
 Await the whole public workflow before teardown: CalculateAll followups, password-provider/VALIDATE/retry
 and notification callbacks extend beyond one guarded exchange. Keep borrowed inputs/services alive and

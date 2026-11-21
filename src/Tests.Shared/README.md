@@ -271,10 +271,9 @@ public static async Task WithOathAsync(
 }
 ```
 
-For **OATH reset setup**, use the module's `WithOathSessionAsync`: successful RESET ends the old session,
-and setup closes its connection before opening a fresh body session/connection. Do not reset and continue
-using the session in the generic example above. See [OATH reset migration](../Oath/README.md#migrating-reset-callers).
-This is OATH-specific, not a change to other applets' helpers.
+For **OATH reset setup**, the module's `WithOathSessionAsync` uses a separate owned connection for setup and
+disposes it before opening the body session. This isolates the fixture's setup from the test body; successful
+`ResetAsync` itself refreshes the same session and keeps its connection. See [OATH reset migration](../Oath/README.md#migrating-reset-callers).
 
 ## Byte-Level Unit Test Recorder
 

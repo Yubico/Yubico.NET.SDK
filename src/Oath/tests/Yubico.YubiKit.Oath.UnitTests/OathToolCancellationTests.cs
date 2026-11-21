@@ -305,6 +305,18 @@ public class OathToolCancellationTests
         Assert.True(session.Disposed);
     }
 
+    [Fact]
+    public async Task ResetSuccess_DisposalFailureReturnsErrorWithoutRepeatingReset()
+    {
+        var session = new FakeSession { DisposeFailure = new InvalidOperationException("Connection teardown failed.") };
+
+        int exitCode = await ResetCommand.ExecuteAsync(true, TestContext.Current.CancellationToken, Services(session));
+
+        Assert.Equal(1, exitCode);
+        Assert.Equal(1, session.Operations);
+        Assert.True(session.Disposed);
+    }
+
     [Theory]
     [InlineData("add")]
     [InlineData("uri")]
@@ -471,7 +483,7 @@ public class OathToolCancellationTests
         public Task ResetAsync(CancellationToken cancellationToken = default) => Operate(cancellationToken);
         public Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default) => Operate(cancellationToken);
         public Task UnsetKeyAsync(CancellationToken cancellationToken = default) => Operate(cancellationToken);
-        public Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public Task<Memory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task<T> AuthenticateAndRetryAsync<T>(Func<CancellationToken, Task<T>> operation, Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public Task AuthenticateAndRetryAsync(Func<CancellationToken, Task> operation, Func<CancellationToken, Task<ReadOnlyMemory<byte>>> passwordProvider, CancellationToken cancellationToken = default) => throw new NotSupportedException();
     }

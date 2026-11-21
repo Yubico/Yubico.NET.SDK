@@ -23,15 +23,16 @@ namespace Yubico.YubiKit.Oath;
 ///     Inherited IsAuthenticated records Core SCP setup, not OATH password validation or ongoing channel
 ///     health. IsLocked and IsPasswordProtected describe this session's observed applet state. Cached
 ///     metadata getters can retain historical values after disposal; operations refuse a terminal session.
-///     Await complete public tasks before disposal or input cleanup. Aggregate followups, authentication
-///     retry and user-presence callbacks extend beyond Core's individual guarded exchanges. Keep borrowed
-///     inputs and callback/prompt resources alive until those tasks finish, without reentrant disposal.
+///     Await each complete public operation before starting an independent operation or disposing the session.
+///     The operation delegate passed to <c>AuthenticateAndRetryAsync</c> can use this session as part of
+///     that workflow. Keep borrowed inputs and callback/prompt resources alive through completion. Do not
+///     start independent operations from prompt callbacks or dispose the session from within a workflow.
 /// </remarks>
 public interface IOathSession : IApplicationSession
 {
     /// <summary>
     ///     Gets this session's device identifier, computed as <c>Base64(SHA256(salt)[:16])</c> with padding stripped.
-    ///     A fresh session after factory reset reads the new salt and identifier; this cached value is not refreshed.
+    ///     Successful <see cref="ResetAsync" /> refreshes this identifier using the new salt.
     /// </summary>
     string DeviceId { get; }
 
@@ -39,9 +40,8 @@ public interface IOathSession : IApplicationSession
     ///     Gets the raw salt bytes from the OATH applet SELECT response.
     /// </summary>
     /// <remarks>
-    ///     Borrows session-owned storage until disposal, which clears existing views. Copy only when
-    ///     independent storage is needed. Successful RESET ends the session; create a fresh session for
-    ///     the new salt and identity rather than reading historical cached state from this one.
+    ///     Borrows session-owned storage. A confirmed reset or session disposal clears existing views.
+    ///     Read this property again after a successful reset to obtain the new salt.
     /// </remarks>
     ReadOnlyMemory<byte> Salt { get; }
 
@@ -86,7 +86,7 @@ public interface IOathSession : IApplicationSession
     Task<IReadOnlyList<Credential>> ListCredentialsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Adds a credential or replaces an existing credential with the same raw credential ID.
+    ///     Adds a credential or overwrites the existing credential with the same raw credential ID.
     /// </summary>
     /// <remarks>
     ///     <para>
@@ -150,7 +150,7 @@ public interface IOathSession : IApplicationSession
     /// </param>
     /// <param name="cancellationToken">The cancellation token for the operation.</param>
     /// <returns>
-    ///     Independent, caller-owned HMAC storage, excluding the protocol's leading digit-count byte.
+    ///     Fresh, writable, caller-owned HMAC storage, excluding the protocol's leading digit-count byte.
     ///     The returned memory remains valid after session disposal.
     /// </returns>
     /// <remarks>
@@ -158,9 +158,8 @@ public interface IOathSession : IApplicationSession
     ///     contains a digit header and a nonempty HMAC payload before reporting successful user presence;
     ///     this structural check does not verify a particular digest length. Clear the returned bytes
     ///     when no longer needed, including when later processing fails. For a result named <c>hmac</c>,
-    ///     use <c>CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(hmac).Span)</c> in a
-    ///     <c>finally</c> block. These types are in <c>System.Security.Cryptography</c> and
-    ///     <c>System.Runtime.InteropServices</c>, respectively. The caller also remains responsible
+    ///     use <c>CryptographicOperations.ZeroMemory(hmac.Span)</c> in a <c>finally</c> block.
+    ///     The caller also remains responsible
     ///     for clearing its challenge storage when appropriate, after the operation completes.
     /// </remarks>
     /// <exception cref="ArgumentException">
@@ -170,7 +169,7 @@ public interface IOathSession : IApplicationSession
     /// <exception cref="Core.BadResponseException">
     ///     The required full-response tag is missing, or its value lacks the digit header or HMAC payload.
     /// </exception>
-    Task<ReadOnlyMemory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge,
+    Task<Memory<byte>> CalculateAsync(Credential credential, ReadOnlyMemory<byte> challenge,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -229,20 +228,24 @@ public interface IOathSession : IApplicationSession
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Resets the OATH application, removing all credentials and the access key, and ends this session.
+    ///     Resets the OATH application, removing all credentials and the access key.
     /// </summary>
     /// <remarks>
-    ///     Confirmed RESET success is terminal for both plain and secure-channel sessions. This method
-    ///     awaits asynchronous disposal of the protocol, derived secure-channel state and applet secrets;
-    ///     it does not SELECT, refresh metadata or re-establish SCP. Later caller cancellation does not
-    ///     interrupt that disposal. Further operations on this session throw <see cref="ObjectDisposedException" />.
-    ///     Dispose and reopen the connection, then create a new session to inspect or use the reset applet.
-    ///     A borrowed connection remains caller-owned and is not closed by this method; a connection opened
-    ///     by the convenience session factory is owned by the session and disposed normally.
-    ///     A disposal failure propagates even though RESET has already succeeded; the session remains terminal.
-    ///     Cancellation or overlap refusal before exchange admission leaves the session intact. A transport
-    ///     failure or device error is not confirmed RESET success and does not prove that no data changed.
+    ///     After confirmed RESET, the session discards old applet and secure-channel state, reselects,
+    ///     refreshes applet metadata and, if configured, establishes SCP again using the original caller-owned
+    ///     key parameters. OATH reset does not reset Security Domain keys. Keep the parameters alive and
+    ///     unchanged until the session is disposed. The session continues on the same connection on success.
+    ///     Cancellation after the successful RESET exchange does not interrupt reinitialization. Cancellation
+    ///     before the exchange leaves the session intact. A transport failure or device error does not
+    ///     confirm RESET success or prove that no data changed.
+    ///     If post-reset reinitialization fails and you supplied the connection, close and reopen it before
+    ///     creating a new session. The failed exchange may have left the connection out of sync.
     /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    ///     The exchange was refused before RESET (for example, because recovery was required or another exchange
+    ///     was active), or RESET succeeded but reinitialization failed. In the latter case the error reports
+    ///     confirmed reset and the inner exception gives the reinitialization failure; the session has ended.
+    /// </exception>
     Task ResetAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -267,13 +270,18 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Validates the access key using mutual HMAC-SHA1 challenge-response authentication.
     /// </summary>
-    /// <param name="key">The borrowed access key, normally obtained from <see cref="DeriveKey" />.</param>
+    /// <param name="key">The borrowed 16-byte access key, normally obtained from <see cref="DeriveKey" />.</param>
     /// <param name="cancellationToken">The cancellation token for the operation.</param>
     /// <remarks>
     ///     <para>
     ///         Requires an outstanding challenge from the OATH applet SELECT response. Call this method
     ///         only while <see cref="IsLocked" /> is <see langword="true" />, not for an already unlocked
-    ///         or unprotected session. Successful validation consumes the challenge and unlocks the session.
+    ///         or unprotected session. The SDK consumes the challenge and reports the session unlocked only
+    ///         after successful verification. If device-HMAC verification fails, the SDK keeps the session open,
+    ///         leaves <see cref="IsLocked" /> true, and retains the original device challenge. This does not
+    ///         roll back device state; the applet may already have accepted the host proof. You can attempt
+    ///         validation again with the same access key in the same session. The SDK sends a fresh host
+    ///         challenge, but the applet may not accept the retry.
     ///     </para>
     ///     <para>
     ///         Pass the access key, not raw password bytes. The caller retains ownership of <paramref name="key" />;
@@ -282,6 +290,7 @@ public interface IOathSession : IApplicationSession
     ///         needed, including if validation fails.
     ///     </para>
     /// </remarks>
+    /// <exception cref="ArgumentException">The access key is not exactly 16 bytes.</exception>
     /// <exception cref="InvalidOperationException">The session has no outstanding challenge.</exception>
     /// <exception cref="Core.BadResponseException">
     ///     The device's authentication HMAC does not match verification, or its required response is missing.
@@ -292,7 +301,7 @@ public interface IOathSession : IApplicationSession
     /// <summary>
     ///     Sets or changes the access key for the OATH applet.
     /// </summary>
-    /// <param name="key">The borrowed new access key, normally obtained from <see cref="DeriveKey" />.</param>
+    /// <param name="key">The borrowed new 16-byte access key, normally obtained from <see cref="DeriveKey" />.</param>
     /// <param name="cancellationToken">The cancellation token for the operation.</param>
     /// <remarks>
     ///     <para>
@@ -307,6 +316,7 @@ public interface IOathSession : IApplicationSession
     ///         needed, including if setting the key fails.
     ///     </para>
     /// </remarks>
+    /// <exception cref="ArgumentException">The access key is not exactly 16 bytes.</exception>
     Task SetKeyAsync(ReadOnlyMemory<byte> key, CancellationToken cancellationToken = default);
 
     /// <summary>

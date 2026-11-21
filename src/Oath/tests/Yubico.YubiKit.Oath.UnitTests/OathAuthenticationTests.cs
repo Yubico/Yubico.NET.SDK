@@ -45,6 +45,35 @@ public class OathAuthenticationTests
         0x90, 0x00
     ];
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(15)]
+    [InlineData(17)]
+    [InlineData(32)]
+    public async Task RawAccessKey_UnsupportedLengthsNeverReachApplet(int length)
+    {
+        using var connection = new RecordingSmartCardConnection(SelectResponseProtected(), [0x90, 0], [0x90, 0]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OathSession.CreateAsync(connection, cancellationToken: token);
+        byte[] key = new byte[length];
+        Array.Fill(key, (byte)0xA5);
+        try
+        {
+            var validateError = await Record.ExceptionAsync(() => session.ValidateAsync(key, token));
+            var setError = await Record.ExceptionAsync(() => session.SetKeyAsync(key, token));
+            Assert.Single(connection.TransmittedCommands); // SELECT only
+            Assert.Equal("key", Assert.IsType<ArgumentException>(validateError).ParamName);
+            Assert.Equal("key", Assert.IsType<ArgumentException>(setError).ParamName);
+            Assert.All(key, value => Assert.Equal(0xA5, value));
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+            foreach (byte[] command in connection.TransmittedCommands)
+                CryptographicOperations.ZeroMemory(command);
+        }
+    }
+
     // --- ISC-23: persistent password-protection state, independent of unlock state ---
 
     [Fact]
@@ -104,9 +133,26 @@ public class OathAuthenticationTests
 
         byte[] key = Rfc2898DeriveBytes.Pbkdf2(
             "new password"u8, Salt, iterations: 1000, HashAlgorithmName.SHA1, outputLength: 16);
-        await session.SetKeyAsync(key, TestContext.Current.CancellationToken);
+        try
+        {
+            await session.SetKeyAsync(key, TestContext.Current.CancellationToken);
 
-        Assert.True(session.IsPasswordProtected);
+            Assert.True(session.IsPasswordProtected);
+            byte[] command = connection.TransmittedCommands[1];
+            Assert.Equal(0x03, command[1]);
+            Assert.Equal(new byte[] { 0x73, 0x11, 0x21 }, command[5..8]);
+            Assert.True(CryptographicOperations.FixedTimeEquals(key, command.AsSpan(8, 16)));
+            Span<byte> expectedKey = stackalloc byte[16];
+            Rfc2898DeriveBytes.Pbkdf2("new password"u8, Salt, expectedKey, 1000, HashAlgorithmName.SHA1);
+            try { Assert.True(CryptographicOperations.FixedTimeEquals(expectedKey, key)); }
+            finally { CryptographicOperations.ZeroMemory(expectedKey); }
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+            foreach (byte[] command in connection.TransmittedCommands)
+                CryptographicOperations.ZeroMemory(command);
+        }
     }
 
     [Fact]

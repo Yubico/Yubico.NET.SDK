@@ -3,6 +3,7 @@
 
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Buffers;
 using System.ComponentModel;
 using System.Formats.Asn1;
 using System.Security.Cryptography;
@@ -314,20 +315,32 @@ public sealed class OpenPgpKeysAttestCommand : YkCommandBase<KeysAttestSettings>
 {
     protected override ConnectionType[] AppletTransports => [ConnectionType.SmartCard];
 
-    protected override async Task<int> ExecuteCommandAsync(
-        CommandContext context, KeysAttestSettings settings, YkDeviceContext deviceContext)
+    internal Func<string?, IMemoryOwner<byte>?> AcquirePin { get; init; } =
+        static provided => GetPin(provided, "Enter User PIN");
+
+    protected override Task<int> ExecuteCommandAsync(
+        CommandContext context, KeysAttestSettings settings, YkDeviceContext deviceContext) =>
+        ExecuteWithSelectionAsync(context, settings, run => run(deviceContext));
+
+    protected override async Task<int> ExecuteWithSelectionAsync(CommandContext context, KeysAttestSettings settings,
+        Func<Func<YkDeviceContext, Task<int>>, Task<int>> selectAndRun)
     {
         var keyRef = ParseKeyRef(settings.Key);
         if (keyRef == KeyRef.Att)
             throw new ArgumentException("Attestation requires the sig, dec, or aut slot.");
-        using var pin = GetPin(settings.Pin, "Enter User PIN");
+        using var pin = AcquirePin(settings.Pin);
         if (pin is null)
         {
             return ExitCode.UserCancelled;
         }
 
+        return await selectAndRun(device => AttestAsync(device, keyRef, pin.Memory));
+    }
+
+    private static async Task<int> AttestAsync(YkDeviceContext deviceContext, KeyRef keyRef, ReadOnlyMemory<byte> pin)
+    {
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
-        await session.VerifyPinAsync(pin.Memory);
+        await session.VerifyPinAsync(pin);
         using var cert = await session.AttestKeyAsync(keyRef);
 
         AnsiConsole.MarkupLine("[bold]Attestation Certificate[/]");

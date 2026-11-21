@@ -150,7 +150,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         IOpenPgpBackend backend = new OpenPgpBackend(protocol);
 
         await backend.SelectForInitializationAsync(cancellationToken).ConfigureAwait(false);
-        var (framingVersion, featureVersion, admitUnverifiedScp) =
+        var (framingVersion, featureVersion, scpEligibilityVersion) =
             await ResolveFirmwareAsync(backend, cancellationToken).ConfigureAwait(false);
 
         var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
@@ -159,7 +159,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
                 configuration,
                 scpKeyParams,
                 cancellationToken,
-                admitUnverifiedScpFirmware: admitUnverifiedScp)
+                scpEligibilityFirmwareVersion: scpEligibilityVersion)
             .ConfigureAwait(false);
 
         if (!ReferenceEquals(protocol, effectiveProtocol))
@@ -179,7 +179,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
             FirmwareVersion, _appData.Aid.Serial);
     }
 
-    private async Task<(FirmwareVersion Framing, FirmwareVersion Features, bool AdmitUnverifiedScp)> ResolveFirmwareAsync(
+    private async Task<(FirmwareVersion Framing, FirmwareVersion Features, FirmwareVersion ScpEligibility)> ResolveFirmwareAsync(
         IOpenPgpBackend backend, CancellationToken cancellationToken)
     {
         var cachedInfo = _firmwareVersionOverride is null ? _readCachedDeviceInfo?.Invoke() : null;
@@ -197,9 +197,10 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         _pinAttemptsVersion = cachedNeo && !featureVersion.IsAlphaOrBeta ? appletVersion : featureVersion;
         // A present, non-final qualifier (including unnamed values) is not production evidence.
         // cachedInfo is intentionally absent when the caller supplied an override.
-        bool admitUnverifiedScp = featureVersion.IsAlphaOrBeta ||
-            cachedInfo?.VersionQualifier is { Type: not VersionQualifierType.Final };
-        return (_numericVersion ?? new FirmwareVersion(1, 0, 0), featureVersion, admitUnverifiedScp);
+        var scpEligibility = featureVersion.IsAlphaOrBeta ||
+            cachedInfo?.VersionQualifier is { Type: not VersionQualifierType.Final }
+            ? FirmwareVersion.Default : featureVersion;
+        return (_numericVersion ?? new FirmwareVersion(1, 0, 0), featureVersion, scpEligibility);
     }
 
     // ── Data Access ───────────────────────────────────────────────────

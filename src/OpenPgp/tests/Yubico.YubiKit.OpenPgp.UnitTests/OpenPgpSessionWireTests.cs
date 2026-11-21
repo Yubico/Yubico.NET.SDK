@@ -1420,6 +1420,38 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal([0xA4, 0xF1, 0x50], connection.TransmittedCommands.Select(command => command[1]).ToArray());
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Initialize_PreviewOverrideAdmitsScpWhileAppletVersionControlsFraming(bool usePreviewOverride)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var recording = new RecordingSmartCardConnection(OkResponse(), [0x05, 0x02, 0, 0x90, 0], [0x69, 0x82]);
+        using var connection = new ExtendedProbeConnection(recording);
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            FirmwareVersionOverride = usePreviewOverride ? FirmwareVersion.Default : null,
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true },
+            ScpKeyParameters = keys,
+        };
+
+        Task Create() => OpenPgpSession.CreateAsync(connection, options, token);
+        if (usePreviewOverride)
+        {
+            var error = await Assert.ThrowsAsync<ApduException>(Create);
+            Assert.Equal((short)0x6982, error.SW);
+            Assert.Equal([0xA4, 0xF1, 0x50], recording.TransmittedCommands.Select(command => command[1]).ToArray());
+            Assert.Equal(8, recording.TransmittedCommands[^1][4]);
+            Assert.Equal(14, recording.TransmittedCommands[^1].Length);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(Create);
+            Assert.Equal([0xA4, 0xF1], recording.TransmittedCommands.Select(command => command[1]).ToArray());
+        }
+    }
+
     private sealed class ExtendedProbeConnection(RecordingSmartCardConnection inner) : ISmartCardConnection
     {
         public Transport Transport => inner.Transport;

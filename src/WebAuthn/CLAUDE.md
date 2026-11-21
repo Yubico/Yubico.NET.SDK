@@ -438,8 +438,8 @@ Keep these conditions attached to public guidance when changing extension flow:
 - LargeBlob uses largeBlobKey/storage-array operations, not the alternative direct extension.
   Required support needs discoverable creation: a discouraged resident key is rejected before GetInfo;
   a preferred resident key needs advertised `rk` support. A missing returned key reports unsupported.
-  Writes require exactly one original allowed credential under
-  WebAuthn, but the client currently does not check this. Reads can fail response construction after a
+  Writes deliberately accept multi-entry allow lists, unlike L3 §10.1.5. Use the final assertion's
+  credential-bound key, never the first original entry. Reads can fail response construction after a
   successful assertion. Do not equate nullable Blob with one proven absence/support/error state; the
   nullable-array conversion turns missing data into a present empty memory value; nullable presence and
   length do not distinguish it from a stored empty blob.

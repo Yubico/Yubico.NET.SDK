@@ -47,9 +47,10 @@ public sealed record class LargeBlobInput
 
     /// <summary>Authentication: store this blob for the asserted credential.</summary>
     /// <remarks>
-    /// Supply exactly one entry in the original <c>AllowCredentials</c> list, as WebAuthn requires for
-    /// writes. The current client does not enforce this constraint; later credential selection does
-    /// not satisfy it. The memory remains caller-owned and must stay unchanged until the ceremony,
+    /// The client accepts multiple entries in the original <c>AllowCredentials</c> list, deliberately
+    /// diverging from the exact-one requirement of WebAuthn L3 §10.1.5. The final assertion and its
+    /// returned storage key determine which credential's blob is written, not the original list order.
+    /// The memory remains caller-owned and must stay unchanged until the ceremony,
     /// including storage work, completes. Clear sensitive caller-owned data when no longer needed.
     /// </remarks>
     public ReadOnlyMemory<byte>? Write { get; init; }

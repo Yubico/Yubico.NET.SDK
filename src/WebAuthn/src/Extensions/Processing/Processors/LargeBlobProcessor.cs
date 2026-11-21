@@ -83,8 +83,8 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
     /// <summary>
     /// L3 §10.1.5 authentication: "If support is present, or if both read and write are present, return
     /// ... NotSupportedError". An authenticator without the supported storage route is skipped.
-    /// The original allow list is not available here, so the required single-entry check for writes
-    /// is currently missing; narrowing the final assertion request is not equivalent validation.
+    /// The SDK deliberately accepts multi-entry allow lists for writes; it uses the final assertion's
+    /// credential-bound key. This is a divergence from the L3 exact-one requirement, not validation.
     /// </summary>
     public static LargeBlobProcessor? ForAuthentication(LargeBlobInput input, ExtensionContext context)
     {

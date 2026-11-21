@@ -104,15 +104,6 @@ public class Ctap2LargeBlobAuditReproTests
                             }
                         }
                         Assert.True(matched);
-
-                        // Explicit opt-in secret export: a nonempty AUDIT_LARGE_BLOB_KEY_OUT makes this
-                        // fixture write the largeBlobKey as immutable hexadecimal text to that file.
-                        // Only use for human-authorized interop on a dedicated device with a protected
-                        // destination and planned file/environment cleanup; this is not safe key storage.
-                        if (Environment.GetEnvironmentVariable("AUDIT_LARGE_BLOB_KEY_OUT") is { Length: > 0 } keyOut)
-                        {
-                            await File.WriteAllTextAsync(keyOut, Convert.ToHexString(response.LargeBlobKey.Value.Span));
-                        }
                     }
                     finally { CryptographicOperations.ZeroMemory(writeToken); }
                 }
@@ -131,8 +122,7 @@ public class Ctap2LargeBlobAuditReproTests
             // Manual prerequisite: separately authorize a getAssertion/key acquisition and external
             // python-fido2 write, then provide the same secret as AUDIT_LARGE_BLOB_KEY_HEX.
             // This test decodes an immutable environment string and clears only its decoded key array,
-            // not the environment text or returned plaintext. The sibling opt-in fixture can export
-            // the key to disk; neither channel is production-safe secret handling.
+            // not the environment text or returned plaintext. This is not production-safe secret handling.
             string? keyHex = Environment.GetEnvironmentVariable("AUDIT_LARGE_BLOB_KEY_HEX");
             Skip.If(string.IsNullOrEmpty(keyHex), "Run C-interop.py and provide AUDIT_LARGE_BLOB_KEY_HEX");
             byte[] key = Convert.FromHexString(keyHex ?? "");

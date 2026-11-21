@@ -25,34 +25,24 @@ namespace Yubico.YubiKit.Core.Transports.Hid.MacOS;
 ///     call forwarding with small managed compositions and status handling.
 /// </summary>
 [SupportedOSPlatform("macos")]
-internal sealed class MacOSHidReportApi : IMacOSHidReportApi
+internal sealed class MacOSHidReportApi : IMacOSHidReportApi, MacOSHidDeviceLookup.INative
 {
     public static readonly MacOSHidReportApi Instance = new();
 
     private MacOSHidReportApi() { }
 
-    public nint CreateDevice(long entryId)
-    {
-        var deviceEntry = 0;
-        try
-        {
-            var matchingDictionary = IOKitNativeMethods.IORegistryEntryIDMatching((ulong)entryId);
-            deviceEntry = IOKitNativeMethods.IOServiceGetMatchingService(0, matchingDictionary);
+    public nint CreateDevice(long entryId) => MacOSHidDeviceLookup.CreateDevice(this, (ulong)entryId);
 
-            if (deviceEntry == 0)
-                throw new PlatformApiException("Failed to find matching device entry in IO registry.");
+    nint MacOSHidDeviceLookup.INative.CreateMatchingDictionary(ulong entryId) =>
+        IOKitNativeMethods.IORegistryEntryIDMatching(entryId);
 
-            var device = IOKitNativeMethods.IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
+    int MacOSHidDeviceLookup.INative.GetMatchingServices(nint dictionary, out uint iterator) =>
+        (int)IOKitNativeMethods.IOServiceGetMatchingServices(0, dictionary, out iterator);
 
-            if (device == IntPtr.Zero) throw new PlatformApiException("Failed to create HID device handle.");
-
-            return device;
-        }
-        finally
-        {
-            if (deviceEntry != 0) _ = IOKitNativeMethods.IOObjectRelease(deviceEntry);
-        }
-    }
+    uint MacOSHidDeviceLookup.INative.NextService(uint iterator) => IOKitNativeMethods.IOIteratorNext(iterator);
+    bool MacOSHidDeviceLookup.INative.IsIteratorValid(uint iterator) => IOKitNativeMethods.IOIteratorIsValid(iterator) != 0;
+    nint MacOSHidDeviceLookup.INative.CreateHidDevice(uint service) => IOKitNativeMethods.IOHIDDeviceCreate(0, service);
+    void MacOSHidDeviceLookup.INative.ReleaseIoObject(uint handle) => _ = IOKitNativeMethods.IOObjectRelease(handle);
 
     public void OpenDevice(nint device)
     {
@@ -99,3 +89,7 @@ internal sealed class MacOSHidReportApi : IMacOSHidReportApi
     public void RegisterRemovalCallback(nint device, nint callback, nint context) =>
         IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(device, callback, context);
 }
+
+// Distinguishes a vanished registry entry from an open failure on a device that was found.
+internal sealed class MacOSHidEntryUnavailableException()
+    : PlatformApiException("Failed to find matching device entry in IO registry.");

@@ -118,6 +118,20 @@ public class EncryptedMetadataDecryptorTests
         Assert.Null(result);
     }
 
+    [Theory]
+    [InlineData(32, 16)]
+    [InlineData(32, 31)]
+    [InlineData(32, 48)]
+    [InlineData(31, 32)]
+    [InlineData(64, 32)]
+    public void GetInfoDecryptors_RejectOtherThanOneCiphertextBlockAndSupportedTokenWidths(int tokenLength, int fieldLength)
+    {
+        byte[] token = new byte[tokenLength];
+        byte[] field = new byte[fieldLength];
+        Assert.Null(EncryptedMetadataDecryptor.DecryptIdentifier(token, field));
+        Assert.Null(EncryptedMetadataDecryptor.DecryptCredStoreState(token, field));
+    }
+
     [Fact]
     public void DecryptIdentifier_EmptyCiphertext_ReturnsNull()
     {
@@ -335,7 +349,7 @@ public class EncryptedMetadataDecryptorTests
         Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
 
         // Decrypt
-        var decrypted = EncryptedMetadataDecryptor.DecryptIdentifier(ppuat, ivAndCiphertext);
+        var decrypted = EncryptedMetadataDecryptor.DecryptWithInfo(ppuat, ivAndCiphertext, "encIdentifier"u8);
 
         // Assert
         Assert.NotNull(decrypted);
@@ -368,7 +382,7 @@ public class EncryptedMetadataDecryptorTests
         Array.Copy(encrypted, 0, ivAndCiphertext, iv.Length, encrypted.Length);
 
         // Decrypt
-        var decrypted = EncryptedMetadataDecryptor.DecryptCredStoreState(ppuat, ivAndCiphertext);
+        var decrypted = EncryptedMetadataDecryptor.DecryptWithInfo(ppuat, ivAndCiphertext, "encCredStoreState"u8);
 
         // Assert
         Assert.NotNull(decrypted);

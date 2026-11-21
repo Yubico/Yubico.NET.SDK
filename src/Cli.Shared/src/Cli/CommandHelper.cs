@@ -23,17 +23,32 @@ public static class CommandHelper
     /// <summary>
     /// Sets up a <see cref="CancellationTokenSource"/> that cancels on Ctrl+C.
     /// </summary>
-    /// <returns>A <see cref="CancellationTokenSource"/> wired to Console.CancelKeyPress.</returns>
-    public static CancellationTokenSource CreateConsoleCts()
-    {
-        var cts = new CancellationTokenSource();
-        Console.CancelKeyPress += (_, e) =>
-        {
-            e.Cancel = true;
-            cts.Cancel();
-        };
+    /// <returns>A <see cref="CancellationTokenSource"/> that detaches from Console.CancelKeyPress on disposal.</returns>
+    public static CancellationTokenSource CreateConsoleCts() => new ConsoleCancellationTokenSource();
 
-        return cts;
+    private sealed class ConsoleCancellationTokenSource : CancellationTokenSource
+    {
+        public ConsoleCancellationTokenSource() => Console.CancelKeyPress += OnCancelKeyPress;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                Console.CancelKeyPress -= OnCancelKeyPress;
+            base.Dispose(disposing);
+        }
+
+        private void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs args)
+        {
+            try
+            {
+                Cancel();
+                args.Cancel = true;
+            }
+            catch (ObjectDisposedException)
+            {
+                // A notification already captured by Console can race with detachment.
+            }
+        }
     }
 
 }

@@ -66,6 +66,7 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     /// used by this SDK's experimental seed-key profile, which lives at a different protocol layer.
     /// </para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public static readonly CoseAlgorithm Esp256SplitArkgPlaceholder = new(-65539);
 
     /// <summary>
@@ -88,6 +89,7 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     /// in this SDK's experimental seed-key profile).
     /// </para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public static readonly CoseAlgorithm ArkgP256 = Esp256SplitArkgPlaceholder;
 
     /// <summary>
@@ -110,6 +112,7 @@ public readonly record struct CoseAlgorithm(int Value) : IEquatable<CoseAlgorith
     /// The two constants live at different protocol layers and are NOT interchangeable.
     /// </para>
     /// </remarks>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public static readonly CoseAlgorithm ArkgP256SeedKey = new(-65700);
 
     /// <summary>

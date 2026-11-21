@@ -134,17 +134,17 @@
     },
     {
       "path": "Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs", "reviewOwner": "Core maintainers",
-      "rationale": "IORegistry matching, lookup, ID retrieval and release are synchronous native entry points used by discovery; no proof of their callers' scheduling is implied.",
-      "evidence": ["Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs:152-190 declares registry discovery primitives."],
+      "rationale": "IORegistry ID retrieval, dictionary creation, service matching, iterator reads and validation, and object release are synchronous. The matching call consumes its dictionary and reports kernel status; the HID open path owns and releases its acquired iterator and service. Only exhaustion of a valid non-null iterator is classified as a missing entry; null iterators and query failures are not rediscovery signals. No scheduling or physical qualification follows from this classification.",
+      "evidence": ["Native/MacOS/IOKitFramework/IOKitFramework.Interop.cs declares the registry and iterator imports; Transports/Hid/MacOS/MacOSHidReportApi.cs forwards them and MacOSHidDeviceLookup.cs classifies results and releases acquired IOKit objects."],
       "status": ["documented", "outstanding"],
-      "entries": ["IOObjectRelease#EDC96D1529BB", "IORegistryEntryGetRegistryEntryID#31000B4A5A02", "IORegistryEntryIDMatching#9186C0F91D5C", "IOServiceGetMatchingService#D7A6327A958B"]
+      "entries": ["IOIteratorIsValid#1F6A4C0321A2", "IOIteratorNext#F5526BF2A290", "IOObjectRelease#66BC87783A40", "IORegistryEntryGetRegistryEntryID#31000B4A5A02", "IORegistryEntryIDMatching#9186C0F91D5C", "IOServiceGetMatchingServices#6C0F79BFACF9"]
     },
     {
       "path": "Native/MacOS/IOKitFramework/IOKitHid.Interop.cs", "reviewOwner": "Core maintainers",
       "rationale": "IOKit HID device/manager creation, report I/O, run-loop scheduling, callback registration and release are synchronous native entries; get/set report may block. Callback delivery and listener teardown need separate review.",
       "evidence": ["Native/MacOS/IOKitFramework/IOKitHid.Interop.cs declares device and manager operations and native callback registration; Transports/Hid/MacOS/MacOSHidReportApi.cs forwards device callback registration. MacOSHidDeviceListener.Listen opens the scheduled manager on its worker; Cleanup closes it after callbacks return; failed close retains manager and callback context."],
       "status": ["documented", "outstanding"],
-      "entries": ["IOHIDDeviceClose#C7E42FEEC46B", "IOHIDDeviceCreate#27EFE0C115DA", "IOHIDDeviceGetProperty#0E3E0064B9D0", "IOHIDDeviceGetReport#054AFB1ECF80", "IOHIDDeviceGetService#EE6F5F66648B", "IOHIDDeviceOpen#BF0F983FEE5D", "IOHIDDeviceRegisterInputReportCallback#36CD98F7C260", "IOHIDDeviceRegisterRemovalCallback#735AEA45BC5F", "IOHIDDeviceScheduleWithRunLoop#F2BC49F83D04", "IOHIDDeviceSetReport#E5C03E8562A3", "IOHIDDeviceUnscheduleFromRunLoop#1B2E2F3DBE33", "IOHIDManagerClose#9C95C22FB9DF", "IOHIDManagerCopyDevices#19989DF0FA20", "IOHIDManagerCreate#C43A7CDC7A9C", "IOHIDManagerOpen#D5B15C335A1B", "IOHIDManagerRegisterDeviceMatchingCallback#F716446B73D3", "IOHIDManagerRegisterDeviceRemovalCallback#AF59CBE9D09D", "IOHIDManagerScheduleWithRunLoop#08B4D54D6516", "IOHIDManagerSetDeviceMatching#2470DECB5A83", "IOHIDManagerUnscheduleFromRunLoop#925EE5EB662B"]
+      "entries": ["IOHIDDeviceClose#C7E42FEEC46B", "IOHIDDeviceCreate#D89E80424C5C", "IOHIDDeviceGetProperty#0E3E0064B9D0", "IOHIDDeviceGetReport#054AFB1ECF80", "IOHIDDeviceGetService#EE6F5F66648B", "IOHIDDeviceOpen#BF0F983FEE5D", "IOHIDDeviceRegisterInputReportCallback#36CD98F7C260", "IOHIDDeviceRegisterRemovalCallback#735AEA45BC5F", "IOHIDDeviceScheduleWithRunLoop#F2BC49F83D04", "IOHIDDeviceSetReport#E5C03E8562A3", "IOHIDDeviceUnscheduleFromRunLoop#1B2E2F3DBE33", "IOHIDManagerClose#9C95C22FB9DF", "IOHIDManagerCopyDevices#19989DF0FA20", "IOHIDManagerCreate#C43A7CDC7A9C", "IOHIDManagerOpen#D5B15C335A1B", "IOHIDManagerRegisterDeviceMatchingCallback#F716446B73D3", "IOHIDManagerRegisterDeviceRemovalCallback#AF59CBE9D09D", "IOHIDManagerScheduleWithRunLoop#08B4D54D6516", "IOHIDManagerSetDeviceMatching#2470DECB5A83", "IOHIDManagerUnscheduleFromRunLoop#925EE5EB662B"]
     },
     {
       "path": "Native/NativeMethods.cs", "reviewOwner": "Core maintainers",

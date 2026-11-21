@@ -130,6 +130,7 @@ public class WebAuthnExtensionAuditReproTests
 
     [Fact]
     [Trait("Audit", "YESDK-1634")]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public void YESDK1634_PreviewSignMissingInnerAttestationDoesNotSubstituteCredentialKey()
     {
         var publicKey = new CborWriter(CborConformanceMode.Ctap2Canonical);

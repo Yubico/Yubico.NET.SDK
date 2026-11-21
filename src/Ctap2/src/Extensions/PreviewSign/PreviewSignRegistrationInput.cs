@@ -32,6 +32,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// algorithm support or ceremony policy.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed class PreviewSignRegistrationInput
 {
     /// <summary>

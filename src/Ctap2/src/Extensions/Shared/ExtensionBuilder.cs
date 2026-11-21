@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Extensions;
@@ -54,8 +55,10 @@ public sealed class ExtensionBuilder
     private bool _minPinLength;
     private bool _largeBlobKey;
     private bool _hmacSecretRequested;
+#pragma warning disable YKEXP001 // Only WithPreviewSign can populate these fields.
     private PreviewSignRegistrationInput? _previewSignRegistration;
     private PreviewSignSigningParams? _previewSignAuthentication;
+#pragma warning restore YKEXP001
 
     /// <summary>
     /// Adds the credProtect extension with the specified policy.
@@ -223,19 +226,30 @@ public sealed class ExtensionBuilder
             saltData = salt1.ToArray();
         }
 
-        // Encrypt salts
-        var saltEnc = protocol.Encrypt(sharedSecret, saltData);
-
-        // Compute auth tag
-        var saltAuth = protocol.Authenticate(sharedSecret, saltEnc);
-
-        return new HmacSecretInput
+        byte[]? saltEnc = null;
+        byte[]? saltAuth = null;
+        try
         {
-            KeyAgreement = keyAgreement,
-            SaltEnc = saltEnc,
-            SaltAuth = saltAuth,
-            PinUvAuthProtocol = protocol.Version
-        };
+            saltEnc = protocol.Encrypt(sharedSecret, saltData);
+            saltAuth = protocol.Authenticate(sharedSecret, saltEnc);
+            return new HmacSecretInput
+            {
+                KeyAgreement = keyAgreement,
+                SaltEnc = saltEnc,
+                SaltAuth = saltAuth,
+                PinUvAuthProtocol = protocol.Version
+            };
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(saltEnc);
+            CryptographicOperations.ZeroMemory(saltAuth);
+            throw;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(saltData);
+        }
     }
 
     /// <summary>
@@ -294,6 +308,7 @@ public sealed class ExtensionBuilder
     /// this builder currently emits registration input and ignores signing input.
     /// </remarks>
     /// <returns>This builder for chaining.</returns>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public ExtensionBuilder WithPreviewSign(PreviewSignRegistrationInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -314,6 +329,7 @@ public sealed class ExtensionBuilder
     /// </remarks>
     /// <param name="signingParams">The selected credential's signing parameters.</param>
     /// <returns>This builder for chaining.</returns>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public ExtensionBuilder WithPreviewSign(PreviewSignSigningParams signingParams)
     {
         ArgumentNullException.ThrowIfNull(signingParams);
@@ -408,6 +424,7 @@ public sealed class ExtensionBuilder
             writer.WriteBoolean(true);
         }
 
+#pragma warning disable YKEXP001 // Encode only an explicit previewSign opt-in.
         if (_previewSignRegistration is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
@@ -418,10 +435,12 @@ public sealed class ExtensionBuilder
             writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
             EncodePreviewSignSigningParams(writer, _previewSignAuthentication);
         }
+#pragma warning restore YKEXP001
 
         writer.WriteEndMap();
     }
 
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     private static void EncodePreviewSignRegistrationInput(CborWriter writer, PreviewSignRegistrationInput input)
     {
         var encodedBytes = PreviewSignCbor.EncodeRegistrationInput(input);
@@ -431,6 +450,7 @@ public sealed class ExtensionBuilder
         CopyCborValue(reader, writer);
     }
 
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     private static void EncodePreviewSignSigningParams(CborWriter writer, PreviewSignSigningParams signingParams)
     {
         var encodedBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);

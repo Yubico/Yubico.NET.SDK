@@ -33,9 +33,11 @@ internal interface ICtap2Backend
     /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>
     /// <param name="userPresenceNotification">The non-null notification handle for this operation.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <param name="onSuccess">Internal acknowledgement of a successful wire status, before notifying the caller's prompt.</param>
     /// <returns>The response data (status byte has already been validated).</returns>
     Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,
         UserPresenceNotification userPresenceNotification,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        Action? onSuccess = null);
 }

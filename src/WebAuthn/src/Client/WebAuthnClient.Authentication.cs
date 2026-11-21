@@ -39,6 +39,8 @@ public sealed partial class WebAuthnClient
     /// request to one descriptor; it does not return every allowed credential held by the authenticator.
     /// Without an allow list, the authenticator can return multiple discoverable credentials for the RP,
     /// subject to its own selection behavior. No match produces an empty list rather than an exception.
+    /// A reported assertion count above the SDK's 1024-per-ceremony limit raises a Constraint error
+    /// before requesting continuations. This host resource limit is not a CTAP validity rule.
     /// </para>
     /// <para>
     /// Assertions and extension output processing, including extension writes, finish before this method

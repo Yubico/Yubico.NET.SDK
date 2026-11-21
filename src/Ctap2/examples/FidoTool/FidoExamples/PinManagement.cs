@@ -211,7 +211,7 @@ public static class PinManagement
 
             var status = await clientPin.GetPinRetriesAsync(cancellationToken);
 
-            return PinRetriesResult.Succeeded(status.RetriesRemaining, status.PowerCycleRequired);
+            return PinRetriesResult.Succeeded(status.RetriesRemaining, status.PowerCycleRequired is true);
         }
         catch (CtapException ex)
         {

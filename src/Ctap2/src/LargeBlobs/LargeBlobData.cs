@@ -33,14 +33,13 @@ namespace Yubico.YubiKit.Ctap2.LargeBlobs;
 /// Reading (§6.10.4): an entry that does not decrypt under the key is simply not this credential's
 /// ("skip this array element"); a decrypted entry whose inflation fails or whose inflated length is
 /// not origSize is an error. This SDK skips origSize above 1 MiB before decryption: a platform limit
-/// chosen from the §6.10.4 SHOULD note, not a universal protocol maximum. Encrypt has no matching cap.
+/// chosen from the §6.10.4 SHOULD note, not a universal protocol maximum. Encrypt enforces the same limit.
 /// </para>
 /// <para>
 /// Unknown elements of accepted maps retain their encoded key/value bytes (§6.10.3 permits unknown
 /// elements), while known fields and the enclosing maps are reconstructed. This is not byte-exact
 /// preservation of a foreign entry or the complete array. Nonconforming entries are skipped; origSize
-/// and integer map keys are limited to the signed Int64 range. Unknown values retain encoded slices,
-/// including unsigned values beyond Int64, subject to reader/writer conformance requirements.
+/// retains the full unsigned 64-bit range. Values above the cap can be preserved without inflating them.
 /// </para>
 /// </remarks>
 public sealed class LargeBlobEntry
@@ -53,10 +52,10 @@ public sealed class LargeBlobEntry
     private const int TagSize = 16;
 
     /// <summary>
-    /// The largest origSize this SDK will inflate: 1 MiB, the minimum CTAP §6.10.4 asks platforms to
+    /// The largest original size this SDK will inflate or encrypt: 1 MiB, the minimum CTAP §6.10.4 asks platforms to
     /// permit ("that maximum SHOULD be at least 1MiB").
     /// </summary>
-    public const long MaxOriginalSize = 1024 * 1024;
+    public const ulong MaxOriginalSize = 1024 * 1024;
 
     private readonly IReadOnlyList<(ReadOnlyMemory<byte> Key, ReadOnlyMemory<byte> Value)> _unknownElements;
 
@@ -65,7 +64,7 @@ public sealed class LargeBlobEntry
     /// <param name="nonce">The 12-byte AEAD nonce.</param>
     /// <param name="originalSize">The length of the uncompressed data.</param>
     /// <remarks>Keep borrowed storage unchanged while this entry is used or serialized. Read-only views are not immutable storage.</remarks>
-    public LargeBlobEntry(ReadOnlyMemory<byte> ciphertext, ReadOnlyMemory<byte> nonce, long originalSize)
+    public LargeBlobEntry(ReadOnlyMemory<byte> ciphertext, ReadOnlyMemory<byte> nonce, ulong originalSize)
         : this(ciphertext, nonce, originalSize, [])
     {
     }
@@ -73,7 +72,7 @@ public sealed class LargeBlobEntry
     private LargeBlobEntry(
         ReadOnlyMemory<byte> ciphertext,
         ReadOnlyMemory<byte> nonce,
-        long originalSize,
+        ulong originalSize,
         IReadOnlyList<(ReadOnlyMemory<byte> Key, ReadOnlyMemory<byte> Value)> unknownElements)
     {
         if (nonce.Length != NonceSize)
@@ -85,8 +84,6 @@ public sealed class LargeBlobEntry
         {
             throw new ArgumentException("Ciphertext must include the 16-byte AEAD tag (CTAP §6.10.3).", nameof(ciphertext));
         }
-
-        ArgumentOutOfRangeException.ThrowIfNegative(originalSize);
 
         Ciphertext = ciphertext;
         Nonce = nonce;
@@ -101,7 +98,7 @@ public sealed class LargeBlobEntry
     public ReadOnlyMemory<byte> Nonce { get; }
 
     /// <summary>§6.10.3 element 3: "the length, in bytes, of the uncompressed data".</summary>
-    public long OriginalSize { get; }
+    public ulong OriginalSize { get; }
 
     /// <summary>
     /// Attempts to decrypt this entry with a credential's largeBlobKey.
@@ -156,12 +153,12 @@ public sealed class LargeBlobEntry
     /// </summary>
     /// <remarks>
     /// Borrows key/data for this call and returns new ciphertext/nonce arrays. Clear caller-owned
-    /// plaintext/key storage after use. The returned compressed array is cleared, but this does not
-    /// clear the compression stream's backing storage or establish end-to-end provider cleanup.
-    /// Data above MaxOriginalSize is accepted here but cannot be returned by TryDecrypt.
+    /// plaintext/key storage after use. Internal compressed buffers are cleared; this does not
+    /// establish end-to-end provider cleanup.
     /// </remarks>
     public static LargeBlobEntry Encrypt(ReadOnlySpan<byte> largeBlobKey, ReadOnlySpan<byte> data)
     {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan((ulong)data.Length, MaxOriginalSize, nameof(data));
         if (largeBlobKey.Length != KeyLength)
         {
             throw new ArgumentException($"Large blob key must be {KeyLength} bytes.", nameof(largeBlobKey));
@@ -173,8 +170,8 @@ public sealed class LargeBlobEntry
             var nonce = RandomNumberGenerator.GetBytes(NonceSize);
             var ciphertextAndTag = new byte[compressed.Length + TagSize];
             using var aesGcm = new AesGcm(largeBlobKey, TagSize);
-            aesGcm.Encrypt(nonce, compressed, ciphertextAndTag.AsSpan(0, compressed.Length), ciphertextAndTag.AsSpan(compressed.Length), AssociatedData(data.Length));
-            return new LargeBlobEntry(ciphertextAndTag, nonce, data.Length);
+            aesGcm.Encrypt(nonce, compressed, ciphertextAndTag.AsSpan(0, compressed.Length), ciphertextAndTag.AsSpan(compressed.Length), AssociatedData((ulong)data.Length));
+            return new LargeBlobEntry(ciphertextAndTag, nonce, (ulong)data.Length);
         }
         finally
         {
@@ -191,7 +188,7 @@ public sealed class LargeBlobEntry
         writer.WriteInt32(KeyNonce);
         writer.WriteByteString(Nonce.Span);
         writer.WriteInt32(KeyOrigSize);
-        writer.WriteInt64(OriginalSize);
+        writer.WriteUInt64(OriginalSize);
         foreach (var (key, value) in _unknownElements)
         {
             writer.WriteEncodedValue(key.Span);
@@ -214,20 +211,14 @@ public sealed class LargeBlobEntry
         }
 
         ReadOnlyMemory<byte>? ciphertext = null, nonce = null;
-        long? origSize = null;
+        ulong? origSize = null;
         var unknown = new List<(ReadOnlyMemory<byte> Key, ReadOnlyMemory<byte> Value)>();
         var count = reader.ReadStartMap();
         for (var i = 0; i < count; i++)
         {
-            if (reader.PeekState() is not (CborReaderState.UnsignedInteger or CborReaderState.NegativeInteger))
-            {
-                // Non-integer key: keep it as an unknown element verbatim.
-                unknown.Add((reader.ReadEncodedValue(), reader.ReadEncodedValue()));
-                continue;
-            }
-
             var encodedKey = reader.ReadEncodedValue();
-            var key = new CborReader(encodedKey, CborConformanceMode.Lax).ReadInt64();
+            // Known keys are canonical single-byte unsigned integers; preserve other keys verbatim.
+            var key = encodedKey.Length == 1 ? encodedKey.Span[0] : -1;
             switch (key)
             {
                 case KeyCiphertext when reader.PeekState() == CborReaderState.ByteString:
@@ -237,7 +228,7 @@ public sealed class LargeBlobEntry
                     nonce = reader.ReadByteString();
                     break;
                 case KeyOrigSize when reader.PeekState() == CborReaderState.UnsignedInteger:
-                    origSize = reader.ReadInt64();
+                    origSize = reader.ReadUInt64();
                     break;
                 case KeyCiphertext or KeyNonce or KeyOrigSize:
                     reader.SkipValue(); // required element of the wrong type → not conforming
@@ -270,11 +261,11 @@ public sealed class LargeBlobEntry
     }
 
     /// <summary>§6.10.3: "The value 0x626c6f62 ("blob") || uint64LittleEndian(origSize)".</summary>
-    private static byte[] AssociatedData(long origSize)
+    private static byte[] AssociatedData(ulong origSize)
     {
         var ad = new byte[4 + sizeof(ulong)];
         "blob"u8.CopyTo(ad);
-        BinaryPrimitives.WriteUInt64LittleEndian(ad.AsSpan(4), (ulong)origSize);
+        BinaryPrimitives.WriteUInt64LittleEndian(ad.AsSpan(4), origSize);
         return ad;
     }
 
@@ -282,12 +273,21 @@ public sealed class LargeBlobEntry
     private static byte[] Deflate(ReadOnlySpan<byte> data)
     {
         using var output = new MemoryStream();
-        using (var deflate = new DeflateStream(output, CompressionLevel.Optimal, leaveOpen: true))
+        try
         {
-            deflate.Write(data);
+            using (var deflate = new DeflateStream(output, CompressionLevel.Optimal, leaveOpen: true))
+            {
+                deflate.Write(data);
+            }
+            return output.ToArray();
         }
-
-        return output.ToArray();
+        finally
+        {
+            if (output.TryGetBuffer(out ArraySegment<byte> buffer))
+            {
+                CryptographicOperations.ZeroMemory(buffer.AsSpan());
+            }
+        }
     }
 
     /// <summary>
@@ -295,7 +295,7 @@ public sealed class LargeBlobEntry
     /// is not equal to origSize, return an error." Reads at most origSize + 1 bytes so an inflation bomb
     /// cannot exceed the cap.
     /// </summary>
-    private static byte[] Inflate(byte[] compressed, long originalSize, Action<byte[]>? temporaryObserver)
+    private static byte[] Inflate(byte[] compressed, ulong originalSize, Action<byte[]>? temporaryObserver)
     {
         var expected = checked((int)originalSize);
         var buffer = new byte[expected + 1];
@@ -358,12 +358,10 @@ public sealed class LargeBlobArray
     /// <exception cref="ArgumentException">The data is too short or the hash does not match.</exception>
     /// <exception cref="CborContentException">CBOR is malformed or violates the reader's conformance requirements.</exception>
     /// <exception cref="InvalidOperationException">A typed read encounters the wrong CBOR major type, including a non-array root.</exception>
-    /// <exception cref="OverflowException">An origSize or integer map key is outside the signed Int64 range.</exception>
     /// <remarks>
     /// Known ciphertext/nonce byte strings are independently copied, but retained unknown encoded
     /// keys/values borrow slices of data. The result is therefore not a fully detached snapshot.
-    /// Rejects short/hash-corrupt input for direct callers; this does not validate every complete-envelope
-    /// or unsigned-range condition. <see cref="LargeBlobStorage.ReadLargeBlobArrayAsync"/> applies
+    /// Rejects short/hash-corrupt input for direct callers. <see cref="LargeBlobStorage.ReadLargeBlobArrayAsync"/> applies
     /// §6.10.2's rule that a short or corrupt array is treated as the initial (empty) array.
     /// </remarks>
     public static LargeBlobArray Deserialize(ReadOnlyMemory<byte> data)
@@ -389,6 +387,8 @@ public sealed class LargeBlobArray
         }
 
         reader.ReadEndArray();
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the large-blob array.");
         return new LargeBlobArray { Entries = entries };
     }
 

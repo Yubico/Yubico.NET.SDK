@@ -18,6 +18,7 @@ using Yubico.YubiKit.Ctap2.Extensions;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class ArkgP256SignArgsTests
 {
     [Fact]

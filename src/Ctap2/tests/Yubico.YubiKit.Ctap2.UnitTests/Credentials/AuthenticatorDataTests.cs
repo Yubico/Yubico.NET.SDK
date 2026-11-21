@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2.Credentials;
 
@@ -128,15 +129,42 @@ public class AuthenticatorDataTests
         Assert.True(flags.HasFlag(AuthenticatorDataFlags.AttestedCredentialData));
     }
 
-    [Fact]
-    public void Parse_ExtensionDataFlag_ReturnsTrue()
+    [Theory]
+    [InlineData(true, "")]
+    [InlineData(true, "80")]
+    [InlineData(true, "A16178")]
+    [InlineData(true, "A0F5")]
+    [InlineData(false, "A0")]
+    public void Parse_RejectsInvalidExtensionSuffix(bool ed, string suffixHex)
     {
-        // Enum-bit inspection only; this test does not call Parse or validate an ED extension map.
-        var data = MinimalAuthData.ToArray();
-        data[32] = 0x81; // UP + ED flag
+        byte[] data = [.. MinimalAuthData, .. Convert.FromHexString(suffixHex)];
+        data[32] = ed ? (byte)0x81 : (byte)0x01;
 
-        var flags = (AuthenticatorDataFlags)data[32];
-        Assert.True(flags.HasFlag(AuthenticatorDataFlags.ExtensionData));
+        Assert.Throws<System.Formats.Cbor.CborContentException>(() => AuthenticatorData.Parse(data));
+    }
+
+    [Fact]
+    public void Parse_AttestedScalarKey_RejectsMalformedStructure()
+    {
+        byte[] data = [.. MinimalAuthData, .. new byte[16], 0, 1, 0xAB, 0x01];
+        data[32] |= 0x40;
+
+        Assert.Throws<CborContentException>(() => AuthenticatorData.Parse(data));
+    }
+
+    [Fact]
+    public void Parse_AttestedKeyMap_PreservesUnknownEncodedValuesBeforeExtensions()
+    {
+        // Unknown integer label 99 with an array containing a tagged value.
+        byte[] key = Convert.FromHexString("A1186381D8184100");
+        byte[] data = [.. MinimalAuthData, .. new byte[16], 0, 1, 0xAB, .. key, 0xA0];
+        data[32] |= 0xC0;
+
+        var parsed = AuthenticatorData.Parse(data);
+
+        var attested = Assert.IsType<AttestedCredentialData>(parsed.AttestedCredentialData);
+        Assert.Equal(key, attested.CredentialPublicKey.ToArray());
+        Assert.NotNull(parsed.Extensions);
     }
 
     [Fact]

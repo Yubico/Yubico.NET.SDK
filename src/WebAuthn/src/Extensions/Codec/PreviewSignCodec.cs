@@ -35,6 +35,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Codec;
 /// outputs are translated back into WebAuthn-level previewSign outputs.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 internal static class PreviewSignCodec
 {
     private const string ExtensionId = "previewSign";
@@ -90,7 +91,7 @@ internal static class PreviewSignCodec
     /// previewSign output is absent. Attestation decoding does not verify its signature or trust.
     /// </returns>
     /// <exception cref="WebAuthnClientError">
-    /// Thrown with InvalidState when signed previewSign output is present but the unsigned
+    /// Thrown with InvalidState when signed previewSign output was decoded but the unsigned
     /// previewSign output is absent, or the decoded inner authenticator data has no attested credential data.
     /// </exception>
     /// <exception cref="InvalidOperationException">
@@ -108,7 +109,7 @@ internal static class PreviewSignCodec
     /// </remarks>
     public static PreviewSign.PreviewSignRegistrationOutput? ParseRegistrationOutput(
         WebAuthnAuthenticatorData authData,
-        IReadOnlyDictionary<string, ReadOnlyMemory<byte>>? unsignedExtensionOutputs)
+        IReadOnlyDictionary<string, Memory<byte>>? unsignedExtensionOutputs)
     {
         if (!authData.ParsedExtensions.TryGetValue(ExtensionId, out var rawCbor))
         {

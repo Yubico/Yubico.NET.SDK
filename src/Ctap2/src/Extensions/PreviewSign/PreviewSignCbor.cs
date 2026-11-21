@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Formats.Cbor;
+using Yubico.YubiKit.Core;
 
 namespace Yubico.YubiKit.Ctap2.Extensions;
 
@@ -28,6 +30,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// return independent arrays; they do not validate negotiation, attestation or algorithm-specific
 /// Tbs/args semantics. Decoded byte strings are copies without a disposable cleanup owner.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public static class PreviewSignCbor
 {
     /// <summary>
@@ -335,6 +338,9 @@ public static class PreviewSignCbor
 
         reader.ReadEndMap();
 
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the previewSign unsigned registration map.");
+
         if (!innerCbor.HasValue)
         {
             throw new InvalidOperationException("previewSign unsigned output missing attestation object (key 7)");
@@ -368,11 +374,9 @@ public static class PreviewSignCbor
                     authData = reader.ReadByteString();
                     break;
                 case InnerAttestationObjectKeys.AttStmt:
-                    var bytesBefore = reader.BytesRemaining;
-                    reader.SkipValue();
-                    var bytesConsumed = bytesBefore - reader.BytesRemaining;
-                    var offset = innerCbor.Length - bytesBefore;
-                    attStmtRaw = innerCbor.Slice(offset, bytesConsumed);
+                    if (reader.PeekState() != CborReaderState.StartMap)
+                        throw new CborContentException("previewSign inner attestation statement must be a map.");
+                    attStmtRaw = reader.ReadEncodedValue();
                     break;
                 default:
                     reader.SkipValue();
@@ -381,6 +385,9 @@ public static class PreviewSignCbor
         }
 
         reader.ReadEndMap();
+
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the previewSign inner attestation object.");
 
         if (fmt is null)
         {
@@ -464,10 +471,8 @@ public static class PreviewSignCbor
     /// signed algorithm agreement, generated-key binding or inner UP/UV policy.
     /// </para>
     /// <para>
-    /// Returns false for absent output/attested data, another key carrier, or caught CborContentException
-    /// and InvalidOperationException. Other malformed-authData failures, such as ArgumentException,
-    /// can propagate. The returned convenience object has no disposal owner and uses the seed's derived
-    /// algorithm, unlike PreviewSignRegistrationOutput.TryGetGeneratedKey's current seed-marker propagation.
+    /// Returns false for absent output, malformed present output or another key carrier. Malformed
+    /// output is diagnosed without logging its contents. The reported algorithm is not verified here.
     /// </para>
     /// </remarks>
     public static bool TryExtractGeneratedKey(
@@ -478,17 +483,17 @@ public static class PreviewSignCbor
 
         try
         {
-            if (response.UnsignedExtensionOutputs?.ContainsKey("previewSign") != true)
-            {
+            if (!TryGetRegistrationParts(response, out var signedPreviewSign, out var unsignedPreviewSign))
                 return false;
-            }
+            var signedReader = new CborReader(signedPreviewSign, CborConformanceMode.Ctap2Canonical);
+            (int algorithm, _) = DecodeRegistrationOutput(signedReader);
 
-            var previewSignCbor = response.UnsignedExtensionOutputs["previewSign"];
-            var innerAttestation = DecodeUnsignedRegistrationOutput(previewSignCbor);
+            var innerAttestation = DecodeUnsignedRegistrationOutput(unsignedPreviewSign);
             var authData = Credentials.AuthenticatorData.Parse(innerAttestation.AuthData);
 
             if (authData.AttestedCredentialData is null)
             {
+                LogMalformedRegistration();
                 return false;
             }
 
@@ -502,17 +507,46 @@ public static class PreviewSignCbor
                 authData.AttestedCredentialData.CredentialId,
                 arkgSeedKey.BlPublicKey,
                 arkgSeedKey.KemPublicKey,
-                arkgSeedKey.DerivedKeyAlgorithm);  // -9 (Esp256), NOT -65700 (seed-key alg)
+                new Cose.CoseAlgorithm(algorithm));
 
             return true;
         }
-        catch (System.Formats.Cbor.CborContentException)
+        catch (Exception ex) when (ex is CborContentException or InvalidOperationException or ArgumentException or OverflowException)
         {
+            LogMalformedRegistration();
             return false;
         }
-        catch (InvalidOperationException)
+    }
+
+    private static bool TryGetRegistrationParts(
+        Credentials.MakeCredentialResponse response,
+        out ReadOnlyMemory<byte> signed,
+        out Memory<byte> unsigned)
+    {
+        unsigned = default;
+        bool hasUnsigned = response.UnsignedExtensionOutputs?.TryGetValue("previewSign", out unsigned) == true;
+        signed = default;
+        bool hasSigned = response.ExtensionOutputs is { } signedOutputs &&
+            ExtensionOutput.Decode(signedOutputs).TryGetRawExtension("previewSign", out signed);
+        if (hasSigned != hasUnsigned)
+            LogMalformedRegistration();
+        return hasSigned && hasUnsigned;
+    }
+
+    internal static void LogMalformedRegistration()
+    {
+        try
         {
-            return false;
+            PreviewSignDiagnostics.Logger.LogWarning("Malformed previewSign registration output was ignored.");
         }
+        catch (Exception)
+        {
+            // Diagnostics are best-effort; a provider must not break the Try contract.
+        }
+    }
+
+    private static class PreviewSignDiagnostics
+    {
+        internal static readonly ILogger Logger = YubiKitLogging.LoggerFactory.CreateLogger(nameof(PreviewSignCbor));
     }
 }

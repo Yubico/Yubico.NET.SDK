@@ -37,6 +37,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// pattern-matches the known subtypes and throws on unknown runtime types.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public abstract record class CoseSignArgs
 {
     /// <summary>

@@ -24,8 +24,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.CredentialManagement;
 /// Mock-wire checks for selected credential-management request fields, enumeration and owned views.
 /// </summary>
 /// <remarks>
-/// Metadata/delete tests inspect their encoded fields; enumeration tests check first totals,
-/// order and read-only storage, not continuation request bytes or global command adjacency.
+/// Enumeration tests match every request before returning the corresponding response.
 /// Cancellation/decode failures assert propagation and unchanged supplied responses, not
 /// observed clearing of inaccessible local entries or device recovery. Update-user transcripts
 /// are not covered. The fake's version-2/16-byte tags are artificial and do not qualify protocol 2.
@@ -35,6 +34,31 @@ public sealed class CredentialManagementWireTests
     private readonly ICtap2Session _session = Substitute.For<ICtap2Session>();
     private readonly WirePinUvAuthProtocol _protocol = new();
     private readonly byte[] _pinUvAuthToken = [0x01, 0x02, 0x03, 0x04];
+
+    [Fact]
+    public async Task DisposedHelper_RejectsOperationsWithoutSendingOrReleasingBorrowedDependencies()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var protocol = new PinUvAuthProtocolV1();
+        _session.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), cancellationToken)
+            .Returns(CreateCredentialMetadataResponse());
+        byte[] token = Enumerable.Repeat((byte)1, 32).ToArray();
+        var helper = new Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement(_session, protocol, token);
+        var descriptor = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var user = new PublicKeyCredentialUserEntity(new byte[] { 2 }, "name", "Name");
+
+        helper.Dispose();
+        helper.Dispose();
+
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.GetCredentialsMetadataAsync(cancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.EnumerateRelyingPartiesAsync(cancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.EnumerateCredentialsAsync(new byte[32], cancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.DeleteCredentialAsync(descriptor, cancellationToken));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => helper.UpdateUserInformationAsync(descriptor, user, cancellationToken));
+        Assert.Empty(_session.ReceivedCalls());
+        Assert.Equal(16, protocol.Authenticate(new byte[32], new byte[] { 1 }).Length);
+        Assert.All(token, value => Assert.Equal(1, value));
+    }
 
     [Fact]
     public async Task GetCredentialsMetadataAsync_SendsCanonicalCredentialManagementRequest()
@@ -101,9 +125,12 @@ public sealed class CredentialManagementWireTests
     [Fact]
     public async Task EnumerateRelyingPartiesAsync_ReturnsReportedTotalAndPreservesOrder()
     {
-        _session.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(
-            CreateRelyingPartyResponse("first.example", total: 2),
-            CreateRelyingPartyResponse("second.example"));
+        ExpectInventoryTrace(
+            [.. Convert.FromHexString("0AA3010203020450"), .. new byte[16]],
+            [0x0A, 0xA1, 0x01, 0x03],
+            CreateRelyingPartyResponse("first.example", total: 3),
+            CreateRelyingPartyResponse("second.example"),
+            CreateRelyingPartyResponse("third.example"));
 
         using var credentialManagement = new Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement(
             _session,
@@ -112,14 +139,15 @@ public sealed class CredentialManagementWireTests
 
         var result = await credentialManagement.EnumerateRelyingPartiesAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(2, result.ReportedTotal);
-        Assert.Equal(["first.example", "second.example"], result.RelyingParties.Select(rp => rp.RelyingParty.Id));
-        Assert.Equal(2, result.RelyingParties[0].TotalRpCount);
+        Assert.Equal(3, result.ReportedTotal);
+        Assert.Equal(["first.example", "second.example", "third.example"], result.RelyingParties.Select(rp => rp.RelyingParty.Id));
+        Assert.Equal(3, result.RelyingParties[0].TotalRpCount);
         Assert.Null(result.RelyingParties[1].TotalRpCount);
+        Assert.Null(result.RelyingParties[2].TotalRpCount);
         var mutableView = Assert.IsAssignableFrom<IList<RelyingPartyInfo>>(result.RelyingParties);
         Assert.True(mutableView.IsReadOnly);
         Assert.Throws<NotSupportedException>(() => mutableView.Add(result.RelyingParties[0]));
-        await _session.Received(2).SendCborRequestAsync(
+        await _session.Received(3).SendCborRequestAsync(
             Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<CancellationToken>());
     }
@@ -127,7 +155,10 @@ public sealed class CredentialManagementWireTests
     [Fact]
     public async Task EnumerateCredentialsAsync_ReturnsReportedTotalAndPreservesOrder()
     {
-        _session.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(
+        byte[] rpHash = [0xA5, .. new byte[31]];
+        ExpectInventoryTrace(
+            [.. Convert.FromHexString("0AA4010402A1015820"), .. rpHash, 0x03, 0x02, 0x04, 0x50, .. new byte[16]],
+            [0x0A, 0xA1, 0x01, 0x05],
             CreateStoredCredentialResponse(0x11, total: 3),
             CreateStoredCredentialResponse(0x22),
             CreateStoredCredentialResponse(0x33));
@@ -138,7 +169,7 @@ public sealed class CredentialManagementWireTests
             _pinUvAuthToken);
 
         using var result = await credentialManagement.EnumerateCredentialsAsync(
-            new byte[32],
+            rpHash,
             TestContext.Current.CancellationToken);
 
         Assert.Equal(3, result.ReportedTotal);
@@ -159,24 +190,41 @@ public sealed class CredentialManagementWireTests
             Arg.Any<CancellationToken>());
     }
 
-    [Fact]
-    public async Task EnumerateCredentialsAsync_WithoutReportedTotal_ReturnsOneCredentialAndNullTotal()
+    [Theory]
+    [InlineData(null)]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(int.MaxValue)]
+    public async Task Enumerations_WithInvalidBeginTotal_StopWithoutContinuation(int? reportedTotal)
     {
-        _session.SendCborRequestAsync(default, TestContext.Current.CancellationToken).ReturnsForAnyArgs(CreateStoredCredentialResponse(0x11));
+        var ct = TestContext.Current.CancellationToken;
+        _session.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateStoredCredentialResponse(0x11, reportedTotal),
+            CreateRelyingPartyResponse("example.com", reportedTotal));
 
         using var credentialManagement = new Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement(
             _session,
             _protocol,
             _pinUvAuthToken);
 
-        using var result = await credentialManagement.EnumerateCredentialsAsync(
-            new byte[32],
-            TestContext.Current.CancellationToken);
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => credentialManagement.EnumerateCredentialsAsync(new byte[32], ct));
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => credentialManagement.EnumerateRelyingPartiesAsync(ct));
 
-        Assert.Null(result.ReportedTotal);
-        Assert.Single(result.Credentials);
-        Assert.Equal(0x11, result.Credentials[0].CredentialId.Id.Span[0]);
-        Assert.Null(result.Credentials[0].TotalCredentials);
+        await _session.Received(2).SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct);
+    }
+
+    [Fact]
+    public async Task EnumerateCredentialsAsync_WithMalformedRpHash_DoesNotSend()
+    {
+        using var helper = new Yubico.YubiKit.Ctap2.CredentialManagement.CredentialManagement(
+            _session, _protocol, _pinUvAuthToken);
+
+        await Assert.ThrowsAsync<ArgumentException>("rpIdHash", () =>
+            helper.EnumerateCredentialsAsync(new byte[31], TestContext.Current.CancellationToken));
+
+        Assert.Empty(_session.ReceivedCalls());
     }
 
     [Fact]
@@ -264,6 +312,18 @@ public sealed class CredentialManagementWireTests
 
     private static CborReader CborPayloadReader(byte[] request) =>
         new(request.AsMemory(1), CborConformanceMode.Ctap2Canonical);
+
+    private void ExpectInventoryTrace(byte[] begin, byte[] next, params ReadOnlyMemory<byte>[] responses)
+    {
+        int index = 0;
+        _session.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), TestContext.Current.CancellationToken)
+            .Returns(call =>
+            {
+                Assert.InRange(index, 0, responses.Length - 1);
+                Assert.Equal(index == 0 ? begin : next, call.Arg<ReadOnlyMemory<byte>>().ToArray());
+                return responses[index++];
+            });
+    }
 
     private static void AssertCredentialIdParam(CborReader reader, byte[] expectedId)
     {

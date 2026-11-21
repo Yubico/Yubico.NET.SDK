@@ -123,10 +123,12 @@ public abstract record CoseKey
         ReadOnlyMemory<byte> coseEncoded)
     {
         // ARKG uses an EC2-shaped experimental key selected by its algorithm identifier.
+#pragma warning disable YKEXP001 // Recognize the wire marker without marking ordinary COSE decoding experimental.
         if (algorithm == CoseAlgorithm.ArkgP256SeedKey)
         {
             return CoseArkgP256SeedKey.Decode(parameters, algorithm);
         }
+#pragma warning restore YKEXP001
 
         return keyType switch
         {

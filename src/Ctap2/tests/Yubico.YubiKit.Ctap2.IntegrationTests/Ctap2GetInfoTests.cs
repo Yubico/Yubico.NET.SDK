@@ -50,7 +50,7 @@ public class Ctap2GetInfoTests
                 info.Versions.Contains("FIDO_2_1") ||
                 info.Versions.Contains("FIDO_2_3"),
                 $"Expected at least one CTAP2 version, got: [{string.Join(", ", info.Versions)}]");
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Checks length 16 and an additional nonzero-AAGUID test assumption, not authenticator identity verification.
@@ -66,7 +66,7 @@ public class Ctap2GetInfoTests
             Assert.Equal(16, info.Aaguid.Length);
             Assert.False(info.Aaguid.Span.SequenceEqual(new byte[16]),
                 "AAGUID should not be all zeros");
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Requires clientPin key presence and checks plat/rk/up values only if supplied.
@@ -97,7 +97,7 @@ public class Ctap2GetInfoTests
 
             Assert.True(info.Options.ContainsKey("clientPin"),
                 "YubiKey should have clientPin option");
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Tests that GetInfo returns PIN/UV auth protocol versions.
@@ -115,7 +115,7 @@ public class Ctap2GetInfoTests
             Assert.True(
                 info.PinUvAuthProtocols.Contains(1) || info.PinUvAuthProtocols.Contains(2),
                 "YubiKey should support PIN/UV auth protocol 1 or 2");
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Tests that GetInfo returns supported algorithms including ES256.
@@ -133,7 +133,7 @@ public class Ctap2GetInfoTests
             var hasEs256 = info.Algorithms.Any(a =>
                 a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
             Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Checks a non-null extension list; the guarded disjunction does not establish hmac-secret support.
@@ -153,7 +153,7 @@ public class Ctap2GetInfoTests
                 Assert.True(hasHmacSecret || info.Extensions.Count > 0,
                     "YubiKey should support at least one extension");
             }
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Checks reported firmware against the test's accepted values only when the field is present.
@@ -172,7 +172,7 @@ public class Ctap2GetInfoTests
                 Assert.True(isBetaKey || isProductionKey,
                     $"Expected firmware 5.0+ or 0.0.1 (beta), got {info.FirmwareVersion}");
             }
-        });
+        }, normalizePin: false);
 
     /// <summary>
     /// Checks the reported message-size minimum only when the field is present.
@@ -189,5 +189,5 @@ public class Ctap2GetInfoTests
                 Assert.True(info.MaxMsgSize.Value >= 1024,
                     "Max message size should be at least 1024 bytes");
             }
-        });
+        }, normalizePin: false);
 }

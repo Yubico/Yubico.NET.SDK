@@ -26,8 +26,8 @@ namespace Yubico.YubiKit.Ctap2.Crypto;
 /// an opaque 128-bit credential-store state. Each output is a fresh 16-byte IV followed by
 /// 16 bytes of AES-128-CBC ciphertext. They are not per-credential identifiers. Use the matching
 /// persistent token, not an arbitrary ordinary PIN/UV token. These offline helpers do not check
-/// device capabilities, token permissions or the standard field lengths; they accept generic
-/// block-aligned ciphertext, including IV-only input.
+/// device capabilities or token permissions. The GetInfo decryptors require a 16- or 32-byte token
+/// and exactly one ciphertext block after the 16-byte IV.
 /// </para>
 /// <para>
 /// CBC without padding is not authenticated encryption: a wrong token can return plausible bytes.
@@ -56,7 +56,7 @@ public static class EncryptedMetadataDecryptor
     /// </summary>
     /// <param name="ppuat">The Persistent PIN/UV Auth Token.</param>
     /// <param name="encIdentifier">Borrowed IV-prefixed encIdentifier bytes from GetInfo.</param>
-    /// <returns>Caller-owned plaintext, or null for empty/short input or a caught cryptographic failure.</returns>
+    /// <returns>Caller-owned opaque plaintext, or null for an invalid input shape or cryptographic failure.</returns>
     /// <remarks>
     /// <para>
     /// The plaintext is a device identifier, not a credential ID. Randomized encryption changes the
@@ -66,7 +66,7 @@ public static class EncryptedMetadataDecryptor
     /// </remarks>
     public static byte[]? DecryptIdentifier(ReadOnlySpan<byte> ppuat, ReadOnlySpan<byte> encIdentifier)
     {
-        return DecryptWithInfo(ppuat, encIdentifier, "encIdentifier"u8);
+        return DecryptGetInfoField(ppuat, encIdentifier, "encIdentifier"u8);
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public static class EncryptedMetadataDecryptor
     /// </summary>
     /// <param name="ppuat">The Persistent PIN/UV Auth Token.</param>
     /// <param name="encCredStoreState">Borrowed IV-prefixed encCredStoreState bytes from GetInfo.</param>
-    /// <returns>Caller-owned plaintext, or null for empty/short input or a caught cryptographic failure.</returns>
+    /// <returns>Caller-owned opaque plaintext, or null for an invalid input shape or cryptographic failure.</returns>
     /// <remarks>
     /// <para>
     /// The plaintext describes opaque credential-store state, not an individual credential's metadata.
@@ -84,7 +84,7 @@ public static class EncryptedMetadataDecryptor
     /// </remarks>
     public static byte[]? DecryptCredStoreState(ReadOnlySpan<byte> ppuat, ReadOnlySpan<byte> encCredStoreState)
     {
-        return DecryptWithInfo(ppuat, encCredStoreState, "encCredStoreState"u8);
+        return DecryptGetInfoField(ppuat, encCredStoreState, "encCredStoreState"u8);
     }
 
     /// <summary>
@@ -115,7 +115,10 @@ public static class EncryptedMetadataDecryptor
         return key;
     }
 
-    private static byte[]? DecryptWithInfo(
+    private static byte[]? DecryptGetInfoField(ReadOnlySpan<byte> ppuat, ReadOnlySpan<byte> field, ReadOnlySpan<byte> info) =>
+        ppuat.Length is 16 or 32 && field.Length == 32 ? DecryptWithInfo(ppuat, field, info) : null;
+
+    internal static byte[]? DecryptWithInfo(
         ReadOnlySpan<byte> ppuat,
         ReadOnlySpan<byte> encryptedData,
         ReadOnlySpan<byte> info)
@@ -145,6 +148,8 @@ public static class EncryptedMetadataDecryptor
             salt: ZeroSalt,
             info: info);
 
+        byte[]? plaintext = null;
+        bool transferred = false;
         try
         {
             // AES-128-CBC without padding provides no authentication or wrong-token detection.
@@ -153,9 +158,10 @@ public static class EncryptedMetadataDecryptor
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
 
-            var plaintext = new byte[ciphertext.Length];
+            plaintext = new byte[ciphertext.Length];
             aes.DecryptCbc(ciphertext, iv, plaintext, PaddingMode.None);
 
+            transferred = true;
             return plaintext;
         }
         catch (CryptographicException)
@@ -166,6 +172,10 @@ public static class EncryptedMetadataDecryptor
         {
             // Clear the key from stack
             CryptographicOperations.ZeroMemory(key);
+            if (!transferred)
+            {
+                CryptographicOperations.ZeroMemory(plaintext);
+            }
         }
     }
 }

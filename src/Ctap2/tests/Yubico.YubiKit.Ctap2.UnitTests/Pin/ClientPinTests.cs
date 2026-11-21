@@ -14,7 +14,12 @@
 
 using NSubstitute;
 using System.Formats.Cbor;
+using System.Reflection;
 using System.Text;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Ctap2.Backend;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
@@ -69,14 +74,14 @@ public sealed class ClientPinTests : IDisposable
     {
         using var clientPin = CreateClientPin();
 
-        // powerCycleState is omitted: false below is the parser default, not explicit device state.
+        // powerCycleState is omitted, not encoded as false.
         var responseData = CreatePinRetriesResponse(5, false);
         SetupMockResponse(responseData);
 
         var status = await clientPin.GetPinRetriesAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(5, status.RetriesRemaining);
-        Assert.False(status.PowerCycleRequired);
+        Assert.Null(status.PowerCycleRequired);
     }
 
     [Fact]
@@ -105,6 +110,36 @@ public sealed class ClientPinTests : IDisposable
         var status = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(3, status.RetriesRemaining);
+        Assert.False(status.PowerCycleRequired);
+    }
+
+    [Theory]
+    [InlineData(false, "A0")]
+    [InlineData(false, "A10320")]
+    [InlineData(false, "A1031A80000000")]
+    [InlineData(false, "A1030000")]
+    [InlineData(true, "A104F5")]
+    [InlineData(true, "A10520")]
+    [InlineData(true, "A1051A80000000")]
+    [InlineData(true, "A1050000")]
+    public async Task RetryQueries_RejectMalformedCountsInsteadOfReportingExhaustion(bool uv, string wireHex)
+    {
+        using var clientPin = CreateClientPin();
+        SetupMockResponse(Convert.FromHexString(wireHex));
+        var ct = TestContext.Current.CancellationToken;
+
+        await Assert.ThrowsAsync<BadResponseException>(() => uv ? (Task)clientPin.GetUvRetriesAsync(ct) : clientPin.GetPinRetriesAsync(ct));
+    }
+
+    [Fact]
+    public async Task UvRetryQuery_IgnoresPinPowerCycleField()
+    {
+        using var clientPin = CreateClientPin();
+        SetupMockResponse(CreateUvRetriesResponse(0, true));
+
+        var status = await clientPin.GetUvRetriesAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, status.RetriesRemaining);
         Assert.False(status.PowerCycleRequired);
     }
 
@@ -169,6 +204,78 @@ public sealed class ClientPinTests : IDisposable
         await _mockSession.ReceivedWithAnyArgs(2).SendCborRequestAsync(default, TestContext.Current.CancellationToken);
     }
 
+    [Theory]
+    [InlineData("e\u0301abc", "éabc", 1)]
+    [InlineData("e\u0301", "é", 31)] // 93 input bytes, 62 normalized bytes.
+    [InlineData("😀abc", "😀abc", 1)]
+    public async Task SetPinAsync_EncryptsPaddedNfcUtf8WithoutChangingCallerBytes(string input, string nfc, int repeats)
+    {
+        byte[] source = Encoding.UTF8.GetBytes(string.Concat(Enumerable.Repeat(input, repeats)));
+        byte[] original = source.ToArray();
+        byte[] expected = new byte[64];
+        Encoding.UTF8.GetBytes(string.Concat(Enumerable.Repeat(nfc, repeats)), expected);
+        var ct = TestContext.Current.CancellationToken;
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateKeyAgreementResponse(CreateMockCoseKey()), CreateEmptyResponse());
+        using var clientPin = CreateClientPin();
+
+        await clientPin.SetPinAsync(source, ct);
+
+        Assert.Equal(expected, _fakeProtocol.LastEncryptionInput);
+        Assert.Equal(original, source);
+    }
+
+    [Theory]
+    [InlineData("😀ab")]
+    [InlineData("e\u0301ab")]
+    [InlineData("abcd\0")]
+    public async Task SetPinAsync_RejectsInvalidNormalizedContentBeforeAnyWireCall(string pin)
+    {
+        using var clientPin = CreateClientPin();
+
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(Encoding.UTF8.GetBytes(pin), TestContext.Current.CancellationToken));
+
+        Assert.Empty(_mockSession.ReceivedCalls());
+    }
+
+    [Fact]
+    public async Task SetPinAsync_RejectsMalformedUtf8BeforeAnyWireCall()
+    {
+        using var clientPin = CreateClientPin();
+        byte[] invalidUtf8 = [0x61, 0x62, 0x63, 0xC0, 0x80];
+
+        await Assert.ThrowsAsync<ArgumentException>(() => clientPin.SetPinAsync(invalidUtf8, TestContext.Current.CancellationToken));
+
+        Assert.Empty(_mockSession.ReceivedCalls());
+    }
+
+    [Fact]
+    public async Task SetPinAsync_NonAsciiRequiresGlobalizationButAsciiDoesNot()
+    {
+        // Also run this test in an isolated unit-test process with DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1.
+        bool invariant = Environment.GetEnvironmentVariable("DOTNET_SYSTEM_GLOBALIZATION_INVARIANT") == "1";
+        var ct = TestContext.Current.CancellationToken;
+        var keyAgreement = CreateKeyAgreementResponse(CreateMockCoseKey());
+        var success = CreateEmptyResponse();
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(keyAgreement, success, keyAgreement, success);
+        using var clientPin = CreateClientPin();
+        byte[] nonAscii = "e\u0301abc"u8.ToArray();
+
+        if (invariant)
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => clientPin.SetPinAsync(nonAscii, ct));
+            Assert.Empty(_mockSession.ReceivedCalls());
+        }
+        else
+        {
+            await clientPin.SetPinAsync(nonAscii, ct);
+            Assert.Equal("éabc"u8.ToArray(), _fakeProtocol.LastEncryptionInput?[..5]);
+        }
+
+        await clientPin.SetPinAsync("1234"u8.ToArray(), ct);
+        Assert.Equal("1234"u8.ToArray(), _fakeProtocol.LastEncryptionInput?[..4]);
+    }
+
     [Fact]
     public async Task ChangePinAsync_WithValidPins_SendsCommand()
     {
@@ -187,11 +294,11 @@ public sealed class ClientPinTests : IDisposable
     }
 
     [Fact]
-    public async Task ChangePinAsync_WithShortCurrentPin_ThrowsArgumentExceptionNamingCurrentPin()
+    public async Task ChangePinAsync_WithMalformedCurrentPin_ThrowsArgumentExceptionNamingCurrentPin()
     {
         using var clientPin = CreateClientPin();
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(Encoding.UTF8.GetBytes("ab"), Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.ChangePinAsync(new byte[] { 0xC0, 0x80, 0x61, 0x62 }, Encoding.UTF8.GetBytes("1234"), TestContext.Current.CancellationToken));
 
         Assert.Equal("currentPin", exception.ParamName);
     }
@@ -207,11 +314,11 @@ public sealed class ClientPinTests : IDisposable
     }
 
     [Fact]
-    public async Task GetPinTokenAsync_WithShortPin_ThrowsArgumentExceptionNamingPin()
+    public async Task GetPinTokenAsync_WithMalformedPin_ThrowsArgumentExceptionNamingPin()
     {
         using var clientPin = CreateClientPin();
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.GetPinTokenAsync(Encoding.UTF8.GetBytes("ab"), TestContext.Current.CancellationToken));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => clientPin.GetPinTokenAsync(new byte[] { 0xC0, 0x80, 0x61, 0x62 }, TestContext.Current.CancellationToken));
 
         Assert.Equal("pin", exception.ParamName);
     }
@@ -235,6 +342,125 @@ public sealed class ClientPinTests : IDisposable
         Assert.Equal(encryptedToken.Length, token.Length);
     }
 
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(1, false)]
+    [InlineData(2, false)]
+    [InlineData(0, true)]
+    [InlineData(1, true)]
+    [InlineData(2, true)]
+    public async Task TokenAcquisition_ClearsConcreteRawResponseEvenOnDecodeFailure(int route, bool malformed)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] getInfo = Convert.FromHexString("A30181684649444F5F325F3003500000000000000000000000000000000004A16E70696E557641757468546F6B656EF5");
+        using var connection = Substitute.For<ISmartCardConnection>();
+        connection.Transport.Returns(Transport.Nfc);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns((ReadOnlyMemory<byte>)new byte[] { 0x90, 0x00 }, (byte[])[0x00, .. getInfo, 0x90, 0x00]);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+
+        byte[] encrypted = Enumerable.Repeat((byte)0xA5, 32).ToArray();
+        var retained = MakeApduResponse(TokenResponse(encrypted, malformed));
+        var protocol = Substitute.For<ISmartCardProtocol>();
+        protocol.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), cancellationToken: ct).Returns(
+            call => call.Arg<ApduCommand>().Data.Span[0] == CtapCommand.GetInfo ? MakeApduResponse(getInfo) :
+                // Key agreement is the first PIN subcommand; token response must be the retained instance.
+                call.Arg<ApduCommand>().Data.Span[5] == 0x02
+                    ? MakeApduResponse(CreateKeyAgreementResponse(CreateMockCoseKey()).Span) : retained);
+        // Keep the real session and backend, retaining the APDU owner that the PC/SC pipeline would hide.
+        var field = typeof(Ctap2Session).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("The session backend field was not found.");
+        field.SetValue(session, new SmartCardBackend(protocol));
+        using var clientPin = new ClientPin(session, _fakeProtocol);
+
+        await AssertTokenResponseAsync(clientPin, route, encrypted, malformed, ct);
+
+        Assert.All(retained.Data.ToArray(), value => Assert.Equal(0, value));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task TokenAcquisition_DoesNotClearCustomSessionResponse(bool malformed)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] encrypted = Enumerable.Repeat((byte)0xA5, 32).ToArray();
+        byte[] borrowed = TokenResponse(encrypted, malformed);
+        byte[] original = borrowed.ToArray();
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateKeyAgreementResponse(CreateMockCoseKey()), borrowed);
+        using var clientPin = CreateClientPin();
+
+        await AssertTokenResponseAsync(clientPin, 0, encrypted, malformed, ct);
+
+        Assert.Equal(original, borrowed);
+    }
+
+    private static async Task AssertTokenResponseAsync(ClientPin clientPin, int route, byte[] expected,
+        bool malformed, CancellationToken ct)
+    {
+        byte[] pin = "1234"u8.ToArray();
+        Task<byte[]> AcquireToken() => route switch
+        {
+            0 => clientPin.GetPinTokenAsync(pin, ct),
+            1 => clientPin.GetPinUvAuthTokenUsingPinAsync(pin, PinUvAuthTokenPermissions.MakeCredential, "example.com", ct),
+            _ => clientPin.GetPinUvAuthTokenUsingUvAsync(PinUvAuthTokenPermissions.BioEnrollment, cancellationToken: ct)
+        };
+
+        if (malformed)
+            await Assert.ThrowsAsync<BadResponseException>(AcquireToken);
+        else
+            Assert.Equal(expected, await AcquireToken());
+    }
+
+    private static byte[] TokenResponse(byte[] encrypted, bool malformed) => malformed
+        ? [.. CreatePinTokenResponse(encrypted).Span, 0x00] // An unexpected second CBOR item after the token map.
+        : CreatePinTokenResponse(encrypted).ToArray();
+
+    private static ApduResponse MakeApduResponse(ReadOnlySpan<byte> payload) =>
+        new((byte[])[0x00, .. payload, 0x90, 0x00]);
+
+    [Theory]
+    [InlineData(0, 1, 16, true)]
+    [InlineData(1, 1, 32, true)]
+    [InlineData(2, 2, 32, true)]
+    [InlineData(0, 1, 24, false)]
+    [InlineData(1, 2, 16, false)]
+    [InlineData(2, 2, 48, false)]
+    public async Task TokenAcquisition_ValidatesDecryptedWidthAndClearsRejectedPlaintext(int route, int version, int width, bool accepted)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _fakeProtocol.Version = version;
+        byte[] plaintext = Enumerable.Repeat((byte)0x42, width).ToArray();
+        _fakeProtocol.DecryptedOutput = plaintext;
+        _mockSession.GetInfoAsync(ct).Returns(new AuthenticatorInfo
+        {
+            Options = new Dictionary<string, bool> { ["pinUvAuthToken"] = true }
+        });
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateKeyAgreementResponse(CreateMockCoseKey()), CreatePinTokenResponse(new byte[64]));
+        using var clientPin = CreateClientPin();
+        byte[] pin = "1234"u8.ToArray();
+
+        Task<byte[]> AcquireToken() => route switch
+        {
+            0 => clientPin.GetPinTokenAsync(pin, ct),
+            1 => clientPin.GetPinUvAuthTokenUsingPinAsync(pin, PinUvAuthTokenPermissions.MakeCredential, "example.com", ct),
+            _ => clientPin.GetPinUvAuthTokenUsingUvAsync(PinUvAuthTokenPermissions.BioEnrollment, cancellationToken: ct)
+        };
+
+        if (accepted)
+        {
+            Assert.Same(plaintext, await AcquireToken());
+            Assert.All(plaintext, value => Assert.Equal(0x42, value));
+        }
+        else
+        {
+            await Assert.ThrowsAsync<BadResponseException>(AcquireToken);
+            Assert.All(plaintext, value => Assert.Equal(0, value));
+        }
+    }
+
     [Fact]
     public async Task GetPinUvAuthTokenUsingPinAsync_WithNoPermissions_ThrowsArgumentException()
     {
@@ -245,15 +471,43 @@ public sealed class ClientPinTests : IDisposable
     }
 
     [Fact]
-    public async Task GetPinUvAuthTokenUsingPinAsync_WithShortPin_ThrowsArgumentExceptionNamingPin()
+    public async Task GetPinUvAuthTokenUsingPinAsync_WithMalformedPin_ThrowsArgumentExceptionNamingPin()
     {
         using var clientPin = CreateClientPin();
 
         // Permissions are valid here, so "permissions" is the name this must not report.
         var exception = await Assert.ThrowsAsync<ArgumentException>(
-            () => clientPin.GetPinUvAuthTokenUsingPinAsync(Encoding.UTF8.GetBytes("ab"), PinUvAuthTokenPermissions.MakeCredential, cancellationToken: TestContext.Current.CancellationToken));
+            () => clientPin.GetPinUvAuthTokenUsingPinAsync(new byte[] { 0xC0, 0x80, 0x61, 0x62 }, PinUvAuthTokenPermissions.MakeCredential, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal("pin", exception.ParamName);
+    }
+
+    [Fact]
+    public async Task ChangePinAsync_HashesExactCurrentPinWithoutApplyingNewPinPolicy()
+    {
+        byte[] currentPin = "e\u0301"u8.ToArray(); // Valid UTF-8, but decomposed and fewer than four characters.
+        var ct = TestContext.Current.CancellationToken;
+        ReadOnlyMemory<byte> sent = default;
+        ReadOnlyMemory<byte> snapshot = default;
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            _ => CreateKeyAgreementResponse(CreateMockCoseKey()),
+            call =>
+            {
+                sent = call.ArgAt<ReadOnlyMemory<byte>>(0);
+                snapshot = sent.ToArray();
+                return CreateEmptyResponse();
+            });
+        using var clientPin = CreateClientPin();
+
+        await clientPin.ChangePinAsync(currentPin, "5678"u8.ToArray(), ct);
+
+        Assert.All(sent.ToArray(), b => Assert.Equal(0, b));
+        var reader = new CborReader(snapshot[1..], CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap();
+        while (reader.ReadInt32() != 6) // pinHashEnc; the fake encrypts by copying.
+            reader.SkipValue();
+        Assert.Equal(System.Security.Cryptography.SHA256.HashData(currentPin)[..16], reader.ReadByteString());
+        Assert.Equal("e\u0301"u8.ToArray(), currentPin);
     }
 
     [Fact]
@@ -276,6 +530,51 @@ public sealed class ClientPinTests : IDisposable
         var token = await clientPin.GetPinUvAuthTokenUsingPinAsync(Encoding.UTF8.GetBytes("1234"), PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "example.com", TestContext.Current.CancellationToken);
 
         Assert.NotNull(token);
+    }
+
+    [Theory]
+    [InlineData(1, false)]
+    [InlineData(2, false)]
+    [InlineData(1, true)]
+    [InlineData(2, true)]
+    public async Task TokenRequests_SelectPermissionCommandByGetInfoNotProtocol(int version, bool permissionSupport)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _fakeProtocol.Version = version;
+        _mockSession.GetInfoAsync(ct).Returns(new AuthenticatorInfo
+        {
+            Options = new Dictionary<string, bool> { ["pinUvAuthToken"] = permissionSupport }
+        });
+        ReadOnlyMemory<byte> request = default;
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            _ => CreateKeyAgreementResponse(CreateMockCoseKey()),
+            call =>
+            {
+                request = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                return CreatePinTokenResponse(new byte[32]);
+            });
+        using var clientPin = CreateClientPin();
+
+        await clientPin.GetPinUvAuthTokenUsingPinAsync("1234"u8.ToArray(), PinUvAuthTokenPermissions.MakeCredential, "example.com", ct);
+
+        var reader = new CborReader(request[1..], CborConformanceMode.Ctap2Canonical);
+        Assert.Equal(permissionSupport ? 6 : 4, reader.ReadStartMap());
+        Assert.Equal(1, reader.ReadInt32());
+        Assert.Equal(version, reader.ReadInt32());
+        Assert.Equal(2, reader.ReadInt32());
+        Assert.Equal(permissionSupport ? 0x09 : 0x05, reader.ReadInt32());
+        Assert.Equal(3, reader.ReadInt32());
+        reader.SkipValue();
+        Assert.Equal(6, reader.ReadInt32());
+        reader.SkipValue();
+        if (permissionSupport)
+        {
+            Assert.Equal(9, reader.ReadInt32());
+            Assert.Equal((int)PinUvAuthTokenPermissions.MakeCredential, reader.ReadInt32());
+            Assert.Equal(10, reader.ReadInt32());
+            Assert.Equal("example.com", reader.ReadTextString());
+        }
+        reader.ReadEndMap();
     }
 
     [Fact]
@@ -529,7 +828,9 @@ public sealed class ClientPinTests : IDisposable
 /// </summary>
 internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
 {
-    public int Version => 2;
+    public int Version { get; set; } = 2;
+    public byte[]? DecryptedOutput { get; set; }
+    public byte[]? LastEncryptionInput { get; private set; }
     public int AuthenticationTagLength => 32;
     public bool IsDisposed { get; private set; }
     public int DisposeCount { get; private set; }
@@ -552,10 +853,13 @@ internal sealed class FakePinUvAuthProtocol : IPinUvAuthProtocol
     public byte[] Kdf(ReadOnlySpan<byte> z) => new byte[64];
 
     public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
-        => plaintext.ToArray();
+    {
+        LastEncryptionInput = plaintext.ToArray();
+        return plaintext.ToArray();
+    }
 
     public byte[] Decrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> ciphertext)
-        => ciphertext.ToArray();
+        => DecryptedOutput ?? ciphertext.ToArray();
 
     public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
         => new byte[32];

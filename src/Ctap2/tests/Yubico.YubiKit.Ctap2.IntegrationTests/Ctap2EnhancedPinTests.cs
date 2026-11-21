@@ -71,7 +71,7 @@ public class Ctap2EnhancedPinTests
                 Assert.True(info.MinPinLength.Value >= 4,
                     $"Minimum PIN length should be at least 4, got {info.MinPinLength.Value}");
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -84,7 +84,7 @@ public class Ctap2EnhancedPinTests
             {
                 Assert.IsType<bool>(info.ForcePinChange.Value);
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -98,7 +98,7 @@ public class Ctap2EnhancedPinTests
                 Assert.True(info.MaxRpidsForSetMinPinLength.Value >= 0,
                     "MaxRpidsForSetMinPinLength should be non-negative");
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]

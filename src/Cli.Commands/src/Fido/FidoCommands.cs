@@ -350,7 +350,14 @@ public sealed class FidoConfigToggleAlwaysUvCommand : YkCommandBase<FidoConfigSe
                 pin.Memory, PinUvAuthTokenPermissions.AuthenticatorConfig);
 
             var config = new AuthenticatorConfig(session, protocol, pinToken);
-            await config.ToggleAlwaysUvAsync();
+            var info = await session.GetInfoAsync();
+            if (!info.Options.TryGetValue("alwaysUv", out bool current))
+            {
+                OutputHelpers.WriteError("The authenticator does not advertise always-UV support.");
+                return ExitCode.GenericError;
+            }
+
+            await config.SetAlwaysUvAsync(!current);
 
             OutputHelpers.WriteSuccess("Always-UV setting toggled.");
             return ExitCode.Success;
@@ -678,8 +685,9 @@ public sealed class FidoFingerprintsAddCommand : YkCommandBase<FidoFingerprintsA
 
             AnsiConsole.MarkupLine("[yellow]Touch your YubiKey now...[/]");
 
-            var result = await bio.EnrollBeginAsync();
-            var templateId = result.TemplateId;
+            var begin = await bio.EnrollBeginAsync();
+            var templateId = begin.TemplateId;
+            EnrollmentSampleResult result = begin;
             var sampleNumber = 1;
 
             FidoHelpers.DisplaySampleStatus(sampleNumber, result.RemainingSamples, result.LastSampleStatus);
@@ -1026,9 +1034,10 @@ public static class FidoHelpers
             FingerprintSampleStatus.TooSkewed => "Finger too skewed",
             FingerprintSampleStatus.TooShort => "Touch too short",
             FingerprintSampleStatus.MergeFailure => "Merge failure",
-            FingerprintSampleStatus.StorageFull => "Fingerprint storage full",
-            FingerprintSampleStatus.NoUserActivity => "No finger detected (timeout)",
-            FingerprintSampleStatus.NoUserPresence => "No user presence",
+            FingerprintSampleStatus.Exists => "Fingerprint already enrolled",
+            FingerprintSampleStatus.DatabaseFull => "Fingerprint storage full",
+            FingerprintSampleStatus.NoUserActivity => "No touch or swipe detected",
+            FingerprintSampleStatus.NoUpTransition => "Lift your finger and try again",
             _ => $"Unknown status: {status}"
         };
 

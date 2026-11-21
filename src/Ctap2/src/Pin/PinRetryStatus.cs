@@ -21,17 +21,17 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 public sealed class PinRetryStatus
 {
     /// <summary>
-    /// Gets the parsed PIN retry count, currently defaulted to zero if the response omits it.
+    /// Gets the PIN retry count reported by the authenticator.
     /// </summary>
     public int RetriesRemaining { get; }
 
     /// <summary>
-    /// Gets the parsed power-cycle indication, currently defaulted to false if omitted.
+    /// Gets the power-cycle indication, or <c>null</c> if the authenticator did not report it.
     /// </summary>
-    /// <remarks>CTAP defines omission as unknown. False does not prove a power cycle is unnecessary or a PIN attempt is safe; this model does not distinguish omission from explicit false.</remarks>
-    public bool PowerCycleRequired { get; }
+    /// <remarks>Use <c>is true</c> to act on an affirmative indication. A snapshot is not permission to retry.</remarks>
+    public bool? PowerCycleRequired { get; }
 
-    internal PinRetryStatus(int retriesRemaining, bool powerCycleRequired)
+    internal PinRetryStatus(int retriesRemaining, bool? powerCycleRequired)
     {
         RetriesRemaining = retriesRemaining;
         PowerCycleRequired = powerCycleRequired;

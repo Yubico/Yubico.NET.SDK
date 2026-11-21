@@ -63,11 +63,11 @@ public interface ICtap2Session : IApplicationSession
     /// <para>
     /// The request must include the CTAP command byte as the first byte, followed by
     /// the CBOR-encoded parameters (if any). The caller selects the command schema, authorization
-    /// and stateful sequence, and must meet CTAP canonical encoding, nesting and device message-size
-    /// limits. This method does not perform capability, PIN/UV or command-schema preflight and does
+    /// and stateful sequence, and must meet CTAP canonical encoding and nesting limits. This method
+    /// does not perform capability, PIN/UV or command-schema preflight and does
     /// not infer user-presence notifications. Transport framing and CTAP status handling still apply.
-    /// CTAP2.1 §8 limits nesting to four levels and messages to 1024 bytes unless GetInfo maxMsgSize
-    /// advertises a larger limit; the session does not enforce that device limit at this boundary.
+    /// The session enforces the maxMsgSize from initialization (1024 bytes if absent), counting
+    /// both the command byte and its parameters, not the transport framing.
     /// </para>
     /// <para>
     /// Keep request storage valid and unchanged until the call completes, and clear caller-owned
@@ -78,9 +78,9 @@ public interface ICtap2Session : IApplicationSession
     /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The successful response payload without the CTAP status byte; it can be empty.</returns>
-    /// <exception cref="ArgumentException">The request has no command byte.</exception>
-    /// <exception cref="CtapException">A nonzero CTAP status is received, or Other is synthesized
-    /// for a response with no status byte. Transport/APDU errors have separate origins.</exception>
+    /// <exception cref="ArgumentException">The request has no command byte or exceeds the device's message limit.</exception>
+    /// <exception cref="CtapException">A nonzero CTAP status is received.</exception>
+    /// <exception cref="Core.BadResponseException">The response lacks a CTAP status byte.</exception>
     Task<ReadOnlyMemory<byte>> SendCborRequestAsync(
         ReadOnlyMemory<byte> request,
         CancellationToken cancellationToken = default);
@@ -128,8 +128,14 @@ public interface ICtap2Session : IApplicationSession
     /// seconds. Meet the product's transport and any enabled long-touch requirements; inspect
     /// <see cref="AuthenticatorInfo.TransportsForReset"/> and <see cref="AuthenticatorInfo.LongTouchForReset"/>
     /// where advertised. The authenticator enforces these conditions; this method does not arrange
-    /// power cycling, enforce a local clock, refresh session state or roll back an attempted reset.
+    /// power cycling, enforce a local clock or roll back an attempted reset.
     /// Reset is destructive and cannot be undone.
+    /// </para>
+    /// <para>
+    /// After a confirmed reset the same session refreshes GetInfo and its request limits, reselects
+    /// on SmartCard and reestablishes any configured SCP channel. The refresh is not cancelled by
+    /// the request token; if refresh fails, the session ends but the reset is not undone. Previous
+    /// PIN/UV tokens are no longer valid. Keep borrowed SCP key parameters alive through reset.
     /// </para>
     /// <para>
     /// Product procedure: https://docs.yubico.com/yesdk/users-manual/application-fido2/fido2-reset.html

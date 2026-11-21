@@ -29,8 +29,7 @@ namespace Yubico.YubiKit.Ctap2.Backend;
 /// decoding. Completed means CTAP success, not verified presence, UV or RP authentication.
 /// A successful status-stripped view shares Core's accumulated response array and has no cleanup owner.
 /// Failure cleanup clears that untransferred array after terminal resolution, not independent input-report
-/// or decoded copies. A logging provider throwing while a secondary resolution failure is logged can
-/// bypass the later clearing statement.</remarks>
+/// or decoded copies.</remarks>
 internal sealed class HidBackend : ICtap2Backend
 {
     private readonly IFidoHidProtocol _protocol;
@@ -46,7 +45,8 @@ internal sealed class HidBackend : ICtap2Backend
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,
         UserPresenceNotification userPresenceNotification,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Action? onSuccess = null)
     {
         ArgumentNullException.ThrowIfNull(userPresenceNotification);
 
@@ -64,20 +64,24 @@ internal sealed class HidBackend : ICtap2Backend
         Exception? primaryException = null;
         ReadOnlyMemory<byte> response = default;
         var responseTransferred = false;
+        Action? confirmDrain = onSuccess is null ? null : () =>
+        {
+            outcome = UserPresenceOutcome.Completed;
+            onSuccess();
+        };
         try
         {
-            response = await _protocol.SendCommandAsync(
-                    CtapConstants.CtapHidCbor,
-                    request,
-                    userPresenceNotification,
-                    cancellationToken)
+            response = await SendCommandAsync(request, userPresenceNotification, cancellationToken, confirmDrain)
                 .ConfigureAwait(false);
 
-            // A missing status byte is reported as synthetic Other, not a received device status.
             if (response.Length < 1)
             {
-                throw new CtapException(CtapStatus.Other, "Empty response from authenticator");
+                throw new BadResponseException("The HID CTAP response did not contain a status byte.");
             }
+
+            // The production protocol has already notified at the validated drain boundary.
+            if (outcome != UserPresenceOutcome.Completed && response.Span[0] == (byte)CtapStatus.Success)
+                confirmDrain?.Invoke();
 
             var status = (CtapStatus)response.Span[0];
             outcome = status switch
@@ -98,7 +102,7 @@ internal sealed class HidBackend : ICtap2Backend
             responseTransferred = true;
             return response[1..];
         }
-        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested && outcome != UserPresenceOutcome.Completed)
         {
             outcome = UserPresenceOutcome.Cancelled;
             primaryException = ex;
@@ -111,11 +115,21 @@ internal sealed class HidBackend : ICtap2Backend
         }
         finally
         {
-            await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
-            if (!responseTransferred && !response.IsEmpty)
+            try
             {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+                await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (!responseTransferred && !response.IsEmpty)
+                    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
             }
         }
     }
+
+    private Task<ReadOnlyMemory<byte>> SendCommandAsync(ReadOnlyMemory<byte> request,
+        UserPresenceNotification notification, CancellationToken cancellationToken, Action? confirmDrain) =>
+        confirmDrain is not null && _protocol is FidoHidProtocol protocol
+            ? protocol.SendCommandAsync(CtapConstants.CtapHidCbor, request, notification, cancellationToken, confirmDrain)
+            : _protocol.SendCommandAsync(CtapConstants.CtapHidCbor, request, notification, cancellationToken);
 }

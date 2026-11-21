@@ -50,14 +50,21 @@ public class AuthenticatorConfigTests
     /// </summary>
     private sealed class TestPinUvAuthProtocol : IPinUvAuthProtocol
     {
-        public int Version => 2;
+        public int Version => WriteFailure is { } failure ? throw failure : 2;
         public int AuthenticationTagLength => 16;
         public byte[]? LastAuthenticateMessage { get; private set; }
+        public byte[]? Tag { get; private set; }
+        public Exception? AuthenticateFailure { get; set; }
+        public Exception? WriteFailure { get; set; }
 
         public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
         {
             LastAuthenticateMessage = message.ToArray();
-            return new byte[16]; // Return 16-byte auth param
+            if (AuthenticateFailure is { } failure)
+                throw failure;
+            Tag = new byte[16];
+            Tag.AsSpan().Fill(0xAB);
+            return Tag;
         }
 
         public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
@@ -76,6 +83,40 @@ public class AuthenticatorConfigTests
             => true;
 
         public void Dispose() { }
+    }
+
+    [Theory]
+    [InlineData("success")]
+    [InlineData("authenticate")]
+    [InlineData("build")]
+    [InlineData("send")]
+    public async Task SetMinPinLength_ClearsOwnedTagAndRequestWithoutClearingBorrowedToken(string stage)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var failure = new InvalidOperationException(stage);
+        if (stage == "authenticate") _testProtocol.AuthenticateFailure = failure;
+        if (stage == "build") _testProtocol.WriteFailure = failure;
+
+        ReadOnlyMemory<byte> request = default;
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct).Returns(call =>
+        {
+            request = call.Arg<ReadOnlyMemory<byte>>();
+            Assert.Equal(CtapCommand.Config, request.Span[0]);
+            Assert.Equal(0xAB, request.Span[^1]);
+            return stage == "send"
+                ? Task.FromException<ReadOnlyMemory<byte>>(failure)
+                : Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        });
+
+        Task Send() => _config.SetMinPinLengthAsync(6, cancellationToken: ct);
+        if (stage == "success") await Send();
+        else Assert.Same(failure, await Assert.ThrowsAsync<InvalidOperationException>(Send));
+
+        if (stage == "authenticate") Assert.Null(_testProtocol.Tag);
+        else Assert.All(Assert.IsType<byte[]>(_testProtocol.Tag), b => Assert.Equal(0, b));
+        Assert.Equal(stage is "build" or "authenticate", request.IsEmpty);
+        Assert.All(request.ToArray(), b => Assert.Equal(0, b));
+        Assert.Equal(new byte[] { 1, 2, 3, 4 }, _pinUvAuthToken);
     }
 
     [Fact]
@@ -121,6 +162,10 @@ public class AuthenticatorConfigTests
     public async Task ToggleAlwaysUvAsync_SendsCorrectCommand()
     {
         // Arrange
+        _mockSession.GetInfoAsync(Arg.Any<CancellationToken>()).Returns(new AuthenticatorInfo
+        {
+            Options = new Dictionary<string, bool> { ["alwaysUv"] = false }
+        });
         byte[]? capturedRequest = null;
         _mockSession.SendCborRequestAsync(
                 Arg.Do<ReadOnlyMemory<byte>>(x => capturedRequest = x.ToArray()),
@@ -128,7 +173,7 @@ public class AuthenticatorConfigTests
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
 
         // Act
-        await _config.ToggleAlwaysUvAsync(TestContext.Current.CancellationToken);
+        await _config.SetAlwaysUvAsync(true, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(capturedRequest);
@@ -139,6 +184,43 @@ public class AuthenticatorConfigTests
         // Verify subCommand is 0x02 (ToggleAlwaysUv)
         Assert.Equal(1, reader.ReadInt32()); // key
         Assert.Equal(0x02, reader.ReadInt32()); // value (subCommand)
+    }
+
+    [Fact]
+    public async Task SetAlwaysUvAsync_WhenMatching_DoesNotToggle()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _mockSession.GetInfoAsync(ct).Returns(new AuthenticatorInfo
+        {
+            Options = new Dictionary<string, bool> { ["alwaysUv"] = true }
+        });
+
+        await _config.SetAlwaysUvAsync(true, ct);
+
+        Assert.Null(_testProtocol.LastAuthenticateMessage);
+        await _mockSession.DidNotReceiveWithAnyArgs().SendCborRequestAsync(default, ct);
+    }
+
+    [Fact]
+    public async Task SetMinPinLengthAsync_EncodesExplicitFalseAndEmptyRpList()
+    {
+        byte[]? request = null;
+        _mockSession.SendCborRequestAsync(
+                Arg.Do<ReadOnlyMemory<byte>>(value => request = value.ToArray()),
+                Arg.Any<CancellationToken>())
+            .Returns(ReadOnlyMemory<byte>.Empty);
+
+        await _config.SetMinPinLengthAsync(rpIds: [], forceChangePin: false, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(request);
+        var reader = new CborReader(request.AsMemory(1));
+        reader.ReadStartMap();
+        Assert.Equal(1, reader.ReadInt32());
+        Assert.Equal(3, reader.ReadInt32());
+        Assert.Equal(2, reader.ReadInt32());
+        byte[] parameters = reader.ReadEncodedValue().ToArray();
+        Assert.Equal(new byte[] { 0xA2, 0x02, 0x80, 0x03, 0xF4 }, parameters);
+        Assert.Equal([.. Enumerable.Repeat((byte)0xFF, 32), 0x0D, 0x03, .. parameters], _testProtocol.LastAuthenticateMessage);
     }
 
     [Fact]
@@ -371,13 +453,17 @@ public class AuthenticatorConfigTests
     public async Task AuthenticatesOverCorrectMessage_ToggleAlwaysUv()
     {
         // Arrange
+        _mockSession.GetInfoAsync(Arg.Any<CancellationToken>()).Returns(new AuthenticatorInfo
+        {
+            Options = new Dictionary<string, bool> { ["alwaysUv"] = false }
+        });
         _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
 
         // Act
-        await _config.ToggleAlwaysUvAsync(TestContext.Current.CancellationToken);
+        await _config.SetAlwaysUvAsync(true, TestContext.Current.CancellationToken);
 
         // Assert - check what message was authenticated via our test protocol
         var capturedMessage = _testProtocol.LastAuthenticateMessage;

@@ -49,6 +49,7 @@ public class Fido2ExtensionAuditReproTests
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public void YESDK1634_PreviewSignBuilderEncodesTheGivenCredentialsParameters()
     {
         var extensions = new ExtensionBuilder()

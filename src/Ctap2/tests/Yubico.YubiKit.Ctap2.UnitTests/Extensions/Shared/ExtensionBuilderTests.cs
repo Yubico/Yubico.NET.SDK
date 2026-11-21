@@ -344,6 +344,37 @@ public class ExtensionBuilderTests
     }
 
     [Fact]
+    public void WithHmacSecret_AuthenticationFailureClearsOwnedCiphertextAndLeavesInputs()
+    {
+        using var protocol = new ThrowingSaltProtocol();
+        byte[] key = Enumerable.Repeat((byte)0x11, 32).ToArray();
+        byte[] salt = Enumerable.Repeat((byte)0x22, 32).ToArray();
+        var (keyAgreement, _) = protocol.Encapsulate(new Dictionary<int, object?>());
+
+        Assert.Throws<InvalidOperationException>(() => new ExtensionBuilder().WithHmacSecret(protocol, key, keyAgreement, salt));
+
+        byte[] ciphertext = Assert.IsType<byte[]>(protocol.Ciphertext);
+        Assert.Equal(new byte[32], ciphertext);
+        Assert.All(key, value => Assert.Equal(0x11, value));
+        Assert.All(salt, value => Assert.Equal(0x22, value));
+    }
+
+    private sealed class ThrowingSaltProtocol : MockPinProtocol
+    {
+        internal byte[]? Ciphertext { get; private set; }
+
+        public override byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext) =>
+            Ciphertext = base.Encrypt(key, plaintext);
+
+        public override byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
+        {
+            Assert.Equal(32, message.Length);
+            Assert.Equal(0x33, message[0]);
+            throw new InvalidOperationException("Synthetic authentication failure.");
+        }
+    }
+
+    [Fact]
     public void WithHmacSecret_InvalidSalt1Length_ThrowsArgumentException()
     {
         // Arrange
@@ -414,7 +445,7 @@ internal class MockPinProtocol : Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol
         return new byte[32];
     }
 
-    public byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
+    public virtual byte[] Encrypt(ReadOnlySpan<byte> key, ReadOnlySpan<byte> plaintext)
     {
         // Simple XOR for testing
         var ciphertext = new byte[plaintext.Length];
@@ -431,7 +462,7 @@ internal class MockPinProtocol : Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol
         return Encrypt(key, ciphertext);
     }
 
-    public byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
+    public virtual byte[] Authenticate(ReadOnlySpan<byte> key, ReadOnlySpan<byte> message)
     {
         // Simple hash for testing
         var auth = new byte[16];

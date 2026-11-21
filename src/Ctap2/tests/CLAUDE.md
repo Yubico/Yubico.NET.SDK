@@ -121,8 +121,9 @@ finally
 Do not reset the FIDO application as routine test setup. `WithCtap2SessionAsync` defaults to
 `normalizePin: true`: after initialization it may set the known test PIN, request a token to verify it,
 or change it through a temporary value for forcePinChange recovery. Even a matching PIN is not a no-op;
-a mismatch can consume a retry before a skip. Failed recovery can leave the temporary PIN, and current
-helpers have cleanup gaps. Use explicit `normalizePin: false` when the test is intended to make only
+a mismatch can consume a retry before a skip. Failed recovery can leave the temporary PIN; clearing
+the fixture buffer does not restore device state. Config tests establish the required state before
+the exercise rather than issuing recovery commands in teardown. Use explicit `normalizePin: false` when the test is intended to make only
 read-only calls; do not treat existing default-helper smoke paths as read-only. A CTAP2 `ResetAsync` permanently deletes
 credentials and requires a human-approved unplug/replug/touch ceremony; see the FidoTool reset example.
 
@@ -194,7 +195,7 @@ public void RegistrationExtensions_EncodePolicyAndHmacEnablement()
 - **Firmware version gates**: Some tests only work on specific firmware versions (check AuthenticatorInfo)
 - **Resident key limits**: Read credential metadata; remaining discoverable capacity is an estimate, not a fixed slot count
 - **Evidence scope**: Parsed responses, nonempty signatures and fake-wire assertions are not RP/attestation,
-  firmware, biometric or FIPS qualification. Bio APIs have known standard wire/schema/completion limitations.
-- **Secret lifetime**: Existing integration fixtures have cleanup gaps; the optional AuditV2 blob interop
-  fixture can export a large-blob key as immutable hex text to disk. It is a human-controlled secret-export
-  path, not a no-persistence or unattended safety example.
+  firmware, biometric or FIPS qualification.
+- **Secret lifetime**: The SDK-write fixture checks the blob in-process without exporting its key. The
+  separate external-writer fixture still requires a human-authorized key supplied via an environment
+  variable; it does not erase the environment text and is not an unattended safety example.

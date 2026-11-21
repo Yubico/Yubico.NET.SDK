@@ -119,9 +119,7 @@ public static class MakeCredential
 
                 var authParam = protocol.Authenticate(pinToken, clientDataHash);
                 options.WithPinUvAuth(authParam, protocol.Version);
-                // Known sample defect: uv must be omitted beside pinUvAuthParam (even uv:false).
-                // Preserve this executable call for the separately scoped sample fix.
-                options.WithUserVerification(true);
+                // Token authentication supplies UV; omit the separate CTAP uv option entirely.
             }
 
             var response = await session.MakeCredentialAsync(

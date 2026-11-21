@@ -46,28 +46,15 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// </remarks>
 public sealed class CredBlobInput
 {
-    private ReadOnlyMemory<byte> _blob;
-
     /// <summary>
     /// Gets or sets the blob data to store with the credential.
     /// </summary>
     /// <remarks>
-    /// This DTO accepts 1–32 bytes; that is an SDK restriction, not the protocol's maximum capacity.
+    /// MakeCredential checks nonemptiness and the authenticator's advertised capacity.
     /// The memory is borrowed, not copied. Keep it unchanged through encoding and transmission,
     /// then clear caller-owned sensitive storage when it is no longer needed.
     /// </remarks>
-    public required ReadOnlyMemory<byte> Blob
-    {
-        get => _blob;
-        init
-        {
-            if (value.Length is < 1 or > 32)
-            {
-                throw new ArgumentException("CredBlob must be between 1 and 32 bytes", nameof(Blob));
-            }
-            _blob = value;
-        }
-    }
+    public required ReadOnlyMemory<byte> Blob { get; init; }
 
     /// <summary>
     /// Encodes this credBlob input as CBOR (the raw blob bytes).

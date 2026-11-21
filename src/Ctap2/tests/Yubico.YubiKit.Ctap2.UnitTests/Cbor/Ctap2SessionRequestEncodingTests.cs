@@ -157,6 +157,44 @@ public sealed class Ctap2SessionRequestEncodingTests
         reader.ReadEndMap();
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void BuildMakeCredentialRequest_EncodesTokenAndBuiltInUvAsSeparateChoices(bool useToken)
+    {
+        var options = new MakeCredentialOptions().WithResidentKey(true);
+        if (useToken)
+            options.WithPinUvAuth(new byte[16], 1);
+        else
+            options.WithUserVerification(true);
+
+        var reader = CborPayloadReader(Ctap2SessionRequestEncoding.BuildMakeCredentialRequest(
+            ClientDataHash(), new PublicKeyCredentialRpEntity("example.com", "Example"),
+            new PublicKeyCredentialUserEntity(new byte[] { 1 }, "user", "User"),
+            [PublicKeyCredentialParameters.CreateES256()], options));
+
+        int fields = reader.ReadStartMap() ?? throw new InvalidOperationException();
+        var keys = new List<int>();
+        for (int i = 0; i < fields; i++)
+        {
+            int key = reader.ReadInt32();
+            keys.Add(key);
+            if (key == 7)
+            {
+                if (useToken) AssertOptionMap(reader, ("rk", true));
+                else AssertOptionMap(reader, ("rk", true), ("uv", true));
+            }
+            else
+            {
+                reader.SkipValue();
+            }
+        }
+        reader.ReadEndMap();
+        Assert.Contains(7, keys);
+        Assert.Equal(useToken, keys.Contains(8));
+        Assert.Equal(useToken, keys.Contains(9));
+    }
+
     private static ReadOnlyMemory<byte> ClientDataHash()
     {
         var hash = new byte[32];

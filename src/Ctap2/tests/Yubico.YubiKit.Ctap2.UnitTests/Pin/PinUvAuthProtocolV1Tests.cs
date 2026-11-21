@@ -39,8 +39,10 @@ public sealed class PinUvAuthProtocolV1Tests
         Assert.Equal(16, protocol.AuthenticationTagLength);
     }
 
-    [Fact]
-    public void Encapsulate_ValidPeerKey_ReturnsKeyAgreementAndSecret()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Encapsulate_ValidPeerKey_ReturnsKeyAgreementAndSecret(bool includeUnknownLabel)
     {
         using var protocol = new PinUvAuthProtocolV1();
 
@@ -49,12 +51,14 @@ public sealed class PinUvAuthProtocolV1Tests
 
         var peerCoseKey = new Dictionary<int, object?>
         {
-            // The fixture omits required alg=-25; success reflects the current missing label check.
             { 1, 2 },
+            { 3, -25 },
             { -1, 1 },
             { -2, peerParams.Q.X },
             { -3, peerParams.Q.Y }
         };
+        if (includeUnknownLabel)
+            peerCoseKey[1000] = 1;
 
         var (keyAgreement, sharedSecret) = protocol.Encapsulate(peerCoseKey);
 
@@ -64,6 +68,28 @@ public sealed class PinUvAuthProtocolV1Tests
         Assert.Equal(2, keyAgreement[1]);
         Assert.Equal(-25, keyAgreement[3]);
         Assert.Equal(1, keyAgreement[-1]);
+        Assert.False(keyAgreement.ContainsKey(1000));
+    }
+
+    [Theory]
+    [InlineData(1, null)]
+    [InlineData(1, 1)]
+    [InlineData(3, null)]
+    [InlineData(3, -7)]
+    [InlineData(-1, null)]
+    [InlineData(-1, 2)]
+    public void Encapsulate_RejectsMissingOrWrongPeerLabels(int label, int? replacement)
+    {
+        using var protocol = new PinUvAuthProtocolV1();
+        using var peer = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
+        var q = peer.ExportParameters(false).Q;
+        var key = new Dictionary<int, object?> { [1] = 2, [3] = -25, [-1] = 1, [-2] = q.X, [-3] = q.Y };
+        if (replacement is int value)
+            key[label] = value;
+        else
+            key.Remove(label);
+
+        Assert.Throws<ArgumentException>(() => protocol.Encapsulate(key));
     }
 
     [Fact]
@@ -180,6 +206,17 @@ public sealed class PinUvAuthProtocolV1Tests
         var decrypted = protocol.Decrypt(key, ciphertext);
 
         Assert.Equal(plaintext, decrypted);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Decrypt_PreservesAes256ZeroBlockVector(bool protocol2)
+    {
+        using IPinUvAuthProtocol protocol = protocol2 ? new PinUvAuthProtocolV2() : new PinUvAuthProtocolV1();
+        byte[] ciphertext = Convert.FromHexString("DC95C078A2408989AD48A21492842087");
+        byte[] wire = protocol2 ? [.. new byte[16], .. ciphertext] : ciphertext;
+        Assert.Equal(new byte[16], protocol.Decrypt(new byte[protocol2 ? 64 : 32], wire));
     }
 
     [Fact]

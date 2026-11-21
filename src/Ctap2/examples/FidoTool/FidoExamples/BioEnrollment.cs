@@ -170,13 +170,14 @@ public static class BioEnrollmentExample
             var bio = new FingerprintBioEnrollment(session, protocol, pinToken);
 
             // Begin enrollment - first sample
-            var result = await bio.EnrollBeginAsync(cancellationToken: cancellationToken);
-            var templateId = result.TemplateId;
+            var begin = await bio.EnrollBeginAsync(cancellationToken: cancellationToken);
+            var templateId = begin.TemplateId;
+            EnrollmentSampleResult result = begin;
             var sampleNumber = 1;
 
             onSampleCaptured?.Invoke(sampleNumber, result.RemainingSamples, result.LastSampleStatus);
 
-            // Continue using the begin ID, not result.TemplateId from a later sample.
+            // Continue using the ID from begin, regardless of later sample feedback.
             while (!result.IsComplete && !cancellationToken.IsCancellationRequested)
             {
                 try
@@ -361,27 +362,20 @@ public static class BioEnrollmentExample
     }
 
     /// <summary>
-    /// Returns true only for a successful read with bioEnroll=true.
+    /// Returns true if GetInfo advertises the standard bioEnroll option.
     /// </summary>
     /// <remarks>
-    /// False also covers every caught error/cancellation. bioEnroll=false still advertises support with
-    /// no provisioned templates; this probe currently misclassifies that state and ignores preview support.
+    /// The option value describes whether templates exist, not whether the command is supported.
+    /// This probe does not check the prototype option. Read failures and cancellation propagate.
     /// </remarks>
     public static async Task<bool> IsSupported(
         IYubiKey yubiKey,
         CancellationToken cancellationToken = default)
     {
-        try
-        {
-            await using var session = await yubiKey.CreateCtap2SessionAsync(
-                cancellationToken: cancellationToken);
-            var info = await session.GetInfoAsync(cancellationToken);
-            return info.Options.TryGetValue("bioEnroll", out var supported) && supported;
-        }
-        catch
-        {
-            return false;
-        }
+        await using var session = await yubiKey.CreateCtap2SessionAsync(
+            cancellationToken: cancellationToken);
+        var info = await session.GetInfoAsync(cancellationToken);
+        return info.Options.ContainsKey("bioEnroll");
     }
 
     /// <summary>
@@ -401,9 +395,10 @@ public static class BioEnrollmentExample
             FingerprintSampleStatus.TooSkewed => "Finger too skewed",
             FingerprintSampleStatus.TooShort => "Touch too short",
             FingerprintSampleStatus.MergeFailure => "Merge failure",
-            FingerprintSampleStatus.StorageFull => "Fingerprint storage full",
-            FingerprintSampleStatus.NoUserActivity => "No finger detected (timeout)",
-            FingerprintSampleStatus.NoUserPresence => "No user presence",
+            FingerprintSampleStatus.Exists => "Fingerprint already enrolled",
+            FingerprintSampleStatus.DatabaseFull => "Fingerprint storage full",
+            FingerprintSampleStatus.NoUserActivity => "No touch or swipe detected",
+            FingerprintSampleStatus.NoUpTransition => "Lift your finger and try again",
             _ => $"Unknown status: {status}"
         };
 

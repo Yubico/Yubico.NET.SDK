@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Yubico.YubiKit.Cli.Commands.UnitTests" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Spectre.Console" />
   </ItemGroup>

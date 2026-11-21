@@ -67,7 +67,9 @@ internal sealed class RegistrationExtensionSession : IDisposable
         if (inputs.LargeBlob is not null && LargeBlobProcessor.ForRegistration(inputs.LargeBlob, requireResidentKey, context) is { } largeBlob) processors.Add(largeBlob);
         if (inputs.Prf is not null && context.Supports(ExtensionIdentifiers.HmacSecret)) processors.Add(PrfProcessor.ForRegistration(inputs.Prf, context));
         if (inputs.CredProps is not null) processors.Add(new CredPropsProcessor(requireResidentKey));
+#pragma warning disable YKEXP001 // Bridge only explicitly requested previewSign inputs.
         if (inputs.PreviewSign is not null && context.Supports(ExtensionIdentifiers.PreviewSign)) processors.Add(new PreviewSignProcessor(inputs.PreviewSign, options.UserVerification));
+#pragma warning restore YKEXP001
         return new RegistrationExtensionSession(processors, requested: true);
     }
 

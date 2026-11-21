@@ -24,8 +24,9 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 /// Interactive menu for factory reset of the FIDO application.
 /// </summary>
 /// <remarks>
-/// Human-coordinated only. The post-reinsert selection is not bound to the confirmed physical key and
-/// reuses the old transport choice; a different key can be reset. Preflight defaults and current prompt
+/// Human-coordinated only. Retain the selected transport and try the original device view first.
+/// A vanished macOS HID entry may be rediscovered by a unique confirmed serial on that transport.
+/// A serial-less GetInfo fingerprint does not uniquely identify a physical key. Preflight and current prompt
 /// strings are not authoritative transport/timing evidence. ReadLine/confirmation prompts do not honor
 /// cancellation while blocked. Follow the sample README's qualified product reset procedure and verify
 /// the final physical target; a failed result does not establish unchanged credentials/PIN/settings.
@@ -51,10 +52,10 @@ public static class ResetMenu
 
         // Query authenticator for reset-specific capabilities
         var preflight = await ResetAuthenticator.GetPreflightInfoAsync(
-            selection.Device, resetTransport, cancellationToken);
+            selection.Device, resetTransport, selection.SerialNumber, cancellationToken);
 
         // Check transport restrictions
-        if (preflight is { TransportsForReset.Count: > 0 })
+        if (preflight.TransportsForReset.Count > 0)
         {
             var currentTransport = ToCtapTransport(resetTransport);
             var allowed = preflight.TransportsForReset;
@@ -74,7 +75,7 @@ public static class ResetMenu
             return;
         }
 
-        var touchInstruction = preflight?.LongTouchForReset == true
+        var touchInstruction = preflight.LongTouchForReset
             ? "Press and hold for 10 seconds after re-inserting"
             : "Touch your YubiKey after re-inserting";
 
@@ -93,27 +94,13 @@ public static class ResetMenu
 
         AnsiConsole.MarkupLine("[yellow]Remove your YubiKey now...[/]");
         AnsiConsole.MarkupLine("[grey]Press Enter after re-inserting your YubiKey.[/]");
-        Console.ReadLine();
-
-        // Known target-continuity defect: independent selection can return a different physical key.
-        var newSelection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-        if (newSelection is null)
-        {
-            OutputHelpers.WriteError("No YubiKey found after re-insertion.");
+        if (Console.ReadLine() is null)
             return;
-        }
-
-        // Old transport is reused; preflight can fail/default and is not a target/timing guarantee.
-        var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
-            newSelection.Device, resetTransport, cancellationToken);
-
-        var touchMsg = reinsertedPreflight?.TouchMessage ?? "Touch your YubiKey to confirm.";
-        AnsiConsole.MarkupLine($"[yellow]{Markup.Escape(touchMsg)}[/]");
 
         var result = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Resetting FIDO application...", async _ =>
-                await ResetAuthenticator.ResetAsync(newSelection.Device, resetTransport, cancellationToken));
+                await ResetAuthenticator.ResetAsync(preflight, cancellationToken));
 
         if (result.Success)
         {

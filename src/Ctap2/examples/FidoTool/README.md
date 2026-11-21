@@ -9,6 +9,11 @@ The tool retains its FIDO CLI identity: the application is FIDO and its PIN is a
 `Yubico.YubiKit.Ctap2` provides CTAP2 operations over the shared CTAPHID USB transport or the
 FIDO SmartCard application. WebAuthn is the higher-level ceremony API, not the HID transport.
 
+**Demo only.** FidoTool demonstrates CTAP exchanges; it does not register accounts or verify sign-ins.
+Its credential demo uses a generated account handle and a synthetic client-data hash, and its assertion
+demo displays the first result rather than running account selection. A relying party needs its own
+challenge, exact client data, account binding, and independent verification of the returned data.
+
 ## Quick Start
 
 PIN-changing and token-authorized flows select PIN/UV protocol 2 without negotiation. Before using
@@ -66,10 +71,15 @@ FidoTool reset -f
    NFC remaining in reader contact, and product-dependent long touch. CTAP 2.3's enabled long-touch
    option requires at least five seconds, not a universal ten-second press.
 
-The sample independently selects again after reinsert; it does **not** bind that selection to the
-originally confirmed physical key. Another key can be reset. Manually verify the final target and avoid
-ambiguous multi-key setups. Preflight failures/cancellation can be swallowed and defaults displayed;
-missing metadata is not proof of unrestricted transports or a short touch. Existing executable prompts
+The sample first tries the selected device view on the same transport after reinsertion. On macOS,
+fresh HID discovery is attempted only when a valid registry iterator confirms no matching entry,
+and only on the same transport with a confirmed serial that matches exactly one candidate. An
+inconclusive lookup (including a null iterator) can require explicit reselection even when the entry
+is gone. The sample checks the live serial on the same connection that will send Reset. Without a
+serial it never retargets: if the original view opens, it compares GetInfo
+AAGUID, firmware and supported versions on that connection. A matching fingerprint is **not unique device identity**.
+Manually verify the physical target and avoid ambiguous multi-key setups. Failed checks prevent Reset;
+missing optional metadata is not proof of unrestricted transports or a short touch. Existing executable prompts
 still contain overgeneralized five/ten-second wording; follow the qualified product procedure, not those
 messages as a timing authority. `-f` is not an unattended CI reset mode. A failed call does not prove no reset.
 
@@ -128,9 +138,8 @@ FidoTool credentials delete "$CREDENTIAL_ID_HEX" -f
 ### fingerprints
 
 Fingerprint flows need actual biometric hardware and advertised support; a firmware threshold is not
-qualification. The current SDK bio helper has known standard wire/authentication/timeout, template-array
-schema and sample-status limitations. An empty inventory can mean an unsupported command, and decoded
-remaining-samples zero is not verified enrollment completion. Next replies need not repeat the begin
+qualification. The standard request format is checked in software, not qualified on biometric hardware.
+A decoded remaining-samples zero is not independently verified enrollment persistence. Next replies need not repeat the begin
 template ID; the sample correctly retains it separately. A thrown cancellation can skip the explicit
 enrollment-cancel path. Do not rely on these flows as working standardized enrollment or cancellation.
 Set `FINGERPRINT_ID_HEX` to the actual template ID:
@@ -209,16 +218,18 @@ Prefer HID FIDO for ordinary USB CTAP2 coverage. USB SmartCard CTAP2 is supporte
 
 The active `DeviceSelector` delegates to `Cli.Shared` and admits exposed HID FIDO **or SmartCard**
 interfaces. Session creation subsequently checks the FIDO AID and transport/firmware requirements;
-SmartCard-only non-CTAP keys can appear in selection. One candidate auto-selects. Multiple candidates
-prompt in an interactive terminal; noninteractive mode prefers HID FIDO, then the first eligible key.
+SmartCard-only non-CTAP keys can appear in selection. One candidate auto-selects in an interactive
+terminal; multiple candidates prompt. Non-interactive commands require `--serial SERIAL` and never
+fall back to another key if the requested serial is absent or ambiguous.
 The shared selector identifies choices by index, uses cancellable selection/retry prompts, and returns
 without prompting when a noninteractive scan finds no candidates. It reuses last-known discovery
 metadata or performs one best-effort live fallback per candidate during that selection invocation.
 
-Ctrl+C requests a cancellation token. Selection and its metadata fallback propagate cancellation;
+Ctrl+C requests a cancellation token; the console handler detaches when its source is disposed.
+Selection and the biometric support probe propagate cancellation and support-probe failures;
 synchronous menu/PIN/ReadLine prompts remain blocked until input returns. Operation helpers still catch
 general exceptions and return failure results, losing cancellation and error provenance. Support probes
-can also turn failures into unsupported results. Inspect the operation outcome and device state before
+other than the biometric probe may still conflate failure and absence. Inspect the operation outcome and device state before
 retrying; cancellation provides no rollback of a sent command.
 
 ## Security Notes

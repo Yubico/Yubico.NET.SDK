@@ -20,6 +20,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Cose;
 public class CoseAlgorithmTests
 {
     [Fact]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public void Esp256SplitArkgPlaceholder_Value_IsNegative65539()
     {
         // Assert
@@ -40,6 +41,7 @@ public class CoseAlgorithmTests
     }
 
     [Fact]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public void IsKnown_True_ForNamedConstants()
     {
         // Assert
@@ -62,6 +64,7 @@ public class CoseAlgorithmTests
     }
 
     [Fact]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public void ToString_NamesKnownAlgorithms()
     {
         // Assert

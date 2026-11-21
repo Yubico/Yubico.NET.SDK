@@ -13,6 +13,9 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Formats.Cbor;
+using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
@@ -46,6 +49,9 @@ namespace Yubico.YubiKit.Ctap2;
 /// </remarks>
 public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 {
+    private const int DefaultMaxMessageSize = 1024;
+    private int _maxMessageSize = DefaultMaxMessageSize;
+    private int? _maxCredBlobLength;
     /// <summary>
     /// Nominal firmware threshold for FIDO2 (5.0+), not a per-device capability or authorization check.
     /// </summary>
@@ -84,15 +90,25 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     private static readonly Feature FeatureFido2UsbSmartCard = new("FIDO2 over USB SmartCard", 5, 8, 0);
 
     private readonly ILogger _logger;
+    private readonly ProtocolConfiguration? _configuration;
+    private readonly FirmwareVersion? _firmwareVersionOverride;
+    private readonly ScpKeyParameters? _scpKeyParameters;
+    private readonly DeviceInfo? _cachedDeviceInfo;
+    private Exception? _resetRefreshFailure;
 
     private ICtap2Backend _backend = null!;
 
     private Ctap2Session(
         IConnection connection,
-        IUserPresencePrompt? userPresencePrompt = null)
-        : base(connection, userPresencePrompt)
+        SessionCreationOptions? options,
+        DeviceInfo? cachedDeviceInfo)
+        : base(connection, options?.UserPresencePrompt)
     {
         _logger = Logger;
+        _configuration = options?.ProtocolConfiguration;
+        _firmwareVersionOverride = options?.FirmwareVersionOverride;
+        _scpKeyParameters = options?.ScpKeyParameters;
+        _cachedDeviceInfo = cachedDeviceInfo;
     }
 
     /// <summary>
@@ -134,44 +150,47 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         IConnection connection,
         SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default) =>
+        CreateAsync(connection, options, cachedDeviceInfo: null, cancellationToken);
+
+    internal static Task<Ctap2Session> CreateAsync(
+        IConnection connection,
+        SessionCreationOptions? options,
+        DeviceInfo? cachedDeviceInfo,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
-            () => new Ctap2Session(connection, options?.UserPresencePrompt),
-            (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+            () => new Ctap2Session(connection, options, cachedDeviceInfo),
+            (session, token) => session.InitializeAsync(token),
             cancellationToken);
 
-    private async Task InitializeAsync(
-        ProtocolConfiguration? configuration,
-        FirmwareVersion? firmwareVersionOverride,
-        ScpKeyParameters? scpKeyParams,
-        CancellationToken cancellationToken)
+    private async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = await PrepareProtocolAsync(scpKeyParams, cancellationToken).ConfigureAwait(false);
+        var protocol = await PrepareProtocolAsync(_scpKeyParameters, cancellationToken).ConfigureAwait(false);
         var backend = CreateBackend(protocol);
         if (backend is SmartCardBackend smartCardBackend)
             await smartCardBackend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
 
         // The transport gate uses detected firmware; an override only affects later configuration.
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
-        var detectedFirmwareVersion = info.FirmwareVersion ?? new FirmwareVersion();
+        var detectedFirmwareVersion = _cachedDeviceInfo?.FirmwareVersion ?? info.FirmwareVersion ?? new FirmwareVersion();
 
         if (Connection is ISmartCardConnection smartCardConnection)
         {
-            EnsureSmartCardTransportSupported(smartCardConnection.Transport, detectedFirmwareVersion);
+            EnsureSmartCardTransportSupported(
+                smartCardConnection.Transport, detectedFirmwareVersion, _cachedDeviceInfo?.VersionQualifier);
         }
 
-        // Configure the session firmware snapshot, then establish SCP and rebind the backend if needed.
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
-                firmwareVersionOverride ?? detectedFirmwareVersion,
-                configuration,
-                scpKeyParams,
-                cancellationToken)
+                GetConfigurationFirmwareVersion(detectedFirmwareVersion, info.FirmwareVersion),
+                _configuration,
+                _scpKeyParameters,
+                cancellationToken,
+                scpEligibilityFirmwareVersion: GetScpEligibilityFirmwareVersion(detectedFirmwareVersion))
             .ConfigureAwait(false);
 
         if (!ReferenceEquals(protocol, effectiveProtocol))
@@ -180,12 +199,36 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         }
 
         _backend = backend;
+        _maxMessageSize = info.MaxMsgSize ?? DefaultMaxMessageSize;
+        _maxCredBlobLength = info.MaxCredBlobLength;
 
         _logger.LogDebug(
             "FIDO session initialized. Firmware: {Version}, Versions: [{Versions}]",
             detectedFirmwareVersion,
             string.Join(", ", info.Versions));
     }
+
+    private FirmwareVersion GetConfigurationFirmwareVersion(FirmwareVersion detected, FirmwareVersion? applet)
+    {
+        if (_firmwareVersionOverride is { } configured)
+            return configured;
+
+        // A major-zero cache can pass the USB gate without outranking numeric GetInfo for APDU framing.
+        // A qualified prerelease with a numeric version keeps its numeric framing.
+        return Connection is ISmartCardConnection && detected.IsAlphaOrBeta && applet is { Major: > 0 }
+            ? applet
+            : detected;
+    }
+
+    private FirmwareVersion GetScpEligibilityFirmwareVersion(FirmwareVersion detected) =>
+        // An explicit firmware override still governs SCP configuration, but not the USB gate.
+        _firmwareVersionOverride ??
+        (detected.IsAlphaOrBeta || HasNonFinalQualifier(_cachedDeviceInfo?.VersionQualifier)
+            ? FirmwareVersion.Default
+            : detected);
+
+    private static bool HasNonFinalQualifier(VersionQualifier? qualifier) =>
+        qualifier is { Type: not VersionQualifierType.Final };
 
     /// <inheritdoc />
     public Task<AuthenticatorInfo> GetInfoAsync(CancellationToken cancellationToken = default)
@@ -216,19 +259,80 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     public async Task ResetAsync(CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        await SendCborAsync(
-                CtapCommand.Reset,
-                CreateUserPresenceNotification(ConnectionType is ConnectionType.HidFido
-                    ? new UserPresenceContext
-                    {
-                        Basis = UserPresenceBasis.PolicyMayRequire,
-                        Application = UserPresenceApplications.Fido2,
-                        Operation = UserPresenceOperations.Ctap2.Reset
-                    }
-                    : null),
-                cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-        _logger.LogInformation("FIDO application reset completed");
+        var notification = CreateUserPresenceNotification(ConnectionType is ConnectionType.HidFido
+            ? new UserPresenceContext
+            {
+                Basis = UserPresenceBasis.PolicyMayRequire,
+                Application = UserPresenceApplications.Fido2,
+                Operation = UserPresenceOperations.Ctap2.Reset
+            }
+            : null);
+        bool confirmed = false;
+        Exception? notificationFailure = null;
+        try
+        {
+            await _backend.SendCborAsync(new byte[] { CtapCommand.Reset }, notification, cancellationToken,
+                onSuccess: () => confirmed = true).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (confirmed)
+        {
+            // A logger or terminal callback can fail after the successful CTAP status is known.
+            notificationFailure = ex;
+        }
+
+        await RefreshAfterResetAsync().ConfigureAwait(false);
+        if (notificationFailure is not null)
+            ExceptionDispatchInfo.Throw(notificationFailure);
+        _logger.LogInformation("FIDO application reset completed and session refreshed");
+    }
+
+    private async Task RefreshAfterResetAsync()
+    {
+        IsInitialized = false;
+        IsAuthenticated = false;
+        FirmwareVersion = new FirmwareVersion();
+        _maxMessageSize = DefaultMaxMessageSize;
+        _maxCredBlobLength = null;
+        _backend = null!;
+
+        try
+        {
+            var oldProtocol = Protocol;
+            Protocol = null;
+            if (oldProtocol is IAsyncDisposable asyncProtocol)
+                await asyncProtocol.DisposeAsync().ConfigureAwait(false);
+            else
+                oldProtocol?.Dispose();
+
+            // The authenticator has already reset. Complete or end the session even if the caller cancelled.
+            await InitializeSessionAsync(InitializeAsync, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _resetRefreshFailure = ex;
+            await DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        catch (Exception cleanupFailure) when (_resetRefreshFailure is not null)
+        {
+            // Don't cache a secondary failure which would be replayed by the caller's await using.
+            try
+            {
+                _resetRefreshFailure.Data["ResetRefreshCleanupException"] = cleanupFailure;
+            }
+            catch (Exception)
+            {
+                // Diagnostic attachment must not replace the refresh failure.
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -271,6 +375,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         Ctap2SessionRequestEncoding.ThrowIfDuplicateCredentialParameters(pubKeyCredParams, nameof(pubKeyCredParams));
 
         EnsureInitialized();
+        ValidateCredBlob(options);
 
         byte[]? request = null;
         ReadOnlyMemory<byte> response;
@@ -291,7 +396,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
                     Scope = rp.Id
                 });
 
-            response = await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken)
+            response = await SendWithinMessageLimitAsync(request, userPresenceNotification, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -304,14 +409,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         }
 
         // CTAP status and terminal notification resolution precede decode; failure here is not rollback.
-        var result = MakeCredentialResponse.Decode(response);
-
-        _logger.LogInformation(
-            "Credential created. Format: {Format}, CredentialId length: {Length}",
-            result.Format,
-            result.GetCredentialId().Length);
-
-        return result;
+        return DecodeCredentialResponse(response, MakeCredentialResponse.Decode);
     }
 
     /// <inheritdoc />
@@ -353,7 +451,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
                         Scope = rpId
                     });
 
-            response = await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken)
+            response = await SendWithinMessageLimitAsync(request, userPresenceNotification, cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -366,13 +464,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         }
 
         // Parsing is not relying-party verification and can fail after a successful device exchange.
-        var result = GetAssertionResponse.Decode(response);
-
-        _logger.LogInformation(
-            "Assertion obtained. NumberOfCredentials: {Count}",
-            result.NumberOfCredentials ?? 1);
-
-        return result;
+        return DecodeCredentialResponse(response, GetAssertionResponse.Decode);
     }
 
     /// <inheritdoc />
@@ -384,13 +476,61 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         // The caller preserves device sequence adjacency and tracks the first response's count.
         var request = CtapRequestBuilder.Create(CtapCommand.GetNextAssertion).Build();
 
-        var response = await _backend.SendCborAsync(
+        var response = await SendWithinMessageLimitAsync(
                 request,
                 UserPresenceNotification.None,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        return GetAssertionResponse.Decode(response);
+        return DecodeCredentialResponse(response, GetAssertionResponse.Decode);
+    }
+
+    private void ValidateCredBlob(MakeCredentialOptions? options)
+    {
+        if (options?.Extensions is not { Length: > 0 } extensions)
+        {
+            return;
+        }
+
+        var reader = new CborReader(extensions, CborConformanceMode.Ctap2Canonical);
+        reader.ReadStartMap();
+        while (reader.PeekState() is not CborReaderState.EndMap)
+        {
+            if (reader.ReadTextString() != Extensions.ExtensionIdentifiers.CredBlob)
+            {
+                reader.SkipValue();
+                continue;
+            }
+
+            int length = reader.ReadDefiniteLengthByteString().Length;
+            if (length == 0)
+            {
+                throw new ArgumentException("credBlob must not be empty.", nameof(options));
+            }
+            if (_maxCredBlobLength is not int limit)
+            {
+                throw new NotSupportedException("The authenticator did not advertise a credBlob capacity.");
+            }
+            if (length > limit)
+            {
+                throw new ArgumentException($"credBlob exceeds the authenticator's {limit}-byte capacity.", nameof(options));
+            }
+        }
+        reader.ReadEndMap();
+    }
+
+    private static T DecodeCredentialResponse<T>(ReadOnlyMemory<byte> response, Func<ReadOnlyMemory<byte>, T> decode)
+    {
+        try
+        {
+            return decode(response);
+        }
+        finally
+        {
+            // Both backends transfer their writable response storage to this session.
+            // Typed decoders no longer retain any view of it, even on success.
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+        }
     }
 
     /// <summary>
@@ -422,7 +562,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             request = new byte[] { command };
         }
 
-        return await _backend.SendCborAsync(request, userPresenceNotification, cancellationToken).ConfigureAwait(false);
+        return await SendWithinMessageLimitAsync(request, userPresenceNotification, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -431,8 +571,34 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
-        return await _backend.SendCborAsync(request, UserPresenceNotification.None, cancellationToken)
+        return await SendWithinMessageLimitAsync(request, UserPresenceNotification.None, cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    // Unlike ICtap2Session, this session knows that the backend returned an SDK-owned payload.
+    internal async Task<byte[]> DecodePinTokenResponseAsync(ReadOnlyMemory<byte> request,
+        Func<ReadOnlyMemory<byte>, byte[]> decode, CancellationToken cancellationToken)
+    {
+        var response = await SendCborRequestAsync(request, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            return decode(response);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+        }
+    }
+
+    private Task<ReadOnlyMemory<byte>> SendWithinMessageLimitAsync(
+        ReadOnlyMemory<byte> request,
+        UserPresenceNotification notification,
+        CancellationToken cancellationToken)
+    {
+        if (request.Length > _maxMessageSize)
+            throw new ArgumentException($"The CTAP request exceeds the authenticator's {_maxMessageSize}-byte message limit.", nameof(request));
+
+        return _backend.SendCborAsync(request, notification, cancellationToken);
     }
 
     private static async Task<AuthenticatorInfo> GetInfoCoreAsync(
@@ -468,14 +634,16 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 
     internal static void EnsureSmartCardTransportSupported(
         Transport transport,
-        FirmwareVersion firmwareVersion)
+        FirmwareVersion firmwareVersion,
+        VersionQualifier? qualifier = null)
     {
         if (transport == Transport.Nfc)
         {
             return;
         }
 
-        if (FeatureFido2UsbSmartCard.IsSupportedByFirmware(firmwareVersion))
+        if (HasNonFinalQualifier(qualifier) ||
+            FeatureFido2UsbSmartCard.IsSupportedByFirmware(firmwareVersion))
         {
             return;
         }

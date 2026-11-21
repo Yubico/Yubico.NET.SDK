@@ -14,7 +14,11 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.Hid.MacOS;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 
@@ -24,7 +28,8 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 /// and clears the PIN; named storage/configuration effects depend on the applicable protocol/product.
 /// </summary>
 /// <remarks>
-/// This helper does not power-cycle, verify target continuity, enforce a local reset timer or roll back.
+/// A vanished macOS HID entry may be rediscovered by a unique confirmed serial on the same transport.
+/// This helper does not power-cycle, enforce a local reset timer or roll back.
 /// CTAP 2.1/2.3 require receipt within ten seconds of power-up for displayless devices; Yubico documents
 /// five seconds before firmware 5.5.2 and ten on 5.5.4+, with 5.5.2/5.5.3 unspecified in that passage.
 /// Separate transport/product presence requirements apply. Current executable timing/error prompts are
@@ -45,101 +50,100 @@ public static class ResetAuthenticator
         public static ResetResult Failed(string error) => new() { Success = false, ErrorMessage = error };
     }
 
-    /// <summary>
-    /// Pre-reset information queried from the authenticator to guide user prompts.
-    /// </summary>
-    public sealed record ResetPreflightInfo
+    // A GetInfo fingerprint is only a consistency check; identical models can report matching fields.
+    internal sealed record ResetPreflightInfo(IYubiKey Device, ConnectionType Transport, int? SerialNumber,
+        AuthenticatorInfo Info)
     {
-        /// <summary>
-        /// The parsed long-touch option, defaulting absent metadata to false.
-        /// CTAP 2.3's enabled option requires at least five seconds; false is not proof a short tap suffices.
-        /// </summary>
-        public bool LongTouchForReset { get; init; }
+        public bool LongTouchForReset => Info.LongTouchForReset ?? false;
+        public IReadOnlyList<string> TransportsForReset => Info.TransportsForReset;
 
-        /// <summary>
-        /// Transports the authenticator allows for reset (e.g. "usb", "nfc").
-        /// Empty metadata does not prove that all transports are allowed.
-        /// </summary>
-        public IReadOnlyList<string> TransportsForReset { get; init; } = [];
-
-        /// <summary>
-        /// Returns the sample's current touch message, not a qualified per-product timing contract.
-        /// </summary>
-        public string TouchMessage => LongTouchForReset
-            ? "Press and hold the YubiKey button for 10 seconds to confirm."
-            : "Touch the YubiKey to confirm.";
+        public bool MatchesFingerprint(AuthenticatorInfo actual) =>
+            Info.Aaguid.Span.SequenceEqual(actual.Aaguid.Span) &&
+            Info.FirmwareVersion == actual.FirmwareVersion &&
+            Info.Versions.Order(StringComparer.Ordinal).SequenceEqual(actual.Versions.Order(StringComparer.Ordinal));
     }
 
-    /// <summary>
-    /// Queries the authenticator for reset-related information before performing
-    /// the actual reset. Missing fields are defaulted and all failures/cancellation return null;
-    /// the result does not validate reset timing, target identity or transport restrictions.
-    /// </summary>
-    public static async Task<ResetPreflightInfo?> GetPreflightInfoAsync(
-        IYubiKey yubiKey,
-        CancellationToken cancellationToken) =>
-        await GetPreflightInfoAsync(yubiKey, null, cancellationToken).ConfigureAwait(false);
+    internal static async Task<ResetPreflightInfo> GetPreflightInfoAsync(
+        IYubiKey selected, ConnectionType preferredConnection, int? serialNumber, CancellationToken cancellationToken)
+    {
+        await using var session = await selected.CreateCtap2SessionAsync(
+            new SessionCreationOptions { PreferredConnectionType = preferredConnection }, cancellationToken);
+        var info = await session.GetInfoAsync(cancellationToken);
+        return new ResetPreflightInfo(selected, preferredConnection, serialNumber, info);
+    }
 
-    public static async Task<ResetPreflightInfo?> GetPreflightInfoAsync(
-        IYubiKey yubiKey,
-        ConnectionType? preferredConnection = null,
-        CancellationToken cancellationToken = default)
+    internal static async Task<ResetResult> ResetAsync(ResetPreflightInfo target, CancellationToken cancellationToken,
+        Func<ConnectionType, CancellationToken, Task<IReadOnlyList<IYubiKey>>>? discover = null)
     {
         try
         {
-            await using var session = await yubiKey.CreateCtap2SessionAsync(
-                new SessionCreationOptions { PreferredConnectionType = preferredConnection },
-                cancellationToken: cancellationToken);
+            var options = new SessionCreationOptions { PreferredConnectionType = target.Transport };
+            await using var connection = await OpenResetConnectionAsync(
+                target, discover ?? YubiKeyManager.FindAllAsync, cancellationToken);
 
-            var info = await session.GetInfoAsync(cancellationToken);
-
-            return new ResetPreflightInfo
+            // Both sessions borrow this handle. Dispose Management before CTAP selects its applet.
+            // Reopening the interface here could reset a different card than the one verified.
+            DeviceInfo? deviceInfo;
+            if (target.SerialNumber is int serial)
             {
-                LongTouchForReset = info.LongTouchForReset ?? false,
-                TransportsForReset = info.TransportsForReset
-            };
-        }
-        catch
-        {
-            return null;
-        }
-    }
+                await using var management = await ManagementSession.CreateAsync(connection, options, cancellationToken);
+                deviceInfo = await management.GetDeviceInfoAsync(cancellationToken);
+                if (deviceInfo.Value.SerialNumber != serial)
+                    return ResetResult.Failed("Reinserted device did not report the confirmed serial number. Reset not sent.");
+            }
+            else
+            {
+                deviceInfo = target.Device.CachedDeviceInfo;
+            }
 
-    /// <summary>
-    /// Performs a factory reset of the FIDO application.
-    /// The YubiKey must have been recently re-inserted before calling this method,
-    /// and the user must meet its separate presence/long-touch requirements. Firmware alone is not a
-    /// universal ten-second-touch rule, and session initialization consumes the receipt window too.
-    /// </summary>
-    public static async Task<ResetResult> ResetAsync(
-        IYubiKey yubiKey,
-        CancellationToken cancellationToken) =>
-        await ResetAsync(yubiKey, null, cancellationToken).ConfigureAwait(false);
-
-    public static async Task<ResetResult> ResetAsync(
-        IYubiKey yubiKey,
-        ConnectionType? preferredConnection = null,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            await using var session = await yubiKey.CreateCtap2SessionAsync(
-                new SessionCreationOptions { PreferredConnectionType = preferredConnection },
-                cancellationToken: cancellationToken);
+            await using var session = await Ctap2Session.CreateAsync(connection, options, deviceInfo, cancellationToken);
+            if (target.SerialNumber is null && !target.MatchesFingerprint(await session.GetInfoAsync(cancellationToken)))
+                return ResetResult.Failed("Reinserted GetInfo fingerprint differs from the confirmed device. Reset not sent.");
 
             await session.ResetAsync(cancellationToken);
-
             return ResetResult.Succeeded();
         }
         catch (CtapException ex)
         {
             return ResetResult.Failed(MapCtapError(ex));
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ResetResult.Failed($"Failed to reset authenticator: {ex.Message}");
         }
     }
+
+    private static async Task<IConnection> OpenResetConnectionAsync(ResetPreflightInfo target,
+        Func<ConnectionType, CancellationToken, Task<IReadOnlyList<IYubiKey>>> discover, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await OpenAsync(target.Device, target.Transport, cancellationToken);
+        }
+        catch (MacOSHidEntryUnavailableException) when (target.Transport == ConnectionType.HidFido)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (target.SerialNumber is not int serial)
+                throw new InvalidOperationException("The selected HID interface is no longer available and has no confirmed serial number. Reselect the device. Reset not sent.");
+
+            var devices = await discover(target.Transport, cancellationToken);
+            var matches = devices.Where(device => device.SerialNumber == serial && device.SupportsConnection(target.Transport))
+                .Take(2).ToArray();
+            if (matches.Length != 1)
+                throw new InvalidOperationException("Could not uniquely rediscover the confirmed serial on the selected transport. Reselect the device. Reset not sent.");
+
+            cancellationToken.ThrowIfCancellationRequested();
+            return await OpenAsync(matches[0], target.Transport, cancellationToken);
+        }
+    }
+
+    private static async Task<IConnection> OpenAsync(IYubiKey device, ConnectionType transport, CancellationToken cancellationToken) =>
+        transport switch
+        {
+            ConnectionType.SmartCard => await device.ConnectAsync<ISmartCardConnection>(cancellationToken),
+            ConnectionType.HidFido => await device.ConnectAsync<IFidoHidConnection>(cancellationToken),
+            _ => throw new NotSupportedException("FIDO reset requires SmartCard or FIDO HID.")
+        };
 
     private static string MapCtapError(CtapException ex) =>
         ex.Status switch

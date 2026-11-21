@@ -129,7 +129,7 @@ public class LargeBlobStorageTests
         _mockSession.SendCborRequestAsync(
                 Arg.Any<ReadOnlyMemory<byte>>(),
                 Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(ReadOnlyMemory<byte>.Empty));
+            .Returns(Task.FromResult(CreateReadResponse([])));
 
         var storage = new LargeBlobStorage(_mockSession);
 
@@ -139,6 +139,133 @@ public class LargeBlobStorageTests
         // Assert
         Assert.NotNull(result);
         Assert.Empty(result.Entries);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("A0")]
+    [InlineData("A10101")]
+    [InlineData("A10140F5")]
+    public async Task ReadLargeBlobArrayAsync_RejectsMalformedFragment(string hex)
+    {
+        ReadOnlyMemory<byte> response = Convert.FromHexString(hex);
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+        var storage = new LargeBlobStorage(_mockSession);
+
+        await Assert.ThrowsAsync<CborContentException>(() => storage.ReadLargeBlobArrayAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ReadLargeBlobArrayAsync_StopsAtAdvertisedArrayLimit()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _mockSession.GetInfoAsync(ct).Returns(new AuthenticatorInfo { MaxMsgSize = 128, MaxSerializedLargeBlobArray = 128 });
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct)
+            .Returns(CreateReadResponse(new byte[64]));
+        var storage = new LargeBlobStorage(_mockSession);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => storage.ReadLargeBlobArrayAsync(ct));
+        await _mockSession.Received(3).SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct);
+    }
+
+    [Theory]
+    [InlineData(64, null, 0)] // maxMsgSize leaves no fragment payload.
+    [InlineData(128, 16, 0)] // Even the empty serialized array exceeds the advertised capacity.
+    [InlineData(65, null, 32730)] // 32768 serialized bytes at one byte per fragment need a 32769th read.
+    public async Task WriteLargeBlobArrayAsync_RejectsUnreadableArraysBeforeSending(int maxMsgSize, int? advertised, int ciphertextLength)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        _mockSession.GetInfoAsync(ct).Returns(new AuthenticatorInfo { MaxMsgSize = maxMsgSize, MaxSerializedLargeBlobArray = advertised });
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct)
+            .Returns<ReadOnlyMemory<byte>>(_ => throw new Xunit.Sdk.XunitException("An unreadable array must not send a write fragment."));
+        var array = ciphertextLength == 0 ? LargeBlobArray.CreateEmpty() : new LargeBlobArray
+        {
+            Entries = [new LargeBlobEntry(new byte[ciphertextLength], new byte[12], 1)]
+        };
+        if (ciphertextLength > 0)
+            Assert.Equal(32768, array.Serialize().Length);
+
+        var storage = new LargeBlobStorage(_mockSession, _testProtocol, _pinUvAuthToken);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => storage.WriteLargeBlobArrayAsync(array, ct));
+        await _mockSession.DidNotReceive().SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct);
+    }
+
+    [Fact]
+    public async Task WriteThenRead_AtExactCapacity_UsesEmptyTerminatingRead()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var array = new LargeBlobArray
+        {
+            Entries = [LargeBlobEntry.Encrypt(_pinUvAuthToken, [0xCA, 0xFE])]
+        };
+        byte[] expected = array.Serialize();
+        int length = expected.Length;
+        _mockSession.GetInfoAsync(ct).Returns(new AuthenticatorInfo { MaxMsgSize = 64 + length, MaxSerializedLargeBlobArray = length });
+        var requestIndex = 0;
+        byte[] stored = [];
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct).Returns(call =>
+        {
+            var request = call.Arg<ReadOnlyMemory<byte>>();
+            Assert.Equal(0x0C, request.Span[0]);
+            var reader = new CborReader(request[1..], CborConformanceMode.Ctap2Canonical);
+            if (requestIndex++ == 0)
+            {
+                Assert.Equal(5, reader.ReadStartMap());
+                Assert.Equal(2, reader.ReadInt32());
+                stored = reader.ReadByteString();
+                Assert.Equal(expected, stored);
+                Assert.Equal(3, reader.ReadInt32());
+                Assert.Equal(0, reader.ReadInt32());
+                Assert.Equal(4, reader.ReadInt32());
+                Assert.Equal(length, reader.ReadInt32());
+                Assert.Equal(5, reader.ReadInt32());
+                Assert.Equal(new byte[16], reader.ReadByteString());
+                Assert.Equal(6, reader.ReadInt32());
+                Assert.Equal(2, reader.ReadInt32());
+                reader.ReadEndMap();
+                Assert.Equal(0, reader.BytesRemaining);
+                return ReadOnlyMemory<byte>.Empty;
+            }
+
+            Assert.Equal(2, reader.ReadStartMap());
+            Assert.Equal(1, reader.ReadInt32());
+            Assert.Equal(length, reader.ReadInt32());
+            Assert.Equal(3, reader.ReadInt32());
+            Assert.Equal(requestIndex == 2 ? 0 : length, reader.ReadInt32());
+            reader.ReadEndMap();
+            Assert.Equal(0, reader.BytesRemaining);
+            Assert.InRange(requestIndex, 2, 3);
+            return CreateReadResponse(requestIndex == 2 ? stored : []);
+        });
+
+        var storage = new LargeBlobStorage(_mockSession, _testProtocol, _pinUvAuthToken);
+        await storage.WriteLargeBlobArrayAsync(array, ct);
+        var read = await storage.ReadLargeBlobArrayAsync(ct);
+
+        Assert.Equal(3, requestIndex);
+        Assert.Equal(expected, read.Serialize());
+    }
+
+    [Theory]
+    [InlineData("80", false, false)]
+    [InlineData("80F5", false, true)]
+    [InlineData("80F5", true, false)]
+    public async Task ReadLargeBlobArrayAsync_DistinguishesMalformedCborFromCorruptHash(string bodyHex, bool corruptHash, bool malformed)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] body = Convert.FromHexString(bodyHex);
+        byte[] hash = SHA256.HashData(body);
+        if (corruptHash)
+            hash[0] ^= 0xFF;
+        _mockSession.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct)
+            .Returns(CreateReadResponse([.. body, .. hash.AsSpan(0, 16)]));
+        var storage = new LargeBlobStorage(_mockSession);
+
+        if (malformed)
+            await Assert.ThrowsAsync<CborContentException>(() => storage.ReadLargeBlobArrayAsync(ct));
+        else
+            Assert.Empty((await storage.ReadLargeBlobArrayAsync(ct)).Entries);
     }
 
     [Fact]

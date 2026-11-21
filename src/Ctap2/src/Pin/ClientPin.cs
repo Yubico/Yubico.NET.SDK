@@ -12,8 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Buffers;
 using System.Formats.Cbor;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.Unicode;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Ctap2.Cbor;
 using static Yubico.YubiKit.Ctap2.Cbor.CoseKeyWriter;
 
@@ -38,11 +43,10 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 /// Each PIN set/change or token request performs fresh key agreement.
 /// </para>
 /// <para>
-/// Supply PINs as NFC-normalized UTF-8, with at least four Unicode characters and no final 0x00
-/// byte. For a new PIN, also meet the authenticator's current minimum in Unicode code points and
-/// any additional device policy. The SDK checks only 4–63 input bytes: it does not validate UTF-8,
-/// normalization, code-point count, a final zero byte or the advertised minimum. It hashes the
-/// exact supplied bytes, so do not append padding to a PIN argument.
+/// Supply unpadded UTF-8 PINs. New PINs are normalized to NFC and must then contain at least four
+/// Unicode code points, fit in 63 UTF-8 bytes, and not end in 0x00. Non-ASCII new PINs require
+/// functioning .NET globalization support for NFC. The authenticator applies its configured policy.
+/// An existing PIN must be valid UTF-8 and is hashed exactly as supplied without applying new-PIN rules.
 /// </para>
 /// <para>
 /// If GetInfo reports forcePINChange=true, change the PIN before requesting a PIN token.
@@ -72,6 +76,7 @@ namespace Yubico.YubiKit.Ctap2.Pin;
 public sealed class ClientPin : IDisposable
 {
     private const int PinMinLength = 4;
+    private static readonly bool SupportsNfc = CheckNfcSupport();
     private const int PinMaxLength = 63;
     private const int PinBlockSize = 64;
 
@@ -106,8 +111,8 @@ public sealed class ClientPin : IDisposable
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The authenticator's current PIN retry status.</returns>
     /// <remarks>
-    /// Missing response fields currently default to zero retries and false power-cycle state;
-    /// false therefore does not prove another attempt is safe. PIN_AUTH_BLOCKED indicates a
+    /// Omitted power-cycle state is unknown, and a snapshot does not prove another attempt is safe.
+    /// PIN_AUTH_BLOCKED indicates a
     /// temporary block requiring a power cycle, whereas PIN_BLOCKED indicates exhausted retries
     /// requiring reset. Do not blindly retry an incorrect PIN.
     /// </remarks>
@@ -124,7 +129,7 @@ public sealed class ClientPin : IDisposable
         var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
-        var (retriesRemaining, powerCycleRequired) = ParsePinRetriesResponse(response);
+        var (retriesRemaining, powerCycleRequired) = ParseRetriesResponse(response, ClientPinResponse.PinRetries);
         return new PinRetryStatus(retriesRemaining, powerCycleRequired);
     }
 
@@ -134,8 +139,8 @@ public sealed class ClientPin : IDisposable
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The authenticator's current user-verification retry status.</returns>
     /// <remarks>
-    /// Missing counts currently default to zero. CTAP 2.1 defines no power-cycle field for this
-    /// response; the result's false default is not recovery evidence. Exhausted built-in UV retries
+    /// The count must be present. CTAP defines no power-cycle field for this response.
+    /// Exhausted built-in UV retries
     /// can be re-enabled by reset or a successful configured ClientPIN token request. This method
     /// does not attempt recovery or decide whether the caller should fall back to PIN.
     /// </remarks>
@@ -152,61 +157,55 @@ public sealed class ClientPin : IDisposable
         var response = await _session.SendCborRequestAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
-        var (retriesRemaining, powerCycleRequired) = ParseUvRetriesResponse(response);
-        return new UserVerificationRetryStatus(retriesRemaining, powerCycleRequired);
+        var (retriesRemaining, _) = ParseRetriesResponse(response, ClientPinResponse.UvRetries);
+        return new UserVerificationRetryStatus(retriesRemaining);
     }
 
     /// <summary>
     /// Sets a new PIN on the authenticator (first-time setup).
     /// </summary>
     /// <param name="newPin">
-    ///     The borrowed, unpadded NFC UTF-8 new PIN, 4–63 bytes. Meet the current device minimum
-    ///     in code points and additional policy; the SDK checks byte length only. Keep the buffer
+    ///     The borrowed, unpadded UTF-8 new PIN, normalized to NFC by the SDK. Meet the current device
+    ///     minimum in code points and additional policy. Keep the buffer
     ///     unchanged through task completion and clear it after its last use, including on failure.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <exception cref="ArgumentException">If the PIN byte length is invalid.</exception>
+    /// <exception cref="ArgumentException">The PIN is malformed UTF-8 or violates the normalized PIN constraints.</exception>
+    /// <exception cref="NotSupportedException">The runtime cannot normalize a non-ASCII new PIN.</exception>
     /// <exception cref="CtapException">If the authenticator rejects setup, for example because a PIN is already set or device PIN policy is not met.</exception>
     /// <remarks>The PIN must not end in 0x00. This method right-zero-pads it to exactly 64 bytes before encryption; AES adds no padding.</remarks>
     public async Task SetPinAsync(ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(newPin, nameof(newPin));
-
-        // Get authenticator's key agreement key
-        var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        // Perform ECDH key agreement
-        var (platformKey, sharedSecret) = _protocol.Encapsulate(authenticatorKey);
-
-        byte[]? pinBytes = null;
+        byte[] pinBytes = NormalizeAndPadNewPin(newPin.Span, nameof(newPin));
+        byte[]? sharedSecret = null;
         byte[]? newPinEnc = null;
         byte[]? pinUvAuthParam = null;
         try
         {
-            // Right-zero-pad the unpadded PIN to 64 bytes; AES itself uses no padding.
-            pinBytes = PadPin(newPin.Span);
+            var authenticatorKey = await GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
+            var (platformKey, secret) = _protocol.Encapsulate(authenticatorKey);
+            sharedSecret = secret;
             newPinEnc = _protocol.Encrypt(sharedSecret, pinBytes);
 
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc)
             pinUvAuthParam = _protocol.Authenticate(sharedSecret, newPinEnc);
 
-            var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin);
+            builder
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.SetPin)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
                 .WithBytes(ClientPinParam.NewPinEnc, newPinEnc)
-                .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
-                .Build();
+                .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam);
 
-            await _session.SendCborRequestAsync(request, cancellationToken)
+            await SendClearableRequestAsync(builder.Build(), cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(sharedSecret);
-            if (pinBytes is not null) CryptographicOperations.ZeroMemory(pinBytes);
+            if (sharedSecret is not null) CryptographicOperations.ZeroMemory(sharedSecret);
+            CryptographicOperations.ZeroMemory(pinBytes);
             if (newPinEnc is not null) CryptographicOperations.ZeroMemory(newPinEnc);
             if (pinUvAuthParam is not null) CryptographicOperations.ZeroMemory(pinUvAuthParam);
         }
@@ -216,16 +215,17 @@ public sealed class ClientPin : IDisposable
     /// Changes the existing PIN on the authenticator.
     /// </summary>
     /// <param name="currentPin">
-    ///     The borrowed, unpadded NFC UTF-8 current PIN, 4–63 bytes, with no final 0x00.
+    ///     The borrowed, unpadded UTF-8 bytes of the current PIN, hashed unchanged.
     ///     Keep it unchanged through task completion and clear it after its last use, including on failure.
     /// </param>
     /// <param name="newPin">
-    ///     The borrowed, unpadded NFC UTF-8 new PIN, 4–63 bytes, with no final 0x00. Meet the
-    ///     current device minimum in code points and additional policy; the SDK checks byte length
-    ///     only. Keep it unchanged through task completion and clear it after its last use.
+    ///     The borrowed, unpadded UTF-8 new PIN, normalized to NFC by the SDK. Meet the current
+    ///     device minimum in code points and additional policy. Keep it unchanged through task
+    ///     completion and clear it after its last use.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <exception cref="ArgumentException">If either PIN byte length is invalid.</exception>
+    /// <exception cref="ArgumentException">Either PIN is malformed UTF-8 or the normalized new PIN violates its constraints.</exception>
+    /// <exception cref="NotSupportedException">The runtime cannot normalize a non-ASCII new PIN.</exception>
     /// <exception cref="CtapException">If the authenticator rejects the change, including an incorrect/blocked current PIN or a new PIN that violates policy.</exception>
     /// <remarks>
     /// A successful change invalidates existing authenticator tokens. This helper does not retain
@@ -238,30 +238,23 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(currentPin, nameof(currentPin));
-        ValidatePin(newPin, nameof(newPin));
-
-        // Get authenticator's key agreement key
-        var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        // Perform ECDH key agreement
-        var (platformKey, sharedSecret) = _protocol.Encapsulate(authenticatorKey);
-
+        ValidateExistingPin(currentPin.Span, nameof(currentPin));
+        byte[] newPinBytes = NormalizeAndPadNewPin(newPin.Span, nameof(newPin));
+        byte[]? sharedSecret = null;
         byte[]? pinHashEnc = null;
-        byte[]? newPinBytes = null;
         byte[]? newPinEnc = null;
         byte[]? message = null;
         byte[]? currentPinHash = null;
         byte[]? pinUvAuthParam = null;
         try
         {
+            var authenticatorKey = await GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
+            var (platformKey, secret) = _protocol.Encapsulate(authenticatorKey);
+            sharedSecret = secret;
             // Compute PIN hash for current PIN: LEFT(SHA-256(currentPin), 16)
             currentPinHash = ComputePinHash(currentPin.Span);
             pinHashEnc = _protocol.Encrypt(sharedSecret, currentPinHash);
 
-            // Right-zero-pad the new PIN to 64 bytes before no-padding AES encryption.
-            newPinBytes = PadPin(newPin.Span);
             newPinEnc = _protocol.Encrypt(sharedSecret, newPinBytes);
 
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc || pinHashEnc)
@@ -271,26 +264,26 @@ public sealed class ClientPin : IDisposable
 
             pinUvAuthParam = _protocol.Authenticate(sharedSecret, message);
 
-            var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin);
+            builder
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.ChangePin)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
                 .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc)
                 .WithBytes(ClientPinParam.NewPinEnc, newPinEnc)
-                .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
-                .Build();
+                .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam);
 
-            await _session.SendCborRequestAsync(request, cancellationToken)
+            await SendClearableRequestAsync(builder.Build(), cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(sharedSecret);
+            if (sharedSecret is not null) CryptographicOperations.ZeroMemory(sharedSecret);
             if (currentPinHash is not null) CryptographicOperations.ZeroMemory(currentPinHash);
             if (pinHashEnc is not null) CryptographicOperations.ZeroMemory(pinHashEnc);
             if (newPinEnc is not null) CryptographicOperations.ZeroMemory(newPinEnc);
             if (message is not null) CryptographicOperations.ZeroMemory(message);
-            if (newPinBytes is not null) CryptographicOperations.ZeroMemory(newPinBytes);
+            CryptographicOperations.ZeroMemory(newPinBytes);
             if (pinUvAuthParam is not null) CryptographicOperations.ZeroMemory(pinUvAuthParam);
         }
     }
@@ -299,12 +292,13 @@ public sealed class ClientPin : IDisposable
     /// Requests a token with the legacy getPinToken subcommand using the PIN.
     /// </summary>
     /// <param name="pin">
-    ///     The borrowed, unpadded NFC UTF-8 PIN, 4–63 bytes, with no final 0x00. The SDK checks
-    ///     byte length only. Keep it unchanged through task completion and clear it after its last use.
+    ///     The borrowed, unpadded UTF-8 bytes of the existing PIN. Keep them unchanged through task
+    ///     completion and clear them after their last use.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including if a subsequent operation fails. CTAP V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes. This helper does not validate the decrypted token length.</returns>
-    /// <exception cref="ArgumentException">If the PIN byte length is outside 4–63 bytes.</exception>
+    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including if a subsequent operation fails. V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes.</returns>
+    /// <exception cref="BadResponseException">The token is missing or has an invalid decrypted length for protocol 1 or 2.</exception>
+    /// <exception cref="ArgumentException">If the PIN is not valid UTF-8.</exception>
     /// <exception cref="CtapException">If the PIN is incorrect.</exception>
     /// <remarks>
     /// Use <see cref="IPinUvAuthProtocol.Authenticate"/> to compute pinUvAuthParam, not to
@@ -319,7 +313,7 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(pin, nameof(pin));
+        ValidateExistingPin(pin.Span, nameof(pin));
 
         // Get authenticator's key agreement key
         var authenticatorKey = await GetKeyAgreementAsync(cancellationToken)
@@ -336,18 +330,14 @@ public sealed class ClientPin : IDisposable
             pinHash = ComputePinHash(pin.Span);
             pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
 
-            var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin);
+            builder
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetPinToken)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
-                .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc)
-                .Build();
+                .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc);
 
-            var response = await _session.SendCborRequestAsync(request, cancellationToken)
-                .ConfigureAwait(false);
-
-            var encryptedToken = ParsePinTokenResponse(response);
-            return _protocol.Decrypt(sharedSecret, encryptedToken);
+            return await SendTokenRequestAsync(builder.Build(), sharedSecret, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -361,14 +351,15 @@ public sealed class ClientPin : IDisposable
     /// Requests a PIN/UV auth token using PIN, with explicit permissions when supported.
     /// </summary>
     /// <param name="pin">
-    ///     The borrowed, unpadded NFC UTF-8 PIN, 4–63 bytes, with no final 0x00. The SDK checks
-    ///     byte length only. Keep it unchanged through task completion and clear it after its last use.
+    ///     The borrowed, unpadded UTF-8 bytes of the existing PIN. Keep them unchanged through task
+    ///     completion and clear them after their last use.
     /// </param>
     /// <param name="permissions">The nonzero permissions to request. The caller must choose a valid combination supported by the authenticator; only None is locally rejected.</param>
     /// <param name="rpId">Required for MakeCredential/GetAssertion permissions; optional to restrict CredentialManagement to one RP; ignored for BioEnrollment, LargeBlobWrite, AuthenticatorConfig and CredentialManagementRO. Null or empty omits the field.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. CTAP V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes; decrypted length is not checked here. The array carries no permission, RP, expiry or persistence metadata.</returns>
-    /// <exception cref="ArgumentException">If the PIN byte length is outside 4–63 bytes or permissions is None.</exception>
+    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes. The array carries no permission, RP, expiry or persistence metadata.</returns>
+    /// <exception cref="BadResponseException">The token is missing or has an invalid decrypted length for protocol 1 or 2.</exception>
+    /// <exception cref="ArgumentException">If the PIN is not valid UTF-8 or permissions is None.</exception>
     /// <exception cref="CtapException">If the PIN is incorrect or permissions are invalid.</exception>
     /// <remarks>
     /// <para>
@@ -398,7 +389,7 @@ public sealed class ClientPin : IDisposable
         CancellationToken cancellationToken = default)
     {
         EnsureNotDisposed();
-        ValidatePin(pin, nameof(pin));
+        ValidateExistingPin(pin.Span, nameof(pin));
 
         if (permissions == PinUvAuthTokenPermissions.None)
         {
@@ -430,7 +421,8 @@ public sealed class ClientPin : IDisposable
             pinHash = ComputePinHash(pin.Span);
             pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
 
-            var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin);
+            builder
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetPinUvAuthTokenUsingPinWithPermissions)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
@@ -442,12 +434,7 @@ public sealed class ClientPin : IDisposable
                 builder.WithString(ClientPinParam.RpId, rpId);
             }
 
-            var request = builder.Build();
-            var response = await _session.SendCborRequestAsync(request, cancellationToken)
-                .ConfigureAwait(false);
-
-            var encryptedToken = ParsePinTokenResponse(response);
-            return _protocol.Decrypt(sharedSecret, encryptedToken);
+            return await SendTokenRequestAsync(builder.Build(), sharedSecret, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -463,7 +450,8 @@ public sealed class ClientPin : IDisposable
     /// <param name="permissions">The nonzero permissions to request. Choose a valid, supported combination; CredentialManagementRO must be requested alone.</param>
     /// <param name="rpId">Required for MakeCredential/GetAssertion; optional to scope CredentialManagement; ignored for BioEnrollment, LargeBlobWrite, AuthenticatorConfig and CredentialManagementRO. Null or empty omits the field.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. CTAP V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes; decrypted length is not checked here. No scope or persistence metadata accompanies the array.</returns>
+    /// <returns>A new caller-owned decrypted token. Clear it after its last use, including on subsequent failure. V1 tokens are 16 or 32 bytes; V2 tokens are 32 bytes. No scope or persistence metadata accompanies the array.</returns>
+    /// <exception cref="BadResponseException">The token is missing or has an invalid decrypted length for protocol 1 or 2.</exception>
     /// <exception cref="ArgumentException">If permissions is None.</exception>
     /// <exception cref="CtapException">If UV fails or permissions are invalid.</exception>
     /// <remarks>
@@ -508,7 +496,7 @@ public sealed class ClientPin : IDisposable
 
         try
         {
-            var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetPinUvAuthTokenUsingUvWithPermissions)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
@@ -519,16 +507,44 @@ public sealed class ClientPin : IDisposable
                 builder.WithString(ClientPinParam.RpId, rpId);
             }
 
-            var request = builder.Build();
-            var response = await _session.SendCborRequestAsync(request, cancellationToken)
-                .ConfigureAwait(false);
-
-            var encryptedToken = ParsePinTokenResponse(response);
-            return _protocol.Decrypt(sharedSecret, encryptedToken);
+            return await SendTokenRequestAsync(builder.Build(), sharedSecret, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(sharedSecret);
+        }
+    }
+
+    private async Task<byte[]> SendTokenRequestAsync(byte[] request, byte[] sharedSecret,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (_session is Ctap2Session ownedSession)
+            {
+                return await ownedSession.DecodePinTokenResponseAsync(request,
+                    response => DecodePinToken(response, sharedSecret), cancellationToken).ConfigureAwait(false);
+            }
+
+            // A custom session may be lending arbitrary memory; decode without mutating its response.
+            var borrowedResponse = await _session.SendCborRequestAsync(request, cancellationToken).ConfigureAwait(false);
+            return DecodePinToken(borrowedResponse, sharedSecret);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(request);
+        }
+    }
+
+    private async Task<ReadOnlyMemory<byte>> SendClearableRequestAsync(byte[] request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _session.SendCborRequestAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(request);
         }
     }
 
@@ -553,42 +569,81 @@ public sealed class ClientPin : IDisposable
         return ParseKeyAgreementResponse(response);
     }
 
-    /// <summary>
-    ///     Checks only the PIN argument's byte length, not its Unicode encoding or device policy.
-    /// </summary>
-    /// <param name="pin">The supplied, unpadded PIN bytes.</param>
-    /// <param name="paramName">
-    ///     The name of the public parameter <paramref name="pin" /> was supplied through. The
-    ///     public surface spells this parameter three different ways — <c>pin</c>,
-    ///     <c>currentPin</c> and <c>newPin</c> — so the caller has to name its own, otherwise
-    ///     <see cref="ArgumentException.ParamName" /> would report this helper's local name,
-    ///     which matches nothing a caller can filter on.
-    /// </param>
-    /// <exception cref="ArgumentException">
-    ///     Thrown when the supplied data is shorter than <see cref="PinMinLength" /> bytes or
-    ///     longer than <see cref="PinMaxLength" /> bytes.
-    /// </exception>
-    private static void ValidatePin(ReadOnlyMemory<byte> pin, string paramName)
+    private static void ValidateExistingPin(ReadOnlySpan<byte> pin, string paramName)
     {
-        if (pin.Length < PinMinLength)
-        {
-            throw new ArgumentException(
-                $"PIN must be at least {PinMinLength} bytes.", paramName);
-        }
+        if (!Utf8.IsValid(pin))
+            throw new ArgumentException("PIN must be valid UTF-8.", paramName);
+    }
 
-        if (pin.Length > PinMaxLength)
+    private static bool CheckNfcSupport()
+    {
+        // Invariant mode accepts the operation but leaves decomposed text unchanged.
+        Span<char> probe = stackalloc char[2];
+        try
         {
-            throw new ArgumentException(
-                $"PIN must not exceed {PinMaxLength} bytes.", paramName);
+            return "e\u0301".AsSpan().TryNormalize(probe, out int written) && written == 1 && probe[0] == '\u00E9';
+        }
+        catch (PlatformNotSupportedException)
+        {
+            return false;
         }
     }
 
-    private static byte[] PadPin(ReadOnlySpan<byte> pin)
+    private static byte[] NormalizeAndPadNewPin(ReadOnlySpan<byte> pin, string paramName)
     {
-        // Zero-initialized tail supplies CTAP's right padding, not PKCS#7.
-        var padded = new byte[PinBlockSize];
-        pin.CopyTo(padded);
-        return padded;
+        ValidateExistingPin(pin, paramName);
+        if (Ascii.IsValid(pin))
+        {
+            ValidateNewPin(pin.Length, pin.Length, !pin.IsEmpty && pin[^1] == 0, paramName);
+            byte[] padded = new byte[PinBlockSize];
+            pin.CopyTo(padded);
+            return padded;
+        }
+
+        if (!SupportsNfc)
+            throw new NotSupportedException("Non-ASCII CTAP PINs require .NET globalization support for NFC normalization.");
+
+        return NormalizeNonAsciiPin(pin, paramName);
+    }
+
+    private static byte[] NormalizeNonAsciiPin(ReadOnlySpan<byte> pin, string paramName)
+    {
+        int charCount = Encoding.UTF8.GetCharCount(pin);
+        char[]? rented = null;
+        Span<char> decoded = charCount <= 192 ? stackalloc char[charCount] : (rented = ArrayPool<char>.Shared.Rent(charCount)).AsSpan(0, charCount);
+        // For well-formed text UTF-8 length is always at least the UTF-16 length.
+        Span<char> normalized = stackalloc char[PinMaxLength];
+        Span<byte> padded = stackalloc byte[PinBlockSize];
+        padded.Clear();
+        try
+        {
+            Encoding.UTF8.GetChars(pin, decoded);
+            if (!((ReadOnlySpan<char>)decoded).TryNormalize(normalized, out int written))
+                throw new ArgumentException("The normalized PIN must not exceed 63 UTF-8 bytes.", paramName);
+
+            var text = normalized[..written];
+            int runeCount = 0;
+            foreach (var _ in text.EnumerateRunes())
+                runeCount++;
+
+            ValidateNewPin(runeCount, Encoding.UTF8.GetByteCount(text), !text.IsEmpty && text[^1] == '\0', paramName);
+            Encoding.UTF8.GetBytes(text, padded);
+            return padded.ToArray();
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(decoded));
+            if (rented is not null)
+                ArrayPool<char>.Shared.Return(rented);
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(normalized));
+            CryptographicOperations.ZeroMemory(padded);
+        }
+    }
+
+    private static void ValidateNewPin(int codePoints, int bytes, bool endsInNull, string paramName)
+    {
+        if (codePoints < PinMinLength || bytes > PinMaxLength || endsInNull)
+            throw new ArgumentException("The normalized PIN must have at least four Unicode code points, at most 63 UTF-8 bytes, and no trailing NUL.", paramName);
     }
 
     private static byte[] ComputePinHash(ReadOnlySpan<byte> pin)
@@ -605,66 +660,43 @@ public sealed class ClientPin : IDisposable
         }
     }
 
-    private static (int Retries, bool PowerCycleRequired) ParsePinRetriesResponse(ReadOnlyMemory<byte> data)
+    private static (int Retries, bool? PowerCycleRequired) ParseRetriesResponse(ReadOnlyMemory<byte> data, int retryKey)
     {
-        // Omitted powerCycleState means unknown in CTAP; this model collapses it to false.
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
         var mapLength = reader.ReadStartMap();
-
-        int retries = 0;
-        var powerCycleRequired = false;
+        int? retries = null;
+        bool? powerCycleRequired = null;
 
         for (var i = 0; i < mapLength; i++)
         {
             var key = reader.ReadInt32();
 
-            switch (key)
+            if (key == retryKey)
             {
-                case ClientPinResponse.PinRetries:
-                    retries = reader.ReadInt32();
-                    break;
-                case ClientPinResponse.PowerCycleState:
-                    powerCycleRequired = reader.ReadBoolean();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
+                if (reader.PeekState() != CborReaderState.UnsignedInteger)
+                    throw new BadResponseException("The ClientPIN retry count is not a nonnegative Int32.");
+
+                ulong count = reader.ReadUInt64();
+                if (count > int.MaxValue)
+                    throw new BadResponseException("The ClientPIN retry count exceeds Int32.MaxValue.");
+
+                retries = (int)count;
+            }
+            else if (retryKey == ClientPinResponse.PinRetries && key == ClientPinResponse.PowerCycleState)
+            {
+                powerCycleRequired = reader.ReadBoolean();
+            }
+            else
+            {
+                reader.SkipValue();
             }
         }
 
         reader.ReadEndMap();
-        return (retries, powerCycleRequired);
-    }
+        if (reader.BytesRemaining != 0 || retries is null)
+            throw new BadResponseException("The ClientPIN retry response must contain the retry count in one complete map.");
 
-    private static (int Retries, bool PowerCycleRequired) ParseUvRetriesResponse(ReadOnlyMemory<byte> data)
-    {
-        // CTAP 2.1 defines no UV powerCycleState; current parsing still accepts field 4.
-        var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
-        var mapLength = reader.ReadStartMap();
-
-        int retries = 0;
-        var powerCycleRequired = false;
-
-        for (var i = 0; i < mapLength; i++)
-        {
-            var key = reader.ReadInt32();
-
-            switch (key)
-            {
-                case ClientPinResponse.UvRetries:
-                    retries = reader.ReadInt32();
-                    break;
-                case ClientPinResponse.PowerCycleState:
-                    powerCycleRequired = reader.ReadBoolean();
-                    break;
-                default:
-                    reader.SkipValue();
-                    break;
-            }
-        }
-
-        reader.ReadEndMap();
-        return (retries, powerCycleRequired);
+        return (retries.Value, powerCycleRequired);
     }
 
     private static Dictionary<int, object?> ParseKeyAgreementResponse(ReadOnlyMemory<byte> data)
@@ -694,13 +726,39 @@ public sealed class ClientPin : IDisposable
             "Response missing required keyAgreement field.");
     }
 
+    private byte[] DecodePinToken(ReadOnlyMemory<byte> data, ReadOnlySpan<byte> sharedSecret)
+    {
+        byte[] encryptedToken = ParsePinTokenResponse(data);
+        byte[]? token = null;
+        try
+        {
+            token = _protocol.Decrypt(sharedSecret, encryptedToken);
+            bool validLength = _protocol.Version switch
+            {
+                1 => token.Length is 16 or 32,
+                2 => token.Length == 32,
+                _ => true // This SDK does not define the token shape for other protocol versions.
+            };
+            if (!validLength)
+                throw new BadResponseException("The decrypted PIN/UV token has an invalid length for its protocol.");
+
+            byte[] result = token;
+            token = null;
+            return result;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(encryptedToken);
+            if (token is not null)
+                CryptographicOperations.ZeroMemory(token);
+        }
+    }
+
     private static byte[] ParsePinTokenResponse(ReadOnlyMemory<byte> data)
     {
-        // This encrypted-token copy is not cleared here; the caller receives separate plaintext.
         var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
         var mapLength = reader.ReadStartMap();
-
-        byte[]? pinToken = null;
+        ReadOnlyMemory<byte> encodedToken = default;
 
         for (var i = 0; i < mapLength; i++)
         {
@@ -708,7 +766,7 @@ public sealed class ClientPin : IDisposable
 
             if (key == ClientPinResponse.PinUvAuthToken)
             {
-                pinToken = reader.ReadByteString();
+                encodedToken = reader.ReadEncodedValue();
             }
             else
             {
@@ -718,8 +776,10 @@ public sealed class ClientPin : IDisposable
 
         reader.ReadEndMap();
 
-        return pinToken ?? throw new InvalidOperationException(
-            "Response missing required pinUvAuthToken field.");
+        if (reader.BytesRemaining != 0 || encodedToken.IsEmpty)
+            throw new BadResponseException("The ClientPIN token response must contain pinUvAuthToken in one complete map.");
+
+        return new CborReader(encodedToken, CborConformanceMode.Ctap2Canonical).ReadByteString();
     }
 
     private static Dictionary<int, object?> ParseCoseKey(CborReader reader)

@@ -50,8 +50,8 @@ public sealed class PinUvAuthProtocolV2Tests
 
         var peerCoseKey = new Dictionary<int, object?>
         {
-            // The fixture omits required alg=-25; success reflects the current missing label check.
             { 1, 2 },      // kty: EC2
+            { 3, -25 },    // alg: ECDH-ES + HKDF-256
             { -1, 1 },     // crv: P-256
             { -2, peerParams.Q.X },
             { -3, peerParams.Q.Y }
@@ -394,7 +394,8 @@ public sealed class PinUvAuthProtocolV2Tests
             { 1, 2 },
             { -1, 1 },
             { -2, peerParams.Q.X },
-            { -3, peerParams.Q.Y }
+            { -3, peerParams.Q.Y },
+            { 3, -25 }
         };
 
         var (keyAgreement1, _) = protocol.Encapsulate(peerCoseKey);

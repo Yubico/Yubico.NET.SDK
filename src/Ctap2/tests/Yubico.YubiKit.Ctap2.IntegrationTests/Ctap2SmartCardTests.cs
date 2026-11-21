@@ -57,7 +57,7 @@ public class Ctap2SmartCardTests
                 Assert.NotNull(info);
                 Assert.True(info.Versions.Count > 0, "AuthenticatorInfo.Versions should not be empty");
                 Assert.Equal(16, info.Aaguid.Length);
-            }, preferredConnection: ConnectionType.SmartCard);
+            }, normalizePin: false, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {
@@ -93,7 +93,7 @@ public class Ctap2SmartCardTests
                     info.Versions.Contains("FIDO_2_1") ||
                     info.Versions.Contains("FIDO_2_3"),
                     $"Expected at least one CTAP2 version, got: [{string.Join(", ", info.Versions)}]");
-            }, preferredConnection: ConnectionType.SmartCard);
+            }, normalizePin: false, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {
@@ -128,7 +128,7 @@ public class Ctap2SmartCardTests
                 var hasEs256 = info.Algorithms.Any(a =>
                     a.Type == "public-key" && a.Algorithm == CoseAlgorithmIdentifier.Es256);
                 Assert.True(hasEs256, "YubiKey should support ES256 algorithm");
-            }, preferredConnection: ConnectionType.SmartCard);
+            }, normalizePin: false, preferredConnection: ConnectionType.SmartCard);
         }
         catch (NotSupportedException)
         {

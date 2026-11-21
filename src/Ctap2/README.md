@@ -177,12 +177,14 @@ an already configured, known evaluation PIN. It does not set a PIN. If `pinUvAut
 and RP scope. This is not protocol-1 negotiation or a guarantee of administrative authorization.
 
 `GetPinRetriesAsync` and `GetUvRetriesAsync` return `PinRetryStatus` and
-`UserVerificationRetryStatus`. Their missing counts/defaulted booleans do not prove known retry state;
-`PowerCycleRequired=false` is not assurance that a power cycle is unnecessary, and CTAP 2.1 defines no such
-UV power-cycle field. Stop on blocked states rather than blindly retrying: temporary `PinAuthBlocked`
+`UserVerificationRetryStatus`. Both require a retry count. PIN `PowerCycleRequired` is nullable:
+use `is true` to act on an affirmative indication; `null` means the authenticator did not report it.
+CTAP defines no such UV power-cycle field. Stop on blocked states rather than blindly retrying: temporary `PinAuthBlocked`
 differs from exhausted `PinBlocked`. `ClientPin` also exposes PIN set/change operations. PIN bytes must
-represent NFC-normalized UTF-8, satisfy the current code-point minimum and byte limit, and not end in NUL;
-the SDK's 4–63-byte check alone does not establish these requirements.
+be unpadded UTF-8. The SDK normalizes new PINs to NFC, then checks at least four Unicode code points,
+at most 63 UTF-8 bytes, and no trailing NUL. For non-ASCII new PINs, enable .NET globalization support
+for NFC; invariant mode cannot normalize them. The authenticator can apply stricter policy. Existing PIN
+bytes are validated as UTF-8 and hashed unchanged.
 
 ```csharp
 byte[] pin = Encoding.UTF8.GetBytes("123456");
@@ -243,8 +245,8 @@ is a toggle, not an idempotent desired-state setter. Re-read GetInfo to reconcil
 outcome before another toggle. Setting minimum PIN policy is separate from the `minPinLength` extension,
 which only discloses the current code-point minimum to authorized RPs during creation.
 
-`FingerprintBioEnrollment` currently has known standard-command wire, response-schema and sample-status
-limitations; do not treat its presence or a firmware threshold as a working standardized enrollment flow.
+`FingerprintBioEnrollment` uses the CTAP 2.1 standard request format by default. This is not a device
+interoperability qualification. The opt-in prototype command retains its prior wire profile.
 Keep the begin template ID independently for continuation. A decoded remaining count of zero is not
 verified enrollment completion; cancellation of a .NET token is not `EnrollCancelAsync`.
 
@@ -307,10 +309,14 @@ applicability supplies none of those missing checks and must not restrict unknow
 Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, GetInfo follows channel
 preparation directly; there is no applet-selection step.
 
-The USB SmartCard gate uses detected GetInfo firmware before `FirmwareVersionOverride` configures the
-session and protocol. Missing firmware becomes `0.0.0`; major-zero versions pass the SDK's permissive
-feature policy, not a verified modern-firmware check. HID INIT vendor bytes, GetInfo firmware and
-Management firmware are separate observations. Later GetInfo reads do not reconfigure the session.
+The USB SmartCard gate uses cached device firmware and its qualifier when available, otherwise GetInfo
+firmware. A present non-final qualifier or a major-zero version (including missing firmware) passes the
+SDK's permissive feature policy, not a verified modern-firmware check. GetInfo must still succeed.
+`FirmwareVersionOverride` changes session/protocol configuration, not the gate. Without it, numeric
+GetInfo firmware takes precedence over a major-zero cache for APDU configuration. SCP uses the explicit
+override if supplied; otherwise unverified firmware (non-final qualifier or major zero) permits an SCP
+attempt without changing APDU framing. HID INIT vendor bytes,
+GetInfo firmware and Management firmware are separate observations. Later GetInfo reads do not reconfigure the session.
 Initial SmartCard SELECT/GetInfo precede options-based configuration. For major-zero firmware,
 Core chooses APDU format from connection support before its ordinary `ForceShortApdus` handling.
 
@@ -346,11 +352,30 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
 - Caller PIN buffers are borrowed; returned ClientPin tokens are caller-owned (administrative helpers
   borrow them). Clear each with `CryptographicOperations.ZeroMemory` after the final await, in a `finally`.
 - `ClientPin` disposes the supplied protocol, not the session. Its named PIN/hash/shared-secret buffers
-  have scoped cleanup, but requests, builder-retained copies and successful responses do not have an
-  end-to-end zeroing guarantee. Protocol disposal does not clear caller-owned returned tokens or outputs.
+  have scoped cleanup. The single-use request builder clears its input copies, and ClientPin clears
+  its PIN-bearing request arrays after sending. This is not an end-to-end zeroing guarantee. Protocol
+  disposal does not clear caller-owned returned tokens or outputs.
 - Never log PINs, PIN tokens, or secret-derived extension outputs such as hmac-secret and PRF results.
-- Credential/extension response copies, including plaintext large-blob keys, have no general disposable
-  secret-owner contract. Clearing a caller copy or disposing the session does not clear those copies.
+- `MakeCredentialResponse` and `GetAssertionResponse` are not disposable. Their `LargeBlobKey`, signed
+  `AuthenticatorDataRaw` and (for registration) encoded `UnsignedExtensionOutputs` are caller-owned
+  `Memory<byte>` buffers. Use them unchanged for verification, then zero their spans when finished.
+  `ExtensionOutputs` aliases `AuthenticatorDataRaw`, so clearing the latter also clears signed outputs.
+  Disposing a session does not clear returned buffers or copies made by downstream decoders.
+- Registration responses require attested credential data. When the ED flag is set, the signed
+  suffix must contain exactly one CBOR map. Assertion credential counts use the unsigned wire
+  width (`uint?`); decoding still does not verify a ceremony or reserve an assertion sequence.
+- The legacy `TryGetLargeBlobSupport` reads a registration support boolean, not a write result.
+  The synthetic large-blob DTO and key accessor are removed; use `LargeBlobKey` on the credential
+  response for the implemented storage route.
+- Typed `MakeCredentialAsync` rejects empty `credBlob` inputs and values beyond the device's
+  GetInfo-advertised capacity before sending; raw requests remain the caller's responsibility.
+- `GetAssertionResponse.User` is native account-picker data, not a browser-filtered result. The application
+  decides what to disclose to the relying party. Use the opaque user ID for account binding and do not
+  forward display names or other identifying device metadata indiscriminately.
+- Fingerprint feedback `0x0B`, `0x0D` and `0x0E` are `Exists`, `NoUserActivity` and `NoUpTransition`.
+  `DatabaseFull` (`0x0C`) follows python-fido2; CTAP 2.1 leaves that value unused. The former
+  `FingerprintSensorInfo.MaxTemplateCount` was an unqualified interpretation of key 4; that key
+  remains available through `RawData` but is not advertised as a capacity.
 - hmac-secret derives from credential-scoped random secrets, with distinct verified/unverified modes.
   WebAuthn PRF adds client-side input hashing and requires the verified variant; the current WebAuthn
   adapter's UV-override and result-cleanup limitations remain disclosed in its guide.

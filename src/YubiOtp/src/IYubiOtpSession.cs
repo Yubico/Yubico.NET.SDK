@@ -129,7 +129,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the configuration.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task UpdateConfigurationAsync(
@@ -155,7 +155,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the swap.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SwapSlotsAsync(CancellationToken cancellationToken = default);
@@ -176,7 +176,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the deletion.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task DeleteSlotAsync(
@@ -205,7 +205,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the scan map.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SetScanMapAsync(
@@ -248,7 +248,7 @@ public interface IYubiOtpSession : IApplicationSession
     /// advance as expected after the write, indicating the YubiKey rejected the configuration.
     /// </exception>
     /// <exception cref="BadResponseException">
-    /// Thrown for detected malformed status; the current SmartCard fallback does not reject every short status.
+    /// Thrown when the final write status is shorter than six bytes.
     /// </exception>
     /// <exception cref="ObjectDisposedException">Thrown when the session has been disposed.</exception>
     Task SetNdefConfigurationAsync(

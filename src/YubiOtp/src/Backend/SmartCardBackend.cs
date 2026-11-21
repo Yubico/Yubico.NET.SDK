@@ -109,8 +109,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
         var statusBytes = response.Data;
 
-        // A short write response needs a separate status read. The validator below currently does not
-        // reject a fallback that is still short; successful return is not complete malformed-status validation.
+        // A short write response needs a separate status read; validate before returning it to the session.
         if (statusBytes.Length < YubiOtpConstants.StatusBytesLength)
         {
             statusBytes = await ReadStatusAsync(cancellationToken).ConfigureAwait(false);
@@ -203,15 +202,15 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
     }
 
     /// <summary>
-    /// Checks the sequence when status is long enough. Current exceptions are an effective firmware
+    /// Validates status length and sequence. Current sequence exceptions are an effective firmware
     /// interval of 5.0.0 inclusive to 5.5.0 exclusive, and any returned zero. These permissive checks
-    /// do not establish that every malformed status or rejected device write is detected.
+    /// do not establish that every rejected device write is detected.
     /// </summary>
     private void ValidateProgrammingSequence(ReadOnlySpan<byte> statusBytes)
     {
         if (statusBytes.Length < YubiOtpConstants.StatusBytesLength)
         {
-            return;
+            throw new BadResponseException("OTP write status is shorter than six bytes.");
         }
 
         var newProgSeq = statusBytes[3];

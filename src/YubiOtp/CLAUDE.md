@@ -159,8 +159,8 @@ and limited to overlapping known member IDs.
 - HOTP stores `imf / 16` as a big-endian `ushort`. Nonzero preset output still needs physical qualification.
 - Scan-map API enforces 38 bytes versus the vendor 45-entry map; do not recommend truncation/full-map programming.
 - Type/operation minimums do not validate every legacy flag, password length, preset counter, or hardware feature.
-- SmartCard write sequence checks bypass 5.0.0 <= effective version < 5.5.0, accept any returned zero, and
-  silently accept status shorter than six bytes after fallback. These are limitations, not intended validation.
+- SmartCard rejects write status shorter than six bytes after fallback. Sequence checks still bypass
+  5.0.0 <= effective version < 5.5.0 and accept any returned zero.
 - SmartCard data reads return the expected prefix, allowing excess data. HID data reads validate CRC over
   expected length plus two bytes and return the expected prefix; HID writes only check status length here.
 - OtpTool's static command uses UTF-8 bytes as raw scan codes and ignores layout. Its TOTP flag is not code

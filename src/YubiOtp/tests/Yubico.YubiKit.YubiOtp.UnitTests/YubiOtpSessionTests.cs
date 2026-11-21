@@ -181,6 +181,37 @@ public class YubiOtpSessionTests
     }
 
     [Fact]
+    public async Task PutConfigurationAsync_ShortStatusFallback_DoesNotPublishAndAllowsNextValidWrite()
+    {
+        var (connection, session) = await CreateFakeSessionAsync(touchLow: 0x05);
+        await using var lease = session;
+        using var configuration = new HmacSha1SlotConfiguration(new byte[20]);
+        var ct = TestContext.Current.CancellationToken;
+        List<byte> instructions = [];
+        Queue<byte[]> replies = new([
+            [0x90, 0x00],
+            [5, 7, 0, 0xFE, 0x00, 0x90, 0x00],
+            [5, 7, 0, 10, 0x02, 0, 0x90, 0x00]
+        ]);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                instructions.Add(call.ArgAt<ReadOnlyMemory<byte>>(0).Span[1]);
+                return Task.FromResult<ReadOnlyMemory<byte>>(replies.Dequeue());
+            });
+
+        await Assert.ThrowsAsync<BadResponseException>(() => session.PutConfigurationAsync(
+            Slot.Two, configuration, cancellationToken: ct));
+        Assert.True(session.GetConfigState().IsConfigured(Slot.One));
+        Assert.False(session.GetConfigState().IsConfigured(Slot.Two));
+
+        await session.PutConfigurationAsync(Slot.Two, configuration, cancellationToken: ct);
+        Assert.False(session.GetConfigState().IsConfigured(Slot.One));
+        Assert.True(session.GetConfigState().IsConfigured(Slot.Two));
+        Assert.Equal([(byte)0x01, (byte)0x03, (byte)0x01], instructions);
+    }
+
+    [Fact]
     public async Task CalculateHmacSha1Async_SmartCardTransportTimeout_PropagatesWithoutNotification()
     {
         var prompt = new RecordingUserPresencePrompt();

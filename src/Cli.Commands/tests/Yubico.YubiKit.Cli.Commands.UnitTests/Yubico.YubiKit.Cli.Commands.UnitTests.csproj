@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Yubico.YubiKit.Cli.Commands.csproj" />
+    <ProjectReference Include="../../../Ctap2/examples/FidoTool/FidoTool.csproj" />
   </ItemGroup>
 
 </Project>

@@ -14,7 +14,9 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
@@ -73,11 +75,23 @@ public static class ResetAuthenticator
         try
         {
             var options = new SessionCreationOptions { PreferredConnectionType = target.Transport };
-            if (target.SerialNumber is int serial &&
-                (await target.Device.GetDeviceInfoAsync(options, cancellationToken)).SerialNumber != serial)
-                return ResetResult.Failed("Reinserted device did not report the confirmed serial number. Reset not sent.");
+            await using IConnection connection = target.Transport switch
+            {
+                ConnectionType.SmartCard => await target.Device.ConnectAsync<ISmartCardConnection>(cancellationToken),
+                ConnectionType.HidFido => await target.Device.ConnectAsync<IFidoHidConnection>(cancellationToken),
+                _ => throw new NotSupportedException("FIDO reset requires SmartCard or FIDO HID.")
+            };
 
-            await using var session = await target.Device.CreateCtap2SessionAsync(options, cancellationToken);
+            // Both sessions borrow this handle. Dispose Management before CTAP selects its applet.
+            // Reopening the interface here could reset a different card than the one verified.
+            if (target.SerialNumber is int serial)
+            {
+                await using var management = await ManagementSession.CreateAsync(connection, options, cancellationToken);
+                if ((await management.GetDeviceInfoAsync(cancellationToken)).SerialNumber != serial)
+                    return ResetResult.Failed("Reinserted device did not report the confirmed serial number. Reset not sent.");
+            }
+
+            await using var session = await Ctap2Session.CreateAsync(connection, options, cancellationToken);
             if (target.SerialNumber is null && !target.MatchesFingerprint(await session.GetInfoAsync(cancellationToken)))
                 return ResetResult.Failed("Reinserted GetInfo fingerprint differs from the confirmed device. Reset not sent.");
 

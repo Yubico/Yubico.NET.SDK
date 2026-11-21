@@ -40,6 +40,8 @@ public sealed partial class WebAuthnClient
     /// <para>
     /// With a nonempty allow list, the client probes for a matching credential and narrows the final
     /// request to one descriptor; it does not return every allowed credential held by the authenticator.
+    /// If that probe misses and PRF applies to every eligible entry, a configured, caller-supplied PIN
+    /// can be used for one additional silent selection pass to find a verification-protected credential.
     /// Without an allow list, the authenticator can return multiple discoverable credentials for the RP,
     /// subject to its own selection behavior. No match produces an empty list rather than an exception.
     /// A reported assertion count above the SDK's 1024-per-ceremony limit raises a Constraint error
@@ -155,6 +157,16 @@ public sealed partial class WebAuthnClient
             {
                 selected ??= await ProbeCredentialsAsync(options.RpId, candidates, info, auth, decision, remintPermissions: null, ct)
                     .ConfigureAwait(false);
+                if (selected is null && CanReprobeForPrf(options, context, candidates, auth, callerPinBytes))
+                {
+                    // A UV-protected credential may be invisible to the first silent probe. Only
+                    // retry with the supplied PIN if every eligible candidate would evaluate PRF.
+                    preference = UserVerificationPreference.Required;
+                    decision = UvDecisionLogic.Decide(info, preference, auth.PinAvailable, permissions);
+                    await AcquireCeremonyTokenAsync(auth, decision, ct).ConfigureAwait(false);
+                    selected = await ProbeCredentialsAsync(options.RpId, candidates, info, auth, decision, remintPermissions: null, ct)
+                        .ConfigureAwait(false);
+                }
                 allowList = [selected ?? new PublicKeyCredentialDescriptor(DummyCredentialId, candidates[0].Type)];
             }
 
@@ -177,6 +189,28 @@ public sealed partial class WebAuthnClient
                 .ConfigureAwait(false);
             return (matches, extensions);
         }
+    }
+
+    private static bool CanReprobeForPrf(
+        PublicKeyCredentialRequestOptions options, ExtensionContext context,
+        IReadOnlyList<PublicKeyCredentialDescriptor> candidates, CeremonyAuth auth, ReadOnlyMemory<byte>? callerPinBytes)
+    {
+        if (auth.Token is not null || callerPinBytes is null || options.Extensions?.Prf is not { } prf
+            || !context.Info.Options.TryGetValue("clientPin", out bool configured) || !configured)
+            return false;
+
+        // Use the same ID eligibility rule as CredentialFilter. A mixed eligible list cannot prove
+        // the hidden credential has an applicable PRF input, so it retains ordinary ceremony policy.
+        bool eligible = false;
+        foreach (var candidate in candidates)
+        {
+            if (context.Info.MaxCredentialIdLength is { } max && candidate.Id.Length > max)
+                continue;
+            if (!PrfProcessor.RequiresVerifiedAssertionEvaluation(prf, context, candidate))
+                return false;
+            eligible = true;
+        }
+        return eligible;
     }
 
     private static async Task<IReadOnlyList<MatchedCredential>> BuildMatchedResponsesAsync(

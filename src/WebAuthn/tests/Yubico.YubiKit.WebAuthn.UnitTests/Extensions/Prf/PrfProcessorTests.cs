@@ -141,6 +141,77 @@ public class PrfProcessorTests
         await _backend.Received(applicable ? 1 : 0).EncapsulateAsync(Arg.Any<CancellationToken>());
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Assertion_ReprobesHiddenCredentialOnlyWhenAllCandidatesEvaluatePrf(bool fallback)
+    {
+        _ = Context("hmac-secret");
+        _backend.Protocol.Returns(_protocol);
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true, extensions: ["hmac-secret"]));
+        _backend.GetPinUvTokenAsync(PinUvAuthMethod.Pin, PinUvAuthTokenPermissions.GetAssertion, "example.com",
+                Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(_protocol, new byte[32]));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        int silent = 0, verifiedSilent = 0, final = 0;
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            var sent = Assert.Single(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(request.AllowList));
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+            {
+                Assert.Null(request.Extensions);
+                if (!request.PinUvAuthParam.HasValue)
+                {
+                    silent++;
+                    throw new Ctap2.CtapException(Ctap2.CtapStatus.NoCredentials);
+                }
+                verifiedSilent++;
+                Assert.Equal(a.Id.ToArray(), sent.Id.ToArray());
+                return MockCtap2Responses.CreateMockGetAssertionResponse(a.Id.ToArray());
+            }
+            final++;
+            if (!fallback)
+            {
+                Assert.Equal(new byte[] { 0 }, sent.Id.ToArray());
+                Assert.Null(request.Extensions);
+                Assert.Null(request.PinUvAuthParam);
+                throw new Ctap2.CtapException(Ctap2.CtapStatus.NoCredentials);
+            }
+            Assert.Equal(a.Id.ToArray(), sent.Id.ToArray());
+            Assert.NotNull(request.PinUvAuthParam);
+            Assert.NotEmpty(ReadHmacSecretInput(Assert.IsType<ReadOnlyMemory<byte>>(request.Extensions)));
+            return MockCtap2Responses.CreateMockGetAssertionResponse(a.Id.ToArray());
+        });
+
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            RpId = "example.com",
+            Challenge = new byte[32],
+            AllowCredentials = [a, b],
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new AuthenticationExtensionInputs(Prf: new PrfInput
+            {
+                First = fallback ? PrfEvalFirst.AsMemory() : (ReadOnlyMemory<byte>?)null,
+                EvalByCredential = new Dictionary<string, PrfInputValues> { ["AQ"] = new() { First = PrfEvalFirst } }
+            })
+        };
+        var ct = TestContext.Current.CancellationToken;
+        var matches = await client.GetAssertionAsync(options, "123456"u8.ToArray(), ct);
+        if (fallback)
+            Assert.Equal(a.Id.ToArray(), (await Assert.Single(matches).SelectAsync(ct)).CredentialId.ToArray());
+        else
+            Assert.Empty(matches);
+        Assert.Equal(2, silent);
+        Assert.Equal(fallback ? 1 : 0, verifiedSilent);
+        Assert.Equal(1, final);
+        await _backend.Received(fallback ? 1 : 0).EncapsulateAsync(Arg.Any<CancellationToken>());
+    }
+
     private static Dictionary<int, object?> ReadHmacSecretInput(ReadOnlyMemory<byte> extensionsCbor)
     {
         var reader = new CborReader(extensionsCbor, CborConformanceMode.Ctap2Canonical);

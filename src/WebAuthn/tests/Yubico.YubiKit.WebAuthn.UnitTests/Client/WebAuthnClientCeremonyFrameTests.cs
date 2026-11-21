@@ -88,14 +88,14 @@ public class WebAuthnClientCeremonyFrameTests
             clientPinSupported: true, extensions: ["previewSign", "hmac-secret", "hmac-secret-mc"]));
         _backend.EncapsulateAsync(Arg.Any<CancellationToken>()).Throws(failure);
         var allowed = new PublicKeyCredentialDescriptor(new byte[] { 1 });
-        var probeCount = 0;
+        var noPrf = new PublicKeyCredentialDescriptor(new byte[] { 2 });
         var commandCount = 0;
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
         {
             var request = call.Arg<BackendGetAssertionRequest>();
             if (request.Options?.GetValueOrDefault("up", true) == false)
             {
-                if (retry && ++probeCount == 1)
+                if (retry && request.PinUvAuthParam is null)
                     throw new CtapException(CtapStatus.NoCredentials);
                 return MockCtap2Responses.CreateMockGetAssertionResponse([1]);
             }
@@ -103,18 +103,25 @@ public class WebAuthnClientCeremonyFrameTests
             Assert.Null(request.Extensions); // The dummy request cannot carry the requested previewSign input.
             throw new CtapException(CtapStatus.PuatRequired);
         });
-        var prf = new PrfInput { First = "RP input"u8.ToArray() };
+        var prf = retry ? new PrfInput
+        {
+            EvalByCredential = new Dictionary<string, PrfInputValues> { ["AQ"] = new() { First = "RP input"u8.ToArray() } }
+        } : new PrfInput { First = "RP input"u8.ToArray() };
+        var signingInputs = new Dictionary<ReadOnlyMemory<byte>, WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams>
+        {
+            [allowed.Id] = new(new byte[] { 2 }, new byte[] { 3 })
+        };
+        if (retry)
+            signingInputs[noPrf.Id] = new(new byte[] { 4 }, new byte[] { 5 });
         await using var client = _client;
         Task PerformAsync() => registration
             ? client.MakeCredentialAsync(Registration() with
             {
                 Extensions = new RegistrationExtensionInputs(Prf: prf, PreviewSign: new([CoseAlgorithm.Es256]))
             }, Pin, ct)
-            : client.GetAssertionAsync(WithAllowList(allowed) with
+            : client.GetAssertionAsync(WithAllowList(retry ? [allowed, noPrf] : [allowed]) with
             {
-                Extensions = new AuthenticationExtensionInputs(Prf: prf, PreviewSign: new(
-                    new Dictionary<ReadOnlyMemory<byte>, WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams>
-                    { [allowed.Id] = new(new byte[] { 2 }, new byte[] { 3 }) }))
+                Extensions = new AuthenticationExtensionInputs(Prf: prf, PreviewSign: new(signingInputs))
             }, Pin, ct);
 
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(PerformAsync);

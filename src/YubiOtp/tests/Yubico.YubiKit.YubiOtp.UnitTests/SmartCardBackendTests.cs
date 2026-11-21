@@ -130,11 +130,18 @@ public class SmartCardBackendTests
         Assert.True(result.Length >= 6);
     }
 
-    [Fact]
-    public async Task WriteUpdateAsync_Firmware5x_SkipsProgSeqValidation()
+    [Theory]
+    [InlineData(0, 0, 3, 0, 1, true)]
+    [InlineData(4, 2, 3, 0, 1, true)]
+    [InlineData(4, 3, 3, 0, 1, false)]
+    [InlineData(5, 0, 3, 0, 1, false)]
+    [InlineData(4, 3, 3, 0, 0, true)]
+    [InlineData(4, 2, 0, 0, 0, false)]
+    [InlineData(4, 2, 3, 99, 1, false)]
+    public async Task WriteUpdateAsync_SequenceResetUsesEmptyStateOrLegacyWindow(
+        int minor, int patch, byte previous, byte current, byte bits, bool accepted)
     {
-        // The current implementation bypasses 5.0.0 <= version < 5.5.0; this fake exercises 5.2.0.
-        var response = MakeStatusResponse(progSeq: 99);
+        var response = MakeStatusResponse(progSeq: current, touchLo: bits);
 
         _protocol.TransmitAndReceiveAsync(
                 Arg.Any<ApduCommand>(),
@@ -142,11 +149,19 @@ public class SmartCardBackendTests
                 Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(response));
 
-        var backend = CreateBackend(version: new FirmwareVersion(5, 2, 0), initialProgSeq: 0);
+        var backend = CreateBackend(version: new FirmwareVersion(5, minor, patch), initialProgSeq: previous);
+        var ct = TestContext.Current.CancellationToken;
 
-        // Should not throw despite prog_seq mismatch
-        var result = await backend.WriteUpdateAsync(ConfigSlot.Config1, ReadOnlyMemory<byte>.Empty, CancellationToken.None);
-        Assert.True(result.Length >= 6);
+        if (accepted)
+        {
+            var result = await backend.WriteUpdateAsync(ConfigSlot.Config1, ReadOnlyMemory<byte>.Empty, ct);
+            Assert.Equal(current, result.Span[3]);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                backend.WriteUpdateAsync(ConfigSlot.Config1, ReadOnlyMemory<byte>.Empty, ct).AsTask());
+        }
     }
 
     [Fact]

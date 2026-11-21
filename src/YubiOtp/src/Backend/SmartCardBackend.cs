@@ -33,7 +33,7 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
         YubiKitLogging.LoggerFactory.CreateLogger<SmartCardBackend>();
 
     private static readonly FirmwareVersion Firmware500 = new(5, 0, 0);
-    private static readonly FirmwareVersion Firmware550 = new(5, 5, 0);
+    private static readonly FirmwareVersion Firmware543 = new(5, 4, 3);
 
     private readonly ISmartCardProtocol _protocol;
     private readonly FirmwareVersion _firmwareVersion;
@@ -208,9 +208,8 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
     }
 
     /// <summary>
-    /// Validates status length and sequence. Current sequence exceptions are an effective firmware
-    /// interval of 5.0.0 inclusive to 5.5.0 exclusive, and any returned zero. These permissive checks
-    /// do not establish that every rejected device write is detected.
+    /// Validates status length and accepts an increment, wraparound, or reset to zero from a positive
+    /// predecessor when empty or in the legacy 5.0.0–5.4.2 programming-state window.
     /// </summary>
     private void ValidateProgrammingSequence(ReadOnlySpan<byte> statusBytes)
     {
@@ -221,18 +220,12 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
         var newProgSeq = statusBytes[3];
 
-        // The current compatibility bypass covers all 5.0.0 <= version < 5.5.0.
-        if (_firmwareVersion >= Firmware500
-            && _firmwareVersion < Firmware550)
-        {
-            _lastProgSeq = newProgSeq;
-            return;
-        }
-
-        // Accept the increment, or zero after any predecessor (not only a 255-to-0 rollover).
         var expectedProgSeq = (byte)((_lastProgSeq + 1) & 0xFF);
+        bool legacyWindow = _firmwareVersion >= Firmware500 && _firmwareVersion < Firmware543;
+        bool acceptReset = newProgSeq == 0 && _lastProgSeq > 0 &&
+                           ((statusBytes[4] & 0x1F) == 0 || legacyWindow);
 
-        if (newProgSeq != 0 && newProgSeq != expectedProgSeq)
+        if (newProgSeq != expectedProgSeq && !acceptReset)
         {
             throw new InvalidOperationException(
                 $"Programming sequence validation failed. Expected {expectedProgSeq}, got {newProgSeq}. " +

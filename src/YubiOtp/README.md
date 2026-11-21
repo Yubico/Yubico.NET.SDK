@@ -357,8 +357,9 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
   the update mask's pacing bits do not grant permission to change challenge touch/short mode. Legacy
   delay, fast-trigger, numeric-keypad, and serial-visibility flags have firmware-specific applicability.
   Serial visibility merges across slots: clearing one slot's flag need not hide the device serial globally.
-- SmartCard write sequence checks are bypassed for effective firmware 5.0.0 ≤ version < 5.5.0 and accept
-  zero after any prior sequence. A fallback write status shorter than six bytes is rejected without updating
+- SmartCard accepts a sequence increment (including wraparound). A reset to zero from a positive sequence
+  is also accepted when status is empty or effective firmware is in [5.0.0, 5.4.3). The 5.4.3 boundary is
+  a software rule, not a physical qualification. A fallback write status shorter than six bytes is rejected without updating
   cached status. OTP HID data reads check CRC over the expected
   response prefix; its write-status check is a minimum-length check, not that data-response CRC check.
   CRC detects transmission errors, not cryptographic authenticity.

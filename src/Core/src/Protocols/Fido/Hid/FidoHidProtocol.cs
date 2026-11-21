@@ -320,11 +320,10 @@ internal class FidoHidProtocol(
                 bool ctapSuccess = IsCtapSuccess(expectedCommand, responseData);
                 if (ctapSuccess)
                     onCtapSuccess?.Invoke();
-                _logger.LogTrace("Received {Length} bytes in response", responseLength);
 
-                // Assemble the complete terminal response before surfacing cancellation or callback failure,
-                // so its continuation packets are consumed rather than left for the next exchange.
+                // Surface a callback failure after complete drain and confirmation, before fallible logging.
                 promptFailure?.Throw();
+                _logger.LogTrace("Received {Length} bytes in response", responseLength);
 
                 // CTAP 2.3 Proposed Standard §11.2.9.1.5 requires the authenticator to return
                 // KEEPALIVE_CANCEL on the canceled original CBOR request, with no reply to CANCEL itself.
@@ -343,10 +342,22 @@ internal class FidoHidProtocol(
         }
         catch (Exception) when (promptFailure is not null && !terminalResponseDrained)
         {
+            WarnAboutTerminalValidationFailure(promptFailure.SourceException);
+            throw;
+        }
+    }
+
+    private void WarnAboutTerminalValidationFailure(Exception promptFailure)
+    {
+        try
+        {
             _logger.LogWarning(
                 "User-presence callback failed before CTAP HID terminal response validation also failed; exception type {ExceptionType}",
-                promptFailure.SourceException.GetType().FullName);
-            throw;
+                promptFailure.GetType().FullName);
+        }
+        catch (Exception)
+        {
+            // A logging failure must not replace the original transport or framing failure.
         }
     }
 

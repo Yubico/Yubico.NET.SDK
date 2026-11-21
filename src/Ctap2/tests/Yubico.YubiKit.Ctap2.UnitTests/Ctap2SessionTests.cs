@@ -565,10 +565,12 @@ public class Ctap2SessionTests
     }
 
     [Theory]
-    [InlineData(true, false)]
-    [InlineData(false, false)]
-    [InlineData(true, true)]
-    public async Task ResetAsync_HidRequestCallbackFailureRefreshesOnlyAfterSuccessfulDrain(bool success, bool partial)
+    [InlineData(true, false, false)]
+    [InlineData(false, false, false)]
+    [InlineData(true, true, false)]
+    [InlineData(true, false, true)]
+    [InlineData(true, true, true)]
+    public async Task ResetAsync_HidRequestCallbackFailureRefreshesOnlyAfterSuccessfulDrain(bool success, bool partial, bool failLog)
     {
         var ct = TestContext.Current.CancellationToken;
         using var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse(), resetSucceeds: success)
@@ -577,15 +579,21 @@ public class Ctap2SessionTests
         };
         var failure = new InvalidOperationException("presence request failed");
         var prompt = new RecordingUserPresencePrompt(requestException: failure);
+        string template = partial
+            ? "User-presence callback failed before CTAP HID terminal response validation also failed; exception type {ExceptionType}"
+            : "Received {Length} bytes in response";
+        var provider = new TerminalTraceFailureProvider(template, new InvalidOperationException("logger failed"), partial ? null : 1);
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        using var logging = YubiKitLogging.UseTemporary(factory);
         await using var session = await Ctap2Session.CreateAsync(connection,
             new SessionCreationOptions { UserPresencePrompt = prompt }, ct);
+        provider.Armed = failLog;
 
         var actual = await Record.ExceptionAsync(() => session.ResetAsync(ct));
 
         if (partial)
         {
-            Assert.IsType<InvalidOperationException>(actual);
-            Assert.NotSame(failure, actual);
+            Assert.Equal("CTAP HID continuation packet channel mismatch", Assert.IsType<InvalidOperationException>(actual).Message);
         }
         else
             Assert.Same(failure, actual);
@@ -593,6 +601,8 @@ public class Ctap2SessionTests
         Assert.True(session.IsInitialized);
         if (success && !partial)
             Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+        Assert.Equal(failLog && !partial, provider.Armed); // Warning was attempted; post-drain trace was skipped.
+        Assert.Single(prompt.Requested);
         Assert.Empty(prompt.Resolved);
     }
 
@@ -655,17 +665,17 @@ public class Ctap2SessionTests
         Assert.True(confirmed);
     }
 
-    private sealed class TerminalTraceFailureProvider(string? template, Exception failure) : ILoggerProvider, ILogger
+    private sealed class TerminalTraceFailureProvider(string? template, Exception failure, int? expectedLength = null) : ILoggerProvider, ILogger
     {
         public bool Armed { get; set; }
         public ILogger CreateLogger(string categoryName) => this;
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
-        public bool IsEnabled(LogLevel logLevel) => logLevel == LogLevel.Trace;
+        public bool IsEnabled(LogLevel logLevel) => logLevel is LogLevel.Trace or LogLevel.Warning;
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
             Func<TState, Exception?, string> formatter)
         {
             if (Armed && state is IReadOnlyList<KeyValuePair<string, object?>> fields &&
-                Equals(fields[^1].Value, template))
+                Equals(fields[^1].Value, template) && (expectedLength is null || Equals(fields[0].Value, expectedLength)))
             {
                 Armed = false;
                 throw failure;

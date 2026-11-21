@@ -75,6 +75,29 @@ public class WebAuthnClientCeremonyFrameTests
 
     private static ReadOnlyMemory<byte> Pin => "123456"u8.ToArray();
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task MakeCredential_MapsDiscoveryAndTokenFailuresWithoutEnteringCommandRetry(bool discovery)
+    {
+        await using var client = _client;
+        var failure = new CtapException(CtapStatus.PuatRequired);
+        if (discovery)
+            _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Throws(failure);
+        else
+            _backend.GetPinUvTokenAsync(PinUvAuthMethod.Pin, Arg.Any<PinUvAuthTokenPermissions>(), RpId,
+                Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>()).Throws(failure);
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(
+            Registration(), Pin, TestContext.Current.CancellationToken));
+
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
+        Assert.Same(failure, error.InnerException);
+        await _backend.Received(discovery ? 0 : 1).GetPinUvTokenAsync(PinUvAuthMethod.Pin,
+            Arg.Any<PinUvAuthTokenPermissions>(), RpId, Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
+        await _backend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+    }
+
     [Fact]
     public async Task MakeCredential_PuatRequiredTwice_EscalatesOnceThenMapsTheSecondFailure()
     {

@@ -156,8 +156,8 @@ public sealed partial class WebAuthnClient
 
     /// <summary>
     /// Maps a caught <see cref="CtapException"/> to a typed <see cref="WebAuthnClientError"/>, retaining
-    /// the original exception as its cause. This mapper does not cover the whole ceremony: discovery,
-    /// token acquisition, and extension output processing can propagate lower-level failures.
+    /// the original exception as its cause. GetInfo and token failures use this general mapper;
+    /// probe, credential-command and extension-output handling have separate contracts.
     /// During ceremonies, MapCeremonyCtapException handles CredentialExcluded and previewSign-specific
     /// mapping before delegating here.
     /// </summary>

@@ -104,7 +104,7 @@ public sealed partial class WebAuthnClient
             topOrigin: options.TopOrigin);
 
         // Get authenticator info
-        var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
+        var info = await GetCeremonyInfoAsync(cancellationToken).ConfigureAwait(false);
 
         // Resolve the resident-key preference against the authenticator (WebAuthn L3 §5.4.6):
         // required → rk, preferred → rk only if the authenticator can, discouraged → omit.

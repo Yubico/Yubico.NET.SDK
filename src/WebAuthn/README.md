@@ -280,7 +280,8 @@ or extension writes.
 An empty match list is normal. Excluded registration credentials map to `InvalidState`; unavailable
 required verification and an observed ceremony timeout map to `NotAllowed`. Caller-token cancellation
 propagates `OperationCanceledException`, not the client's `Cancelled` error code. Authenticator timeout
-statuses instead map to `Constraint`. Capability reads, token acquisition, transport/setup, and extension
+statuses instead map to `Constraint`. GetInfo and token acquisition use general CTAP status mappings
+without triggering command escalation. Transport/setup and extension
 output processing can propagate lower-level exceptions: not every failure is `WebAuthnClientError`.
 A failure does not trigger a retry on another transport. See
 [`WebAuthnClientError`](src/WebAuthnClientError.cs) for the error vocabulary.

@@ -110,7 +110,7 @@ public sealed partial class WebAuthnClient
     /// Runs one ceremony attempt and, if the authenticator answers CTAP2_ERR_PUAT_REQUIRED to a
     /// request made without required verification, runs it once more with verification required.
     /// Other CTAP failures from the attempt are mapped to a typed <see cref="WebAuthnClientError"/>.
-    /// Token acquisition happens outside that catch and can propagate its own failures.
+    /// Token acquisition is mapped separately and cannot trigger command escalation.
     /// </summary>
     /// <remarks>
     /// The attempt must end at the authenticator's answer. Follow-up work that may itself fail with a
@@ -129,7 +129,14 @@ public sealed partial class WebAuthnClient
         while (true)
         {
             var decision = UvDecisionLogic.Decide(info, preference, auth.PinAvailable, permissions);
-            await auth.AcquireAsync(decision, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await auth.AcquireAsync(decision, cancellationToken).ConfigureAwait(false);
+            }
+            catch (CtapException ex)
+            {
+                throw MapCtapStatusToWebAuthnError(ex);
+            }
 
             try
             {
@@ -189,10 +196,29 @@ public sealed partial class WebAuthnClient
 
         if (auth.Token is not null && remintPermissions is { } permissions)
         {
-            await auth.RemintAsync(decision, permissions, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await auth.RemintAsync(decision, permissions, cancellationToken).ConfigureAwait(false);
+            }
+            catch (CtapException ex)
+            {
+                throw MapCtapStatusToWebAuthnError(ex);
+            }
         }
 
         return match;
+    }
+
+    private async Task<AuthenticatorInfo> GetCeremonyInfoAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (CtapException ex)
+        {
+            throw MapCtapStatusToWebAuthnError(ex);
+        }
     }
 
     /// <summary>CTAP "uv" option key from the decision, plus "rk" for registration; null when neither applies.</summary>

@@ -107,7 +107,7 @@ public sealed partial class WebAuthnClient
             topOrigin: options.TopOrigin);
 
         // Get authenticator info
-        var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
+        var info = await GetCeremonyInfoAsync(cancellationToken).ConfigureAwait(false);
 
         // Extension processors are created per attempt; their permissions join the token request.
         var context = new ExtensionContext(info, _backend.Protocol, _backend);

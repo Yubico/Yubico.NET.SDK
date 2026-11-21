@@ -463,8 +463,8 @@ Keep these conditions attached to public guidance when changing extension flow:
 - Use `ArrayPool<byte>.Shared` for >512 byte temp buffers
 
 **Error Handling:**
-- The main attempt maps selected CTAP failures (and previewSign-specific statuses), but GetInfo and
-  token acquisition are outside that mapping catch. Output preparation is outside the retry scope so
+- GetInfo and token acquisition use the general CTAP status mapper, not previewSign policy or command
+  escalation. The main attempt maps command failures. Output preparation is outside the retry scope so
   an output failure cannot cause repeated credential creation. Lower-level exceptions can escape.
 - Caller cancellation propagates `OperationCanceledException`. A resulting timeout cancellation maps
   to `NotAllowed` only when the caller token was not cancelled; success can win the race. The timer

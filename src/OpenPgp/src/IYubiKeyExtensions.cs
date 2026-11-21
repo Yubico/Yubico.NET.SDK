@@ -38,8 +38,9 @@ public static class IYubiKeyExtensions
         ///     Uses only SmartCard transport; an unsupported preference or a failed open/initialization does not
         ///     select another transport. Dispose the returned session with <c>await using</c> to close its hidden
         ///     connection after protocol teardown. Failed creation also cleans up that connection.
-        ///     SCP parameters are borrowed through factory completion. The session retains but does not dispose
-        ///     the caller's user-presence prompt; keep it alive through all session operations and callbacks.
+        ///     The session borrows SCP parameters and their key/certificate resources for its lifetime,
+        ///     including reset reauthentication; it does not dispose them or the caller's user-presence prompt.
+        ///     Keep these resources alive through session disposal.
         /// </remarks>
         public async Task<OpenPgpSession> CreateOpenPgpSessionAsync(
             SessionCreationOptions? options = null,

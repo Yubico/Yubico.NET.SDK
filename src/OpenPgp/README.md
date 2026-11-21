@@ -80,22 +80,24 @@ exchanges, including chaining and SCP processing, but a public method can span s
 cache changes and callbacks. For example, certificate occurrence selection and its read/write are separate exchanges.
 Keep borrowed keys, input buffers and prompt services alive through the complete task, not just its last transmit.
 
-Creation binds the session before device I/O, selects the applet and reads its version, then configures framing and
+Creation binds the session before device I/O, selects the applet and resolves firmware, then configures framing and
 optional SCP before parsing application data. A failed factory disposes/detaches the session; a direct factory leaves
 your connection open, while the device extension cleans up its hidden connection. `FirmwareVersionOverride` chooses
-the effective framing/feature version without skipping the version probe. Device metadata, the detected applet version,
+the effective framing/feature version and bypasses cached metadata. Cached NEO firmware retains its physical framing
+profile but uses the applet version for the PIN-attempt command. Device metadata, the detected applet version,
 the effective session version and the AID's Card specification version are separate diagnostic values.
 
 For SCP, supply `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile. Keep those parameters and
-their contained resources alive through actual factory completion. SCP03 parameter disposal clears its retained
+their contained resources alive through session disposal, including reset reauthentication. The session does not
+dispose those borrowed parameters. SCP03 parameter disposal clears its retained
 `StaticKeys`, not your original source arrays. SCP11 parameters retain the supplied key/certificate objects: disposal
 disposes the retained OCE private key and certificates, but not the SD public key. Avoid independently disposing shared
-aliases while creation uses them. These ownership rules do not establish device/profile support or trust. Generic Core
+aliases while the session uses them. These ownership rules do not establish device/profile support or trust. Generic Core
 SCP version checks alone do not identify the earliest supported OpenPGP firmware. `IsAuthenticated` records SCP setup;
 the card separately enforces User/Admin PIN authorization. See the [Core guide](../Core/README.md) for SCP configuration.
 
 `GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF. Credential operations read F9 separately. Typed
-initialization requires recognized mandatory algorithm attributes. After successful initialization, use `GetDataAsync`
+initialization preserves well-formed unmodeled algorithms and rejects malformed known fields. Use `GetDataAsync`
 for raw response inspection when a model omits a field. If typed initialization itself fails, dispose that attempt and
 use a separate [raw SmartCard session](../../docs/architecture/raw-access-tiers.md) for diagnosis.
 
@@ -419,7 +421,7 @@ static async Task DecipherAndConsumeAsync(
 }
 ```
 
-The method owns this returned memory, so `MemoryMarshal.AsMemory` clears the actual backing storage.
+The caller owns this writable result; clear the actual backing storage with `CryptographicOperations.ZeroMemory(result.Span)`.
 Use that technique only for SDK outputs whose storage you own, rather than arbitrary borrowed read-only inputs.
 Clearing a `ToArray()` copy would leave the original secret intact. The SDK clears its raw decipher response after
 copying the successful result. RSA/EdDSA signatures instead transfer response storage to the caller; ECDSA returns

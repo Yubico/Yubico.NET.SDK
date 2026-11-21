@@ -46,8 +46,8 @@ public interface IOpenPgpSession : IApplicationSession
     /// </summary>
     /// <remarks>
     ///     Refreshes cached algorithm attributes and UIF values without requiring PIN verification.
-    ///     The KDF cache is separate and remains unchanged. Parsing requires recognized algorithms in
-    ///     mandatory fields; use raw data access to inspect response fields outside the model.
+    ///     Credential operations read F9 separately. Well-formed unmodeled algorithm attributes and
+    ///     raw application data remain available for inspection.
     /// </remarks>
     Task<ApplicationRelatedData> GetApplicationRelatedDataAsync(
         CancellationToken cancellationToken = default);
@@ -70,8 +70,8 @@ public interface IOpenPgpSession : IApplicationSession
     /// <remarks>
     ///     The caller supplies correctly encoded value bytes and any required authentication. This method
     ///     borrows <paramref name="data" /> until completion; clear sensitive input afterward. Writes can
-    ///     persistently change credentials, keys or configuration. Cached algorithms, UIF and KDF remain
-    ///     unchanged: refresh application data for algorithms/UIF, and open a fresh session after raw KDF writes.
+    ///     persistently change credentials, keys or configuration. Refresh the application data after
+    ///     writing algorithms or UIF, and use a fresh session to verify a raw KDF write.
     /// </remarks>
     Task PutDataAsync(
         DataObject dataObject,
@@ -84,8 +84,7 @@ public interface IOpenPgpSession : IApplicationSession
     /// <param name="length">Requested positive byte count, within the card's advertised challenge limit.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
-    ///     Check Extended Capabilities before requesting a challenge. The SDK validates positivity and
-    ///     sends the request; capability and maximum-length rejection are left to the card/protocol.
+    ///     The SDK checks positivity and the card's advertised challenge capability and maximum length.
     ///     The caller owns the returned bytes and clears them if used as secret material.
     /// </remarks>
     Task<ReadOnlyMemory<byte>> GetChallengeAsync(
@@ -549,13 +548,12 @@ public interface IOpenPgpSession : IApplicationSession
 
     /// <summary>
     ///     Gets the list of supported algorithm attributes per key slot.
-    ///     Requires firmware 5.2.0+.
     /// </summary>
     /// <remarks>
     ///     Below 5.2.0, returns a built-in per-slot RSA list instead of querying the card. Otherwise
-    ///     preserves order and repeated slots. Entries with unknown tags or algorithm encodings rejected by
-    ///     the parser are skipped; known Curve25519 entries receive a pre-5.6.1 workaround. Treat the result
-    ///     as the SDK's interpreted list and use raw FA bytes when inspecting omitted entries.
+    ///     preserves order and repeated slots. Unknown slot tags are omitted from this typed list;
+    ///     unmodeled algorithms for known slots are preserved, and malformed modeled fields are rejected.
+    ///     Known Curve25519 entries receive a pre-5.6.1 workaround. Use raw FA bytes to inspect omitted entries.
     /// </remarks>
     Task<IReadOnlyList<SupportedAlgorithm>> GetSupportedAlgorithmsAsync(
         CancellationToken cancellationToken = default);

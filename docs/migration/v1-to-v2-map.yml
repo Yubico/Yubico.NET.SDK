@@ -219,7 +219,7 @@ mappings:
     evidence:
       - develop:Yubico.YubiKey/src/Yubico/YubiKey/OpenPgp/
       - yubikit:src/OpenPgp/
-    notes: Review User/Admin PIN authorization, KDF transitions, raw crypto formats, key slots and persistent state manually; see src/OpenPgp/README.md. Historical v1 availability in this entry remains unverified against the separate first-in-v2 narrative; this pass preserves that chronology question rather than inferring a mapping from current source.
+    notes: Review User/Admin PIN authorization, KDF transitions, raw crypto formats, key slots and persistent state manually. DecryptAsync returns caller-owned writable Memory<byte>; clear its span directly. GenerationTimes and SetGenerationTimeAsync use uint seconds since 1970-01-01 UTC, with zero meaning unspecified. See src/OpenPgp/README.md. Historical v1 availability remains unverified against the separate first-in-v2 narrative.
     last_reviewed_commit: e348013685d92a6a665cd0b8bd7e8b05850fddd5
   - id: applet-security-domain
     status: manual

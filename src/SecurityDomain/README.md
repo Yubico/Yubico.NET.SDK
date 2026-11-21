@@ -136,10 +136,9 @@ ECPublicKey devicePublicKey = await session.GenerateKeyAsync(keyReference, repla
 ```
 
 Persist `devicePublicKey` through this trusted provisioning session. End that session before opening
-another. SCP11 creation also needs a known supported firmware version, normally 5.7.2 or later, in
-`FirmwareVersionOverride`: Security Domain's default 5.3.0 fails Core's SCP11 setup gate locally, even
-if the preceding generation request succeeded on a newer device. An override supplies policy; it does
-not detect firmware or prove hardware support.
+another. SCP11 requires device support (production firmware 5.7.2 or later). Known unsupported production
+firmware is rejected locally; with unknown or development firmware, setup is attempted. An override
+supplies policy; it does not detect firmware or prove hardware support.
 
 This complete composable method uses the directives above plus System.Collections.Generic,
 System.Threading and System.Threading.Tasks. The caller supplies the intended device, an SCP11b reference,
@@ -244,12 +243,10 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
   admits one session. Disjoint scoped views remain uncoordinated. Whoever creates a connection disposes
   it with `await using`; a session from `CreateSecurityDomainSessionAsync` owns the one it opened.
   See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
-- The Security Domain cannot detect firmware. `SessionCreationOptions.FirmwareVersionOverride` is its only
-  exact version source; without it the session assumes 5.3.0 for protocol configuration. Supply the version
-  from a Management session so the SCP11 gate can be evaluated.
-- `GenerateKeyAsync` locally checks for firmware 5.7.2 only when you supplied
-  `FirmwareVersionOverride` at creation. Without it, the request reaches the device and may fail with an
-  `ApduException`. Reset currently clears this explicit-version indicator; use a fresh session afterward.
+- Without an explicit `FirmwareVersionOverride`, the device factory uses cached device info. The Security
+  Domain has no version read of its own. Without either source, the protocol uses 5.3.0 framing and admits
+  firmware-gated attempts. Major-zero and cached alpha/beta versions also admit them. Known numeric versions
+  still determine PC/SC framing independently of feature eligibility. Reset preserves both decisions.
 - Key generation/import/deletion, certificate/CA/allowlist storage and clearing, raw `StoreDataAsync`, and
   reset change persistent state. Review the target reference and recovery plan before sending them.
 - With SCP parameters supplied, selected secure-channel configuration failures (`ApduException`,

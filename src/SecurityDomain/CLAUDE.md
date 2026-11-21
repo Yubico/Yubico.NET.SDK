@@ -140,12 +140,12 @@ final SCP11 1.4 and the complete YubiKey profile remain unverified.
 ### Session Initialization Pattern
 
 `CreateAsync(ISmartCardConnection, SessionCreationOptions?, CancellationToken)` combines construction and
-asynchronous initialization. The constructor retains the connection and protocol configuration. `InitializeAsync`
-takes SCP parameters, firmware version, then cancellation token. It prepares the protocol, selects the SD
-through `SecurityDomainBackend.SelectApplicationAsync`, and configures it with the supplied version or
-5.3.0 fallback. If configuration returns a different protocol, the backend is rebuilt for that protocol.
-SCP11 creation therefore requires a known supported override (normally 5.7.2+), independently of the
-optional local GenerateKey gate. An override does not skip SELECT or establish actual device support.
+asynchronous initialization. The constructor retains protocol configuration, framing version and eligibility
+policy. `InitializeAsync` prepares the protocol, selects the SD, then configures framing and establishes SCP.
+An explicit override takes precedence over cached device info; SD has no version-read command. Unknown
+firmware uses the 5.3.0 framing fallback. Unknown and development firmware admit gated attempts without
+changing numeric framing. If SCP returns a different protocol, the backend is rebuilt for it. No version
+source skips SELECT or establishes actual device support.
 
 `ProtocolFactory`, `IProtocol`, and `ISmartCardProtocol` are not consumer extension points. External low-level
 code should use `RawSmartCardSession`; SecurityDomain uses these types only as friend-assembly implementation
@@ -221,7 +221,7 @@ foreach (var entry in keyInfo)
 - **5.7.2**: SCP11 support; existing factory-state tests expect four entries rather than three
 
 These count assertions describe the tested factory-state expectation, not a universal count after key
-management. `GenerateKeyAsync` locally gates SCP11 only when an exact version was supplied at creation.
+management. `GenerateKeyAsync` rejects known unsupported production firmware, not unknown or prerelease builds.
 
 ## Known Gotchas
 

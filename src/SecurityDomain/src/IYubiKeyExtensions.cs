@@ -36,11 +36,11 @@ public static class IYubiKeyExtensions
         ///     The returned session owns the underlying connection and will dispose it when the session is disposed.
         ///     Use an await using scope. Only SmartCard transport (USB CCID or NFC) is supported.
         ///     The caller retains ownership of supplied SCP parameters and disposes them after the session.
-        ///     Supply FirmwareVersionOverride when the exact firmware is known: Security Domain cannot
-        ///     detect it and otherwise configures with 5.3.0. Reset reapplies the protocol configuration
-        ///     and firmware policy and switches to default SCP03 keys after confirmed stopping outcomes.
-        ///     SCP11 setup requires a known supported override (normally 5.7.2+); the default 5.3.0
-        ///     fails Core's local gate before authentication. An override is policy, not hardware detection.
+        ///     An explicit firmware override takes precedence over cached device info. The Security Domain
+        ///     has no version read of its own. Without either source, the protocol uses 5.3.0 framing and
+        ///     admits firmware-gated attempts. Major-zero and cached alpha/beta versions also admit them.
+        ///     This policy does not prove device support and does not change known numeric framing.
+        ///     Reset reapplies the protocol configuration and firmware policy with default SCP03 keys.
         /// </remarks>
         /// <exception cref="SecureChannelException">
         ///     SCP parameters were supplied and secure-channel configuration threw ApduException,
@@ -58,14 +58,16 @@ public static class IYubiKeyExtensions
                 ConnectionType.SmartCard);
             var sessionOptions = (options ?? new SessionCreationOptions())
                 .WithPreferredConnectionType(transport);
+            var cachedDeviceInfo = yubiKey.CachedDeviceInfo;
 
             return await yubiKey.CreateSessionOverTransportAsync(
                     transport,
                     async (connection, ct) =>
                     {
-                        var session = await SecurityDomainSession.CreateAsync(
+                        var session = await SecurityDomainSession.CreateForDeviceAsync(
                                 (ISmartCardConnection)connection,
                                 sessionOptions,
+                                cachedDeviceInfo,
                                 ct)
                             .ConfigureAwait(false);
                         session.OwnConnection();

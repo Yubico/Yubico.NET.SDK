@@ -221,9 +221,10 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <remarks>
     ///     Requires device-accepted administrative authority. Persist the public key through a trusted
     ///     provisioning path; the private key stays on the device. Only SCP11a (0x11), SCP11b (0x13)
-    ///     and SCP11c (0x15) KIDs are accepted. It checks firmware support when a version is supplied.
+    ///     and SCP11c (0x15) KIDs are accepted. Unknown and prerelease firmware admit the attempt;
+    ///     known unsupported production firmware is rejected locally.
     /// </remarks>
-    /// <exception cref="NotSupportedException">An explicitly supplied firmware version is below 5.7.2.</exception>
+    /// <exception cref="NotSupportedException">The known production firmware version is below 5.7.2.</exception>
     /// <exception cref="ArgumentException">The key reference does not specify an SCP11 KID.</exception>
     /// <exception cref="Yubico.YubiKit.Core.BadResponseException">The response is empty.</exception>
     Task<ECPublicKey> GenerateKeyAsync(

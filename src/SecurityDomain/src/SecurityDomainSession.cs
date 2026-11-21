@@ -82,9 +82,10 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     private readonly ILogger _logger;
 
     private readonly ProtocolConfiguration? _configuration;
+    private readonly FirmwareVersion _framingFirmwareVersion;
+    private readonly bool _admitUnverifiedFirmware;
     private ISmartCardProtocol? _protocol;
     private ISecurityDomainBackend? _backend;
-    private bool _hasExplicitFirmwareVersion;
     private bool _endingAfterResetFailure;
 
     // Per-session test seam for observing real certificate lifetimes without replacing the loader.
@@ -95,11 +96,18 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// </summary>
     private SecurityDomainSession(
         ISmartCardConnection connection,
-        ProtocolConfiguration? configuration)
+        SessionCreationOptions? options,
+        DeviceInfo? cachedDeviceInfo)
         : base(connection)
     {
         _logger = Logger;
-        _configuration = configuration;
+        _configuration = options?.ProtocolConfiguration;
+        var overrideVersion = options?.FirmwareVersionOverride;
+        var knownVersion = overrideVersion ?? cachedDeviceInfo?.FirmwareVersion;
+        _framingFirmwareVersion = knownVersion ?? FirmwareVersion.V5_3_0;
+        _admitUnverifiedFirmware = knownVersion?.IsAlphaOrBeta != false ||
+            overrideVersion is null &&
+            cachedDeviceInfo?.VersionQualifier.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta;
     }
 
     /// <summary>
@@ -127,11 +135,11 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
     /// <remarks>
     ///     Without SCP parameters the session supports unauthenticated discovery. The caller retains
     ///     ownership of supplied key parameters and disposes them after the session. Security Domain
-    ///     cannot detect firmware: creation uses the supplied override or configures with 5.3.0.
-    ///     Supply an exact version for the local SCP11 generation gate. Reset reapplies configuration and
+    ///     cannot detect firmware: this direct factory uses the supplied override or configures framing
+    ///     with 5.3.0. Unknown and major-zero firmware admit firmware-gated attempts without promising
+    ///     support. Reset reapplies configuration and
     ///     firmware policy, but switches to the public default SCP03 keys after confirmed stopping outcomes.
-    ///     SCP11 setup itself requires a known supported override, normally 5.7.2 or later: the default
-    ///     5.3.0 fails Core's gate before the handshake. Keep supplied parameters and their contained
+    ///     A known production version below 5.7.2 still rejects SCP11 locally. Keep supplied parameters and their contained
     ///     key/certificate owners alive through session disposal. The SDK does not dispose them.
     /// </remarks>
     /// <exception cref="SecureChannelException">
@@ -143,23 +151,27 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default) =>
+        CreateForDeviceAsync(connection, options, cachedDeviceInfo: null, cancellationToken);
+
+    internal static Task<SecurityDomainSession> CreateForDeviceAsync(
+        ISmartCardConnection connection,
+        SessionCreationOptions? options,
+        DeviceInfo? cachedDeviceInfo,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
-            () => new SecurityDomainSession(connection, options?.ProtocolConfiguration),
-            (session, token) => session.InitializeAsync(
-                options?.ScpKeyParameters, options?.FirmwareVersionOverride, token),
+            () => new SecurityDomainSession(connection, options, cachedDeviceInfo),
+            (session, token) => session.InitializeAsync(options?.ScpKeyParameters, token),
             cancellationToken);
 
     /// <summary>
     ///     Ensures the Security Domain application is selected and secure messaging is configured if requested.
     /// </summary>
     /// <param name="scpKeyParameters">Borrowed parameters for this handshake.</param>
-    /// <param name="firmwareVersion">Optional firmware version used to configure the protocol.</param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     private async Task InitializeAsync(
         ScpKeyParameters? scpKeyParameters,
-        FirmwareVersion? firmwareVersion,
         CancellationToken cancellationToken)
     {
         ThrowIfDisposed();
@@ -172,20 +184,16 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         ISecurityDomainBackend backend = new SecurityDomainBackend(protocol);
         await backend.SelectApplicationAsync(cancellationToken).ConfigureAwait(false);
 
-        // Security Domain is available on firmware 5.3.0 and newer.
-        // If the caller already knows the firmware, they can provide it and enable feature gating.
-        _hasExplicitFirmwareVersion = firmwareVersion is not null;
-        var resolvedFirmwareVersion = firmwareVersion ?? FirmwareVersion.V5_3_0;
-
         ISmartCardProtocol effectiveProtocol;
         try
         {
             effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                     protocol,
-                    resolvedFirmwareVersion,
+                    _framingFirmwareVersion,
                     _configuration,
                     scpKeyParameters,
-                    cancellationToken)
+                    cancellationToken,
+                    admitUnverifiedScpFirmware: _admitUnverifiedFirmware)
                 .ConfigureAwait(false);
         }
         catch (OperationCanceledException)
@@ -563,7 +571,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             throw new ArgumentException("GenerateKeyAsync requires an SCP11 key identifier (0x11, 0x13 or 0x15).",
                 nameof(keyReference));
 
-        if (_hasExplicitFirmwareVersion)
+        if (!_admitUnverifiedFirmware)
             EnsureSupports(FeatureScp11);
 
         if (replaceKvn == 0)
@@ -838,8 +846,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
 
             await BlockResetReferencesAsync(keyInfo, cancellationToken).ConfigureAwait(false);
             using var defaultKeys = Scp03KeyParameters.Default;
-            var firmware = _hasExplicitFirmwareVersion ? FirmwareVersion : (FirmwareVersion?)null;
-            await InitializeSessionAsync(token => InitializeAsync(defaultKeys, firmware, token), cancellationToken)
+            await InitializeSessionAsync(token => InitializeAsync(defaultKeys, token), cancellationToken)
                 .ConfigureAwait(false);
         }
         catch

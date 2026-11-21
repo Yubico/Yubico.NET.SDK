@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -853,6 +854,60 @@ public class SecurityDomainSessionTests
     }
 
     private static byte[] OkResponse() => [0x90, 0x00];
+
+    [Theory]
+    [InlineData(5, VersionQualifierType.Beta, true)]
+    [InlineData(5, VersionQualifierType.Final, false)]
+    [InlineData(0, VersionQualifierType.Final, true)]
+    [InlineData(null, VersionQualifierType.Final, true)]
+    public async Task CreateSecurityDomainSessionAsync_UsesFirmwareEligibilityWithoutChangingNumericFraming(
+        int? major, VersionQualifierType qualifier, bool expectHandshake)
+    {
+        var yubiKey = CreateMockYubiKey(out var connection);
+        if (major is int numericMajor)
+        {
+            var version = new FirmwareVersion(numericMajor, 7, 0);
+            yubiKey.CachedDeviceInfo.Returns(default(DeviceInfo) with
+            {
+                FirmwareVersion = version,
+                VersionQualifier = new VersionQualifier(version, qualifier, 0)
+            });
+        }
+
+        var commands = new List<byte[]>();
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                commands.Add(call.Arg<ReadOnlyMemory<byte>>().ToArray());
+                return new ReadOnlyMemory<byte>(commands.Count == 1 ? OkResponse() : [0x69, 0x82]);
+            });
+
+        var point = Convert.FromHexString("046B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296" +
+            "4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5");
+        using var keys = new Scp11KeyParameters(new KeyReference(0x13, 0xFF),
+            ECPublicKey.CreateFromValue(point, KeyType.P256));
+        var options = new SessionCreationOptions
+        {
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true },
+            ScpKeyParameters = keys
+        };
+
+        var error = await Assert.ThrowsAsync<SecureChannelException>(() => yubiKey.CreateSecurityDomainSessionAsync(
+            options, TestContext.Current.CancellationToken));
+        if (expectHandshake)
+        {
+            Assert.Equal(2, commands.Count);
+            Assert.Equal(unchecked((short)0x6982), error.StatusWord);
+            Assert.Equal(0x88, commands[1][1]);
+            if (major != 0) // The existing genuine major-zero PC/SC mode is not being changed here.
+                Assert.Equal(commands[1].Length - 6, commands[1][4]);
+        }
+        else
+        {
+            Assert.Single(commands);
+            Assert.IsType<NotSupportedException>(error.InnerException);
+        }
+    }
 
     [Theory]
     [InlineData(-1)]

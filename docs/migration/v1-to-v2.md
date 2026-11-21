@@ -947,11 +947,28 @@ LIST remains silent. See `yubihsm-retry-exception`,
 hardware-verified and renamed to `RetriesRemaining` to match v1's "retries remaining before deletion" semantics;
 see `yubihsm-credential-retries-remaining-rename`.
 
-Pass UTF-8 `ReadOnlyMemory<byte>` to the nine password-taking `IHsmAuthSession`/`HsmAuthSession` members.
-The parameters are named `credentialPassword`, `derivationPassword`, `currentPassword` and `newPassword`.
-Clear caller-owned byte buffers in `finally`; an owning disposable buffer can provide the same lifetime
-boundary. Keep derivation and credential passwords separate: one derives the HSM's long-lived key pair,
-the other protects use of the YubiKey credential. See `yubihsm-credential-password-bytes` in the map.
+Pass a disposable `CredentialPassword` for `credentialPassword`, `currentPassword` and `newPassword`.
+Use `FromUtf8` for up to 16 encoded UTF-8 bytes (zero-padded), or `FromRaw` for exactly 16 opaque bytes.
+Both factories copy the input; disposing the holder does not clear the source. Keep the holder alive
+through the awaited operation and clear the caller-owned input separately:
+
+```csharp
+try
+{
+    using var password = CredentialPassword.FromUtf8(passwordBytes);
+    // For exactly 16 opaque bytes, use CredentialPassword.FromRaw(passwordBytes) instead.
+    await session.PutCredentialSymmetricAsync(managementKey, label, keyEnc, keyMac, password,
+        cancellationToken: cancellationToken);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(passwordBytes);
+}
+```
+
+The separate PBKDF2 `derivationPassword` still takes borrowed UTF-8 `ReadOnlyMemory<byte>` and the
+caller clears its buffer. It derives the HSM's long-lived key pair; the credential password protects
+use of the YubiKey credential. See `yubihsm-credential-password-bytes` in the map.
 
 ## Manual Low-Level Command Cases
 

@@ -536,12 +536,21 @@ mappings:
     confidence: high
     migration_kind: member
     v1: YubiHsmAuthSession credential-password parameters (ReadOnlyMemory<byte> in Symmetric.cs; string in Aes128CredentialWithSecrets.cs and related asymmetric/admin members)
-    v2: IHsmAuthSession/HsmAuthSession password parameters as UTF-8 ReadOnlyMemory<byte> (credentialPassword, derivationPassword, currentPassword, newPassword)
+    v2: IHsmAuthSession/HsmAuthSession uses disposable CredentialPassword for credentialPassword, currentPassword, and newPassword; derivationPassword remains borrowed UTF-8 ReadOnlyMemory<byte>
     evidence:
       - yubikit:src/YubiHsm/src/HsmAuthSession.cs
       - yubikit:src/YubiHsm/src/IHsmAuthSession.cs
+      - yubikit:src/YubiHsm/src/CredentialPassword.cs
       - yubikit:docs/migration/v1-to-v2-changelog.md
-    notes: The initial v2 snapshot regressed nine IHsmAuthSession/HsmAuthSession members (11 parameters) to a string credential-password parameter, which .NET cannot securely zero. This finished the sweep started for Fido2/OpenPgp/Oath (`75353fd1`, 2026-04-09) and closes a v1 regression rather than introducing one - v1's YubiHsmAuthSession.Symmetric.cs path already took a ReadOnlyMemory<byte> credentialPassword. Affected members - PutCredentialSymmetricAsync, PutCredentialDerivedAsync, CalculateSessionKeysSymmetricAsync, CalculateSessionKeysAsymmetricAsync, GetChallengeAsync, PutCredentialAsymmetricAsync, GenerateCredentialAsymmetricAsync, ChangeCredentialPasswordAsync, ChangeCredentialPasswordAdminAsync. Breaking, with no [Obsolete] overload (package is 2.0.0-alpha.2). Migrate by passing Encoding.UTF8.GetBytes(password) and zeroing the resulting array in a finally, or an owning buffer type that zeroes on disposal; validation (max 16 UTF-8 bytes, null-padded) and PBKDF2-HMAC-SHA256 derivation are unchanged. The same change corrected the GetChallengeAsync firmware boundary (5.6.0 supports the command without a password; 5.7.1 adds the optional password field) and added session-key context-length validation (8-byte host+HSM challenges for symmetric; 65-byte EPK-OCE+EPK-SD for asymmetric) before device I/O; see the 2026-08-31 and 2026-09-03 changelog entries for full detail. The parameters briefly carried a `...Utf8` suffix (`credentialPasswordUtf8`, etc.); `refactor(yubihsm,core): drop Utf8 param suffix and split prompt types` (c5dc3aec) dropped that suffix in favor of the plain names shown above, matching the same rename applied to Fido2/OpenPgp/Oath (see `2026-09-05` changelog entry). Breaking for named arguments only.
+    notes: >-
+      Migrate PutCredentialSymmetricAsync, PutCredentialDerivedAsync, CalculateSessionKeysSymmetricAsync,
+      CalculateSessionKeysAsymmetricAsync, GetChallengeAsync, PutCredentialAsymmetricAsync,
+      GenerateCredentialAsymmetricAsync, ChangeCredentialPasswordAsync, and ChangeCredentialPasswordAdminAsync
+      to the disposable holder, with no legacy overload. Use FromUtf8 on clearable encoded input (up to 16 bytes,
+      zero-padded), or FromRaw on exactly 16 opaque bytes. Dispose the holder after the awaited operation;
+      separately clear the caller-owned source. The derivation password remains borrowed UTF-8 ReadOnlyMemory<byte>
+      and PBKDF2-HMAC-SHA256 derivation is unchanged. GetChallengeAsync supports the command from 5.6.0;
+      5.7.1 adds the optional password field. The symmetric and asymmetric contexts are 16 and 130 bytes respectively.
     last_reviewed_commit: 277920d9de48d4aedad7ecc5d00201a015b5a297
   - id: core-device-serial-and-correlation
     status: assisted

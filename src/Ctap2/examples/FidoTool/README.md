@@ -213,8 +213,9 @@ Prefer HID FIDO for ordinary USB CTAP2 coverage. USB SmartCard CTAP2 is supporte
 
 The active `DeviceSelector` delegates to `Cli.Shared` and admits exposed HID FIDO **or SmartCard**
 interfaces. Session creation subsequently checks the FIDO AID and transport/firmware requirements;
-SmartCard-only non-CTAP keys can appear in selection. One candidate auto-selects. Multiple candidates
-prompt in an interactive terminal; noninteractive mode prefers HID FIDO, then the first eligible key.
+SmartCard-only non-CTAP keys can appear in selection. One candidate auto-selects in an interactive
+terminal; multiple candidates prompt. Non-interactive commands require `--serial SERIAL` and never
+fall back to another key if the requested serial is absent or ambiguous.
 The shared selector identifies choices by index, uses cancellable selection/retry prompts, and returns
 without prompting when a noninteractive scan finds no candidates. It reuses last-known discovery
 metadata or performs one best-effort live fallback per candidate during that selection invocation.

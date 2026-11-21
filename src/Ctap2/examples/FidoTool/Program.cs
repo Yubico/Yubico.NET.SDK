@@ -77,15 +77,16 @@ static async Task<int> RunVerbAsync(string[] args, CancellationToken cancellatio
         // Check value flags before any discovery, prompts, or device operation.
         _ = ParseOption(args, "--pin");
         _ = ParseOption(args, "--new-pin");
+        int? serialNumber = ParseSerial(args);
 
         return verb switch
         {
-            "info" => await RunInfoVerbAsync(cancellationToken),
-            "reset" => await RunResetVerbAsync(args, cancellationToken),
-            "access" => await RunAccessVerbAsync(args, cancellationToken),
-            "config" => await RunConfigVerbAsync(args, cancellationToken),
-            "credentials" => await RunCredentialsVerbAsync(args, cancellationToken),
-            "fingerprints" => await RunFingerprintsVerbAsync(args, cancellationToken),
+            "info" => await RunInfoVerbAsync(serialNumber, cancellationToken),
+            "reset" => await RunResetVerbAsync(args, serialNumber, cancellationToken),
+            "access" => await RunAccessVerbAsync(args, serialNumber, cancellationToken),
+            "config" => await RunConfigVerbAsync(args, serialNumber, cancellationToken),
+            "credentials" => await RunCredentialsVerbAsync(args, serialNumber, cancellationToken),
+            "fingerprints" => await RunFingerprintsVerbAsync(args, serialNumber, cancellationToken),
             "help" or "--help" or "-h" => ShowHelp(),
             _ => ShowUnknownCommand(args[0])
         };
@@ -104,9 +105,9 @@ static async Task<int> RunVerbAsync(string[] args, CancellationToken cancellatio
 // ---------------------------------------------------------------------------
 // fido info
 // ---------------------------------------------------------------------------
-static async Task<int> RunInfoVerbAsync(CancellationToken cancellationToken)
+static async Task<int> RunInfoVerbAsync(int? serialNumber, CancellationToken cancellationToken)
 {
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    var selection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
     if (selection is null)
     {
         OutputHelpers.WriteError("No YubiKey found.");
@@ -130,7 +131,7 @@ static async Task<int> RunInfoVerbAsync(CancellationToken cancellationToken)
 // ---------------------------------------------------------------------------
 // fido reset [-f]
 // ---------------------------------------------------------------------------
-static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancellationToken)
+static async Task<int> RunResetVerbAsync(string[] args, int? serialNumber, CancellationToken cancellationToken)
 {
     var force = HasFlag(args, "-f") || HasFlag(args, "--force");
 
@@ -146,7 +147,7 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
     if (!force)
     {
         // Query a selected device, but this identity is not bound to the later destructive selection.
-        var preSelection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        var preSelection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
         if (preSelection is null)
         {
             OutputHelpers.WriteError("No YubiKey found.");
@@ -172,7 +173,7 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
         Console.ReadLine();
     }
 
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    var selection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
     if (selection is null)
     {
         OutputHelpers.WriteError("No YubiKey found.");
@@ -205,11 +206,11 @@ static async Task<int> RunResetVerbAsync(string[] args, CancellationToken cancel
 // fido access change-pin [--pin PIN] [--new-pin PIN]
 // fido access verify-pin [--pin PIN]
 // ---------------------------------------------------------------------------
-static async Task<int> RunAccessVerbAsync(string[] args, CancellationToken cancellationToken)
+static async Task<int> RunAccessVerbAsync(string[] args, int? serialNumber, CancellationToken cancellationToken)
 {
     var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
 
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    var selection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
     if (selection is null)
     {
         OutputHelpers.WriteError("No YubiKey found.");
@@ -286,11 +287,11 @@ static async Task<int> RunAccessVerbAsync(string[] args, CancellationToken cance
 // fido config toggle-always-uv [--pin PIN]
 // fido config enable-ep-attestation [--pin PIN]
 // ---------------------------------------------------------------------------
-static async Task<int> RunConfigVerbAsync(string[] args, CancellationToken cancellationToken)
+static async Task<int> RunConfigVerbAsync(string[] args, int? serialNumber, CancellationToken cancellationToken)
 {
     var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
 
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    var selection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
     if (selection is null)
     {
         OutputHelpers.WriteError("No YubiKey found.");
@@ -353,11 +354,11 @@ static async Task<int> RunConfigVerbAsync(string[] args, CancellationToken cance
 // fido credentials list [--pin PIN]
 // fido credentials delete CREDENTIAL_ID [--pin PIN] [-f]
 // ---------------------------------------------------------------------------
-static async Task<int> RunCredentialsVerbAsync(string[] args, CancellationToken cancellationToken)
+static async Task<int> RunCredentialsVerbAsync(string[] args, int? serialNumber, CancellationToken cancellationToken)
 {
     var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
 
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    var selection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
     if (selection is null)
     {
         OutputHelpers.WriteError("No YubiKey found.");
@@ -479,11 +480,11 @@ static async Task<int> RunCredentialsVerbAsync(string[] args, CancellationToken 
 // fido fingerprints delete FINGERPRINT_ID [--pin PIN] [-f]
 // fido fingerprints rename FINGERPRINT_ID NAME [--pin PIN]
 // ---------------------------------------------------------------------------
-static async Task<int> RunFingerprintsVerbAsync(string[] args, CancellationToken cancellationToken)
+static async Task<int> RunFingerprintsVerbAsync(string[] args, int? serialNumber, CancellationToken cancellationToken)
 {
     var subVerb = args.Length > 1 ? args[1].ToLowerInvariant() : "help";
 
-    var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+    var selection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
     if (selection is null)
     {
         OutputHelpers.WriteError("No YubiKey found.");
@@ -716,6 +717,17 @@ static string? ParseOption(string[] args, string flag)
     return value;
 }
 
+static int? ParseSerial(string[] args)
+{
+    string? value = ParseOption(args, "--serial");
+    if (value is null)
+        return null;
+    if (!int.TryParse(value, System.Globalization.NumberStyles.None,
+            System.Globalization.CultureInfo.InvariantCulture, out int serial) || serial <= 0)
+        throw new ArgumentException("--serial must be a positive decimal device serial number.");
+    return serial;
+}
+
 static bool HasFlag(string[] args, string flag) =>
     args.Any(a => string.Equals(a, flag, StringComparison.OrdinalIgnoreCase));
 
@@ -741,6 +753,7 @@ static int ShowHelp()
     AnsiConsole.MarkupLine("  [green]--pin PIN[/]       Provide PIN (prompted if omitted in interactive mode)");
     AnsiConsole.MarkupLine("  [green]--new-pin PIN[/]   Provide the new PIN for set-pin or change-pin");
     AnsiConsole.MarkupLine("  [green]-f, --force[/]     Skip confirmation prompts");
+    AnsiConsole.MarkupLine("Non-interactive use requires [grey]--serial SERIAL[/].");
     return 0;
 }
 

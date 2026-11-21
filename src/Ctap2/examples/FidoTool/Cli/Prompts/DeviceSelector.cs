@@ -21,10 +21,19 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Prompts;
 /// </remarks>
 public static class DeviceSelector
 {
-    private static readonly SharedSelector Selector = new(
-        [ConnectionType.HidFido, ConnectionType.SmartCard], NonInteractiveSelection.PreferFirstTransport);
-
-    /// <summary>Finds an eligible YubiKey, preferring FIDO HID when multiple devices cannot be prompted for.</summary>
+    /// <summary>Finds an eligible YubiKey from an interactive terminal.</summary>
     public static Task<DeviceSelection?> SelectDeviceAsync(CancellationToken cancellationToken = default) =>
-        Selector.SelectDeviceAsync(cancellationToken);
+        SelectDeviceAsync(null, cancellationToken);
+
+    /// <summary>Finds the specified serial, or prompts for an interactive choice.</summary>
+    public static Task<DeviceSelection?> SelectDeviceAsync(int? serialNumber, CancellationToken cancellationToken)
+    {
+        bool interactive = Spectre.Console.AnsiConsole.Profile.Capabilities.Interactive && !Console.IsInputRedirected;
+        if (!interactive && serialNumber is null)
+            throw new InvalidOperationException("Non-interactive use requires an explicit --serial target.");
+
+        var selector = new SharedSelector([ConnectionType.HidFido, ConnectionType.SmartCard],
+            NonInteractiveSelection.RequireChoice, serialNumber);
+        return selector.SelectDeviceAsync(cancellationToken, allowInteraction: interactive);
+    }
 }

@@ -105,6 +105,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal const int Pbkdf2DerivedKeyLength = 32;
 
     private IHsmAuthBackend _backend = null!;
+    private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
     private HsmAuthSession(
         ISmartCardConnection connection,
@@ -272,8 +273,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 continue;
 
             var value = tlv.Value.Span;
-            if (value.Length < 3)
-                continue;
+            if (value.Length is < (MinLabelLength + 3) or > (MaxLabelLength + 3))
+                throw new BadResponseException("LIST returned a credential record with an invalid label length.");
 
             var algorithm = (HsmAuthAlgorithm)value[0];
             var touchByte = value[1];
@@ -285,12 +286,24 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             };
             var labelBytes = value[2..^1]; // Everything except algorithm, touch, and retries-remaining
             var retriesRemaining = value[^1];
-            var label = Encoding.UTF8.GetString(labelBytes);
+            var label = DecodeListedLabel(labelBytes);
 
             credentials.Add(new HsmAuthCredential(label, algorithm, retriesRemaining, touchRequired));
         }
 
         return credentials;
+    }
+
+    private static string DecodeListedLabel(ReadOnlySpan<byte> label)
+    {
+        try
+        {
+            return StrictUtf8.GetString(label);
+        }
+        catch (DecoderFallbackException)
+        {
+            throw new BadResponseException("LIST returned a credential label that is not valid UTF-8.");
+        }
     }
 
     /// <inheritdoc />

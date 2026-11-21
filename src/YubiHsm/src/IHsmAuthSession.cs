@@ -38,6 +38,8 @@ public interface IHsmAuthSession : IApplicationSession
     ///     identifiers are preserved and unknown touch values become <c>null</c>. Select a supported
     ///     algorithm explicitly before using a credential.
     /// </remarks>
+    /// <exception cref="Yubico.YubiKit.Core.BadResponseException">A credential record has an invalid label length or encoding.</exception>
+    /// <exception cref="ArgumentException">The response has malformed TLV framing.</exception>
     Task<IReadOnlyList<HsmAuthCredential>> ListCredentialsAsync(
         CancellationToken cancellationToken = default);
 

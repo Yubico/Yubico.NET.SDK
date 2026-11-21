@@ -24,6 +24,37 @@ namespace Yubico.YubiKit.YubiHsm.UnitTests;
 public class HsmAuthSessionByteLevelTests
 {
     [Fact]
+    public async Task ListCredentialsAsync_PreservesUnknownAlgorithmAndTouchPolicy()
+    {
+        using var connection = CreateInitializedConnection([
+            0x72, 0x04, 0x26, 0x01, (byte)'a', 8,
+            0x70, 0x01, 0xFF, // Unknown, well-formed extension.
+            0x72, 0x05, 0xFE, 0x02, 0xC3, 0xA9, 7,
+            0x90, 0x00]);
+        await using var session = await HsmAuthSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Collection(await session.ListCredentialsAsync(TestContext.Current.CancellationToken),
+            known => Assert.Equal(new HsmAuthCredential("a", HsmAuthAlgorithm.Aes128YubicoAuthentication, 8, true), known),
+            future => Assert.Equal(new HsmAuthCredential("é", (HsmAuthAlgorithm)0xFE, 7, null), future));
+    }
+
+    [Theory]
+    [InlineData("72022601")]
+    [InlineData("7203260108")]
+    [InlineData("72042601FF08")]
+    public async Task ListCredentialsAsync_DoesNotReturnPartialListWhenARecordIsMalformed(string malformedRecordHex)
+    {
+        using var connection = CreateInitializedConnection([
+            0x72, 0x04, 0x26, 0x01, (byte)'a', 8,
+            .. Convert.FromHexString(malformedRecordHex), 0x90, 0x00]);
+        await using var session = await HsmAuthSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<BadResponseException>(() => session.ListCredentialsAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = new RecordingSmartCardConnection();

@@ -40,7 +40,7 @@ internal sealed class MacOSHidReportApi : IMacOSHidReportApi
             deviceEntry = IOKitNativeMethods.IOServiceGetMatchingService(0, matchingDictionary);
 
             if (deviceEntry == 0)
-                throw new PlatformApiException("Failed to find matching device entry in IO registry.");
+                throw new MacOSHidEntryUnavailableException();
 
             var device = IOKitNativeMethods.IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
 
@@ -99,3 +99,7 @@ internal sealed class MacOSHidReportApi : IMacOSHidReportApi
     public void RegisterRemovalCallback(nint device, nint callback, nint context) =>
         IOKitNativeMethods.IOHIDDeviceRegisterRemovalCallback(device, callback, context);
 }
+
+// Distinguishes a vanished registry entry from an open failure on a device that was found.
+internal sealed class MacOSHidEntryUnavailableException()
+    : PlatformApiException("Failed to find matching device entry in IO registry.");

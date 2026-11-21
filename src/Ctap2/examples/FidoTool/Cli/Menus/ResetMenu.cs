@@ -24,7 +24,8 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 /// Interactive menu for factory reset of the FIDO application.
 /// </summary>
 /// <remarks>
-/// Human-coordinated only. The same device view and transport are retained through reinsertion.
+/// Human-coordinated only. Retain the selected transport and try the original device view first.
+/// A vanished macOS HID entry may be rediscovered by a unique confirmed serial on that transport.
 /// A serial-less GetInfo fingerprint does not uniquely identify a physical key. Preflight and current prompt
 /// strings are not authoritative transport/timing evidence. ReadLine/confirmation prompts do not honor
 /// cancellation while blocked. Follow the sample README's qualified product reset procedure and verify

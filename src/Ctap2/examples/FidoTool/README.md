@@ -71,9 +71,11 @@ FidoTool reset -f
    NFC remaining in reader contact, and product-dependent long touch. CTAP 2.3's enabled long-touch
    option requires at least five seconds, not a universal ten-second press.
 
-The sample retains the selected device view and transport across reinsertion. It checks the live serial
-when a serial was available. Without one it compares GetInfo AAGUID, firmware and supported versions
-on the connection that will send Reset. A matching fingerprint is **not unique device identity**.
+The sample first tries the selected device view on the same transport after reinsertion. If the macOS
+HID registry entry is gone, it tries fresh discovery on that transport only, and only with a confirmed
+serial that matches exactly one candidate. It checks the live serial on the same connection that will
+send Reset. Without a serial it never retargets: if the original view opens, it compares GetInfo
+AAGUID, firmware and supported versions on that connection. A matching fingerprint is **not unique device identity**.
 Manually verify the physical target and avoid ambiguous multi-key setups. Failed checks prevent Reset;
 missing optional metadata is not proof of unrestricted transports or a short touch. Existing executable prompts
 still contain overgeneralized five/ten-second wording; follow the qualified product procedure, not those

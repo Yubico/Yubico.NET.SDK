@@ -16,6 +16,7 @@ using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.Hid.MacOS;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management;
 
@@ -27,7 +28,8 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 /// and clears the PIN; named storage/configuration effects depend on the applicable protocol/product.
 /// </summary>
 /// <remarks>
-/// This helper uses the selected device throughout. It does not power-cycle, enforce a local reset timer or roll back.
+/// A vanished macOS HID entry may be rediscovered by a unique confirmed serial on the same transport.
+/// This helper does not power-cycle, enforce a local reset timer or roll back.
 /// CTAP 2.1/2.3 require receipt within ten seconds of power-up for displayless devices; Yubico documents
 /// five seconds before firmware 5.5.2 and ten on 5.5.4+, with 5.5.2/5.5.3 unspecified in that passage.
 /// Separate transport/product presence requirements apply. Current executable timing/error prompts are
@@ -70,17 +72,14 @@ public static class ResetAuthenticator
         return new ResetPreflightInfo(selected, preferredConnection, serialNumber, info);
     }
 
-    internal static async Task<ResetResult> ResetAsync(ResetPreflightInfo target, CancellationToken cancellationToken)
+    internal static async Task<ResetResult> ResetAsync(ResetPreflightInfo target, CancellationToken cancellationToken,
+        Func<ConnectionType, CancellationToken, Task<IReadOnlyList<IYubiKey>>>? discover = null)
     {
         try
         {
             var options = new SessionCreationOptions { PreferredConnectionType = target.Transport };
-            await using IConnection connection = target.Transport switch
-            {
-                ConnectionType.SmartCard => await target.Device.ConnectAsync<ISmartCardConnection>(cancellationToken),
-                ConnectionType.HidFido => await target.Device.ConnectAsync<IFidoHidConnection>(cancellationToken),
-                _ => throw new NotSupportedException("FIDO reset requires SmartCard or FIDO HID.")
-            };
+            await using var connection = await OpenResetConnectionAsync(
+                target, discover ?? YubiKeyManager.FindAllAsync, cancellationToken);
 
             // Both sessions borrow this handle. Dispose Management before CTAP selects its applet.
             // Reopening the interface here could reset a different card than the one verified.
@@ -113,6 +112,38 @@ public static class ResetAuthenticator
             return ResetResult.Failed($"Failed to reset authenticator: {ex.Message}");
         }
     }
+
+    private static async Task<IConnection> OpenResetConnectionAsync(ResetPreflightInfo target,
+        Func<ConnectionType, CancellationToken, Task<IReadOnlyList<IYubiKey>>> discover, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await OpenAsync(target.Device, target.Transport, cancellationToken);
+        }
+        catch (MacOSHidEntryUnavailableException) when (target.Transport == ConnectionType.HidFido)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (target.SerialNumber is not int serial)
+                throw new InvalidOperationException("The selected HID interface is no longer available and has no confirmed serial number. Reselect the device. Reset not sent.");
+
+            var devices = await discover(target.Transport, cancellationToken);
+            var matches = devices.Where(device => device.SerialNumber == serial && device.SupportsConnection(target.Transport))
+                .Take(2).ToArray();
+            if (matches.Length != 1)
+                throw new InvalidOperationException("Could not uniquely rediscover the confirmed serial on the selected transport. Reselect the device. Reset not sent.");
+
+            cancellationToken.ThrowIfCancellationRequested();
+            return await OpenAsync(matches[0], target.Transport, cancellationToken);
+        }
+    }
+
+    private static async Task<IConnection> OpenAsync(IYubiKey device, ConnectionType transport, CancellationToken cancellationToken) =>
+        transport switch
+        {
+            ConnectionType.SmartCard => await device.ConnectAsync<ISmartCardConnection>(cancellationToken),
+            ConnectionType.HidFido => await device.ConnectAsync<IFidoHidConnection>(cancellationToken),
+            _ => throw new NotSupportedException("FIDO reset requires SmartCard or FIDO HID.")
+        };
 
     private static string MapCtapError(CtapException ex) =>
         ex.Status switch

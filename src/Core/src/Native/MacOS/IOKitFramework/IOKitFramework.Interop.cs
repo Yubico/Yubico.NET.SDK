@@ -176,15 +176,18 @@ internal static partial class NativeMethods
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     internal static partial IntPtr IORegistryEntryIDMatching(ulong entryID); /* Returns retained */
 
-    /*!
-        @function IOServiceGetMatchingService
-        @abstract Look up a registered IOService object that matches a matching dictionary.
-        @discussion This is the preferred method of finding IOService objects currently registered by IOKit (that is, objects that have had their registerService() methods invoked). To find IOService objects that aren't yet registered, use an iterator as created by IORegistryEntryCreateIterator(). IOServiceAddMatchingNotification can also supply this information and install a notification of new IOServices. The matching information used in the matching dictionary may vary depending on the class of service being looked up.
-        @param masterPort The master port obtained from IOMasterPort(). Pass kIOMasterPortDefault to look up the default master port.
-        @param matching A CF dictionary containing matching information, of which one reference is always consumed by this function (Note prior to the Tiger release there was a small chance that the dictionary might not be released if there was an error attempting to serialize the dictionary). IOKitLib can construct matching dictionaries for common criteria with helper functions such as IOServiceMatching, IOServiceNameMatching, IOBSDNameMatching.
-        @result The first service matched is returned on success. The service must be released by the caller.
-      */
+    // Consumes the matching dictionary on every native return. A nonzero iterator returned
+    // on success is owned by the caller and must be released with IOObjectRelease.
     [LibraryImport(Libraries.IOKitFramework)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    internal static partial int IOServiceGetMatchingService(int masterPort, IntPtr matching /* Releases arg */);
+    internal static partial kern_return_t IOServiceGetMatchingServices(uint mainPort, nint matching, out int iterator);
+
+    [LibraryImport(Libraries.IOKitFramework)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial int IOIteratorNext(int iterator);
+
+    // Mach boolean_t is 32 bits, not a marshalled C/C++ bool.
+    [LibraryImport(Libraries.IOKitFramework)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+    internal static partial int IOIteratorIsValid(int iterator);
 }

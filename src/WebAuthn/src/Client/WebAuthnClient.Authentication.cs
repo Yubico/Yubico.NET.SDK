@@ -112,7 +112,9 @@ public sealed partial class WebAuthnClient
         var context = new ExtensionContext(info, null, _backend);
         var permissions = PinUvAuthTokenPermissions.GetAssertion
             | AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context).Permissions;
+#pragma warning disable YKEXP001 // Apply previewSign-specific errors only to explicit extension requests.
         bool hasPreviewSign = options.Extensions?.PreviewSign is not null;
+#pragma warning restore YKEXP001
         var uvPreference = Extensions.Processing.Processors.PrfProcessor.RequiresVerifiedEvaluation(options.Extensions?.Prf, context, registration: false)
             ? Preferences.UserVerificationPreference.Required : options.UserVerification;
 

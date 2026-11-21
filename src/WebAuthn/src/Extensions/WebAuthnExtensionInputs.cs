@@ -16,6 +16,8 @@ using Yubico.YubiKit.Ctap2.Extensions;
 
 namespace Yubico.YubiKit.WebAuthn.Extensions;
 
+#pragma warning disable YKEXP001 // Stable aggregate carriers allow null experimental inputs.
+
 /// <summary>
 /// Extension inputs for WebAuthn registration (MakeCredential).
 /// </summary>
@@ -42,7 +44,7 @@ public sealed record class RegistrationExtensionInputs(
     Inputs.LargeBlobInput? LargeBlob = null,
     Inputs.PrfInput? Prf = null,
     Inputs.CredPropsInput? CredProps = null,
-    PreviewSign.PreviewSignRegistrationInput? PreviewSign = null);
+    [property: System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")] PreviewSign.PreviewSignRegistrationInput? PreviewSign = null);
 
 /// <summary>
 /// Extension inputs for WebAuthn authentication (GetAssertion).
@@ -64,5 +66,5 @@ public sealed record class RegistrationExtensionInputs(
 public sealed record class AuthenticationExtensionInputs(
     Inputs.LargeBlobInput? LargeBlob = null,
     Inputs.PrfInput? Prf = null,
-    PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null,
+    [property: System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")] PreviewSign.PreviewSignAuthenticationInput? PreviewSign = null,
     bool GetCredBlob = false);

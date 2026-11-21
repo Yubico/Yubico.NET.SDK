@@ -391,6 +391,8 @@ var authenticationExtensions = new AuthenticationExtensionInputs(
 
 ## previewSign Extension
 
+The previewSign surface uses `YKEXP001`; keep opt-ins local to consumers of the draft extension.
+
 **Purpose:** Generate a separate signing key associated with a WebAuthn credential, then use its handle
 for algorithm-specific signing during authentication. This is the experimental
 [Yubico WebAuthn sign-extension draft v4, §10.2.1](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension),

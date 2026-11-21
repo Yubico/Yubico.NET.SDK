@@ -26,6 +26,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 ///     previewSign authentication through the extension session (Yubico previewSign draft v4 §10.2.1): the client
 ///     validates signByCredential against allowCredentials and sends the entry of the credential it selected.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignProcessorTests
 {
     private const int KeyHandleKey = 2;  // draft CDDL: key-handle = 2, tbs = 6, additional-args = 7

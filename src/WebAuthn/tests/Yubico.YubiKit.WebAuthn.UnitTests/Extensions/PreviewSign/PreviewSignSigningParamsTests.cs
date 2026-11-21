@@ -24,6 +24,7 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 /// is caller-provided algorithm-specific data and is exposed unchanged. These arbitrary fixture
 /// bytes test pass-through, not semantic validity as a CBOR COSE_Sign_Args map.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignSigningParamsTests
 {
     [Fact]

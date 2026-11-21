@@ -365,6 +365,7 @@ public class WebAuthnClientCeremonyFrameTests
     }
 
     [Fact]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public async Task MakeCredential_PreviewSignRequested_MapsCtapErrorsThroughPreviewSignMapper()
     {
         _backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())

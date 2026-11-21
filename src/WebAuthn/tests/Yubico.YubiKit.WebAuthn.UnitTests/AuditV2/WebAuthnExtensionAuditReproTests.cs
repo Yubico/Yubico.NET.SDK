@@ -92,6 +92,7 @@ public class WebAuthnExtensionAuditReproTests
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public async Task YESDK1634_RegistrationFailsWhenPreviewSignInnerAttestationIsMissing()
     {
         var extensions = new CborWriter(CborConformanceMode.Ctap2Canonical);

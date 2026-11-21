@@ -33,6 +33,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// until the ceremony completes; ownership remains with the caller.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class PreviewSignAuthenticationInput
 {
     /// <summary>

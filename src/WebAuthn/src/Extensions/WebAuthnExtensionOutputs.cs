@@ -41,6 +41,7 @@ public sealed record class RegistrationExtensionOutputs
     /// <summary>Gets the credential properties output.</summary>
     public Outputs.CredPropsOutput? CredProps { get; init; }
     /// <summary>Gets the generated signing key details.</summary>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public PreviewSign.PreviewSignRegistrationOutput? PreviewSign { get; init; }
 }
 
@@ -71,5 +72,6 @@ public sealed record class AuthenticationExtensionOutputs
     /// <summary>Gets the PRF evaluation results.</summary>
     public Outputs.PrfAuthenticationOutput? Prf { get; init; }
     /// <summary>Gets the signature over the to-be-signed data.</summary>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public PreviewSign.PreviewSignAuthenticationOutput? PreviewSign { get; init; }
 }

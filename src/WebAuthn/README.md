@@ -360,6 +360,9 @@ the authenticator; it does not set a PIN policy. Null and `Requested = false` bo
 
 ### Evaluate experimental signing
 
+The previewSign-specific types and properties are marked experimental (`YKEXP001`). Opt in only at
+the call sites that use them. Ordinary registration and authentication do not require this opt-in.
+
 `previewSign` implements the [Yubico WebAuthn sign-extension draft v4](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension),
 not a CTAP version or an adopted W3C signing standard. Registration generates a **separate signing
 key**, not a way to export or repurpose the WebAuthn credential's private key. Authentication requires

@@ -20,6 +20,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing;
 /// <summary>Mutable sink the registration processors write into; <see cref="Build"/> yields the typed record.</summary>
 internal sealed class RegistrationExtensionOutputsBuilder
 {
+#pragma warning disable YKEXP001 // Forward optional experimental output in the stable result container.
     public CredProtectOutput? CredProtect { get; set; }
     public CredBlobMakeCredentialOutput? CredBlob { get; set; }
     public MinPinLengthOutput? MinPinLength { get; set; }

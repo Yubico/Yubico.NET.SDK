@@ -151,6 +151,7 @@ public class ExtensionSessionTests
     }
 
     [Fact(Timeout = 5000)]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public void PrepareInputs_PreviewSignWithMultipleStandardExtensions_ProducesCtap2CanonicalOrder()
     {
         // Arrange - combine previewSign with standard extensions that have different lengths

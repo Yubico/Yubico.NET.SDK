@@ -27,6 +27,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// </para>
 /// </remarks>
 [Flags]
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public enum PreviewSignFlags : byte
 {
     /// <summary>
@@ -48,6 +49,7 @@ public enum PreviewSignFlags : byte
 /// <summary>
 /// Extension methods for <see cref="PreviewSignFlags"/>.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 internal static class PreviewSignFlagsExtensions
 {
     /// <summary>

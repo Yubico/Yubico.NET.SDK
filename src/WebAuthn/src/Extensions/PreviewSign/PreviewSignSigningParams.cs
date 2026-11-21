@@ -42,6 +42,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// requires nonempty TBS locally. Algorithms can impose additional requirements that this type does not validate.
 /// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class PreviewSignSigningParams
 {
     /// <summary>

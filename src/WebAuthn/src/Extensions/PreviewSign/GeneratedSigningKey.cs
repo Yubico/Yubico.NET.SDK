@@ -55,6 +55,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// (v4 §10.2.1) makes it a required member, and <see cref="KeyHandle"/> and <see cref="PublicKey"/>
 /// are taken from its attested credential data.
 /// </param>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class GeneratedSigningKey(
     ReadOnlyMemory<byte> KeyHandle,
     CoseKey PublicKey,

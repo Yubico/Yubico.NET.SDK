@@ -68,6 +68,26 @@ public sealed class OpenPgpPutKeyWireTests
     }
 
     [Fact]
+    public async Task RsaImport_Neo_UsesCrtWithModulusFormatAndModulusComponent()
+    {
+        using var rsa = RSA.Create(2048);
+        using var key = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
+        var connection = CreateConnection(afterAttributeWrite: true, importChunks: 4,
+            versionResponse: [0x03, 0x04, 0x00, 0x90, 0x00]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        await session.PutKeyAsync(KeyRef.Sig, key, token);
+
+        byte[] attributes = Assert.Single(connection.TransmittedCommands, command => command[1] == InsPutData);
+        Assert.Equal(0x03, ApduData(attributes).Span[^1]);
+        var (crt, headers, values) = ParseImport(connection);
+        Assert.Equal(CrtSig, crt);
+        Assert.Equal([0x91, 0x03, 0x92, 0x81, 0x80, 0x93, 0x81, 0x80, 0x94, 0x81, 0x80,
+            0x95, 0x81, 0x80, 0x96, 0x81, 0x80, 0x97, 0x82, 0x01, 0x00], headers);
+        Assert.Equal(rsa.ExportParameters(false).Modulus, values[^256..]);
+    }
+
+    [Fact]
     public async Task RsaImport_InsideRocaGenerationPolicy_SendsPrivateKeyTemplate()
     {
         using var rsa = RSA.Create(2048);

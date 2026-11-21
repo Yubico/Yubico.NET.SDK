@@ -294,6 +294,23 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
+    public async Task NeoFixedAttributes_GeneratesWithoutAttributeWriteAndRefusesDeletion()
+    {
+        byte[] appData = ApplicationRelatedDataResponse(attributesChangeable: false);
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x03, 0x04, 0x00, 0x90, 0x00], appData,
+            OkResponse(), appData);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.DeleteKeyAsync(KeyRef.Sig, token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa4096), token));
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+
+        await session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa2048), token);
+
+        Assert.Equal([0x47, 0xCA], connection.TransmittedCommands.Skip(3).Select(c => c[1]).ToArray());
+    }
+
+    [Fact]
     public async Task AttestationKey_ReadAndGenerate_SendNestedCrt()
     {
         var connection = CreateInitializedConnection(
@@ -1156,17 +1173,18 @@ public sealed class OpenPgpSessionWireTests
         Uif? dec = null,
         Uif? aut = null,
         Uif? att = null,
-        AlgorithmAttributes? decipherAttributes = null) =>
-        [.. BuildApplicationRelatedData(sig, dec, aut, att, decipherAttributes), 0x90, 0x00];
+        AlgorithmAttributes? decipherAttributes = null,
+        bool attributesChangeable = true) =>
+        [.. BuildApplicationRelatedData(sig, dec, aut, att, decipherAttributes, attributesChangeable), 0x90, 0x00];
 
     private static byte[] BuildApplicationRelatedData(Uif? sig, Uif? dec, Uif? aut, Uif? att,
-        AlgorithmAttributes? decipherAttributes = null)
+        AlgorithmAttributes? decipherAttributes, bool attributesChangeable)
     {
         // AID: D276000124010304000612345678 (OpenPGP v3.4, Yubico, serial 12345678).
         byte[] aid = [0xD2, 0x76, 0x00, 0x01, 0x24, 0x01, 0x03, 0x04, 0x00, 0x06, 0x12, 0x34, 0x56, 0x78];
         byte[] historicalBytes = [0x00, 0x73, 0x00, 0x01, 0x80, 0x05, 0x90, 0x00];
         byte[] rsa2048Attributes = [0x01, 0x08, 0x00, 0x00, 0x11, 0x00];
-        byte[] extendedCapabilities = [0x75, 0x00, 0x00, 0xFF, 0x04, 0x80, 0x00, 0xFF, 0x00, 0x00];
+        byte[] extendedCapabilities = [attributesChangeable ? (byte)0x75 : (byte)0x71, 0x00, 0x00, 0xFF, 0x04, 0x80, 0x00, 0xFF, 0x00, 0x00];
         byte[] pwStatus = [0x00, 0x7F, 0x7F, 0x7F, 0x03, 0x00, 0x03];
         var fingerprints = new byte[60];
         var caFingerprints = new byte[60];

@@ -46,8 +46,14 @@ public sealed partial class OpenPgpSession
             "Generating {AlgorithmType} key for {Slot}",
             attributes.GetType().Name,
             keyRef);
-        await SetAlgorithmAttributesAsync(keyRef, attributes, cancellationToken)
-            .ConfigureAwait(false);
+        if (_appData.Discretionary.ExtendedCapabilities.Flags.HasFlag(ExtendedCapabilityFlags.AlgorithmAttributesChangeable))
+        {
+            await SetAlgorithmAttributesAsync(keyRef, attributes, cancellationToken).ConfigureAwait(false);
+        }
+        else if (attributes is not RsaAttributes { NLen: (int)RsaSize.Rsa2048 })
+        {
+            throw new NotSupportedException("This YubiKey only supports RSA 2048 keys.");
+        }
 
         await GenerateKeyPairAsync(keyRef, cancellationToken).ConfigureAwait(false);
     }
@@ -113,12 +119,13 @@ public sealed partial class OpenPgpSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        if (FirmwareVersion.Major is > 0 and < 4)
+            throw new NotSupportedException("OpenPGP key deletion is not supported on YubiKey NEO.");
 
         _logger.LogInformation("Deleting key from {Slot}", keyRef);
 
         // Attribute switching is destructive and can leave partial state between writes.
-        // NEO's vendor deletion path instead overwrites a key; this sequence needs separate
-        // old-family qualification. Certificate and host metadata management remain separate.
+        // Certificate and host metadata management remain separate.
         var rsa4096 = RsaAttributes.Create(RsaSize.Rsa4096);
         var rsa2048 = RsaAttributes.Create(RsaSize.Rsa2048);
 

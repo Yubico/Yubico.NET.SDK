@@ -285,7 +285,8 @@ public interface IOpenPgpSession : IApplicationSession
     /// <summary>Generates a key pair with the supplied algorithm attributes in the specified slot.</summary>
     /// <remarks>
     ///     Verify the Admin PIN first and choose attributes advertised for the slot. Attribute writing precedes
-    ///     generation and can invalidate an existing key. Later failure/cancellation can leave partial changes;
+    ///     generation when supported and can invalidate an existing key. Fixed-attribute cards accept only
+    ///     RSA 2048. Later failure/cancellation can leave partial changes;
     ///     inspect fresh application data/public key before retrying. Successful generation refreshes the cache,
     ///     but refresh itself can fail after key creation. Manage certificates and fingerprint/time metadata separately.
     ///     EC generation uses the SDK's 5.2.0 check. On-card RSA generation is refused before writing

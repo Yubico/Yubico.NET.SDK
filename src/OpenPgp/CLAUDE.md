@@ -161,9 +161,9 @@ qualification. Vendor commercial-version wording and development-source gates ha
 | Key attestation | 5.2.0 | `EnsureSupports` |
 | Unverify PIN | 5.6.0 | `EnsureSupports` |
 
-Cached/ATT UIF and retry/challenge capability checks remain incomplete. NEO RSA import advertises CRT 02
-while including modulus (vendor uses 03), and vendor NEO deletion differs from attribute switching. Preserve
-those compatibility qualifications. On-card RSA generation is refused before writing attributes on
+Cached/ATT UIF and retry/challenge capability checks remain incomplete. NEO RSA import labels the
+modulus-bearing CRT template as format 03. NEO deletion is unsupported rather than overwriting the key;
+old-family device qualification remains separate. On-card RSA generation is refused before writing attributes on
 `[4.2.0, 4.3.5)` as a conservative policy; YSA-2017-01 identifies 4.2.6–4.3.4 as affected and
 4.3.5 as corrected. Independently generated imports are not subject to this gate.
 

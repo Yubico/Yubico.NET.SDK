@@ -565,3 +565,7 @@ TestResults/
 Yubico.Core/fuzz/
 
 Plans/
+# Isolated V2 checkout, documentation tools, generated configuration, and build logs
+/.docbuild/
+
+/docs/v2-api/**/*.yml

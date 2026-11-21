@@ -34,9 +34,9 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// See: https://www.w3.org/TR/webauthn-2/#sctn-attested-credential-data
 /// </para>
 /// <para>
-/// Parse copies the credential ID and encoded key. It extracts one CBOR value for the key without
-/// requiring a COSE map, alg or algorithm-specific parameters. Decode the key separately and apply
-/// RP algorithm/trust policy; extraction is not attestation or mathematical-key verification.
+/// Parse copies the credential ID and one encoded CBOR map for the key. It preserves unknown map
+/// contents without requiring an alg or algorithm-specific parameters. Decode the key separately
+/// and apply RP algorithm/trust policy; extraction is not attestation or mathematical-key verification.
 /// </para>
 /// </remarks>
 public sealed class AttestedCredentialData

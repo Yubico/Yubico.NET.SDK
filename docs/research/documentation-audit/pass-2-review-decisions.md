@@ -44,6 +44,8 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-27](#ag-27-r1-clear-scope) | 2026-11-20 | Dennis clarified R1: no new public `Clear()` convenience methods on applet result types. Existing public `ApduResponse.Clear()` remains supported; the SDK must still clear sensitive buffers it owns. | Approved |
 | [AG-28](#ag-28-delivery-commit-scope) | 2026-11-20 | Dennis approved reconciliation #3: one commit per unsplit card or per approved, independently scoped facet of a split card. | Interpretation only; no implementation authorized |
 | [AG-29](#ag-29-c1-caller-serialization) | 2026-11-20 | Dennis withdraws SDK-wide fail-fast operation admission (C1/X4). Callers serialize operations per session; the existing logical-exchange guard is unchanged. | Approved; documentation only |
+| [AG-30](#ag-30-q11-keyreplacement-exact-shape) | 2026-11-21 | Dennis supplied the exact Security Domain `KeyReplacement` shape, replacement range, and four mandatory-argument signatures. | Approved for SD-IMP-006 |
+| [AG-31](#ag-31-november-21-follow-up-approvals) | 2026-11-21 | Dennis approved the OATH reset follow-up, CTAP reset rediscovery, WebAuthn continuation limit, PIV adoption of X13 and legacy-derived retry refusal; requested a Rust/Python PIV PIN-only design comparison and directed public NuGet.org sourcing for NativeShims. | Approved within the scope below; PIV PIN-only API design and NativeShims availability verification pending |
 
 ### AG-8 classification run
 
@@ -607,6 +609,60 @@ draining the rest of an applet workflow during disposal.
 and PIV-specific guidance in the PIV PR. This disposition does not presume or authorize new bug fixes. Fix a
 verified concurrency or state defect only within existing narrow approval; escalate new findings for a scope
 decision rather than creating new cards under C1.
+
+### AG-30 Q11 KeyReplacement exact shape
+
+Dennis supplied this Security Domain-only design on 2026-11-21. It supersedes the numeric replacement
+argument for all three `PutKeyAsync` payload overloads (`StaticKeys`, `ECPublicKey`, `ECPrivateKey`) and
+`GenerateKeyAsync`. Each requires `KeyReplacement replace` before its optional cancellation token.
+
+```csharp
+public readonly record struct KeyReplacement
+{
+    private KeyReplacement(byte kvn) => Kvn = kvn;
+    internal byte Kvn { get; }
+    public static KeyReplacement New { get; } = new(0);
+    public static KeyReplacement Of(byte existingKvn) => existingKvn is >= 0x01 and <= 0xFE
+        ? new(existingKvn)
+        : throw new ArgumentOutOfRangeException(nameof(existingKvn), "KVN must be 0x01–0xFE.");
+    public bool IsNew => Kvn == 0;
+}
+```
+
+`New` (also the default struct value) sends P1 `0x00`. `Of(0x02)` with target KVN `0x03` replaces
+version 2 with version 3: P1 is `0x02`, the first command data byte is `0x03`. `Of` rejects `0x00` and
+`0xFF`; the target-reference rules are unchanged. No numeric or optional replacement overload remains.
+
+### AG-31 November 21 follow-up approvals
+
+Dennis approved the outstanding proposals in chat on 2026-11-21, with the PIV design follow-up and NativeShims
+sourcing directive below.
+
+- **OATH (X2):** Correct the reset message to distinguish a confirmed reset followed by failed reinitialization
+  from a reset whose outcome was not confirmed. Add a focused software-only SCP11 re-handshake test after a
+  confirmed reset. The Copilot loop stops at three rounds; use independent review to close the remaining
+  findings, with no automatic fourth Copilot review request.
+- **CTAP-IMP-048:** Keep the selected device through reinsertion. If the old macOS entry is invalid, allow
+  rediscovery only on the same transport and only when exactly one candidate matches the known serial of the
+  originally selected key. Verify the target and reset on that same open connection. Do not automatically fall
+  back to serial-less rediscovery; the existing GetInfo fingerprint for a retained serial-less device is not
+  unique identity.
+- **WebAuthn:** Leave the CTAP response DTO count as `uint`. If the authenticator reports a credential count
+  greater than 1024, return an explicit typed error before issuing any `GetNext` call; never truncate the
+  results. This is an SDK safety limit, not a specification bound.
+- **PIV / OpenPGP (X13):** Block on-card RSA key generation in both applets for the conservative ROCA firmware
+  interval `[4.2.0, 4.3.5)`. Do not change import, signing or decryption. PIV is adopting X13 policy; this
+  does not close the physical qualification in PIVIMP-003.
+- **PIVIMP-002:** The retry-count helper must refuse legacy derived-management-key mode before any mutation.
+  The PIN-only helper design is still open: have a subagent compare the Rust and Python SDKs and return findings
+  and a design grounded in both. Astra must review the final design and have any issues corrected. No exact
+  helper signature or exception type was approved.
+- **NativeShims:** Source dependencies from public [NuGet.org](https://www.nuget.org/), without relying on an
+  internal feed. Verify that the required package IDs and versions are actually available there; availability
+  and public-only restore have not been verified by this record.
+
+These are scope and design decisions, not delivery or qualification results. No merge or hardware run was
+authorized. Dennis retains merge authority and coordinates device fixtures later.
 
 ### AG-14 firmware rule detail
 

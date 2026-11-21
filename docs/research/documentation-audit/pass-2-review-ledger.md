@@ -24,7 +24,7 @@ pins, options and pseudocode. Agreement numbers (AG-n) point into `pass-2-review
 | # | Decision | Recorded |
 | --- | --- | --- |
 | X1 | A failed login never ends the session; it clears only that credential's earlier success; a failed SCP handshake ends it | AG-23 |
-| X2 | Sessions continue after a confirmed reset in every applet: reselect, clear cached and authenticated state, re-read, re-run SCP; Security Domain re-authenticates with the default SCP03 keys (Q12 a). Flips PGP-IMP-005 and MGMT-IMP-010 | AG-22, AG-23 |
+| X2 | Sessions continue after a confirmed reset in every applet: reselect, clear cached and authenticated state, re-read, re-run SCP; Security Domain re-authenticates with the default SCP03 keys (Q12 a). Flips PGP-IMP-005 and MGMT-IMP-010. OATH follow-up: correct the reset message and add focused software-only SCP11 coverage | AG-22, AG-23, [AG-31](pass-2-review-decisions.md#ag-31-november-21-follow-up-approvals) |
 | X3 | Secret results are caller-owned writable `Memory<byte>` (single and composite, R1); `IDisposable` only for secret holders (`CredentialPassword`, `SessionKeys`). No new public `Clear()` convenience methods on applet result types. Existing public `ApduResponse.Clear()` remains supported; the SDK must still clear sensitive buffers it owns. Samples follow S1 | AG-21, AG-24, AG-25, [AG-27](pass-2-review-decisions.md#ag-27-r1-clear-scope) |
 | X4 | Rule C1: callers serialize one complete operation at a time per session and await it before another operation or disposal. Concurrent use is unsupported; the existing logical protocol exchange guard is unchanged. No whole-operation admission guard or workflow lease. | [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization), supersedes AG-21 |
 | X5, X6 | Cancellation and error mapping settled through their cards | AG-20, AG-21 |
@@ -34,7 +34,7 @@ pins, options and pseudocode. Agreement numbers (AG-n) point into `pass-2-review
 | X10 | Tests start from a known state; self-cleanup only as a justified exception | AG-13 |
 | X11 | previewSign and ARKG in scope behind `[Experimental("YKEXP001")]`; no new user docs | AG-11 |
 | X12 | `CredentialPassword` with `FromUtf8` (padded, at most 16 bytes) and `FromRaw` (exactly 16) | AG-23 |
-| X13 | Conservative ROCA range [4.2.0, 4.3.5) | AG-20 |
+| X13 | Conservative ROCA range [4.2.0, 4.3.5) for on-card RSA generation in PIV and OpenPGP; import, signing and decryption unchanged. PIV policy adoption does not close PIVIMP-003 qualification. | AG-20, [AG-31](pass-2-review-decisions.md#ag-31-november-21-follow-up-approvals) |
 | S1 | Sample apps: readability first, no added secret clearing, demo-only warning | AG-21 |
 | D1 | Every PR labels each divergence from the sibling SDKs with its reason | AG-21 |
 | C1 | See X4 | [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) |
@@ -77,7 +77,7 @@ The withdrawn C1 guard is not a shared prerequisite.
 | WA-IMP-019 | WebAuthn | Low | A2 | Auto | python, Android and Rust accept empty generated handles. .NET rejects them in the constructor. TBS rule unchanged. Veto pass: no veto | AG-25; see also AG-11 |
 | WA-IMP-020 | WebAuthn | Low | A1 | Auto | Mechanical test fixture change from the card. Keep the extra-field case. Veto pass: no veto | AG-25; see also AG-11 |
 | WA-IMP-021 | WebAuthn | Low | A1 | Auto | Mechanical test assertion: returned credential ID must belong to the allow list. Veto pass: no veto | AG-25 |
-| WA-WHOLE-CEREMONY (Whole-ceremony lifetime) | WebAuthn | Medium (conditional) | Interview (unmatched; T2 a) | Dennis | A: ceremonies stay caller-serialized and fully awaited, documented; see X4/C1 | AG-12; [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) |
+| WA-WHOLE-CEREMONY (Whole-ceremony lifetime) | WebAuthn | Medium (conditional) | Interview (unmatched; T2 a) | Dennis | A: ceremonies stay caller-serialized and fully awaited, documented; see X4/C1. Separate continuation follow-up: keep the `uint` DTO and fail with a typed error before `GetNext` if the count exceeds the SDK limit of 1024; no truncation. | AG-12; [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization); [AG-31](pass-2-review-decisions.md#ag-31-november-21-follow-up-approvals) |
 | Ceremony/platform qualification | WebAuthn | no severity | T1 | T1 hardware | No code decision; device qualification | classification only |
 | MGMT-IMP-001 | Management | Low | Interview (gated: G3; T2) | Dennis | (a): keep the NFC-restriction firmware preflight with the 5.7 boundary | AG-22 |
 | MGMT-IMP-002 | Management | No assigned defect severity | T1 | T1 hardware | No code decision; device qualification | AG-19 |
@@ -146,7 +146,7 @@ The withdrawn C1 guard is not a shared prerequisite.
 | CTAP-IMP-045 | CTAP2 | Low | A1 | Auto | No-brainer yes. Missing flag values and unknown verbs fail; help runs before device selection; unknown sensor kind is not renamed. Veto pass: no veto | AG-25 |
 | CTAP-IMP-046 | CTAP2 | Medium | Interview (no rule) | Dennis | Lean accepted: (a) | AG-12 |
 | CTAP-IMP-047 | CTAP2 | Medium | Interview (G5, no rule) | Dennis | a | AG-20 |
-| CTAP-IMP-048 | CTAP2 | High | Interview (G1) | Dennis | Approved / (a) Retain the selected device object through reinsertion; without a serial, verify with a GetInfo fingerprint and document that it is not unique identity | AG-16 |
+| CTAP-IMP-048 | CTAP2 | High | Interview (G1) | Dennis | Retain the selected device through reinsertion; verify a retained serial-less device with a GetInfo fingerprint (not unique identity). If the old macOS entry is invalid, rediscover only with exactly one known serial match on the same transport; no automatic serial-less fallback. Verify and reset on the same open connection. | AG-16; [AG-31](pass-2-review-decisions.md#ag-31-november-21-follow-up-approvals) |
 | CTAP-DEC-002 | CTAP2 | none assigned | Interview (no rule) | Dennis | Lean, follow siblings / (a) | AG-12 |
 | CTAP-DEC-003 | CTAP2 | none assigned | T1 | T1 hardware | No code decision; device qualification | classification only |
 | CORE-CTAP-X020 | CTAP2 | Medium | Interview (no rule) | Dennis | Lean accepted: (a) | AG-12 |
@@ -155,7 +155,7 @@ The withdrawn C1 guard is not a shared prerequisite.
 | SD-IMP-003 | Security Domain | Medium | A2 (secondary A6) | Auto | Serials are not normalized to positive DER INTEGER, as all three siblings do; SCP11c counter stays documented as unsupported. Veto pass: no veto | AG-25 |
 | SD-IMP-004 | Security Domain | Medium | Interview (G3) | Auto (AG-19) | M1 | AG-19 |
 | SD-IMP-005 | Security Domain | Medium | Interview (G5) | Dennis | Continue after reset (X2), re-authenticating with the restored default SCP03 keys; Q12 (a): always, whatever channel was used before | AG-22; AG-23 (Q12) |
-| SD-IMP-006 | Security Domain | Medium | Interview (G3) | Split: facet auto (AG-19), rest Dennis | A: restrict GENERATE to 0x11, 0x13, 0x15 before sending; named-intent KeyReplacement API in this pass (Q11: required parameter, four overloads), Security Domain only (AG-23) | AG-20; amended in AG-21 |
+| SD-IMP-006 | Security Domain | Medium | Interview (G3) | Split: facet auto (AG-19), rest Dennis | A: restrict GENERATE to 0x11, 0x13, 0x15 before sending; named-intent KeyReplacement API in this pass (Q11: required parameter, four overloads), Security Domain only (AG-23) | AG-20; amended in AG-21; exact Q11 shape in [AG-30](pass-2-review-decisions.md#ag-30-q11-keyreplacement-exact-shape) |
 | SD-IMP-007 | Security Domain | Low test debt, Medium assurance | A5 | Auto | Unit-level oracles follow in-repo specific-exception, status and disposal-probe tests; device facets move to T1. Veto pass: no veto | AG-25 |
 | SD-IMP-008 | Security Domain | Medium (real secrets), Low (fixtures) | A5 (secondary A2) | Auto | Local KCV and AES temporaries zeroed as the repo already does; explicit P-256 curve byte matches all siblings. Fixture cleanup excluded. Veto pass: no veto | AG-25 |
 | SD-DEP-001 | Security Domain | Qualification, no defect severity | T1 | T1 hardware | No code decision; device qualification | classification only |
@@ -211,7 +211,7 @@ The withdrawn C1 guard is not a shared prerequisite.
 | PGP-CORE-004 | OpenPGP | Medium (Low delay) | Interview (G5; T2) | Dennis | A / Verified: the advisory UIF read builds a `UserPresenceContext` (Basis PolicyRequires / PolicyMayRequire) for Core `IUserPresencePrompt` (`OpenPgpSession.cs:327-378`), the same primitive PIV, OATH, OTP, HSM Auth and CTAP2 use. Engineer adds a test: failed UIF read plus throwing logger still notifies with PolicyMayRequire and signs | AG-21 |
 | Physical/chronology qualification | OpenPGP | none assigned | T1 | T1 hardware | No code decision; device qualification | classification only |
 | PIVIMP-001 | PIV | High | Interview (G1; T2) | Dennis | A | AG-20 |
-| PIVIMP-002 | PIV | High | Interview (G1, G3; G5 on legacy derived) | Dennis | A, Python shape / Raw calls stay raw; opt-in coherent helpers modelled on ykman `pivman_set_mgm_key` / `pivman_change_pin` / `pivman_set_pin_attempts` (@4ca60f70 `ykman/piv.py:314-420`). Derived mode follows Python: management-key rotation clears the salt, PIN change re-derives with a fresh salt. Rust `crates/ykman/src/piv.rs:96-139` @90940e9b has no derived-mode handling, so Python is the only precedent there. Tests: Q10 | AG-21 |
+| PIVIMP-002 | PIV | High | Interview (G1, G3; G5 on legacy derived) | Dennis | A, Python shape / Raw calls stay raw; opt-in coherent helpers modelled on ykman `pivman_set_mgm_key` / `pivman_change_pin` / `pivman_set_pin_attempts` (@4ca60f70 `ykman/piv.py:314-420`). Derived mode follows Python: management-key rotation clears the salt, PIN change re-derives with a fresh salt. Rust `crates/ykman/src/piv.rs:96-139` @90940e9b has no derived-mode handling, so Python is the only precedent there. Tests: Q10. The retry helper refuses legacy derived mode before mutation; PIN-only API design remains pending the Rust/Python comparison and Astra review. | AG-21; [AG-31](pass-2-review-decisions.md#ag-31-november-21-follow-up-approvals) |
 | PIVIMP-003 | PIV | Qualification | T1 | T1 hardware | No code decision; device qualification | classification only |
 | PIVIMP-004 | PIV | Medium | Interview | Dennis | Lean accepted: A | AG-12 |
 | PIVIMP-005 | PIV | High | Interview (G1) | F1 confirmed | Sample tool signs the message, not the hash / Open choice: RSA padding, Sia leans PKCS#1 v1.5 only (Rust) vs also PSS (Python) / Approved 2026-11-15 with Sia's lean: PKCS#1 v1.5 only, no PSS (Rust precedent) | AG-10 |

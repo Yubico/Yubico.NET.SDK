@@ -48,6 +48,11 @@ card or per approved, independently scoped facet of a split card, with `Audit-Ca
 One draft PR per applet against `--base yubikit-pass2-base`, starting with OATH, with the Copilot review-fix loop.
 The withdrawn C1 guard is not a shared prerequisite.
 
+WebAuthn delivery: [draft PR #798](https://github.com/Yubico/Yubico.NET.SDK/pull/798). WA-IMP-019 signing
+follows [AG-32](pass-2-review-decisions.md#ag-32-previewsign-empty-generated-handle): empty but present
+handles are accepted as input; this amends only the nonempty-handle facet of CTAP-IMP-040/AG-11.
+Attended ceremonies and hardware/platform qualification remain pending.
+
 Security Domain delivery: [draft PR #792](https://github.com/Yubico/Yubico.NET.SDK/pull/792). Hardware qualification remains pending.
 
 Management software and documentation are in draft [PR #791](https://github.com/Yubico/Yubico.NET.SDK/pull/791),
@@ -57,11 +62,6 @@ Management qualification matrix remain pending; no device or integration executi
 CTAP2 delivery: [draft PR #790](https://github.com/Yubico/Yubico.NET.SDK/pull/790) against `yubikit-pass2-base`.
 Software changes and checks are ready for independent review. CTAP-IMP-030 stays deferred;
 CTAP-IMP-022 and CTAP-DEC-003 are not hardware-qualified by this PR.
-
-WebAuthn delivery: [draft PR #798](https://github.com/Yubico/Yubico.NET.SDK/pull/798) against `yubikit-pass2-base`.
-WA-IMP-019 signing follows [AG-32](pass-2-review-decisions.md#ag-32-previewsign-empty-generated-handle):
-empty but present generated handles are accepted as input; this amends only the nonempty-handle facet of
-CTAP-IMP-040/AG-11. Hardware, attended ceremonies, and platform qualification remain pending.
 
 OATH delivery: [draft PR #789](https://github.com/Yubico/Yubico.NET.SDK/pull/789) carries the approved software and
 documentation, including the OATH policy adoptions. OATH-DEC-004/006/007 and secure-reset qualification remain pending;

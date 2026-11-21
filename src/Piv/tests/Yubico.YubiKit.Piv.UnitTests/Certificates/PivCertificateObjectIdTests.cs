@@ -12,6 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.Piv.Backends;
 using Yubico.YubiKit.Piv.Certificates;
 
 namespace Yubico.YubiKit.Piv.UnitTests.Certificates;
@@ -66,5 +71,47 @@ public class PivCertificateObjectIdTests
 
         Assert.Equal("slot", exception.ParamName);
         Assert.StartsWith("Slot 0x00 does not support certificates", exception.Message);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("7100")]
+    [InlineData("710100")]
+    [InlineData("710102")]
+    public async Task GetCertificateAsync_AdmitsDerOnlyForUncompressedMode(string certInfo)
+    {
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var request = new CertificateRequest("CN=PIV unit test", key, HashAlgorithmName.SHA256);
+        using var expected = request.CreateSelfSigned(DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddDays(1));
+        var backend = new CertificateBackend(expected.RawData, Convert.FromHexString(certInfo));
+        var token = TestContext.Current.CancellationToken;
+
+        if (certInfo == "710102")
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() =>
+                CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, token));
+            return;
+        }
+
+        using var actual = await CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, token);
+        Assert.NotNull(actual);
+        Assert.Equal(expected.RawData, actual.RawData);
+    }
+
+    private sealed class CertificateBackend(byte[] certificate, byte[] certInfo) : IBackend
+    {
+        public Task<Initialization> ReadInitialStateAsync(CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public Task<ApduResponse> SendAsync(
+            ApduCommand command,
+            bool throwOnError = true,
+            CancellationToken cancellationToken = default)
+        {
+            Assert.Equal(0xCB, command.Ins);
+            byte[] length = new byte[BerLength.EncodingSize(certificate.Length)];
+            BerLength.Write(length, certificate.Length);
+            return Task.FromResult(new ApduResponse([0x70, .. length, .. certificate, .. certInfo, 0xFE, 0x00], unchecked((short)0x9000)));
+        }
     }
 }

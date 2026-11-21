@@ -70,9 +70,11 @@ internal static class CertificateProtocol
             ? cert.ToArray()
             : null;
 
-        bool isCompressed = tlvDict.TryGetValue(TagCertificateInfo, out var info)
-            && info.Length > 0
-            && info.Span[0] == CompressedCertificate;
+        byte mode = tlvDict.TryGetValue(TagCertificateInfo, out var info) && !info.IsEmpty
+            ? info.Span[0]
+            : UncompressedCertificate;
+        if (mode is not (CompressedCertificate or UncompressedCertificate))
+            throw new NotSupportedException($"Unsupported PIV certificate compression mode 0x{mode:X2}. Inspect the raw certificate object instead.");
 
         if (certBytes is null || certBytes.Length == 0)
         {
@@ -80,7 +82,7 @@ internal static class CertificateProtocol
         }
 
         // Decompress if needed
-        if (isCompressed)
+        if (mode == CompressedCertificate)
         {
             using var input = new MemoryStream(certBytes);
             using var gzip = new GZipStream(input, CompressionMode.Decompress);

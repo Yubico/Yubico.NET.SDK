@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Ctap2;
+using System.Formats.Cbor;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Extensions;
 using Yubico.YubiKit.Ctap2.Pin;
@@ -140,21 +141,14 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
         AuthenticationExtensionOutputsBuilder outputs,
         CancellationToken cancellationToken)
     {
-        if (response.LargeBlobKey is not { } largeBlobKey)
-        {
-            return; // No response key: omit the operation result; the cause is not diagnosed here.
-        }
-
         if (_input.Read)
         {
-            // Read errors are not normalized here: CTAP errors propagate; the session suppresses
-            // InvalidOperationException. A null storage result converts to present empty memory below,
-            // so nullable presence and length do not distinguish absent data from a stored empty blob.
-            var storage = _context.Backend.CreateLargeBlobStorage(token: null);
-            var blob = await storage.GetBlobAsync(largeBlobKey, cancellationToken).ConfigureAwait(false);
-            outputs.LargeBlob = new LargeBlobAuthenticationOutput(Blob: blob);
+            outputs.LargeBlob = new LargeBlobAuthenticationOutput(Blob: await ReadBlobAsync(response, cancellationToken)
+                .ConfigureAwait(false));
+            return;
         }
-        else if (_input.Write is { } data)
+
+        if (response.LargeBlobKey is { } largeBlobKey && _input.Write is { } data)
         {
             // L3 §10.1.5: "set written to true if the write succeeded and false otherwise".
             bool written;
@@ -170,6 +164,23 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
             }
 
             outputs.LargeBlob = new LargeBlobAuthenticationOutput(Written: written);
+        }
+    }
+
+    private async Task<ReadOnlyMemory<byte>?> ReadBlobAsync(GetAssertionResponse response, CancellationToken cancellationToken)
+    {
+        if (response.LargeBlobKey is not { } key)
+            return null;
+
+        try
+        {
+            var storage = _context.Backend.CreateLargeBlobStorage(token: null);
+            var blob = await storage.GetBlobAsync(key, cancellationToken).ConfigureAwait(false);
+            return blob is null ? (ReadOnlyMemory<byte>?)null : blob.AsMemory();
+        }
+        catch (Exception ex) when (ex is CtapException or CborContentException or InvalidOperationException)
+        {
+            return null;
         }
     }
 }

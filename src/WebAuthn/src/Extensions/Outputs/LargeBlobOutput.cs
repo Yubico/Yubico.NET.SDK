@@ -29,12 +29,9 @@ public sealed record class LargeBlobRegistrationOutput(bool Supported);
 /// </summary>
 /// <remarks>
 /// <para>
-/// A missing largeBlob output, missing read data, a valid empty blob, and a failed read are distinct
-/// conditions. Do not use a null value alone to infer support, absence of stored data, or failure.
-/// Current read handling can omit the output on an InvalidOperationException or propagate storage
-/// errors after the assertion succeeds. When storage returns no blob, the current array-to-memory
-/// conversion produces a present value of length zero. <c>Blob.HasValue</c> and the blob's length
-/// therefore do not distinguish that result from a stored empty blob.
+/// A supported read keeps the output present even when there is no key, no stored data, or a CTAP,
+/// CBOR, or invalid-operation storage failure. In those cases Blob is null; a stored empty blob
+/// is present with length zero. Cancellation is not treated as a read result.
 /// </para>
 /// <para>
 /// Retrieved data is decrypted application plaintext and may be sensitive. SDK-produced results have

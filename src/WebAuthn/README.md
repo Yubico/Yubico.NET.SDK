@@ -351,10 +351,10 @@ The SDK deliberately accepts multiple original `AllowCredentials` entries for wr
 WebAuthn L3 §10.1.5's exact-one requirement. It writes with the storage key returned by the final
 assertion for the selected credential. The SDK requires a PIN/UV token for writes and adds
 `LargeBlobWrite` to the ceremony permissions, even though CTAP has an unconfigured-authenticator
-exception. Storage work runs after the assertion, before `GetAssertionAsync` returns. Read/storage
-errors can therefore propagate after a successful assertion; an absent result or nullable `Blob` alone
-does not reliably distinguish missing data, unsupported capability, and failure. Valid empty data is
-a separate state. Decrypted blob and credential-blob outputs may contain sensitive application data
+exception. Storage work runs after the assertion, before `GetAssertionAsync` returns. A supported read
+with no stored data, no key, or a storage status/decoding failure returns `LargeBlob` with `Blob = null`.
+A stored empty blob returns a present, zero-length value. Cancellation still propagates.
+Decrypted blob and credential-blob outputs may contain sensitive application data
 and share the lack of an SDK-owned cleanup contract described above.
 
 `MinPinLength` reports the existing policy in Unicode code points only when the RP is authorized on

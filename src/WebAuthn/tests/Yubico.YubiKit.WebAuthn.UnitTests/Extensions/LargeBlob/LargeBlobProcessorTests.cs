@@ -20,6 +20,7 @@ using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
+using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
@@ -179,19 +180,36 @@ public class LargeBlobProcessorTests
         Assert.False(result?.LargeBlob?.Written);
     }
 
-    /// <summary>No largeBlobKey in this assertion: no storage access and no output; the fixture does not establish why the key is absent.</summary>
-    [Fact]
-    public async Task Authentication_NoKeyInAssertion_ProducesNoOutput()
+    [Theory]
+    [InlineData(0, false)] // no key
+    [InlineData(1, false)] // no stored blob
+    [InlineData(2, true)] // stored empty blob
+    [InlineData(3, false)] // storage failure
+    public async Task Authentication_ReadKeepsTheExtensionPresent(int scenario, bool hasBlob)
     {
-        using var session = AuthenticationExtensionSession.Create(
-            new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true }), allowCredentials: null, Context());
-        var response = MockCtap2Responses.CreateMockGetAssertionResponse();
-
-        var result = await session.PrepareOutputsAsync(response,
-            WebAuthnAuthenticatorData.Decode(response.AuthenticatorDataRaw), token: null, TestContext.Current.CancellationToken);
-
-        Assert.Null(result?.LargeBlob);
-        await _storage.DidNotReceive().GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        var info = Context().Info;
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: scenario == 0 ? null : LargeBlobKey));
+        _storage.GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()).Returns(_ => scenario switch
+        {
+            3 => throw new Yubico.YubiKit.Ctap2.CtapException(Yubico.YubiKit.Ctap2.CtapStatus.InvalidCbor),
+            2 => Array.Empty<byte>(),
+            _ => (byte[]?)null
+        });
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var ct = TestContext.Current.CancellationToken;
+        var matches = await client.GetAssertionAsync(new()
+        {
+            Challenge = new byte[32], RpId = "example.com",
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
+        }, cancellationToken: ct);
+        var response = await Assert.Single(matches).SelectAsync(ct);
+        var result = Assert.IsType<LargeBlobAuthenticationOutput>(response.ClientExtensionResults?.LargeBlob);
+        Assert.Equal(hasBlob, result.Blob.HasValue);
+        if (result.Blob is { } blob) Assert.True(blob.IsEmpty);
+        await _storage.Received(scenario == 0 ? 0 : 1).GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
     }
 
     /// <summary>L3 §10.1.5 authentication: "If support is present, or if both read and write are present, return ... NotSupportedError".</summary>

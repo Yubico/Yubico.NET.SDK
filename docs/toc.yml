@@ -23,7 +23,6 @@
 - name: V1 Core API
   href: core-api/
   homepage: core-api/index.md
-
 - name: V2 API (alpha)
   href: v2-api/
   homepage: v2-api/index.md

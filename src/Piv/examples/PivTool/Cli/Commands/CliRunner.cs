@@ -638,6 +638,12 @@ internal static class CliRunner
     private static async Task<int> HandleSignAsync(
         Dictionary<string, string?> flags, int? serial, bool useJson, CancellationToken ct)
     {
+        if (!DeviceHelper.TryParseSigningHash(flags, out var hashAlgorithm))
+        {
+            Console.Error.WriteLine("Error: --hash requires sha256, sha384, or sha512. Omit it for Ed25519.");
+            return 1;
+        }
+
         var slot = DeviceHelper.ParseSlot(DeviceHelper.GetFlag(flags, "slot"));
         var pin = DeviceHelper.ParseCredentialBytes(DeviceHelper.GetFlag(flags, "pin"), "pin");
         var inputPath = DeviceHelper.GetFlag(flags, "input");
@@ -657,8 +663,6 @@ internal static class CliRunner
             return 1;
         }
 
-        var hashFlag = DeviceHelper.GetFlag(flags, "hash");
-        var hashAlg = hashFlag is null ? default : DeviceHelper.ParseHashAlgorithm(hashFlag);
         var outputPath = DeviceHelper.GetFlag(flags, "output");
         var dataToSign = await File.ReadAllBytesAsync(inputPath, ct);
 
@@ -676,7 +680,7 @@ internal static class CliRunner
                 return 1;
             }
 
-            var result = await Signing.SignDataAsync(session, slot.Value, dataToSign, hashAlg, ct);
+            var result = await Signing.SignDataAsync(session, slot.Value, dataToSign, hashAlgorithm, ct);
 
             if (outputPath is not null && result.Success)
             {

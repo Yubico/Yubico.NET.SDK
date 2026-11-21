@@ -145,8 +145,8 @@ guarantee; prefer 1–63 bytes in short mode and verify empty/64-byte boundaries
   than all-path erasure when a logging provider itself throws.
 - HMAC clears its padded copy; AES borrows the unpadded six-byte input. Keep borrowed inputs stable until await ends.
 - Immutable password/CLI strings cannot be deterministically erased. Raw translated scan codes permit mutable-source cleanup.
-- Normal WriteConfig cleanup clears assembled blocks, but invalid new/current-code paths allocate secret copies
-  before validation/try and can strand them. No-I/O rejection is not an all-path erasure guarantee.
+- WriteConfig validates both access codes before copying secret fields and clears its assembled blocks on
+  success or failure. Separate lower-layer copies remain outside this cleanup scope.
 - Never log keys, access codes, or challenge data
 
 ## Current implementation constraints

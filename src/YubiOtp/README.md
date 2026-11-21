@@ -377,8 +377,8 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
   The one-shot HMAC helper transfers only after hidden-session teardown succeeds. If teardown throws
   after calculation, it clears the retained result and faults. This does not erase separate incoming-report,
   APDU, decrypted-response or transport staging copies.
-- Normal write cleanup clears assembled configuration/payload copies, but invalid access-code preflight
-  currently has cleanup gaps. No-I/O validation does not imply erasure of every temporary allocation.
+- Configuration writes validate both code lengths before encoding and clear the assembled SDK-owned blocks
+  when the write completes or faults. This does not cover independent transport copies.
   None of these measures promises erasure of all heap copies. Never log keys, passwords, codes, or responses.
 
 ## Example

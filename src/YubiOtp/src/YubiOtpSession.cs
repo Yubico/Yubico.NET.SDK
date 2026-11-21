@@ -569,17 +569,23 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         ReadOnlyMemory<byte> currentAccessCode,
         CancellationToken cancellationToken)
     {
+        ValidateCurrentAccessCode(currentAccessCode);
         var configBytes = config.GetConfig(accessCode.Span);
-        var data = BuildPayloadWithAccessCode(configBytes, currentAccessCode);
-
         try
         {
-            _status = await _backend.WriteUpdateAsync(configSlot, data, cancellationToken)
-                .ConfigureAwait(false);
+            var data = BuildPayloadWithAccessCode(configBytes, currentAccessCode);
+            try
+            {
+                _status = await _backend.WriteUpdateAsync(configSlot, data, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(data);
+            }
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(data);
             CryptographicOperations.ZeroMemory(configBytes);
         }
     }
@@ -596,17 +602,24 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
             return data.ToArray();
         }
 
-        if (currentAccessCode.Length != YubiOtpConstants.AccessCodeSize)
+        ValidateCurrentAccessCode(currentAccessCode);
+        var currentCode = currentAccessCode.Span;
+        var payload = data.Span;
+        var result = new byte[data.Length + YubiOtpConstants.AccessCodeSize];
+        payload.CopyTo(result);
+        currentCode.CopyTo(result.AsSpan(data.Length));
+        return result;
+    }
+
+    private static void ValidateCurrentAccessCode(ReadOnlyMemory<byte> currentAccessCode)
+    {
+        if (!currentAccessCode.IsEmpty && currentAccessCode.Length != YubiOtpConstants.AccessCodeSize)
         {
             throw new ArgumentException(
                 $"Access code must be exactly {YubiOtpConstants.AccessCodeSize} bytes, got {currentAccessCode.Length}.",
                 nameof(currentAccessCode));
         }
 
-        var result = new byte[data.Length + YubiOtpConstants.AccessCodeSize];
-        data.Span.CopyTo(result);
-        currentAccessCode.Span.CopyTo(result.AsSpan(data.Length));
-        return result;
     }
 
     private void EnsureOtpSupports(Feature feature)

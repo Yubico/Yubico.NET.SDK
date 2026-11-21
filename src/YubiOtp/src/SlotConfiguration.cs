@@ -143,13 +143,24 @@ public abstract class SlotConfiguration : IDisposable
     /// <param name="accCode">The new 6-byte write-protection code, not the current authentication code. Empty sends zeros.</param>
     /// <returns>A new caller-owned 52-byte array containing secrets and CRC. Clear it after use; disposing this object does not clear it.</returns>
     /// <remarks>
-    /// Validate a nonempty code's six-byte length before calling. The current implementation copies secret
-    /// fields before rejecting a bad length and does not clear that failed allocation. After disposal,
-    /// encoding/data setters reject use, but not every flag setter checks disposal; do not reuse the object.
+    /// Validates the code and evaluates configuration flags before copying secret fields into the result.
+    /// Do not reuse the configuration after disposal.
     /// </remarks>
     public byte[] GetConfig(ReadOnlySpan<byte> accCode = default)
     {
         ThrowIfDisposed();
+
+        if (!accCode.IsEmpty && accCode.Length != YubiOtpConstants.AccessCodeSize)
+        {
+            throw new ArgumentException(
+                $"Access code must be exactly {YubiOtpConstants.AccessCodeSize} bytes, got {accCode.Length}.",
+                nameof(accCode));
+        }
+
+        // The flag getters may be overridden by callers. Run them before allocating the secret block.
+        var extFlags = GetEffectiveExtFlags();
+        var tktFlags = GetEffectiveTktFlags();
+        var cfgFlags = GetEffectiveCfgFlags();
 
         var config = new byte[YubiOtpConstants.ConfigSize];
 
@@ -157,22 +168,12 @@ public abstract class SlotConfiguration : IDisposable
         _uid.CopyTo(config.AsSpan(YubiOtpConstants.FixedSize, YubiOtpConstants.UidSize));
         _key.CopyTo(config.AsSpan(YubiOtpConstants.FixedSize + YubiOtpConstants.UidSize, YubiOtpConstants.KeySize));
 
-        if (!accCode.IsEmpty)
-        {
-            if (accCode.Length != YubiOtpConstants.AccessCodeSize)
-            {
-                throw new ArgumentException(
-                    $"Access code must be exactly {YubiOtpConstants.AccessCodeSize} bytes, got {accCode.Length}.",
-                    nameof(accCode));
-            }
-
-            accCode.CopyTo(config.AsSpan(38, YubiOtpConstants.AccessCodeSize));
-        }
+        accCode.CopyTo(config.AsSpan(38, YubiOtpConstants.AccessCodeSize));
 
         config[44] = _fixedSize;
-        config[45] = (byte)GetEffectiveExtFlags();
-        config[46] = (byte)GetEffectiveTktFlags();
-        config[47] = (byte)GetEffectiveCfgFlags();
+        config[45] = (byte)extFlags;
+        config[46] = (byte)tktFlags;
+        config[47] = (byte)cfgFlags;
 
         // Bytes 48-49 are RFU (reserved), already zero
 
@@ -266,6 +267,7 @@ public abstract class SlotConfiguration : IDisposable
 
     protected void SetExtFlag(ExtendedFlag flag, bool enable)
     {
+        ThrowIfDisposed();
         if (enable)
         {
             _extFlags |= flag;
@@ -278,6 +280,7 @@ public abstract class SlotConfiguration : IDisposable
 
     protected void SetTktFlag(TicketFlag flag, bool enable)
     {
+        ThrowIfDisposed();
         if (enable)
         {
             _tktFlags |= flag;
@@ -290,6 +293,7 @@ public abstract class SlotConfiguration : IDisposable
 
     protected void SetCfgFlag(ConfigFlag flag, bool enable)
     {
+        ThrowIfDisposed();
         if (enable)
         {
             _cfgFlags |= flag;

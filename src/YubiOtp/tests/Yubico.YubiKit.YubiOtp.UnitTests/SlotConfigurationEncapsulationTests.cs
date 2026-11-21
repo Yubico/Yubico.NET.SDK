@@ -85,6 +85,17 @@ public class SlotConfigurationEncapsulationTests
         Assert.All(keyBuffer, value => Assert.Equal(0, value));
     }
 
+    [Fact]
+    public void Dispose_PreventsExtTicketAndConfigFlagMutation()
+    {
+        var configuration = new HmacSha1SlotConfiguration(new byte[20]);
+        configuration.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => configuration.AllowUpdate(false));
+        Assert.Throws<ObjectDisposedException>(() => configuration.ProtectSlot2());
+        Assert.Throws<ObjectDisposedException>(() => configuration.RequireTouch());
+    }
+
     private static FieldInfo GetField(string fieldName) =>
         typeof(SlotConfiguration).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)
         ?? throw new InvalidOperationException($"SlotConfiguration field '{fieldName}' was not found.");

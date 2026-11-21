@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -67,15 +68,23 @@ public sealed class OpenPgpPutKeyWireTests
         Assert.Equal(PadLeft(rsa.ExportParameters(true).Q!, 128), values[131..]);
     }
 
-    [Fact]
-    public async Task RsaImport_Neo_UsesCrtWithModulusFormatAndModulusComponent()
+    [Theory]
+    [InlineData(null)]
+    [InlineData(VersionQualifierType.Alpha)]
+    public async Task RsaImport_Neo_UsesCrtWithModulusFormatAndModulusComponent(VersionQualifierType? qualifier)
     {
         using var rsa = RSA.Create(2048);
         using var key = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
         var connection = CreateConnection(afterAttributeWrite: true, importChunks: 4,
             versionResponse: [0x03, 0x04, 0x00, 0x90, 0x00]);
         var token = TestContext.Current.CancellationToken;
-        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var physical = new FirmwareVersion(3, 4, 0);
+        DeviceInfo? cached = qualifier is { } type ? default(DeviceInfo) with
+        {
+            FirmwareVersion = physical,
+            VersionQualifier = new VersionQualifier(physical, type, 0),
+        } : null;
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection, null, () => cached, token);
         await session.PutKeyAsync(KeyRef.Sig, key, token);
 
         byte[] attributes = Assert.Single(connection.TransmittedCommands, command => command[1] == InsPutData);

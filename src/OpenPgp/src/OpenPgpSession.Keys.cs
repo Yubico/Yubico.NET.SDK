@@ -70,7 +70,7 @@ public sealed partial class OpenPgpSession
 
         _logger.LogInformation("Importing {KeyType} key into {Slot}", privateKey.KeyType, keyRef);
 
-        using var import = PrivateKeyImport.Create(privateKey, keyRef, FirmwareVersion);
+        using var import = PrivateKeyImport.Create(privateKey, keyRef, _numericVersion ?? FirmwareVersion);
         if (import.Attributes is EcAttributes)
             EnsureSupports(FeatureEc);
 
@@ -120,7 +120,7 @@ public sealed partial class OpenPgpSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
-        if (FirmwareVersion.Major is > 0 and < 4)
+        if (_numericVersion is { Major: > 0 and < 4 })
             throw new NotSupportedException("OpenPGP key deletion is not supported on YubiKey NEO.");
 
         _logger.LogInformation("Deleting key from {Slot}", keyRef);

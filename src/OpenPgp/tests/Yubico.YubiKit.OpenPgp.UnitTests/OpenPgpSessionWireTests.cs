@@ -724,14 +724,22 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal(before, connection.TransmittedCommands.Count);
     }
 
-    [Fact]
-    public async Task NeoFixedAttributes_GeneratesWithoutAttributeWriteAndRefusesDeletion()
+    [Theory]
+    [InlineData(null)]
+    [InlineData(VersionQualifierType.Beta)]
+    public async Task NeoFixedAttributes_GeneratesWithoutAttributeWriteAndRefusesDeletion(VersionQualifierType? qualifier)
     {
         byte[] appData = ApplicationRelatedDataResponse(attributesChangeable: false);
         var connection = new RecordingSmartCardConnection(OkResponse(), [0x03, 0x04, 0x00, 0x90, 0x00], appData,
             OkResponse(), appData);
         var token = TestContext.Current.CancellationToken;
-        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var physical = new FirmwareVersion(3, 4, 0);
+        DeviceInfo? cached = qualifier is { } type ? default(DeviceInfo) with
+        {
+            FirmwareVersion = physical,
+            VersionQualifier = new VersionQualifier(physical, type, 0),
+        } : null;
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection, null, () => cached, token);
         await Assert.ThrowsAsync<NotSupportedException>(() => session.DeleteKeyAsync(KeyRef.Sig, token));
         await Assert.ThrowsAsync<NotSupportedException>(() => session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa4096), token));
         Assert.Equal(3, connection.TransmittedCommands.Count);

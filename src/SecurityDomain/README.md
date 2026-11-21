@@ -259,7 +259,8 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
 - `StaticKeys` holds the ENC, MAC, and DEK values and implements `IDisposable`. Wrap it in `using` so the key
   bytes are zeroed; `Scp03KeyParameters` and `Scp11KeyParameters` do the same for what they own.
 - Session creation borrows the key parameters you pass. You keep ownership and remain responsible for
-  disposing them after every session using them is gone. Security Domain retains the exact object for reset.
+  disposing them after every session using them is gone. After confirmed reset, the session uses its own
+  default SCP03 parameters; the SDK does not reuse or dispose the original caller-owned parameters.
 - `GetCertificatesAsync` returns caller-owned certificates. Dispose each certificate when no longer needed;
   disposing the session does not dispose them. If any certificate cannot be loaded, the SDK disposes those
   already loaded and throws instead of returning a partial bundle.
@@ -272,7 +273,7 @@ expand SCP11's explicit P-256 requirements. `DisplayName` is for human output.
 | Parameter content | Ownership action |
 | --- | --- |
 | `StaticKeys` | Copies the original arrays. Clear those sources separately; `Scp03KeyParameters` retains and disposes that same `StaticKeys` object. |
-| SCP11 private key and certificates | Parameters copy the collection, not the contained objects. Disposing parameters disposes the retained private-key wrapper and certificates; arrange one owner and keep them alive through every session/reset. The SD public-key object is not disposed by parameters. |
+| SCP11 private key and certificates | Parameters copy the collection, not the contained objects. Disposing parameters disposes the retained private-key wrapper and certificates; arrange one owner and keep them alive through session disposal. Security Domain reset does not reuse them. The SD public-key object is not disposed by parameters. |
 | Record clones | Share contained owners; cloning parameters is not an independent secret/certificate lifetime. |
 
 `GetDataAsync` returns a view into a response array, not a pooled loan. That view survives session disposal,

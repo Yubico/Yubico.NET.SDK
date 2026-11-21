@@ -21,7 +21,8 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 /// <remarks>
 ///     This owner retains and disposes the exact StaticKeys instance supplied by the caller. A record with-clone
 ///     shares that owner rather than cloning its key arrays. Keep parameters alive until all using sessions have
-///     been disposed; Security Domain also borrows them for reset. Supply per-card keys: initialization does not
+///     been disposed. Security Domain borrows the caller's parameters for the initial handshake and uses
+///     its own default SCP03 parameters after confirmed reset. Supply per-card keys: initialization does not
 ///     diversify a base master key from INITIALIZE UPDATE's diversification bytes.
 /// </remarks>
 public sealed record Scp03KeyParameters : ScpKeyParameters

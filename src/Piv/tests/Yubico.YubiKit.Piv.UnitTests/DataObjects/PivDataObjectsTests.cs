@@ -194,14 +194,17 @@ public class PivDataObjectsTests
         Assert.Equal(Salt16, decoded.Salt!.Value.ToArray());
     }
 
-    [Fact]
-    public void AdminData_WithPinLastUpdated_RoundTripsExactly()
+    [Theory]
+    [InlineData(0x04030201, "8009810100830401020304")]
+    [InlineData(0x030201, "80088101008303010203")]
+    public void AdminData_WithPinLastUpdated_RoundTripsV1LittleEndianWireBytes(long seconds, string expected)
     {
-        var updated = DateTimeOffset.FromUnixTimeSeconds(1_700_000_000);
+        var updated = DateTimeOffset.FromUnixTimeSeconds(seconds);
         var adminData = AdminData.Create(pukBlocked: false, pinProtected: false, pinLastUpdated: updated);
 
         var encoded = adminData.Encode();
-        Assert.True(AdminData.TryDecode(encoded, out var decoded));
+        Assert.Equal(expected, Convert.ToHexString(encoded.Span));
+        Assert.True(AdminData.TryDecode(Convert.FromHexString(expected), out var decoded));
 
         Assert.Equal(updated, decoded.PinLastUpdated);
     }

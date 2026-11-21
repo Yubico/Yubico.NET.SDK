@@ -391,8 +391,9 @@ Key rules:
 - Build request returns command byte + CBOR payload
 - Use `.WithValue(key, writer => ...)` for complex values or sensitive byte spans that should be written directly instead of copied through `.WithBytes(...)`
 - Keep operation-level request builders as pure encoding helpers; do not introduce operation-specific CTAP command classes
-- WithBytes/encoded inputs retain private copies with no disposal owner; WithValue callbacks run at Build.
-  Keep callback inputs valid until Build. Clear caller-owned encoded request arrays after the awaited send.
+- Builders are single-use, including after a failed Build. WithBytes and WithEncodedValue copies are
+  cleared when replaced, built or disposed; dispose a builder if abandoning it. WithValue callbacks
+  borrow their inputs until Build returns. Clear caller-owned encoded request arrays after the awaited send.
   The session enforces GetInfo maxMsgSize (1024 bytes if absent) on typed and raw sends, including
   the command byte. Canonical encoding alone does not enforce command schema, CTAP depth or full input exhaustion.
 

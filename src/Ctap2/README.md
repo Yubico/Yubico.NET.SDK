@@ -348,8 +348,9 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
 - Caller PIN buffers are borrowed; returned ClientPin tokens are caller-owned (administrative helpers
   borrow them). Clear each with `CryptographicOperations.ZeroMemory` after the final await, in a `finally`.
 - `ClientPin` disposes the supplied protocol, not the session. Its named PIN/hash/shared-secret buffers
-  have scoped cleanup, but requests, builder-retained copies and successful responses do not have an
-  end-to-end zeroing guarantee. Protocol disposal does not clear caller-owned returned tokens or outputs.
+  have scoped cleanup. The single-use request builder clears its input copies, and ClientPin clears
+  its PIN-bearing request arrays after sending. This is not an end-to-end zeroing guarantee. Protocol
+  disposal does not clear caller-owned returned tokens or outputs.
 - Never log PINs, PIN tokens, or secret-derived extension outputs such as hmac-secret and PRF results.
 - `MakeCredentialResponse` and `GetAssertionResponse` are not disposable. Their `LargeBlobKey`, signed
   `AuthenticatorDataRaw` and (for registration) encoded `UnsignedExtensionOutputs` are caller-owned

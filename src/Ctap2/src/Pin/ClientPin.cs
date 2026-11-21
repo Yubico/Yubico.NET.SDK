@@ -191,15 +191,15 @@ public sealed class ClientPin : IDisposable
             // Compute pinUvAuthParam = authenticate(sharedSecret, newPinEnc)
             pinUvAuthParam = _protocol.Authenticate(sharedSecret, newPinEnc);
 
-            var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin);
+            builder
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.SetPin)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
                 .WithBytes(ClientPinParam.NewPinEnc, newPinEnc)
-                .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
-                .Build();
+                .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam);
 
-            await _session.SendCborRequestAsync(request, cancellationToken)
+            await SendClearableRequestAsync(builder.Build(), cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -264,16 +264,16 @@ public sealed class ClientPin : IDisposable
 
             pinUvAuthParam = _protocol.Authenticate(sharedSecret, message);
 
-            var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin);
+            builder
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.ChangePin)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
                 .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc)
                 .WithBytes(ClientPinParam.NewPinEnc, newPinEnc)
-                .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam)
-                .Build();
+                .WithBytes(ClientPinParam.PinUvAuthParam, pinUvAuthParam);
 
-            await _session.SendCborRequestAsync(request, cancellationToken)
+            await SendClearableRequestAsync(builder.Build(), cancellationToken)
                 .ConfigureAwait(false);
         }
         finally
@@ -330,14 +330,14 @@ public sealed class ClientPin : IDisposable
             pinHash = ComputePinHash(pin.Span);
             pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
 
-            var request = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin);
+            builder
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetPinToken)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
-                .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc)
-                .Build();
+                .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc);
 
-            var response = await _session.SendCborRequestAsync(request, cancellationToken)
+            var response = await SendClearableRequestAsync(builder.Build(), cancellationToken)
                 .ConfigureAwait(false);
 
             return DecodePinToken(response, sharedSecret);
@@ -424,7 +424,8 @@ public sealed class ClientPin : IDisposable
             pinHash = ComputePinHash(pin.Span);
             pinHashEnc = _protocol.Encrypt(sharedSecret, pinHash);
 
-            var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin);
+            builder
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetPinUvAuthTokenUsingPinWithPermissions)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
@@ -436,8 +437,7 @@ public sealed class ClientPin : IDisposable
                 builder.WithString(ClientPinParam.RpId, rpId);
             }
 
-            var request = builder.Build();
-            var response = await _session.SendCborRequestAsync(request, cancellationToken)
+            var response = await SendClearableRequestAsync(builder.Build(), cancellationToken)
                 .ConfigureAwait(false);
 
             return DecodePinToken(response, sharedSecret);
@@ -522,6 +522,18 @@ public sealed class ClientPin : IDisposable
         finally
         {
             CryptographicOperations.ZeroMemory(sharedSecret);
+        }
+    }
+
+    private async Task<ReadOnlyMemory<byte>> SendClearableRequestAsync(byte[] request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _session.SendCborRequestAsync(request, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(request);
         }
     }
 

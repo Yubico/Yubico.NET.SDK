@@ -117,6 +117,7 @@ Yubico.YubiKit.Ctap2.Cbor.AaguidConverter
 Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder
 Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder.Build() -> byte[]!
 Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder.BuildAsMemory() -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder.Dispose() -> void
 Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder.WithArray(int key, System.Action<System.Formats.Cbor.CborWriter!>! writeArray) -> Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder!
 Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder.WithBool(int key, bool value) -> Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder!
 Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder.WithBytes(int key, System.ReadOnlyMemory<byte> value) -> Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder!

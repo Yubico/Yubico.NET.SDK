@@ -10,6 +10,31 @@ namespace Yubico.YubiKit.Ctap2.UnitTests;
 public class CtapRequestBuilderTests
 {
     [Fact]
+    public void Build_EncodesSnapshotAndConsumesBuilder()
+    {
+        byte[] source = [0xAA];
+        var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin).WithBytes(1, source);
+        source[0] = 0xBB;
+
+        Assert.Equal(new byte[] { CtapCommand.ClientPin, 0xA1, 0x01, 0x41, 0xAA }, builder.Build());
+        Assert.Equal(0xBB, source[0]);
+        Assert.Throws<InvalidOperationException>(builder.Build);
+        Assert.Throws<InvalidOperationException>(() => builder.WithInt(2, 3));
+    }
+
+    [Fact]
+    public void Build_WhenValueCallbackFails_StillConsumesBuilder()
+    {
+        var failure = new FormatException("Fixture failure");
+        var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            .WithBytes(1, new byte[] { 0xAA })
+            .WithValue(2, _ => throw failure);
+
+        Assert.Same(failure, Assert.Throws<FormatException>(builder.Build));
+        Assert.Throws<InvalidOperationException>(builder.Build);
+    }
+
+    [Fact]
     public void Create_WithCommandOnly_ReturnsCommandByte()
     {
         // Arrange & Act

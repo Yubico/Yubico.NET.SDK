@@ -405,14 +405,22 @@ public sealed class ClientPinTests : IDisposable
     {
         byte[] currentPin = "e\u0301"u8.ToArray(); // Valid UTF-8, but decomposed and fewer than four characters.
         var ct = TestContext.Current.CancellationToken;
+        ReadOnlyMemory<byte> sent = default;
+        ReadOnlyMemory<byte> snapshot = default;
         _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
-            CreateKeyAgreementResponse(CreateMockCoseKey()), CreateEmptyResponse());
+            _ => CreateKeyAgreementResponse(CreateMockCoseKey()),
+            call =>
+            {
+                sent = call.ArgAt<ReadOnlyMemory<byte>>(0);
+                snapshot = sent.ToArray();
+                return CreateEmptyResponse();
+            });
         using var clientPin = CreateClientPin();
 
         await clientPin.ChangePinAsync(currentPin, "5678"u8.ToArray(), ct);
 
-        var request = (ReadOnlyMemory<byte>)_mockSession.ReceivedCalls().Last().GetArguments()[0]!;
-        var reader = new CborReader(request[1..], CborConformanceMode.Ctap2Canonical);
+        Assert.All(sent.ToArray(), b => Assert.Equal(0, b));
+        var reader = new CborReader(snapshot[1..], CborConformanceMode.Ctap2Canonical);
         reader.ReadStartMap();
         while (reader.ReadInt32() != 6) // pinHashEnc; the fake encrypts by copying.
             reader.SkipValue();
@@ -455,13 +463,18 @@ public sealed class ClientPinTests : IDisposable
         {
             Options = new Dictionary<string, bool> { ["pinUvAuthToken"] = permissionSupport }
         });
+        ReadOnlyMemory<byte> request = default;
         _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
-            CreateKeyAgreementResponse(CreateMockCoseKey()), CreatePinTokenResponse(new byte[32]));
+            _ => CreateKeyAgreementResponse(CreateMockCoseKey()),
+            call =>
+            {
+                request = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                return CreatePinTokenResponse(new byte[32]);
+            });
         using var clientPin = CreateClientPin();
 
         await clientPin.GetPinUvAuthTokenUsingPinAsync("1234"u8.ToArray(), PinUvAuthTokenPermissions.MakeCredential, "example.com", ct);
 
-        var request = (ReadOnlyMemory<byte>)_mockSession.ReceivedCalls().Last().GetArguments()[0]!;
         var reader = new CborReader(request[1..], CborConformanceMode.Ctap2Canonical);
         Assert.Equal(permissionSupport ? 6 : 4, reader.ReadStartMap());
         Assert.Equal(1, reader.ReadInt32());

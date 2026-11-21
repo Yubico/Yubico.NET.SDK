@@ -33,6 +33,7 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </remarks>
 public sealed class WebAuthnClientData
 {
+    private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
     /// <summary>
     /// Gets the raw client data JSON bytes.
     /// </summary>
@@ -76,7 +77,9 @@ public sealed class WebAuthnClientData
     /// enforce the relationship between crossOrigin and topOrigin. The client's ceremony methods
     /// validate their options separately. String escaping follows CCDToString (L3 §5.8.1.1):
     /// quotes and backslashes are escaped, and U+0000 through U+001F use four lowercase hex digits.
+    /// Unicode is not normalized or replaced.
     /// </remarks>
+    /// <exception cref="EncoderFallbackException">A string contains an unpaired UTF-16 surrogate.</exception>
     public static WebAuthnClientData Create(
         string type,
         ReadOnlyMemory<byte> challenge,
@@ -88,7 +91,7 @@ public sealed class WebAuthnClientData
         ArgumentNullException.ThrowIfNull(origin);
 
         var json = BuildJson(type, challenge.Span, origin.StringValue, crossOrigin, topOrigin);
-        var jsonBytes = Encoding.UTF8.GetBytes(json);
+        var jsonBytes = StrictUtf8.GetBytes(json);
 
         Span<byte> hash = stackalloc byte[32];
         SHA256.HashData(jsonBytes, hash);

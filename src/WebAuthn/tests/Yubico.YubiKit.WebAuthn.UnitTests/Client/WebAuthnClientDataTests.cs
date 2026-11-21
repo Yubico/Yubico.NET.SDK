@@ -167,6 +167,29 @@ public class WebAuthnClientDataTests
         Assert.Contains("\"test\\\"type\"", json);
     }
 
+    [Theory]
+    [InlineData(true, 0xD800)]
+    [InlineData(false, 0xDC00)]
+    public void Create_RejectsUnpairedSurrogatesRatherThanHashingReplacementCharacters(bool inType, int surrogate)
+    {
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        var malformed = $"a{(char)surrogate}b";
+        Assert.Throws<System.Text.EncoderFallbackException>(() => WebAuthnClientData.Create(
+            inType ? malformed : "webauthn.get", new byte[] { 1 }, origin,
+            crossOrigin: true, topOrigin: inType ? null : malformed));
+    }
+
+    [Fact]
+    public void Create_PreservesUnicodeAndLowercaseControlEscaping()
+    {
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        var data = WebAuthnClientData.Create("e\u0301\U0001f600\u000a", new byte[] { 1 }, origin,
+            crossOrigin: true, topOrigin: "https://\u00e9.example");
+        byte[] expected = "{\"type\":\"e\u0301\U0001f600\\u000a\",\"challenge\":\"AQ\",\"origin\":\"https://example.com\",\"crossOrigin\":true,\"topOrigin\":\"https://\u00e9.example\"}"u8.ToArray();
+        Assert.Equal(expected, data.JsonBytes.ToArray());
+        Assert.Equal(SHA256.HashData(expected), data.Hash.ToArray());
+    }
+
     [Fact]
     public void Create_ByteIdenticalForFixedInputs()
     {

@@ -76,6 +76,42 @@ public class WebAuthnClientCeremonyFrameTests
     private static ReadOnlyMemory<byte> Pin => "123456"u8.ToArray();
 
     [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public async Task PrfEvaluationRequiresVerificationOnlyWhenSupported(bool registration, bool evaluationSupported)
+    {
+        string[] names = evaluationSupported ? ["hmac-secret", "hmac-secret-mc"]
+            : registration ? ["hmac-secret"] : [];
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: names));
+        _backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
+        await using var client = _client;
+        var ct = TestContext.Current.CancellationToken;
+        var prf = new PrfInput { First = "RP input"u8.ToArray() };
+
+        Task PerformAsync() => registration
+            ? client.MakeCredentialAsync(Registration(UserVerificationPreference.Discouraged) with
+                { Extensions = new RegistrationExtensionInputs(Prf: prf) }, cancellationToken: ct)
+            : client.GetAssertionAsync(Authentication(UserVerificationPreference.Discouraged) with
+                { Extensions = new AuthenticationExtensionInputs(Prf: prf) }, cancellationToken: ct);
+
+        if (evaluationSupported)
+            Assert.Equal(WebAuthnClientErrorCode.NotAllowed, (await Assert.ThrowsAsync<WebAuthnClientError>(PerformAsync)).Code);
+        else
+            await PerformAsync();
+
+        await _backend.Received(!evaluationSupported && registration ? 1 : 0)
+            .MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+        await _backend.Received(!evaluationSupported && !registration ? 1 : 0)
+            .GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public async Task MakeCredential_MapsDiscoveryAndTokenFailuresWithoutEnteringCommandRetry(bool discovery)

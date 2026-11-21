@@ -113,11 +113,13 @@ public sealed partial class WebAuthnClient
         var permissions = PinUvAuthTokenPermissions.GetAssertion
             | AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context).Permissions;
         bool hasPreviewSign = options.Extensions?.PreviewSign is not null;
+        var uvPreference = Extensions.Processing.Processors.PrfProcessor.RequiresVerifiedEvaluation(options.Extensions?.Prf, context, registration: false)
+            ? Preferences.UserVerificationPreference.Required : options.UserVerification;
 
         using var auth = new CeremonyAuth(this, options.RpId, callerPinBytes);
 
         var (matches, extensions) = await RunWithUvEscalationAsync(
-            info, options.UserVerification, permissions, auth, hasPreviewSign, AttemptAsync, cancellationToken)
+            info, uvPreference, permissions, auth, hasPreviewSign, AttemptAsync, cancellationToken)
             .ConfigureAwait(false);
 
         // Build every response now, outside the escalation scope and while the token is live (extension

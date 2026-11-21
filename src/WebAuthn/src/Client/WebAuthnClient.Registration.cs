@@ -127,12 +127,14 @@ public sealed partial class WebAuthnClient
             | (options.ExcludeCredentials is { Count: > 0 } ? PinUvAuthTokenPermissions.GetAssertion : PinUvAuthTokenPermissions.None)
             | RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context).Permissions;
         bool hasPreviewSign = options.Extensions?.PreviewSign is not null;
+        var uvPreference = Extensions.Processing.Processors.PrfProcessor.RequiresVerifiedEvaluation(options.Extensions?.Prf, context, registration: true)
+            ? Preferences.UserVerificationPreference.Required : options.UserVerification;
 
         using var auth = new CeremonyAuth(this, options.Rp.Id, callerPinBytes);
         IReadOnlyList<PublicKeyCredentialDescriptor>? probedExcludeList = null;
 
         var (ctapResponse, extensions) = await RunWithUvEscalationAsync(
-            info, options.UserVerification, permissions, auth, hasPreviewSign, AttemptAsync, cancellationToken)
+            info, uvPreference, permissions, auth, hasPreviewSign, AttemptAsync, cancellationToken)
             .ConfigureAwait(false);
 
         // Outputs are prepared outside the escalation scope, while the token is still live.

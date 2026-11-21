@@ -282,9 +282,8 @@ ceremony once.
 
 Both ceremonies union extension permissions before the decision; largeBlob writes contribute
 `LargeBlobWrite`. The SDK requires a token for those writes, even though CTAP permits an
-unconfigured-authenticator exception. PRF contributes no extra permission and currently preserves the
-caller UV preference: this fails to enforce WebAuthn L3 §10.1.4's verified-PRF override. Recommend
-Required for evaluation without calling it a full conformance or cleanup fix.
+unconfigured-authenticator exception. PRF contributes no extra permission. Supported evaluation
+requires UV under WebAuthn L3 §10.1.4; registration enablement alone does not.
 
 ### User-presence notification
 
@@ -429,7 +428,7 @@ Generic signing params carry raw `additionalArgs`; ARKG helpers can be converted
 
 Keep these conditions attached to public guidance when changing extension flow:
 
-- PRF does not enforce the verified-variant UV override. Its SDK-produced read-only results and
+- PRF requires verification for supported evaluation. Its SDK-produced read-only results and
   intermediate copies have no disposal/zeroing guarantee; clearing a caller copy or disposing the
   client does not clear them. PRF results are derived secrets, not public metadata.
 - Enforced credProtect requires advertised support before creation (CTAP2.3 §12.1). Optional requests

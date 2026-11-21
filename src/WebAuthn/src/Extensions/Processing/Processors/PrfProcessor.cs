@@ -35,13 +35,16 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 /// </summary>
 /// <remarks>
 /// WebAuthn L3 REC 2026-08-25 §10.1.4 requires the verified PRF and a UV-preference override if needed.
-/// The current client does not enforce that requirement: this processor requests no extra token
-/// permissions and does not override UserVerification. Request Required for evaluation to avoid
-/// switching between CTAP's verified and unverified PRFs. That workaround does not establish general
-/// PRF conformance. The current WebAuthn backend uses protocol 2, without protocol-1 negotiation.
+/// Supported evaluation makes the ceremony require UV. Enablement alone does not. Results are not
+/// exposed unless the authenticator data reports UV.
 /// </remarks>
 internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor, IDisposable
 {
+    public static bool RequiresVerifiedEvaluation(PrfInput? input, ExtensionContext context, bool registration) =>
+        input is not null && context.Supports(ExtensionIdentifiers.HmacSecret)
+        && (registration
+            ? input.First is not null && context.Supports(ExtensionIdentifiers.HmacSecretMakeCredential)
+            : input.First is not null || input.EvalByCredential is { Count: > 0 });
     private readonly PrfInput _input;
     private readonly ExtensionContext _context;
     private readonly bool _registration;
@@ -216,7 +219,8 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
         CancellationToken cancellationToken)
     {
         var output = PrfCodec.ParseRegistrationOutput(authData.ParsedExtensions);
-        var results = _evaluateAtCreation ? DecryptOutput(authData, ExtensionIdentifiers.HmacSecretMakeCredential) : null;
+        var results = _evaluateAtCreation && authData.UserVerified
+            ? DecryptOutput(authData, ExtensionIdentifiers.HmacSecretMakeCredential) : null;
         outputs.Prf = output with { Results = results };
         return ValueTask.CompletedTask;
     }
@@ -228,7 +232,7 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
         AuthenticationExtensionOutputsBuilder outputs,
         CancellationToken cancellationToken)
     {
-        var results = DecryptOutput(authData, ExtensionIdentifiers.HmacSecret);
+        var results = authData.UserVerified ? DecryptOutput(authData, ExtensionIdentifiers.HmacSecret) : null;
         outputs.Prf = results is null ? null : new PrfAuthenticationOutput(results);
         return ValueTask.CompletedTask;
     }

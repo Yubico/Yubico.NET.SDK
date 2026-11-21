@@ -322,11 +322,10 @@ IDs and whose nonempty map requires an allow list. Registration does not accept 
 processor runs; registration-time evaluation additionally needs advertised `hmac-secret-mc` support.
 Check enablement and evaluation results separately.
 
-**Current limitation:** [WebAuthn L3 §10.1.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension)
-requires the hmac-secret-backed PRF to use the verified variant, overriding the UV preference if needed.
-This client does not enforce that override. Request `UserVerification = UserVerificationPreference.Required`
-for evaluation; otherwise actual UV changes can change the output for the same credential and input.
-Selecting Required alone does **not** establish full PRF conformance or solve result cleanup.
+[WebAuthn L3 §10.1.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension)
+requires the hmac-secret-backed PRF to use the verified variant. Supported evaluation overrides the
+ceremony's UV preference to Required; registration enablement alone does not. The client omits the
+evaluation output if the authenticator did not report verification.
 
 PRF outputs are derived secrets: never log them. SDK-produced results expose read-only memory without
 a disposal/zeroing guarantee for returned arrays or intermediate copies; disposing the client does not

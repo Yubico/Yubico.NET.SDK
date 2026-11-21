@@ -17,6 +17,7 @@ AnsiConsole.Write(
         .Color(Color.Green));
 
 AnsiConsole.MarkupLine("[grey]YubiKey PIV Management Tool - SDK Example Application[/]");
+AnsiConsole.MarkupLine("[yellow]Demo only, not for production.[/]");
 AnsiConsole.MarkupLine("[grey]Tip: run with --help for non-interactive CLI usage.[/]");
 AnsiConsole.WriteLine();
 

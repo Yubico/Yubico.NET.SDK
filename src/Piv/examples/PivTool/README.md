@@ -97,6 +97,8 @@ PIV retry subquery fails, and verification's exit status describes execution rat
 
 ## Choose the supported crypto path
 
+**Demo only, not for production.** Do not use PivTool to process production credentials or plaintext.
+
 `sign` uses PKCS#1 v1.5 for RSA and hashes for ECDSA. Both default to SHA-256. Ed25519 signs the
 original message: omit `--hash` (in the interactive menu select **Default (no explicit hash)**).
 The tool rejects X25519 for signing; use `CalculateSecretAsync` with an application-selected KDF instead.
@@ -105,7 +107,8 @@ See the [SDK crypto tasks](../../README.md#verify-the-pin-sign-and-verify-on-the
 The CLI decrypt handler selects PKCS#1 v1.5 and exposes no padding flag. Use direct `DecryptAsync` for
 OAEP and mutable plaintext cleanup. `DecryptionResult.DecryptedData` currently exposes read-only memory
 without an ordinary clearing API; preserve ownership boundaries rather than casting it writable. Treat
-the tool's plaintext output/files as sensitive application data.
+the tool's plaintext output/files as sensitive application data. The sample does not provide production
+plaintext lifetime or storage guarantees.
 
 ## Credentials, recovery and reset
 

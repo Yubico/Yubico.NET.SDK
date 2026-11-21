@@ -119,7 +119,9 @@ development firmware follows the SDK's modern-default convention. Metadata takes
 
 `IsManagementKeyAuthenticated` reports the session's observed PIV management authentication. The inherited
 `IsAuthenticated` reports protocol authentication such as SCP. PIN verification is separate card state.
-Failed management authentication clears a previous recorded success; successful `SetManagementKeyAsync`
+Failed PIN verification does not invalidate recorded management authentication. Failed management authentication
+clears a previous recorded management success without altering PIN state. Neither failure ends the session;
+retry with fresh credentials subject to the card's counters. Successful `SetManagementKeyAsync`
 updates the type and preserves authentication without retaining the supplied key bytes. A SET security-status
 failure clears the flag; other SET command failures preserve it. External card changes can still invalidate
 what a local observation tells you.

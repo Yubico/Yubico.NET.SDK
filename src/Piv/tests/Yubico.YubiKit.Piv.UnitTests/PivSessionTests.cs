@@ -501,6 +501,24 @@ public class PivSessionTests
     }
 
     [Fact]
+    public async Task VerifyPinAsync_WhenPinIsWrong_PreservesManagementAuthenticationAndAllowsRetry()
+    {
+        var connection = CreateInitializedConnection([0x63, 0xC2], OkResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await PivSession.CreateAsync(connection, cancellationToken: token);
+        MarkAuthenticated(session);
+
+        var failure = await Assert.ThrowsAsync<InvalidPinException>(() => session.VerifyPinAsync("123457"u8.ToArray(), token));
+        Assert.Equal(2, failure.RetriesRemaining);
+        Assert.True(session.IsManagementKeyAuthenticated);
+        await session.VerifyPinAsync("123456"u8.ToArray(), token);
+
+        Assert.True(session.IsInitialized);
+        Assert.True(session.IsManagementKeyAuthenticated);
+        Assert.Equal(0x20, LastCommand(connection)[1]);
+    }
+
+    [Fact]
     public async Task ResetAsync_BlocksPinAndPukThenResets()
     {
         var connection = CreateInitializedConnection(

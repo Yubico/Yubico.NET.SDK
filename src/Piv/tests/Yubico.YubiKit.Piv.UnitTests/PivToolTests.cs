@@ -25,6 +25,51 @@ namespace Yubico.YubiKit.Piv.UnitTests;
 public class PivToolTests
 {
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task RetryInfoCancellation_ReachesCliCancellationExit(bool cancelPinQuery)
+    {
+        var session = Substitute.For<IPivSession>();
+        using var source = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        source.Cancel();
+        var token = source.Token;
+        session.GetPinAttemptsAsync(token).Returns(cancelPinQuery ? Task.FromCanceled<int>(token) : Task.FromResult(2));
+        session.GetPukMetadataAsync(token).Returns(Task.FromCanceled<PukMetadata>(token));
+        using var errors = new StringWriter();
+
+        int exitCode = await CliRunner.RunWithCancellationExitAsync(async () =>
+        {
+            var result = await DeviceInfoQuery.GetPivRetryInfoAsync(session, token);
+            return result.Success ? 0 : 1;
+        }, errors);
+
+        Assert.Equal(130, exitCode);
+        Assert.Contains("Operation cancelled.", errors.ToString());
+        await session.Received(cancelPinQuery ? 0 : 1).GetPukMetadataAsync(token);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task RetryInfoNonCancellationFailure_PreservesAvailableCounter(bool pinQueryFails)
+    {
+        var session = Substitute.For<IPivSession>();
+        var token = TestContext.Current.CancellationToken;
+        session.GetPinAttemptsAsync(token).Returns(pinQueryFails
+            ? Task.FromException<int>(new InvalidOperationException("PIN counter unavailable"))
+            : Task.FromResult(2));
+        session.GetPukMetadataAsync(token).Returns(pinQueryFails
+            ? Task.FromResult(new PukMetadata(false, 3, 1))
+            : Task.FromException<PukMetadata>(new NotSupportedException()));
+
+        var result = await DeviceInfoQuery.GetPivRetryInfoAsync(session, token);
+
+        Assert.True(result.Success);
+        Assert.Equal(pinQueryFails ? (int?)null : 2, result.PinRetriesRemaining);
+        Assert.Equal(pinQueryFails ? 1 : (int?)null, result.PukRetriesRemaining);
+    }
+
+    [Theory]
     [InlineData(false, null, true, null)]
     [InlineData(true, null, false, null)]
     [InlineData(true, "unsupported", false, null)]

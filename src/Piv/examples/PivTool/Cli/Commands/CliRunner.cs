@@ -44,7 +44,8 @@ internal static class CliRunner
         }
     }
 
-    internal static async Task<int> RunAsync(string[] args, CancellationToken ct = default, TextReader? resetInput = null)
+    internal static async Task<int> RunAsync(string[] args, CancellationToken ct = default, TextReader? resetInput = null,
+        Func<int?, CancellationToken, Task<IPivSession?>>? openResetSession = null)
     {
         var (command, flags) = ParseArgs(args);
 
@@ -81,7 +82,8 @@ internal static class CliRunner
             "attest" => await HandleAttestAsync(flags, serial, useJson, ct),
             "attest-intermediate" => await HandleAttestIntermediateAsync(flags, serial, useJson, ct),
             "slot-info" => await HandleSlotInfoAsync(flags, serial, useJson, ct),
-            "reset" => await HandleResetAsync(flags, serial, useJson, resetInput ?? Console.In, ct),
+            "reset" => await HandleResetAsync(flags, serial, useJson, resetInput ?? Console.In,
+                openResetSession ?? OpenResetSessionAsync, ct),
             "help" or "--help" or "-h" or "-?" => PrintHelp(),
             _ => PrintUnknownCommand(command)
         };
@@ -941,7 +943,8 @@ internal static class CliRunner
     }
 
     private static async Task<int> HandleResetAsync(
-        Dictionary<string, string?> flags, int? serial, bool useJson, TextReader input, CancellationToken ct)
+        Dictionary<string, string?> flags, int? serial, bool useJson, TextReader input,
+        Func<int?, CancellationToken, Task<IPivSession?>> openSession, CancellationToken ct)
     {
         bool force = DeviceHelper.HasFlag(flags, "force");
 
@@ -966,10 +969,8 @@ internal static class CliRunner
         }
 
         ct.ThrowIfCancellationRequested();
-        var device = await DeviceHelper.GetDeviceAsync(serial, ct);
-        if (device is null) return 1;
-
-        await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+        await using var session = await openSession(serial, ct);
+        if (session is null) return 1;
         var result = await Reset.ResetPivApplicationAsync(session, ct);
 
         if (useJson) JsonOutput.Write(result);
@@ -977,6 +978,12 @@ internal static class CliRunner
         else Console.Error.WriteLine($"Error: {result.ErrorMessage}");
 
         return result.Success ? 0 : 1;
+    }
+
+    private static async Task<IPivSession?> OpenResetSessionAsync(int? serial, CancellationToken ct)
+    {
+        var device = await DeviceHelper.GetDeviceAsync(serial, ct);
+        return device is null ? null : await device.CreatePivSessionAsync(cancellationToken: ct);
     }
 
     // ── Help ─────────────────────────────────────────────────────────────────

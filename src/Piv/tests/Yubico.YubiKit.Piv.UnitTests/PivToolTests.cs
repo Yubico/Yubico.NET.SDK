@@ -143,22 +143,68 @@ public class PivToolTests
     }
 
     [Fact]
-    public async Task ResetCancellation_ReachesCliCancellationExit()
+    public async Task AdmittedResetCancellation_WaitsForResetAndSessionDisposalBeforeExiting()
     {
         var session = Substitute.For<IPivSession>();
-        using var source = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
-        source.Cancel();
-        session.ResetAsync(source.Token).Returns(Task.FromCanceled(source.Token));
+        using var budget = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        budget.CancelAfter(TimeSpan.FromSeconds(10));
+        using var signal = CancellationTokenSource.CreateLinkedTokenSource(budget.Token);
+        using var reader = new StringReader("RESET");
         using var errors = new StringWriter();
-
-        int exitCode = await CliRunner.RunWithCancellationExitAsync(async () =>
+        var resetStarted = new TaskCompletionSource<CancellationToken>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var resetCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var disposalStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var disposalCompletion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        int opens = 0;
+        session.ResetAsync(Arg.Any<CancellationToken>()).Returns(call =>
         {
-            var result = await Reset.ResetPivApplicationAsync(session, source.Token);
-            return result.Success ? 0 : 1;
-        }, errors);
+            resetStarted.SetResult(call.Arg<CancellationToken>());
+            return resetCompletion.Task;
+        });
+        session.DisposeAsync().Returns(_ =>
+        {
+            disposalStarted.SetResult();
+            return new ValueTask(disposalCompletion.Task);
+        });
 
-        Assert.Equal(130, exitCode);
-        Assert.Contains("Operation cancelled.", errors.ToString());
+        Task<IPivSession?> Open(int? serial, CancellationToken ct)
+        {
+            Assert.Equal(123, serial);
+            Assert.Equal(signal.Token, ct);
+            Interlocked.Increment(ref opens);
+            return Task.FromResult<IPivSession?>(session);
+        }
+
+        var run = CliRunner.RunWithCancellationExitAsync(() => CliRunner.RunAsync(["reset", "--serial", "123"], signal.Token, reader, Open), errors);
+        try
+        {
+            Assert.Equal(signal.Token, await resetStarted.Task.WaitAsync(budget.Token));
+            Assert.Equal(1, Volatile.Read(ref opens));
+            signal.Cancel();
+            Assert.False(resetCompletion.Task.IsCompleted);
+            Assert.False(run.IsCompleted);
+            Assert.False(disposalStarted.Task.IsCompleted);
+            Assert.False(disposalCompletion.Task.IsCompleted);
+
+            resetCompletion.SetCanceled(signal.Token);
+            await disposalStarted.Task.WaitAsync(budget.Token);
+            Assert.False(run.IsCompleted);
+            disposalCompletion.SetResult();
+
+            Assert.Equal(130, await run.WaitAsync(budget.Token));
+            Assert.Contains("Operation cancelled.", errors.ToString());
+            await session.Received(1).ResetAsync(signal.Token);
+            await session.Received(1).DisposeAsync();
+            Assert.Equal(1, Volatile.Read(ref opens));
+        }
+        finally
+        {
+            signal.Cancel();
+            resetCompletion.TrySetCanceled(signal.Token);
+            disposalCompletion.TrySetResult();
+            // Independent, bounded cleanup even if the test token was canceled.
+            await run.WaitAsync(TimeSpan.FromSeconds(10), CancellationToken.None);
+        }
     }
 
     [Fact]
@@ -177,7 +223,7 @@ public class PivToolTests
             try
             {
                 release.Wait(budget.Token);
-                return "not confirmed";
+                return "RESET";
             }
             finally
             {
@@ -185,23 +231,32 @@ public class PivToolTests
             }
         });
         using var errors = new StringWriter();
-        var run = CliRunner.RunWithCancellationExitAsync(() => CliRunner.RunAsync(["reset"], signal.Token, reader), errors);
+        int opens = 0;
+        Task<IPivSession?> Open(int? serial, CancellationToken ct)
+        {
+            Interlocked.Increment(ref opens);
+            return Task.FromResult<IPivSession?>(null);
+        }
+
+        var run = CliRunner.RunWithCancellationExitAsync(() => CliRunner.RunAsync(["reset"], signal.Token, reader, Open), errors);
         try
         {
             await started.Task.WaitAsync(budget.Token);
             signal.Cancel();
             Assert.Equal(130, await run.WaitAsync(budget.Token));
             Assert.False(finished.Task.IsCompleted);
+            Assert.Equal(0, Volatile.Read(ref opens));
             Assert.Contains("Operation cancelled.", errors.ToString());
         }
         finally
         {
             release.Set();
             // Independent bounded drain: the fake must release its reader before disposal.
-            await run.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+            await run.WaitAsync(TimeSpan.FromSeconds(10), CancellationToken.None);
             if (started.Task.IsCompleted)
-                await finished.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+                await finished.Task.WaitAsync(TimeSpan.FromSeconds(10), CancellationToken.None);
         }
+        Assert.Equal(0, Volatile.Read(ref opens));
     }
 
     [Theory]

@@ -505,7 +505,7 @@ currently leaves OpenPGP statuses, including 6600, outside its `TimedOut` classi
 prompt alive until full operation and callback completion, and avoid reentering or disposing the session from a
 callback. Sign/authenticate resolve completion before transferring the signature; decrypt resolves before copying
 the caller's result and clears the raw response even if resolution fails. Attestation creates its certificate before
-the outer completion callback; a callback failure can currently abandon that disposable certificate.
+the outer completion callback and disposes that certificate if completion fails before transfer to the caller.
 
 Cancellation is checked before each logical exchange is admitted. After admission, constituent SmartCard work uses
 `CancellationToken.None`; a later exchange in the same public method can still reject the canceled token. Ending an

@@ -174,28 +174,30 @@ public sealed partial class OpenPgpSession
         // GET_ATTESTATION generates the attestation cert and writes it to the
         // certificate slot for the key. We then read it back with GetCertificateAsync.
         // The Python implementation uses the same send_apdu → get_certificate(key_ref) sequence.
-        // The outer notification helper resolves Completed after this callback returns its certificate.
-        // A resolution failure can abandon that disposable result; it has no local cleanup scope here.
         var command = new ApduCommand(0x80, (int)Ins.GetAttestation, (int)keyRef, 0x00);
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(KeyRef.Att, UserPresenceOperations.OpenPgp.AttestKey, cancellationToken).ConfigureAwait(false));
-        return await RunWithUserPresenceNotificationAsync(
+        X509Certificate2? ownedCertificate = null;
+        try
+        {
+            X509Certificate2 certificate = await RunWithUserPresenceNotificationAsync(
                 userPresenceNotification,
                 async token =>
                 {
                     await TransmitAsync(command, token).ConfigureAwait(false);
-
-                    var cert = await GetCertificateAsync(keyRef, token).ConfigureAwait(false);
-                    if (cert is null)
-                    {
-                        throw new InvalidOperationException(
+                    return ownedCertificate = await GetCertificateAsync(keyRef, token).ConfigureAwait(false)
+                        ?? throw new InvalidOperationException(
                             $"Attestation certificate was not found in slot {keyRef} after GET_ATTESTATION.");
-                    }
-
-                    return cert;
                 },
                 cancellationToken)
-            .ConfigureAwait(false);
+                .ConfigureAwait(false);
+            ownedCertificate = null;
+            return certificate;
+        }
+        finally
+        {
+            ownedCertificate?.Dispose();
+        }
     }
 
     /// <inheritdoc />

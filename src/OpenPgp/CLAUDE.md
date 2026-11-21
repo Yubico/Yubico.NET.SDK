@@ -208,9 +208,8 @@ authorization. Its later APDU exception does not isolate Unverify's effect or es
 When `SessionCreationOptions.UserPresencePrompt` is supplied, signing, decryption, authentication, and
 attestation use the relevant cached UIF before the cryptographic APDU. `On`/`Fixed` map to `PolicyRequires`,
 `Cached`/`CachedFixed` map to `PolicyMayRequire`, and `Off` is silent. Attestation uses the attestation-key
-UIF (`KeyRef.Att`). A failed UIF read falls back to `PolicyMayRequire` when diagnostic logging succeeds,
-allowing the cryptographic operation to proceed. A logging exception propagates instead and can prevent that
-operation; cancellation still propagates. Firmware without UIF support stays silent because it cannot configure
+UIF (`KeyRef.Att`). A failed advisory UIF read falls back to `PolicyMayRequire` even if diagnostic logging
+also fails; cancellation still propagates. Firmware without UIF support stays silent because it cannot configure
 that policy. A direct GET DATA is issued only when the cached application-related data omitted that key's UIF.
 Device APDU errors resolve as `Failed`; OpenPGP statuses including 6600 currently receive no `TimedOut`
 classification. Terminal outcomes are `Completed`, `Cancelled`, and `Failed`. Decryption resolves successfully before materializing the caller's

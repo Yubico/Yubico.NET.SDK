@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -430,8 +432,10 @@ public sealed class OpenPgpSessionWireTests
         Assert.All(prompt.Resolved, entry => Assert.Equal(UserPresenceOutcome.Completed, entry.Outcome));
     }
 
-    [Fact]
-    public async Task SignAsync_WhenUifReadFails_NotifiesMayRequireAndStillSigns()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SignAsync_WhenUifReadFails_NotifiesMayRequireAndStillSigns(bool loggerThrows)
     {
         var connection = CreateInitializedConnection([0x6A, 0x88], CryptoResponse());
         var prompt = new RecordingUserPresencePrompt(connection);
@@ -439,6 +443,14 @@ public sealed class OpenPgpSessionWireTests
             connection,
             new SessionCreationOptions { UserPresencePrompt = prompt },
             TestContext.Current.CancellationToken);
+
+        if (loggerThrows)
+        {
+            // Replace this session's diagnostic logger only; don't change the process-global factory.
+            var loggerField = typeof(OpenPgpSession).GetField("_logger", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?? throw new InvalidOperationException("Missing session logger.");
+            loggerField.SetValue(session, new ThrowingUifLogger());
+        }
 
         var signature = await session.SignAsync(
             "message"u8.ToArray(),
@@ -1116,6 +1128,20 @@ public sealed class OpenPgpSessionWireTests
         public override byte[] ToBytes() => encoding;
 
         public override void Dispose() => Disposed = true;
+    }
+
+    private sealed class ThrowingUifLogger : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (exception is ApduException)
+                throw new InvalidOperationException("UIF diagnostics failed.");
+        }
     }
 
     private sealed class RecordingUserPresencePrompt(

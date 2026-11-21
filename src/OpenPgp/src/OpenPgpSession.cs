@@ -368,9 +368,15 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         }
         catch (Exception ex)
         {
-            // UIF is advisory metadata. If diagnostic logging succeeds, a failed read falls back to
-            // PolicyMayRequire so the cryptographic operation can proceed. Logging failures propagate.
-            _logger.LogDebug(ex, "Could not read UIF for {Slot}; user presence may be required", keyRef);
+            // Neither advisory metadata nor its diagnostics may prevent the requested operation.
+            try
+            {
+                _logger.LogDebug(ex, "Could not read UIF for {Slot}; user presence may be required", keyRef);
+            }
+            catch (Exception)
+            {
+                // Continue with the advisory fallback even when the logging provider fails.
+            }
             basis = UserPresenceBasis.PolicyMayRequire;
         }
 

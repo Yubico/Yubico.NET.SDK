@@ -868,6 +868,10 @@ Touch-required credential calculations notify `SessionCreationOptions.UserPresen
 
 Use `Yubico.YubiKit.YubiOtp` for Yubico OTP configuration and slot operations. Review slot numbering, configuration flags, and write/update behavior manually.
 
+Read device information through Management/Core. V2 has no typed OTP FIPS-mode query or legacy mode/configuration
+mutator. FIPS capability and approval metadata is not OTP FIPS-mode state, and modern Management TLV writes are
+not a replacement for the legacy mode command.
+
 A keyboard-layout-aware `StaticPasswordSlotConfiguration(string, KeyboardLayout)` constructor and Yubico-OTP-algorithm challenge-response (`YubicoOtpChallengeResponseSlotConfiguration`/`CalculateYubicoOtpAsync`) were restored after an initial v2 gap; see `yubiotp-static-password-keyboard` and `yubiotp-yubico-otp-challenge-response` in `v1-to-v2-map.yml`. HMAC-SHA1 and Yubico OTP key inputs of invalid length now fail before any device I/O instead of being silently hashed or padded.
 
 Migrate v1 `UseTouchNotifier` to `SessionCreationOptions.UserPresencePrompt`. OTP HID reports a live

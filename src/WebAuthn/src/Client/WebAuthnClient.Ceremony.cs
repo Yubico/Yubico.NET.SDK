@@ -154,8 +154,9 @@ public sealed partial class WebAuthnClient
 
     /// <summary>
     /// Probes <paramref name="candidates"/> with up:false (exclude-list pre-flight, allow-list selection).
-    /// Probe failures other than "no match" are reported as <see cref="WebAuthnClientErrorCode.Unknown"/>
-    /// and never escalate verification.
+    /// Probe CTAP failures other than "no match" map to <see cref="WebAuthnClientErrorCode.Unknown"/>.
+    /// Unassociated successful responses fail with <see cref="WebAuthnClientErrorCode.InvalidState"/>.
+    /// Neither failure can trigger verification escalation.
     /// </summary>
     /// <param name="rpId">The relying party identifier.</param>
     /// <param name="candidates">The descriptors to probe.</param>

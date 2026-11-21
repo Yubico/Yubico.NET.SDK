@@ -40,7 +40,8 @@ internal static class CredentialFilter
 
     /// <summary>
     /// Returns the first descriptor in <paramref name="candidates"/> that the authenticator
-    /// recognises, or null when it recognises none.
+    /// recognises, or null when no eligible credentials were sent or all eligible probes missed.
+    /// A successful response that does not identify a credential in its probe chunk is an error.
     /// </summary>
     /// <param name="backend">The WebAuthn backend for CTAP commands.</param>
     /// <param name="rpId">The relying party identifier.</param>
@@ -135,7 +136,12 @@ internal static class CredentialFilter
                         return chunk[0];
 
                     var matchedId = response.GetCredentialId();
-                    return chunk.FirstOrDefault(descriptor => descriptor.Id.Span.SequenceEqual(matchedId.Span));
+                    if (!matchedId.IsEmpty
+                        && chunk.FirstOrDefault(descriptor => descriptor.Id.Span.SequenceEqual(matchedId.Span)) is { } matched)
+                        return matched;
+
+                    throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
+                        "The successful credential probe did not identify a credential in the submitted list.");
                 }
                 finally
                 {

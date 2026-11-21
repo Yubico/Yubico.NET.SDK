@@ -161,6 +161,7 @@ public sealed partial class WebAuthnClient
                 {
                     // A UV-protected credential may be invisible to the first silent probe. Only
                     // retry with the supplied PIN if every eligible candidate would evaluate PRF.
+                    ct.ThrowIfCancellationRequested();
                     preference = UserVerificationPreference.Required;
                     decision = UvDecisionLogic.Decide(info, preference, auth.PinAvailable, permissions);
                     await AcquireCeremonyTokenAsync(auth, decision, ct).ConfigureAwait(false);

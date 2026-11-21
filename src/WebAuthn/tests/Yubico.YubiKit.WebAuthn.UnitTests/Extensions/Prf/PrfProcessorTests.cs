@@ -142,9 +142,10 @@ public class PrfProcessorTests
     }
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task Assertion_ReprobesHiddenCredentialOnlyWhenAllCandidatesEvaluatePrf(bool fallback)
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public async Task Assertion_ReprobesHiddenCredentialOnlyWhenAllCandidatesEvaluatePrf(bool fallback, bool cancelAfterMiss)
     {
         _ = Context("hmac-secret");
         _backend.Protocol.Returns(_protocol);
@@ -155,6 +156,7 @@ public class PrfProcessorTests
             .Returns(_ => new PinUvAuthTokenSession(_protocol, new byte[32]));
         var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
         var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        using var caller = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
         int silent = 0, verifiedSilent = 0, final = 0;
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
         {
@@ -165,7 +167,8 @@ public class PrfProcessorTests
                 Assert.Null(request.Extensions);
                 if (!request.PinUvAuthParam.HasValue)
                 {
-                    silent++;
+                    if (++silent == 2 && cancelAfterMiss)
+                        caller.Cancel(); // Last reply is still NoCredentials; no PIN attempt may follow cancellation.
                     throw new Ctap2.CtapException(Ctap2.CtapStatus.NoCredentials);
                 }
                 verifiedSilent++;
@@ -200,16 +203,23 @@ public class PrfProcessorTests
                 EvalByCredential = new Dictionary<string, PrfInputValues> { ["AQ"] = new() { First = PrfEvalFirst } }
             })
         };
-        var ct = TestContext.Current.CancellationToken;
-        var matches = await client.GetAssertionAsync(options, "123456"u8.ToArray(), ct);
-        if (fallback)
-            Assert.Equal(a.Id.ToArray(), (await Assert.Single(matches).SelectAsync(ct)).CredentialId.ToArray());
+        bool reprobed = fallback && !cancelAfterMiss;
+        if (cancelAfterMiss)
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.GetAssertionAsync(options, "123456"u8.ToArray(), caller.Token));
         else
-            Assert.Empty(matches);
+        {
+            var matches = await client.GetAssertionAsync(options, "123456"u8.ToArray(), caller.Token);
+            if (fallback)
+                Assert.Equal(a.Id.ToArray(), (await Assert.Single(matches).SelectAsync(caller.Token)).CredentialId.ToArray());
+            else
+                Assert.Empty(matches);
+        }
         Assert.Equal(2, silent);
-        Assert.Equal(fallback ? 1 : 0, verifiedSilent);
-        Assert.Equal(1, final);
-        await _backend.Received(fallback ? 1 : 0).EncapsulateAsync(Arg.Any<CancellationToken>());
+        Assert.Equal(reprobed ? 1 : 0, verifiedSilent);
+        Assert.Equal(cancelAfterMiss ? 0 : 1, final);
+        await _backend.Received(reprobed ? 1 : 0).GetPinUvTokenAsync(PinUvAuthMethod.Pin, PinUvAuthTokenPermissions.GetAssertion,
+            "example.com", Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
+        await _backend.Received(reprobed ? 1 : 0).EncapsulateAsync(Arg.Any<CancellationToken>());
     }
 
     private static Dictionary<int, object?> ReadHmacSecretInput(ReadOnlyMemory<byte> extensionsCbor)

@@ -75,6 +75,36 @@ public class WebAuthnClientCeremonyFrameTests
 
     private static ReadOnlyMemory<byte> Pin => "123456"u8.ToArray();
 
+    [Fact]
+    public async Task Assertion_UnassociatedSuccessfulProbeIsNotAPrfRetryMiss()
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(clientPinSupported: true, extensions: ["hmac-secret"]));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        var wrong = MockCtap2Responses.CreateMockGetAssertionResponse(b.Id.ToArray(), largeBlobKey: Enumerable.Repeat((byte)0x45, 32).ToArray());
+        var requests = new List<BackendGetAssertionRequest>();
+        _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(requests.Add), Arg.Any<CancellationToken>())
+            .Returns(wrong);
+        var options = WithAllowList(a, b) with
+        {
+            Extensions = new AuthenticationExtensionInputs(Prf: new PrfInput { First = "RP input"u8.ToArray() })
+        };
+
+        await using var client = _client;
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(options, Pin, TestContext.Current.CancellationToken));
+        Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+        var probe = Assert.Single(requests);
+        Assert.False(probe.Options?.GetValueOrDefault("up", true));
+        Assert.Equal(a, Assert.Single(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(probe.AllowList)));
+        Assert.Null(probe.PinUvAuthParam);
+        await _backend.DidNotReceive().GetPinUvTokenAsync(Arg.Any<PinUvAuthMethod>(), Arg.Any<PinUvAuthTokenPermissions>(),
+            Arg.Any<string>(), Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>());
+        await _backend.DidNotReceive().EncapsulateAsync(Arg.Any<CancellationToken>());
+        Assert.False(wrong.AuthenticatorDataRaw.Span.ContainsAnyExcept((byte)0));
+        Assert.False(wrong.LargeBlobKey.GetValueOrDefault().Span.ContainsAnyExcept((byte)0));
+    }
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(false, true)]

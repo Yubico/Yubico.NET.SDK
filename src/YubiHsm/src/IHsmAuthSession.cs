@@ -22,9 +22,10 @@ namespace Yubico.YubiKit.YubiHsm;
 /// </summary>
 /// <remarks>
 ///     Inherited IsAuthenticated records Core SCP setup, not management-key/credential-password authority,
-///     ongoing channel health, or completion of the external HSM handshake. Await complete public tasks
-///     before another operation or disposal, keeping borrowed inputs and prompt resources alive. LIST
-///     policy lookup, CALCULATE, parsing and callbacks extend beyond individual guarded exchanges.
+///     ongoing channel health, or completion of the external HSM handshake. Concurrent operations on
+///     one session are unsupported. Await the entire operation before another operation or disposal,
+///     keeping borrowed inputs and prompt resources alive. LIST policy lookup, CALCULATE, parsing and
+///     callbacks extend beyond individual guarded exchanges; the guard is not a workflow lease.
 ///     A rejected applet password or management key does not end the session or invalidate a separately
 ///     established SCP channel. The SDK tracks no cached applet login; each credential-gated command
 ///     presents its own authorization. Follow the device's remaining retry count. A failed SCP handshake

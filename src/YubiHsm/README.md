@@ -276,7 +276,8 @@ the cancellation request as a device-interruption guarantee.
   admits one session. Disjoint scoped views remain uncoordinated. Whoever creates a connection disposes
   it with `await using`; a session from `CreateHsmAuthSessionAsync` owns the one it opened.
   See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
-- Await the entire public workflow before another operation or disposal. Optional LIST policy lookup,
+- Concurrent use of one session is unsupported. Await the entire public workflow before another operation
+  or disposal. Optional LIST policy lookup,
   CALCULATE, parsing and callbacks are separate phases; Core drains an admitted exchange, not all later
   application work. Keep borrowed inputs/prompt resources alive until the task is terminal.
 - `ResetAsync` (no undo), `DeleteCredentialAsync`, and `PutManagementKeyAsync` change persistent applet state.

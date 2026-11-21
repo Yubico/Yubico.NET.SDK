@@ -212,51 +212,7 @@ public sealed class FingerprintBioEnrollment
             return [];
         }
 
-        return ReadTemplateInventory(response);
-    }
-
-    private static IReadOnlyList<TemplateInfo> ReadTemplateInventory(ReadOnlyMemory<byte> response)
-    {
-        var reader = new CborReader(response, CborConformanceMode.Ctap2Canonical);
-        List<TemplateInfo>? results = null;
-        var mapCount = reader.ReadStartMap() ?? 0;
-        for (var i = 0; i < mapCount; i++)
-        {
-            if (reader.ReadInt32() != 7)
-            {
-                reader.SkipValue();
-                continue;
-            }
-
-            int count = reader.ReadStartArray() ?? throw new CborContentException("Template array must have a definite length.");
-            results = [];
-            for (int j = 0; j < count; j++)
-                results.Add(ReadInventoryEntry(reader));
-            reader.ReadEndArray();
-        }
-
-        reader.ReadEndMap();
-        if (reader.BytesRemaining != 0 || results is null)
-            throw new CborContentException("Expected a complete template inventory response with templateInfos.");
-        return results;
-    }
-
-    private static TemplateInfo ReadInventoryEntry(CborReader reader)
-    {
-        byte[]? id = null;
-        string? name = null;
-        int fields = reader.ReadStartMap() ?? 0;
-        for (int i = 0; i < fields; i++)
-        {
-            int key = reader.ReadInt32();
-            if (key == 1) id = reader.ReadByteString();
-            else if (key == 2) name = reader.ReadTextString();
-            else reader.SkipValue();
-        }
-        reader.ReadEndMap();
-        if (id is null || id.Length == 0)
-            throw new CborContentException("Template inventory entry lacks an ID.");
-        return new TemplateInfo { TemplateId = id, FriendlyName = name };
+        return EnrollmentEnumerationResult.Decode(response).Templates;
     }
 
     /// <summary>

@@ -286,9 +286,8 @@ public sealed class EnrollmentBeginResult : EnrollmentSampleResult
 /// Metadata identifying and naming an enrolled fingerprint, not biometric template sample bytes.
 /// </summary>
 /// <remarks>
-/// The current decoder reads a flat map with ID/name at keys 4/7. CTAP 2.1 (2022-06-21 errata),
-/// Section 6.7, instead defines nested TemplateInfo with required ID key 1 and optional name
-/// key 2, inside the inventory's key-7 array. This decoder does not implement that schema.
+/// CTAP 2.1 §6.7 defines a nested TemplateInfo with required ID key 1 and optional name key 2.
+/// Use <see cref="EnrollmentEnumerationResult.Decode"/> for the surrounding inventory envelope.
 /// </remarks>
 public sealed class TemplateInfo
 {
@@ -303,23 +302,25 @@ public sealed class TemplateInfo
     public string? FriendlyName { get; internal init; }
 
     /// <summary>
-    /// Gets the optional integer locally interpreted as a sample count at key 8.
+    /// Gets the legacy sample count property, which is not populated by the standard decoder.
     /// </summary>
     /// <remarks>
-    /// No original vendor definition establishes this interpretation. Standard envelope
-    /// key 8 is maxTemplateFriendlyName, not sample count, and nested TemplateInfo has no such field.
+    /// Standard envelope key 8 is maxTemplateFriendlyName, not sample count.
     /// </remarks>
     public int? SampleCount { get; internal init; }
 
     /// <summary>
-    /// Decodes a TemplateInfo from a CBOR response.
+    /// Decodes one nested TemplateInfo map, not the surrounding CBOR response.
     /// </summary>
     /// <param name="data">The CBOR-encoded response data.</param>
     /// <returns>The decoded template info.</returns>
     public static TemplateInfo Decode(ReadOnlyMemory<byte> data)
     {
-        var reader = new CborReader(data, CborConformanceMode.Lax);
-        return DecodeFromReader(reader);
+        var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
+        var result = DecodeFromReader(reader);
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the template inventory entry.");
+        return result;
     }
 
     /// <summary>
@@ -327,44 +328,20 @@ public sealed class TemplateInfo
     /// </summary>
     internal static TemplateInfo DecodeFromReader(CborReader reader)
     {
-        ReadOnlyMemory<byte> templateId = default;
-        string? friendlyName = null;
-        int? sampleCount = null;
-
-        var mapCount = reader.ReadStartMap() ?? 0;
-
-        for (var i = 0; i < mapCount; i++)
+        byte[]? id = null;
+        string? name = null;
+        int fields = reader.ReadStartMap() ?? 0;
+        for (int i = 0; i < fields; i++)
         {
-            var key = reader.ReadInt32();
-
-            switch (key)
-            {
-                case 4: // templateId (0x04)
-                    templateId = reader.ReadByteString();
-                    break;
-
-                case 7: // Local flat-name field, not the standard nested TemplateInfo key 2.
-                    friendlyName = reader.ReadTextString();
-                    break;
-
-                case 8: // Local sampleCount interpretation; no established vendor definition.
-                    sampleCount = reader.ReadInt32();
-                    break;
-
-                default:
-                    reader.SkipValue();
-                    break;
-            }
+            int key = reader.ReadInt32();
+            if (key == 1) id = reader.ReadByteString();
+            else if (key == 2) name = reader.ReadTextString();
+            else reader.SkipValue();
         }
-
         reader.ReadEndMap();
-
-        return new TemplateInfo
-        {
-            TemplateId = templateId,
-            FriendlyName = friendlyName,
-            SampleCount = sampleCount
-        };
+        if (id is null || id.Length == 0)
+            throw new CborContentException("Template inventory entry lacks an ID.");
+        return new TemplateInfo { TemplateId = id, FriendlyName = name };
     }
 }
 
@@ -382,27 +359,30 @@ public sealed class EnrollmentEnumerationResult
     /// Decodes an EnrollmentEnumerationResult from a CBOR response.
     /// </summary>
     /// <param name="data">The CBOR-encoded response data.</param>
-    /// <returns>The decoded enumeration result containing the first template.</returns>
-    /// <remarks>
-    /// Wraps one flat decoded TemplateInfo. This does not parse the all-template array
-    /// required by CTAP 2.1 Section 6.7.6, and is not a complete standard inventory decoder.
-    /// </remarks>
+    /// <returns>All entries in the key-7 templateInfos array (CTAP 2.1 §6.7.6).</returns>
     public static EnrollmentEnumerationResult Decode(ReadOnlyMemory<byte> data)
     {
-        // Current flat-template wrapper, not the standard key-7 array of nested TemplateInfo maps.
-        var template = TemplateInfo.Decode(data);
-
-        return new EnrollmentEnumerationResult
+        var reader = new CborReader(data, CborConformanceMode.Ctap2Canonical);
+        List<TemplateInfo>? results = null;
+        var mapCount = reader.ReadStartMap() ?? 0;
+        for (var i = 0; i < mapCount; i++)
         {
-            Templates = [template]
-        };
-    }
+            if (reader.ReadInt32() != 7)
+            {
+                reader.SkipValue();
+                continue;
+            }
 
-    /// <summary>
-    /// Creates an enumeration result from a list of templates.
-    /// </summary>
-    internal static EnrollmentEnumerationResult FromTemplates(IReadOnlyList<TemplateInfo> templates)
-    {
-        return new EnrollmentEnumerationResult { Templates = templates };
+            int count = reader.ReadStartArray() ?? throw new CborContentException("Template array must have a definite length.");
+            results = [];
+            for (int j = 0; j < count; j++)
+                results.Add(TemplateInfo.DecodeFromReader(reader));
+            reader.ReadEndArray();
+        }
+
+        reader.ReadEndMap();
+        if (reader.BytesRemaining != 0 || results is null)
+            throw new CborContentException("Expected a complete template inventory response with templateInfos.");
+        return new EnrollmentEnumerationResult { Templates = results };
     }
 }

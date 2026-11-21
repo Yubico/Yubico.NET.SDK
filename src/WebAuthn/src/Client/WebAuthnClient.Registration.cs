@@ -75,7 +75,7 @@ public sealed partial class WebAuthnClient
         }
         catch (OperationCanceledException ex) when (deadline.Expired)
         {
-            throw CeremonyTimedOut(options.Timeout, ex);
+            throw CeremonyTimedOut(deadline.EffectiveTimeout, ex);
         }
     }
 

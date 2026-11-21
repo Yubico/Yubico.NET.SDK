@@ -468,7 +468,7 @@ Keep these conditions attached to public guidance when changing extension flow:
   an output failure cannot cause repeated credential creation. Lower-level exceptions can escape.
 - Caller cancellation propagates `OperationCanceledException`. A resulting timeout cancellation maps
   to `NotAllowed` only when the caller token was not cancelled; success can win the race. The timer
-  starts after validation/RP callback, is cooperative, and uses the framework-supported delay range.
+  starts after validation/RP callback, is cooperative, and caps only the upper bound at 600,000 ms.
 - Exclusion maps to `InvalidState`; main authentication NoCredentials/InvalidCredential returns no
   matches. Do not promise universal `WebAuthnClientError` normalization or rollback of side effects.
 

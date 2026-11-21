@@ -21,12 +21,13 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// The deadline is a signal, not a hard stop: the transport decides when it can act on it (FIDO HID
 /// sends <c>CTAPHID_CANCEL</c> at the next keep-alive; PC/SC exchanges run to their answer). A
 /// <c>null</c> timeout starts no timer; the 300 s default WebAuthn L3 §15.1 recommends is not applied.
-/// Values are not clamped to the L3 range and must fit the framework's supported delay.
+/// Only the upper bound is clamped (600,000 ms); short positive timeouts are not lengthened.
 /// The timer starts after validation/RP authorization. Unlike a full WebAuthn L3 §5.1.3 / §5.1.4
 /// lifetime timer, this helper does not reject success that races cancellation.
 /// </remarks>
 internal sealed class CeremonyDeadline : IDisposable
 {
+    private static readonly TimeSpan MaximumTimeout = TimeSpan.FromMilliseconds(600_000);
     private readonly CancellationTokenSource? _timer;
     private readonly CancellationTokenSource? _linked;
     private readonly CancellationToken _caller;
@@ -36,7 +37,8 @@ internal sealed class CeremonyDeadline : IDisposable
         _caller = caller;
         if (timeout is { } value)
         {
-            _timer = new CancellationTokenSource(value);
+            EffectiveTimeout = value > MaximumTimeout ? MaximumTimeout : value;
+            _timer = new CancellationTokenSource(EffectiveTimeout.Value);
             _linked = CancellationTokenSource.CreateLinkedTokenSource(_timer.Token, caller);
             Token = _linked.Token;
         }
@@ -51,6 +53,8 @@ internal sealed class CeremonyDeadline : IDisposable
 
     /// <summary>The token to pass to every step of the ceremony.</summary>
     public CancellationToken Token { get; }
+
+    public TimeSpan? EffectiveTimeout { get; }
 
     /// <summary>
     /// True when the timeout elapsed and the caller did not cancel. Caller cancellation prevents

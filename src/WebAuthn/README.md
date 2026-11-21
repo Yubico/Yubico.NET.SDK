@@ -270,8 +270,8 @@ credential is excluded.
 
 Pass the ceremony's third argument by name when omitting the PIN:
 `client.GetAssertionAsync(requestOptions, cancellationToken: cancellationToken)`.
-`Timeout` on either options record has no SDK default or clamping and must be positive and within the
-framework-supported delay range. It starts after local validation and the RP callback, and signals
+`Timeout` on either options record has no SDK default. A supplied value must be positive, and only
+values above 600,000 ms are clamped. It starts after local validation and the RP callback, and signals
 cooperative cancellation, not a hard completion deadline. HID can send `CTAPHID_CANCEL` during a
 keep-alive and drain a terminal response; admitted SmartCard exchanges finish before returning.
 A completed success can win the cancellation race. Cancellation does not roll back credential creation

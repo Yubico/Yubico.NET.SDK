@@ -94,9 +94,8 @@ public sealed record class PublicKeyCredentialCreationOptions
     /// </para>
     /// <para>
     /// <c>null</c> starts no timer; L3 §15.1 recommends a 300 s default, which this client does not apply.
-    /// Values are not clamped to the L3 range. A non-positive value is rejected with
-    /// <see cref="WebAuthnClientErrorCode.InvalidRequest"/>; a positive value exceeding the delay supported
-    /// by <see cref="CancellationTokenSource"/> throws <see cref="ArgumentOutOfRangeException"/>.
+    /// A non-positive value is rejected with <see cref="WebAuthnClientErrorCode.InvalidRequest"/>.
+    /// Values above 600,000 ms are shortened to that maximum; shorter values are unchanged.
     /// This cooperative timer is not a complete implementation of L3 §5.1.3's lifetime timer.
     /// A resulting <see cref="OperationCanceledException"/> propagates unchanged if the caller's token
     /// is cancelled, rather than being wrapped as a timeout.

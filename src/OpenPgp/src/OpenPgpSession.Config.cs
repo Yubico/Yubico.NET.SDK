@@ -108,7 +108,8 @@ public sealed partial class OpenPgpSession
     {
         ThrowIfDisposed();
 
-        EnsureSupports(FeatureAlgorithmInfo);
+        if (!IsSupported(FeatureAlgorithmInfo))
+            return GetLegacySupportedAlgorithms();
 
         _logger.LogDebug("Getting algorithm information");
 
@@ -210,6 +211,19 @@ public sealed partial class OpenPgpSession
     }
 
     // ── Private Helpers ───────────────────────────────────────────────
+
+    private IReadOnlyList<SupportedAlgorithm> GetLegacySupportedAlgorithms()
+    {
+        bool neo = FirmwareVersion.Major is > 0 and < 4;
+        var format = neo ? RsaImportFormat.CrtWithModulus : RsaImportFormat.Standard;
+        RsaSize[] sizes = neo || FirmwareVersion is { Major: 4, Minor: 4 }
+            ? [RsaSize.Rsa2048] : [RsaSize.Rsa2048, RsaSize.Rsa3072, RsaSize.Rsa4096];
+        List<SupportedAlgorithm> algorithms = [];
+        foreach (var slot in new[] { KeyRef.Sig, KeyRef.Dec, KeyRef.Aut })
+        foreach (var size in sizes)
+            algorithms.Add(new SupportedAlgorithm(slot, RsaAttributes.Create(size, format)));
+        return algorithms;
+    }
 
     /// <summary>
     ///     Fixes invalid Curve25519 entries in algorithm information for firmware &lt; 5.6.1.

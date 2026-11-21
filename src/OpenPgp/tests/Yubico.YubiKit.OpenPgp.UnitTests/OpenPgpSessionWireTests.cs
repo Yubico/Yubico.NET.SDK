@@ -984,6 +984,21 @@ public sealed class OpenPgpSessionWireTests
         new([OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(), .. trailingResponses]);
 
     [Fact]
+    public async Task LegacyFirmware_UsesBuiltInAlgorithmsAndRejectsUnsupportedUifBeforeWrite()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x04, 0x04, 0x00, 0x90, 0x00], ApplicationRelatedDataResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var algorithms = await session.GetSupportedAlgorithmsAsync(token);
+        Assert.Equal([KeyRef.Sig, KeyRef.Dec, KeyRef.Aut], algorithms.Select(algorithm => algorithm.KeyRef).ToArray());
+        Assert.All(algorithms, algorithm => Assert.Equal(2048, Assert.IsType<RsaAttributes>(algorithm.Attributes).NLen));
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.SetUifAsync(KeyRef.Sig, Uif.Cached, token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.SetUifAsync(KeyRef.Att, Uif.On, token));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.GetChallengeAsync(256, token));
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
     public async Task Initialize_WithExplicitOverride_DoesNotConsultCacheOrSendGetVersion()
     {
         var connection = new RecordingSmartCardConnection(OkResponse(), ApplicationRelatedDataResponse());

@@ -124,19 +124,20 @@ management key through your own secure store before installing it.
 Reset text mode asks for `RESET` unless `--force` is present; JSON mode requires `--force`. Normal PIV
 reset removes ordinary keys/certificates/objects and restores credentials, while retaining F9 attestation
 material. Blocking PIN/PUK and refreshing post-reset metadata can fail on either side of the physical reset;
-inspect state before retrying. Bio MPE requires its product device-reset route. `cert-delete` executes
+inspect state before retrying. Configured biometrics are refused before retry consumption; follow the product's
+device-reset procedure instead. Confirmed reset reselects PIV and refreshes the same session, including SCP
+if configured. `cert-delete` executes
 without confirmation: the `--force` shown in runtime help has no effect in that handler.
 
-The interactive CSR menu currently omits PIN verification, and its certificate export path reads the wrong
-result field. Use the CLI CSR/export tasks or direct SDK calls for these tasks. Callback signature generators
-block while calling the async SDK and have limited cancellation propagation; a displayed timeout can also
-represent cancellation caught by the helper. Await terminal work and inspect device state before repeating
-mutations. These limitations remain engineering follow-ups rather than guarantees of the sample.
+The interactive CSR menu verifies the PIN before signing. Certificate export writes PEM from the returned
+certificate. The synchronous signature callbacks pass the operation token and wait for the full SDK task.
+Cancellation exits with code 130, not a touch-timeout diagnosis. Await terminal work and inspect device
+state before repeating a mutation.
 
 Keep the original SDK task and its inputs/session/prompt alive until actual completion, even if an outer wait ends.
 Core guards one logical exchange, not the tool's complete credential, certificate or PIN-only workflow. PIV presence
 callbacks and local RSA unpadding sit outside that exchange guard. A cancellation token does not interrupt admitted
-SmartCard traffic or supply a native deadline; the sample's broad error/timeout mapping does not establish one.
+SmartCard traffic or supply a native deadline.
 
 ## Find the SDK examples
 

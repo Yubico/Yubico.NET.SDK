@@ -947,7 +947,7 @@ internal static class CliRunner
 
         if (!force && !useJson)
         {
-            Console.Write("WARNING: This will reset the PIV application and delete all keys. Type 'RESET' to confirm: ");
+            Console.Write("WARNING: This deletes ordinary PIV keys, certificates, and data objects, but retains F9 attestation. Type 'RESET' to confirm: ");
             var input = Console.ReadLine();
             if (!string.Equals(input, "RESET", StringComparison.Ordinal))
             {

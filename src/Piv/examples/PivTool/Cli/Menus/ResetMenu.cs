@@ -17,9 +17,8 @@ public static class ResetMenu
     {
         OutputHelpers.WriteHeader("Reset PIV Application");
 
-        OutputHelpers.WriteError("WARNING: This will delete ALL PIV data including:");
-        AnsiConsole.MarkupLine("  • All private keys");
-        AnsiConsole.MarkupLine("  • All certificates");
+        OutputHelpers.WriteError("WARNING: This deletes ordinary PIV keys, certificates, and data objects.");
+        AnsiConsole.MarkupLine("  • The F9 attestation key and certificate are retained");
         AnsiConsole.MarkupLine("  • PIN, PUK, and management key will be reset to defaults");
         AnsiConsole.WriteLine();
 

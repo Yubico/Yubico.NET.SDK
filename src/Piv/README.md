@@ -356,8 +356,9 @@ certificate request, while device signing needs an external `X509SignatureGenera
 ### Reset PIV deliberately
 
 `ResetAsync` checks Bio metadata before consuming PIN or PUK retries. If biometrics are configured,
-it refuses without blocking either credential; use the product's device-reset procedure. Only a response
-indicating Bio metadata is unsupported allows the legacy path to proceed without metadata.
+it refuses without blocking either credential; use the product's device-reset procedure. Only `6A88`
+(referenced data not found) or `6D00` (instruction not supported) permits reset without Bio metadata.
+Other errors and repeated known Bio fields stop reset before retry consumption.
 The method consumes PIN and PUK retries until both are blocked, then sends Yubico RESET without requiring
 management authentication. Normal private-key slots, their certificates, provisioning objects and
 credentials return to factory state. **The F9 attestation key and certificate survive normal PIV reset.**

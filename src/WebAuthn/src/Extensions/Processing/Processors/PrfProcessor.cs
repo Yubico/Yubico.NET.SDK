@@ -40,22 +40,21 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 /// </remarks>
 internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor, IDisposable
 {
-    public static bool RequiresVerifiedEvaluation(PrfInput? input, ExtensionContext context, bool registration) =>
-        input is not null && context.Supports(ExtensionIdentifiers.HmacSecret)
-        && (registration
-            ? input.First is not null && context.Supports(ExtensionIdentifiers.HmacSecretMakeCredential)
-            : input.First is not null || input.EvalByCredential is { Count: > 0 });
+    public static bool RequiresVerifiedCreationEvaluation(PrfInput? input, ExtensionContext context) =>
+        input?.First is not null && context.Supports(ExtensionIdentifiers.HmacSecret)
+        && context.Supports(ExtensionIdentifiers.HmacSecretMakeCredential);
+
+    public static bool RequiresVerifiedAssertionEvaluation(PrfInput? input, ExtensionContext context, PublicKeyCredentialDescriptor? selected) =>
+        input is not null && context.Supports(ExtensionIdentifiers.HmacSecret) && SelectInputs(input, selected) is not null;
     private readonly PrfInput _input;
     private readonly ExtensionContext _context;
-    private readonly bool _registration;
     private readonly bool _evaluateAtCreation;
     private PinUvSharedSecret? _sharedSecret;
 
-    private PrfProcessor(PrfInput input, ExtensionContext context, bool registration, bool evaluateAtCreation)
+    private PrfProcessor(PrfInput input, ExtensionContext context, bool evaluateAtCreation)
     {
         _input = input;
         _context = context;
-        _registration = registration;
         _evaluateAtCreation = evaluateAtCreation;
     }
 
@@ -72,7 +71,7 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
         // L3 §10.1.4: evaluation at creation needs "a future extension to [FIDO-CTAP]"; CTAP 2.2 §12.8
         // hmac-secret-mc is that extension.
         bool evaluateAtCreation = input.First is not null && context.Supports(ExtensionIdentifiers.HmacSecretMakeCredential);
-        return new PrfProcessor(input, context, registration: true, evaluateAtCreation);
+        return new PrfProcessor(input, context, evaluateAtCreation);
     }
 
     /// <summary>
@@ -107,7 +106,7 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
             }
         }
 
-        return new PrfProcessor(input, context, registration: false, evaluateAtCreation: false);
+        return new PrfProcessor(input, context, evaluateAtCreation: false);
     }
 
     private static bool TryDecodeCredentialId(string key, out byte[] id)
@@ -132,14 +131,15 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
     public string Name => ExtensionIdentifiers.HmacSecret;
     public PinUvAuthTokenPermissions Permissions => PinUvAuthTokenPermissions.None;
 
-    private bool NeedsSharedSecret => _registration
-        ? _evaluateAtCreation
-        : _input.First is not null || _input.EvalByCredential is { Count: > 0 };
-
     /// <summary>One key agreement per attempt, performed only when salts will be sent.</summary>
-    public async ValueTask PrepareAsync(CancellationToken cancellationToken)
+    public ValueTask PrepareAsync(CancellationToken cancellationToken) => PrepareSecretAsync(_evaluateAtCreation, cancellationToken);
+
+    public ValueTask PrepareAsync(PublicKeyCredentialDescriptor? selected, CancellationToken cancellationToken) =>
+        PrepareSecretAsync(SelectInputs(_input, selected) is not null, cancellationToken);
+
+    private async ValueTask PrepareSecretAsync(bool needsSecret, CancellationToken cancellationToken)
     {
-        if (NeedsSharedSecret && _sharedSecret is null)
+        if (needsSecret && _sharedSecret is null)
         {
             _sharedSecret = await _context.Backend.EncapsulateAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -161,7 +161,7 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
 
     public void PrepareInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token)
     {
-        var ev = SelectInputs(selected);
+        var ev = SelectInputs(_input, selected);
         if (ev is null || _sharedSecret is null)
         {
             return;
@@ -199,16 +199,17 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
     /// encoding of the credential ID that will be returned, let ev be the value of that entry. If ev is
     /// null and eval is present, then let ev be the value of eval."
     /// </summary>
-    private PrfInputValues? SelectInputs(PublicKeyCredentialDescriptor? selected)
+    private static PrfInputValues? SelectInputs(PrfInput input, PublicKeyCredentialDescriptor? selected)
     {
         if (selected is not null
-            && _input.EvalByCredential is { } byCredential
-            && byCredential.TryGetValue(Base64Url.Encode(selected.Id.Span), out var forCredential))
+            && input.EvalByCredential is { } byCredential
+            && byCredential.TryGetValue(Base64Url.Encode(selected.Id.Span), out var forCredential)
+            && forCredential is not null)
         {
             return forCredential;
         }
 
-        return _input.First is { } first ? new PrfInputValues { First = first, Second = _input.Second } : null;
+        return input.First is { } first ? new PrfInputValues { First = first, Second = input.Second } : null;
     }
 
     public ValueTask PrepareOutputsAsync(

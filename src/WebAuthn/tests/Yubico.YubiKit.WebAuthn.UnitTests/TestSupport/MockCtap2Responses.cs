@@ -39,7 +39,8 @@ internal static class MockCtap2Responses
         PublicKeyCredentialUserEntity? user = null,
         byte[]? authDataExtensionsCbor = null,
         byte[]? largeBlobKey = null,
-        bool omitCredential = false)
+        bool omitCredential = false,
+        bool userVerified = true)
     {
         credentialId ??= RandomNumberGenerator.GetBytes(32);
         signature ??= RandomNumberGenerator.GetBytes(64);
@@ -69,7 +70,7 @@ internal static class MockCtap2Responses
 
         // 0x02: authData
         writer.WriteInt32(2);
-        writer.WriteByteString(BuildAuthData(authDataExtensionsCbor));
+        writer.WriteByteString(BuildAuthData(authDataExtensionsCbor, userVerified));
 
         // 0x03: signature
         writer.WriteInt32(3);
@@ -108,11 +109,11 @@ internal static class MockCtap2Responses
     /// Bare authenticator data: rpIdHash (32) + flags UP|UV (1) + signCount (4), with no attested
     /// credential data.
     /// </summary>
-    public static byte[] BuildAuthData(byte[]? extensionsCbor = null)
+    public static byte[] BuildAuthData(byte[]? extensionsCbor = null, bool userVerified = true)
     {
         var authData = new byte[37 + (extensionsCbor?.Length ?? 0)];
         SHA256.HashData("example.com"u8, authData.AsSpan(0, 32));
-        authData[32] = (byte)(0x05 | (extensionsCbor is null ? 0 : 0x80)); // UP | UV, ED when extensions follow
+        authData[32] = (byte)(0x01 | (userVerified ? 0x04 : 0) | (extensionsCbor is null ? 0 : 0x80));
         authData[36] = 0x01;
         extensionsCbor?.CopyTo(authData.AsSpan(37));
         return authData;

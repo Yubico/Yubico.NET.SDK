@@ -128,7 +128,7 @@ public sealed partial class WebAuthnClient
         var permissions = PinUvAuthTokenPermissions.MakeCredential
             | (options.ExcludeCredentials is { Count: > 0 } ? PinUvAuthTokenPermissions.GetAssertion : PinUvAuthTokenPermissions.None)
             | RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context).Permissions;
-        var uvPreference = Extensions.Processing.Processors.PrfProcessor.RequiresVerifiedEvaluation(options.Extensions?.Prf, context, registration: true)
+        var uvPreference = Extensions.Processing.Processors.PrfProcessor.RequiresVerifiedCreationEvaluation(options.Extensions?.Prf, context)
             ? Preferences.UserVerificationPreference.Required : options.UserVerification;
 
         using var auth = new CeremonyAuth(this, options.Rp.Id, callerPinBytes);

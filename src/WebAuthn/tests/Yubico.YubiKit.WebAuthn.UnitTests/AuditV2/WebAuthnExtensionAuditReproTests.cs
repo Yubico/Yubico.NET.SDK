@@ -73,7 +73,7 @@ public class WebAuthnExtensionAuditReproTests
         var selected = new PublicKeyCredentialDescriptor(id);
         using var session = AuthenticationExtensionSession.Create(
             new AuthenticationExtensionInputs(Prf: input), [selected], PrfContext());
-        await session.PrepareAsync(TestContext.Current.CancellationToken);
+        await session.PrepareAsync(TestContext.Current.CancellationToken, selected);
 
         var extensions = session.PrepareInputs(selected, token: null);
 

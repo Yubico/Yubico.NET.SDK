@@ -77,6 +77,7 @@ public class WebAuthnClientCeremonyFrameTests
 
     [Theory]
     [InlineData(false, false)]
+    [InlineData(false, true)]
     [InlineData(true, false)]
     [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public async Task ExtensionPreparationUsesGeneralMappingBeforeFirstOrRetriedCommand(bool registration, bool retry)

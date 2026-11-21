@@ -69,12 +69,12 @@ internal sealed class AuthenticationExtensionSession : IDisposable
         _processors.Aggregate(PinUvAuthTokenPermissions.None, (acc, p) => acc | p.Permissions);
 
     /// <summary>Runs every processor's authenticator-dependent preparation (key agreement etc.).</summary>
-    public async ValueTask PrepareAsync(CancellationToken cancellationToken)
+    public async ValueTask PrepareAsync(CancellationToken cancellationToken, PublicKeyCredentialDescriptor? selected = null)
     {
         try
         {
             foreach (var processor in _processors)
-                await processor.PrepareAsync(cancellationToken).ConfigureAwait(false);
+                await processor.PrepareAsync(selected, cancellationToken).ConfigureAwait(false);
         }
         catch (CtapException ex)
         {

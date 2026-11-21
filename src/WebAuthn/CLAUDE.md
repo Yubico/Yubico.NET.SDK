@@ -431,7 +431,9 @@ Generic signing params carry raw `additionalArgs`; ARKG helpers can be converted
 
 Keep these conditions attached to public guidance when changing extension flow:
 
-- PRF requires verification for supported evaluation. Its result spans and the decrypted largeBlob
+- PRF requires verification for applicable, supported evaluation. For authentication, the selected
+  credential's PRF input or fallback `eval` controls the PRF-specific override and key agreement.
+  Other ceremony UV requirements still apply. PRF result spans and the decrypted largeBlob
   span are caller-owned on success. Clear SDK-owned unpublished buffers, not verification bytes
   handed to the caller. Record copies alias the same writable memory; no result type is disposable.
 - Enforced credProtect requires advertised support before creation (CTAP2.3 §12.1). Optional requests

@@ -36,10 +36,10 @@ internal interface IAuthenticationExtensionProcessor
 
     /// <summary>
     /// Performs any authenticator round trip the inputs depend on (key agreement for hmac-secret). Called
-    /// once per attempt, after any required token has been acquired and before <c>PrepareInputs</c>.
+    /// after selection and any required token acquisition, before <c>PrepareInputs</c>.
     /// A ceremony may have no token. Default: nothing.
     /// </summary>
-    ValueTask PrepareAsync(CancellationToken cancellationToken) => ValueTask.CompletedTask;
+    ValueTask PrepareAsync(PublicKeyCredentialDescriptor? selected, CancellationToken cancellationToken) => ValueTask.CompletedTask;
 
     /// <summary>Adds this extension's authenticator input to the CTAP2 builder.</summary>
     /// <param name="builder">The CTAP2 extension builder for the getAssertion request.</param>

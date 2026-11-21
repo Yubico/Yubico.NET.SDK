@@ -297,8 +297,9 @@ with `WithHmacSecret(...)`, and decrypts the result. There is no `"prf"` key on 
 package has no PRF types; see `Yubico.YubiKit.WebAuthn.Extensions.Inputs.PrfInput` and
 docs/architecture/webauthn-extension-processing.md ("Where code belongs").
 
-The current WebAuthn adapter does not enforce PRF's required verified-variant UV override, and result/
-intermediate copies lack an owned cleanup guarantee; retain these limitations when linking the transform.
+The WebAuthn adapter requires verified PRF when supported evaluation actually applies: at authentication
+it resolves the selected credential's entry or fallback `eval` before the PRF-specific UV override and
+key agreement. It never publishes an unverified PRF result. Independent ceremony UV policy still applies.
 For large blobs, the SDK uses largeBlobKey/storage rather than the standard direct largeBlob extension.
 `ExtensionOutput.TryGetLargeBlobSupport` reads only a legacy registration boolean, never a storage write or key.
 The direct route does define makeCredential support input; its absence here is an SDK-route limitation,

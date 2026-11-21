@@ -18,6 +18,7 @@ using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
+using Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
@@ -114,13 +115,11 @@ public sealed partial class WebAuthnClient
         var context = new ExtensionContext(info, null, _backend);
         var permissions = PinUvAuthTokenPermissions.GetAssertion
             | AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context).Permissions;
-        var uvPreference = Extensions.Processing.Processors.PrfProcessor.RequiresVerifiedEvaluation(options.Extensions?.Prf, context, registration: false)
-            ? UserVerificationPreference.Required : options.UserVerification;
-
         using var auth = new CeremonyAuth(this, options.RpId, callerPinBytes);
+        PublicKeyCredentialDescriptor? selected = null;
 
         var (matches, extensions) = await RunWithUvEscalationAsync(
-            info, uvPreference, permissions, auth, AttemptAsync, cancellationToken)
+            info, options.UserVerification, permissions, auth, AttemptAsync, cancellationToken)
             .ConfigureAwait(false);
 
         // Build every response now, outside the escalation scope and while the token is live (extension
@@ -147,21 +146,31 @@ public sealed partial class WebAuthnClient
             AuthenticationExtensionSession Extensions)> AttemptWithAsync(
             AuthenticationExtensionSession extensions, UvDecision decision, UserVerificationPreference preference, CancellationToken ct)
         {
-            await extensions.PrepareAsync(ct).ConfigureAwait(false);
-
             // Allow-list selection (WebAuthn L3 §5.1.4): find the credential with an up:false probe, then
             // assert with exactly that descriptor so per-credential extension inputs can name it. When
             // nothing matched, a dummy descriptor still requests user presence rather than returning
             // the silent probe's miss directly. This does not establish equal timing or prompts.
-            PublicKeyCredentialDescriptor? selected = null;
             IReadOnlyList<PublicKeyCredentialDescriptor>? allowList = null;
             if (options.AllowCredentials is { Count: > 0 } candidates)
             {
-                selected = await ProbeCredentialsAsync(options.RpId, candidates, info, auth, decision, remintPermissions: null, ct)
+                selected ??= await ProbeCredentialsAsync(options.RpId, candidates, info, auth, decision, remintPermissions: null, ct)
                     .ConfigureAwait(false);
                 allowList = [selected ?? new PublicKeyCredentialDescriptor(DummyCredentialId, candidates[0].Type)];
             }
 
+            if ((allowList is null || selected is not null)
+                && PrfProcessor.RequiresVerifiedAssertionEvaluation(options.Extensions?.Prf, context, selected))
+            {
+                preference = UserVerificationPreference.Required;
+                if (!decision.UseToken && !decision.UseUv)
+                {
+                    decision = UvDecisionLogic.Decide(info, preference, auth.PinAvailable, permissions);
+                    await AcquireCeremonyTokenAsync(auth, decision, ct).ConfigureAwait(false);
+                }
+            }
+
+            if (allowList is null || selected is not null)
+                await extensions.PrepareAsync(ct, selected).ConfigureAwait(false);
             var request = BuildGetAssertionRequest(options, clientData, auth, decision, extensions, selected, allowList, out bool hasPreviewSign);
             var first = await GetFirstAssertionAsync(request, preference, hasPreviewSign, ct).ConfigureAwait(false);
             var matches = first is null ? [] : await CredentialMatcher.MatchAsync(_backend, first, allowList is not null, selected, ct)

@@ -277,12 +277,22 @@ public sealed class YubiOtpSession : ApplicationSession, IYubiOtpSession
         var configSlot = slot.Map(SlotOperation.Update);
         if (!_admitAllFirmwareGates && FirmwareVersion >= AccessCodeUpdateRestrictedFrom &&
             FirmwareVersion < AccessCodeUpdateRestrictedUntil &&
-            !CryptographicOperations.FixedTimeEquals(accessCode.Span, currentAccessCode.Span))
+            !AccessCodesMatch(accessCode.Span, currentAccessCode.Span))
         {
             throw new NotSupportedException("Updating the access code is not supported on firmware 4.3.2–4.3.5.");
         }
 
         return WriteConfigAsync(configSlot, config, accessCode, currentAccessCode, cancellationToken);
+    }
+
+    private static bool AccessCodesMatch(ReadOnlySpan<byte> accessCode, ReadOnlySpan<byte> currentAccessCode)
+    {
+        // Compare effective protection values without changing how either argument is serialized.
+        Span<byte> unprotected = stackalloc byte[YubiOtpConstants.AccessCodeSize];
+        unprotected.Clear();
+        return CryptographicOperations.FixedTimeEquals(
+            accessCode.IsEmpty ? unprotected : accessCode,
+            currentAccessCode.IsEmpty ? unprotected : currentAccessCode);
     }
 
     /// <inheritdoc />

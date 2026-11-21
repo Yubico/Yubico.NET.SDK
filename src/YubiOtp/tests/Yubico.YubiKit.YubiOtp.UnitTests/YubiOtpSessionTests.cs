@@ -467,6 +467,39 @@ public class YubiOtpSessionTests
         Assert.Equal(currentCode, sent[57..63]);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task UpdateConfigurationAsync_ZeroAndOmittedCodesDoNotChangeProtection(bool omitCurrentCode)
+    {
+        var (connection, session) = await CreateFakeSessionAsync(firmware: new FirmwareVersion(4, 3, 2));
+        await using var lease = session;
+        using var configuration = new UpdateConfiguration();
+        var ct = TestContext.Current.CancellationToken;
+        byte[] zeros = new byte[6];
+        byte[]? sent = null;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                sent = call.ArgAt<ReadOnlyMemory<byte>>(0).ToArray();
+                return Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 4, 3, 2, 10, 0, 0, 0x90, 0x00 });
+            });
+
+        await session.UpdateConfigurationAsync(Slot.Two, configuration,
+            accessCode: omitCurrentCode ? zeros : default,
+            currentAccessCode: omitCurrentCode ? default : zeros,
+            cancellationToken: ct);
+
+        Assert.NotNull(sent);
+        Assert.Equal(0x05, sent[2]); // Update slot 2
+        Assert.Equal(omitCurrentCode ? 52 : 58, sent[4]);
+        Assert.Equal(zeros, sent[43..49]);
+        if (!omitCurrentCode)
+        {
+            Assert.Equal(zeros, sent[57..63]);
+        }
+    }
+
     public class KeyLengthPreflightValidation
     {
         [Fact]

@@ -138,9 +138,9 @@ finally
 ```
 
 Clearing `AllowUpdate` can prevent later updates. Legacy Manual 3.3 also describes dormant activation as
-one-way within updates: once cleared, setting it again requires replacement. Tagged vendor tools reject
-access-code changes on firmware 4.3.2–4.3.5; this SDK does not enforce that restriction. Check applicability
-to your firmware rather than treating legacy flag rules as universal 5.x behavior.
+one-way within updates: once cleared, setting it again requires replacement. The SDK rejects access-code
+changes on firmware 4.3.2–4.3.5, treating omission and six zero bytes as the same unprotected value.
+Do not treat legacy flag rules as universal 5.x behavior.
 
 ### Program a slot for HMAC-SHA1 challenge-response
 

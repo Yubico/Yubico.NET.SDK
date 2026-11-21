@@ -854,6 +854,28 @@ public class SecurityDomainSessionTests
 
     private static byte[] OkResponse() => [0x90, 0x00];
 
+    [Fact]
+    public async Task ResetAsync_FailedRefreshAndTeardown_PreservesRefreshErrorThroughAwaitUsing()
+    {
+        var yubiKey = CreateMockYubiKey(out var connection);
+        var responses = new RecordingSmartCardConnection(OkResponse(),
+            [0xC0, 0x02, 0x01, 0xFF, 0x90, 0x00], [0x69, 0x83], OkResponse(), [0x69, 0x82]);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call => responses.TransmitAndReceiveAsync(call.Arg<ReadOnlyMemory<byte>>(),
+                call.Arg<CancellationToken>()));
+        connection.DisposeAsync().Returns(_ => ValueTask.FromException(new IOException("Test teardown failed.")));
+
+        var failure = await Assert.ThrowsAsync<SecureChannelException>(async () =>
+        {
+            await using var session = await yubiKey.CreateSecurityDomainSessionAsync(
+                cancellationToken: TestContext.Current.CancellationToken);
+            await session.ResetAsync(TestContext.Current.CancellationToken);
+        });
+
+        Assert.Equal(unchecked((short)0x6982), failure.StatusWord);
+        await connection.Received(1).DisposeAsync();
+    }
+
     [Theory]
     [InlineData(9, 0x19, -1, false)]
     [InlineData(11, 0x19, -1, false)]

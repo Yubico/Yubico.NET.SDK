@@ -14,6 +14,7 @@
 
 namespace Yubico.YubiKit.Management.UnitTests;
 
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -28,6 +29,10 @@ using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Management.Backend;
 
+[CollectionDefinition(nameof(ManagementSessionLoggingCollection), DisableParallelization = true)]
+public sealed class ManagementSessionLoggingCollection;
+
+[Collection(nameof(ManagementSessionLoggingCollection))]
 public class ManagementSessionTests
 {
     [Fact]
@@ -423,6 +428,8 @@ public class ManagementSessionTests
         public bool RejectReset { get; init; }
         public bool FailReselect { get; init; }
         public bool UnknownSelectVersion { get; init; }
+        public Exception? DisposalFailure { get; init; }
+        public int DisposeAttempts { get; private set; }
         public Transport Transport => Transport.Usb;
         public ConnectionType Type => ConnectionType.SmartCard;
 
@@ -464,7 +471,66 @@ public class ManagementSessionTests
         public IDisposable BeginTransaction(CancellationToken cancellationToken) => throw new NotSupportedException();
         public bool SupportsExtendedApdu() => false;
         public void Dispose() { }
-        public ValueTask DisposeAsync() => default;
+        public ValueTask DisposeAsync()
+        {
+            DisposeAttempts++;
+            return DisposalFailure is { } failure ? ValueTask.FromException(failure) : default;
+        }
+    }
+
+    [Fact]
+    public async Task ResetDeviceAsync_RefreshAndCleanupLoggingFail_PreservesRefreshErrorThroughImplicitDisposal()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var cleanupFailure = new InvalidOperationException("Scripted owned connection disposal failure.");
+        var provider = new ThrowOnCleanupLogProvider(cleanupFailure);
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Debug).AddProvider(provider));
+        using var logging = YubiKitLogging.UseTemporary(factory);
+        var connection = new VersionedSmartCardConnection(5, 6) { FailReselect = true, DisposalFailure = cleanupFailure };
+
+        var failure = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await using var session = await ManagementSession.CreateAsync(connection, cancellationToken: ct);
+            session.OwnConnection();
+            await session.ResetDeviceAsync(ct);
+        });
+
+        Assert.Contains("reset was confirmed", failure.Message, StringComparison.Ordinal);
+        Assert.Equal(unchecked((short)0x6A82), Assert.IsType<ApduException>(failure.InnerException).SW);
+        Assert.Equal(1, connection.DisposeAttempts);
+        Assert.Equal(1, provider.FailedLogs);
+    }
+
+    [Fact]
+    public async Task DisposeAsync_OutsideResetRefreshFailure_StillPropagatesOwnedConnectionFailure()
+    {
+        var cleanupFailure = new InvalidOperationException("Scripted owned connection disposal failure.");
+        var connection = new VersionedSmartCardConnection(5, 6) { DisposalFailure = cleanupFailure };
+        var session = await ManagementSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
+        session.OwnConnection();
+
+        Assert.Same(cleanupFailure, await Assert.ThrowsAsync<InvalidOperationException>(() => session.DisposeAsync().AsTask()));
+        Assert.Same(cleanupFailure, await Assert.ThrowsAsync<InvalidOperationException>(() => session.DisposeAsync().AsTask()));
+        Assert.Equal(1, connection.DisposeAttempts);
+    }
+
+    private sealed class ThrowOnCleanupLogProvider(Exception cleanupFailure) : ILoggerProvider, ILogger
+    {
+        public int FailedLogs { get; private set; }
+        public ILogger CreateLogger(string categoryName) => this;
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Dispose() { }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (!ReferenceEquals(exception, cleanupFailure))
+                return;
+
+            FailedLogs++;
+            throw new InvalidOperationException("Scripted logging provider failure.");
+        }
     }
 
     [Fact]

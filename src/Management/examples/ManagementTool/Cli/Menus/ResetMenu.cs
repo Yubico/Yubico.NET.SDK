@@ -75,9 +75,8 @@ public static class ResetMenu
         if (result.Success)
         {
             AnsiConsole.WriteLine();
-            OutputHelpers.WriteSuccess("Factory reset completed successfully");
-            OutputHelpers.WriteInfo("The YubiKey has been reset to factory defaults.");
-            OutputHelpers.WriteWarning("All PINs and PUKs are now set to their default values.");
+            OutputHelpers.WriteSuccess("Bio MPE FIDO and PIV reset confirmed, including the shared PIN.");
+            OutputHelpers.WriteInfo("This reset does not erase the F9 attestation slot.");
         }
         else
         {

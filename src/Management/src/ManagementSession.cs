@@ -263,7 +263,14 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
         }
         catch (Exception exception) when (_endingAfterRefreshFailure)
         {
-            _logger.LogDebug(exception, "Management cleanup after a failed reset refresh also failed.");
+            try
+            {
+                _logger.LogDebug(exception, "Management cleanup after a failed reset refresh also failed.");
+            }
+            catch
+            {
+                // Keep the disposal gate from replaying a secondary failure over the reset refresh error.
+            }
         }
     }
 

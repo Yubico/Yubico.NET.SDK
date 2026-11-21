@@ -58,7 +58,7 @@ public static class IYubiKeyExtensions
                 ConnectionType.SmartCard);
             var sessionOptions = (options ?? new SessionCreationOptions())
                 .WithPreferredConnectionType(transport);
-            var cachedDeviceInfo = yubiKey.CachedDeviceInfo;
+            var cachedDeviceInfo = sessionOptions.FirmwareVersionOverride is null ? yubiKey.CachedDeviceInfo : null;
 
             return await yubiKey.CreateSessionOverTransportAsync(
                     transport,

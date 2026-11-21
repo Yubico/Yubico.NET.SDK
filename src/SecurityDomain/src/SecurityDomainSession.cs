@@ -107,7 +107,7 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         _framingFirmwareVersion = knownVersion ?? FirmwareVersion.V5_3_0;
         _admitUnverifiedFirmware = knownVersion?.IsAlphaOrBeta != false ||
             overrideVersion is null &&
-            cachedDeviceInfo?.VersionQualifier.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta;
+            cachedDeviceInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta;
     }
 
     /// <summary>
@@ -252,7 +252,15 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "GET DATA for object 0x{DataObject:X4} failed", dataObject);
+            try
+            {
+                _logger.LogWarning(ex, "GET DATA for object 0x{DataObject:X4} failed", dataObject);
+            }
+            catch
+            {
+                // Diagnostics must not replace the error from the attempted GET DATA.
+            }
+
             throw;
         }
     }

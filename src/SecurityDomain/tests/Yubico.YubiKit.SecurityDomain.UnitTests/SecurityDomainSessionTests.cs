@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -855,23 +856,85 @@ public class SecurityDomainSessionTests
 
     private static byte[] OkResponse() => [0x90, 0x00];
 
+    [Fact]
+    public async Task CreateSecurityDomainSessionAsync_ExplicitOverrideDoesNotReadCache()
+    {
+        var yubiKey = CreateMockYubiKey(out _);
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x69, 0x82]);
+        yubiKey.ConnectAsync<ISmartCardConnection>(Arg.Any<CancellationToken>()).Returns(
+            Task.FromResult<ISmartCardConnection>(connection));
+        yubiKey.CachedDeviceInfo.Returns(_ => throw new InvalidOperationException("Cache must not be read."));
+        using var keys = Scp03KeyParameters.Default;
+
+        var failure = await Assert.ThrowsAsync<SecureChannelException>(() => yubiKey.CreateSecurityDomainSessionAsync(
+            new SessionCreationOptions { FirmwareVersionOverride = new(5, 3, 0), ScpKeyParameters = keys },
+            TestContext.Current.CancellationToken));
+
+        Assert.Equal(unchecked((short)0x6982), failure.StatusWord);
+        Assert.Equal(0x50, connection.TransmittedCommands[1][1]);
+    }
+
+    [Fact]
+    public async Task ResetAsync_PreflightTransportFailureSurvivesThrowingWarningLogger()
+    {
+        var connection = CreateMockConnection();
+        var transportFailure = new IOException("Test key listing failed.");
+        int transmissions = 0;
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(_ => ++transmissions == 1
+                ? Task.FromResult<ReadOnlyMemory<byte>>(OkResponse())
+                : Task.FromException<ReadOnlyMemory<byte>>(transportFailure));
+        await using var session = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        // Change only this fixture's logger; do not mutate the process-wide logger factory.
+        var logger = new ThrowingWarningLogger();
+        var loggerField = typeof(SecurityDomainSession).GetField("_logger", BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.NotNull(loggerField);
+        loggerField.SetValue(session, logger);
+
+        var failure = await Assert.ThrowsAsync<IOException>(() => session.ResetAsync(TestContext.Current.CancellationToken));
+
+        Assert.Same(transportFailure, failure);
+        Assert.Equal(1, logger.WarningCount);
+        Assert.Equal(2, transmissions);
+        Assert.True(session.IsInitialized);
+    }
+
+    private sealed class ThrowingWarningLogger : ILogger
+    {
+        public int WarningCount { get; private set; }
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => logLevel == LogLevel.Warning;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel == LogLevel.Warning)
+            {
+                WarningCount++;
+                throw new InvalidOperationException("Test warning failed.");
+            }
+        }
+    }
+
     [Theory]
     [InlineData(5, VersionQualifierType.Beta, true)]
     [InlineData(5, VersionQualifierType.Final, false)]
+    [InlineData(5, null, false)]
     [InlineData(0, VersionQualifierType.Final, true)]
     [InlineData(null, VersionQualifierType.Final, true)]
     public async Task CreateSecurityDomainSessionAsync_UsesFirmwareEligibilityWithoutChangingNumericFraming(
-        int? major, VersionQualifierType qualifier, bool expectHandshake)
+        int? major, VersionQualifierType? qualifier, bool expectHandshake)
     {
         var yubiKey = CreateMockYubiKey(out var connection);
         if (major is int numericMajor)
         {
             var version = new FirmwareVersion(numericMajor, 7, 0);
-            yubiKey.CachedDeviceInfo.Returns(default(DeviceInfo) with
-            {
-                FirmwareVersion = version,
-                VersionQualifier = new VersionQualifier(version, qualifier, 0)
-            });
+            var info = default(DeviceInfo) with { FirmwareVersion = version };
+            if (qualifier is { } type)
+                info = info with { VersionQualifier = new VersionQualifier(version, type, 0) };
+            yubiKey.CachedDeviceInfo.Returns(info);
         }
 
         var commands = new List<byte[]>();

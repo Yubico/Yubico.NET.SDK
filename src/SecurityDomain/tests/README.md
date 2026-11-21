@@ -98,9 +98,11 @@ the state created by the previous session.
 3. Opens a fresh test session with the supplied configuration, firmware and optional SCP parameters
 4. Runs test action
 
-Yubico documents factory SCP03 restoration after last-set deletion, but the SDK does not verify factory
-contents after reset. Exhaustion alone does not throw, an empty key listing skips reset, and errors or
-cancellation can leave partial changes. Tests that require defaults should assert the relevant state.
+Yubico documents factory SCP03 restoration after last-set deletion. `ResetAsync` reports exhausted
+references, unexpected statuses, and transport failures as an incomplete reset. With no actionable keys
+it skips reset. After confirmed stopping outcomes it establishes a default SCP03 channel, which proves
+acceptance of those keys, not complete factory restoration. Failures or cancellation can leave partial
+changes. Tests that require defaults should assert the relevant state.
 
 ## Test Categories
 

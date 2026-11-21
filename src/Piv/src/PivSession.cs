@@ -193,7 +193,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
 
         Logger.LogDebug("PIV: Resetting PIV application");
 
-        var bio = await BioProtocol.TryGetBioMetadataAsync(_backend, cancellationToken).ConfigureAwait(false);
+        var bio = await BioProtocol.ReadResetPreflightAsync(_backend, cancellationToken).ConfigureAwait(false);
         if (bio is { IsConfigured: true })
             throw new InvalidOperationException("PIV reset is unavailable while biometrics are configured. Follow the device-reset procedure for this product.");
 

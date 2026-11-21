@@ -37,20 +37,37 @@ internal static class BioProtocol
     private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(BioProtocol));
 
     internal static async Task<BioMetadata> GetBioMetadataAsync(IBackend backend, CancellationToken cancellationToken = default) =>
-        await TryGetBioMetadataAsync(backend, cancellationToken).ConfigureAwait(false)
+        await ReadBioMetadataAsync(backend, forReset: false, cancellationToken).ConfigureAwait(false)
         ?? throw new NotSupportedException("Biometric verification is not supported by this YubiKey.");
 
-    internal static async Task<BioMetadata?> TryGetBioMetadataAsync(IBackend backend, CancellationToken cancellationToken)
+    internal static Task<BioMetadata?> ReadResetPreflightAsync(IBackend backend, CancellationToken cancellationToken) =>
+        ReadBioMetadataAsync(backend, forReset: true, cancellationToken);
+
+    private static async Task<BioMetadata?> ReadBioMetadataAsync(IBackend backend, bool forReset, CancellationToken cancellationToken)
     {
         var command = new ApduCommand(Cla, InsGetMetadata, 0, KeyReference.Bio);
         var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
         try
         {
-            if (response.SW is SWConstants.FileOrApplicationNotFound or SWConstants.DataNotFound or SWConstants.InsNotSupported)
+            if (response.SW is SWConstants.DataNotFound or SWConstants.InsNotSupported
+                || (!forReset && response.SW == SWConstants.FileOrApplicationNotFound))
                 return null;
-            EnsureAvailable(response);
+            if (!response.IsOK())
+                throw ApduException.FromStatusWord(response.SW, "Biometric operation failed");
             // Python YubiKit 4ca60f7 piv.py:1111-1133: retries are required; the two flags are optional.
-            var fields = TlvHelper.DecodeDictionary(response.Data);
+            using var tlvs = TlvHelper.DecodeList(response.Data);
+            var fields = new Dictionary<int, ReadOnlyMemory<byte>>();
+            foreach (var tlv in tlvs)
+            {
+                if (tlv.Tag is not (TagRetries or TagConfigured or TagTemporaryPinActive))
+                    continue;
+                if (!fields.TryAdd(tlv.Tag, tlv.Value))
+                {
+                    if (forReset)
+                        throw new ApduException($"Duplicate biometric metadata field 0x{tlv.Tag:X2}.");
+                    fields[tlv.Tag] = tlv.Value;
+                }
+            }
             byte retries = ReadByte(fields, TagRetries, required: true);
             byte configured = ReadByte(fields, TagConfigured);
             byte temporaryPin = ReadByte(fields, TagTemporaryPinActive);

@@ -665,13 +665,10 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Successful device reset irreversibly removes ordinary keys/certificates and restores application
     ///     defaults. YubiKey ATT key/certificate survive, as does a fixed ATT touch policy. A public certificate
     ///     backup cannot recover a replaced factory ATT private key or its manufacturer trust.
-    ///     The current method ignores TERMINATE/ACTIVATE status words and checks no complete reset postcondition;
-    ///     normal return alone is insufficient to establish erasure. Read back keys, certificates, PIN/retry,
+    ///     The method checks TERMINATE and ACTIVATE and refreshes the same session, including a new SCP
+    ///     handshake when configured. If that refresh fails the session ends. Read back keys, certificates, PIN/retry,
     ///     KDF and policy state independently. Failure/cancellation can leave PINs blocked or state partly changed.
-    ///     The cached KDF reference is dropped without disposal; retain its cleanup scope through session teardown.
-    ///     Reset retains the effective version and any existing SCP processor graph. Reselection sends a plain
-    ///     SELECT through that graph, then uses its retained secure state for subsequent commands; it performs
-    ///     no fresh SCP handshake. The inherited authentication flag does not establish channel restoration.
+    ///     Keep caller-owned SCP parameters alive through session disposal; they are used again after reset.
     ///     After uncertain reset/recovery, dispose and reopen, then inspect persistent state before retrying.
     /// </remarks>
     Task ResetAsync(

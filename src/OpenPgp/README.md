@@ -518,18 +518,15 @@ Authorize reset only when loss of ordinary keys/certificates and configuration i
 reset restores the application's ordinary defaults. **ATT key/certificate and fixed ATT policy survive.** Saving a
 public ATT certificate preserves that certificate, not a recoverable factory private key or manufacturer trust.
 
-`ResetAsync` attempts PIN blocking, TERMINATE, ACTIVATE and state refresh, using the SDK's 1.0.6 check. Its current
-implementation ignores TERMINATE/ACTIVATE statuses and checks no complete erasure postcondition. A normal return
+`ResetAsync` confirms PIN blocking, TERMINATE and ACTIVATE, using the SDK's 1.0.6 check. A normal return
 alone proves too little: independently inspect key status, certificates, PIN acceptance/retries, KDF and UIF afterward.
 Cancellation/failure can leave blocked PINs or partial state. `ResetAsync` refreshes the session's application-data
 cache without returning metadata. The `ResetAndInspectAsync` example below makes a separate application-data read
 and returns that result for part of the inspection; your application supplies authorization and full verification.
 
-Reset preserves the session's effective version, including any override. On an SCP-created session, reset commands
-use the existing secure graph; reselection sends a plain SELECT without discarding that graph or establishing new
-keys, and subsequent commands use its retained secure state. OpenPGP retains no creation parameters for a reset
-handshake. The inherited authentication flag therefore supplies no SCP-restoration evidence. Dispose/reopen after
-uncertain reset or recovery, and independently inspect persistent state before retrying.
+After confirmation, the same session reselects and rereads the applet using the original options. Configured SCP
+uses a fresh handshake; keep the caller-owned parameters alive for the life of the session. A refresh failure
+ends the session. After an uncertain reset, dispose/reopen and inspect persistent state before retrying.
 
 ```csharp
 static async Task<ApplicationRelatedData> ResetAndInspectAsync(

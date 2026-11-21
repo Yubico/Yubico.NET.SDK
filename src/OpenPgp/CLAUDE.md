@@ -85,15 +85,14 @@ with the current KDF. Both User VERIFY references (P2=81 and 82) use PW1 for der
 4. TERMINATE (INS=0xE6)
 5. ACTIVATE (INS=0x44)
 
-Current TERMINATE/ACTIVATE statuses are ignored and there is no complete reset postcondition. A later
-SELECT/read establishes access, so reset guidance requires independent state inspection. Ordinary material
+TERMINATE and ACTIVATE statuses are checked. Reselection and application-data readback establish access, not
+complete erasure; reset guidance requires independent state inspection. Ordinary material
 is erased on successful device reset; YubiKey ATT key/certificate and fixed ATT policy survive. Ordinary
 key replacement clears fixed UIF; fixed ATT recovery requires irreversible ATT private-key replacement.
 
-Reset preserves the effective version and inherited readiness/authentication state. An existing SCP session retains
-its processor graph and keys: SELECT is plain, subsequent sends are secure, and no new handshake runs. OpenPGP
-retains no creation SCP parameters for reset. Reopen after uncertainty and inspect persistent state before retrying;
-an authentication flag alone establishes no channel restoration. The integration helper instead resets in a separate
+After confirmation, reset clears host readiness, authentication and UIF state, retires the old protocol, and
+reinitializes the same session with the original options, including SCP when requested. A failed refresh ends
+the session. Reopen after uncertainty and inspect persistent state before retrying. The integration helper resets in a separate
 plain session before creating an optional SCP body session, so it supplies no SCP-reset oracle.
 
 ## Model Layer

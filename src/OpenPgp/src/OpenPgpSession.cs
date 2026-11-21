@@ -71,6 +71,10 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     private readonly Dictionary<KeyRef, Uif> _updatedUifs = [];
     private IOpenPgpBackend? _backend;
     private ApplicationRelatedData _appData = null!;
+    private ProtocolConfiguration? _configuration;
+    private ScpKeyParameters? _scpKeyParameters;
+    private FirmwareVersion? _firmwareVersionOverride;
+    private bool _endingAfterResetFailure;
 
     // ── Constructor (private — use CreateAsync) ───────────────────────
 
@@ -100,7 +104,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     ///     the session while leaving this caller-owned connection open. Selection and version discovery precede
     ///     optional SCP setup; application-data parsing uses the configured protocol before readiness is published.
     ///     FirmwareVersionOverride selects the effective framing/feature version without skipping the version probe
-    ///     or consulting physical-device metadata. Keep borrowed SCP inputs alive through factory completion.
+    ///     or consulting physical-device metadata. Keep borrowed SCP inputs alive for the lifetime of the session.
     /// </remarks>
     public static Task<OpenPgpSession> CreateAsync(
         ISmartCardConnection connection,
@@ -127,6 +131,9 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         if (IsInitialized)
             return;
 
+        _configuration = configuration;
+        _scpKeyParameters = scpKeyParams;
+        _firmwareVersionOverride = firmwareVersionOverride;
         var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
             .ConfigureAwait(false);
         IOpenPgpBackend backend = new OpenPgpBackend(protocol);

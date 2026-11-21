@@ -953,6 +953,54 @@ public sealed class OpenPgpSessionWireTests
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(), .. trailingResponses]);
 
+    [Theory]
+    [InlineData(0x20, 1)] // unrelated VERIFY error
+    [InlineData(0xE6, 3)] // TERMINATE refusal
+    [InlineData(0x44, 4)] // ACTIVATE refusal
+    public async Task ResetAsync_WhenCommandIsRejected_StopsAtThatCommand(byte instruction, int precedingSuccesses)
+    {
+        byte[][] responses = [PwStatusResponse(), [0x69, 0x83], [0x69, 0x83], OkResponse(), OkResponse()];
+        var connection = CreateInitializedConnection([.. responses.Take(precedingSuccesses), [0x6A, 0x80]]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(token));
+
+        Assert.Equal((short)0x6A80, error.SW);
+        Assert.Equal(4 + precedingSuccesses, connection.TransmittedCommands.Count);
+        Assert.Equal(instruction, LastCommand(connection)[1]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ResetAsync_ConfirmedReset_ReselectsAndRequiresSuccessfulRefresh(bool refreshFails)
+    {
+        var connection = CreateInitializedConnection(PwStatusResponse(), [0x69, 0x83], [0x69, 0x83],
+            OkResponse(), OkResponse(), OkResponse(), VersionResponse(),
+            refreshFails ? [0x6A, 0x80] : ApplicationRelatedDataResponse(), PwStatusResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        if (refreshFails)
+        {
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetAsync(token));
+            Assert.Equal((short)0x6A80, Assert.IsType<ApduException>(error.InnerException).SW);
+            Assert.False(session.IsInitialized);
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetPinStatusAsync(token));
+        }
+        else
+        {
+            await session.ResetAsync(token);
+            Assert.True(session.IsInitialized);
+            Assert.False(session.IsAuthenticated);
+            Assert.Equal(3, (await session.GetPinStatusAsync(token)).AttemptsUser);
+        }
+
+        Assert.Equal([0xCA, 0x20, 0x20, 0xE6, 0x44, 0xA4, 0xF1, 0xCA],
+            connection.TransmittedCommands.Skip(3).Take(8).Select(command => command[1]).ToArray());
+    }
+
     private static RecordingSmartCardConnection CreateCertificateReadConnection(KeyRef keyRef, byte[] response) =>
         keyRef is KeyRef.Att
             ? CreateInitializedConnection(response)

@@ -560,6 +560,38 @@ public class SecurityDomainSessionTests
             connection.TransmittedCommands[1]);
     }
 
+    [Theory]
+    [InlineData(0x01)]
+    [InlineData(0x02)]
+    [InlineData(0x03)]
+    public async Task DeleteKeyAsync_ForScp03WithZeroVersion_DoesNotTransmitDelete(byte kid)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => session.DeleteKeyAsync(
+            new KeyReference(kid, 0), deleteLast: true, cancellationToken: TestContext.Current.CancellationToken));
+
+        Assert.Single(connection.TransmittedCommands);
+    }
+
+    [Theory]
+    [InlineData(0x11, 0, 0xD0, 0x11)]
+    [InlineData(0, 0x21, 0xD2, 0x21)]
+    public async Task DeleteKeyAsync_WithOneWildcard_TransmitsRemainingFilter(byte kid, byte kvn, byte tag, byte value)
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        using var session = await SecurityDomainSession.CreateAsync(
+            connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.DeleteKeyAsync(new KeyReference(kid, kvn), cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal([0x80, 0xE4, 0x00, 0x00, 0x03, tag, 0x01, value, 0x00], connection.TransmittedCommands[1]);
+    }
+
     [Fact]
     public async Task GenerateKeyAsync_TransmitsGenerateKeyWithCurveParameters()
     {

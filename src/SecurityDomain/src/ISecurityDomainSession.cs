@@ -239,12 +239,12 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <remarks>
     ///     Requires device-accepted administrative authority. A filter may match multiple keys. SCP03
     ///     component KIDs 0x01, 0x02 and 0x03 are normalized to a KVN-only filter, so supply a nonzero KVN:
-    ///     deletion affects the whole matching set, not just one component. Do not use SCP03 with KVN 0;
-    ///     the current implementation does not reject the resulting empty filter.
+    ///     deletion affects the whole matching set, not just one component. The SDK rejects empty
+    ///     filters before sending DELETE, including an SCP03 component with KVN 0.
     ///     Yubico documents last-SCP03-set deletion as restoring the default set. This is destructive,
     ///     not a way to leave the device protected with no keys.
     /// </remarks>
-    /// <exception cref="ArgumentException">Both supplied filter fields are zero.</exception>
+    /// <exception cref="ArgumentException">Both filter fields are zero, or the KID is an SCP03 component and KVN is zero.</exception>
     Task DeleteKeyAsync(
         KeyReference keyReference,
         bool deleteLast = false,

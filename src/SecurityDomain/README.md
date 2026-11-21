@@ -120,8 +120,8 @@ Before removing any retained old set, dispose the importing session and verify a
 `Scp03KeyParameters` built from the new reference and escrowed keys. Only then delete the old set, if it is
 still present. `DeleteKeyAsync` takes a filter: zero KID or KVN omits that condition, so multiple keys can
 match. SCP03 component KIDs 0x01/0x02/0x03 become a **KVN-only filter**; always supply a nonzero KVN and
-review all matching keys. The SDK does not reject the empty filter produced by SCP03 with KVN 0; do not
-use that combination. `deleteLast: true` permits last-key deletion on the device; it is not a host safety
+review all matching keys. The SDK rejects empty filters before sending DELETE, including SCP03 with
+KVN 0. `deleteLast: true` permits last-key deletion on the device; it is not a host safety
 check. Yubico documents deletion of the last SCP03 set as restoring factory defaults, not leaving the
 device protected without keys.
 

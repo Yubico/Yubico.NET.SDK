@@ -51,6 +51,8 @@ including the two canonical Core metadata referrals. MGMT-IMP-002, MGMT-IMP-011 
 Management qualification matrix remain pending; no device or integration execution was performed.
 
 CTAP2 delivery: [draft PR #790](https://github.com/Yubico/Yubico.NET.SDK/pull/790) against `yubikit-pass2-base`.
+Software changes and checks are ready for independent review. CTAP-IMP-030 stays deferred;
+CTAP-IMP-022 and CTAP-DEC-003 are not hardware-qualified by this PR.
 
 ## Cards
 

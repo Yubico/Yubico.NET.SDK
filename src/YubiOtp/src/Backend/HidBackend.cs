@@ -112,6 +112,11 @@ internal sealed class HidBackend : IYubiOtpBackend
 
             outcome = UserPresenceOutcome.Completed;
             await userPresenceNotification.ResolveAsync(outcome).ConfigureAwait(false);
+            if (slot is ConfigSlot.ChalHmac1 or ConfigSlot.ChalHmac2)
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response[expectedLength..]).Span);
+            }
+
             responseTransferred = true;
             return response[..expectedLength];
         }

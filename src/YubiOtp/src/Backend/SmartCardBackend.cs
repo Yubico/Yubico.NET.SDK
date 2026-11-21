@@ -167,6 +167,11 @@ internal sealed class SmartCardBackend : IYubiOtpBackend
 
             outcome = UserPresenceOutcome.Completed;
             await userPresenceNotification.ResolveAsync(outcome).ConfigureAwait(false);
+            if (slot is ConfigSlot.ChalHmac1 or ConfigSlot.ChalHmac2)
+            {
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(responseData[expectedLength..]).Span);
+            }
+
             responseTransferred = true;
             return responseData[..expectedLength];
         }

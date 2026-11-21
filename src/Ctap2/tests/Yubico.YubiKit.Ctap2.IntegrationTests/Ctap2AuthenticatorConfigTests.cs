@@ -30,9 +30,9 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// setup can set/change a PIN or consume retries. These require human-approved PIN work
 /// and known device state, not a read-only GetInfo lane. Support is checked per option,
 /// not qualified by a firmware threshold. Restoration is partial/best-effort: a failed
-/// assertion can leave alwaysUv toggled, the minimum is not reduced, and a failed second
-/// PIN change can leave the temporary PIN. The outer finally clears configPinToken but
-/// does not cover all newly allocated token/PIN buffers on exceptional paths.
+/// assertion can leave alwaysUv enabled, the minimum is not reduced, and a failed second
+/// PIN change can leave the temporary PIN. These tests require authorized fixture state;
+/// the finally blocks clear local buffers, not device state.
 /// </remarks>
 [Trait("Category", "Integration")]
 [Trait("Feature", "AuthenticatorConfig")]
@@ -50,6 +50,12 @@ public class Ctap2AuthenticatorConfigTests
             if (!info.Options.TryGetValue("authnrCfg", out var configSupported) || !configSupported)
             {
                 Skip.If(true, "YubiKey does not support authenticatorConfig (authnrCfg option)");
+                return;
+            }
+
+            if (!info.Options.ContainsKey("alwaysUv"))
+            {
+                Skip.If(true, "YubiKey does not advertise alwaysUv support.");
                 return;
             }
 
@@ -72,40 +78,14 @@ public class Ctap2AuthenticatorConfigTests
 
             try
             {
-                // Read current alwaysUv state
-                var initialAlwaysUv = info.Options.TryGetValue("alwaysUv", out var alwaysUvValue)
-                    && alwaysUvValue;
-
                 var config = new AuthenticatorConfig(session, clientPin.Protocol, configPinToken);
+                await config.SetAlwaysUvAsync(false);
+                var baseline = await session.GetInfoAsync();
+                Assert.False(baseline.Options["alwaysUv"]);
 
-                // Toggle alwaysUv
-                await config.SetAlwaysUvAsync(!initialAlwaysUv);
-
-                // Read new state
+                await config.SetAlwaysUvAsync(true);
                 var updatedInfo = await session.GetInfoAsync();
-                var newAlwaysUv = updatedInfo.Options.TryGetValue("alwaysUv", out var newAlwaysUvValue)
-                    && newAlwaysUvValue;
-
-                Assert.NotEqual(initialAlwaysUv, newAlwaysUv);
-
-                // Attempt a second toggle only after the assertion; not exception-safe restoration.
-                // A fresh token is requested, but the restored state is not re-read or asserted.
-                byte[] restorePinToken;
-                if (supportsPermissions)
-                {
-                    restorePinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-                        Ctap2TestData.PinUtf8,
-                        PinUvAuthTokenPermissions.AuthenticatorConfig);
-                }
-                else
-                {
-                    restorePinToken = await clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8);
-                }
-
-                var restoreConfig = new AuthenticatorConfig(session, clientPin.Protocol, restorePinToken);
-                await restoreConfig.SetAlwaysUvAsync(initialAlwaysUv);
-
-                CryptographicOperations.ZeroMemory(restorePinToken);
+                Assert.True(updatedInfo.Options["alwaysUv"]);
             }
             finally
             {
@@ -187,7 +167,7 @@ public class Ctap2AuthenticatorConfigTests
         });
 
     /// <summary>
-    /// Attempts force-change flag/token/PIN-change checks with best-effort recovery.
+    /// Exercises the force-change flag, blocked token and explicit PIN-change cycle.
     /// </summary>
     /// <remarks>
     /// The token-block assertion uses legacy GetPinTokenAsync (0x05) and expects PinInvalid,
@@ -255,16 +235,28 @@ public class Ctap2AuthenticatorConfigTests
                     () => clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8));
                 Assert.Equal(CtapStatus.PinInvalid, ex.Status);
 
-                // Step 4: Attempt two PIN changes; second-change failure can leave the reversed PIN and uncleared bytes.
+                // Step 4: Change the PIN as part of the exercise, not in teardown.
                 byte[] reversedPin = Ctap2TestData.PinUtf8.Reverse().ToArray();
-                await clientPin.ChangePinAsync(Ctap2TestData.PinUtf8, reversedPin);
-                await clientPin.ChangePinAsync(reversedPin, Ctap2TestData.PinUtf8);
-                CryptographicOperations.ZeroMemory(reversedPin);
+                try
+                {
+                    await clientPin.ChangePinAsync(Ctap2TestData.PinUtf8, reversedPin);
+                    await clientPin.ChangePinAsync(reversedPin, Ctap2TestData.PinUtf8);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(reversedPin);
+                }
 
                 // Step 5: Verify PIN tokens work again
                 var restoredToken = await clientPin.GetPinTokenAsync(Ctap2TestData.PinUtf8);
-                Assert.NotEmpty(restoredToken);
-                CryptographicOperations.ZeroMemory(restoredToken);
+                try
+                {
+                    Assert.NotEmpty(restoredToken);
+                }
+                finally
+                {
+                    CryptographicOperations.ZeroMemory(restoredToken);
+                }
 
                 // Step 6: Verify flag is cleared
                 var clearedInfo = await session.GetInfoAsync();
@@ -274,24 +266,6 @@ public class Ctap2AuthenticatorConfigTests
             finally
             {
                 CryptographicOperations.ZeroMemory(configPinToken);
-
-                // Best-effort recovery only if the flag still appears set. This is not rollback:
-                // it assumes the known PIN remains current and does not cover a failed second change.
-                try
-                {
-                    var checkInfo = await session.GetInfoAsync();
-                    if (checkInfo.ForcePinChange == true)
-                    {
-                        byte[] tempPin = Ctap2TestData.PinUtf8.Reverse().ToArray();
-                        await clientPin.ChangePinAsync(Ctap2TestData.PinUtf8, tempPin);
-                        await clientPin.ChangePinAsync(tempPin, Ctap2TestData.PinUtf8);
-                        CryptographicOperations.ZeroMemory(tempPin);
-                    }
-                }
-                catch
-                {
-                    // Recovery errors are ignored; later normalization may also fail. State is not guaranteed restored.
-                }
             }
         });
 }

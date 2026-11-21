@@ -37,8 +37,8 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
 ///     <para>
 ///     A matching PIN still triggers a token exchange. A mismatch can consume a retry before a skip.
 ///     A skip or cancellation does not roll back PIN changes. Force-change recovery can leave the
-///     temporary reversed PIN if its second change fails; that temporary buffer is cleared only on
-///     success. The verification token is discarded without clearing. Reset advice in diagnostic
+///     temporary reversed PIN if its second change fails; clearing the host buffer does not restore
+///     device state. Reset advice in diagnostic
 ///     strings is not a coordinated product reset procedure, and temporary PinAuthBlocked differs
 ///     from exhausted PinBlocked.
 ///     </para>
@@ -106,15 +106,13 @@ public static class Ctap2TestStateExtensions
         // This is not transactional: a failed second change can leave the temporary PIN configured.
         if (info.ForcePinChange == true)
         {
+            byte[] tempPin = KnownTestPin.Reverse().ToArray();
             try
             {
-                byte[] tempPin = KnownTestPin.Reverse().ToArray();
                 await clientPin.ChangePinAsync(KnownTestPin, tempPin, cancellationToken)
                     .ConfigureAwait(false);
                 await clientPin.ChangePinAsync(tempPin, KnownTestPin, cancellationToken)
                     .ConfigureAwait(false);
-                // This success-path clearing does not cover failed changes.
-                CryptographicOperations.ZeroMemory(tempPin);
             }
             catch (CtapException ex) when (ex.Status is CtapStatus.PinInvalid
                                                or CtapStatus.PinPolicyViolation)
@@ -123,14 +121,18 @@ public static class Ctap2TestStateExtensions
                     $"CTAP2 forcePinChange recovery failed ({ex.Status}). PIN differs from " +
                     "known test PIN '11234567' or policy rejects it. Reset: ykman fido reset");
             }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(tempPin);
+            }
         }
 
         // A token request verifies the PIN even when it already matches; a mismatch can consume a retry.
-        // The returned secret is currently discarded without clearing.
         try
         {
-            _ = await clientPin.GetPinTokenAsync(KnownTestPin, cancellationToken)
+            var token = await clientPin.GetPinTokenAsync(KnownTestPin, cancellationToken)
                 .ConfigureAwait(false);
+            CryptographicOperations.ZeroMemory(token);
         }
         catch (CtapException ex) when (ex.Status is CtapStatus.PinInvalid)
         {

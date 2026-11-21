@@ -121,8 +121,9 @@ finally
 Do not reset the FIDO application as routine test setup. `WithCtap2SessionAsync` defaults to
 `normalizePin: true`: after initialization it may set the known test PIN, request a token to verify it,
 or change it through a temporary value for forcePinChange recovery. Even a matching PIN is not a no-op;
-a mismatch can consume a retry before a skip. Failed recovery can leave the temporary PIN, and current
-helpers have cleanup gaps. Use explicit `normalizePin: false` when the test is intended to make only
+a mismatch can consume a retry before a skip. Failed recovery can leave the temporary PIN; clearing
+the fixture buffer does not restore device state. Config tests establish the required state before
+the exercise rather than issuing recovery commands in teardown. Use explicit `normalizePin: false` when the test is intended to make only
 read-only calls; do not treat existing default-helper smoke paths as read-only. A CTAP2 `ResetAsync` permanently deletes
 credentials and requires a human-approved unplug/replug/touch ceremony; see the FidoTool reset example.
 

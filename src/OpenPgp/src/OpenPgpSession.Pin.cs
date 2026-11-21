@@ -205,6 +205,9 @@ public sealed partial class OpenPgpSession
         ArgumentOutOfRangeException.ThrowIfGreaterThan(resetAttempts, 255);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(adminAttempts, 255);
 
+        if (FirmwareVersion.Major == 1 ? FirmwareVersion.IsLessThan(1, 0, 7) : FirmwareVersion.IsLessThan(4, 3, 1))
+            throw new NotSupportedException("Changing OpenPGP PIN attempts is not supported on this firmware.");
+
         _logger.LogDebug(
             "Setting PIN attempts (user={User}, reset={Reset}, admin={Admin})",
             userAttempts, resetAttempts, adminAttempts);

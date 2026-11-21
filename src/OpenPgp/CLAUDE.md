@@ -160,7 +160,8 @@ qualification. Vendor commercial-version wording and development-source gates ha
 | Key attestation | 5.2.0 | `EnsureSupports` |
 | Unverify PIN | 5.6.0 | `EnsureSupports` |
 
-Cached/ATT UIF and retry/challenge capability checks remain incomplete. NEO RSA import labels the
+Cached/ATT UIF writes require 5.2.1; challenge checks the advertised flag and length. Changing PIN attempts
+uses the applet version floor of 1.0.7 on the major-1 path and 4.3.1 otherwise. NEO RSA import labels the
 modulus-bearing CRT template as format 03. NEO deletion is unsupported rather than overwriting the key;
 old-family device qualification remains separate. On-card RSA generation is refused before writing attributes on
 `[4.2.0, 4.3.5)` as a conservative policy; YSA-2017-01 identifies 4.2.6–4.3.4 as affected and

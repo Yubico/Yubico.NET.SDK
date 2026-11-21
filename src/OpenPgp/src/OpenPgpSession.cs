@@ -74,16 +74,20 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     private ProtocolConfiguration? _configuration;
     private ScpKeyParameters? _scpKeyParameters;
     private FirmwareVersion? _firmwareVersionOverride;
+    private readonly Func<DeviceInfo?>? _readCachedDeviceInfo;
+    private FirmwareVersion? _numericVersion;
     private bool _endingAfterResetFailure;
 
     // ── Constructor (private — use CreateAsync) ───────────────────────
 
     private OpenPgpSession(
         ISmartCardConnection connection,
-        IUserPresencePrompt? userPresencePrompt = null)
+        IUserPresencePrompt? userPresencePrompt = null,
+        Func<DeviceInfo?>? readCachedDeviceInfo = null)
         : base(connection, userPresencePrompt)
     {
         _logger = Logger;
+        _readCachedDeviceInfo = readCachedDeviceInfo;
     }
 
     // ── Factory ───────────────────────────────────────────────────────
@@ -103,17 +107,21 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     ///     The session binds to the connection before device I/O; failed initialization disposes and detaches
     ///     the session while leaving this caller-owned connection open. Selection and version discovery precede
     ///     optional SCP setup; application-data parsing uses the configured protocol before readiness is published.
-    ///     FirmwareVersionOverride selects the effective framing/feature version without skipping the version probe
-    ///     or consulting physical-device metadata. Keep borrowed SCP inputs alive for the lifetime of the session.
+    ///     An explicit firmware override bypasses discovery. Otherwise a device factory prefers cached device
+    ///     firmware and the connection factory reads the applet version. Keep borrowed SCP inputs alive for the session.
     /// </remarks>
     public static Task<OpenPgpSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default) => CreateWithDeviceInfoAsync(connection, options, null, cancellationToken);
+
+    internal static Task<OpenPgpSession> CreateWithDeviceInfoAsync(
+        ISmartCardConnection connection, SessionCreationOptions? options, Func<DeviceInfo?>? readCachedDeviceInfo,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
-            () => new OpenPgpSession(connection, options?.UserPresencePrompt),
+            () => new OpenPgpSession(connection, options?.UserPresencePrompt, readCachedDeviceInfo),
             (session, token) => session.InitializeAsync(
                 options?.ProtocolConfiguration, options?.ScpKeyParameters, options?.FirmwareVersionOverride, token),
             cancellationToken);
@@ -138,12 +146,12 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
             .ConfigureAwait(false);
         IOpenPgpBackend backend = new OpenPgpBackend(protocol);
 
-        var initialization = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
-        var firmwareVersion = initialization.FirmwareVersion;
+        await backend.SelectForInitializationAsync(cancellationToken).ConfigureAwait(false);
+        var (framingVersion, featureVersion) = await ResolveFirmwareAsync(backend, cancellationToken).ConfigureAwait(false);
 
         var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
-                firmwareVersionOverride ?? firmwareVersion,
+                framingVersion,
                 configuration,
                 scpKeyParams,
                 cancellationToken)
@@ -155,6 +163,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         }
 
         _backend = backend;
+        FirmwareVersion = featureVersion;
 
         // Cache capabilities, algorithms and UIF. F9/KDF is loaded separately on first use.
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
@@ -162,7 +171,23 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
 
         _logger.LogInformation(
             "OpenPGP session initialized (firmware {Version}, serial {Serial})",
-            firmwareVersion, _appData.Aid.Serial);
+            FirmwareVersion, _appData.Aid.Serial);
+    }
+
+    private async Task<(FirmwareVersion Framing, FirmwareVersion Features)> ResolveFirmwareAsync(
+        IOpenPgpBackend backend, CancellationToken cancellationToken)
+    {
+        var cachedInfo = _firmwareVersionOverride is null ? _readCachedDeviceInfo?.Invoke() : null;
+        var known = _firmwareVersionOverride ?? cachedInfo?.FirmwareVersion;
+        var appletVersion = known is { IsAlphaOrBeta: false }
+            ? null : await backend.ReadVersionAsync(cancellationToken).ConfigureAwait(false);
+        var features = known ?? appletVersion;
+        _numericVersion = known is { IsAlphaOrBeta: false } ? known
+            : appletVersion is { IsAlphaOrBeta: false } ? appletVersion : null;
+        // Unknown framing uses the legacy short profile, not a synthesized zero-major protocol version.
+        return (_numericVersion ?? new FirmwareVersion(1, 0, 0),
+            cachedInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta
+                ? new FirmwareVersion() : features ?? new FirmwareVersion());
     }
 
     // ── Data Access ───────────────────────────────────────────────────

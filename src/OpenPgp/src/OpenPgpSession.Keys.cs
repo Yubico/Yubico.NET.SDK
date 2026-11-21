@@ -37,7 +37,7 @@ public sealed partial class OpenPgpSession
 
         // YSA-2017-01 lists 4.2.6–4.3.4; follow the conservative vendor SDK interval.
         if (attributes is RsaAttributes &&
-            FirmwareVersion.IsAtLeast(4, 2, 0) && FirmwareVersion.IsLessThan(4, 3, 5))
+            _numericVersion is { } numeric && numeric.IsAtLeast(4, 2, 0) && numeric.IsLessThan(4, 3, 5))
         {
             throw new NotSupportedException("On-card RSA generation is disabled on OpenPGP firmware 4.2.0 through 4.3.4 (ROCA policy). Import an independently generated key instead.");
         }

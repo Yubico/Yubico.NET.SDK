@@ -13,12 +13,15 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.OpenPgp.Backend;
 
 internal interface IOpenPgpBackend
 {
-    Task<OpenPgpInitialization> ReadInitialStateAsync(CancellationToken cancellationToken = default);
+    Task SelectForInitializationAsync(CancellationToken cancellationToken);
+
+    Task<FirmwareVersion?> ReadVersionAsync(CancellationToken cancellationToken);
 
     Task<ApduResponse> SendAsync(
         ApduCommand command,

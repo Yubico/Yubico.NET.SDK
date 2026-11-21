@@ -51,12 +51,11 @@ split into reset-code and prior-administrator-authentication methods so no input
 ### Initialization Sequence
 1. Bind the borrowed connection and register the owned protocol before device I/O.
 2. SELECT OpenPGP AID → handle 0x6285/0x6985 with ACTIVATE → re-SELECT
-3. GET_VERSION (INS=0xF1) → BCD decode the first three bytes of an OK response with at least three bytes.
-   Every non-OK response, short OK response or caught APDU exception falls back to 1.0.0; other exceptions propagate.
-   This fallback establishes no qualified minimum device version. Keep applet response, physical-device
-   metadata and effective configured version distinct, especially on development devices.
-4. Configure the effective override-or-detected version and optional SCP, then rebind the backend if needed.
-   Physical-device metadata is not consulted. The override does not skip SELECT/version discovery.
+3. Use explicit override, cached physical-device firmware, or applet GET VERSION (BCD bytes). Unknown or
+   prerelease metadata admits local feature checks. Preserve known numeric framing separately; missing numeric
+   data uses the legacy short profile without qualifying a minimum firmware version.
+4. Configure framing and optional SCP, then rebind the backend if needed. SCP eligibility independent of
+   numeric framing still needs the Core `admitUnverifiedScpFirmware` option from PR #792.
 5. Cache `ApplicationRelatedData` for algorithms/UIF; F9/KDF is read on demand. Publish readiness only after initialization
    completes. Failed initialization disposes/detaches the session; the device helper cleans up its hidden connection.
 

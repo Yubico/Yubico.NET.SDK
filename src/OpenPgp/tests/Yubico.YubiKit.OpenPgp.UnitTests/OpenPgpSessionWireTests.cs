@@ -19,6 +19,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Utilities;
@@ -981,6 +982,30 @@ public sealed class OpenPgpSessionWireTests
 
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(), .. trailingResponses]);
+
+    [Fact]
+    public async Task Initialize_WithExplicitOverride_DoesNotConsultCacheOrSendGetVersion()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), ApplicationRelatedDataResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection,
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(4, 3, 5) },
+            () => throw new InvalidOperationException("The override bypasses cached metadata."), token);
+
+        Assert.False(session.IsSupported(OpenPgpSession.FeatureEc));
+        Assert.Equal([0xA4, 0xCA], connection.TransmittedCommands.Select(command => command[1]).ToArray());
+    }
+
+    [Fact]
+    public async Task Initialize_WithUnsuccessfulVersionRead_UsesOptimisticFeaturesButStillReadsAppData()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x69, 0x85], ApplicationRelatedDataResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        Assert.True(session.IsSupported(OpenPgpSession.FeatureUnverify));
+        Assert.Equal([0xA4, 0xF1, 0xCA], connection.TransmittedCommands.Select(command => command[1]).ToArray());
+    }
 
     [Theory]
     [InlineData(0x20, 1)] // unrelated VERIFY error

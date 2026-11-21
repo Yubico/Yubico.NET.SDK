@@ -29,12 +29,12 @@ Core is installed transitively. The current SDK checks these version thresholds 
 Match these checks with the card's advertised capabilities, supported algorithms, slot and policy support.
 They describe this SDK's checks rather than a blanket availability guarantee. In particular, cached/ATT touch
 policies need additional device support, and retry/challenge commands leave some capability checks to the card.
-The version query falls back to 1.0.0 for every non-OK response, successful response shorter than three bytes,
-or caught APDU exception; transport and other exceptions propagate. This is a compatibility value, not a qualified
-minimum device version. NEO applet versions have a different history from physical firmware; NEO import,
-generation and deletion paths still need
-separate qualification. Development-device applet versions and device metadata can differ: retain both when
-diagnosing a feature check, and use an override only with a known device profile.
+Session configuration prefers an explicit override, then cached physical-device firmware, then the OpenPGP
+applet's own GET VERSION. Those last two sources can differ. Prerelease or unknown versions admit local
+feature checks without guaranteeing command support. Protocol framing uses a known numeric version when
+available; otherwise it starts with the legacy short profile, not a qualified minimum firmware claim.
+Required initialization and cancellation failures propagate. Old-family import and generation still require
+separate qualification; NEO deletion is unsupported.
 
 For RSA generation, follow [YSA-2017-01](https://www.yubico.com/support/security-advisories/ysa-2017-01/):
 the advisory identifies on-device OpenPGP RSA generation on 4.2.6–4.3.4 as affected by ROCA and 4.3.5 as corrected.

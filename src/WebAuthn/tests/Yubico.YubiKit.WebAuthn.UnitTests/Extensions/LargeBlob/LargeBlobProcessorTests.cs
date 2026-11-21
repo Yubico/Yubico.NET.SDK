@@ -25,6 +25,7 @@ using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
+using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.LargeBlob;
@@ -136,6 +137,66 @@ public class LargeBlobProcessorTests
     private static readonly byte[] LargeBlobKey = Enumerable.Repeat((byte)0x4B, 32).ToArray();
     private static readonly byte[] StoredBlob = "stored blob"u8.ToArray();
 
+    [Theory]
+    [InlineData(false, 32, false)] // Unsupported route, even with an unsolicited key.
+    [InlineData(true, null, false)] // Missing returned key.
+    [InlineData(true, 31, false)] // Malformed returned key.
+    [InlineData(true, 32, true)] // Present empty write reaches storage.
+    public async Task Authentication_ReportsWhetherTheRequestedEmptyWriteSucceeded(bool supported, int? keyLength, bool written)
+    {
+        _ = Context();
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(new AuthenticatorInfo
+        {
+            Extensions = supported ? ["largeBlobKey"] : [],
+            Options = new Dictionary<string, bool> { ["largeBlobs"] = supported, ["clientPin"] = true, ["pinUvAuthToken"] = true }
+        });
+        var permissions = PinUvAuthTokenPermissions.GetAssertion | PinUvAuthTokenPermissions.LargeBlobWrite;
+        _backend.GetPinUvTokenAsync(PinUvAuthMethod.Pin, permissions, "example.com", Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
+            .Returns(_ => new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]));
+        byte[] id = [1];
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            Assert.Equal(id, Assert.Single(request.AllowList ?? []).Id.Span);
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+                return MockCtap2Responses.CreateMockGetAssertionResponse(id);
+
+            Assert.Equal(supported, RequestsLargeBlobKey(request.Extensions));
+            Assert.Equal(supported, request.PinUvAuthParam.HasValue);
+            return MockCtap2Responses.CreateMockGetAssertionResponse(id, largeBlobKey: keyLength switch
+            {
+                null => null,
+                32 => LargeBlobKey,
+                int length => new byte[length]
+            });
+        });
+        _storage.SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                Assert.Equal(LargeBlobKey, call.ArgAt<ReadOnlyMemory<byte>>(0).Span);
+                Assert.True(call.ArgAt<ReadOnlyMemory<byte>>(1).IsEmpty);
+                return Task.CompletedTask;
+            });
+
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var ct = TestContext.Current.CancellationToken;
+        var matches = await client.GetAssertionAsync(new()
+        {
+            Challenge = new byte[32],
+            RpId = "example.com",
+            AllowCredentials = [new(id)],
+            UserVerification = UserVerificationPreference.Discouraged,
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Write = ReadOnlyMemory<byte>.Empty })
+        }, "123456"u8.ToArray(), ct);
+        var result = await Assert.Single(matches).SelectAsync(ct);
+        var output = Assert.IsType<LargeBlobAuthenticationOutput>(result.ClientExtensionResults?.LargeBlob);
+        Assert.Equal(written, output.Written);
+        Assert.Null(output.Blob);
+        _backend.Received(written ? 1 : 0).CreateLargeBlobStorage(Arg.Any<PinUvAuthTokenSession?>());
+        await _storage.Received(written ? 1 : 0).SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+    }
+
     private readonly IWebAuthnBackend _backend = Substitute.For<IWebAuthnBackend>();
     private readonly ILargeBlobStorage _storage = Substitute.For<ILargeBlobStorage>();
 
@@ -239,8 +300,7 @@ public class LargeBlobProcessorTests
 
     /// <summary>The SDK requests LargeBlobWrite for a write and reports true when mocked storage succeeds.</summary>
     /// <remarks>
-    /// The null allow list exercises a current validation gap, not WebAuthn permission to write
-    /// without exactly one original allowed credential. CTAP itself also permits pinless writes in
+    /// This processor-level test bypasses the ceremony's nonempty allow-list preflight. CTAP itself permits pinless writes in
     /// unconfigured-device cases that the current SDK storage path does not support.
     /// </remarks>
     [Fact]

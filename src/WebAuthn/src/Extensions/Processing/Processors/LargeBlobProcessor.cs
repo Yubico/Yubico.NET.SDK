@@ -83,8 +83,8 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
 
     /// <summary>
     /// L3 §10.1.5 authentication: "If support is present, or if both read and write are present, return
-    /// ... NotSupportedError". An unsupported read still initializes the client result, without
-    /// requesting a key or attempting storage I/O.
+    /// ... NotSupportedError". An unsupported read or write still initializes the client result,
+    /// without requesting a key or attempting storage I/O.
     /// The SDK deliberately accepts multi-entry allow lists for writes; it uses the final assertion's
     /// credential-bound key. This is a divergence from the L3 exact-one requirement, not validation.
     /// </summary>
@@ -98,7 +98,8 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
         }
 
         bool supported = IsSupported(context);
-        return supported || input.Read ? new LargeBlobProcessor(input, context, requestKey: supported) : null;
+        return supported || input.Read || input.Write.HasValue
+            ? new LargeBlobProcessor(input, context, requestKey: supported) : null;
     }
 
     public string Name => ExtensionIdentifiers.LargeBlobKey;
@@ -109,7 +110,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
     /// alwaysUv is not enabled; this SDK path does not.
     /// </remarks>
     public PinUvAuthTokenPermissions Permissions =>
-        _input.Write is not null ? PinUvAuthTokenPermissions.LargeBlobWrite : PinUvAuthTokenPermissions.None;
+        _requestKey && _input.Write.HasValue ? PinUvAuthTokenPermissions.LargeBlobWrite : PinUvAuthTokenPermissions.None;
 
     public void PrepareInputs(ExtensionBuilder builder, PinUvAuthTokenSession? token)
     {
@@ -150,10 +151,13 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
             return;
         }
 
-        if (response.LargeBlobKey is { } largeBlobKey && _input.Write is { } data)
+        if (_input.Write is not { } data)
+            return;
+
+        // L3 §10.1.5: "set written to true if the write succeeded and false otherwise".
+        bool written = false;
+        if (_requestKey && response.LargeBlobKey is { Length: 32 } largeBlobKey)
         {
-            // L3 §10.1.5: "set written to true if the write succeeded and false otherwise".
-            bool written;
             try
             {
                 var storage = _context.Backend.CreateLargeBlobStorage(token);
@@ -164,9 +168,8 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
             {
                 written = false;
             }
-
-            outputs.LargeBlob = new LargeBlobAuthenticationOutput(Written: written);
         }
+        outputs.LargeBlob = new LargeBlobAuthenticationOutput(Written: written);
     }
 
     private async Task<Memory<byte>?> ReadBlobAsync(GetAssertionResponse response, CancellationToken cancellationToken)

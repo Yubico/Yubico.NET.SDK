@@ -33,6 +33,25 @@ public class SecureChannelExceptionTests
     private static byte[] OkResponse() => [0x90, 0x00];
 
     [Fact]
+    public async Task CreateAsync_AfterDisposingFirstSession_ReusesCallerOwnedParameters()
+    {
+        using var keys = Scp03KeyParameters.Default;
+        using var first = new Scp03HandshakeFakeConnection();
+        using var second = new Scp03HandshakeFakeConnection();
+        var options = new SessionCreationOptions { ScpKeyParameters = keys };
+
+        await using (var session = await SecurityDomainSession.CreateAsync(first, options,
+                         TestContext.Current.CancellationToken))
+        {
+            Assert.True(session.IsAuthenticated);
+        }
+
+        await using var reopened = await SecurityDomainSession.CreateAsync(second, options,
+            TestContext.Current.CancellationToken);
+        Assert.True(reopened.IsAuthenticated);
+    }
+
+    [Fact]
     public async Task CreateAsync_Scp03ClaNotSupported_PreservesNestedStatusWithoutCopyingDetails()
     {
         using var connection = new RecordingSmartCardConnection(OkResponse(), [0x6E, 0x00]);

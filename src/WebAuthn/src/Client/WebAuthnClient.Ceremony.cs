@@ -106,8 +106,8 @@ public sealed partial class WebAuthnClient
     /// <summary>
     /// Runs one ceremony attempt and, if the authenticator answers CTAP2_ERR_PUAT_REQUIRED to a
     /// request made without required verification, runs it once more with verification required.
-    /// Other CTAP failures from the attempt are mapped to a typed <see cref="WebAuthnClientError"/>.
-    /// Token acquisition is mapped separately and cannot trigger command escalation.
+    /// Only the initial credential command leaves an eligible PUAT_REQUIRED unmapped. Preparation,
+    /// probes and continuations handle their CTAP statuses separately and cannot retry that command.
     /// </summary>
     /// <remarks>
     /// The attempt must end at the authenticator's answer. Follow-up work that may itself fail with a
@@ -119,36 +119,36 @@ public sealed partial class WebAuthnClient
         UserVerificationPreference preference,
         PinUvAuthTokenPermissions permissions,
         CeremonyAuth auth,
-        bool hasPreviewSign,
-        Func<UvDecision, CancellationToken, Task<TAttempt>> attempt,
+        Func<UvDecision, UserVerificationPreference, CancellationToken, Task<TAttempt>> attempt,
         CancellationToken cancellationToken)
     {
         while (true)
         {
             var decision = UvDecisionLogic.Decide(info, preference, auth.PinAvailable, permissions);
-            if (decision.UseToken)
-                _ = _backend.Protocol;
-            try
-            {
-                await auth.AcquireAsync(decision, cancellationToken).ConfigureAwait(false);
-            }
-            catch (CtapException ex)
-            {
-                throw MapCtapStatusToWebAuthnError(ex);
-            }
+            await AcquireCeremonyTokenAsync(auth, decision, cancellationToken).ConfigureAwait(false);
 
             try
             {
-                return await attempt(decision, cancellationToken).ConfigureAwait(false);
+                return await attempt(decision, preference, cancellationToken).ConfigureAwait(false);
             }
             catch (CtapException ex) when (ShouldRetryWithRequiredUv(ex, preference))
             {
                 preference = UserVerificationPreference.Required;
             }
-            catch (CtapException ex)
-            {
-                throw MapCeremonyCtapException(ex, hasPreviewSign);
-            }
+        }
+    }
+
+    private async Task AcquireCeremonyTokenAsync(CeremonyAuth auth, UvDecision decision, CancellationToken ct)
+    {
+        try
+        {
+            if (decision.UseToken)
+                _ = _backend.Protocol;
+            await auth.AcquireAsync(decision, ct).ConfigureAwait(false);
+        }
+        catch (CtapException ex)
+        {
+            throw MapCtapStatusToWebAuthnError(ex);
         }
     }
 
@@ -239,7 +239,7 @@ public sealed partial class WebAuthnClient
 
     /// <summary>
     /// Maps a caught CTAP failure of the ceremony attempt: CredentialExcluded
-    /// is WebAuthn L3 §5.1.3's InvalidStateError; previewSign requests use the previewSign mapper; the rest
+    /// is WebAuthn L3 §5.1.3's InvalidStateError; commands carrying previewSign use its mapper; the rest
     /// go through <see cref="MapCtapStatusToWebAuthnError"/>.
     /// </summary>
     private static WebAuthnClientError MapCeremonyCtapException(CtapException ex, bool hasPreviewSign)

@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
+using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -112,50 +114,27 @@ public sealed partial class WebAuthnClient
         var context = new ExtensionContext(info, null, _backend);
         var permissions = PinUvAuthTokenPermissions.GetAssertion
             | AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context).Permissions;
-#pragma warning disable YKEXP001 // Apply previewSign-specific errors only to explicit extension requests.
-        bool hasPreviewSign = options.Extensions?.PreviewSign is not null;
-#pragma warning restore YKEXP001
         var uvPreference = Extensions.Processing.Processors.PrfProcessor.RequiresVerifiedEvaluation(options.Extensions?.Prf, context, registration: false)
-            ? Preferences.UserVerificationPreference.Required : options.UserVerification;
+            ? UserVerificationPreference.Required : options.UserVerification;
 
         using var auth = new CeremonyAuth(this, options.RpId, callerPinBytes);
 
         var (matches, extensions) = await RunWithUvEscalationAsync(
-            info, uvPreference, permissions, auth, hasPreviewSign, AttemptAsync, cancellationToken)
+            info, uvPreference, permissions, auth, AttemptAsync, cancellationToken)
             .ConfigureAwait(false);
 
         // Build every response now, outside the escalation scope and while the token is live (extension
         // outputs may need it); MatchedCredential.SelectAsync then does no further authenticator work.
         using (extensions)
-        {
-            var results = new List<MatchedCredential>(matches.Count);
-            var prepared = new List<AuthenticationResponse>(matches.Count);
-            bool published = false;
-            try
-            {
-                foreach (var (credentialId, user, response) in matches)
-                {
-                    var authenticationResponse = await BuildAuthenticationResponseAsync(
-                        response, credentialId, clientData, extensions, auth.Token, cancellationToken).ConfigureAwait(false);
-                    prepared.Add(authenticationResponse);
-                    results.Add(new MatchedCredential(credentialId, user, _ => Task.FromResult(authenticationResponse)));
-                }
-                published = true;
-                return results;
-            }
-            finally
-            {
-                ClearAssertionBuffers(matches, prepared, published);
-            }
-        }
+            return await BuildMatchedResponsesAsync(matches, clientData, extensions, auth.Token, cancellationToken).ConfigureAwait(false);
 
         async Task<(IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> Matches,
-            AuthenticationExtensionSession Extensions)> AttemptAsync(UvDecision decision, CancellationToken ct)
+            AuthenticationExtensionSession Extensions)> AttemptAsync(UvDecision decision, UserVerificationPreference preference, CancellationToken ct)
         {
             var extensions = AuthenticationExtensionSession.Create(options.Extensions, options.AllowCredentials, context);
             try
             {
-                return await AttemptWithAsync(extensions, decision, ct).ConfigureAwait(false);
+                return await AttemptWithAsync(extensions, decision, preference, ct).ConfigureAwait(false);
             }
             catch
             {
@@ -166,7 +145,7 @@ public sealed partial class WebAuthnClient
 
         async Task<(IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> Matches,
             AuthenticationExtensionSession Extensions)> AttemptWithAsync(
-            AuthenticationExtensionSession extensions, UvDecision decision, CancellationToken ct)
+            AuthenticationExtensionSession extensions, UvDecision decision, UserVerificationPreference preference, CancellationToken ct)
         {
             await extensions.PrepareAsync(ct).ConfigureAwait(false);
 
@@ -183,16 +162,57 @@ public sealed partial class WebAuthnClient
                 allowList = [selected ?? new PublicKeyCredentialDescriptor(DummyCredentialId, candidates[0].Type)];
             }
 
-            var request = BuildGetAssertionRequest(options, clientData, auth, decision, extensions, selected, allowList);
-            try
+            var request = BuildGetAssertionRequest(options, clientData, auth, decision, extensions, selected, allowList, out bool hasPreviewSign);
+            var first = await GetFirstAssertionAsync(request, preference, hasPreviewSign, ct).ConfigureAwait(false);
+            var matches = first is null ? [] : await CredentialMatcher.MatchAsync(_backend, first, allowList is not null, selected, ct)
+                .ConfigureAwait(false);
+            return (matches, extensions);
+        }
+    }
+
+    private static async Task<IReadOnlyList<MatchedCredential>> BuildMatchedResponsesAsync(
+        IReadOnlyList<(ReadOnlyMemory<byte> Id, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)> matches,
+        WebAuthnClientData clientData, AuthenticationExtensionSession extensions, PinUvAuthTokenSession? token, CancellationToken ct)
+    {
+        var results = new List<MatchedCredential>(matches.Count);
+        var prepared = new List<AuthenticationResponse>(matches.Count);
+        bool published = false;
+        try
+        {
+            foreach (var (credentialId, user, response) in matches)
             {
-                var matches = await CredentialMatcher.MatchAsync(_backend, request, selected, ct).ConfigureAwait(false);
-                return (matches, extensions);
+                var authenticationResponse = await BuildAuthenticationResponseAsync(
+                    response, credentialId, clientData, extensions, token, ct).ConfigureAwait(false);
+                prepared.Add(authenticationResponse);
+                results.Add(new MatchedCredential(credentialId, user, _ => Task.FromResult(authenticationResponse)));
             }
-            finally
-            {
-                Util.SensitiveMemory.Zero(request.Extensions);
-            }
+            published = true;
+            return results;
+        }
+        finally
+        {
+            ClearAssertionBuffers(matches, prepared, published);
+        }
+    }
+
+    private async Task<GetAssertionResponse?> GetFirstAssertionAsync(
+        BackendGetAssertionRequest request, UserVerificationPreference preference, bool hasPreviewSign, CancellationToken ct)
+    {
+        try
+        {
+            return await _backend.GetAssertionAsync(request, ct).ConfigureAwait(false);
+        }
+        catch (CtapException ex) when (CredentialMatcher.IsNoCredentialsError(ex.Status))
+        {
+            return null;
+        }
+        catch (CtapException ex) when (!ShouldRetryWithRequiredUv(ex, preference))
+        {
+            throw MapCeremonyCtapException(ex, hasPreviewSign);
+        }
+        finally
+        {
+            Util.SensitiveMemory.Zero(request.Extensions);
         }
     }
 
@@ -228,10 +248,11 @@ public sealed partial class WebAuthnClient
         UvDecision decision,
         AuthenticationExtensionSession extensions,
         PublicKeyCredentialDescriptor? selected,
-        IReadOnlyList<PublicKeyCredentialDescriptor>? allowList)
+        IReadOnlyList<PublicKeyCredentialDescriptor>? allowList,
+        out bool hasPreviewSign)
     {
         // Extension inputs first: an input that cannot be built must fail before any pinUvAuthParam exists.
-        var extensionsCbor = extensions.PrepareInputs(selected, auth.Token);
+        var extensionsCbor = extensions.PrepareInputs(selected, auth.Token, out hasPreviewSign);
         var (pinUvAuthParam, pinUvAuthProtocol) = auth.SignClientData(clientData.Hash.Span);
 
         return new BackendGetAssertionRequest

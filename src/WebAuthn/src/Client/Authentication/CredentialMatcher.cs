@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.WebAuthn.Client.Authentication;
 /// Internal helper for matching credentials during authentication.
 /// </summary>
 /// <remarks>
-/// Collects final assertions via GetAssertion and GetNextAssertion. CredentialFilter performs
+/// Collects final assertions starting with the successful GetAssertion response. CredentialFilter performs
 /// allow-list probing before this helper receives the narrowed request.
 /// </remarks>
 internal sealed class CredentialMatcher
@@ -33,7 +33,8 @@ internal sealed class CredentialMatcher
     /// Matches credentials for an authentication request.
     /// </summary>
     /// <param name="backend">The WebAuthn backend to use.</param>
-    /// <param name="request">The backend GetAssertion request.</param>
+    /// <param name="firstResponse">The successful GetAssertion response.</param>
+    /// <param name="hasAllowList">Whether the final request included an allow list.</param>
     /// <param name="selected">The real descriptor selected by probing, never the dummy descriptor.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
@@ -43,35 +44,23 @@ internal sealed class CredentialMatcher
     internal static async Task<IReadOnlyList<(ReadOnlyMemory<byte> CredentialId, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)>>
         MatchAsync(
             IWebAuthnBackend backend,
-            BackendGetAssertionRequest request,
+            GetAssertionResponse firstResponse,
+            bool hasAllowList,
             PublicKeyCredentialDescriptor? selected,
             CancellationToken cancellationToken)
     {
-        GetAssertionResponse firstResponse;
-
-        try
-        {
-            firstResponse = await backend.GetAssertionAsync(request, cancellationToken);
-        }
-        catch (CtapException ex) when (IsNoCredentialsError(ex.Status))
-        {
-            // Authenticator has no matching credentials - return empty list
-            return Array.Empty<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
-        }
-
         var results = new List<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
 
         uint? numberOfCredentials = CheckAssertionCount(firstResponse);
 
         try
         {
-            bool hasAllowList = request.AllowList is { Count: > 0 };
             var firstCredId = ResolveCredentialId(firstResponse, selected, hasAllowList);
             results.Add((firstCredId, firstResponse.User, firstResponse));
 
             for (uint i = 1; i < numberOfCredentials; i++)
             {
-                var nextResponse = await backend.GetNextAssertionAsync(cancellationToken);
+                var nextResponse = await GetContinuationAsync(backend, cancellationToken).ConfigureAwait(false);
                 var nextCredId = ResolveCredentialId(nextResponse, selected, hasAllowList, allowOmission: false);
                 results.Add((nextCredId, nextResponse.User, nextResponse));
             }
@@ -82,6 +71,18 @@ internal sealed class CredentialMatcher
             foreach (var (_, _, response) in results)
                 ClearUnreturnedAssertion(response);
             throw;
+        }
+    }
+
+    private static async Task<GetAssertionResponse> GetContinuationAsync(IWebAuthnBackend backend, CancellationToken ct)
+    {
+        try
+        {
+            return await backend.GetNextAssertionAsync(ct).ConfigureAwait(false);
+        }
+        catch (CtapException ex)
+        {
+            throw WebAuthnClient.MapCtapStatusToWebAuthnError(ex);
         }
     }
 
@@ -119,7 +120,7 @@ internal sealed class CredentialMatcher
             CryptographicOperations.ZeroMemory(key.Span);
     }
 
-    private static bool IsNoCredentialsError(CtapStatus status)
+    internal static bool IsNoCredentialsError(CtapStatus status)
     {
         // NotAllowed (0x30) is "device denied the operation" (user cancel, policy reject) —
         // semantically distinct from "no matching credential" and must propagate so callers

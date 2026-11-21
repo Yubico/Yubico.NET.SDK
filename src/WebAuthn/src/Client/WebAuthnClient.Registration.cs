@@ -24,6 +24,7 @@ using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Cose;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
+using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -127,9 +128,6 @@ public sealed partial class WebAuthnClient
         var permissions = PinUvAuthTokenPermissions.MakeCredential
             | (options.ExcludeCredentials is { Count: > 0 } ? PinUvAuthTokenPermissions.GetAssertion : PinUvAuthTokenPermissions.None)
             | RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context).Permissions;
-#pragma warning disable YKEXP001 // Apply previewSign-specific errors only to explicit extension requests.
-        bool hasPreviewSign = options.Extensions?.PreviewSign is not null;
-#pragma warning restore YKEXP001
         var uvPreference = Extensions.Processing.Processors.PrfProcessor.RequiresVerifiedEvaluation(options.Extensions?.Prf, context, registration: true)
             ? Preferences.UserVerificationPreference.Required : options.UserVerification;
 
@@ -137,7 +135,7 @@ public sealed partial class WebAuthnClient
         IReadOnlyList<PublicKeyCredentialDescriptor>? probedExcludeList = null;
 
         var (ctapResponse, extensions) = await RunWithUvEscalationAsync(
-            info, uvPreference, permissions, auth, hasPreviewSign, AttemptAsync, cancellationToken)
+            info, uvPreference, permissions, auth, AttemptAsync, cancellationToken)
             .ConfigureAwait(false);
 
         // Outputs are prepared outside the escalation scope, while the token is still live.
@@ -162,12 +160,12 @@ public sealed partial class WebAuthnClient
         }
 
         async Task<(MakeCredentialResponse Response, RegistrationExtensionSession Extensions)> AttemptAsync(
-            UvDecision decision, CancellationToken ct)
+            UvDecision decision, UserVerificationPreference preference, CancellationToken ct)
         {
             var extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context);
             try
             {
-                return await AttemptWithAsync(extensions, decision, ct).ConfigureAwait(false);
+                return await AttemptWithAsync(extensions, decision, preference, ct).ConfigureAwait(false);
             }
             catch
             {
@@ -177,7 +175,7 @@ public sealed partial class WebAuthnClient
         }
 
         async Task<(MakeCredentialResponse Response, RegistrationExtensionSession Extensions)> AttemptWithAsync(
-            RegistrationExtensionSession extensions, UvDecision decision, CancellationToken ct)
+            RegistrationExtensionSession extensions, UvDecision decision, UserVerificationPreference preference, CancellationToken ct)
         {
             await extensions.PrepareAsync(ct).ConfigureAwait(false);
 
@@ -199,16 +197,26 @@ public sealed partial class WebAuthnClient
             }
 
             var request = BuildMakeCredentialRequest(options, clientData, auth, decision, excludeList,
-                requireResidentKey, info, extensions);
-            try
-            {
-                var response = await _backend.MakeCredentialAsync(request, ct).ConfigureAwait(false);
-                return (response, extensions);
-            }
-            finally
-            {
-                Util.SensitiveMemory.Zero(request.Extensions);
-            }
+                requireResidentKey, info, extensions, out bool hasPreviewSign);
+            var response = await SendMakeCredentialAsync(request, preference, hasPreviewSign, ct).ConfigureAwait(false);
+            return (response, extensions);
+        }
+    }
+
+    private async Task<MakeCredentialResponse> SendMakeCredentialAsync(
+        BackendMakeCredentialRequest request, UserVerificationPreference preference, bool hasPreviewSign, CancellationToken ct)
+    {
+        try
+        {
+            return await _backend.MakeCredentialAsync(request, ct).ConfigureAwait(false);
+        }
+        catch (CtapException ex) when (!ShouldRetryWithRequiredUv(ex, preference))
+        {
+            throw MapCeremonyCtapException(ex, hasPreviewSign);
+        }
+        finally
+        {
+            Util.SensitiveMemory.Zero(request.Extensions);
         }
     }
 
@@ -229,14 +237,15 @@ public sealed partial class WebAuthnClient
         IReadOnlyList<PublicKeyCredentialDescriptor>? excludeList,
         bool requireResidentKey,
         AuthenticatorInfo info,
-        RegistrationExtensionSession extensions)
+        RegistrationExtensionSession extensions,
+        out bool hasPreviewSign)
     {
         var pubKeyCredParams = options.PubKeyCredParams
             .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
             .ToList();
 
         // Extension inputs first: an input that cannot be built must fail before any pinUvAuthParam exists.
-        var extensionsCbor = extensions.PrepareInputs(auth.Token);
+        var extensionsCbor = extensions.PrepareInputs(auth.Token, out hasPreviewSign);
         var (pinUvAuthParam, pinUvAuthProtocol) = auth.SignClientData(clientData.Hash.Span);
 
         return new BackendMakeCredentialRequest

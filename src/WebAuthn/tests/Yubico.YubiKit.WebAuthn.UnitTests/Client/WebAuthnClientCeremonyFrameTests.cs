@@ -76,6 +76,55 @@ public class WebAuthnClientCeremonyFrameTests
     private static ReadOnlyMemory<byte> Pin => "123456"u8.ToArray();
 
     [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
+    public async Task ExtensionPreparationUsesGeneralMappingBeforeFirstOrRetriedCommand(bool registration, bool retry)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var failure = new CtapException(CtapStatus.InvalidOption);
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
+            clientPinSupported: true, extensions: ["previewSign", "hmac-secret", "hmac-secret-mc"]));
+        _backend.EncapsulateAsync(Arg.Any<CancellationToken>()).Throws(failure);
+        var allowed = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var probeCount = 0;
+        var commandCount = 0;
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+            {
+                if (retry && ++probeCount == 1)
+                    throw new CtapException(CtapStatus.NoCredentials);
+                return MockCtap2Responses.CreateMockGetAssertionResponse([1]);
+            }
+            commandCount++;
+            Assert.Null(request.Extensions); // The dummy request cannot carry the requested previewSign input.
+            throw new CtapException(CtapStatus.PuatRequired);
+        });
+        var prf = new PrfInput { First = "RP input"u8.ToArray() };
+        await using var client = _client;
+        Task PerformAsync() => registration
+            ? client.MakeCredentialAsync(Registration() with
+            {
+                Extensions = new RegistrationExtensionInputs(Prf: prf, PreviewSign: new([CoseAlgorithm.Es256]))
+            }, Pin, ct)
+            : client.GetAssertionAsync(WithAllowList(allowed) with
+            {
+                Extensions = new AuthenticationExtensionInputs(Prf: prf, PreviewSign: new(
+                    new Dictionary<ReadOnlyMemory<byte>, WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams>
+                    { [allowed.Id] = new(new byte[] { 2 }, new byte[] { 3 }) }))
+            }, Pin, ct);
+
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(PerformAsync);
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+        Assert.Same(failure, error.InnerException);
+        Assert.Equal(retry ? 1 : 0, commandCount);
+        await _backend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+        await _backend.Received(1).EncapsulateAsync(Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
     [InlineData(true, true)]
     [InlineData(true, false)]
     [InlineData(false, true)]
@@ -364,12 +413,17 @@ public class WebAuthnClientCeremonyFrameTests
             permissions);
     }
 
-    [Fact]
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
-    public async Task MakeCredential_PreviewSignRequested_MapsCtapErrorsThroughPreviewSignMapper()
+    public async Task MakeCredential_UsesSpecialMappingOnlyWhenPreviewSignIsSent(bool supported)
     {
+        if (!supported)
+            ArrangeNoTokenAuthenticator();
+        var failure = new CtapException(CtapStatus.InvalidOption);
         _backend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
-            .Throws(new CtapException(CtapStatus.UnsupportedAlgorithm));
+            .Throws(failure);
         var options = Registration() with
         {
             Extensions = new RegistrationExtensionInputs(
@@ -379,8 +433,9 @@ public class WebAuthnClientCeremonyFrameTests
         var error = await Assert.ThrowsAsync<WebAuthnClientError>(() =>
             _client.MakeCredentialAsync(options, Pin, TestContext.Current.CancellationToken));
 
-        Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
-        Assert.StartsWith("previewSign:", error.Message, StringComparison.Ordinal);
+        Assert.Equal(supported ? WebAuthnClientErrorCode.InvalidState : WebAuthnClientErrorCode.NotSupported, error.Code);
+        Assert.Equal(supported, error.Message.StartsWith("previewSign:", StringComparison.Ordinal));
+        Assert.Same(failure, error.InnerException);
     }
 
     [Fact]
@@ -410,6 +465,52 @@ public class WebAuthnClientCeremonyFrameTests
     private void ArrangeNoTokenAuthenticator() =>
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo()); // no clientPin: ceremony runs without a token
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
+    public async Task AssertionUsesSpecialMappingOnlyWhenPreviewSignIsSent(bool match)
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: ["previewSign"]));
+        var allowed = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var failure = new CtapException(CtapStatus.InvalidOption);
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+                return match ? MockCtap2Responses.CreateMockGetAssertionResponse([1]) : throw new CtapException(CtapStatus.NoCredentials);
+            Assert.Equal(match, request.Extensions.HasValue);
+            throw failure;
+        });
+        var options = WithAllowList(allowed) with
+        {
+            Extensions = new AuthenticationExtensionInputs(PreviewSign: new(
+                new Dictionary<ReadOnlyMemory<byte>, WebAuthn.Extensions.PreviewSign.PreviewSignSigningParams>
+                { [allowed.Id] = new(new byte[] { 2 }, new byte[] { 3 }) }))
+        };
+        await using var client = _client;
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(options,
+            cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(match ? WebAuthnClientErrorCode.InvalidState : WebAuthnClientErrorCode.NotSupported, error.Code);
+        Assert.Same(failure, error.InnerException);
+    }
+
+    [Fact]
+    public async Task AssertionContinuationDoesNotRetryTheInitialCommand()
+    {
+        var failure = new CtapException(CtapStatus.PuatRequired);
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(numberOfCredentials: 2));
+        _backend.GetNextAssertionAsync(Arg.Any<CancellationToken>()).Throws(failure);
+        await using var client = _client;
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(
+            Authentication(UserVerificationPreference.Discouraged), Pin, TestContext.Current.CancellationToken));
+        Assert.Equal(WebAuthnClientErrorCode.NotAllowed, error.Code);
+        Assert.Same(failure, error.InnerException);
+        await _backend.Received(1).GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+    }
 
     [Theory]
     [InlineData(true)]

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Extensions;
 using Yubico.YubiKit.Ctap2.Pin;
@@ -70,14 +71,22 @@ internal sealed class AuthenticationExtensionSession : IDisposable
     /// <summary>Runs every processor's authenticator-dependent preparation (key agreement etc.).</summary>
     public async ValueTask PrepareAsync(CancellationToken cancellationToken)
     {
-        foreach (var processor in _processors)
+        try
         {
-            await processor.PrepareAsync(cancellationToken).ConfigureAwait(false);
+            foreach (var processor in _processors)
+                await processor.PrepareAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (CtapException ex)
+        {
+            throw WebAuthnClient.MapCtapStatusToWebAuthnError(ex);
         }
     }
 
     /// <summary>Builds the CTAP2 extensions map, or null when no processor adds an input.</summary>
-    public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token)
+    public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token) =>
+        PrepareInputs(selected, token, out _);
+
+    public ReadOnlyMemory<byte>? PrepareInputs(PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token, out bool hasPreviewSign)
     {
         var builder = new ExtensionBuilder();
         foreach (var processor in _processors)
@@ -85,6 +94,7 @@ internal sealed class AuthenticationExtensionSession : IDisposable
             processor.PrepareInputs(builder, selected, token);
         }
 
+        hasPreviewSign = builder.HasPreviewSign;
         return builder.Build();
     }
 

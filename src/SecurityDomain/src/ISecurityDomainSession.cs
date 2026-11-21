@@ -154,11 +154,12 @@ public interface ISecurityDomainSession : IApplicationSession
     ///     YubiKey, the first SCP03 import replaces the default set even when replaceKvn is 0. With custom
     ///     sets already installed, 0 adds a version; a nonzero value requests replacement. Escrow secrets
     ///     before import and verify a fresh session with the new keys before deleting any retained old set.
-    ///     The SDK does not enforce every device range: replaceKvn is currently cast to one byte.
+    ///     The SDK rejects replaceKvn outside 0–255 before sending; it does not enforce every device-specific version range.
     ///     Response validation requires the requested KVN followed by exactly three matching KCVs.
     /// </remarks>
     /// <exception cref="ArgumentNullException">The static key set is null.</exception>
     /// <exception cref="ArgumentException">The reference does not use KID 0x01.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The replacement version is outside 0–255.</exception>
     /// <exception cref="InvalidOperationException">No data encryptor is available, or KCV validation fails.</exception>
     // The overloads represent distinct SCP03, EC public-key, and EC private-key payloads.
 #pragma warning disable RS0026
@@ -178,10 +179,10 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <remarks>
     ///     Use a NIST P-256 CA-KLOC public key reference when provisioning host authentication for SCP11a/c.
     ///     Device-accepted administrative authority is required; this overload does not check it locally.
-    ///     Supply a one-byte replacement version: the current implementation casts replaceKvn to byte
-    ///     without range validation. The caller retains responsibility for the supplied key.
+    ///     The SDK rejects replaceKvn outside 0–255 before sending. The caller retains responsibility for the supplied key.
     /// </remarks>
     /// <exception cref="ArgumentException">The public key is not NIST P-256.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The replacement version is outside 0–255.</exception>
     /// <exception cref="InvalidOperationException">The response checksum does not match the requested version.</exception>
     Task PutKeyAsync(
         KeyReference keyReference,
@@ -199,10 +200,10 @@ public interface ISecurityDomainSession : IApplicationSession
     /// <remarks>
     ///     Imports a NIST P-256 Security Domain private key using the session's data encryptor.
     ///     Device-accepted administrative authority is also required. The caller retains responsibility
-    ///     for the private key; keep it in a using scope. Supply a one-byte replacement version: the
-    ///     current implementation casts replaceKvn to byte without range validation.
+    ///     for the private key; keep it in a using scope. The SDK rejects replaceKvn outside 0–255 before sending.
     /// </remarks>
     /// <exception cref="ArgumentException">The private key is not NIST P-256.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">The replacement version is outside 0–255.</exception>
     /// <exception cref="InvalidOperationException">No data encryptor is available, or the response checksum does not match.</exception>
     Task PutKeyAsync(
         KeyReference keyReference,

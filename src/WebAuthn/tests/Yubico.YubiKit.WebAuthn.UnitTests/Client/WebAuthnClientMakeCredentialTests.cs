@@ -43,7 +43,7 @@ public class WebAuthnClientMakeCredentialTests
             extensions: supported ? ["minPinLength"] : []));
         BackendMakeCredentialRequest? captured = null;
         _mockBackend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(request => captured = request with
-            { Extensions = request.Extensions is { } encoded ? new ReadOnlyMemory<byte>(encoded.ToArray()) : (ReadOnlyMemory<byte>?)null }), Arg.Any<CancellationToken>())
+        { Extensions = request.Extensions is { } encoded ? new ReadOnlyMemory<byte>(encoded.ToArray()) : (ReadOnlyMemory<byte>?)null }), Arg.Any<CancellationToken>())
             .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
         var result = await _client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
         {

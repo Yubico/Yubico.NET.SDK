@@ -96,9 +96,9 @@ public class WebAuthnClientCeremonyFrameTests
 
         Task PerformAsync() => registration
             ? client.MakeCredentialAsync(Registration(UserVerificationPreference.Discouraged) with
-                { Extensions = new RegistrationExtensionInputs(Prf: prf) }, cancellationToken: ct)
+            { Extensions = new RegistrationExtensionInputs(Prf: prf) }, cancellationToken: ct)
             : client.GetAssertionAsync(Authentication(UserVerificationPreference.Discouraged) with
-                { Extensions = new AuthenticationExtensionInputs(Prf: prf) }, cancellationToken: ct);
+            { Extensions = new AuthenticationExtensionInputs(Prf: prf) }, cancellationToken: ct);
 
         if (evaluationSupported)
             Assert.Equal(WebAuthnClientErrorCode.NotAllowed, (await Assert.ThrowsAsync<WebAuthnClientError>(PerformAsync)).Code);

@@ -6,11 +6,11 @@ uid: YubiKitV2ApiIndexPage
 
 API reference for the next generation of the YubiKey .NET SDK.
 
-<div class="v2-alpha-notice">
-<strong>Alpha documentation</strong>
-<p>APIs may change. This reference follows the <code>yubikit</code> branch.
-V2 is intended for evaluation and is not yet recommended for production use.</p>
-</div>
+> [!IMPORTANT]
+> **Alpha documentation**
+>
+> APIs may change. This reference follows the `yubikit` branch.
+> V2 is intended for evaluation and is not yet recommended for production use.
 
 ## SDK modules
 

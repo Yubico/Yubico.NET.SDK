@@ -44,6 +44,8 @@ card or per approved, independently scoped facet of a split card, with `Audit-Ca
 One draft PR per applet against `--base yubikit-pass2-base`, starting with OATH, with the Copilot review-fix loop.
 The withdrawn C1 guard is not a shared prerequisite.
 
+Security Domain delivery: [draft PR #792](https://github.com/Yubico/Yubico.NET.SDK/pull/792). Hardware qualification remains pending.
+
 ## Cards
 
 | Card | Applet | Severity | Classified as | Status | Final call | Recorded in |

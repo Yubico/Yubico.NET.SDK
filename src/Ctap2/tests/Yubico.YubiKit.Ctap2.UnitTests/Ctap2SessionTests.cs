@@ -771,8 +771,7 @@ public class Ctap2SessionTests
         oversized[0] = CtapCommand.GetInfo;
 
         await Assert.ThrowsAsync<ArgumentException>(() => session.SendCborRequestAsync(oversized, ct));
-        await Assert.ThrowsAsync<Ctap2Session.GetAssertionSizeException>(() =>
-            session.GetAssertionAsync(new string('a', limit), new byte[32], cancellationToken: ct));
+        await Assert.ThrowsAsync<ArgumentException>(() => session.GetAssertionAsync(new string('a', limit), new byte[32], cancellationToken: ct));
         Assert.Equal(initialTransmissions, connection.TransmittedCommands.Count);
         await session.SendCborRequestAsync(oversized.AsMemory(0, limit), ct);
         Assert.Equal(initialTransmissions + 1, connection.TransmittedCommands.Count);

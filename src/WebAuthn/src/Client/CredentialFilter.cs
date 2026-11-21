@@ -30,8 +30,8 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// <para>
 /// Descriptors are probed with <c>authenticatorGetAssertion</c>, <c>up: false</c> and a zero client
 /// data hash, in chunks of <c>maxCredentialCountInList</c> (CTAP 2.1-2.3 §6.4). A chunk the
-/// authenticator rejects with CTAP2_ERR_REQUEST_TOO_LARGE or the session refuses before sending due
-/// to its encoded size is retried smaller; CTAP2_ERR_NO_CREDENTIALS
+/// authenticator rejects with CTAP2_ERR_REQUEST_TOO_LARGE or whose canonical encoding does not fit
+/// the host message-size check is retried smaller; CTAP2_ERR_NO_CREDENTIALS
 /// moves to the next chunk; any other status propagates. Descriptors longer than
 /// <c>maxCredentialIdLength</c> are skipped: the authenticator cannot have issued them.
 /// </para>
@@ -77,7 +77,7 @@ internal static class CredentialFilter
         try
         {
             var result = await FindAsync(eligible, info, requireUvAndUp: false, chunk =>
-                backend.GetAssertionAsync(new BackendGetAssertionRequest
+                SendChunkIfFitsAsync(backend, new BackendGetAssertionRequest
                 {
                     ClientDataHash = zeroClientDataHash,
                     RpId = rpId,
@@ -85,7 +85,7 @@ internal static class CredentialFilter
                     Options = new Dictionary<string, bool> { ["up"] = false },
                     PinUvAuthParam = pinUvAuthParam is null ? null : (ReadOnlyMemory<byte>?)pinUvAuthParam,
                     PinUvAuthProtocol = token is null ? null : (byte)token.Protocol.Version
-                }, cancellationToken), cancellationToken).ConfigureAwait(false);
+                }, info, cancellationToken), cancellationToken).ConfigureAwait(false);
             if (result is { } match)
             {
                 CredentialMatcher.ClearUnreturnedAssertion(match.Response);
@@ -118,10 +118,17 @@ internal static class CredentialFilter
             $"Authenticator reported maxCredentialCountInList = {maxCreds}; CTAP §6.4 requires a value greater than zero, so the credential list cannot be checked.");
     }
 
+    /// <summary>Returns a preflight refusal without dispatching, or sends the fitting request.</summary>
+    internal static async Task<(bool Fits, GetAssertionResponse? Response)> SendChunkIfFitsAsync(IWebAuthnBackend backend,
+        BackendGetAssertionRequest request, AuthenticatorInfo info, CancellationToken ct) =>
+        WebAuthnBackend.FitsGetAssertion(request, info)
+            ? (true, await backend.GetAssertionAsync(request, ct).ConfigureAwait(false))
+            : (false, null);
+
     /// <summary>Checks eligible chunks in order and transfers ownership of only an associated success.</summary>
     internal static async Task<(PublicKeyCredentialDescriptor Selected, GetAssertionResponse Response)?> FindAsync(
         IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info, bool requireUvAndUp,
-        Func<IReadOnlyList<PublicKeyCredentialDescriptor>, Task<GetAssertionResponse>> getAssertion, CancellationToken ct)
+        Func<IReadOnlyList<PublicKeyCredentialDescriptor>, Task<(bool Fits, GetAssertionResponse? Response)>> getAssertion, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
         if (eligible.Count == 0)
@@ -133,10 +140,10 @@ internal static class CredentialFilter
         {
             ct.ThrowIfCancellationRequested();
             var chunk = eligible.Skip(offset).Take(limit).ToList();
-            GetAssertionResponse response;
+            (bool fits, GetAssertionResponse? response) result;
             try
             {
-                response = await getAssertion(chunk).ConfigureAwait(false);
+                result = await getAssertion(chunk).ConfigureAwait(false);
             }
             catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
             {
@@ -148,19 +155,25 @@ internal static class CredentialFilter
                 limit = chunk.Count - 1; // Retry from the same offset without losing any candidates.
                 continue;
             }
-            catch (Ctap2Session.GetAssertionSizeException) when (chunk.Count > 1)
+            if (!result.fits)
             {
-                // The encoded command did not reach the device. Retry the same offset with fewer IDs.
+                // Only an explicit preflight result for this command authorizes host-side refinement.
+                if (chunk.Count == 1)
+                    throw OversizeAssertion(info);
                 limit = chunk.Count - 1;
                 continue;
             }
 
+            var response = result.response ?? throw new InvalidOperationException("The backend did not return an assertion.");
             return (Associate(response, chunk, requireUvAndUp, ct), response);
         }
 
         ct.ThrowIfCancellationRequested();
         return null;
     }
+
+    internal static ArgumentException OversizeAssertion(AuthenticatorInfo info) =>
+        new($"The CTAP request exceeds the authenticator's {info.MaxMsgSize ?? Ctap2Session.DefaultMaxMessageSize}-byte message limit.", "request");
 
     internal static PublicKeyCredentialDescriptor Associate(GetAssertionResponse response,
         IReadOnlyList<PublicKeyCredentialDescriptor> chunk, bool requireUvAndUp, CancellationToken ct)

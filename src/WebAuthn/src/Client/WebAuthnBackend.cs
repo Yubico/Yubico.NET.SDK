@@ -216,7 +216,36 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
 
         ArgumentNullException.ThrowIfNull(request);
 
-        // Build options
+        var options = ProjectGetAssertionOptions(request);
+        try
+        {
+            return await _session.GetAssertionAsync(
+                request.RpId, request.ClientDataHash, options, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
+    internal static bool FitsGetAssertion(BackendGetAssertionRequest request, AuthenticatorInfo info)
+    {
+        var options = ProjectGetAssertionOptions(request);
+        byte[]? encoded = null;
+        try
+        {
+            encoded = Ctap2SessionRequestEncoding.BuildGetAssertionRequest(request.RpId, request.ClientDataHash, options);
+            return encoded.Length <= (info.MaxMsgSize ?? Ctap2Session.DefaultMaxMessageSize);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(encoded);
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
+    private static GetAssertionOptions ProjectGetAssertionOptions(BackendGetAssertionRequest request)
+    {
         var options = new GetAssertionOptions();
 
         // Map allow list if provided
@@ -251,18 +280,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
             options.Extensions = request.Extensions;
         }
 
-        try
-        {
-            return await _session.GetAssertionAsync(
-                request.RpId,
-                request.ClientDataHash,
-                options,
-                cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            SensitiveMemory.Zero(options.PinUvAuthParam);
-        }
+        return options;
     }
 
     /// <inheritdoc/>

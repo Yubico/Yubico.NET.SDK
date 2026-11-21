@@ -235,27 +235,30 @@ public sealed partial class WebAuthnClient
             // Never publish the provisional assertion, even if the second command fails or is cancelled.
             CredentialMatcher.ClearUnreturnedAssertion(response);
             IReadOnlyList<PublicKeyCredentialDescriptor> singleton = [selected];
-            response = await SendTokenlessUvAssertionAsync(
-                rpId, clientData, singleton, extensions, deferPrf: false, deferPreviewSign: false, allowChunkStatus: false, ct)
+            var second = await SendTokenlessUvAssertionAsync(
+                rpId, clientData, singleton, info, extensions, deferPrf: false, deferPreviewSign: false, allowChunkStatus: false, ct)
                 .ConfigureAwait(false);
+            if (!second.Fits)
+                throw CredentialFilter.OversizeAssertion(info);
+            response = second.Response ?? throw new InvalidOperationException("The backend did not return an assertion.");
             _ = CredentialFilter.Associate(response, singleton, requireUvAndUp: true, ct);
         }
 
         return await CredentialMatcher.MatchAsync(_backend, response, hasAllowList: true, selected, ct).ConfigureAwait(false);
 
-        Task<GetAssertionResponse> SendChunkAsync(IReadOnlyList<PublicKeyCredentialDescriptor> chunk)
+        Task<(bool Fits, GetAssertionResponse? Response)> SendChunkAsync(IReadOnlyList<PublicKeyCredentialDescriptor> chunk)
         {
             // The first descriptor is a representative only for PRF inputs common to the entire wire
             // chunk. It is not a selection, and previewSign must wait for the actual credential ID.
             deferPrf = extensions.PrfInputsDiffer(chunk);
             deferPreviewSign = chunk.Count > 1 && extensions.HasPreviewSign;
-            return SendTokenlessUvAssertionAsync(rpId, clientData, chunk, extensions,
+            return SendTokenlessUvAssertionAsync(rpId, clientData, chunk, info, extensions,
                 deferPrf, deferPreviewSign, allowChunkStatus: true, ct);
         }
     }
 
-    private async Task<GetAssertionResponse> SendTokenlessUvAssertionAsync(string rpId, WebAuthnClientData clientData,
-        IReadOnlyList<PublicKeyCredentialDescriptor> chunk, AuthenticationExtensionSession extensions,
+    private async Task<(bool Fits, GetAssertionResponse? Response)> SendTokenlessUvAssertionAsync(string rpId, WebAuthnClientData clientData,
+        IReadOnlyList<PublicKeyCredentialDescriptor> chunk, AuthenticatorInfo info, AuthenticationExtensionSession extensions,
         bool deferPrf, bool deferPreviewSign, bool allowChunkStatus, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
@@ -264,7 +267,7 @@ public sealed partial class WebAuthnClient
         try
         {
             ct.ThrowIfCancellationRequested();
-            return await _backend.GetAssertionAsync(BuildTokenlessUvAssertion(rpId, clientData, chunk, encoded), ct)
+            return await CredentialFilter.SendChunkIfFitsAsync(_backend, BuildTokenlessUvAssertion(rpId, clientData, chunk, encoded), info, ct)
                 .ConfigureAwait(false);
         }
         catch (CtapException ex) when (!allowChunkStatus || ex.Status is not (CtapStatus.NoCredentials or CtapStatus.RequestTooLarge))

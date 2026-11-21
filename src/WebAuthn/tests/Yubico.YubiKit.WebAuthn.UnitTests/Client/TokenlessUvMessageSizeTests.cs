@@ -16,6 +16,8 @@ using NSubstitute;
 using System.Buffers.Binary;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Cose;
@@ -127,6 +129,53 @@ public class TokenlessUvMessageSizeTests
 
     private static (PublicKeyCredentialDescriptor A, PublicKeyCredentialDescriptor B) Descriptors(int length) =>
         (new(Enumerable.Repeat((byte)1, length).ToArray()), new(Enumerable.Repeat((byte)2, length).ToArray()));
+
+    [Fact]
+    public async Task TokenlessUvSize_ResolutionFailureFromAnotherSessionDoesNotReplayAssertion()
+    {
+        var (a, b) = Descriptors(16);
+        var outerWire = new List<byte[]>();
+        var innerWire = new List<byte[]>();
+        using var outerConnection = FakeConnection(outerWire, Miss, AssertionSuccess());
+        using var innerConnection = FakeConnection(innerWire);
+        var ct = TestContext.Current.CancellationToken;
+        await using var innerSession = await Ctap2Session.CreateAsync(innerConnection, cancellationToken: ct);
+        var prompt = Substitute.For<IUserPresencePrompt>();
+        ArgumentException? innerFailure = null;
+        prompt.OnUserPresenceResolvedAsync(Arg.Any<UserPresenceContext>(), UserPresenceOutcome.Completed, CancellationToken.None)
+            .Returns(_ => ResolveAsync());
+        await using var outerSession = await Ctap2Session.CreateAsync(outerConnection,
+            new SessionCreationOptions { UserPresencePrompt = prompt }, ct);
+        await using var client = CreateClient(outerSession);
+
+        var error = await Assert.ThrowsAnyAsync<ArgumentException>(() => client.GetAssertionAsync(new PublicKeyCredentialRequestOptions
+        {
+            Challenge = new byte[32],
+            RpId = RpId,
+            AllowCredentials = [a, b],
+            UserVerification = UserVerificationPreference.Required
+        }, cancellationToken: ct));
+
+        Assert.Same(innerFailure, error);
+        Assert.Empty(innerWire);
+        Assert.Equal(2, outerWire.Count); // One silent miss, one completed real assertion; no retry or reselection.
+        var sent = ReadAssertion(outerWire[1]);
+        Assert.Contains(sent.Hash, value => value != 0);
+        AssertChunk(sent, sent.Hash, a, b);
+
+        async ValueTask ResolveAsync()
+        {
+            try
+            {
+                await innerSession.GetAssertionAsync(new string('a', MessageLimit), new byte[32], cancellationToken: ct);
+            }
+            catch (ArgumentException ex)
+            {
+                innerFailure = ex;
+                throw;
+            }
+        }
+    }
 
     private static WebAuthnClient CreateClient(Ctap2Session session)
     {

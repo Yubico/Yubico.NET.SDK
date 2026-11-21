@@ -596,19 +596,10 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         CancellationToken cancellationToken)
     {
         if (request.Length > _maxMessageSize)
-        {
-            var message = $"The CTAP request exceeds the authenticator's {_maxMessageSize}-byte message limit.";
-            throw request.Span[0] == CtapCommand.GetAssertion
-                ? new GetAssertionSizeException(message)
-                : new ArgumentException(message, nameof(request));
-        }
+            throw new ArgumentException($"The CTAP request exceeds the authenticator's {_maxMessageSize}-byte message limit.", nameof(request));
 
         return _backend.SendCborAsync(request, notification, cancellationToken);
     }
-
-    // This marker is exclusive to the encoded GetAssertion size check above, before dispatch. In
-    // particular, a local rejection of an extension's setup command cannot trigger chunk refinement.
-    internal sealed class GetAssertionSizeException(string message) : ArgumentException(message, "request");
 
     private static async Task<AuthenticatorInfo> GetInfoCoreAsync(
         ICtap2Backend backend,

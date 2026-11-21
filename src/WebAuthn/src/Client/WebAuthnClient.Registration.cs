@@ -262,7 +262,8 @@ public sealed partial class WebAuthnClient
         IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info, WebAuthnClientData clientData, CancellationToken ct)
     {
         var match = await FindTokenlessUvCredentialAsync(eligible, info,
-            chunk => _backend.GetAssertionAsync(BuildTokenlessUvAssertion(rpId, clientData, chunk), ct), ct).ConfigureAwait(false);
+            chunk => CredentialFilter.SendChunkIfFitsAsync(_backend, BuildTokenlessUvAssertion(rpId, clientData, chunk), info, ct), ct)
+            .ConfigureAwait(false);
         if (match is not { } found)
             return null;
 

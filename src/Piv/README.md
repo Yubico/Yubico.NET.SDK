@@ -75,17 +75,20 @@ SELECT and publish readiness after management-type discovery. Failed direct crea
 without closing your connection; failed convenience creation also cleans up its hidden connection.
 
 For SCP, pass `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile and keep its inputs alive
-through actual factory completion. The session owns the effective protocol; its backend borrows it. The caller owns
+through actual factory completion and any reset, which reuses the same parameters. The session owns the effective
+protocol; its backend borrows it. The caller owns
 the SCP parameters: SCP03 parameter disposal disposes the retained `StaticKeys` owner, whose arrays are copies of
 the original inputs. SCP11 parameters copy certificate-list membership but retain the supplied objects; disposal
 disposes the OCE private key and certificates, not the SD public key. Record copies can share these contained owners.
 Keep one explicit cleanup owner and avoid disposing an alias during creation. See the [Core guide](../Core/README.md)
 for configuration; setup flags and generic version gates do not establish full PIV SCP/profile interoperability.
 
-Await and serialize complete public tasks before another operation or disposal. Core excludes overlapping logical
+Concurrent use of a PIV session is unsupported. Await each complete operation or workflow before the next call
+or disposal. Core excludes overlapping logical
 APDU exchanges, including chaining/SCP, but management authentication uses two exchanges and PIN-only/reset workflows
 span several. Parsing, prompt callbacks and local RSA unpadding can continue after an exchange leaves the guard.
-Keep borrowed credentials, keys, peer objects and prompt services alive through that whole task.
+Disposal does not drain that remaining work. Keep borrowed credentials, keys, peer objects and prompt services
+alive through the whole task. See the [Core session contract](../../docs/architecture/connection-ownership-and-contention.md#protocol-exchange-overlap).
 
 ## Common operations
 
@@ -116,7 +119,9 @@ development firmware follows the SDK's modern-default convention. Metadata takes
 
 `IsManagementKeyAuthenticated` reports the session's observed PIV management authentication. The inherited
 `IsAuthenticated` reports protocol authentication such as SCP. PIN verification is separate card state.
-Failed management authentication clears a previous recorded success; successful `SetManagementKeyAsync`
+Failed PIN verification does not invalidate recorded management authentication. Failed management authentication
+clears a previous recorded management success without altering PIN state. Neither failure ends the session;
+retry with fresh credentials subject to the card's counters. Successful `SetManagementKeyAsync`
 updates the type and preserves authentication without retaining the supplied key bytes. A SET security-status
 failure clears the flag; other SET command failures preserve it. External card changes can still invalidate
 what a local observation tells you.
@@ -145,7 +150,8 @@ Import accepts an application-owned `IPrivateKey`. Keep it alive through the awa
 afterward to clear its private material. RSA import requires exponent 65537. PIV supports its modeled RSA,
 P-256/P-384 and firmware-gated Ed25519/X25519 subsets; the shared Core catalog includes additional types
 for other applications. See [Core cryptographic keys](../Core/README.md#cryptographic-metadata) for key creation
-and loading. Key generation returns public material; the device retains the private key.
+and loading. Import overwrites a key already in the selected slot without checking for occupancy; it does not
+replace the slot's certificate. Key generation returns public material; the device retains the private key.
 
 ### Store and read a certificate
 
@@ -169,8 +175,11 @@ The caller owns certificates returned by retrieval and attestation and disposes 
 Automatic compression uses GZip when DER exceeds 1856 bytes. That is an SDK policy based on a recommended
 PIV certificate length, rather than a hard storage limit; device capacity still applies. Select `Always`
 to force GZip even for smaller certificates; the current enum has no force-uncompressed mode.
-This reader supports GZip and ordinary DER;
-other vendors' certificate encodings may require a raw-object workflow.
+The reader supports ordinary DER, GZip, and Net iD zlib (read only). It rejects unknown nonzero
+CertInfo modes rather than treating them as DER.
+Decompression stops if output would exceed 64 KiB. This is an SDK safety limit, not a measured
+hardware limit or a PIV profile requirement.
+Use the raw-object API to inspect unsupported encodings.
 
 ### Verify the PIN, sign and verify on the host
 
@@ -206,6 +215,9 @@ ECDSA accepts a digest and returns ASN.1 DER `SEQUENCE(r,s)`. Ed25519 accepts th
 a raw 64-byte signature. RSA signing accepts a complete host-prepared EMSA-PKCS1-v1_5 or EMSA-PSS encoded
 representative and returns a modulus-sized result. A hash alone is insufficient RSA signature encoding.
 The overload without `KeyType` reads metadata (5.3+); older keys need the explicit type, matched to the slot.
+Before returning output or reporting user-presence completion, the SDK checks exact RSA and Ed25519
+widths, canonical ECDSA DER with both scalars in the curve's range, and agreement output width.
+Shape validation does not replace host verification of signatures.
 
 ### Decrypt and clear the plaintext
 
@@ -268,6 +280,55 @@ instruction is unavailable. The older `63CX` status carries 0–15 retries; succ
 Every call restores PIN `123456` and PUK `12345678`, even for unchanged limits. Change both afterward.
 These are separate commands: retain a recovery plan for a failure between them.
 
+### Credential changes with PIN-only metadata
+
+The raw `SetManagementKeyAsync`, `ChangePinAsync`, and `SetPinAttemptsAsync` do not update ADMIN DATA or
+PRINTED. Opt in on `IPivSession` when managing these recovery objects:
+
+| Method | Persistent effects |
+| --- | --- |
+| `SetManagementKeyWithMetadataAsync` | Installs the replacement, clears any legacy derivation salt, then updates ADMIN DATA and PRINTED as needed. Choose `ManagementKeyStorage.NotStored` or `PinProtected` explicitly. Removing or replacing a recorded protected copy also needs PIN verification. With `NotStored` and no recorded copy, the SDK does not inspect PRINTED or repair an orphaned copy. |
+| `ChangePinWithMetadataAsync` | Changes the PIN. A PIN-protected independent key remains unchanged. For legacy derived Triple-DES, the SDK authenticates with the old derived key after the PIN change, verifies the new PIN, and installs the new derived key without touch before writing a fresh salt. Mixed stored and derived metadata is refused before changing the PIN. |
+| `SetPinAttemptsWithMetadataAsync` | With management authentication and a verified PIN, sets both limits (1–255), restores PIN `123456` and PUK `12345678`, and clears only the ADMIN DATA PUK-blocked flag. Refuses any legacy derivation salt before mutation. Set new credentials separately; there is no automatic reblocking or PRINTED edit. |
+
+Rotation changes **key storage only**. Unlike `SetPinOnlyModeAsync`, it does not block the PUK or
+restore a default key. An already blocked PUK stays blocked. Keep an independent secure backup of the
+replacement. Example for a human-coordinated rotation (the caller supplies and owns the three buffers):
+
+```csharp
+static async Task RotateProtectedAsync(
+    IYubiKey device, KeyType type, byte[] activeKey, byte[] replacement, byte[] pin,
+    CancellationToken cancellationToken)
+{
+    try
+    {
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        await session.AuthenticateAsync(activeKey, cancellationToken);
+        await session.VerifyPinAsync(pin, cancellationToken);
+        await session.SetManagementKeyWithMetadataAsync(type, replacement, ManagementKeyStorage.PinProtected,
+            cancellationToken: cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(activeKey);
+        CryptographicOperations.ZeroMemory(replacement);
+        CryptographicOperations.ZeroMemory(pin);
+    }
+}
+```
+
+Await each complete workflow before reusing or clearing an input, calling the session again, or disposing it.
+Required metadata reads and parsing fail closed; supported objects keep unrelated fields and raw timestamp
+bytes. PIN-only detection and recovery use the same field scan, so opaque child fields do not hide the stored
+key or derivation salt. The typed `AdminData` decoder is unchanged. If PRINTED is missing or empty when
+rotating to protected storage or removing a recorded copy, the SDK requires a successful no-data VERIFY
+before proceeding. This query does not submit a PIN. Writes are separate, without retries or rollback.
+The operational exception identifies the failed phase, earlier acknowledged persistent writes and whether
+the current write was not attempted or is unconfirmed.
+Cancellation still raises `OperationCanceledException`; the original cause remains the inner exception.
+Inspect actual card state before retrying or attempting recovery; unconfirmed does not mean unchanged.
+These messages are for people, not a parsing contract. PIN failures can consume retry attempts.
+
 ### Enable, reopen, recover and disable PIN-protected administration
 
 PIN-protected mode stores the **already active** management key in PIN-gated PRINTED storage and records
@@ -323,13 +384,15 @@ Raw PIN/key/retry changes leave these recovery objects unchanged, so coordinate 
 Use the typed CHUID, CCC, ADMIN DATA and Key History methods for the SDK's modeled provisioning shapes.
 CHUID fixes FASC-N/expiration/signature fields; CCC fixes its surrounding fields. Other valid vendor/profile
 encodings may need `GetObjectAsync`/`PutObjectAsync`. Raw methods exchange inner object bytes, with the
-outer `53` wrapper handled by the SDK. Use defined `DataObject` identifiers; keep request IDs within the
-intended PIV range because arbitrary integers currently reach the encoder without a range guard.
+outer `53` wrapper handled by the SDK. Prefer defined `DataObject` identifiers; raw request IDs outside
+`0..0xFFFFFF` are rejected rather than truncated to another identifier.
 
 CHUID/CCC constructors borrow supplied identifier memory; decoding copies it and encoding returns a new
 nonsecret buffer. Key History counts describe retired keys with on-/off-card certificates. Maintain it
-alongside your provisioning workflow; its parser/constructor validate a narrower shape than a complete
-federal profile. ADMIN flags describe stored software records. Its timestamp currently uses trimmed
+alongside your provisioning workflow. The fixed Key History model checks the 20-key limit and the
+SP 800-73-4 F3 rules: an HTTP DNS-name/hex SHA-256 URL is required with off-card certificates, optional
+with only on-card certificates, and omitted when both counts are zero. Inspect other layouts via raw object access.
+ADMIN flags describe stored software records. Its timestamp currently uses trimmed
 little-endian Unix seconds, differing from Python YubiKey Manager's four-byte big-endian encoding;
 coordinate interoperability before writing timestamps across tools.
 
@@ -341,17 +404,20 @@ certificate request, while device signing needs an external `X509SignatureGenera
 
 ### Reset PIV deliberately
 
-`ResetAsync` consumes PIN and PUK retries until both are blocked, then sends Yubico RESET without requiring
+`ResetAsync` checks Bio metadata before consuming PIN or PUK retries. If biometrics are configured,
+it refuses without blocking either credential; use the product's device-reset procedure. Only `6A88`
+(referenced data not found) or `6D00` (instruction not supported) permits reset without Bio metadata.
+Other errors and repeated known Bio fields stop reset before retry consumption.
+The method consumes PIN and PUK retries until both are blocked, then sends Yubico RESET without requiring
 management authentication. Normal private-key slots, their certificates, provisioning objects and
 credentials return to factory state. **The F9 attestation key and certificate survive normal PIV reset.**
 Failure or cancellation can leave retry counters partly consumed before RESET. After a successful device
 reset the session clears management authentication and refreshes the management-key type; refresh can
-still throw after the reset has applied. Inspect fresh state before retrying. Bio MPE uses a Management
-device-reset route; the PIV implementation's Bio preflight remains unfinished. Consult the product's reset
-procedure before invoking this workflow on Bio hardware.
+still throw after the reset has applied. Inspect fresh state before retrying.
 
-Reset keeps the current backend/protocol and performs no reselection or fresh SCP handshake. The inherited channel
-authentication flag therefore supplies no post-reset restoration evidence. After uncertain reset or recovery, await
+After confirmed reset, the same session reselects PIV, refreshes the applet version, and reestablishes SCP
+if configured. PIV reset does not reset Security Domain; the handshake uses the original caller-owned parameters.
+If selection or the handshake fails, the session ends. After uncertain reset or recovery, await
 actual work and teardown, reopen and inspect persistent state before retrying; retain independent key/recovery backups.
 
 ## User interaction
@@ -406,8 +472,9 @@ never cast from Core `KeyType` or infer PIV support from catalog representation/
   `SetPinAttemptsAsync` resets the PIN to `123456` and the PUK to `12345678` every time it runs, even with
   unchanged limits; follow it with `ChangePinAsync` and `ChangePukAsync`.
 - Operations enforce firmware gates themselves and throw `NotSupportedException` before transmitting an
-  unsupported key or policy request. RSA generation is disabled on ROCA-affected 4.2.6–4.3.4; import remains
-  independently available. YubiKey 4 FIPS (4.4.x) rejects RSA1024 and PIN policy `Never`.
+  unsupported key or policy request. The SDK conservatively excludes on-card RSA generation on firmware
+  from 4.2.0 inclusive to 4.3.5 exclusive. This gate does not change import or use of independently
+  generated keys. YubiKey 4 FIPS (4.4.x) rejects RSA1024 and PIN policy `Never`.
 
 ## Preview API migration
 
@@ -436,9 +503,13 @@ Shared Core support for secp256k1 or Brainpool does not add PIV generation, impo
 The support matrix follows the reviewed [Android PIV source](https://github.com/Yubico/yubikit-android/blob/76b89d35142d9a4937b6b72e5c840e057a280620/piv/src/main/java/com/yubico/yubikit/piv/PivSession.java).
 The reviewed [Python implementation](https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/piv.py)
 agrees on P-384/policies (4.0), cached touch/attestation (4.3), metadata (5.3), AES (5.4), and
-move/delete/Curve25519/large RSA (5.7). Its conservative serial (5.0.3) and ROCA (4.2.0) boundaries differ;
-this SDK retains the existing Android-aligned serial (5.0.0) and ROCA (4.2.6) boundaries. Major-zero
-development firmware retains Core's permissive compatibility handling.
+move/delete/Curve25519/large RSA (5.7). The SDK retains the Android-aligned serial boundary (5.0.0 versus
+Python's 5.0.3), but adopts the conservative generation interval `[4.2.0, 4.3.5)` used by
+[Python PIV](https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/piv.py#L619-L622)
+and [Python OpenPGP](https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/openpgp.py#L1535-L1537).
+[YSA-2017-01](https://www.yubico.com/support/security-advisories/ysa-2017-01/) identifies 4.2.6–4.3.4;
+the earlier SDK cutoff is a precaution, not confirmation that 4.2.0–4.2.5 are affected. Major-zero development
+firmware retains Core's permissive compatibility handling.
 
 ## Security notes
 
@@ -484,16 +555,40 @@ command buffers after return: that memory can already belong to another renter. 
 production authentication implementation is unchanged; pre-return pooled-buffer clearing
 has no direct runtime assertion in this fixture.
 
+`PivMetadataMutationTests` in the unit project covers strict reads, APDU order, field preservation,
+derived-key calculation, and partial-failure/cancellation messages. Its clearing checks retain real,
+non-pooled backend response bytes and PUT/SET command payloads.
+
 On an explicitly allowlisted dedicated test key, run smoke with
 `dotnet toolchain.cs -- test --integration --project Yubico.YubiKit.Piv --smoke`, then full unattended
 coverage with `dotnet toolchain.cs -- test --integration --project Yubico.YubiKit.Piv --filter "Category!=RequiresUserPresence"`.
 These tests reset and mutate PIV, including a protected-mode enable/reopen/recover/disable round trip. Touch
 and hotplug tests need separate human coordination; multi-key contention tests need two attached keys.
 
+The three integration cases in `PivMetadataMutationTests` require separate attended authorization and
+provisioning. Select one exact case at a time. Keep the fixture on the existing serial allow list and set
+that case's environment variable to the separately authorized serial in decimal. No other serial is eligible
+for that case. Before each case, confirm the actual PIN is `123456`, the active management key has no touch
+policy, and the ADMIN/PRINTED objects have canonical PIN-only metadata:
+
+- **Derived PIN change** (`YUBIKEY_PIV_Q10_DERIVED_PIN_SERIAL`): derived-only ADMIN salt and the matching
+  active Triple-DES key. Authenticates the old derived key before mutation. Leaves the fixture with PIN
+  `678912` and a fresh salt; tests recovery after reopening.
+- **Protected rotation** (`YUBIKEY_PIV_Q10_PROTECTED_ROTATION_SERIAL`): protected-only ADMIN and a PRINTED
+  copy matching the active key. Leaves a new AES-192 key recoverable by PIN; tests that reopening recovers
+  it without changing PUK retries.
+- **Derived rotation** (`YUBIKEY_PIV_Q10_DERIVED_ROTATION_SERIAL`): derived-only ADMIN salt and matching
+  Triple-DES key, with PRINTED unoccupied. Leaves a new PIN-protected AES-192 key without the legacy salt;
+  authenticates it after reopening.
+
+These cases do not reset PIV, change retry limits, or write private-key slots or attestation material.
+Inspect state after a failure rather than retrying or resetting automatically. These cases are compiled;
+physical qualification is pending.
+
 Interpret each assertion at its actual boundary. Actual-array observers in crypto/raw-object tests reach managed
 command/response owners, not the full native/chaining/SCP/provider copy graph. Request-callback cancellation is
-pre-wire; it does not demonstrate interruption of an admitted operation. Reset command-membership assertions check
-neither a complete sequence nor erasure. Hotplug tokens/windows do not bound admitted native work, and uncertain
+pre-wire; it does not demonstrate interruption of an admitted operation. Fake reset command sequences do not prove
+device erasure. Hotplug tokens/windows do not bound admitted native work, and uncertain
 release can retain a claim. Physical PIN/power, separate-process isolation, touch, hotplug and touch-dependent
 cancellation/recovery remain separately qualified/deferred; historical test outcomes do not cover another device,
 firmware, transport or OS.

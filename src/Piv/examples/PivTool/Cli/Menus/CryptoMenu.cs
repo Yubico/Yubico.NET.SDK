@@ -82,11 +82,12 @@ public static class CryptoMenu
         var hashAlg = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("Select hash algorithm:")
-                .AddChoices(["SHA-256", "SHA-384", "SHA-512"])) switch
+                .AddChoices(["Default (no explicit hash)", "SHA-256", "SHA-384", "SHA-512"])) switch
         {
+            "SHA-256" => HashAlgorithmName.SHA256,
             "SHA-384" => HashAlgorithmName.SHA384,
             "SHA-512" => HashAlgorithmName.SHA512,
-            _ => HashAlgorithmName.SHA256
+            _ => default
         };
 
         // Get data to sign

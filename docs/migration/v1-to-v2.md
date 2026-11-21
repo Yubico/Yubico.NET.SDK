@@ -754,6 +754,12 @@ Migration notes:
 - Each transition spans separate commands without rollback. After failure, inspect objects and credential
   state, reauthenticate with the active key and use your backup to complete recovery. Raw PIN/key/retry changes
   leave related recovery objects unchanged. See the [complete reopen/recover/disable task](../../src/Piv/README.md#enable-reopen-recover-and-disable-pin-protected-administration).
+- Opt in to coordinated recovery metadata with `SetManagementKeyWithMetadataAsync`,
+  `ChangePinWithMetadataAsync`, and `SetPinAttemptsWithMetadataAsync`. Specify `ManagementKeyStorage`
+  explicitly for rotation; this changes storage, not full PIN-only mode or the PUK state. PIN changes
+  re-derive a compatible derived-only key, and retry-limit changes refuse any legacy derivation salt
+  before restoring factory PIN/PUK values on supported configurations. See the
+  [credential-change prerequisites and failure contract](../../src/Piv/README.md#credential-changes-with-pin-only-metadata).
 
 ### OATH: Check Password Protection and Retry a Locked Operation
 
@@ -832,8 +838,12 @@ Migrate v1 touch notification and the removed alpha `PivSession.OnTouchRequired`
 Typed CHUID/CCC readers require the SDK provisioning shape; raw object access supports inspection of other
 encodings. ADMIN timestamps currently use trimmed little-endian Unix seconds, differing from Python's fixed
 four-byte big-endian field. Coordinate cross-tool migration rather than assuming byte compatibility.
-Normal PIV reset retains F9 attestation material, consumes PIN/PUK retries before RESET and can throw during
-post-reset metadata refresh after mutation. Preserve backups and inspect fresh state before repeating it.
+`ResetAsync` refuses configured biometrics before consuming PIN/PUK retries; use the product's device-reset
+procedure in that case. Normal PIV reset retains F9 attestation material and consumes PIN/PUK retries before
+RESET. After confirmed RESET, the same session reselects PIV, refreshes its state, and reestablishes any
+configured SCP using the original caller-owned parameters. Keep those parameters alive through reset. Failure
+to restore selection or SCP ends the session; metadata refresh can fail after mutation. Preserve backups and
+inspect fresh state before repeating reset.
 
 ### FIDO2
 

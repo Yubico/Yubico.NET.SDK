@@ -34,10 +34,12 @@ namespace Yubico.YubiKit.Piv;
 /// checks do not imply ASCII-only, digit-only, or UTF-8-validity checks. Returned mutable memory is
 /// transferred to the caller, who must clear plaintext, shared secrets, and temporary PINs after use.</para>
 /// <para>
-/// Await and serialize complete public tasks before another operation or disposal. Core guards one logical
+/// Concurrent use of this session is unsupported. Await each complete public operation or workflow before
+/// starting another or disposing the session. Core guards one logical
 /// APDU exchange, including chaining/SCP, rather than a complete management-authentication, PIN-only or reset
 /// workflow. Parsing, presence callbacks and local RSA unpadding can continue after that exchange leaves the
-/// guard. Keep borrowed inputs, keys and prompt services alive through actual public-task completion.
+/// guard. Disposal does not drain that remaining work. Keep borrowed inputs, keys and prompt services
+/// alive through actual public-task completion.
 /// Cancellation is checked before each exchange is admitted; admitted constituent traffic uses
 /// CancellationToken.None and may succeed after the caller cancels. An outer canceled wait is not operation
 /// completion or permission to clear inputs. Await actual completion/teardown before inspecting or retrying
@@ -79,7 +81,7 @@ public interface IPivSession : IApplicationSession
     /// The SDK blocks the PIN and PUK, then resets normal key slots, certificates, objects and
     /// credentials. The F9 attestation key and certificate survive normal PIV reset. Management
     /// authentication is unnecessary. Failure or cancellation before RESET can leave retries consumed.
-    /// Bio MPE requires its device-reset procedure; the PIV Bio preflight is unfinished.
+    /// Configured biometrics are detected before consuming retries. Use the product's device-reset procedure instead.
     /// </para>
     /// <para>
     /// A successful reset clears management-key authentication and refreshes
@@ -87,8 +89,8 @@ public interface IPivSession : IApplicationSession
     /// session uses detected firmware (not a compatibility override): AES-192 for 5.7+ and development
     /// versions, or Triple-DES for older released versions. Unexpected metadata errors propagate,
     /// including after the physical reset has succeeded. Inspect fresh device state before retrying.
-    /// The method retains the existing backend/protocol, without reselection or a new SCP handshake;
-    /// its authentication flag alone establishes no post-reset secure-channel restoration.
+    /// The same session reselects PIV and, if originally configured, reestablishes SCP using the same
+    /// caller-owned parameters. Keep them alive through reset. Failure to restore selection or SCP ends the session.
     /// </para>
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -165,6 +167,23 @@ public interface IPivSession : IApplicationSession
     /// <exception cref="InvalidPinException">Old PIN incorrect.</exception>
     Task ChangePinAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
 
+    /// <summary>Changes the PIN and re-derives a legacy PIN-derived management key, if configured.</summary>
+    /// <param name="currentPin">The current PIN as 6–8 UTF-8 bytes.</param>
+    /// <param name="newPin">The new PIN as 6–8 UTF-8 bytes.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    /// An independent management key, including a PIN-protected stored copy, is left unchanged.
+    /// For legacy Triple-DES derivation, changes the PIN first, authenticates the old derived key,
+    /// verifies the new PIN, and installs the new derived key without touch before recording its fresh salt.
+    /// Mixed stored and derived metadata is not supported by this method. No prior management authentication is required.
+    /// Keep caller-owned inputs stable until the task completes, then clear them. The SDK clears its own secret buffers.
+    /// Steps are not atomic and are not rolled back; a wrong PIN can consume retries.
+    /// </remarks>
+    /// <exception cref="NotSupportedException">Mixed storage and derivation, or incompatible key type for derivation.</exception>
+    /// <exception cref="InvalidOperationException">An operational failure with phase and write-progress context and the original inner exception.</exception>
+    /// <exception cref="OperationCanceledException">Cancellation, with phase and write-progress context.</exception>
+    Task ChangePinWithMetadataAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Change PUK from old PUK to new PUK.
     /// </summary>
@@ -207,6 +226,22 @@ public interface IPivSession : IApplicationSession
     /// <param name="cancellationToken">Cancellation token.</param>
     Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default);
 
+    /// <summary>Sets the retry limits, restores factory PIN and PUK values, and clears the ADMIN DATA PUK-blocked flag.</summary>
+    /// <param name="pinAttempts">New PIN retry limit, 1–255.</param>
+    /// <param name="pukAttempts">New PUK retry limit, 1–255.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    /// Authenticate with the active management key and verify the PIN on this card session before calling.
+    /// Legacy PIN-derived management keys (including mixed mode) are refused before mutation. The retry command
+    /// restores PIN <c>123456</c> and PUK <c>12345678</c> even if the limits are unchanged. Set real credentials
+    /// separately. No PRINTED update, credential restoration, or PUK reblocking is performed.
+    /// The retry command and ADMIN DATA write are separate; an ADMIN DATA failure does not undo the credential reset.
+    /// </remarks>
+    /// <exception cref="NotSupportedException">A legacy derivation salt is present.</exception>
+    /// <exception cref="InvalidOperationException">A prerequisite is missing or an operation failed. Operational failures include phase and write-progress context and the original inner exception.</exception>
+    /// <exception cref="OperationCanceledException">Cancellation, with phase and write-progress context.</exception>
+    Task SetPinAttemptsWithMetadataAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Get remaining PIN attempts.
     /// </summary>
@@ -247,7 +282,8 @@ public interface IPivSession : IApplicationSession
     /// <remarks>
     /// Requires management-key authentication. The caller keeps <paramref name="privateKey"/> alive
     /// through the awaited operation and disposes it afterward. RSA import requires exponent 65537.
-    /// Key import leaves separately stored certificates unchanged.
+    /// Import overwrites an existing private key in the selected slot without checking for occupancy.
+    /// It leaves separately stored certificates unchanged.
     /// </remarks>
     /// <param name="slot">PIV slot for key storage.</param>
     /// <param name="privateKey">Private key to import.</param>
@@ -498,22 +534,22 @@ public interface IPivSession : IApplicationSession
     /// <summary>
     /// Read PIV data object.
     /// </summary>
-    /// <param name="objectId">PIV object identifier. Prefer defined DataObject values;
-    /// arbitrary integer requests currently reach the encoder without a range guard.</param>
+    /// <param name="objectId">PIV object identifier, from 0 to 0xFFFFFF. Prefer defined DataObject values.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Caller-owned mutable inner object bytes, excluding the outer 53 wrapper, or empty
     /// if absent. Clear sensitive contents after use; public provisioning data needs no secret cleanup.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The object identifier is outside the three-byte range.</exception>
     Task<Memory<byte>> GetObjectAsync(int objectId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Write PIV data object.
     /// </summary>
     /// <remarks>Requires management-key authentication. Pass null data to delete an object.
-    /// The caller retains the input buffer through the awaited operation and clears sensitive contents afterward.
-    /// Prefer defined DataObject identifiers; the current encoder has no arbitrary-integer range guard.</remarks>
-    /// <param name="objectId">PIV data object identifier.</param>
+    /// The caller retains the input buffer through the awaited operation and clears sensitive contents afterward.</remarks>
+    /// <param name="objectId">PIV object identifier, from 0 to 0xFFFFFF. Prefer defined DataObject values.</param>
     /// <param name="data">Object data or null to delete.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="ArgumentOutOfRangeException">The object identifier is outside the three-byte range.</exception>
     Task PutObjectAsync(int objectId, ReadOnlyMemory<byte>? data, CancellationToken cancellationToken = default);
 
     // Typed data objects
@@ -693,6 +729,36 @@ public interface IPivSession : IApplicationSession
     Task SetManagementKeyAsync(
         KeyType keyType,
         ReadOnlyMemory<byte> newKey,
+        bool requireTouch = false,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Rotates the active management key and updates its ADMIN DATA and PRINTED recovery metadata.</summary>
+    /// <param name="keyType">Replacement management key algorithm.</param>
+    /// <param name="newKey">Replacement key bytes. Back up the key independently before calling.</param>
+    /// <param name="storage">Required intent for storing the replacement key in PIN-gated PRINTED.</param>
+    /// <param name="requireTouch">Require touch on subsequent uses of the replacement key.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    /// Authenticate with the active management key first. Verify the PIN before creating, replacing or removing a
+    /// protected copy. If ADMIN DATA records no protected copy and <see cref="ManagementKeyStorage.NotStored"/> is
+    /// requested, PRINTED is not inspected or repaired. Rotation clears legacy derivation salt, preserves unrelated
+    /// metadata, and fails before setting the key if required metadata cannot be read or safely edited.
+    /// Unlike <see cref="SetPinOnlyModeAsync"/>, this does not block or unblock the PUK or implicitly restore a default
+    /// management key. Keep the caller-owned key buffer stable until the task completes, then clear it.
+    /// Writes occur in key, ADMIN DATA, PRINTED order where applicable. There is no retry or rollback: inspect card
+    /// state before taking recovery action. An unconfirmed write may have taken effect.
+    /// </remarks>
+    /// <example>
+    /// After authenticating and verifying the PIN, pass <see cref="ManagementKeyStorage.PinProtected"/> to store the
+    /// new key for PIN-gated recovery while retaining the existing PUK state. To change the complete PIN-only mode
+    /// (which can block the PUK or restore the default key), use <see cref="SetPinOnlyModeAsync"/> instead.
+    /// </example>
+    /// <exception cref="InvalidOperationException">A prerequisite is missing or an operation failed. Operational failures include phase and write-progress context and the original inner exception.</exception>
+    /// <exception cref="OperationCanceledException">Cancellation, with phase and write-progress context.</exception>
+    Task SetManagementKeyWithMetadataAsync(
+        KeyType keyType,
+        ReadOnlyMemory<byte> newKey,
+        ManagementKeyStorage storage,
         bool requireTouch = false,
         CancellationToken cancellationToken = default);
 }

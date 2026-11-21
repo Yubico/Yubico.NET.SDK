@@ -14,6 +14,7 @@
 
 using System.Diagnostics;
 using System.Security.Cryptography;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples.Results;
 
 namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
@@ -29,9 +30,8 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 /// <para>
 /// PIN verification may be required depending on the slot's PIN policy.
 /// Touch may be required depending on the slot's touch policy.
-/// This helper hashes every input and is suitable for the ECDSA demonstration below. RSA needs
-/// host EMSA encoding, which this helper omits; Ed25519 needs the original message, whereas this
-/// helper signs its hash. Use the direct SDK for those algorithms and CalculateSecretAsync for X25519.
+/// This helper uses PKCS#1 v1.5 for RSA and passes the original message to Ed25519.
+/// X25519 supports agreement, not signing.
 /// </para>
 /// </remarks>
 public static class Signing
@@ -41,8 +41,9 @@ public static class Signing
     /// </summary>
     /// <param name="session">A metadata-capable PIV session with PIN already verified if the key policy requires it.</param>
     /// <param name="slot">The slot containing the signing key.</param>
-    /// <param name="dataToSign">The data to sign (will be hashed).</param>
-    /// <param name="hashAlgorithm">Hash algorithm to use (SHA256, SHA384, or SHA512).</param>
+    /// <param name="dataToSign">The original message.</param>
+    /// <param name="hashAlgorithm">SHA256, SHA384, or SHA512 (default: SHA256 for RSA and ECDSA).
+    /// For Ed25519, pass the default value; an explicit hash is not allowed.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result containing signature or error information.</returns>
     /// <example>
@@ -85,30 +86,44 @@ public static class Signing
 
             var stopwatch = Stopwatch.StartNew();
 
-            // Hash the data
-            byte[] hash = hashAlgorithm.Name switch
-            {
-                "SHA256" => SHA256.HashData(dataToSign.Span),
-                "SHA384" => SHA384.HashData(dataToSign.Span),
-                "SHA512" => SHA512.HashData(dataToSign.Span),
-                _ => throw new ArgumentException($"Unsupported hash algorithm: {hashAlgorithm.Name}", nameof(hashAlgorithm))
-            };
-
             // Sign using explicit algorithm from the already-fetched metadata.
             var keyType = metadata.Value.KeyType ?? throw new NotSupportedException(
                 $"Unknown PIV algorithm 0x{metadata.Value.RawAlgorithmId:X2}.");
-            var signature = await session.SignOrDecryptAsync(slot, keyType, hash, cancellationToken);
+            var input = PrepareSigningInput(keyType, dataToSign, hashAlgorithm);
+            var signature = await session.SignOrDecryptAsync(slot, keyType, input, cancellationToken);
 
             stopwatch.Stop();
             return SigningResult.Succeeded(signature, stopwatch.ElapsedMilliseconds);
         }
-        catch (OperationCanceledException)
-        {
-            return SigningResult.Failed("Touch timeout. Please touch the YubiKey when prompted.");
-        }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return SigningResult.Failed($"Signing failed: {ex.Message}");
         }
+    }
+
+    internal static ReadOnlyMemory<byte> PrepareSigningInput(
+        KeyType keyType, ReadOnlyMemory<byte> message, HashAlgorithmName hashAlgorithm)
+    {
+        if (keyType == KeyType.X25519)
+            throw new NotSupportedException("X25519 is a key-agreement algorithm and cannot sign.");
+        if (keyType == KeyType.Ed25519)
+        {
+            if (hashAlgorithm.Name is not null)
+                throw new ArgumentException("Do not select a hash for Ed25519; it signs the original message.", nameof(hashAlgorithm));
+            return message;
+        }
+
+        if (hashAlgorithm.Name is null)
+            hashAlgorithm = HashAlgorithmName.SHA256;
+        byte[] digest = hashAlgorithm.Name switch
+        {
+            "SHA256" => SHA256.HashData(message.Span),
+            "SHA384" => SHA384.HashData(message.Span),
+            "SHA512" => SHA512.HashData(message.Span),
+            _ => throw new ArgumentException($"Unsupported hash algorithm: {hashAlgorithm.Name}", nameof(hashAlgorithm))
+        };
+        return keyType is KeyType.Rsa1024 or KeyType.Rsa2048 or KeyType.Rsa3072 or KeyType.Rsa4096
+            ? YubiKeyRsaSignatureGenerator.EncodeSignatureInput(digest, hashAlgorithm, keyType.GetKeySizeBytes())
+            : digest;
     }
 }

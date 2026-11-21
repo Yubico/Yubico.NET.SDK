@@ -88,11 +88,7 @@ public static class Decryption
         {
             return DecryptionResult.Failed($"Decryption failed: {ex.Message}");
         }
-        catch (OperationCanceledException)
-        {
-            return DecryptionResult.Failed("Touch timeout. Please touch the YubiKey when prompted.");
-        }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return DecryptionResult.Failed($"Decryption failed: {ex.Message}");
         }

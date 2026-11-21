@@ -67,9 +67,10 @@ public static class SlotInfoQuery
     {
         ArgumentNullException.ThrowIfNull(session);
 
+        var slots = new List<SlotInfo>(StandardSlots.Length);
+        bool transferred = false;
         try
         {
-            var slots = new List<SlotInfo>();
 
             foreach (var (slot, name) in StandardSlots)
             {
@@ -77,11 +78,21 @@ public static class SlotInfoQuery
                 slots.Add(slotInfo);
             }
 
-            return SlotInfoResult.Succeeded(slots);
+            var result = SlotInfoResult.Succeeded(slots);
+            transferred = true;
+            return result;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return SlotInfoResult.Failed($"Failed to get slot info: {ex.Message}");
+        }
+        finally
+        {
+            if (!transferred)
+            {
+                foreach (var slot in slots)
+                    slot.Certificate?.Dispose();
+            }
         }
     }
 
@@ -105,7 +116,7 @@ public static class SlotInfoQuery
             var slotInfo = await GetSlotInfoAsync(session, slot, name, cancellationToken);
             return SlotInfoResult.Succeeded([slotInfo]);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return SlotInfoResult.Failed($"Failed to get slot info: {ex.Message}");
         }

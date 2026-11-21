@@ -81,14 +81,24 @@ Direct `PivSession.CreateAsync` borrows the connection; the device extension tra
 after successful initialization. Core binds before SELECT and owns protocol disposal during incomplete setup.
 PIV reads FD before effective-version configuration/SCP, rebinds its backend and discovers management type before
 readiness. The backend borrows the protocol. Keep caller-owned SCP parameters/contained owners alive through factory
-completion and the caller-owned prompt through all callbacks. Failed direct setup detaches without closing the
+completion and any reset, and the caller-owned prompt through all callbacks. Failed direct setup detaches without closing the
 borrowed connection; the convenience helper cleans up its failed hidden connection.
 
 Core guards logical exchanges, not complete authentication, metadata-plus-crypto, PIN-only or reset workflows.
-Await and serialize whole public tasks before other calls or disposal. PIV callbacks and RSA unpadding are outside
+Concurrent use is unsupported. Await the complete operation or workflow before another call or disposal.
+PIV callbacks and RSA unpadding are outside
 the exchange guard and can outlive its drain; this is not OTP's callback-inside-guard self-wait path. Each exchange
 checks cancellation before admission, then uses None for constituent traffic. An outer canceled wait does not
 complete the underlying task or permit borrowed-input cleanup; admitted work may still succeed.
+
+The three `WithMetadataAsync` credential methods are opt-in. Keep raw methods and CLI behavior unchanged.
+Use the strict PIN-only edit reader to preserve original child encodings, including opaque tags and timestamps.
+PIN-only detection and recovery share that field scan; keep the backing response alive until the
+last authentication attempt and clear it afterward. The typed `AdminData` profile does not change.
+Use a no-data VERIFY status check when a positive PIN prerequisite is not established by a PRINTED read;
+do not use `GetPinAttemptsAsync` or a host flag for verification state. The session reports only completed
+raw write calls as acknowledged. An invoked write that fails is unconfirmed, regardless of exception type;
+canceling before the next write leaves that write not attempted. None of these methods retries or rolls back.
 
 ## Critical Security Requirements
 
@@ -231,8 +241,8 @@ Use `EnsureSupports(...)` / `IsSupported(...)` from the session base instead of 
 
 Detected PIV FD, Management/discovery metadata and effective compatibility override have different provenance.
 The override controls framing/feature policy; detected firmware drives the management-type fallback while metadata
-takes precedence. Major-zero acceptance supplies no physical 5.8 minimum. Reset retains the existing backend/protocol
-without reselection or a new SCP handshake; the channel flag alone establishes no restoration evidence.
+takes precedence. Major-zero acceptance supplies no physical 5.8 minimum. Confirmed reset replaces the protocol,
+reselects PIV, probes FD and reestablishes configured SCP with the borrowed parameters before management metadata refresh.
 
 `Features` is a public standalone PIV catalog; `IsSupported` stays public and `EnsureSupports` is protected.
 `Slot` replaces `PivSlot`; shared Core `KeyType` replaces `PivAlgorithm`. Only internal `KeyTypeEncoding`
@@ -261,7 +271,7 @@ detected firmware, independent of compatibility overrides.
 7. **PIN-only transitions**: enabling must authenticate the supplied active management key before PIN verification or writes; disabling restores the type-appropriate default key before deleting PRINTED, then ADMIN DATA.
 8. **Mixed PIN-only recovery**: a returned success flag must match the session's final authenticated candidate; restore an earlier protected-key success after a stale derived candidate fails, or return no success.
 9. **Management-key state**: `IsManagementKeyAuthenticated` reports PIV management-key authentication, distinct from the inherited protocol/SCP `IsAuthenticated`; successful SET updates the type and preserves card-session authentication without retaining key bytes; SET status `0x6982` clears recorded authentication while unrelated command failures preserve authentication and type; every failed authentication attempt and disposal clears prior authentication; initialization and successful RESET share the same conservative default-type fallback when metadata is unavailable, and RESET clears authentication before refresh.
-10. **Reset boundaries**: normal PIV reset retains the F9 attestation key/certificate. PIN/PUK blocking occurs before RESET, so failure can consume retries; metadata refresh can fail after RESET has applied. Preserve the unfinished Bio preflight and route Bio MPE users to the product's device-reset procedure.
+10. **Reset boundaries**: normal PIV reset retains the F9 attestation key/certificate. Refuse on configured Bio metadata before blocking retries; route users to the product's device-reset procedure. PIN/PUK blocking occurs before RESET, so failure can consume retries; metadata refresh can fail after RESET has applied.
 11. **Provisioning shapes**: typed CHUID/CCC readers require the SDK's fixed shape, while raw object access supports inspection of other encodings. ADMIN timestamps currently use trimmed little-endian Unix seconds, differing from Python's fixed big-endian field; preserve that interoperability follow-up.
 12. **Evidence scope**: test names are not cryptographic oracles. Distinguish key generation/output shape, independent host verification, attestation trust and key binding. Hardware qualification is specific to device, firmware, transport and OS.
 

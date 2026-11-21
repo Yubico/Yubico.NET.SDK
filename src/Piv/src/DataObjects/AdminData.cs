@@ -32,9 +32,10 @@ namespace Yubico.YubiKit.Piv.DataObjects;
 /// read and write like any other PIV data object field.
 /// </para>
 /// <para>Flags record software state, so inspect credential metadata when actual card state matters.
-/// Create borrows salt memory; decoding copies it. The timestamp uses trimmed little-endian Unix
-/// seconds, unlike Python YubiKey Manager's fixed four-byte big-endian field. Coordinate cross-tool
-/// timestamp handling before writing it. This is a Yubico software object rather than a NIST field.</para>
+/// Create borrows salt memory; decoding copies it. For .NET V1 compatibility this SDK writes trimmed
+/// little-endian Unix seconds and interprets even four-byte timestamps as little-endian. It does not
+/// detect or import Python YubiKey Manager's fixed four-byte big-endian field automatically. Coordinate
+/// cross-tool timestamp handling before writing it. This is a Yubico software object rather than a NIST field.</para>
 /// </remarks>
 public readonly record struct AdminData
 {

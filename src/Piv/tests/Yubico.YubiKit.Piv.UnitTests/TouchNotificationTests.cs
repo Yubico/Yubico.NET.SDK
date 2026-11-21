@@ -38,7 +38,7 @@ public class TouchNotificationTests
             new byte[32],
             TestContext.Current.CancellationToken);
 
-        Assert.Equal([0xAA], result.ToArray());
+        Assert.Equal(Convert.FromHexString("3007020200AA020101"), result.ToArray());
         Assert.Equal(4, prompt.CommandCountAtRequest);
         Assert.Equal(5, prompt.CommandCountAtResolution);
         Assert.Equal(0x87, connection.TransmittedCommands[^1][1]);
@@ -104,7 +104,7 @@ public class TouchNotificationTests
     {
         var connection = CreateInitializedConnection(
             SlotMetadataResponse(KeyType.Rsa1024, TouchPolicy.Always),
-            [0x7C, 0x02, 0x82, 0x00, 0x90, 0x00]);
+            [0x7C, 0x81, 0x83, 0x82, 0x81, 0x80, .. new byte[128], 0x90, 0x00]);
         var prompt = new RecordingUserPresencePrompt(() => connection.TransmittedCommands.Count);
         await using var session = await CreateSessionAsync(connection, prompt);
 
@@ -287,12 +287,15 @@ public class TouchNotificationTests
         Assert.Same(expected, actual);
     }
 
-    [Fact]
-    public async Task SignOrDecryptAsync_WhenSuccessResponseIsMalformed_ResolvesFailedAndPreservesParseError()
+    [Theory]
+    [InlineData("7D009000", "Invalid crypto response format")]
+    [InlineData("7C0A8208300602010102010253009000", "Invalid crypto response format")]
+    [InlineData("7C0C8208300602010102010253009000", "Invalid crypto response - expected exactly one TAG 0x82")]
+    public async Task SignOrDecryptAsync_WhenSuccessResponseIsMalformed_ResolvesFailedAndPreservesParseError(string response, string error)
     {
         var connection = CreateInitializedConnection(
             SlotMetadataResponse(KeyType.P256, TouchPolicy.Always),
-            [0x7D, 0x00, 0x90, 0x00]);
+            Convert.FromHexString(response));
         var prompt = new RecordingUserPresencePrompt
         {
             ResolutionException = new InvalidOperationException("resolution failed")
@@ -305,12 +308,27 @@ public class TouchNotificationTests
             new byte[32],
             TestContext.Current.CancellationToken));
 
-        Assert.Equal("Invalid crypto response format", actual.Message);
+        Assert.Equal(error, actual.Message);
         AssertNotification(
             prompt,
             UserPresenceBasis.PolicyRequires,
             Slot.Authentication,
             UserPresenceOutcome.Failed);
+    }
+
+    [Fact]
+    public async Task SignOrDecryptAsync_WhenEcdsaScalarIsOutOfRange_ResolvesFailed()
+    {
+        // r equals the curve order, s is 1. This is canonical DER but not a valid signature shape.
+        byte[] response = Convert.FromHexString("7C2A82283026022100FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC6325510201019000");
+        var connection = CreateInitializedConnection(SlotMetadataResponse(KeyType.P256, TouchPolicy.Always), response);
+        var prompt = new RecordingUserPresencePrompt(() => connection.TransmittedCommands.Count);
+        await using var session = await CreateSessionAsync(connection, prompt);
+
+        await Assert.ThrowsAsync<ApduException>(() => session.SignOrDecryptAsync(
+            Slot.Authentication, KeyType.P256, new byte[32], TestContext.Current.CancellationToken));
+
+        AssertNotification(prompt, UserPresenceBasis.PolicyRequires, Slot.Authentication, UserPresenceOutcome.Failed);
     }
 
     [Fact]
@@ -368,7 +386,7 @@ public class TouchNotificationTests
     ];
 
     private static byte[] CryptoResponse(byte result) =>
-        [0x7C, 0x03, 0x82, 0x01, result, 0x90, 0x00];
+        [0x7C, 0x0B, 0x82, 0x09, 0x30, 0x07, 0x02, 0x02, 0x00, result, 0x02, 0x01, 0x01, 0x90, 0x00];
 
     private static void AssertNotification(
         RecordingUserPresencePrompt prompt,

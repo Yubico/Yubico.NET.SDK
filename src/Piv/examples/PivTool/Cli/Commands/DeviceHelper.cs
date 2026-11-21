@@ -197,6 +197,22 @@ internal static class DeviceHelper
             _ => System.Security.Cryptography.HashAlgorithmName.SHA256
         };
 
+    internal static bool TryParseSigningHash(Dictionary<string, string?> flags, out System.Security.Cryptography.HashAlgorithmName hash)
+    {
+        hash = default;
+        if (!flags.TryGetValue("hash", out var value))
+            return true;
+
+        hash = value?.ToLowerInvariant() switch
+        {
+            "sha256" => System.Security.Cryptography.HashAlgorithmName.SHA256,
+            "sha384" => System.Security.Cryptography.HashAlgorithmName.SHA384,
+            "sha512" => System.Security.Cryptography.HashAlgorithmName.SHA512,
+            _ => default
+        };
+        return hash.Name is not null;
+    }
+
     /// <summary>
     /// Returns true if a flag is present (boolean switch) in the flags dictionary.
     /// </summary>

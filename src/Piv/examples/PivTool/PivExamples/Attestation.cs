@@ -73,7 +73,7 @@ public static class Attestation
         {
             return AttestationResult.Failed($"Slot {slot} is empty. Generate a key first.");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return AttestationResult.Failed($"Attestation failed: {ex.Message}");
         }
@@ -112,9 +112,17 @@ public static class Attestation
                 return AttestationResult.Failed("No attestation intermediate certificate found.");
             }
 
-            return AttestationResult.Succeeded(intermediateCert);
+            try
+            {
+                return AttestationResult.Succeeded(intermediateCert);
+            }
+            catch
+            {
+                intermediateCert.Dispose();
+                throw;
+            }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return AttestationResult.Failed($"Failed to get intermediate certificate: {ex.Message}");
         }

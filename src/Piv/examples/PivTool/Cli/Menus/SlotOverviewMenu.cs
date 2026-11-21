@@ -41,7 +41,15 @@ public static class SlotOverviewMenu
                     return;
                 }
 
-                DisplaySlotTable(result.Slots);
+                try
+                {
+                    DisplaySlotTable(result.Slots);
+                }
+                finally
+                {
+                    foreach (var slot in result.Slots)
+                        slot.Certificate?.Dispose();
+                }
             });
     }
 

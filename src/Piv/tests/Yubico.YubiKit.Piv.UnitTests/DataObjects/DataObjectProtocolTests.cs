@@ -28,6 +28,41 @@ namespace Yubico.YubiKit.Piv.UnitTests.DataObjects;
 /// </summary>
 public class DataObjectProtocolTests
 {
+    [Theory]
+    [InlineData(0, "5C0100")]
+    [InlineData(1, "5C0101")]
+    [InlineData(0x100, "5C020100")]
+    [InlineData(0x10000, "5C03010000")]
+    [InlineData(0xFFFFFF, "5C03FFFFFF")]
+    public async Task RawObjectCommands_EncodeIdentifiersWithoutAliasing(int objectId, string identifierTlv)
+    {
+        var commands = new List<string>();
+        var backend = new CapturingBackend { OnSend = command => commands.Add(Convert.ToHexString(command.Data.Span)) };
+        var token = TestContext.Current.CancellationToken;
+
+        await DataObjectProtocol.GetObjectAsync(backend, objectId, token);
+        await DataObjectProtocol.PutObjectAsync(backend, objectId, null, token);
+
+        Assert.Equal([identifierTlv, identifierTlv + "5300"], commands);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(int.MinValue)]
+    [InlineData(0x1000000)]
+    public async Task RawObjectCommands_RejectOutOfWidthIdentifiersBeforeTransmission(int objectId)
+    {
+        var backend = new CapturingBackend();
+        var token = TestContext.Current.CancellationToken;
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>("objectId", () =>
+            DataObjectProtocol.GetObjectAsync(backend, objectId, token));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>("objectId", () =>
+            DataObjectProtocol.PutObjectAsync(backend, objectId, null, token));
+
+        Assert.Null(backend.LastCommand);
+    }
+
     [Fact]
     public async Task PutObjectAsync_ZeroesInternalWriteBufferAfterTransmission()
     {

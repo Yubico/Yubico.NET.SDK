@@ -42,9 +42,7 @@ internal static class DataObjectProtocol
         int objectId,
         CancellationToken cancellationToken = default)
     {
-        // INS 0xCB (GET DATA)
-        var command = new ApduCommand(Cla, InsGetData, ObjectDataP1, ObjectDataP2, EncodeObjectId(objectId));
-        var response = await backend.SendAsync(command, throwOnError: false, cancellationToken).ConfigureAwait(false);
+        var response = await GetObjectResponseAsync(backend, objectId, cancellationToken).ConfigureAwait(false);
 
         try
         {
@@ -58,6 +56,12 @@ internal static class DataObjectProtocol
         {
             response.Clear();
         }
+    }
+
+    internal static Task<ApduResponse> GetObjectResponseAsync(IBackend backend, int objectId, CancellationToken cancellationToken)
+    {
+        var command = new ApduCommand(Cla, InsGetData, ObjectDataP1, ObjectDataP2, EncodeObjectId(objectId));
+        return backend.SendAsync(command, throwOnError: false, cancellationToken);
     }
 
     /// <summary>
@@ -118,6 +122,9 @@ internal static class DataObjectProtocol
     /// </summary>
     private static byte[] EncodeObjectId(int objectId)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(objectId);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(objectId, 0xFFFFFF);
+
         if (objectId <= byte.MaxValue)
         {
             return [TagObjectId, 0x01, (byte)objectId];

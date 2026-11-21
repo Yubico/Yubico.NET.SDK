@@ -68,7 +68,7 @@ attestation slots, but these CLI selectors cover only the four standard slots.
 | Generate/store self-signed certificate | `cert-self-sign --slot <slot> --management-key <hex> --pin <pin> [--subject <dn>] [--validity-days <n>]` |
 | Generate CSR | `cert-csr --slot <slot> --pin <pin> [--subject <dn>] [--output <path>]` |
 | Delete certificate, retaining key | `cert-delete --slot <slot> --management-key <hex>` |
-| Hash and sign (use P-256/P-384) | `sign --slot <slot> --input <path> --pin <pin> [--hash sha256|sha384|sha512] [--output <path>]` |
+| Sign with RSA, ECDSA, or Ed25519 | `sign --slot <slot> --input <path> --pin <pin> [--hash sha256|sha384|sha512] [--output <path>]` |
 | Decrypt RSA PKCS#1 v1.5 ciphertext | `decrypt --slot <slot> --input <path> --pin <pin> [--output <path>]` |
 | Verify against stored certificate | `verify-signature --slot <slot> --data <path> --signature <path> [--hash sha256|sha384|sha512]` |
 | Retrieve slot attestation | `attest --slot <slot> [--output <path>]` |
@@ -94,19 +94,24 @@ output file is selected. With `--output`, signatures/plaintext are binary and ce
 Diagnostics use stderr, while JSON failure objects remain on stdout. Handled operational failure normally
 returns 1; success returns 0. Inspect result fields too: `device-info` can return device data even if the
 PIV retry subquery fails, and verification's exit status describes execution rather than validity.
+Reported cancellation exits 130 and does not diagnose a touch timeout. The certificate/CSR signing
+callback is synchronous by contract and waits for the full PIV task using the outer token; cancellation
+does not interrupt an admitted device exchange or allow early disposal.
 
 ## Choose the supported crypto path
 
-Use the generic `sign`/`Signing.SignDataAsync` helper for ECDSA evaluation: it hashes every input before
-calling the raw SDK primitive. For RSA it omits EMSA encoding, and for Ed25519 it signs the hash rather
-than the original message. X25519 is an agreement algorithm. For those algorithms call the SDK directly:
-prepare a complete RSA signature representative, pass the original Ed25519 message, or use
-`CalculateSecretAsync` with an application-selected KDF. See the [crypto tasks](../../README.md#verify-the-pin-sign-and-verify-on-the-host).
+**Demo only, not for production.** Do not use PivTool to process production credentials or plaintext.
+
+`sign` uses PKCS#1 v1.5 for RSA and hashes for ECDSA. Both default to SHA-256. Ed25519 signs the
+original message: omit `--hash` (in the interactive menu select **Default (no explicit hash)**).
+The tool rejects X25519 for signing; use `CalculateSecretAsync` with an application-selected KDF instead.
+See the [SDK crypto tasks](../../README.md#verify-the-pin-sign-and-verify-on-the-host).
 
 The CLI decrypt handler selects PKCS#1 v1.5 and exposes no padding flag. Use direct `DecryptAsync` for
 OAEP and mutable plaintext cleanup. `DecryptionResult.DecryptedData` currently exposes read-only memory
 without an ordinary clearing API; preserve ownership boundaries rather than casting it writable. Treat
-the tool's plaintext output/files as sensitive application data.
+the tool's plaintext output/files as sensitive application data. The sample does not provide production
+plaintext lifetime or storage guarantees.
 
 ## Credentials, recovery and reset
 
@@ -119,19 +124,20 @@ management key through your own secure store before installing it.
 Reset text mode asks for `RESET` unless `--force` is present; JSON mode requires `--force`. Normal PIV
 reset removes ordinary keys/certificates/objects and restores credentials, while retaining F9 attestation
 material. Blocking PIN/PUK and refreshing post-reset metadata can fail on either side of the physical reset;
-inspect state before retrying. Bio MPE requires its product device-reset route. `cert-delete` executes
+inspect state before retrying. Configured biometrics are refused before retry consumption; follow the product's
+device-reset procedure instead. Confirmed reset reselects PIV and refreshes the same session, including SCP
+if configured. `cert-delete` executes
 without confirmation: the `--force` shown in runtime help has no effect in that handler.
 
-The interactive CSR menu currently omits PIN verification, and its certificate export path reads the wrong
-result field. Use the CLI CSR/export tasks or direct SDK calls for these tasks. Callback signature generators
-block while calling the async SDK and have limited cancellation propagation; a displayed timeout can also
-represent cancellation caught by the helper. Await terminal work and inspect device state before repeating
-mutations. These limitations remain engineering follow-ups rather than guarantees of the sample.
+The interactive CSR menu verifies the PIN before signing. Certificate export writes PEM from the returned
+certificate. The synchronous signature callbacks pass the operation token and wait for the full SDK task.
+Cancellation exits with code 130, not a touch-timeout diagnosis. Await terminal work and inspect device
+state before repeating a mutation.
 
 Keep the original SDK task and its inputs/session/prompt alive until actual completion, even if an outer wait ends.
 Core guards one logical exchange, not the tool's complete credential, certificate or PIN-only workflow. PIV presence
 callbacks and local RSA unpadding sit outside that exchange guard. A cancellation token does not interrupt admitted
-SmartCard traffic or supply a native deadline; the sample's broad error/timeout mapping does not establish one.
+SmartCard traffic or supply a native deadline.
 
 ## Find the SDK examples
 

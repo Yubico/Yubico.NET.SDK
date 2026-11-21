@@ -72,10 +72,17 @@ public class PivConnectionConcurrencyTests
         for (var iteration = 0; iteration < 10; iteration++)
         {
             var readTask = session.GetObjectAsync(DataObject.Retired1);
-            // If refusal is not observed, this assertion can throw before readTask is awaited.
-            // Complete pending-task cleanup on that failure remains a separate harness follow-up.
-            await Assert.ThrowsAsync<InvalidOperationException>(
-                async () => await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
+            try
+            {
+                await Assert.ThrowsAsync<InvalidOperationException>(
+                    async () => await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
+            }
+            catch
+            {
+                // Observe the outstanding operation before disposal, without replacing the assertion failure.
+                _ = await Record.ExceptionAsync(async () => { await readTask; });
+                throw;
+            }
             var readBack = await readTask;
             Assert.Equal(storedObject, readBack.ToArray());
         }

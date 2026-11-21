@@ -70,7 +70,7 @@ public static class Verification
 
         try
         {
-            var cert = await session.GetCertificateAsync(slot, cancellationToken);
+            using var cert = await session.GetCertificateAsync(slot, cancellationToken);
             if (cert is null)
             {
                 return VerificationResult.Failed($"Slot {slot} has no certificate.");
@@ -113,7 +113,7 @@ public static class Verification
                 ? VerificationResult.Valid(stopwatch.ElapsedMilliseconds)
                 : VerificationResult.Invalid(stopwatch.ElapsedMilliseconds);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return VerificationResult.Failed($"Verification failed: {ex.Message}");
         }

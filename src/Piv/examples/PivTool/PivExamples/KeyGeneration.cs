@@ -87,7 +87,7 @@ public static class KeyGeneration
         {
             return KeyGenerationResult.Failed($"Algorithm {keyType} not supported: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return KeyGenerationResult.Failed($"Key generation failed: {ex.Message}");
         }

@@ -72,7 +72,7 @@ public static class Certificates
                 ? CertificateResult.Succeeded(cert)
                 : CertificateResult.Failed($"Slot {slot} is empty.");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Failed to read certificate: {ex.Message}");
         }
@@ -125,7 +125,7 @@ public static class Certificates
         {
             return CertificateResult.Failed("Certificate format not recognized. Expected PEM or DER.");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Import failed: {ex.Message}");
         }
@@ -168,7 +168,7 @@ public static class Certificates
 
             return CertificateResult.Succeeded(cert);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Export failed: {ex.Message}");
         }
@@ -201,7 +201,7 @@ public static class Certificates
             await session.DeleteCertificateAsync(slot, cancellationToken);
             return CertificateResult.Deleted();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Delete failed: {ex.Message}");
         }
@@ -271,12 +271,12 @@ public static class Certificates
             if (publicKey is RSA rsa)
             {
                 request = new CertificateRequest(subjectName, rsa, hashAlgorithm, RSASignaturePadding.Pkcs1);
-                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa);
+                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa, cancellationToken);
             }
             else if (publicKey is ECDsa ecdsa)
             {
                 request = new CertificateRequest(subjectName, ecdsa, hashAlgorithm);
-                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa);
+                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa, cancellationToken);
             }
             else
             {
@@ -306,14 +306,18 @@ public static class Certificates
                 DateTimeOffset.UtcNow.AddDays(validityDays),
                 serialNumber);
 
-            await session.StoreCertificateAsync(
-                slot,
-                newCert,
-                CertificateCompression.Automatic,
-                cancellationToken);
-            return CertificateResult.Succeeded(newCert);
+            try
+            {
+                await session.StoreCertificateAsync(slot, newCert, CertificateCompression.Automatic, cancellationToken);
+                return CertificateResult.Succeeded(newCert);
+            }
+            catch
+            {
+                newCert.Dispose();
+                throw;
+            }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"Generation failed: {ex.Message}");
         }
@@ -387,12 +391,12 @@ public static class Certificates
             if (publicKey is RSA rsa)
             {
                 request = new CertificateRequest(subjectName, rsa, hashAlgorithm, RSASignaturePadding.Pkcs1);
-                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa);
+                signatureGenerator = new YubiKeyRsaSignatureGenerator(session, slot, keyType, rsa, cancellationToken);
             }
             else if (publicKey is ECDsa ecdsa)
             {
                 request = new CertificateRequest(subjectName, ecdsa, hashAlgorithm);
-                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa);
+                signatureGenerator = new YubiKeyEcdsaSignatureGenerator(session, slot, keyType, ecdsa, cancellationToken);
             }
             else
             {
@@ -407,7 +411,7 @@ public static class Certificates
 
             return CertificateResult.CsrGenerated(pem);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return CertificateResult.Failed($"CSR generation failed: {ex.Message}");
         }
@@ -421,7 +425,8 @@ internal sealed class YubiKeyRsaSignatureGenerator(
     IPivSession session,
     Slot slot,
     KeyType keyType,
-    RSA publicKey) : X509SignatureGenerator
+    RSA publicKey,
+    CancellationToken cancellationToken) : X509SignatureGenerator
 {
     public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
     {
@@ -459,21 +464,20 @@ internal sealed class YubiKeyRsaSignatureGenerator(
             _ => throw new ArgumentException($"Unsupported hash algorithm: {hashAlgorithm}")
         };
 
-        // Build DigestInfo structure for PKCS#1 v1.5 signing
-        // DigestInfo ::= SEQUENCE { digestAlgorithm AlgorithmIdentifier, digest OCTET STRING }
-        byte[] digestInfo = BuildDigestInfo(hash, hashAlgorithm);
-
         // Pad to key size with PKCS#1 v1.5 padding
         int keySize = publicKey.KeySize / 8;
-        byte[] padded = ApplyPkcs1Padding(digestInfo, keySize);
+        byte[] padded = EncodeSignatureInput(hash, hashAlgorithm, keySize);
 
-        // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
-        var signature = session.SignOrDecryptAsync(slot, keyType, padded).GetAwaiter().GetResult();
+        // X509SignatureGenerator is synchronous: wait for the full operation, not a separately cancelable wait.
+        var signature = session.SignOrDecryptAsync(slot, keyType, padded, cancellationToken).GetAwaiter().GetResult();
 
         return signature.ToArray();
     }
 
     protected override PublicKey BuildPublicKey() => new(publicKey);
+
+    internal static byte[] EncodeSignatureInput(byte[] digest, HashAlgorithmName hashAlgorithm, int keySize) =>
+        ApplyPkcs1Padding(BuildDigestInfo(digest, hashAlgorithm), keySize);
 
     private static byte[] BuildDigestInfo(byte[] hash, HashAlgorithmName hashAlgorithm)
     {
@@ -527,7 +531,8 @@ internal sealed class YubiKeyEcdsaSignatureGenerator(
     IPivSession session,
     Slot slot,
     KeyType keyType,
-    ECDsa publicKey) : X509SignatureGenerator
+    ECDsa publicKey,
+    CancellationToken cancellationToken) : X509SignatureGenerator
 {
     public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
     {
@@ -561,7 +566,7 @@ internal sealed class YubiKeyEcdsaSignatureGenerator(
         // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
         // YubiKey returns ECDSA signatures in DER format (RFC 3279 SEQUENCE { INTEGER r, INTEGER s }).
         // X.509 CSR signature fields also expect DER, so no conversion is needed.
-        var signatureMemory = session.SignOrDecryptAsync(slot, keyType, hash).GetAwaiter().GetResult();
+        var signatureMemory = session.SignOrDecryptAsync(slot, keyType, hash, cancellationToken).GetAwaiter().GetResult();
         return signatureMemory.ToArray();
     }
 

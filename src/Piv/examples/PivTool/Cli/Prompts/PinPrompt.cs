@@ -249,9 +249,8 @@ public static class PinPrompt
         var key = new byte[keyLength];
         RandomNumberGenerator.Fill(key);
 
-        // Show the hex so user can save it
+        OutputHelpers.WriteWarning("Demo only, not for production: the key below is printed in cleartext. This display is not secure escrow.");
         OutputHelpers.WriteInfo($"Generated key: {Convert.ToHexString(key)}");
-        OutputHelpers.WriteWarning("Save this key securely! You will need it for future management operations.");
 
         return CreateFromSpan(key);
     }

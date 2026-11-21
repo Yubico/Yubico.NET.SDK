@@ -187,11 +187,9 @@ extra hidden Configure I/O. See [L6a managed evidence](../../docs/research/linux
 ### Integration Tests
 - Use `[WithYubiKey]` attribute with firmware filters
 - Touch-triggered tests marked with `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]`
-- Existing tests are destructive: slot-2 programming deletes that slot, swap affects both slots, and the
-  protection suite replaces slot 1 as well. Original unreadable secrets are not restored. Some cleanup is not
-  in finally; a second swap attempts restoration but is not guaranteed after failure.
-- For new tests, prefer dedicated slot 2 and finally cleanup, but inspect the entire fixture and operation
-  sequence rather than treating those guidelines as guarantees of the current suite.
+- Tests are destructive: slot-2 programming can replace that slot, swap affects both slots, and the
+  protection suite also resets slot 1. Use dedicated, authorized fixtures; original unreadable secrets are
+  not restored. Start tests from known state, resetting or restoring the relevant fixture state beforehand.
 - Configured-bit/response-length assertions do not prove keyboard output, digit count, ticket validity,
   NFC read-back, or real-device compatibility. Reflection zeroing tests inspect fields; disposal rejection alone does not.
 

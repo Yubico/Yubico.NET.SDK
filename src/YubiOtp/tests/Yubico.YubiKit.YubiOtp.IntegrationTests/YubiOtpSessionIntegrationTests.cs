@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
@@ -83,22 +84,17 @@ public class YubiOtpSessionIntegrationTests
         Array.Fill(key, (byte)0x31); // "1111..." as key
 
         using var config = new HmacSha1SlotConfiguration(key);
-        await session.PutConfigurationAsync(Slot.Two, config);
-
-        try
+        // Dedicated fixture: start with an empty slot. An unknown protection code is a setup failure.
+        if (session.GetConfigState().IsConfigured(Slot.Two))
         {
-            // Send a challenge
-            byte[] challenge = [0x01, 0x02, 0x03, 0x04];
-            var response = await session.CalculateHmacSha1Async(Slot.Two, challenge);
-
-            // Length-only assertion: this does not compare the returned HMAC with a known-answer value.
-            Assert.Equal(20, response.Length);
-        }
-        finally
-        {
-            // Clean up: delete slot 2
             await session.DeleteSlotAsync(Slot.Two);
         }
+
+        await session.PutConfigurationAsync(Slot.Two, config);
+
+        byte[] challenge = [0x01, 0x02, 0x03, 0x04];
+        var response = await session.CalculateHmacSha1Async(Slot.Two, challenge);
+        Assert.True(CryptographicOperations.FixedTimeEquals(HMACSHA1.HashData(key, challenge), response.Span));
     }
 
     [SkippableTheory]

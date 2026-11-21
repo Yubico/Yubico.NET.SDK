@@ -624,6 +624,26 @@ public class SlotConfigurationTests
     }
 
     [Fact]
+    public void StaticPassword_FromString_UsesSelectedLayoutRatherThanUtf8Bytes()
+    {
+        using var us = new StaticPasswordSlotConfiguration("aA", KeyboardLayout.en_US);
+        using var french = new StaticPasswordSlotConfiguration("aA", KeyboardLayout.fr_FR);
+
+        Assert.Equal(new byte[] { 0x04, 0x84 }, us.GetConfig()[..2]);
+        Assert.Equal(new byte[] { 0x14, 0x94 }, french.GetConfig()[..2]);
+    }
+
+    [Fact]
+    public void StaticPassword_DemoAlphabetIsRepresentableInEverySelectableLayout()
+    {
+        foreach (var layout in Enum.GetValues<KeyboardLayout>())
+        {
+            using var config = new StaticPasswordSlotConfiguration("cbdefghijklnrtuv", layout);
+            Assert.Equal(16, config.GetConfig()[FixedSizeOffset]);
+        }
+    }
+
+    [Fact]
     public void StaticPassword_FromString_MatchesRawScanCodeConstructor()
     {
         // The string overload must produce byte-identical wire output to the

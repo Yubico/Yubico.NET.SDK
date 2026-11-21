@@ -879,9 +879,9 @@ A keyboard-layout-aware `StaticPasswordSlotConfiguration(string, KeyboardLayout)
 Migrate v1 `UseTouchNotifier` to `SessionCreationOptions.UserPresencePrompt`. OTP HID reports a live
 `DeviceWaiting` signal. SmartCard has no authoritative wait signal and does not notify; the cached keyboard
 trigger is not challenge-response `RequireTouch`. Static-password strings have the usual immutable-string cleanup tradeoff; the raw overload needs
-translated scan codes, not UTF-8. OtpTool's static command currently makes that encoding mistake and ignores
-layout, and its `--totp` flag does not generate TOTP codes. Use the public SDK recipes, not those sample
-options, as migration guidance. HOTP accepts initial counters from 0 through 1,048,560 in steps of 16;
+translated scan codes, not UTF-8. OtpTool's static command translates with the selected keyboard layout
+(default `ModHex`). Its `--totp` flag does not generate TOTP codes. HOTP accepts initial counters from 0
+through 1,048,560 in steps of 16;
 nonzero presets require firmware 2.2 or later. Full scan-map programming has current limitations;
 see the [YubiOTP guide](../../src/YubiOtp/README.md#constraints).
 

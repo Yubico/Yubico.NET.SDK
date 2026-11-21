@@ -385,8 +385,8 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
 The interactive OtpTool sample lives at src/YubiOtp/examples/OtpTool/. It demonstrates commands, not
 drop-in `ykman` compatibility. Use the SDK recipes above for production-sensitive provisioning:
 
-- The static command currently passes UTF-8 bytes to the raw scan-code constructor and ignores its layout
-  option. It does not correctly translate text; use `StaticPasswordSlotConfiguration(string, KeyboardLayout)`.
+- The static command translates text using `--keyboard-layout` (default `ModHex`). Select the intended
+  host layout explicitly for non-modhex text.
 - Calculate requires an explicit hex challenge despite the help's stdin suggestion. `--totp` does not
   compute a time counter, period, truncation, or code; use your application's agreed HMAC convention instead.
 - Settings sends full masked values, not a patch, and program/settings commands omit a new access code.

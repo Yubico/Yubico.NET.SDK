@@ -96,8 +96,7 @@ public sealed record CliOptions
     public int? Length { get; init; }
 
     /// <summary>
-    /// Parsed layout option (--keyboard-layout LAYOUT), currently unused by StaticCommand.
-    /// The public SDK string/layout constructor is the working translation route.
+    /// Keyboard layout for static-password translation (--keyboard-layout LAYOUT, default: ModHex).
     /// </summary>
     public string? KeyboardLayout { get; init; }
 
@@ -490,7 +489,7 @@ public sealed record CliOptions
                   --password TEXT            Password text
                   --generate                Generate random password
                   --length N                Length of generated password (1-38)
-                  --keyboard-layout LAYOUT  Keyboard layout (default: US)
+                  --keyboard-layout LAYOUT  Keyboard layout (default: ModHex)
                   --access-code HEX         Current access code
                 """,
 

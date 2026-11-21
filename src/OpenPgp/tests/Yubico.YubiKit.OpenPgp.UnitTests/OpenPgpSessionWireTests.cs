@@ -60,6 +60,50 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Theory]
+    [InlineData("82020800", "830400000100", "84080102030405060708", false)]
+    [InlineData("820108", "83050000010000", "84080102030405060708", false)]
+    [InlineData("820108", "830400000100", "8400", false)]
+    [InlineData("820108", "830400000100", "84080102030405060708870100", false)]
+    [InlineData("8201FF", "830400000100", "84080102030405060708", true)]
+    public async Task MalformedF9_NeverSendsVerify(string hash, string count, string saltsAndHashes, bool unsupported)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnection(Convert.FromHexString("810103" + hash + count + saltsAndHashes + "9000"));
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        Task Verify() => session.VerifyPinAsync("123456"u8.ToArray(), cancellationToken: token);
+        if (unsupported)
+            await Assert.ThrowsAsync<NotSupportedException>(Verify);
+        else
+            await Assert.ThrowsAsync<FormatException>(Verify);
+        Assert.Equal(4, connection.TransmittedCommands.Count);
+        Assert.Equal(0xF9, LastCommand(connection)[3]);
+    }
+
+    [Theory]
+    [InlineData("FB08C106010800001100", false)]
+    [InlineData("FA08C10601080000110000", false)]
+    [InlineData("FA09C106010800001100", false)]
+    [InlineData("FA0BC106010800001100", false)]
+    [InlineData("FA0AC106010800001100", true)]
+    [InlineData("FA8109C18106010800001100", true)]
+    public async Task AlgorithmInformation_ConsumesOriginalBerEnvelope(string encoded, bool accepted)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnection(Convert.FromHexString(encoded + "9000"));
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        if (accepted)
+        {
+            var entry = Assert.Single(await session.GetSupportedAlgorithmsAsync(token));
+            Assert.Equal(KeyRef.Sig, entry.KeyRef);
+            Assert.Equal(2048, Assert.IsType<RsaAttributes>(entry.Attributes).NLen);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => session.GetSupportedAlgorithmsAsync(token));
+        }
+    }
+
+    [Theory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task Reset_WithScp03_ReauthenticatesUsingOriginalKeysOrEndsSession(bool rejectRehandshake)

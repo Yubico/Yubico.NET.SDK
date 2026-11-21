@@ -133,41 +133,19 @@ public sealed partial class OpenPgpSession
         // Unwrap the outer 0xFA TLV to get the inner list.
         // Some firmware versions return malformed TLV — pad and retry (matches ykman pattern:
         // yubikit/openpgp.py Tlv.unpack(DO.ALGORITHM_INFORMATION, buf + b"\0\0")[:-2])
-        Tlv outerTlv;
-        bool padded = false;
-        try
-        {
-            outerTlv = Tlv.Create(rawData.Span);
-        }
-        catch (ArgumentException)
-        {
-            Span<byte> paddedData = new byte[rawData.Length + 2];
-            rawData.Span.CopyTo(paddedData);
-            outerTlv = Tlv.Create(paddedData);
-            padded = true;
-        }
-
-        using var _ = outerTlv;
-        var innerSpan = padded
-            ? outerTlv.Value.Span[..^2]
-            : outerTlv.Value.Span;
-
+        var innerSpan = UnwrapAlgorithmInformation(rawData.Span);
         var result = new List<SupportedAlgorithm>();
-        var offset = 0;
-
-        while (offset < innerSpan.Length)
+        while (!innerSpan.IsEmpty)
         {
-            using var tlv = Tlv.Create(innerSpan[offset..]);
-            offset += tlv.TotalLength;
+            var (tag, _, value) = Tlv.ParseData(ref innerSpan);
 
             // Tag is the DO (0xC1, 0xC2, 0xC3, 0xDA); value is algorithm attributes bytes
-            if (!Enum.IsDefined((DataObject)tlv.Tag) ||
-                !AlgoAttributeToKeyRef.TryGetValue((DataObject)tlv.Tag, out var keyRef))
+            if (!AlgoAttributeToKeyRef.TryGetValue((DataObject)tag, out var keyRef))
             {
                 continue;
             }
 
-            var attrs = AlgorithmAttributes.Parse(tlv.Value.Span);
+            var attrs = AlgorithmAttributes.Parse(value);
             result.Add(new SupportedAlgorithm(keyRef, attrs));
         }
 
@@ -178,6 +156,33 @@ public sealed partial class OpenPgpSession
         }
 
         return result.AsReadOnly();
+    }
+
+    private static ReadOnlySpan<byte> UnwrapAlgorithmInformation(ReadOnlySpan<byte> encoded)
+    {
+        if (encoded.IsEmpty || encoded[0] != (byte)DataObject.AlgorithmInformation)
+            throw new ArgumentException("Expected OpenPGP algorithm information tag FA.", nameof(encoded));
+
+        var remainder = encoded;
+        byte[] value;
+        try
+        {
+            (_, _, value) = Tlv.ParseData(ref remainder);
+        }
+        catch (ArgumentException)
+        {
+            // Legacy firmware declares exactly two bytes more than it sends (ykman compatibility).
+            byte[] padded = [.. encoded, 0, 0];
+            remainder = padded;
+            (_, _, value) = Tlv.ParseData(ref remainder);
+            if (!remainder.IsEmpty || value.Length < 2)
+                throw;
+            return value.AsSpan(0, value.Length - 2);
+        }
+
+        if (!remainder.IsEmpty)
+            throw new ArgumentException("Trailing data after OpenPGP algorithm information.", nameof(encoded));
+        return value;
     }
 
     /// <inheritdoc />

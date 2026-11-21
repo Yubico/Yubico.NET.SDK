@@ -452,6 +452,32 @@ public class Ctap2SessionTests
     }
 
     [Fact]
+    public async Task ReadOnlyInfoAndSelection_SendNoClientPinCommands()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] info = [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00];
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], info, info, [0x00, 0x90, 0x00]);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+
+        Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+        await session.SelectionAsync(ct);
+
+        Assert.Collection(connection.TransmittedCommands,
+            select => Assert.Equal(0xA4, select[1]),
+            probe => AssertCtapCommand(probe, CtapCommand.GetInfo),
+            read => AssertCtapCommand(read, CtapCommand.GetInfo),
+            selection => AssertCtapCommand(selection, CtapCommand.Selection));
+
+        static void AssertCtapCommand(byte[] apdu, byte command)
+        {
+            Assert.Equal(0x10, apdu[1]);
+            Assert.Equal(1, apdu[4]);
+            Assert.Equal(command, apdu[5]);
+        }
+    }
+
+    [Fact]
     public async Task SelectionAsync_WithSmartCardPrompt_DoesNotPredictUserPresence()
     {
         var connection = new DisposeTrackingSmartCardConnection(

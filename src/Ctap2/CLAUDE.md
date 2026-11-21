@@ -42,8 +42,8 @@ not RP registration/sign-in verification. See the README for the complete protoc
 > The firmware gate runs after SmartCard FIDO AID selection because FIDO firmware is obtained from
 > CTAP GetInfo on this transport.
 > FIDO GetInfo can report a `0.x` sentinel firmware (for example `0.0.1`) on devices whose real
-> firmware is available through Management; firmware gates use `Feature.IsSupportedByFirmware(...)`
-> so `Major == 0` passes a permissive SDK feature policy, not a verified modern-firmware check.
+> firmware is available through Management. The USB gate admits cached alpha/beta qualifiers and
+> major-zero metadata under a permissive SDK policy, not a verified modern-firmware check.
 > SDK-managed opens claim the device view's known member interface IDs in this process. An overlapping
 > connection claim is refused with `ConnectionInUseException`; disjoint scoped views, direct factories
 > and other processes need separate coordination. Each connection admits one live session.
@@ -142,8 +142,9 @@ blob read-modify-write, or post-exchange parsing and callbacks. Keep borrowed in
 and caller-owned prompts usable through their last continuation. A callback must not reenter or dispose
 the session awaiting it. Prefer async disposal, but do not treat it as a whole-workflow completion join.
 
-Cached device firmware, then GetInfo firmware if the cache is absent, gates USB SmartCard before an
-override sets effective session/protocol firmware. A direct connection factory has no device cache.
+Cached device firmware and its qualifier, then GetInfo firmware if the cache is absent, gate USB
+SmartCard. Configuration instead prefers numeric GetInfo over a major-zero cache, or uses the
+explicit override without changing the gate. A direct connection factory has no device cache.
 HID INIT vendor bytes and Management firmware are separate observations. Initial SmartCard
 SELECT/GetInfo precede options-based configuration; major-zero configuration selects APDU format from
 connection support before ordinary `ForceShortApdus` handling. SCP setup rebinds the backend without

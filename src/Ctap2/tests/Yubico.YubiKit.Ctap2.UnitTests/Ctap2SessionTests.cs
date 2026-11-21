@@ -649,12 +649,87 @@ public class Ctap2SessionTests
         if (supported)
         {
             await using var session = await device.CreateCtap2SessionAsync(cancellationToken: ct);
-            Assert.Equal(device.CachedDeviceInfo?.FirmwareVersion ?? new FirmwareVersion(), session.FirmwareVersion);
+            var framing = applet == 0x050700u && cachedMajor == 0
+                ? new FirmwareVersion(5, 7, 0)
+                : device.CachedDeviceInfo?.FirmwareVersion ?? new FirmwareVersion();
+            Assert.Equal(framing, session.FirmwareVersion);
         }
         else
         {
             await Assert.ThrowsAsync<NotSupportedException>(() => device.CreateCtap2SessionAsync(cancellationToken: ct));
         }
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public async Task UsbSmartCard_OptimisticGateRetainsNumericApduConfiguration(bool beta, bool useOverride)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(firmwareVersion: 0x050600), 0x90, 0x00],
+            [0x00, 0x90, 0x00])
+        { ExtendedApdu = true };
+        var cachedVersion = beta ? new FirmwareVersion(5, 7, 0) : new FirmwareVersion();
+        var device = new SingleConnectionYubiKey(connection)
+        {
+            CachedDeviceInfo = DeviceInfo.CreateFromTlvs([], cachedVersion) with
+            {
+                VersionQualifier = beta ? new VersionQualifier(cachedVersion, VersionQualifierType.Beta, 1) : null!
+            }
+        };
+        var options = new SessionCreationOptions
+        {
+            FirmwareVersionOverride = useOverride ? new FirmwareVersion(5, 5, 0) : null,
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true }
+        };
+
+        await using var session = await device.CreateCtap2SessionAsync(options, ct);
+        await session.SelectionAsync(ct);
+
+        Assert.Equal(options.FirmwareVersionOverride ?? (beta ? cachedVersion : new FirmwareVersion(5, 6, 0)), session.FirmwareVersion);
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+        Assert.Equal([0x80, 0x10, 0x00, 0x00, 0x01, 0x0B, 0x00], connection.TransmittedCommands[2]);
+    }
+
+    [Fact]
+    public async Task UsbSmartCard_OverrideAndPermissiveCacheDoNotSuppressRequiredGetInfoFailure()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [(byte)CtapStatus.OperationDenied, 0x90, 0x00]);
+        var device = new SingleConnectionYubiKey(connection)
+        {
+            CachedDeviceInfo = DeviceInfo.CreateFromTlvs([], new FirmwareVersion())
+        };
+
+        var error = await Assert.ThrowsAsync<CtapException>(() => device.CreateCtap2SessionAsync(
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) }, ct));
+
+        Assert.Equal(CtapStatus.OperationDenied, error.Status);
+        Assert.Equal(2, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task UsbSmartCard_OverrideDoesNotSuppressCancellationDuringRequiredGetInfo()
+    {
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var ct = cancellation.Token;
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Transport.Returns(Transport.Usb);
+        connection.Type.Returns(ConnectionType.SmartCard);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), CancellationToken.None)
+            .Returns(_ => Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 0x90, 0x00 }), call =>
+            {
+                Assert.Equal(new byte[] { 0x80, 0x10, 0x00, 0x00, 1, 4, 0 }, call.Arg<ReadOnlyMemory<byte>>().ToArray());
+                cancellation.Cancel();
+                return Task.FromCanceled<ReadOnlyMemory<byte>>(ct);
+            });
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Ctap2Session.CreateAsync(connection,
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) }, ct));
+        await connection.Received(2).TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), CancellationToken.None);
     }
 
     [Theory]

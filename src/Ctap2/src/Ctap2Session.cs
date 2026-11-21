@@ -93,7 +93,7 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     private readonly ProtocolConfiguration? _configuration;
     private readonly FirmwareVersion? _firmwareVersionOverride;
     private readonly ScpKeyParameters? _scpKeyParameters;
-    private readonly FirmwareVersion? _cachedFirmwareVersion;
+    private readonly DeviceInfo? _cachedDeviceInfo;
     private Exception? _resetRefreshFailure;
 
     private ICtap2Backend _backend = null!;
@@ -101,14 +101,14 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
     private Ctap2Session(
         IConnection connection,
         SessionCreationOptions? options,
-        FirmwareVersion? cachedFirmwareVersion)
+        DeviceInfo? cachedDeviceInfo)
         : base(connection, options?.UserPresencePrompt)
     {
         _logger = Logger;
         _configuration = options?.ProtocolConfiguration;
         _firmwareVersionOverride = options?.FirmwareVersionOverride;
         _scpKeyParameters = options?.ScpKeyParameters;
-        _cachedFirmwareVersion = cachedFirmwareVersion;
+        _cachedDeviceInfo = cachedDeviceInfo;
     }
 
     /// <summary>
@@ -150,17 +150,17 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         IConnection connection,
         SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default) =>
-        CreateAsync(connection, options, cachedFirmwareVersion: null, cancellationToken);
+        CreateAsync(connection, options, cachedDeviceInfo: null, cancellationToken);
 
     internal static Task<Ctap2Session> CreateAsync(
         IConnection connection,
         SessionCreationOptions? options,
-        FirmwareVersion? cachedFirmwareVersion,
+        DeviceInfo? cachedDeviceInfo,
         CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
-            () => new Ctap2Session(connection, options, cachedFirmwareVersion),
+            () => new Ctap2Session(connection, options, cachedDeviceInfo),
             (session, token) => session.InitializeAsync(token),
             cancellationToken);
 
@@ -176,17 +176,17 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 
         // The transport gate uses detected firmware; an override only affects later configuration.
         var info = await GetInfoCoreAsync(backend, cancellationToken).ConfigureAwait(false);
-        var detectedFirmwareVersion = _cachedFirmwareVersion ?? info.FirmwareVersion ?? new FirmwareVersion();
+        var detectedFirmwareVersion = _cachedDeviceInfo?.FirmwareVersion ?? info.FirmwareVersion ?? new FirmwareVersion();
 
         if (Connection is ISmartCardConnection smartCardConnection)
         {
-            EnsureSmartCardTransportSupported(smartCardConnection.Transport, detectedFirmwareVersion);
+            EnsureSmartCardTransportSupported(
+                smartCardConnection.Transport, detectedFirmwareVersion, _cachedDeviceInfo?.VersionQualifier);
         }
 
-        // Configure the session firmware snapshot, then establish SCP and rebind the backend if needed.
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
-                _firmwareVersionOverride ?? detectedFirmwareVersion,
+                GetConfigurationFirmwareVersion(detectedFirmwareVersion, info.FirmwareVersion),
                 _configuration,
                 _scpKeyParameters,
                 cancellationToken)
@@ -205,6 +205,18 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             "FIDO session initialized. Firmware: {Version}, Versions: [{Versions}]",
             detectedFirmwareVersion,
             string.Join(", ", info.Versions));
+    }
+
+    private FirmwareVersion GetConfigurationFirmwareVersion(FirmwareVersion detected, FirmwareVersion? applet)
+    {
+        if (_firmwareVersionOverride is { } configured)
+            return configured;
+
+        // A major-zero cache can pass the USB gate without outranking numeric GetInfo for APDU framing.
+        // A qualified prerelease with a numeric version keeps its numeric framing.
+        return Connection is ISmartCardConnection && detected.IsAlphaOrBeta && applet is { Major: > 0 }
+            ? applet
+            : detected;
     }
 
     /// <inheritdoc />
@@ -589,14 +601,16 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 
     internal static void EnsureSmartCardTransportSupported(
         Transport transport,
-        FirmwareVersion firmwareVersion)
+        FirmwareVersion firmwareVersion,
+        VersionQualifier? qualifier = null)
     {
         if (transport == Transport.Nfc)
         {
             return;
         }
 
-        if (FeatureFido2UsbSmartCard.IsSupportedByFirmware(firmwareVersion))
+        if (qualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta ||
+            FeatureFido2UsbSmartCard.IsSupportedByFirmware(firmwareVersion))
         {
             return;
         }

@@ -111,10 +111,11 @@ public static class IYubiKeyExtensions
         /// on the same physical YubiKey. Connection failures do not trigger another transport attempt.
         /// Caller-supplied SCP parameters and UserPresencePrompt remain caller-owned. SmartCard
         /// selection and GetInfo precede the detected-firmware USB gate and SCP establishment;
-        /// The gate uses cached device firmware when available, otherwise GetInfo firmware.
-        /// FirmwareVersionOverride changes configured session firmware, not that gate's detected value.
-        /// Major == 0 sentinel/missing firmware passes Feature's optimistic check, not a hardware
-        /// firmware qualification. SCP authentication does not grant CTAP PIN/UV token permissions.
+        /// The gate uses cached firmware and its qualifier when available, otherwise GetInfo firmware.
+        /// An alpha/beta qualifier or major-zero firmware passes the optimistic gate; neither is
+        /// a hardware qualification. Framing prefers numeric GetInfo over a major-zero cache.
+        /// FirmwareVersionOverride changes configured firmware, not the gate.
+        /// SCP authentication does not grant CTAP PIN/UV token permissions.
         /// </para>
         /// </remarks>
         /// <example>
@@ -159,7 +160,7 @@ public static class IYubiKeyExtensions
                             .CreateAsync(
                                 connection,
                                 sessionOptions,
-                                yubiKey.CachedDeviceInfo?.FirmwareVersion,
+                                yubiKey.CachedDeviceInfo,
                                 ct)
                             .ConfigureAwait(false);
 

@@ -20,7 +20,8 @@ namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 /// </remarks>
 internal static class CredentialsCommand
 {
-    public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken)
+    public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken,
+        Func<string[], CancellationToken, Task<int>>? add = null)
     {
         if (args.Length < 2)
         {
@@ -31,7 +32,7 @@ internal static class CredentialsCommand
         return args[1].ToLowerInvariant() switch
         {
             "list" => await ListAsync(args, cancellationToken),
-            "add" => await AddAsync(args, cancellationToken),
+            "add" => await RunAddAsync(args, add ?? AddAsync, cancellationToken),
             "delete" => await DeleteAsync(args, cancellationToken),
             "generate" => await GenerateAsync(args, cancellationToken),
             _ => PrintUsageAndReturn()
@@ -67,6 +68,28 @@ internal static class CredentialsCommand
     }
 
     // ── credentials add LABEL ────────────────────────────────────────────────
+
+    private static Task<int> RunAddAsync(string[] args, Func<string[], CancellationToken, Task<int>> add,
+        CancellationToken cancellationToken)
+    {
+        if (args.Skip(2).Any(arg => IsRetiredOption(arg, "--derivation-password")))
+        {
+            OutputHelpers.WriteError("--derivation-password was removed. Use --derive to enter the password at a masked prompt.");
+            return Task.FromResult(1);
+        }
+
+        if (args.Skip(2).Any(arg => IsRetiredOption(arg, "--key-enc") || IsRetiredOption(arg, "--key-mac")))
+        {
+            OutputHelpers.WriteError("--key-enc and --key-mac were removed. Use --import-keys to enter the keys at masked prompts.");
+            return Task.FromResult(1);
+        }
+
+        return add(args, cancellationToken);
+    }
+
+    private static bool IsRetiredOption(string argument, string option) =>
+        string.Equals(argument, option, StringComparison.OrdinalIgnoreCase) ||
+        argument.StartsWith(option + "=", StringComparison.OrdinalIgnoreCase);
 
     private static async Task<int> AddAsync(string[] args, CancellationToken cancellationToken)
     {
@@ -111,7 +134,7 @@ internal static class CredentialsCommand
             return 1;
 
         using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
-        using var derivationPassword = derive ? OutputHelpers.ReadPassword("Derivation password (PBKDF2)", cancellationToken) : null;
+        using var derivationPassword = derive ? OutputHelpers.ReadDerivationPassword(cancellationToken) : null;
         if (derive && derivationPassword is null)
             return 1;
 

@@ -329,6 +329,7 @@ key/password checks and the application's external HSM authentication. It is not
 
 HsmAuthTool is **demo only, not for production**. It prompts for passwords and keys rather than taking
 them as command-line options. Secret prompts require an interactive console for masked input.
+The demo limits derivation passphrases to 128 UTF-16 code units; this is not an SDK or applet limit.
 Generated symmetric keys and calculated session keys are explicitly printed, so use disposable test credentials.
 The calculation menu lists only symmetric credentials and supplies a console touch prompt. It does not enroll
 an HSM or complete the HSM handshake. From the repository root:

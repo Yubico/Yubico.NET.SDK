@@ -20,6 +20,25 @@ public static class OutputHelpers
     internal static IMemoryOwner<byte>? ReadPassword(string prompt, CancellationToken token) =>
         ReadMasked(CredentialReaderOptions.ForPassphrase() with { Prompt = prompt + ": " }, token);
 
+    internal static IMemoryOwner<byte>? ReadDerivationPassword(CancellationToken token,
+        Func<CredentialReaderOptions, CancellationToken, IMemoryOwner<byte>?>? read = null)
+    {
+        const int sampleMaxLength = 128;
+        var options = CredentialReaderOptions.ForPassphrase() with
+        {
+            Prompt = "Derivation password (PBKDF2): ",
+            // The console reader ignores further keystrokes at capacity. Reserve a slot so an
+            // overlong input cannot be accepted as an exact-limit password after truncation.
+            MaxLength = sampleMaxLength + 1
+        };
+        var password = (read ?? ReadMasked)(options, token);
+        if (password is null || options.Encoding.GetCharCount(password.Memory.Span) <= sampleMaxLength)
+            return password;
+
+        password.Dispose();
+        throw new ArgumentException($"The demo accepts derivation passwords of at most {sampleMaxLength} UTF-16 code units.");
+    }
+
     internal static IMemoryOwner<byte>? ReadKey(string prompt, int length, CancellationToken token) =>
         ReadMasked(CredentialReaderOptions.ForHexKey(length) with { Prompt = prompt + ": " }, token);
 

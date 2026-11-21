@@ -17,7 +17,7 @@ public static class AddDerivedCredential
         CancellationToken cancellationToken = default)
     {
         var label = AnsiConsole.Ask<string>("Credential [green]label[/]:");
-        using var derivationPassword = OutputHelpers.ReadPassword("Derivation password (PBKDF2)", cancellationToken);
+        using var derivationPassword = OutputHelpers.ReadDerivationPassword(cancellationToken);
         if (derivationPassword is null)
         {
             OutputHelpers.WriteError("Derivation password is required.");

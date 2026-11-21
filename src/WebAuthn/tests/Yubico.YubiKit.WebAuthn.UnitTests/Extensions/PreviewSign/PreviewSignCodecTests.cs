@@ -162,9 +162,9 @@ public class PreviewSignCodecTests
 
         Assert.False(extracted);
         Assert.Null(ctapKey);
-        if (!signed && !unsigned)
+        if (!signed)
             Assert.Null(ExtractWebAuthn());
-        else if (signed != unsigned)
+        else if (!unsigned)
             Assert.Equal(WebAuthnClientErrorCode.InvalidState, Assert.Throws<WebAuthnClientError>(() => ExtractWebAuthn()).Code);
         else
             Assert.Throws<CborContentException>(() => ExtractWebAuthn());

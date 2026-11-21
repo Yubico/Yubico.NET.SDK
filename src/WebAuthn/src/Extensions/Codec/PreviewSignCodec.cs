@@ -88,11 +88,11 @@ internal static class PreviewSignCodec
     /// <param name="unsignedExtensionOutputs">Top-level unsigned extension outputs from the CTAP makeCredential response (key 0x06).</param>
     /// <returns>
     /// A <see cref="PreviewSignRegistrationOutput"/> when decoding succeeds, or null when the signed
-    /// and unsigned previewSign outputs are both absent. Attestation decoding does not verify its signature or trust.
+    /// previewSign output is absent. Attestation decoding does not verify its signature or trust.
     /// </returns>
     /// <exception cref="WebAuthnClientError">
-    /// Thrown with InvalidState when exactly one previewSign output is present,
-    /// or the decoded inner authenticator data has no attested credential data.
+    /// Thrown with InvalidState when signed previewSign output was decoded but the unsigned
+    /// previewSign output is absent, or the decoded inner authenticator data has no attested credential data.
     /// </exception>
     /// <exception cref="InvalidOperationException">
     /// A delegated decoder cannot process the output, including an unsigned map missing key 7.
@@ -111,19 +111,9 @@ internal static class PreviewSignCodec
         WebAuthnAuthenticatorData authData,
         IReadOnlyDictionary<string, Memory<byte>>? unsignedExtensionOutputs)
     {
-        bool hasSigned = authData.ParsedExtensions.TryGetValue(ExtensionId, out var rawCbor);
-        Memory<byte> unsignedCbor = default;
-        bool hasUnsigned = unsignedExtensionOutputs?.TryGetValue(ExtensionId, out unsignedCbor) == true;
-        if (!hasSigned && !hasUnsigned)
+        if (!authData.ParsedExtensions.TryGetValue(ExtensionId, out var rawCbor))
         {
             return null;
-        }
-
-        if (!hasSigned || !hasUnsigned)
-        {
-            throw new WebAuthnClientError(
-                WebAuthnClientErrorCode.InvalidState,
-                "previewSign registration requires both the signed algorithm and unsigned generated-key attestation (draft v4 §10.2.1).");
         }
 
         // Decode algorithm + flags from authData.extensions["previewSign"] via the CTAP2 decoder.
@@ -140,6 +130,13 @@ internal static class PreviewSignCodec
         // keyHandle and publicKey are copied from innerAuthData.attestedCredentialData, and
         // attestationObject is a required member of the generated key. The outer credential's key is
         // the WebAuthn credential, not the signing key, so there is nothing to fall back to.
+        if (unsignedExtensionOutputs?.TryGetValue(ExtensionId, out var unsignedCbor) != true)
+        {
+            throw new WebAuthnClientError(
+                WebAuthnClientErrorCode.InvalidState,
+                "previewSign output is present in the authenticator data but the generated-key attestation object is missing from unsignedExtensionOutputs (previewSign draft v4 §10.2.1)");
+        }
+
         // Decode the CTAP-shaped inner attestation object via the CTAP2 decoder. The wire
         // payload uses integer keys ({1:fmt, 2:authData, 3:attStmt}), so WebAuthn rebuilds
         // the attestation object from the decoded components.

@@ -732,7 +732,9 @@ for Final, whereas `VersionQualifier.ToString()` itself includes the qualifier t
 Operations call inherited `EnsureSupports(FeatureSetConfig)` (5.0.0) or
 `EnsureSupports(FeatureDeviceReset)` (5.6.0). Do not replace these with a local `_version` comparison:
 the inherited check uses effective `FirmwareVersion`, including overrides and the optimistic development
-policy. Management represents an explicit Alpha/Beta qualifier as development firmware for those checks.
+policy. Management represents an explicit Alpha/Beta qualifier as development firmware for those checks
+only. Protocol setup receives the numeric version from the live probe when known, otherwise the available
+cached version, unless the caller overrides it. Do not pass synthetic feature firmware to the formatter.
 
 `FeatureDeviceInfo` enforces the 4.1.0 minimum before public reads, not during the factory's best-effort
 probe. The generic write check does not enforce device-supported masks. A separate 5.7 feature gate applies to

@@ -428,6 +428,9 @@ public class ManagementSessionTests
         public bool RejectReset { get; init; }
         public bool FailReselect { get; init; }
         public bool UnknownSelectVersion { get; init; }
+        public bool ReportsBeta { get; init; }
+        public bool ExtendedCapable { get; init; }
+        public byte[] ConfigurationCommand { get; private set; } = [];
         public Exception? DisposalFailure { get; init; }
         public int DisposeAttempts { get; private set; }
         public Transport Transport => Transport.Usb;
@@ -440,6 +443,7 @@ public class ManagementSessionTests
             {
                 0xA4 => Select(),
                 0x1D => ReadInfo(),
+                0x1C => WriteConfig(command),
                 0x1F => Reset(command),
                 _ => throw new InvalidOperationException("Unexpected Management command."),
             };
@@ -465,17 +469,53 @@ public class ManagementSessionTests
         private byte[] ReadInfo()
         {
             Reads++;
+            if (ReportsBeta)
+                return [21, 0x05, 3, major, minor, 0, 0x19, 14,
+                    0x01, 3, major, minor, 0, 0x02, 1, 1, 0x03, 4, 0, 0, 0, 1, 0x90, 0];
             return (major, minor) == (4, 0) ? [0x6D, 0] : [5, 0x05, 3, major, minor, (byte)(Selects - 1), 0x90, 0];
         }
 
+        private byte[] WriteConfig(ReadOnlyMemory<byte> command)
+        {
+            ConfigurationCommand = command.ToArray();
+            return [0x90, 0];
+        }
+
         public IDisposable BeginTransaction(CancellationToken cancellationToken) => throw new NotSupportedException();
-        public bool SupportsExtendedApdu() => false;
+        public bool SupportsExtendedApdu() => ExtendedCapable;
         public void Dispose() { }
         public ValueTask DisposeAsync()
         {
             DisposeAttempts++;
             return DisposalFailure is { } failure ? ValueTask.FromException(failure) : default;
         }
+    }
+
+    [Theory]
+    [InlineData(true, false, true, false)]
+    [InlineData(true, false, false, true)]
+    [InlineData(false, false, true, false)]
+    [InlineData(false, true, true, true)]
+    public async Task SetDeviceConfigAsync_UsesNumericApduFramingIndependentlyOfFeatureAdmission(
+        bool beta, bool unknown, bool forceShort, bool extended)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await using var connection = new VersionedSmartCardConnection(unknown ? (byte)4 : (byte)5, unknown ? (byte)0 : (byte)7)
+        {
+            ReportsBeta = beta,
+            UnknownSelectVersion = unknown,
+            ExtendedCapable = true,
+        };
+        var options = new SessionCreationOptions { ProtocolConfiguration = new() { ForceShortApdus = forceShort } };
+        await using var session = await ManagementSession.CreateAsync(connection, options, ct);
+
+        Assert.Equal(beta || unknown, session.IsSupported(new Feature("future feature", 99, 0, 0)));
+        await session.SetDeviceConfigAsync(new DeviceConfig { NfcRestricted = true }, cancellationToken: ct);
+
+        byte[] expected = extended
+            ? [0, 0x1C, 0, 0, 0, 0, 4, 3, 0x17, 1, 1, 0, 0]
+            : [0, 0x1C, 0, 0, 4, 3, 0x17, 1, 1, 0];
+        Assert.Equal(expected, connection.ConfigurationCommand);
     }
 
     [Fact]

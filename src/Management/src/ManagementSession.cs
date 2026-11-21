@@ -148,17 +148,15 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             ? await DeviceInfoReader.ReadAsync(protocol, null, cancellationToken).ConfigureAwait(false)
             : await TryReadInitialDeviceInfoAsync(protocol, cancellationToken).ConfigureAwait(false);
         _version = liveInfo?.FirmwareVersion ?? fallbackVersion;
-        var effectiveFirmwareVersion = _firmwareVersionOverride ??
-                                       GetFeatureFirmware(cachedDeviceInfo ?? liveInfo, fallbackVersion);
-
         var effectiveProtocol = await ConfigureProtocolAsync(
                 protocol,
-                effectiveFirmwareVersion,
+                GetTransportFirmware(cachedDeviceInfo),
                 _configuration,
                 _scpKeyParameters,
                 cancellationToken)
             .ConfigureAwait(false);
 
+        FirmwareVersion = _firmwareVersionOverride ?? GetFeatureFirmware(cachedDeviceInfo ?? liveInfo, fallbackVersion);
         _backend = CreateBackend(effectiveProtocol);
 
         _logger.LogDebug("Management session initialized with protocol {ProtocolType}", effectiveProtocol.GetType().Name);
@@ -288,6 +286,12 @@ public sealed class ManagementSession : ApplicationSession, IManagementSession
             return null;
         }
     }
+
+    // APDU framing needs the numeric version, not the sentinel used for optimistic feature gates.
+    private FirmwareVersion GetTransportFirmware(DeviceInfo? cachedDeviceInfo) =>
+        _firmwareVersionOverride ??
+        (_version is { Major: > 0 } ? _version : cachedDeviceInfo?.FirmwareVersion ?? _version) ??
+        new FirmwareVersion();
 
     private static FirmwareVersion GetFeatureFirmware(DeviceInfo? info, FirmwareVersion? fallback) =>
         info?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta

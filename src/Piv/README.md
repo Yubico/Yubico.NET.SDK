@@ -423,8 +423,9 @@ never cast from Core `KeyType` or infer PIV support from catalog representation/
   `SetPinAttemptsAsync` resets the PIN to `123456` and the PUK to `12345678` every time it runs, even with
   unchanged limits; follow it with `ChangePinAsync` and `ChangePukAsync`.
 - Operations enforce firmware gates themselves and throw `NotSupportedException` before transmitting an
-  unsupported key or policy request. RSA generation is disabled on ROCA-affected 4.2.6–4.3.4; import remains
-  independently available. YubiKey 4 FIPS (4.4.x) rejects RSA1024 and PIN policy `Never`.
+  unsupported key or policy request. The SDK conservatively excludes on-card RSA generation on firmware
+  from 4.2.0 inclusive to 4.3.5 exclusive. This gate does not change import or use of independently
+  generated keys. YubiKey 4 FIPS (4.4.x) rejects RSA1024 and PIN policy `Never`.
 
 ## Preview API migration
 
@@ -453,9 +454,13 @@ Shared Core support for secp256k1 or Brainpool does not add PIV generation, impo
 The support matrix follows the reviewed [Android PIV source](https://github.com/Yubico/yubikit-android/blob/76b89d35142d9a4937b6b72e5c840e057a280620/piv/src/main/java/com/yubico/yubikit/piv/PivSession.java).
 The reviewed [Python implementation](https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/piv.py)
 agrees on P-384/policies (4.0), cached touch/attestation (4.3), metadata (5.3), AES (5.4), and
-move/delete/Curve25519/large RSA (5.7). Its conservative serial (5.0.3) and ROCA (4.2.0) boundaries differ;
-this SDK retains the existing Android-aligned serial (5.0.0) and ROCA (4.2.6) boundaries. Major-zero
-development firmware retains Core's permissive compatibility handling.
+move/delete/Curve25519/large RSA (5.7). The SDK retains the Android-aligned serial boundary (5.0.0 versus
+Python's 5.0.3), but adopts the conservative generation interval `[4.2.0, 4.3.5)` used by
+[Python PIV](https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/piv.py#L619-L622)
+and [Python OpenPGP](https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/openpgp.py#L1535-L1537).
+[YSA-2017-01](https://www.yubico.com/support/security-advisories/ysa-2017-01/) identifies 4.2.6–4.3.4;
+the earlier SDK cutoff is a precaution, not confirmation that 4.2.0–4.2.5 are affected. Major-zero development
+firmware retains Core's permissive compatibility handling.
 
 ## Security notes
 

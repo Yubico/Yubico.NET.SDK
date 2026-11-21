@@ -1015,7 +1015,7 @@ public sealed class PivSession : ApplicationSession, IPivSession
             EnsureSupports(required);
         EnsureKeyPoliciesSupported(pinPolicy, touchPolicy);
         if (generate && keyType.IsRsa() && !Features.SupportsRsaGeneration(FirmwareVersion))
-            throw new NotSupportedException("RSA key generation is disabled on ROCA-affected firmware 4.2.6–4.3.4.");
+            throw new NotSupportedException("SDK ROCA policy disables on-card RSA generation on firmware from 4.2.0 up to, but not including, 4.3.5.");
         EnsureFipsKeyPolicySupported(keyType, pinPolicy);
     }
 

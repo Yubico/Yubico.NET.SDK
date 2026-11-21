@@ -53,10 +53,12 @@ public static class Features
 
     /// <summary>
     /// Checks if RSA key generation is supported for the given firmware version.
-    /// The SDK excludes ROCA-affected firmware 4.2.6–4.3.4. Other device/profile constraints still apply.
+    /// As a conservative ROCA precaution, the SDK excludes firmware from 4.2.0 inclusive to 4.3.5
+    /// exclusive. This is a generation-only policy, not a statement that every excluded version is affected.
+    /// Other device/profile constraints still apply.
     /// </summary>
     /// <param name="version">Firmware version to check.</param>
     /// <returns>True when the version falls outside the modeled ROCA exclusion interval.</returns>
     public static bool SupportsRsaGeneration(FirmwareVersion version) =>
-        version < new FirmwareVersion(4, 2, 6) || version >= new FirmwareVersion(4, 3, 5);
+        version < new FirmwareVersion(4, 2, 0) || version >= new FirmwareVersion(4, 3, 5);
 }

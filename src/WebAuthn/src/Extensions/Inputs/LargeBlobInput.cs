@@ -31,8 +31,8 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Inputs;
 /// </para>
 /// <para>
 /// The SDK currently requires a PIN/UV token with the LargeBlobWrite permission for every write.
-/// It requests that permission, which may require user verification despite <c>discouraged</c> when
-/// verification is configured. This is stricter than CTAP §6.10.2, which permits unauthenticated writes
+/// A legacy token without permissions does not qualify. The SDK requires verification even under
+/// <c>discouraged</c>. This is stricter than CTAP §6.10.2, which permits unauthenticated writes
 /// on an authenticator without configured verification when <c>alwaysUv</c> is not enabled; that path
 /// is not supported by this SDK.
 /// </para>

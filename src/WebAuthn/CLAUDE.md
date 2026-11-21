@@ -282,7 +282,7 @@ Backstop: if the client's model of the authenticator is wrong and the key answer
 ceremony once.
 
 Both ceremonies union extension permissions before the decision; largeBlob writes contribute
-`LargeBlobWrite`. The SDK requires a token for those writes, even though CTAP permits an
+`LargeBlobWrite`. The SDK requires a permission-scoped token for those writes, even though CTAP permits an
 unconfigured-authenticator exception. PRF contributes no extra permission. Supported evaluation
 requires UV under WebAuthn L3 §10.1.4; registration enablement alone does not.
 

@@ -348,8 +348,9 @@ credentials. A successful response without a storage key still reports `Supporte
 The SDK deliberately accepts multiple original `AllowCredentials` entries for writes, diverging from
 WebAuthn L3 §10.1.5's exact-one requirement. It writes with the storage key returned by the final
 assertion for the selected credential. The SDK requires a PIN/UV token for writes and adds
-`LargeBlobWrite` to the ceremony permissions, even though CTAP has an unconfigured-authenticator
-exception. Storage work runs after the assertion, before `GetAssertionAsync` returns. A supported read
+`LargeBlobWrite` to the ceremony permissions. The legacy token cannot carry that permission. The SDK
+does not implement CTAP's unconfigured-authenticator write exception. Storage work runs after the
+assertion, before `GetAssertionAsync` returns. A supported read
 with no stored data, no key, or a storage status/decoding failure returns `LargeBlob` with `Blob = null`.
 A stored empty blob returns a present, zero-length value. Cancellation still propagates.
 The returned writable `LargeBlob.Blob` is caller-owned; clear its span after last use if it contains

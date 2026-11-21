@@ -157,11 +157,11 @@ machinery for its applet session.
 Initialization wraps `ApduException`, `BadResponseException`, or `NotSupportedException` from
 `ConfigureProtocolAsync` only when SCP parameters were supplied. Preparation and app selection precede
 that catch; cancellation is rethrown unchanged. Later operation failures retain their original types.
-`SecureChannelException.StatusWord` copies only an immediate `ApduException` status, not a nested one.
-A local version-gate failure is not a card rejection. Core's CLA-not-supported translation can put an
-APDU status inside a nested NotSupportedException, leaving the immediate StatusWord null. Provider and
+`SecureChannelException.StatusWord` copies the first `ApduException` status in the inner chain, including
+Core's CLA-not-supported translation. A local version-gate failure is not a card rejection. Provider and
 missing-DEK InvalidOperationException failures are outside this selected catch. Inspect provenance before
-deciding recovery; logged exception text can include provider-defined detail and is not universally redacted.
+deciding recovery. The SDK's wrapper message is fixed, but formatting or logging the whole exception can
+still include provider-defined details from the intact inner chain.
 
 The facade returns response.Data without exposing the ApduResponse owner. The view survives session
 disposal, but caller-copy cleanup cannot reach that owner. Core's supported Clear method also clears

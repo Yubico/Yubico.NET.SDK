@@ -33,6 +33,22 @@ public class SecureChannelExceptionTests
     private static byte[] OkResponse() => [0x90, 0x00];
 
     [Fact]
+    public async Task CreateAsync_Scp03ClaNotSupported_PreservesNestedStatusWithoutCopyingDetails()
+    {
+        using var connection = new RecordingSmartCardConnection(OkResponse(), [0x6E, 0x00]);
+        using var keys = Scp03KeyParameters.Default;
+
+        var exception = await Assert.ThrowsAsync<SecureChannelException>(() => SecurityDomainSession.CreateAsync(
+            connection, new SessionCreationOptions { ScpKeyParameters = keys }, TestContext.Current.CancellationToken));
+
+        var inner = Assert.IsType<NotSupportedException>(exception.InnerException);
+        var apdu = Assert.IsType<ApduException>(inner.InnerException);
+        Assert.Equal(unchecked((short)0x6E00), apdu.SW);
+        Assert.Equal(apdu.SW, exception.StatusWord);
+        Assert.Equal("Failed to establish a secure channel (SCP) with the Security Domain.", exception.Message);
+    }
+
+    [Fact]
     public async Task RawSmartCardSession_CreateWithScp_MarksSessionReadyAfterHandshake()
     {
         using var connection = new Scp03HandshakeFakeConnection();

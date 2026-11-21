@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -31,6 +32,28 @@ namespace Yubico.YubiKit.SecurityDomain.UnitTests;
 public class SecureChannelExceptionTests
 {
     private static byte[] OkResponse() => [0x90, 0x00];
+
+    [Fact]
+    public async Task CreateAsync_Scp11bRejectsInvalidReceiptWithBadResponseCause()
+    {
+        // Standard P-256 generator point, not device material; the zero receipt is deliberately invalid.
+        var point = Convert.FromHexString("046B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296" +
+            "4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5");
+        byte[] response = [0x5F, 0x49, 0x41, .. point, 0x86, 0x10, .. new byte[16], 0x90, 0x00];
+        using var connection = new RecordingSmartCardConnection(OkResponse(), response, OkResponse());
+        var publicKey = ECPublicKey.CreateFromValue(point, KeyType.P256);
+        using var parameters = new Scp11KeyParameters(new KeyReference(0x13, 0xFF), publicKey);
+
+        var error = await Assert.ThrowsAsync<SecureChannelException>(() => SecurityDomainSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = parameters, FirmwareVersionOverride = new(5, 7, 2) },
+            TestContext.Current.CancellationToken));
+
+        Assert.Contains("Receipt does not match", Assert.IsType<BadResponseException>(error.InnerException).Message);
+        Assert.Equal(0x88, connection.TransmittedCommands[1][1]);
+        await using var reopened = await SecurityDomainSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        Assert.False(reopened.IsAuthenticated);
+    }
 
     [Fact]
     public async Task CreateAsync_AfterDisposingFirstSession_ReusesCallerOwnedParameters()

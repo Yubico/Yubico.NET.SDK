@@ -217,18 +217,24 @@ public class SecurityDomainSessionTests
     [Fact]
     public async Task CreateAsync_WithConnectionAndConfiguration_Succeeds()
     {
-        // Arrange
         var connection = CreateMockConnection();
-        var configuration = new ProtocolConfiguration();
+        var commands = new List<byte[]>();
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                commands.Add(call.Arg<ReadOnlyMemory<byte>>().ToArray());
+                return new ReadOnlyMemory<byte>(OkResponse());
+            });
+        var configuration = new ProtocolConfiguration { ForceShortApdus = true };
 
-        // Act
-        var session = await SecurityDomainSession.CreateAsync(
+        await using var session = await SecurityDomainSession.CreateAsync(
             connection,
             new SessionCreationOptions { ProtocolConfiguration = configuration },
             TestContext.Current.CancellationToken);
 
-        // Assert
-        AssertSessionAndDispose(session);
+        await session.GetDataAsync(0x66, new byte[] { 0xAA }, cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal([0x00, 0xCA, 0x00, 0x66, 0x01, 0xAA, 0x00], commands[1]);
     }
 
     [Fact]
@@ -421,18 +427,15 @@ public class SecurityDomainSessionTests
     [Fact]
     public async Task IYubiKeyExtensions_ListKeyInformationAsync_DisposesSession()
     {
-        // Arrange
-        var yubiKey = CreateMockYubiKey(out var connection);
-        SetupGetKeyInfoMock(connection);
+        var yubiKey = CreateMockYubiKey(out _);
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0xC0, 0x02, 0x01, 0xFF, 0x90, 0x00]);
+        yubiKey.ConnectAsync<ISmartCardConnection>(Arg.Any<CancellationToken>()).Returns(
+            Task.FromResult<ISmartCardConnection>(connection));
 
-        // Act
         var keyInfo = await yubiKey.ListKeyInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        // Assert
-        Assert.NotNull(keyInfo);
-        // Verify the connection was used; this assertion does not observe session or connection disposal.
-        await connection.Received()
-            .TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        Assert.Equal(0xFF, Assert.Single(keyInfo).KeyReference.Kvn);
+        Assert.Equal(1, connection.DisposeCount);
     }
 
     [Fact]

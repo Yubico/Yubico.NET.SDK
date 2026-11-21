@@ -60,17 +60,20 @@ def generate(args):
         if not (v2 / project).is_file():
             raise RuntimeError(f'Configured SDK project is missing: {project}')
     entry['src'][0]['src'] = str(v2)
-    entry['output'] = str(WORK / 'metadata' / 'v2-api')
+    entry['output'] = str(ROOT / 'docs' / 'v2-api')
     entry['filter'] = str(ROOT / 'docs' / 'filterConfig.yml')
     entry['properties']['CustomAfterMicrosoftCommonTargets'] = str(ROOT / 'build' / 'docfx.targets')
     resolved_config = WORK / 'docfx.v2.resolved.json'
     resolved_config.write_text(json.dumps(config, indent=2) + '\n')
     logs = WORK / 'logs'
     logs.mkdir(exist_ok=True)
-    # These directories contain only generated files owned by this helper.
-    metadata = WORK / 'metadata'
-    if metadata.exists():
-        shutil.rmtree(metadata)
+    # Replace only generated YAML in API folders; preserve authored Markdown.
+    for folder in ['core-api', 'yubikey-api', 'v2-api']:
+        destination = ROOT / 'docs' / folder
+        destination.mkdir(exist_ok=True)
+        for old in destination.glob('*.yml'):
+            old.unlink()
+    # The site directory contains only generated output.
     site = ROOT / 'docs' / '_site'
     if site.exists():
         shutil.rmtree(site)
@@ -89,19 +92,11 @@ def generate(args):
     docfx_run('metadata', ROOT / 'docfx.json', ROOT, v1_env, 'v1-metadata.log')
     docfx_run('metadata', resolved_config, v2, v2_env, 'v2-metadata.log')
     # A successful process with missing projects must not publish a partial API reference.
-    for project in projects:
-        namespace = Path(project).stem
-        if not (metadata / 'v2-api' / (namespace + '.yml')).is_file():
-            raise RuntimeError(f'Missing V2 namespace metadata: {namespace}')
-    # DocFX resolves TOCs against source paths, so stage generated YAML alongside
-    # the authored API indexes before rendering. Never delete Markdown content.
-    for folder in ['core-api', 'yubikey-api', 'v2-api']:
-        destination = ROOT / 'docs' / folder
-        destination.mkdir(exist_ok=True)
-        for old in destination.glob('*.yml'):
-            old.unlink()
-        for generated in (metadata / folder).glob('*.yml'):
-            shutil.copy2(generated, destination / generated.name)
+    expected = [('core-api', 'Yubico.Core'), ('yubikey-api', 'Yubico.YubiKey')]
+    expected.extend(('v2-api', Path(project).stem) for project in projects)
+    for folder, namespace in expected:
+        if not (ROOT / 'docs' / folder / (namespace + '.yml')).is_file():
+            raise RuntimeError(f'Missing API namespace metadata: {namespace}')
     info = {'v1Commit': revision(ROOT), 'v2Commit': revision(v2),
             'v2Ref': 'yubikit', 'docfxVersion': DOCFX_VERSION}
     (WORK / 'build-info.json').write_text(json.dumps(info, indent=2) + '\n')

@@ -56,10 +56,11 @@ target frameworks, or the restore environment may update the project lockfile.
   list and the V2 landing page when adding a module. CLI and test projects are excluded.
 - `build/build-docs.py` restores the projects, generates each version's metadata
   from its own working directory/SDK, then renders one site with warnings as errors.
-- Metadata is regenerated into `.docbuild/metadata/`; the helper cleans that staging
-  directory and `docs/_site/` to remove obsolete pages. Generated YAML is then copied
-  beside each authored API index so DocFX resolves navigation correctly; old generated
-  YAML there is replaced. Authored Markdown stays in `docs/`.
+- Metadata is generated directly into `docs/core-api/`, `docs/yubikey-api/`, and
+  `docs/v2-api/`. Before generation, the helper removes generated `*.yml` files in
+  those folders and clears `docs/_site/` to remove obsolete pages. Authored Markdown
+  is preserved. Both versions' metadata must pass validation before rendering the site.
+  If generation fails, rerun the helper successfully before using the output.
 - Logs are in `.docbuild/logs/`. `docs/_site/build-info.json` records the two source
   commit IDs and DocFX version. Uncommitted local changes are included in a local build.
 

@@ -15,7 +15,7 @@
       "namespaceLayout": "flattened",
       "memberLayout": "samePage",
       "filter": "./docs/filterConfig.yml",
-      "output": "./.docbuild/metadata/core-api",
+      "output": "./docs/core-api",
       "properties": {
         "TargetFramework": "netstandard2.0"
       }
@@ -34,7 +34,7 @@
       "namespaceLayout": "flattened",
       "memberLayout": "samePage",
       "filter": "./docs/filterConfig.yml",
-      "output": "./.docbuild/metadata/yubikey-api",
+      "output": "./docs/yubikey-api",
       "properties": {
         "TargetFramework": "netstandard2.0"
       }

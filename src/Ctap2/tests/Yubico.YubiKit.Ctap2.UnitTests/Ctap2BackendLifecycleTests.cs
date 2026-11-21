@@ -2,6 +2,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System.Collections;
+using System.Collections.ObjectModel;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
@@ -16,6 +18,36 @@ public sealed class Ctap2BackendLoggingCollection;
 [Collection(nameof(Ctap2BackendLifecycleTests))]
 public class Ctap2BackendLifecycleTests
 {
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task FailedExchange_UnwritableExceptionDataPreservesExactFailureAndClearsResponse(bool getterThrows)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] response = [0x00, 0x11, 0x22];
+        var protocol = Substitute.For<IFidoHidProtocol>();
+        protocol.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(call => RequestAndReturnResponseAsync(call.ArgAt<UserPresenceNotification>(2), response, ct));
+        var expected = new UnwritableDiagnosticException(getterThrows);
+        var notification = CreateNotification(new RecordingUserPresencePrompt(new InvalidOperationException("resolution failed")));
+        var backend = new HidBackend(protocol);
+        using var factory = new FailingResolutionLoggerFactory(new InvalidOperationException("logging failed"));
+        using var logging = YubiKitLogging.UseTemporary(factory);
+
+        var actual = await Record.ExceptionAsync(() =>
+            backend.SendCborAsync(new byte[] { CtapCommand.Reset }, notification, ct, onSuccess: () => throw expected));
+
+        Assert.All(response, value => Assert.Equal(0, value));
+        Assert.Same(expected, actual);
+    }
+
+    private sealed class UnwritableDiagnosticException(bool getterThrows) : Exception
+    {
+        public override IDictionary Data => getterThrows
+            ? throw new InvalidOperationException("Diagnostics unavailable")
+            : new ReadOnlyDictionary<object, object>(new Dictionary<object, object>());
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

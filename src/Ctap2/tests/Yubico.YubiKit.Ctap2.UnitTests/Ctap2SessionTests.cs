@@ -1,6 +1,7 @@
 using FluentAssertions;
 using NSubstitute;
 using System.Buffers.Binary;
+using System.Collections;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
@@ -580,6 +581,31 @@ public class Ctap2SessionTests
     }
 
     [Fact]
+    public async Task ResetAsync_FailedRefreshWithThrowingExceptionDataPreservesExactFailure()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var primary = new UnwritableDiagnosticException();
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00], [0x00, 0x90, 0x00])
+        {
+            ExhaustedResponsesException = primary,
+            DisposeAsyncException = new InvalidOperationException("owned connection teardown failed")
+        };
+        var device = new SingleConnectionYubiKey(connection);
+        await using var session = await device.CreateCtap2SessionAsync(cancellationToken: ct);
+
+        Assert.Same(primary, await Assert.ThrowsAsync<UnwritableDiagnosticException>(() => session.ResetAsync(ct)));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetInfoAsync(ct));
+        await session.DisposeAsync();
+        Assert.Equal(1, connection.DisposeAsyncCount);
+    }
+
+    private sealed class UnwritableDiagnosticException : Exception
+    {
+        public override IDictionary Data => throw new InvalidOperationException("Diagnostics unavailable");
+    }
+
+    [Fact]
     public async Task ResetAsync_FailedRefreshIsTerminalAndDisposalDoesNotReplaceIt()
     {
         var ct = TestContext.Current.CancellationToken;
@@ -871,6 +897,7 @@ public class Ctap2SessionTests
         public int DisposeCount { get; private set; }
         public int DisposeAsyncCount { get; private set; }
         public Exception? DisposeAsyncException { get; init; }
+        public Exception? ExhaustedResponsesException { get; init; }
         public bool PauseAsyncDisposal { get; init; }
         public Task AsyncDisposalStarted => _asyncDisposalStarted.Task;
         public List<byte[]> TransmittedCommands { get; } = [];
@@ -882,6 +909,8 @@ public class Ctap2SessionTests
             CancellationToken cancellationToken = default)
         {
             TransmittedCommands.Add(command.ToArray());
+            if (_responses.Count == 0 && ExhaustedResponsesException is not null)
+                throw ExhaustedResponsesException;
             return Task.FromResult((ReadOnlyMemory<byte>)_responses.Dequeue());
         }
 

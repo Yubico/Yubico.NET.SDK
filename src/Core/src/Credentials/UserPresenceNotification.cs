@@ -159,7 +159,7 @@ internal sealed class UserPresenceNotification
         }
         catch (Exception ex) when (primaryException is not null)
         {
-            primaryException.Data["UserPresenceResolutionException"] = ex;
+            TryAttachDiagnostic(primaryException, "UserPresenceResolutionException", ex);
             try
             {
                 // Logger creation is also fallible; keep it within the secondary failure boundary.
@@ -170,8 +170,20 @@ internal sealed class UserPresenceNotification
             }
             catch (Exception loggingFailure)
             {
-                primaryException.Data["UserPresenceLoggingException"] = loggingFailure;
+                TryAttachDiagnostic(primaryException, "UserPresenceLoggingException", loggingFailure);
             }
+        }
+    }
+
+    private static void TryAttachDiagnostic(Exception primary, string key, Exception secondary)
+    {
+        try
+        {
+            primary.Data[key] = secondary;
+        }
+        catch (Exception)
+        {
+            // Exception.Data can be overridden or read-only. Diagnostic attachment is best effort.
         }
     }
 

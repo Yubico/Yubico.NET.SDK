@@ -313,7 +313,14 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
         catch (Exception cleanupFailure) when (_resetRefreshFailure is not null)
         {
             // Don't cache a secondary failure which would be replayed by the caller's await using.
-            _resetRefreshFailure.Data["ResetRefreshCleanupException"] = cleanupFailure;
+            try
+            {
+                _resetRefreshFailure.Data["ResetRefreshCleanupException"] = cleanupFailure;
+            }
+            catch (Exception)
+            {
+                // Diagnostic attachment must not replace the refresh failure.
+            }
         }
     }
 

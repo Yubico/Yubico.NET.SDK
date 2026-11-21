@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Text;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;

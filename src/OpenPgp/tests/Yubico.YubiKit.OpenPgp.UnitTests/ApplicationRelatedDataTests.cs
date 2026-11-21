@@ -165,7 +165,7 @@ public class ApplicationRelatedDataTests
 
         Assert.Equal(fingerprint, parsed.KeyFingerprints[KeyRef.Sig].ToArray());
         Assert.Equal(caFingerprint, parsed.CaKeyFingerprints[KeyRef.Sig].ToArray());
-        Assert.Equal(0x01020304, parsed.GenerationTimes[KeyRef.Sig]);
+        Assert.Equal(0x01020304u, parsed.GenerationTimes[KeyRef.Sig]);
         Assert.Equal((KeyStatus)0xFE, parsed.KeyInformation[KeyRef.Sig]);
         Assert.Equal([KeyRef.Sig], parsed.KeyInformation.Select(static entry => entry.Key));
         Assert.False(parsed.KeyInformation.ContainsKey((KeyRef)0x7F));

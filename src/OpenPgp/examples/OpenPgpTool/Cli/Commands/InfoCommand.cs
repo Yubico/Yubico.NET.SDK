@@ -40,9 +40,12 @@ public sealed class InfoCommand : OpenPgpCommand<InfoCommand.Settings>
         AnsiConsole.WriteLine();
         OutputHelpers.WriteHeader("PIN Status");
         OutputHelpers.WriteKeyValue("Signature PIN Policy",
-            pinStatus.SignaturePinPolicy == PinPolicy.Always
-                ? "Verify every signature"
-                : "Verify once per session");
+            pinStatus.SignaturePinPolicy switch
+            {
+                PinPolicy.Always => "Verify every signature",
+                PinPolicy.Once => "Verify once per session",
+                var raw => $"Unknown (0x{(byte)raw:X2})",
+            });
 
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]Remaining Attempts[/]");

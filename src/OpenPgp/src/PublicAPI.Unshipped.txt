@@ -15,6 +15,7 @@ Yubico.YubiKit.OpenPgp.ApplicationRelatedData.GeneralFeatures.get -> Yubico.Yubi
 Yubico.YubiKit.OpenPgp.ApplicationRelatedData.GeneralFeatures.init -> void
 Yubico.YubiKit.OpenPgp.ApplicationRelatedData.HistoricalBytes.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.OpenPgp.ApplicationRelatedData.HistoricalBytes.init -> void
+Yubico.YubiKit.OpenPgp.ApplicationRelatedData.Raw.get -> System.ReadOnlyMemory<byte>
 Yubico.YubiKit.OpenPgp.Credentials.OpenPgpCredentialOptions
 Yubico.YubiKit.OpenPgp.Crt
 Yubico.YubiKit.OpenPgp.OpenPgpKeyInfo
@@ -164,11 +165,11 @@ Yubico.YubiKit.OpenPgp.GeneralFeatureManagement.Touchscreen = 1 -> Yubico.YubiKi
 Yubico.YubiKit.OpenPgp.GenerationTimes
 Yubico.YubiKit.OpenPgp.GenerationTimes.ContainsKey(Yubico.YubiKit.OpenPgp.KeyRef key) -> bool
 Yubico.YubiKit.OpenPgp.GenerationTimes.Count.get -> int
-Yubico.YubiKit.OpenPgp.GenerationTimes.GetEnumerator() -> System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<Yubico.YubiKit.OpenPgp.KeyRef, int>>!
+Yubico.YubiKit.OpenPgp.GenerationTimes.GetEnumerator() -> System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<Yubico.YubiKit.OpenPgp.KeyRef, uint>>!
 Yubico.YubiKit.OpenPgp.GenerationTimes.Keys.get -> System.Collections.Generic.IEnumerable<Yubico.YubiKit.OpenPgp.KeyRef>!
-Yubico.YubiKit.OpenPgp.GenerationTimes.TryGetValue(Yubico.YubiKit.OpenPgp.KeyRef key, out int value) -> bool
-Yubico.YubiKit.OpenPgp.GenerationTimes.Values.get -> System.Collections.Generic.IEnumerable<int>!
-Yubico.YubiKit.OpenPgp.GenerationTimes.this[Yubico.YubiKit.OpenPgp.KeyRef key].get -> int
+Yubico.YubiKit.OpenPgp.GenerationTimes.TryGetValue(Yubico.YubiKit.OpenPgp.KeyRef key, out uint value) -> bool
+Yubico.YubiKit.OpenPgp.GenerationTimes.Values.get -> System.Collections.Generic.IEnumerable<uint>!
+Yubico.YubiKit.OpenPgp.GenerationTimes.this[Yubico.YubiKit.OpenPgp.KeyRef key].get -> uint
 Yubico.YubiKit.OpenPgp.IOpenPgpSession
 Yubico.YubiKit.OpenPgp.IOpenPgpSession.AttestKeyAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Security.Cryptography.X509Certificates.X509Certificate2!>!
 Yubico.YubiKit.OpenPgp.IOpenPgpSession.AuthenticateAsync(System.ReadOnlyMemory<byte> data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
@@ -198,7 +199,7 @@ Yubico.YubiKit.OpenPgp.IOpenPgpSession.ResetAsync(System.Threading.CancellationT
 Yubico.YubiKit.OpenPgp.IOpenPgpSession.ResetPinUsingAdminAuthenticationAsync(System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.IOpenPgpSession.ResetPinUsingResetCodeAsync(System.ReadOnlyMemory<byte> resetCode, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetAlgorithmAttributesAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.AlgorithmAttributes! attributes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetGenerationTimeAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, int timestamp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetGenerationTimeAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, uint timestamp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetKdfAsync(Yubico.YubiKit.OpenPgp.Kdf! kdf, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetKeyFingerprintAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.ReadOnlyMemory<byte> fingerprint, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.IOpenPgpSession.SetPinAttemptsAsync(int userAttempts, int resetAttempts, int adminAttempts, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
@@ -299,7 +300,7 @@ Yubico.YubiKit.OpenPgp.OpenPgpSession.ResetAsync(System.Threading.CancellationTo
 Yubico.YubiKit.OpenPgp.OpenPgpSession.ResetPinUsingAdminAuthenticationAsync(System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.OpenPgpSession.ResetPinUsingResetCodeAsync(System.ReadOnlyMemory<byte> resetCode, System.ReadOnlyMemory<byte> newPin, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.OpenPgpSession.SetAlgorithmAttributesAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, Yubico.YubiKit.OpenPgp.AlgorithmAttributes! attributes, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.OpenPgp.OpenPgpSession.SetGenerationTimeAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, int timestamp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.OpenPgp.OpenPgpSession.SetGenerationTimeAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, uint timestamp, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.OpenPgpSession.SetKdfAsync(Yubico.YubiKit.OpenPgp.Kdf! kdf, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.OpenPgpSession.SetKeyFingerprintAsync(Yubico.YubiKit.OpenPgp.KeyRef keyRef, System.ReadOnlyMemory<byte> fingerprint, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.OpenPgp.OpenPgpSession.SetPinAttemptsAsync(int userAttempts, int resetAttempts, int adminAttempts, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
@@ -318,6 +319,8 @@ Yubico.YubiKit.OpenPgp.Pw.Admin = 131 -> Yubico.YubiKit.OpenPgp.Pw
 Yubico.YubiKit.OpenPgp.Pw.Reset = 130 -> Yubico.YubiKit.OpenPgp.Pw
 Yubico.YubiKit.OpenPgp.Pw.User = 129 -> Yubico.YubiKit.OpenPgp.Pw
 Yubico.YubiKit.OpenPgp.PwStatus
+Yubico.YubiKit.OpenPgp.PwStatus.AdminUsesPinBlock2.get -> bool
+Yubico.YubiKit.OpenPgp.PwStatus.AdminUsesPinBlock2.init -> void
 Yubico.YubiKit.OpenPgp.PwStatus.AttemptsAdmin.get -> int
 Yubico.YubiKit.OpenPgp.PwStatus.AttemptsAdmin.init -> void
 Yubico.YubiKit.OpenPgp.PwStatus.AttemptsReset.get -> int
@@ -335,6 +338,8 @@ Yubico.YubiKit.OpenPgp.PwStatus.MaxLenUser.init -> void
 Yubico.YubiKit.OpenPgp.PwStatus.PwStatus() -> void
 Yubico.YubiKit.OpenPgp.PwStatus.SignaturePinPolicy.get -> Yubico.YubiKit.OpenPgp.PinPolicy
 Yubico.YubiKit.OpenPgp.PwStatus.SignaturePinPolicy.init -> void
+Yubico.YubiKit.OpenPgp.PwStatus.UserUsesPinBlock2.get -> bool
+Yubico.YubiKit.OpenPgp.PwStatus.UserUsesPinBlock2.init -> void
 Yubico.YubiKit.OpenPgp.RsaAttributes
 Yubico.YubiKit.OpenPgp.RsaAttributes.ELen.get -> int
 Yubico.YubiKit.OpenPgp.RsaAttributes.ELen.init -> void

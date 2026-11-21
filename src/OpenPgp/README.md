@@ -315,10 +315,7 @@ static async Task ImportRsaSigningKeyAsync(
 Generation/import manages the key, while certificates, fingerprints and timestamps are separate tasks.
 The host computes the card-profile fingerprint and writes exactly 20 bytes with `SetKeyFingerprintAsync`; use
 `SetGenerationTimeAsync` for unsigned four-byte seconds since 1970-01-01 UTC. Zero marks an unspecified time;
-pass zero to clear the date metadata. The current API stores/returns those four bytes through a signed `int`,
-so values above `int.MaxValue` appear negative. Preserve the original bytes or interpret the same 32 bits as
-unsigned seconds, rather than dates before 1970. The setter writes the supplied representation without date-range
-validation or special handling of zero. These host-written fields alone establish no provenance.
+pass zero to clear the date metadata. These host-written fields alone establish no provenance.
 `DeleteKeyAsync` destructively switches attributes to RSA 4096 then RSA 2048; NEO's vendor deletion strategy differs
 and remains separately unqualified. Delete certificates separately when that is your intent.
 

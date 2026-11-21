@@ -231,6 +231,8 @@ public sealed partial class OpenPgpSession
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        if (policy is not (PinPolicy.Once or PinPolicy.Always))
+            throw new ArgumentOutOfRangeException(nameof(policy));
 
         _logger.LogDebug("Setting signature PIN policy to {Policy}", policy);
 

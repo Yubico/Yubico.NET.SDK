@@ -105,7 +105,7 @@ representations and only RSA 2048/3072/4096, not Core's RSA 1024.
 Internal `OpenPgpCurveOids` caches DER **value octets only**, deriving them from dotted OIDs with AsnWriter.
 Ordinary curve OIDs come from Core; the protocol's legacy X25519 (1.3.6.1.4.1.3029.1.5.1) and Ed25519
 (1.3.6.1.4.1.11591.15.1) overrides stay here. They are not RFC 8410 SPKI algorithm OIDs. Failed Try lookup
-returns `KeyType.None`. Unknown OID parser rejection is unchanged; do not silently select P-256.
+returns `KeyType.None`. Valid unmodeled OIDs retain their attribute bytes without inferring a known curve.
 
 Factories choose ECDH/ECDSA/EdDSA from construction and slot, rejecting non-EC families instead of falling
 through to ECDSA. Parsing must preserve the received algorithm byte and import format; never call the factory

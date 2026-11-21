@@ -406,10 +406,7 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Refreshes application data and gets the card's stored generation-time metadata for reported slots.
     /// </summary>
     /// <remarks>
-    ///     Zero denotes an unspecified time. The card stores unsigned four-byte seconds since 1970-01-01 UTC;
-    ///     this API currently exposes those bytes as a signed int. Values above int.MaxValue therefore appear
-    ///     negative. Preserve the original four-byte representation when inspecting the full unsigned range,
-    ///     rather than interpreting negative API values as dates before 1970. See <see cref="GenerationTimes" />.
+    ///     Values are unsigned four-byte seconds since 1970-01-01 UTC. Zero denotes an unspecified time.
     /// </remarks>
     Task<GenerationTimes> GetGenerationTimesAsync(
         CancellationToken cancellationToken = default);
@@ -434,20 +431,15 @@ public interface IOpenPgpSession : IApplicationSession
     /// </summary>
     /// <param name="keyRef">The target slot.</param>
     /// <param name="timestamp">
-    ///     The signed int carrying the four bytes to write in big-endian order. Pass zero to mark the
-    ///     generation time unspecified. Card time uses unsigned seconds since 1970-01-01 UTC; preserve
-    ///     that four-byte representation when handling values above int.MaxValue, which appear negative here.
+    ///     Unsigned seconds since 1970-01-01 UTC. Pass zero to mark the generation time unspecified.
     /// </param>
     /// <param name="cancellationToken">Token used to cancel the operation.</param>
     /// <remarks>
-    ///     Verify the Admin PIN first. The method writes the supplied int's four-byte representation,
-    ///     including negative values, without validating a date range or applying a special zero policy.
-    ///     The card interprets zero as unspecified; other values are unsigned seconds, rather than dates
-    ///     before 1970. This host-supplied metadata is independent of key creation.
+    ///     Verify the Admin PIN first. This host-supplied metadata is independent of key creation.
     /// </remarks>
     Task SetGenerationTimeAsync(
         KeyRef keyRef,
-        int timestamp,
+        uint timestamp,
         CancellationToken cancellationToken = default);
 
     // ── Certificate Operations ────────────────────────────────────────

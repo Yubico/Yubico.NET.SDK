@@ -23,9 +23,8 @@ namespace Yubico.YubiKit.OpenPgp;
 /// </summary>
 /// <remarks>
 ///     Prefer the concrete Create factories for request construction: direct property initialization leaves
-///     the algorithm identifier at its default unless set by a derived type. Parsing requires a known
-///     algorithm/curve; unknown required attributes can prevent session initialization. Raw data access
-///     preserves an inspection route for fields outside the model. Attribute writes can erase or disable a key.
+///     the algorithm identifier at its default unless set by a derived type. Unmodeled response attributes
+///     preserve their wire bytes for inspection but cannot be sent by typed key-management methods.
 /// </remarks>
 public abstract class AlgorithmAttributes
 {
@@ -44,9 +43,12 @@ public abstract class AlgorithmAttributes
     ///     Parses algorithm attributes from the encoded wire format.
     /// </summary>
     /// <param name="encoded">The raw algorithm attributes bytes.</param>
-    /// <exception cref="ArgumentException">Thrown when the algorithm ID is not recognized.</exception>
+    /// <exception cref="ArgumentException">Thrown when known fields are malformed.</exception>
     public static AlgorithmAttributes Parse(ReadOnlySpan<byte> encoded)
     {
+        if (encoded.IsEmpty || encoded[0] == 0)
+            throw new ArgumentException("Missing or reserved algorithm identifier.", nameof(encoded));
+
         var algorithmId = encoded[0];
         var data = encoded[1..];
 
@@ -56,8 +58,21 @@ public abstract class AlgorithmAttributes
             EcAttributes.EcdhAlgorithmId or
             EcAttributes.EcdsaAlgorithmId or
             EcAttributes.EddsaAlgorithmId => EcAttributes.ParseData(algorithmId, data),
-            _ => throw new ArgumentException($"Unsupported algorithm ID: 0x{algorithmId:X2}.", nameof(encoded)),
+            _ => new UnmodeledAttributes(algorithmId, encoded),
         };
+    }
+
+    internal sealed class UnmodeledAttributes : AlgorithmAttributes
+    {
+        private readonly byte[] _encoded;
+
+        internal UnmodeledAttributes(int algorithmId, ReadOnlySpan<byte> encoded)
+        {
+            AlgorithmId = algorithmId;
+            _encoded = encoded.ToArray();
+        }
+
+        public override byte[] ToBytes() => [.. _encoded];
     }
 }
 
@@ -100,6 +115,9 @@ public sealed class RsaAttributes : AlgorithmAttributes
     internal static RsaAttributes ParseData(int algorithmId, ReadOnlySpan<byte> data)
     {
         // Format: 2 bytes nLen + 2 bytes eLen + 1 byte importFormat
+        if (data.Length != 5)
+            throw new ArgumentException("RSA attributes require five bytes after the algorithm identifier.", nameof(data));
+
         var nLen = BinaryPrimitives.ReadUInt16BigEndian(data[..2]);
         var eLen = BinaryPrimitives.ReadUInt16BigEndian(data[2..4]);
         var importFormat = (RsaImportFormat)data[4];
@@ -178,7 +196,7 @@ public sealed class EcAttributes : AlgorithmAttributes
         };
     }
 
-    internal static EcAttributes ParseData(int algorithmId, ReadOnlySpan<byte> data)
+    internal static AlgorithmAttributes ParseData(int algorithmId, ReadOnlySpan<byte> data)
     {
         EcImportFormat importFormat;
         ReadOnlySpan<byte> oidValueBytes;
@@ -194,7 +212,11 @@ public sealed class EcAttributes : AlgorithmAttributes
             oidValueBytes = data;
         }
 
-        var keyType = OpenPgpCurveOids.FromOidValueBytes(oidValueBytes);
+        if (!OpenPgpCurveOids.TryFromOidValueBytes(oidValueBytes, out var keyType))
+        {
+            ValidateOidValue(oidValueBytes);
+            return new UnmodeledAttributes(algorithmId, [(byte)algorithmId, .. data]);
+        }
 
         return new EcAttributes
         {
@@ -202,6 +224,22 @@ public sealed class EcAttributes : AlgorithmAttributes
             KeyType = keyType,
             ImportFormat = importFormat,
         };
+    }
+
+    private static void ValidateOidValue(ReadOnlySpan<byte> value)
+    {
+        // DER OID subidentifiers use minimal base-128 encoding and end with bit 8 clear.
+        if (value.IsEmpty || (value[^1] & 0x80) != 0)
+            throw new ArgumentException("Missing or truncated EC curve OID.", nameof(value));
+
+        bool atStart = true;
+        foreach (byte octet in value)
+        {
+            if (atStart && octet == 0x80)
+                throw new ArgumentException("Non-minimal EC curve OID.", nameof(value));
+
+            atStart = (octet & 0x80) == 0;
+        }
     }
 
     /// <inheritdoc />

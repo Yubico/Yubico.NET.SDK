@@ -30,6 +30,64 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests;
 public sealed class OpenPgpSessionWireTests
 {
     [Fact]
+    public async Task SignaturePolicy_UnknownResponseIsPreservedButNotAcceptedAsRequest()
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnection([0xA7, 0x86, 0x0C, 0x88, 3, 0, 3, 0x90, 0x00]);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var status = await session.GetPinStatusAsync(token);
+
+        Assert.Equal(0xA7, (int)status.SignaturePinPolicy);
+        Assert.Equal(6, status.MaxLenUser);
+        Assert.Equal(12, status.MaxLenReset);
+        Assert.Equal(8, status.MaxLenAdmin);
+        Assert.True(status.UserUsesPinBlock2);
+        Assert.True(status.AdminUsesPinBlock2);
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.SetSignaturePinPolicyAsync(
+            status.SignaturePinPolicy, token));
+        Assert.Equal(4, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task UnknownRequiredCurve_AllowsSessionReadbackButCannotBeResentAsAttributes()
+    {
+        var token = TestContext.Current.CancellationToken;
+        byte[] unknown = [0x12, 0x2B, 0x06, 0x04, 0x01, 0x7F];
+        var appData = ApplicationRelatedDataResponse(decipherAttributes: AlgorithmAttributes.Parse(unknown));
+        using var connection = new RecordingSmartCardConnection([OkResponse(), VersionResponse(), appData, appData]);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var parsed = await session.GetApplicationRelatedDataAsync(token);
+
+        Assert.Equal(appData[..^2], parsed.Raw.ToArray());
+        Assert.Equal(unknown, parsed.Discretionary.AlgorithmAttributesDec.ToBytes());
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.SetAlgorithmAttributesAsync(
+            KeyRef.Dec, parsed.Discretionary.AlgorithmAttributesDec, token));
+        Assert.Equal(4, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
+    [InlineData(0u, "00000000")]
+    [InlineData(0x7FFF_FFFFu, "7FFFFFFF")]
+    [InlineData(0x8000_0000u, "80000000")]
+    [InlineData(0xFFFF_FFFFu, "FFFFFFFF")]
+    public async Task GenerationTime_WriteAndReadback_UsesUnsignedBigEndianSeconds(uint seconds, string hex)
+    {
+        var token = TestContext.Current.CancellationToken;
+        byte[] value = Convert.FromHexString(hex);
+        byte[] appData = ApplicationRelatedDataResponse();
+        // DO CD is the last TLV in this fixture; SIG is first of three four-byte values.
+        value.CopyTo(appData.AsSpan(appData.Length - 14, 4));
+        using var connection = CreateInitializedConnection(OkResponse(), appData);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.SetGenerationTimeAsync(KeyRef.Sig, seconds, token);
+        var command = LastCommand(connection);
+        Assert.Equal(new byte[] { 0x00, 0xDA, 0x00, 0xCE }, command[..4]);
+        Assert.Equal(value, CommandData(command).ToArray());
+        Assert.Equal(seconds, (await session.GetGenerationTimesAsync(token))[KeyRef.Sig]);
+    }
+
+    [Fact]
     public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
     {
         var connection = new RecordingSmartCardConnection();

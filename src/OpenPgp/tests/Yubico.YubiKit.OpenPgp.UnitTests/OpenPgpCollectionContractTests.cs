@@ -21,7 +21,7 @@ public sealed class OpenPgpCollectionContractTests
     [Theory]
     [InlineData(typeof(KeyInformation), typeof(IReadOnlyDictionary<KeyRef, KeyStatus>))]
     [InlineData(typeof(KeyFingerprints), typeof(IReadOnlyDictionary<KeyRef, ReadOnlyMemory<byte>>))]
-    [InlineData(typeof(GenerationTimes), typeof(IReadOnlyDictionary<KeyRef, int>))]
+    [InlineData(typeof(GenerationTimes), typeof(IReadOnlyDictionary<KeyRef, uint>))]
     public void KeyCollectionType_ExposesOnlyReadOnlyDictionaryContract(Type type, Type expectedContract)
     {
         Assert.True(type.IsSealed);

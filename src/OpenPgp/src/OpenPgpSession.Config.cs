@@ -95,6 +95,15 @@ public sealed partial class OpenPgpSession
     {
         ThrowIfDisposed();
         ArgumentNullException.ThrowIfNull(attributes);
+        bool supported = attributes switch
+        {
+            RsaAttributes rsa => rsa.AlgorithmId == RsaAttributes.RsaAlgorithmId && Enum.IsDefined(rsa.ImportFormat),
+            EcAttributes ec => Enum.IsDefined(ec.ImportFormat) && ec.AlgorithmId is
+                EcAttributes.EcdhAlgorithmId or EcAttributes.EcdsaAlgorithmId or EcAttributes.EddsaAlgorithmId,
+            _ => false,
+        };
+        if (!supported)
+            throw new NotSupportedException("Only modeled OpenPGP algorithm attributes can be written.");
 
         _logger.LogInformation("Setting algorithm attributes for {Slot}", keyRef);
 
@@ -158,15 +167,8 @@ public sealed partial class OpenPgpSession
                 continue;
             }
 
-            try
-            {
-                var attrs = AlgorithmAttributes.Parse(tlv.Value.Span);
-                result.Add(new SupportedAlgorithm(keyRef, attrs));
-            }
-            catch (ArgumentException)
-            {
-                // Skip unsupported algorithm attribute types
-            }
+            var attrs = AlgorithmAttributes.Parse(tlv.Value.Span);
+            result.Add(new SupportedAlgorithm(keyRef, attrs));
         }
 
         // Fix Curve25519 entries for firmware < 5.6.1

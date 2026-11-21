@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core.Credentials;
@@ -255,7 +256,7 @@ public sealed partial class OpenPgpSession
     /// <inheritdoc />
     public async Task SetGenerationTimeAsync(
         KeyRef keyRef,
-        int timestamp,
+        uint timestamp,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -263,10 +264,7 @@ public sealed partial class OpenPgpSession
         _logger.LogDebug("Setting generation time for {Slot} to {Timestamp}", keyRef, timestamp);
 
         var data = new byte[4];
-        data[0] = (byte)(timestamp >> 24);
-        data[1] = (byte)(timestamp >> 16);
-        data[2] = (byte)(timestamp >> 8);
-        data[3] = (byte)timestamp;
+        BinaryPrimitives.WriteUInt32BigEndian(data, timestamp);
 
         await PutDataAsync(keyRef.GenerationTimeDo(), data, cancellationToken)
             .ConfigureAwait(false);

@@ -44,6 +44,9 @@ public sealed class ApplicationRelatedData
     /// </summary>
     public ReadOnlyMemory<byte> HistoricalBytes { get; init; }
 
+    /// <summary>The complete encoded application-related data, including any unmodeled objects.</summary>
+    public ReadOnlyMemory<byte> Raw { get; private init; }
+
     /// <summary>
     ///     Extended length information (maximum APDU sizes). Null if not supported.
     /// </summary>
@@ -67,6 +70,9 @@ public sealed class ApplicationRelatedData
     {
         // Unwrap the outer 0x6E tag
         using var outerTlv = Tlv.Create(encoded);
+        if (outerTlv.Tag != (int)DataObject.ApplicationRelatedData || outerTlv.TotalLength != encoded.Length)
+            throw new ArgumentException("Expected exactly one application-related data TLV.", nameof(encoded));
+
         var outerValue = outerTlv.Value.Span;
 
         var data = TlvHelper.DecodeDictionary(outerValue);
@@ -104,6 +110,7 @@ public sealed class ApplicationRelatedData
 
         return new ApplicationRelatedData
         {
+            Raw = encoded.ToArray(),
             Aid = OpenPgpAid.Parse(data[(int)DataObject.Aid].Span),
             HistoricalBytes = data.TryGetValue((int)DataObject.HistoricalBytes, out var hb) ? hb : ReadOnlyMemory<byte>.Empty,
             ExtendedLengthInfo = extLenInfo,

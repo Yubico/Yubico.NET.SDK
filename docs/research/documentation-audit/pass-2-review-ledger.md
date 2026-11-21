@@ -46,6 +46,10 @@ The withdrawn C1 guard is not a shared prerequisite.
 
 Security Domain delivery: [draft PR #792](https://github.com/Yubico/Yubico.NET.SDK/pull/792). Hardware qualification remains pending.
 
+Management software and documentation are in draft [PR #791](https://github.com/Yubico/Yubico.NET.SDK/pull/791),
+including the two canonical Core metadata referrals. MGMT-IMP-002, MGMT-IMP-011 and the physical
+Management qualification matrix remain pending; no device or integration execution was performed.
+
 ## Cards
 
 | Card | Applet | Severity | Classified as | Status | Final call | Recorded in |

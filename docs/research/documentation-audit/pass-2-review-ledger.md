@@ -243,3 +243,7 @@ YubiOTP delivery: [draft PR #793](https://github.com/Yubico/Yubico.NET.SDK/pull/
 | PIVIMP-010 | PIV | Medium | Auto (A4) | Auto | Android masks IDs to 24 bits; Python and Rust do not alias; reject out-of-range IDs before transmit. Veto pass: no veto | AG-25 |
 | PIVCORE-002 | PIV | High | Interview (G1; T2) | Dennis | Documentation only: general Core caller-serialization contract and PIV-specific guidance in the PIV PR. No new runtime guard or bug fix is implied. | AG-21; superseded by [AG-29](pass-2-review-decisions.md#ag-29-c1-caller-serialization) |
 | PIV-QUAL | PIV | Qualification | T1 | T1 hardware | No code decision; device qualification | classification only |
+
+PIV software delivery is tracked in [draft PR #795](https://github.com/Yubico/Yubico.NET.SDK/pull/795).
+PIVIMP-002 and Q10 await the approved public workflow shapes and phased failure contract. Physical qualification
+and the proposed ROCA range change are not closed by this delivery.

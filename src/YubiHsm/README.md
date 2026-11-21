@@ -21,22 +21,20 @@ library to provision the HSM, complete authentication, and exchange protected co
 | `GetChallengeAsync` with a credential password | 5.7.1 |
 | Credential password change | 5.8.0 |
 
-A session normally resolves feature support from the applet's three-byte SELECT version, falling back to
-5.4.3 when that value is absent or has another length. `FirmwareVersionOverride` supplies caller-selected
-policy instead. Choose an override that the actual applet supports: device metadata, a development-build
-label, and an override alone provide different evidence from successfully executing an operation.
-`ResetAsync` reselects the applet and retains the session's resolved version policy.
-An override does not skip SELECT, and malformed TLV framing can fail before fallback. Fixture/discovery
-metadata is a separate version source; it is not substituted by the HSM session factory.
+An explicit `FirmwareVersionOverride` wins. Otherwise the session uses cached device firmware when
+available, then the applet's three-byte version from SELECT. Unknown or prerelease version metadata
+admits applet and SCP version gates optimistically; protocol framing uses a known numeric version when available,
+or the 5.4.3 floor. This policy does not prove command support. Required SELECT failures still propagate.
+After confirmed `ResetAsync`, the session reselects and resolves the policy again; an explicit override persists.
 
 A credential is identified by a public label of 1 to 64 UTF-8 bytes, represented as a plain `string`. A
 symmetric credential holds an AES-128 K-ENC and K-MAC pair, an asymmetric one an EC P-256 private key, and each is
-protected by a credential password of at most 16 UTF-8 bytes. Keep these three secret roles separate:
+protected by a 16-byte credential password. Keep these three secret roles separate:
 
 | Secret | Purpose |
 | --- | --- |
 | 16-byte management key | Authorizes credential enrollment/deletion, management-key rotation and administrator password changes. |
-| Credential password, at most 16 UTF-8 bytes | Authorizes use of a stored YubiKey credential; the SDK pads shorter values to 16 bytes. |
+| `CredentialPassword` | Authorizes use of a stored YubiKey credential; create it from UTF-8 text bytes or exactly 16 raw bytes. |
 | Derivation password | Supplies PBKDF2 input when deriving the long-lived K-ENC/K-MAC pair for symmetric HSM authentication. |
 
 ## Installation
@@ -96,7 +94,7 @@ call; the caller owns the management-key and credential-password inputs for this
 static async Task EnrollSymmetricAsync(
     IYubiKey device,
     ReadOnlyMemory<byte> managementKey,
-    ReadOnlyMemory<byte> credentialPassword,
+    CredentialPassword credentialPassword,
     string label,
     ushort hsmAuthenticationKeyId,
     Func<ushort, string, ReadOnlyMemory<byte>, ReadOnlyMemory<byte>, CancellationToken, Task> provisionHsmAsync,
@@ -138,20 +136,11 @@ cryptogram; the connector relays them. Supply the actual HSM response to CALCULA
 cryptogram asks the applet to verify the HSM cryptogram; omitting it yields keys without that verification.
 Your HSM library still completes host authentication and manages protected command/response state.
 
-The current calculation path passes the full applet response to a parser that accepts exactly 48 bytes.
-A supplied symmetric cryptogram can produce a 56-byte response and fail with `ArgumentException` during
-`SessionKeys.Parse`, as observed on a tested development YubiKey. This is a response-format compatibility
-gap: [vendor Python code](https://github.com/Yubico/yubikey-manager/commit/31d39f64b73e534787382dab4675c0274616627b)
-already handled 56-byte input in July 2023, and its
-[current parser](https://github.com/Yubico/yubikey-manager/blob/296cb587ba15f57672356d8445393a96b41803fb/yubikit/hsmauth.py#L203-L220)
-takes three 16-byte key slices while ignoring any suffix. The
-[vendor C implementation](https://github.com/Yubico/yubihsm-shell/blob/6195c1b687aab56308e9598a0d66941813c94ae5/ykhsmauth/ykhsmauth.c#L561-L631)
-instead withholds an 8-byte symmetric cryptogram and requires a 48-byte response. These host-code choices
-establish neither the extra bytes' meaning nor an
-affected firmware range. Verify the complete HSM authentication flow on your target applet before relying
-on the supplied-cryptogram path. Omitting the cryptogram supports isolated key-calculation tests, rather
-than a safe workaround for authenticated HSM use; your HSM integration must verify its peer and complete
-the handshake.
+The session takes three 16-byte keys from the first 48 CALCULATE data bytes, ignores any suffix,
+and clears the entire final response it owns. Fewer than 48 data bytes raise `BadResponseException`.
+Standalone `SessionKeys.Parse` still accepts exactly the 48-byte key region. A 56-byte response was
+previously observed on a development YubiKey; this software contract neither assigns meaning to the
+extra bytes nor qualifies a firmware range. Verify the complete authenticated HSM flow on the target applet.
 
 The following **application-dependent sketch** declares the application adapter contract explicitly.
 Implement `ISymmetricHsmExchange` against your HSM library. `BeginAsync` opens the intended enrolled
@@ -170,7 +159,7 @@ interface ISymmetricHsmExchange : IAsyncDisposable
 
 static async Task UseSymmetricHsmAsync(
     IYubiKey device, string label, ushort hsmAuthenticationKeyId,
-    ReadOnlyMemory<byte> credentialPassword,
+    CredentialPassword credentialPassword,
     Func<CancellationToken, Task<ISymmetricHsmExchange>> openExchangeAsync,
     CancellationToken cancellationToken)
 {
@@ -285,14 +274,18 @@ the cancellation request as a device-interruption guarantee.
   admits one session. Disjoint scoped views remain uncoordinated. Whoever creates a connection disposes
   it with `await using`; a session from `CreateHsmAuthSessionAsync` owns the one it opened.
   See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
-- Await the entire public workflow before another operation or disposal. Optional LIST policy lookup,
+- Concurrent use of one session is unsupported. Await the entire public workflow before another operation
+  or disposal. Optional LIST policy lookup,
   CALCULATE, parsing and callbacks are separate phases; Core drains an admitted exchange, not all later
   application work. Keep borrowed inputs/prompt resources alive until the task is terminal.
 - `ResetAsync` (no undo), `DeleteCredentialAsync`, and `PutManagementKeyAsync` change persistent applet state.
-  Reset reuses its protocol without a fresh SCP handshake. With SCP, RESET is protected but re-SELECT
-  passes through unprotected; old host state and public readiness/authentication flags remain. End the
-  session/connection scopes and create fresh ones after reset or uncertainty rather than relying on
-  those flags as post-reset channel-health evidence.
+  A confirmed reset refreshes the same session: it reselects the applet on a fresh protocol and runs a new
+  SCP handshake with the caller's original parameters if SCP was requested. Keep those parameters and key
+  owners alive through session disposal. If refresh fails, the applet is already reset and the session ends;
+  open a new session to recover rather than repeating the destructive command.
+- `FirmwareVersion` describes effective feature policy, not a physical version measurement. An explicit override
+  wins, followed by cached device metadata if available, then applet SELECT version data. Unknown or prerelease
+  firmware permits applet operations optimistically; required SELECT errors and cancellation still propagate.
 - Unsupported feature gates throw `NotSupportedException`; on versions 5.6.0–5.7.0 `GetChallengeAsync`
   omits a supplied password.
 - Enrollment, deletion, management-key changes, both CALCULATE methods and both password-change methods
@@ -305,10 +298,18 @@ the cancellation request as a device-interruption guarantee.
   Exhausting a credential's password retries permanently deletes that credential. Exhausting management-key
   retries blocks management operations until an applet reset, which erases all credentials and restores defaults.
 
+Credential import and on-device generation send PUT directly, without a host pre-read or overwrite guard.
+If the applet accepts PUT at an existing label, treat the existing credential as overwritten. A duplicate-label
+rejection from the applet is not converted into replacement; the device error propagates.
+
 ## Security notes
 
-- Credential passwords, management keys, and EC private keys cross the API as borrowed `ReadOnlyMemory<byte>`.
-  The SDK clears its owned padded/request copies. Clear your input buffers with
+- Migrate old credential-password byte arguments with `using var password = CredentialPassword.FromUtf8(input.Span);`
+  for valid UTF-8 of at most 16 bytes (zero-padded), or `CredentialPassword.FromRaw(input.Span)` for exactly 16
+  opaque bytes. Keep the holder alive through the awaited operation; disposal clears its copy, not the source.
+  Acquire secrets in clearable buffers and clear those buffers separately. Derivation passwords, management
+  keys and EC private keys remain borrowed `ReadOnlyMemory<byte>`.
+  The SDK clears its owned request copies. Clear your input buffers with
   `CryptographicOperations.ZeroMemory` in a `finally`, including when acquisition or a later operation fails.
 - `SessionKeys.Parse` copies the response into three owned arrays; disposal clears those arrays and later
   property access throws. Existing spans view the cleared storage. Clear the Parse source and any caller-made
@@ -324,15 +325,12 @@ key/password checks and the application's external HSM authentication. It is not
 
 ## Example
 
-HsmAuthTool is a **diagnostic evaluation sample**. Run it with disposable test credentials: generated symmetric
-keys and calculated session keys are printed, and command-line secrets/visible management-key input can remain
-in process listings, shell history, terminal capture and immutable strings. Its cleanup blocks cover selected
-buffers; some parsing/early-return paths precede those blocks. Use your own secure input/output and total
-cleanup scopes for an application handling valuable keys.
-
-The calculation menu lists all algorithms but always calls the symmetric calculation API; select a symmetric
-credential. It supplies no `IUserPresencePrompt`, and it leaves HSM enrollment and handshake completion to the
-operator's external HSM workflow. The sample lives at `src/YubiHsm/examples/HsmAuthTool/`. From the repository root:
+HsmAuthTool is **demo only, not for production**. It prompts for passwords and keys rather than taking
+them as command-line options. Secret prompts require an interactive console for masked input.
+The demo limits derivation passphrases to 128 UTF-16 code units; this is not an SDK or applet limit.
+Generated symmetric keys and calculated session keys are explicitly printed, so use disposable test credentials.
+The calculation menu lists only symmetric credentials and supplies a console touch prompt. It does not enroll
+an HSM or complete the HSM handshake. From the repository root:
 
 ```bash
 dotnet run --project src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj

@@ -36,6 +36,8 @@ public static class IYubiKeyExtensions
         ///     The returned session owns the underlying connection and will dispose it when the session is disposed.
         ///     Use <c>await using</c> to close the session and its connection when finished.
         ///     The applet uses SmartCard transport; an explicitly requested incompatible transport is rejected.
+        ///     An explicit firmware override wins; otherwise cached device firmware takes precedence over
+        ///     the applet version. Prerelease or unknown firmware admits applet feature gates optimistically.
         /// </remarks>
         public async Task<HsmAuthSession> CreateHsmAuthSessionAsync(
             SessionCreationOptions? options = null,
@@ -56,6 +58,7 @@ public static class IYubiKeyExtensions
                         var session = await HsmAuthSession.CreateAsync(
                                 (ISmartCardConnection)connection,
                                 sessionOptions,
+                                () => yubiKey.CachedDeviceInfo,
                                 ct)
                             .ConfigureAwait(false);
                         session.OwnConnection();

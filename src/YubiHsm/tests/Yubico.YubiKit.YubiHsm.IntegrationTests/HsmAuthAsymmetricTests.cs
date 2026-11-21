@@ -21,7 +21,6 @@ public class HsmAuthAsymmetricTests
 
     private static ReadOnlyMemory<byte> DefaultManagementKey => new byte[16];
     private const string TestLabel = "test-asymmetric";
-    private static ReadOnlyMemory<byte> TestPassword => "password"u8.ToArray();
 
     // ─── Put Asymmetric Credential ──────────────────────────────────────────────
 
@@ -31,6 +30,7 @@ public class HsmAuthAsymmetricTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 // Generate an EC P-256 key pair
                 using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
                 var parameters = ecdsa.ExportParameters(includePrivateParameters: true);
@@ -42,7 +42,7 @@ public class HsmAuthAsymmetricTests
                         DefaultManagementKey,
                         TestLabel,
                         privateKey,
-                        TestPassword,
+                        password,
                         cancellationToken: NewToken());
 
                     var credentials = await session.ListCredentialsAsync(NewToken());
@@ -66,17 +66,18 @@ public class HsmAuthAsymmetricTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 // Generate and store an asymmetric credential
                 await session.GenerateCredentialAsymmetricAsync(
                     DefaultManagementKey,
                     TestLabel,
-                    TestPassword,
+                    password,
                     cancellationToken: NewToken());
 
                 // Get challenge (EPK-OCE for asymmetric credentials)
                 var challenge = await session.GetChallengeAsync(
                     TestLabel,
-                    TestPassword,
+                    password,
                     NewToken());
 
                 // This assertion checks only nonempty response data; point shape requires another check.
@@ -93,11 +94,12 @@ public class HsmAuthAsymmetricTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 // Generate an asymmetric credential on-device
                 await session.GenerateCredentialAsymmetricAsync(
                     DefaultManagementKey,
                     TestLabel,
-                    TestPassword,
+                    password,
                     cancellationToken: NewToken());
 
                 // Get the credential's public key (PK-OCE, 65-byte uncompressed EC point)
@@ -107,7 +109,7 @@ public class HsmAuthAsymmetricTests
                 // Get EPK-OCE from the YubiKey (ephemeral public key, 65 bytes)
                 var epkOce = await session.GetChallengeAsync(
                     TestLabel,
-                    TestPassword,
+                    password,
                     NewToken());
                 Assert.Equal(65, epkOce.Length);
 
@@ -142,7 +144,7 @@ public class HsmAuthAsymmetricTests
                             TestLabel,
                             context,
                             publicKey,
-                            TestPassword,
+                            password,
                             dummyCardCryptogram,
                             NewToken());
                     });
@@ -171,6 +173,7 @@ public class HsmAuthAsymmetricTests
         await state.WithHsmAuthSessionAsync(
             async session =>
             {
+                using var password = CredentialPassword.FromUtf8("password"u8);
                 using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
                 var parameters = ecdsa.ExportParameters(includePrivateParameters: true);
                 var privateKey = parameters.D!;
@@ -181,7 +184,7 @@ public class HsmAuthAsymmetricTests
                         DefaultManagementKey,
                         TestLabel,
                         privateKey,
-                        TestPassword,
+                        password,
                         touchRequired: true,
                         cancellationToken: NewToken());
 

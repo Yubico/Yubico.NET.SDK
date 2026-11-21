@@ -26,10 +26,8 @@ namespace Yubico.YubiKit.YubiHsm;
 ///     after disposal throws <see cref="ObjectDisposedException" />. The caller clears the original
 ///     <see cref="Parse" /> input and any additional copies it makes separately.
 ///     Parsing accepts exactly the 48-byte key region. A full applet CALCULATE response can contain
-///     additional bytes: vendor host code has handled 56-byte responses since 2023, and a supplied
-///     symmetric cryptogram produced that length on a tested development YubiKey. The session currently
-///     passes the full response here, so that path raises <see cref="ArgumentException" />. This parser
-///     leaves the additional bytes' meaning and firmware applicability to a separately verified response contract.
+///     additional bytes. Session calculation passes only the leading key region here and clears its
+///     entire owned response. This parser does not interpret any additional data.
 /// </remarks>
 public sealed class SessionKeys : IDisposable
 {
@@ -101,11 +99,23 @@ public sealed class SessionKeys : IDisposable
                 $"CALCULATE response must be exactly {ExpectedResponseLength} bytes, got {response.Length}.",
                 nameof(response));
 
-        var sEnc = response[..KeyLength].ToArray();
-        var sMac = response[KeyLength..(KeyLength * 2)].ToArray();
-        var sRmac = response[(KeyLength * 2)..].ToArray();
-
-        return new SessionKeys(sEnc, sMac, sRmac);
+        byte[]? sEnc = null;
+        byte[]? sMac = null;
+        byte[]? sRmac = null;
+        try
+        {
+            sEnc = response[..KeyLength].ToArray();
+            sMac = response[KeyLength..(KeyLength * 2)].ToArray();
+            sRmac = response[(KeyLength * 2)..].ToArray();
+            return new SessionKeys(sEnc, sMac, sRmac);
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(sEnc);
+            CryptographicOperations.ZeroMemory(sMac);
+            CryptographicOperations.ZeroMemory(sRmac);
+            throw;
+        }
     }
 
     /// <summary>

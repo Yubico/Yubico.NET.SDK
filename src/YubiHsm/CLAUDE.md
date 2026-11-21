@@ -21,7 +21,7 @@ enrollment and calculation paths handle management keys, credential passwords an
 1. **SmartCard-only** — No HID or OTP transport; `HsmAuthBackend` owns applet select/send mechanics over `ISmartCardProtocol`
 2. **Applet-owned backend** — Session code keeps APDU construction, retry extraction, and sensitive-buffer lifecycle; backend remains a thin SmartCard transport wrapper
 3. **Two credential types** — Symmetric (AES-128, all firmware) and Asymmetric (EC P256, firmware 5.6.0+)
-4. **Owned-buffer cleanup** — Session methods clear their padded passwords, encoded request buffers and derived keys in `finally`; `SessionKeys` clears its three owned arrays on disposal. Caller-owned inputs and additional copies have separate lifetimes.
+4. **Owned-buffer cleanup** — Session methods clear encoded requests and derived keys in `finally`; `CredentialPassword` and `SessionKeys` clear their owned arrays on disposal. Caller-owned inputs and additional copies have separate lifetimes.
 5. **User presence** — Session-key calculations retain the caller-owned `SessionCreationOptions.UserPresencePrompt` for notifications around CALCULATE.
 
 **Key Files:**
@@ -36,13 +36,15 @@ enrollment and calculation paths handle management keys, credential passwords an
 ## Firmware Feature Gates
 
 Asymmetric, challenge and password-change operations use feature gates; base operations rely on successful
-applet selection. Initialization uses the caller's firmware override or the SELECT applet version. The
-backend falls back to 5.4.3 when a three-byte version value is unavailable. Reset reselects over the existing
-protocol and retains resolved version policy. Device metadata and development-build labels alone establish
-neither an operation's availability nor a suitable override.
-Overrides do not skip SELECT, and malformed TLV framing can throw before fallback. Reset sends through
-the existing protocol then reselects without a new SCP handshake; secure SELECT passes through unprotected.
-Old host state and ready/auth flags remain, so dispose/reopen with required options after uncertainty.
+applet selection. An explicit override wins, else cached device firmware if available, else the applet version
+from SELECT. Major-zero, a present non-final qualifier, or missing/malformed version metadata admit applet
+and SCP version gates optimistically. A missing qualifier is not evidence that a known version is non-final.
+The protocol uses the known numeric version for framing, or the 5.4.3 applet floor when it is unknown.
+This feature policy does not prove availability. A failed or cancelled required SELECT still propagates.
+A confirmed reset retires
+the old protocol and clears ready/auth state. The same session reselects over a fresh protocol and reauthenticates
+with the caller's retained SCP parameters, if supplied. A refresh failure ends the session without masking
+the primary exception; completing RESET alone does not establish a new channel.
 No PC/SC transaction is created by this protocol path. Inherited IsAuthenticated records SCP setup,
 not applet management/password authority, live channel health or external HSM authentication.
 
@@ -83,17 +85,11 @@ All communication uses ISO 7816-4 APDUs with CLA=0x00.
 
 ### Credential Password Handling
 
-Credential passwords cross the public API as **UTF-8 `ReadOnlyMemory<byte>`**. Mutable byte storage lets
-the caller clear its secret; .NET strings retain immutable storage. Parameters are named plainly (`credentialPassword`,
-`derivationPassword`, `currentPassword`, `newPassword`) with no `Utf8` suffix; the UTF-8 encoding
-contract lives in the XML documentation for each parameter, not in its name.
-
-- **The caller owns the input buffer** and is responsible for zeroing it. The SDK never zeroes a
-  buffer it does not own.
-- `ValidateCredentialPassword(ReadOnlySpan<byte>)` is the single guard: **at most** 16 bytes.
-- `ParseCredentialPassword(ReadOnlySpan<byte>)` validates, then copies into a fresh 16-byte
-  buffer, null-padding the remainder.
-- The padded copy is always zeroed in a `finally` block.
+The caller supplies a `CredentialPassword` via `FromUtf8` (at most 16 encoded bytes, padded) or `FromRaw`
+(exactly 16 bytes). Both copy the input and neither modifies it. The caller owns the source and holder,
+keeps the holder alive through the operation, then disposes it and clears the separate source. The SDK
+borrows the holder and clears its encoded request buffers. The PBKDF2 derivation password remains a
+separate borrowed UTF-8 byte buffer.
 - Never log password values — log operation metadata only.
 
 Keep acquisition and all later failures inside the caller's clearing scope. The README's typed enrollment
@@ -118,15 +114,12 @@ Keep the returned `SessionKeys` in a `using` scope through the host's HSM task. 
 and rejects later property access. The Parse input and any additional caller/connector copies require
 separate clearing. Calculation returns key material; the HSM library completes host authentication.
 The calculation helper's final-response cleanup reaches the actual raw owner, including status bytes,
-after Parse/callback success or failure. Core's supported owner API is ApduResponse.Clear(); the legacy
-write-through helper is source-functional. Earlier transport/fragment/decrypted arrays remain independent,
+after Parse/callback success or failure, using `ApduResponse.Clear()`. Earlier transport/fragment/decrypted arrays remain independent,
 and retry/backend errors before that try have a different scope. Keep standalone Parse input cleanup separate.
-The session passes the full CALCULATE response to the strict 48-byte key parser. A supplied symmetric
-cryptogram can yield 56 bytes and fail parsing, as observed on a development key. Vendor Python has
-handled 56-byte input since 2023 and now ignores the suffix; vendor C withholds an 8-byte symmetric
-cryptogram and keeps strict 48-byte parsing. Preserve this request/response distinction without assigning
-the extra bytes a meaning or firmware boundary. Qualify supplied-cryptogram examples until the response
-contract is verified; omitted-cryptogram KDF checks establish no authenticated HSM handshake.
+The session passes the leading 48 CALCULATE data bytes to the strict key-region parser. It rejects
+short responses with `BadResponseException`, logs only the data length for longer responses, and
+clears the entire final owner including the suffix. Do not assign the extra bytes a meaning or firmware
+boundary; software key extraction establishes no authenticated HSM handshake.
 
 For symmetric and asymmetric CALCULATE operations, a listed credential with
 `TouchRequired=true` maps to `PolicyRequires`; `false` is silent. A missing credential is also silent;
@@ -146,12 +139,13 @@ The symmetric context is `hostChallenge[8] || hsmChallenge[8]`; the HSM challeng
 card cryptogram are generated by the HSM and relayed by its connector. The asymmetric context is
 `epkOce[65] || epkSd[65]`. Validate exact context lengths before calculation I/O and use the actual HSM
 half for a live handshake. The asymmetric static public-key input identifies the trusted HSM; GET_PUBLIC_KEY
-exports the YubiKey credential's PK-OCE for enrollment. Optional symmetric cryptogram omission skips that
+exports the YubiKey credential's PK-OCE for enrollment. Validate both static public keys as uncompressed
+on-curve P-256 points; point validation does not establish key provenance. Optional symmetric cryptogram omission skips that
 applet verification step. GET_CHALLENGE response shape and asymmetric point/cryptogram validation remain
 partly delegated to the integration layer/device; preserve that distinction in public contracts.
 
 ### EC Private Key Handling
-- `PutCredentialAsymmetricAsync` clears its padded password/request copies; the caller clears imported private-key storage
+- `PutCredentialAsymmetricAsync` clears its request copies; the caller clears imported private-key storage
 - `GenerateCredentialAsymmetricAsync` generates on-device — private key never leaves the YubiKey
 
 ## PBKDF2 Key Derivation
@@ -163,8 +157,8 @@ partly delegated to the integration layer/device; preserve that distinction in p
 - Output: 32 bytes → K-ENC[0..16], K-MAC[16..32]
 - Derived key buffer zeroed in `finally`
 - `DeriveKeys(ReadOnlyMemory<byte>)` passes the password span to PBKDF2 without an explicit helper-owned
-  input copy. The caller clears the input. `Pbkdf2DerivationTests` recomputes expected output through the
-  same .NET primitive using independently stated constants; it checks parameters rather than an external KAT.
+  input copy. The caller clears the input. `Pbkdf2DerivationTests` checks fixed ASCII and UTF-8 vectors
+  independently calculated by Python's `hashlib.pbkdf2_hmac`, with the expressions recorded alongside the vectors.
 
 ## Test Infrastructure
 
@@ -194,10 +188,9 @@ cleanup/readback when persistent credentials or a replacement management key rem
 
 ## Maintenance constraints
 
-Place secret acquisition and cleanup in one failure-safe scope; clearing after an awaited send alone
-leaves exception paths uncovered. The diagnostic example has pre-cleanup parsing/early-return paths, so
-qualify its cleanup claims and preserve its evaluation warning. It prints long-lived/session keys and
-accepts some secrets as visible strings. Its calculation menu always dispatches to the symmetric API.
+The demo tool uses `ConsoleCredentialReader` for passwords and keys and prints generated long-lived/session
+keys with a demo-only warning. It is not a production cleanup or provisioning template. Its calculation menu
+filters to symmetric credentials and wires the shared console user-presence prompt.
 
 Use the retry-checking send helper for operations whose public contract exposes typed retry failures.
 Ordinary backend error throwing bypasses the helper's status parsing, as the current GET_CHALLENGE path

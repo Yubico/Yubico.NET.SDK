@@ -61,7 +61,7 @@ internal sealed class RegistrationExtensionSession : IDisposable
         }
 
         var processors = new List<IRegistrationExtensionProcessor>();
-        if (inputs.CredProtect is not null && context.Supports(ExtensionIdentifiers.CredProtect)) processors.Add(new CredProtectProcessor(inputs.CredProtect));
+        if (CreateCredProtectProcessor(inputs.CredProtect, context) is { } credProtect) processors.Add(credProtect);
         if (inputs.CredBlob is not null && context.Supports(ExtensionIdentifiers.CredBlob)) processors.Add(new CredBlobProcessor(inputs.CredBlob));
         if (inputs.MinPinLength is not null && context.Supports(ExtensionIdentifiers.MinPinLength)) processors.Add(new MinPinLengthProcessor());
         if (inputs.LargeBlob is not null && LargeBlobProcessor.ForRegistration(inputs.LargeBlob, requireResidentKey, context) is { } largeBlob) processors.Add(largeBlob);
@@ -71,6 +71,18 @@ internal sealed class RegistrationExtensionSession : IDisposable
         if (inputs.PreviewSign is not null && context.Supports(ExtensionIdentifiers.PreviewSign)) processors.Add(new PreviewSignProcessor(inputs.PreviewSign, options.UserVerification));
 #pragma warning restore YKEXP001
         return new RegistrationExtensionSession(processors, requested: true);
+    }
+
+    private static CredProtectProcessor? CreateCredProtectProcessor(Inputs.CredProtectInput? input, ExtensionContext context)
+    {
+        if (input is null)
+            return null;
+        if (context.Supports(ExtensionIdentifiers.CredProtect))
+            return new CredProtectProcessor(input);
+        if (input.EnforceCredentialProtectionPolicy)
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "Credential protection is required but the authenticator does not advertise credProtect.");
+        return null;
     }
 
     /// <summary>The union of the processors' token permissions.</summary>

@@ -337,12 +337,10 @@ for secret-handling applications; there is no writable-result-span API to use fo
 
 ### Request protection and blob storage
 
-`CredProtect` forwards the requested policy and reports the returned policy, but
-`EnforceCredentialProtectionPolicy` is **not currently enforced** by this client. Do not rely on that
-flag to prevent unprotected creation. Checking the result can detect an unacceptable policy only
-after a credential has been created; it is not equivalent to pre-creation enforcement. CTAP2.3 §12.1
-places enforcement at the platform and says it SHOULD NOT create without the requested protection
-for policies 2/3 when enforcement is requested.
+`CredProtect` forwards the requested policy and reports the returned policy. With
+`EnforceCredentialProtectionPolicy`, registration refuses to create a credential when GetInfo does
+not advertise `credProtect`. Optional requests remain omittable. This checks advertised capability,
+not independent proof of policy enforcement by the authenticator (CTAP 2.3 §12.1).
 
 Large-blob support uses `largeBlobKey` plus `authenticatorLargeBlobs`, not the alternative direct CTAP
 `largeBlob` extension. Request a discoverable credential (`ResidentKey = Required` when essential)

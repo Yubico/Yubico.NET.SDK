@@ -433,9 +433,8 @@ Keep these conditions attached to public guidance when changing extension flow:
 - PRF does not enforce the verified-variant UV override. Its SDK-produced read-only results and
   intermediate copies have no disposal/zeroing guarantee; clearing a caller copy or disposing the
   client does not clear them. PRF results are derived secrets, not public metadata.
-- credProtect enforcement is not implemented, including unsupported-device handling. CTAP2.3 §12.1
-  assigns the platform a SHOULD NOT for creating without requested policies 2/3 when enforcement is
-  true; forwarding the integer or inspecting output after creation is not enforcement.
+- Enforced credProtect requires advertised support before creation (CTAP2.3 §12.1). Optional requests
+  are omitted on unsupported authenticators. Advertisement is not independent proof of enforcement.
 - LargeBlob uses largeBlobKey/storage-array operations, not the alternative direct extension.
   Required support needs discoverable creation: a discouraged resident key is rejected before GetInfo;
   a preferred resident key needs advertised `rk` support. A missing returned key reports unsupported.

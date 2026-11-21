@@ -19,6 +19,7 @@ using System.Text;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
+using Yubico.YubiKit.Ctap2.Extensions;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
@@ -31,6 +32,40 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 
 public class WebAuthnClientMakeCredentialTests
 {
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public async Task MakeCredential_CredProtectEnforcement_RejectsUnsupportedBeforeCreation(bool supported, bool enforce)
+    {
+        _mockBackend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(
+            extensions: supported ? ["credProtect"] : []));
+        var options = new PublicKeyCredentialCreationOptions
+        {
+            Challenge = new byte[32],
+            Rp = new("example.com", "Example"),
+            User = new(new byte[16], "example", "Example"),
+            PubKeyCredParams = [CoseAlgorithm.Es256],
+            Extensions = new RegistrationExtensionInputs(CredProtect: new(CredProtectPolicy.UserVerificationRequired, enforce))
+        };
+        _mockBackend.MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
+        var ct = TestContext.Current.CancellationToken;
+
+        if (enforce && !supported)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.MakeCredentialAsync(options, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
+            await _mockBackend.DidNotReceive().MakeCredentialAsync(Arg.Any<BackendMakeCredentialRequest>(), Arg.Any<CancellationToken>());
+        }
+        else
+        {
+            await _client.MakeCredentialAsync(options, cancellationToken: ct);
+            await _mockBackend.Received(1).MakeCredentialAsync(
+                Arg.Is<BackendMakeCredentialRequest>(request => request.Extensions.HasValue == supported), Arg.Any<CancellationToken>());
+        }
+    }
+
     [Theory]
     [InlineData(LargeBlobSupport.Required)]
     [InlineData(LargeBlobSupport.Preferred)]

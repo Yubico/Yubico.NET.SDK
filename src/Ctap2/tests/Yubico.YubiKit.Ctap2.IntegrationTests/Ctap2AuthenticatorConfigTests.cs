@@ -79,7 +79,7 @@ public class Ctap2AuthenticatorConfigTests
                 var config = new AuthenticatorConfig(session, clientPin.Protocol, configPinToken);
 
                 // Toggle alwaysUv
-                await config.ToggleAlwaysUvAsync();
+                await config.SetAlwaysUvAsync(!initialAlwaysUv);
 
                 // Read new state
                 var updatedInfo = await session.GetInfoAsync();
@@ -103,7 +103,7 @@ public class Ctap2AuthenticatorConfigTests
                 }
 
                 var restoreConfig = new AuthenticatorConfig(session, clientPin.Protocol, restorePinToken);
-                await restoreConfig.ToggleAlwaysUvAsync();
+                await restoreConfig.SetAlwaysUvAsync(initialAlwaysUv);
 
                 CryptographicOperations.ZeroMemory(restorePinToken);
             }

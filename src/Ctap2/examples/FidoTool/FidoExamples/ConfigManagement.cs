@@ -115,7 +115,13 @@ public static class ConfigManagement
                 cancellationToken: cancellationToken);
 
             var config = new AuthenticatorConfig(session, protocol, pinToken);
-            await config.ToggleAlwaysUvAsync(cancellationToken);
+            var info = await session.GetInfoAsync(cancellationToken);
+            if (!info.Options.TryGetValue("alwaysUv", out bool current))
+            {
+                return ConfigResult.Failed("The authenticator does not advertise always-UV support.");
+            }
+
+            await config.SetAlwaysUvAsync(!current, cancellationToken);
 
             return ConfigResult.Succeeded();
         }
@@ -140,8 +146,8 @@ public static class ConfigManagement
     /// Sets minimum-PIN policy in Unicode code points, not the PIN itself.
     /// </summary>
     /// <remarks>
-    /// Increasing the minimum can force a PIN change even when forceChangePin is false. Nonempty RP IDs
-    /// replace mutable disclosure entries; null/empty lists and false-force fields are omitted by the
+    /// Increasing the minimum can force a PIN change even when forceChangePin is false. Supplied RP IDs
+    /// replace mutable disclosure entries; null lists are omitted by the
     /// helper. An empty list does not clear recipients. minPinLength extension output only reports policy.
     /// </remarks>
     public static async Task<ConfigResult> SetMinPinLengthAsync(

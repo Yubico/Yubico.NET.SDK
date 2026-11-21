@@ -131,8 +131,8 @@ Yubico.YubiKit.Ctap2.Cbor.CtapRequestBuilder.WithValue(int key, System.Action<Sy
 Yubico.YubiKit.Ctap2.Config.AuthenticatorConfig
 Yubico.YubiKit.Ctap2.Config.AuthenticatorConfig.AuthenticatorConfig(Yubico.YubiKit.Ctap2.ICtap2Session! session, Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol! protocol, System.ReadOnlyMemory<byte> pinUvAuthToken) -> void
 Yubico.YubiKit.Ctap2.Config.AuthenticatorConfig.EnableEnterpriseAttestationAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.Ctap2.Config.AuthenticatorConfig.SetMinPinLengthAsync(int newMinPinLength, System.Collections.Generic.IReadOnlyList<string!>? rpIds = null, bool forceChangePin = false, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
-Yubico.YubiKit.Ctap2.Config.AuthenticatorConfig.ToggleAlwaysUvAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Ctap2.Config.AuthenticatorConfig.SetAlwaysUvAsync(bool enabled, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Yubico.YubiKit.Ctap2.Config.AuthenticatorConfig.SetMinPinLengthAsync(int? newMinPinLength = null, System.Collections.Generic.IReadOnlyList<string!>? rpIds = null, bool? forceChangePin = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm
 Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.CoseAlgorithm() -> void
 Yubico.YubiKit.Ctap2.Cose.CoseAlgorithm.CoseAlgorithm(int Value) -> void

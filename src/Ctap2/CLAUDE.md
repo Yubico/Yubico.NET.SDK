@@ -335,8 +335,9 @@ begin, then `total - 1` next calls. A successful begin must report 1–65535 ent
 `NoCredentials` on begin is the empty result. Do not interleave other device operations. A continuation failure throws rather than
 returning partial results. `CredentialManagement.Dispose` rejects subsequent operations but neither
 owns nor clears the borrowed token, and does not end device authorization. Config/bio/storage
-helpers also borrow these dependencies. Toggle alwaysUv only after reading current state; after an
-uncertain outcome re-read before repeating. minPinLength disclosure is not setting policy.
+helpers also borrow these dependencies. `SetAlwaysUvAsync` reads current state before sending a toggle;
+after an uncertain outcome, repeat with the same desired state. `SetMinPinLengthAsync` can omit the
+length, send an empty RP list or send explicit false. minPinLength disclosure is not setting policy.
 
 Bio helpers have known standard subcommand/authentication/timeout and template-array decoding limitations.
 Do not claim interoperable enrollment from fake fixtures or sensor metadata. Retain the begin template

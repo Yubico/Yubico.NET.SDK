@@ -37,8 +37,8 @@ namespace Yubico.YubiKit.Ctap2.Config;
 /// <para>
 /// Read fresh GetInfo before choosing an operation: authnrCfg=true advertises command
 /// support, while individual subcommands can still be unsupported. Check ep, alwaysUv
-/// or setMinPINLength as appropriate. The helper does not query or enforce capabilities
-/// or firmware thresholds. The SDK's firmware feature metadata is not qualified support
+/// or setMinPINLength as appropriate. Except for reading alwaysUv before toggling it,
+/// the helper does not query or enforce capabilities or firmware thresholds. The SDK's firmware feature metadata is not qualified support
 /// for every setting on every model. Read GetInfo again after success to inspect results.
 /// </para>
 /// <para>
@@ -103,8 +103,9 @@ public sealed class AuthenticatorConfig
     }
 
     /// <summary>
-    /// Toggles the alwaysUv setting on the authenticator.
+    /// Sets the alwaysUv setting on the authenticator, toggling only when needed.
     /// </summary>
+    /// <param name="enabled">The requested alwaysUv state.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <remarks>
     /// <para>
@@ -113,17 +114,28 @@ public sealed class AuthenticatorConfig
     /// presence indicates support and its Boolean value is the current enabled state.
     /// </para>
     /// <para>
-    /// This toggles state rather than setting a requested value. Read fresh GetInfo before
-    /// deciding to toggle and again after success. The device can refuse disabling with
+    /// Reads fresh GetInfo before each attempt and sends a toggle only if the current
+    /// value differs. Read GetInfo again to verify success if needed. The device can refuse disabling with
     /// OperationDenied (Section 6.11.2); support does not guarantee both directions work.
     /// Enabling can also disable makeCredUvNotRqd. If a sent command's outcome is unknown,
-    /// reconcile the current state before another toggle: blindly repeating it can invert
-    /// the intended result. No automatic retry or rollback is provided.
+    /// another call reads the current state again. No automatic retry or rollback is provided.
     /// </para>
     /// </remarks>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
-    public async Task ToggleAlwaysUvAsync(CancellationToken cancellationToken = default)
+    /// <exception cref="NotSupportedException">GetInfo does not advertise alwaysUv.</exception>
+    public async Task SetAlwaysUvAsync(bool enabled, CancellationToken cancellationToken = default)
     {
+        var info = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+        if (!info.Options.TryGetValue("alwaysUv", out bool current))
+        {
+            throw new NotSupportedException("The authenticator does not advertise alwaysUv support.");
+        }
+
+        if (current == enabled)
+        {
+            return;
+        }
+
         var payload = BuildCommandPayload(ConfigSubCommand.ToggleAlwaysUv);
         await SendConfigCommandAsync(payload, cancellationToken).ConfigureAwait(false);
     }
@@ -132,11 +144,12 @@ public sealed class AuthenticatorConfig
     /// Sets the minimum PIN length required by the authenticator.
     /// </summary>
     /// <param name="newMinPinLength">The new ClientPIN minimum in Unicode code points.
-    /// This helper accepts 4-63; device policy and UTF-8 PIN-byte limits apply separately.</param>
+    /// Pass null to leave the minimum unchanged. This helper accepts 4-63; device policy and
+    /// UTF-8 PIN-byte limits apply separately.</param>
     /// <param name="rpIds">Optional replacement mutable list of RP IDs allowed to receive
-    /// minPinLength extension output. Null and empty lists are omitted, not requests to clear the list.</param>
+    /// minPinLength extension output. Null omits the field; an empty list removes mutable entries.</param>
     /// <param name="forceChangePin">If true, request a PIN change before PIN-token acquisition.
-    /// False is omitted, not an explicit request to clear forcePINChange.</param>
+    /// Null omits the field. False is transmitted, but does not clear an already-set flag.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <remarks>
     /// <para>
@@ -158,8 +171,7 @@ public sealed class AuthenticatorConfig
     /// Check setMinPINLength support, and minPinLength extension support before supplying
     /// RP IDs. A nonempty list replaces previously added mutable recipients and is combined
     /// with any immutable preconfigured list; it is not an append-only grant. Device storage
-    /// limits still apply. This helper always sends a numeric minimum and cannot express
-    /// a policy-only request with the length omitted. It does not change RP account policy
+    /// limits still apply. This helper does not change RP account policy
     /// or verify extension output; read fresh GetInfo after success to inspect minimum/force state.
     /// </para>
     /// </remarks>
@@ -168,9 +180,9 @@ public sealed class AuthenticatorConfig
     /// </exception>
     /// <exception cref="CtapException">Thrown when the operation fails.</exception>
     public async Task SetMinPinLengthAsync(
-        int newMinPinLength,
+        int? newMinPinLength = null,
         IReadOnlyList<string>? rpIds = null,
-        bool forceChangePin = false,
+        bool? forceChangePin = null,
         CancellationToken cancellationToken = default)
     {
         if (newMinPinLength < 4)
@@ -237,25 +249,28 @@ public sealed class AuthenticatorConfig
     }
 
     private ReadOnlyMemory<byte> BuildSetMinPinLengthPayload(
-        int newMinPinLength,
+        int? newMinPinLength,
         IReadOnlyList<string>? rpIds,
-        bool forceChangePin)
+        bool? forceChangePin)
     {
         // Build the subCommandParams map first
         var paramsWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        var paramsCount = 1; // always have newMinPINLength
-        if (rpIds is { Count: > 0 }) paramsCount++;
-        if (forceChangePin) paramsCount++;
+        var paramsCount = newMinPinLength.HasValue ? 1 : 0;
+        if (rpIds is not null) paramsCount++;
+        if (forceChangePin.HasValue) paramsCount++;
 
         paramsWriter.WriteStartMap(paramsCount);
 
         // 0x01: newMinPINLength
-        paramsWriter.WriteInt32(1);
-        paramsWriter.WriteInt32(newMinPinLength);
+        if (newMinPinLength is int length)
+        {
+            paramsWriter.WriteInt32(1);
+            paramsWriter.WriteInt32(length);
+        }
 
-        // 0x02: minPinLengthRPIDs; null/empty omit the field, not a list-clearing request.
-        if (rpIds is { Count: > 0 })
+        // 0x02: minPinLengthRPIDs; an empty list is distinct from omission.
+        if (rpIds is not null)
         {
             paramsWriter.WriteInt32(2);
             paramsWriter.WriteStartArray(rpIds.Count);
@@ -266,11 +281,11 @@ public sealed class AuthenticatorConfig
             paramsWriter.WriteEndArray();
         }
 
-        // 0x03: forceChangePin; false omits the field rather than clearing the device flag.
-        if (forceChangePin)
+        // 0x03: forceChangePin; explicit false is distinct from omission.
+        if (forceChangePin is bool force)
         {
             paramsWriter.WriteInt32(3);
-            paramsWriter.WriteBoolean(true);
+            paramsWriter.WriteBoolean(force);
         }
 
         paramsWriter.WriteEndMap();

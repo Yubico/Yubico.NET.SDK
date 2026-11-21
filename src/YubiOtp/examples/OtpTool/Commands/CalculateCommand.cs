@@ -33,6 +33,11 @@ public static class CalculateCommand
 
         try
         {
+            if (challenge.Length > 64)
+            {
+                throw new ArgumentException("CHALLENGE must be at most 64 bytes.");
+            }
+
             await using var session = await DeviceHelper.CreateSessionAsync(ct, calculate: true);
 
             var response = await session.CalculateHmacSha1Async(slot, challenge, ct);

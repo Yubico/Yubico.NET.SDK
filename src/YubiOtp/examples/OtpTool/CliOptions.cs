@@ -521,7 +521,7 @@ public sealed record CliOptions
 
                 USAGE: OtpTool calculate SLOT CHALLENGE
 
-                CHALLENGE is a required hex-encoded value. USB calculation uses OTP HID.
+                CHALLENGE is a required hex-encoded value. Calculation prefers OTP HID when available.
                 """,
 
             "ndef" => """

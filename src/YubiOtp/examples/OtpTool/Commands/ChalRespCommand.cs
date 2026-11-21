@@ -51,6 +51,7 @@ public static class ChalRespCommand
 
         try
         {
+            using var config = new HmacSha1SlotConfiguration(hmacKey);
             if (!options.Force && !options.Json)
             {
                 if (!AnsiConsole.Confirm(
@@ -63,8 +64,6 @@ public static class ChalRespCommand
             }
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
-
-            using var config = new HmacSha1SlotConfiguration(hmacKey);
 
             if (options.RequireTouch)
             {

@@ -52,6 +52,7 @@ public static class HotpCommand
 
         try
         {
+            using var config = new HotpSlotConfiguration(hmacKey, options.Imf ?? 0);
             if (!options.Force && !options.Json)
             {
                 if (!AnsiConsole.Confirm(
@@ -64,8 +65,6 @@ public static class HotpCommand
             }
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
-
-            using var config = new HotpSlotConfiguration(hmacKey, options.Imf ?? 0);
 
             if (options.Digits == 8)
             {

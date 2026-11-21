@@ -326,8 +326,8 @@ public class PivSessionTests
     [Fact]
     public async Task SignOrDecryptAsync_TransmitsAuthenticateTemplateWithChallenge()
     {
-        // Response data: dynamic-auth template(7C) containing one-byte result in response tag(82), then SW 9000.
-        var connection = CreateInitializedConnection([0x7C, 0x03, 0x82, 0x01, 0xAA, 0x90, 0x00]);
+        byte[] expected = Convert.FromHexString("3006020101020102");
+        var connection = CreateInitializedConnection([0x7C, 0x0A, 0x82, 0x08, .. expected, 0x90, 0x00]);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
         // ECC P-256 sign/decrypt input is 32 bytes; 0xCC is a sentinel proving the payload survives encoding.
         var data = new byte[32];
@@ -339,7 +339,7 @@ public class PivSessionTests
             data,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal([0xAA], result.ToArray());
+        Assert.Equal(expected, result.ToArray());
         var command = LastCommand(connection);
         // APDU header: INS=GENERAL AUTHENTICATE, P1=algorithm, P2=target slot.
         Assert.Equal(0x87, command[1]);

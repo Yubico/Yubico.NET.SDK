@@ -48,8 +48,8 @@ public class PrivateKeyOperationsTests
     [Fact]
     public async Task SignOrDecryptAsync_ZeroesOriginalResponseBuffer()
     {
-        // Simulates an RSA decrypt / ECC sign response: 7C LL [ 82 LL2 <raw plaintext/signature> ].
-        byte[] payload = Enumerable.Range(1, 32).Select(i => (byte)i).ToArray();
+        // 7C LL [ 82 LL2 <DER signature> ].
+        byte[] payload = Convert.FromHexString("3006020101020102");
         byte[] inner = [0x82, (byte)payload.Length, .. payload];
         byte[] wrapped = [0x7C, (byte)inner.Length, .. inner];
 
@@ -105,7 +105,7 @@ public class PrivateKeyOperationsTests
     [Fact]
     public async Task SignOrDecryptAsync_WhenResolutionThrows_ZeroesCommandAndResponseBuffers()
     {
-        byte[] payload = Enumerable.Range(1, 32).Select(i => (byte)i).ToArray();
+        byte[] payload = Convert.FromHexString("3006020101020102");
         byte[] inner = [0x82, (byte)payload.Length, .. payload];
         byte[] wrapped = [0x7C, (byte)inner.Length, .. inner];
         var backend = new CryptoCapturingBackend(wrapped);

@@ -213,6 +213,9 @@ ECDSA accepts a digest and returns ASN.1 DER `SEQUENCE(r,s)`. Ed25519 accepts th
 a raw 64-byte signature. RSA signing accepts a complete host-prepared EMSA-PKCS1-v1_5 or EMSA-PSS encoded
 representative and returns a modulus-sized result. A hash alone is insufficient RSA signature encoding.
 The overload without `KeyType` reads metadata (5.3+); older keys need the explicit type, matched to the slot.
+Before returning output or reporting user-presence completion, the SDK checks exact RSA and Ed25519
+widths, canonical ECDSA DER with both scalars in the curve's range, and agreement output width.
+Shape validation does not replace host verification of signatures.
 
 ### Decrypt and clear the plaintext
 

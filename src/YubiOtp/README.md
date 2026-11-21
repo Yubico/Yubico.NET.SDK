@@ -113,8 +113,9 @@ default to `AppendCr` and `FastTrigger`; HMAC additionally defaults to short-cha
 The two access-code arguments have different jobs. `currentAccessCode` authenticates a write to an already
 protected slot. `accessCode` sets the new six-byte code. Pass the same code in both to retain protection;
 omitting the new code sends zeros and removes protection where the firmware permits. Access codes protect
-writes, not challenge calculations, and do not encrypt the transport. Validate both code lengths before
-calling: the current implementation can leave internal secret copies uncleared on invalid-code preflight failures.
+writes, not challenge calculations, and do not encrypt the transport. The SDK validates both code lengths
+before copying secret configuration fields. Cleanup of assembled write buffers does not clear independent
+transport copies.
 
 This update fragment assumes `byte[] accessCode` contains the slot's current six-byte code, owned by this
 task, and a keyboard slot previously programmed with `AllowUpdate`. It deliberately chooses all retained

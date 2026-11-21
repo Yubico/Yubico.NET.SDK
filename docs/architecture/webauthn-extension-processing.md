@@ -4,9 +4,9 @@ This document defines how the WebAuthn client turns relying-party extension inpu
 extension requests and turns authenticator extension outputs into client extension results:
 
 > Extension inputs are prepared **per ceremony attempt**, after the authenticator is known, after the
-> PIN/UV decision and any required acquisition, and (for allow-list assertions) after a credential
-> has been selected. Outputs are prepared before any acquired token is disposed. Each extension
-> owns its own per-attempt state.
+> UV decision and any required token acquisition. Defer credential-specific inputs until the
+> credential is known unless the same input applies to every candidate in the request. Outputs are
+> prepared before any acquired token is disposed. Each extension owns its own per-attempt state.
 
 The processors and sessions are internal implementation components, not a public plugin interface.
 The model separates client policy from wire encoding; it does not establish cross-SDK parity or full
@@ -134,13 +134,19 @@ Explicit false enablement/support/write results remain different states.
 1. Validate options; build client data; `GetInfo` (cached).
 2. Resolve `requireResidentKey` against GetInfo.
 3. Create the extension session with inputs, creation options, effective RK and context.
-4. Decide UV using `MakeCredential | session.Permissions`; acquire a token if required/available.
-5. Run `PrepareAsync`, then exclude-list pre-flight through `CredentialFilter` with `up:false`.
-   A match is carried into the final makeCredential exclude list, not rejected directly from the
-   silent probe. Without a token, probes omit PIN-auth fields. With one, probes authenticate a zero
-   client-data hash; registration re-mints the token afterward for the final command.
-6. `session.PrepareInputs` → extensions CBOR → `authenticatorMakeCredential`, with the matched
-   descriptor or empty exclude list and normal required-UP policy. Exclusion maps to `InvalidState`.
+4. Decide UV using the ceremony and extension permissions; include `GetAssertion` for a nonempty
+   exclude list. Acquire a token when the chosen method uses one. Required means verification:
+   ordinary ceremonies can use configured built-in `uv:true` without a token. Extra permissions
+   still require a permission-scoped token.
+5. Run `PrepareAsync`. With tokenless built-in UV, carry the eligible exclude list into creation
+   if the full request fits the count and message-size limits. Otherwise use a positive silent
+   selection already obtained or check eligible entries with verified assertions. A silent miss
+   is not proof of absence. On the ordinary path, probe with `up:false` and re-mint any token used
+   to authenticate the probe before sending the final command.
+6. Send `authenticatorMakeCredential` with the prepared extension inputs and required-UP policy.
+   If a probe was needed, carry the matched descriptor or an empty list into this command; do not
+   reject directly from the probe or replay tokenless creation with a smaller list after a device error.
+   Exclusion maps to `InvalidState`.
 7. `session.PrepareOutputsAsync(response, token)` → `RegistrationExtensionOutputs`.
 8. Dispose the token.
 
@@ -148,19 +154,21 @@ Explicit false enablement/support/write results remain different states.
 
 1. Validate options; build client data; `GetInfo` (cached).
 2. Create the extension session with inputs, original allow list and context.
-3. Decide UV using `GetAssertion | session.Permissions`; acquire a token if required/available, then
-   run `PrepareAsync`.
-4. **Selection.** If `allowCredentials` is non-empty, `CredentialFilter.SelectAsync` probes it in
-   chunks of `maxCredentialCountInList` with `up: false` and returns the first credential the
-   authenticator recognises, or null. This can take multiple round trips; probes request no user
-   presence. A chunk's internal credential choice follows the authenticator response, not a promise
-   of deterministic ordering among all matching descriptors.
-5. `session.PrepareInputs(builder, selected, token)` → extensions CBOR.
-6. `authenticatorGetAssertion` with `allowList = [selected]`. If nothing matched, a **dummy descriptor**
-   (`id = 0x00`, the first entry's type) is sent so user presence is still requested; the
-   main `NO_CREDENTIALS`/`INVALID_CREDENTIAL` responses produce an empty match list. The dummy request
-   avoids returning the silent miss directly; it does not prove equal timings/prompts or that absence
-   cannot be inferred. With no allow list, `GetNextAssertion` can enumerate discoverable assertions.
+3. Decide UV using `GetAssertion | session.Permissions`. Acquire a token when the chosen method uses one.
+4. With a nonempty allow list, probe eligible entries in chunks with `up:false` and keep the first
+   associated match. The authenticator chooses within each chunk. If built-in UV was selected without
+   a token and the silent probe misses, check eligible chunks with the ceremony hash, `uv:true` and
+   requested UP. Require both flags in a successful response and associate its ID with the sent chunk.
+5. Prepare extension inputs for the selected credential. In verified fallback, send PRF in the first
+   assertion only if the effective input is common to the chunk; defer differing per-ID inputs and
+   previewSign when the credential is not yet known. If the selected credential needs a deferred input,
+   discard the provisional assertion and send one more verified assertion for that credential. It can
+   require another gesture and advance the counter again; the SDK does not cache gestures.
+6. On the ordinary path, send `authenticatorGetAssertion` with the selected singleton. An ordinary
+   miss instead sends a **dummy descriptor** (`id = 0x00`, the first entry's type) to request presence
+   before returning no match. This does not prove equal timing or prompts. On verified fallback,
+   return only the final associated assertion, or no match if the eligible entries are exhausted.
+   With no allow list, `GetNextAssertion` can enumerate discoverable assertions.
 7. For every returned assertion, `session.PrepareOutputsAsync(response, token)` runs **eagerly** while
    the token is live; the results are captured in `MatchedCredential`, whose `SelectAsync` performs
    no further authenticator work.
@@ -168,10 +176,9 @@ Explicit false enablement/support/write results remain different states.
 
 ### `CredentialFilter`
 
-Final descriptor omission currently loses the selected ID during response construction. CTAP2.0
-§5.2 permits omission for a singleton allow list; CTAP2.1/2.3 §6.2.2 require the descriptor. Probe
-singleton recovery does not repair that final-response gap. Only an original single-entry request
-gives the application an unambiguous requested ID; guessing the first of multiple entries is unsafe.
+For CTAP2.0 omission compatibility, the client can recover a missing descriptor only from the
+single real descriptor sent on the wire. It copies that ID into the returned result. It never uses
+a dummy or guesses from the original list. A present ID must agree with the selected credential.
 RP verification remains mandatory.
 
 The shared probe implementation:
@@ -181,6 +188,10 @@ The shared probe implementation:
 - probes chunks with `up:false` and, when there is a token, `pinUvAuthParam` over a 32-byte zero client-data hash; without a token, PIN-auth fields are omitted;
 - on `CTAP2_ERR_REQUEST_TOO_LARGE` with a chunk larger than one, shrinks the chunk and retries;
 - on `CTAP2_ERR_NO_CREDENTIALS` advances to the next chunk; any other status propagates.
+
+Verified checks also respect the encoded message-size limit and refine or advance only on the
+concrete CTAP session's current-exchange outcome. A thrown status from a custom `ICtap2Session`
+does not establish that outcome: the verified fallback stops rather than trying another chunk.
 
 ## Flow invariants
 

@@ -260,21 +260,25 @@ Resolution uses an uncancelled token and can delay return after cancellation; a 
 receives no resolution callback. Keep prompt resources usable until their actual callbacks finish.
 
 User verification is separate from presence. `UserVerification` expresses a preference; authenticator
-policy and extension permissions also affect the SDK's PIN/UV-token decision:
+policy and extension permissions also affect whether and how the SDK requests verification:
 
 | Preference | Behavior |
 |---|---|
-| `Required` | Requires a token; fails with `NotAllowed` when no available PIN or built-in UV method can satisfy it. Lower-level acquisition failures can also propagate. |
-| `Preferred` (default) | Tries configured, available verification; can proceed without a token if no method can be supplied. |
-| `Discouraged` | Normally avoids a token. Configured verification can still be required by `alwaysUv`, older makeCredential policy, or privileged extension permissions such as `LargeBlobWrite`. |
+| `Required` | Requires verification, not necessarily a token. Fails with `NotAllowed` when no method is available; lower-level failures can also propagate. |
+| `Preferred` (default) | Tries configured, available verification; can proceed without verification if no method is available. |
+| `Discouraged` | Normally skips verification. `alwaysUv`, older makeCredential policy, or privileged extension permissions can still require it. |
 
-Extension permissions are combined with ceremony permissions before this decision. The client can
-escalate once to Required after `PUAT_REQUIRED`. A configured PIN is not an obtainable PIN unless the
-caller supplies it or a prompt can acquire it. PRF has a separate UV limitation described below.
+For an ordinary ceremony, configured built-in UV can satisfy Required with `uv: true` when the
+authenticator does not support permission tokens and no usable PIN route is selected. Extra
+permissions, such as `LargeBlobWrite`, require a permission-scoped token. The client can escalate
+once to Required after `PUAT_REQUIRED` from an eligible credential command. A configured PIN is not
+obtainable unless the caller supplies it or a prompt can acquire it. PRF has a separate UV policy
+described below.
 
-Registration checks nonempty `ExcludeCredentials` lists in device-sized batches, even when verification is
-discouraged and no PIN token is used. The final registration retains required user presence before reporting that a
-credential is excluded.
+Without tokenless built-in UV, registration probes nonempty `ExcludeCredentials` lists in device-sized
+batches, even when verification is discouraged and no token is used. With tokenless built-in UV, the
+authenticator checks a fitting list during creation. The final registration retains required user
+presence before reporting that a credential is excluded.
 
 ### Cancellation and failures
 

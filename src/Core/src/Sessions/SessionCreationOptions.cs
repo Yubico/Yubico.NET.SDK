@@ -35,10 +35,10 @@ public sealed class SessionCreationOptions
     public ProtocolConfiguration? ProtocolConfiguration { get; init; }
 
     /// <summary>
-    ///     Gets optional Secure Channel Protocol key parameters. Sessions borrow them for initialization;
-    ///     sessions that retain them for reset reinitialization, including OATH and Security Domain, may
-    ///     use them again after initialization. For those sessions, keep the parameters alive and unchanged
-    ///     until session disposal. The caller retains ownership and is responsible for disposing them.
+    ///     Gets optional Secure Channel Protocol key parameters. Sessions borrow them for initialization.
+    ///     Keep them alive and unchanged through session disposal when the applet reuses them for reset,
+    ///     as OATH does. Security Domain borrows them for its initial handshake and uses its own default
+    ///     SCP03 parameters after reset. The caller owns and disposes any supplied parameters.
     /// </summary>
     public ScpKeyParameters? ScpKeyParameters { get; init; }
 
@@ -50,8 +50,9 @@ public sealed class SessionCreationOptions
     /// <summary>
     ///     Gets an explicit override for the effective firmware version used to configure the protocol and
     ///     evaluate feature support after required applet initialization exchanges complete. Security Domain
-    ///     is the exception: it cannot detect firmware, so this value is its only exact version source and
-    ///     directly controls feature gates; without it, that session conservatively assumes version 5.3.0.
+    ///     has no version probe of its own. Without an override, its device factory uses cached device
+    ///     firmware when available. Without either source, the session uses 5.3.0 framing and admits
+    ///     firmware-gated attempts without assuming support.
     /// </summary>
     public FirmwareVersion? FirmwareVersionOverride { get; init; }
 

@@ -64,10 +64,9 @@ Options can describe state: `clientPin: false` means PIN support with no PIN set
 For a one-shot read, use `device.GetCtap2InfoAsync()` **instead of** opening this session, or after disposing
 it. The helper opens/closes its own session and performs an initialization probe plus the requested read.
 
-For decoded encrypted GetInfo metadata, absent `EncIdentifier` and `EncCredStoreState` fields currently
-become present zero-length `ReadOnlyMemory<byte>?` values. `HasValue` is therefore not evidence that the
-authenticator returned a field or supports the feature; nullable presence/length also cannot distinguish
-absence from an encoded empty byte string. Inspect the original CBOR in `info.RawData` for field presence.
+For decoded encrypted GetInfo metadata, absent `EncIdentifier` and `EncCredStoreState` fields are
+`null`. An encoded empty byte string is present with length zero. Presence does not establish that
+the bytes can be decrypted. The original CBOR is available in `info.RawData`.
 
 ## Common operations
 
@@ -302,9 +301,9 @@ Core's [cryptographic catalog](../Core/README.md#cryptographic-metadata) exposes
 with its existing PascalCase constants and unknown-value preservation. A Core COSE mapping is not CTAP2
 operation/profile support. CTAP's PIN/UV key-agreement profile requires EC2/P-256, alg=-25, 32-byte X/Y
 coordinates, an on-curve point and no other optional key parameters. The current helper checks coordinate
-storage types and lengths and imports the point as P-256 through the provider, but omits peer kty/crv/alg
-and optional-parameter checks. This is a validation gap, not intended forward compatibility. Catalog
-applicability supplies none of those missing checks and must not restrict unknown numeric response identifiers.
+storage types and lengths and requires peer `kty = 2`, `alg = -25`, and `crv = 1` before importing
+the point as P-256 through the provider. The SDK ignores unknown extra labels and does not echo them
+in its platform key. These checks are specific to PIN/UV key agreement, not general COSE catalog lookup.
 
 Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, GetInfo follows channel
 preparation directly; there is no applet-selection step.

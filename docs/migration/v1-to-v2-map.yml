@@ -503,7 +503,13 @@ mappings:
     evidence:
       - yubikit:src/SecurityDomain/src/SecureChannelException.cs
       - yubikit:docs/plans/yubikit-gaps-remediation/ISA.md
-    notes: With SCP parameters supplied, SecurityDomainSession.CreateAsync and post-reset reinitialization wrap ApduException, BadResponseException, or NotSupportedException from secure-channel configuration in SecureChannelException. The original failure is preserved as InnerException; StatusWord is copied only from an immediate ApduException, not a nested exception. Protocol preparation and application selection occur before this catch, cancellation is rethrown unchanged, and later per-operation failures retain their original exception types.
+    notes: >-
+      Session creation with supplied SCP parameters and post-reset setup with the SDK's default SCP03
+      parameters wrap ApduException, BadResponseException, or NotSupportedException from secure-channel
+      configuration in SecureChannelException. The original failure is preserved as InnerException;
+      StatusWord comes from the first ApduException in that chain, even if nested, or is null if there is none.
+      Protocol preparation and application selection occur before this catch, cancellation is rethrown unchanged,
+      and later per-operation failures retain their original exception types.
     last_reviewed_commit: e042280ed7ec03a0250745ff3ff272680e5570b9
   - id: openpgp-exception
     status: assisted

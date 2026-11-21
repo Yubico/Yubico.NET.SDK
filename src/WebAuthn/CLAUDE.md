@@ -257,18 +257,18 @@ Unicode code points while its encoded PIN limit is expressed in UTF-8 bytes.
 ### User Verification Decision
 
 `UvDecisionLogic.Decide` (`src/Client/UserVerification/UvDecision.cs`) answers two questions in
-order, and keeping them separate is the point: **whether** the ceremony needs a PIN/UV auth token,
-and only then **which** method supplies it.
+order: **whether** the ceremony needs verification, then **how** to satisfy it (a PIN/UV token or
+built-in verification on the credential command).
 
 "Configured" throughout means the option is advertised **and** enabled. A YubiKey with no PIN set
 still advertises `clientPin: false`, so testing for the key's presence rather than its value reads
 as "verification is available" on a key that has none.
 
-| Preference | Needs a token? |
+| Preference | Verification policy |
 |---|---|
-| `Required` | Always. Throws `NotAllowed` if nothing can satisfy it. |
-| `Preferred` | Tries configured verification when a method is obtainable; can continue without a token when it is not. |
-| `Discouraged` | No — unless verification is configured AND one of: `alwaysUv` is enabled; this is a makeCredential and `makeCredUvNotRqd` is not enabled (pre-CTAP-2.1 keys); or the request needs a permission beyond makeCredential/getAssertion (e.g. `LargeBlobWrite`). |
+| `Required` | Requires verification, not necessarily a token. Throws `NotAllowed` if no method can satisfy it. |
+| `Preferred` | Tries configured verification when a method is obtainable; can continue without verification when it is not. |
+| `Discouraged` | Normally skips verification. With verification configured, `alwaysUv` or makeCredential without enabled `makeCredUvNotRqd` can still request it. Extra permissions such as `LargeBlobWrite` require verification regardless of preference. |
 
 WebAuthn L2 [§5.8.6](https://www.w3.org/TR/2021/REC-webauthn-2-20210408/#enumdef-userverificationrequirement)
 defines preference intent. The enabled-option checks, PIN-first method choice and availability fallback

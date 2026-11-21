@@ -206,22 +206,29 @@ public sealed class CtapRequestBuilder : IDisposable
         }
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-
-        // Insert in numeric order; Ctap2Canonical sorts encoded keys when the map is completed.
-        writer.WriteStartMap(_parameters.Count);
-
-        foreach (var (key, parameter) in _parameters)
+        try
         {
-            writer.WriteInt32(key);
-            parameter.Write(writer);
+            // Insert in numeric order; Ctap2Canonical sorts encoded keys when the map is completed.
+            writer.WriteStartMap(_parameters.Count);
+
+            foreach (var (key, parameter) in _parameters)
+            {
+                writer.WriteInt32(key);
+                parameter.Write(writer);
+            }
+
+            writer.WriteEndMap();
+
+            var result = new byte[1 + writer.BytesWritten];
+            result[0] = _command;
+            writer.Encode(result.AsSpan(1));
+            return result;
         }
-
-        writer.WriteEndMap();
-
-        var result = new byte[1 + writer.BytesWritten];
-        result[0] = _command;
-        writer.Encode(result.AsSpan(1));
-        return result;
+        finally
+        {
+            // Reset clears the currently written portion, not arrays abandoned during writer growth.
+            writer.Reset();
+        }
     }
 
     /// <summary>

@@ -459,13 +459,9 @@ internal sealed class YubiKeyRsaSignatureGenerator(
             _ => throw new ArgumentException($"Unsupported hash algorithm: {hashAlgorithm}")
         };
 
-        // Build DigestInfo structure for PKCS#1 v1.5 signing
-        // DigestInfo ::= SEQUENCE { digestAlgorithm AlgorithmIdentifier, digest OCTET STRING }
-        byte[] digestInfo = BuildDigestInfo(hash, hashAlgorithm);
-
         // Pad to key size with PKCS#1 v1.5 padding
         int keySize = publicKey.KeySize / 8;
-        byte[] padded = ApplyPkcs1Padding(digestInfo, keySize);
+        byte[] padded = EncodeSignatureInput(hash, hashAlgorithm, keySize);
 
         // Sign using YubiKey (blocking call - this is sync API required by X509SignatureGenerator)
         var signature = session.SignOrDecryptAsync(slot, keyType, padded).GetAwaiter().GetResult();
@@ -474,6 +470,9 @@ internal sealed class YubiKeyRsaSignatureGenerator(
     }
 
     protected override PublicKey BuildPublicKey() => new(publicKey);
+
+    internal static byte[] EncodeSignatureInput(byte[] digest, HashAlgorithmName hashAlgorithm, int keySize) =>
+        ApplyPkcs1Padding(BuildDigestInfo(digest, hashAlgorithm), keySize);
 
     private static byte[] BuildDigestInfo(byte[] hash, HashAlgorithmName hashAlgorithm)
     {

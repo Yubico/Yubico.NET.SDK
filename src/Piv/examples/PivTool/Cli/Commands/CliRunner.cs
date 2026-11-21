@@ -641,7 +641,8 @@ internal static class CliRunner
             return 1;
         }
 
-        var hashAlg = DeviceHelper.ParseHashAlgorithm(DeviceHelper.GetFlag(flags, "hash"));
+        var hashFlag = DeviceHelper.GetFlag(flags, "hash");
+        var hashAlg = hashFlag is null ? default : DeviceHelper.ParseHashAlgorithm(hashFlag);
         var outputPath = DeviceHelper.GetFlag(flags, "output");
         var dataToSign = await File.ReadAllBytesAsync(inputPath, ct);
 

@@ -68,7 +68,7 @@ attestation slots, but these CLI selectors cover only the four standard slots.
 | Generate/store self-signed certificate | `cert-self-sign --slot <slot> --management-key <hex> --pin <pin> [--subject <dn>] [--validity-days <n>]` |
 | Generate CSR | `cert-csr --slot <slot> --pin <pin> [--subject <dn>] [--output <path>]` |
 | Delete certificate, retaining key | `cert-delete --slot <slot> --management-key <hex>` |
-| Hash and sign (use P-256/P-384) | `sign --slot <slot> --input <path> --pin <pin> [--hash sha256|sha384|sha512] [--output <path>]` |
+| Sign with RSA, ECDSA, or Ed25519 | `sign --slot <slot> --input <path> --pin <pin> [--hash sha256|sha384|sha512] [--output <path>]` |
 | Decrypt RSA PKCS#1 v1.5 ciphertext | `decrypt --slot <slot> --input <path> --pin <pin> [--output <path>]` |
 | Verify against stored certificate | `verify-signature --slot <slot> --data <path> --signature <path> [--hash sha256|sha384|sha512]` |
 | Retrieve slot attestation | `attest --slot <slot> [--output <path>]` |
@@ -97,11 +97,10 @@ PIV retry subquery fails, and verification's exit status describes execution rat
 
 ## Choose the supported crypto path
 
-Use the generic `sign`/`Signing.SignDataAsync` helper for ECDSA evaluation: it hashes every input before
-calling the raw SDK primitive. For RSA it omits EMSA encoding, and for Ed25519 it signs the hash rather
-than the original message. X25519 is an agreement algorithm. For those algorithms call the SDK directly:
-prepare a complete RSA signature representative, pass the original Ed25519 message, or use
-`CalculateSecretAsync` with an application-selected KDF. See the [crypto tasks](../../README.md#verify-the-pin-sign-and-verify-on-the-host).
+`sign` uses PKCS#1 v1.5 for RSA and hashes for ECDSA. Both default to SHA-256. Ed25519 signs the
+original message: omit `--hash` (in the interactive menu select **Default (no explicit hash)**).
+The tool rejects X25519 for signing; use `CalculateSecretAsync` with an application-selected KDF instead.
+See the [SDK crypto tasks](../../README.md#verify-the-pin-sign-and-verify-on-the-host).
 
 The CLI decrypt handler selects PKCS#1 v1.5 and exposes no padding flag. Use direct `DecryptAsync` for
 OAEP and mutable plaintext cleanup. `DecryptionResult.DecryptedData` currently exposes read-only memory

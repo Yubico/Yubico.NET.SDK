@@ -164,7 +164,7 @@ still include provider-defined details from the intact inner chain.
 
 The facade returns response.Data without exposing the ApduResponse owner. The view survives session
 disposal, but caller-copy cleanup cannot reach that owner. Core's supported Clear method also clears
-status bytes, so inspect status first if a future owned-response path adopts it. Earlier transport,
+status bytes. Static PUT KEY instead retains the APDU response and clears it in a finally after checking KCVs. Earlier transport,
 fragment and decrypted temporaries have separate lifetimes. Public metadata alone needs no secret zeroing.
 
 ## GlobalPlatform Command Structure

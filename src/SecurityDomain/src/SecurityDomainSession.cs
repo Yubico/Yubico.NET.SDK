@@ -499,10 +499,16 @@ public sealed class SecurityDomainSession : ApplicationSession, ISecurityDomainS
             var command = new ApduCommand(ClaGlobalPlatform, InsPutKey, (byte)replaceKvn,
                 (byte)(0x80 | keyReference.Kid),
                 buffer.WrittenMemory);
-            var response = await TransmitAndGetResponseDataAsync(command, cancellationToken).ConfigureAwait(false);
-
-            // Validate response contains expected KCVs
-            SecurityDomainKeyMaterial.ValidateKcv(staticKeys, response.Span);
+            EnsureInitializedBackend();
+            var response = await _backend.SendAsync(command, cancellationToken: cancellationToken).ConfigureAwait(false);
+            try
+            {
+                SecurityDomainKeyMaterial.ValidateKcv(staticKeys, response.Data.Span);
+            }
+            finally
+            {
+                response.Clear();
+            }
 
             _logger.LogInformation("Successfully imported SCP03 keys for Key Reference: {KeyReference}",
                 keyReference);

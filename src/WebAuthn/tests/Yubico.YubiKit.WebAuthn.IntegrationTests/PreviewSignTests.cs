@@ -252,9 +252,10 @@ public class PreviewSignTests
         var response = await Assert.Single(matches).SelectAsync();
         var signature = response.ClientExtensionResults?.PreviewSign?.Signature;
         Assert.NotNull(signature);
-        var (returned, message) = response.CredentialId.Span.SequenceEqual(first.CredentialId.Span)
-            ? (first, messageA)
-            : (second, messageB);
+        bool isFirst = response.CredentialId.Span.SequenceEqual(first.CredentialId.Span);
+        bool isSecond = response.CredentialId.Span.SequenceEqual(second.CredentialId.Span);
+        Assert.True(isFirst || isSecond, "Returned credential ID must belong to the original allow list.");
+        var (returned, message) = isFirst ? (first, messageA) : (second, messageB);
         Assert.True(returned.DerivedKey.VerifySignature(message, signature.Value.Span),
             "the previewSign signature must verify against the key of the credential the authenticator returned");
     }

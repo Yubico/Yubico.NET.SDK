@@ -53,9 +53,10 @@ split into reset-code and prior-administrator-authentication methods so no input
 2. SELECT OpenPGP AID → handle 0x6285/0x6985 with ACTIVATE → re-SELECT
 3. Use explicit override, cached physical-device firmware, or applet GET VERSION (BCD bytes). Unknown or
    prerelease metadata admits local feature checks. Preserve known numeric framing separately; missing numeric
-   data uses the legacy short profile without qualifying a minimum firmware version.
-4. Configure framing and optional SCP, then rebind the backend if needed. SCP eligibility independent of
-   numeric framing still needs the Core `admitUnverifiedScpFirmware` option from PR #792.
+   data uses the legacy profile without qualifying a minimum firmware version.
+4. Configure framing and optional SCP, then rebind the backend if needed. Pass Core's
+   `admitUnverifiedScpFirmware` for unknown/prerelease firmware or a present non-final qualifier, independent
+   of numeric framing. Explicit overrides bypass cached qualifiers.
 5. Cache `ApplicationRelatedData` for algorithms/UIF; F9/KDF is read on demand. Publish readiness only after initialization
    completes. Failed initialization disposes/detaches the session; the device helper cleans up its hidden connection.
 

@@ -1364,6 +1364,75 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Theory]
+    [InlineData(VersionQualifierType.Final, false, false)]
+    [InlineData(null, false, false)]
+    [InlineData(VersionQualifierType.Beta, false, true)]
+    [InlineData((VersionQualifierType)3, false, true)]
+    [InlineData(VersionQualifierType.Beta, true, false)]
+    public async Task Initialize_ScpEligibilityKeepsNumericForcedShortFraming(
+        VersionQualifierType? qualifier, bool useOverride, bool expectHandshake)
+    {
+        var token = TestContext.Current.CancellationToken;
+        var numeric = new FirmwareVersion(5, 2, 0);
+        var info = default(DeviceInfo) with { FirmwareVersion = numeric };
+        if (qualifier is { } type)
+            info = info with { VersionQualifier = new VersionQualifier(numeric, type, 0) };
+        using var recording = new RecordingSmartCardConnection(OkResponse(), [0x69, 0x82]);
+        using var connection = new ExtendedProbeConnection(recording);
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            FirmwareVersionOverride = useOverride ? numeric : null,
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true },
+            ScpKeyParameters = keys,
+        };
+
+        Task Create() => OpenPgpSession.CreateWithDeviceInfoAsync(connection, options,
+            () => useOverride ? throw new InvalidOperationException("Override must bypass cached metadata.") : info, token);
+        if (expectHandshake)
+        {
+            var error = await Assert.ThrowsAsync<ApduException>(Create);
+            Assert.Equal((short)0x6982, error.SW);
+            Assert.Equal([0xA4, 0x50], recording.TransmittedCommands.Select(command => command[1]).ToArray());
+            var initialize = recording.TransmittedCommands[^1];
+            Assert.Equal(8, initialize[4]); // Short Lc despite an extended-capable reader.
+            Assert.Equal(14, initialize.Length);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(Create);
+            Assert.Equal(0xA4, Assert.Single(recording.TransmittedCommands)[1]);
+        }
+    }
+
+    [Theory]
+    [InlineData("6985")]
+    [InlineData("0000009000")]
+    public async Task Initialize_UnknownAppletVersion_AttemptsScpAndPropagatesHandshakeRejection(string version)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection(OkResponse(), Convert.FromHexString(version), [0x69, 0x82]);
+        using var keys = Scp03KeyParameters.Default;
+        var error = await Assert.ThrowsAsync<ApduException>(() => OpenPgpSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = keys }, token));
+
+        Assert.Equal((short)0x6982, error.SW);
+        Assert.Equal([0xA4, 0xF1, 0x50], connection.TransmittedCommands.Select(command => command[1]).ToArray());
+    }
+
+    private sealed class ExtendedProbeConnection(RecordingSmartCardConnection inner) : ISmartCardConnection
+    {
+        public Transport Transport => inner.Transport;
+        public ConnectionType Type => inner.Type;
+        public bool SupportsExtendedApdu() => true;
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken = default) =>
+            inner.TransmitAndReceiveAsync(command, cancellationToken);
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => inner.BeginTransaction(cancellationToken);
+        public void Dispose() => inner.Dispose();
+        public ValueTask DisposeAsync() => inner.DisposeAsync();
+    }
+
+    [Theory]
     [InlineData(0x20, 1)] // unrelated VERIFY error
     [InlineData(0xE6, 3)] // TERMINATE refusal
     [InlineData(0x44, 4)] // ACTIVATE refusal

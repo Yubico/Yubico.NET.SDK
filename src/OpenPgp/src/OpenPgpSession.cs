@@ -150,14 +150,16 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         IOpenPgpBackend backend = new OpenPgpBackend(protocol);
 
         await backend.SelectForInitializationAsync(cancellationToken).ConfigureAwait(false);
-        var (framingVersion, featureVersion) = await ResolveFirmwareAsync(backend, cancellationToken).ConfigureAwait(false);
+        var (framingVersion, featureVersion, admitUnverifiedScp) =
+            await ResolveFirmwareAsync(backend, cancellationToken).ConfigureAwait(false);
 
         var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
                 framingVersion,
                 configuration,
                 scpKeyParams,
-                cancellationToken)
+                cancellationToken,
+                admitUnverifiedScpFirmware: admitUnverifiedScp)
             .ConfigureAwait(false);
 
         if (!ReferenceEquals(protocol, effectiveProtocol))
@@ -177,7 +179,7 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
             FirmwareVersion, _appData.Aid.Serial);
     }
 
-    private async Task<(FirmwareVersion Framing, FirmwareVersion Features)> ResolveFirmwareAsync(
+    private async Task<(FirmwareVersion Framing, FirmwareVersion Features, bool AdmitUnverifiedScp)> ResolveFirmwareAsync(
         IOpenPgpBackend backend, CancellationToken cancellationToken)
     {
         var cachedInfo = _firmwareVersionOverride is null ? _readCachedDeviceInfo?.Invoke() : null;
@@ -188,12 +190,16 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
         var features = known ?? appletVersion;
         _numericVersion = known is { IsAlphaOrBeta: false } ? known
             : appletVersion is { IsAlphaOrBeta: false } ? appletVersion : null;
-        // Unknown framing uses the legacy short profile, not a synthesized zero-major protocol version.
+        // Unknown framing uses the legacy profile, not a synthesized zero-major protocol version.
         var featureVersion = cachedInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta
             ? new FirmwareVersion() : features ?? new FirmwareVersion();
         // The NEO retry command was introduced in applet 1.0.7, not physical firmware 4.3.1.
         _pinAttemptsVersion = cachedNeo && !featureVersion.IsAlphaOrBeta ? appletVersion : featureVersion;
-        return (_numericVersion ?? new FirmwareVersion(1, 0, 0), featureVersion);
+        // A present, non-final qualifier (including unnamed values) is not production evidence.
+        // cachedInfo is intentionally absent when the caller supplied an override.
+        bool admitUnverifiedScp = featureVersion.IsAlphaOrBeta ||
+            cachedInfo?.VersionQualifier is { Type: not VersionQualifierType.Final };
+        return (_numericVersion ?? new FirmwareVersion(1, 0, 0), featureVersion, admitUnverifiedScp);
     }
 
     // ── Data Access ───────────────────────────────────────────────────

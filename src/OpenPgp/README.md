@@ -32,7 +32,10 @@ policies need additional device support, and retry/challenge commands leave some
 Session configuration prefers an explicit override, then cached physical-device firmware, then the OpenPGP
 applet's own GET VERSION. Those last two sources can differ. Prerelease or unknown versions admit local
 feature checks without guaranteeing command support. Protocol framing uses a known numeric version when
-available; otherwise it starts with the legacy short profile, not a qualified minimum firmware claim.
+available; otherwise it starts with the legacy profile, not a qualified minimum firmware claim.
+Unknown or prerelease firmware and a present non-final cached qualifier admit an SCP attempt without changing
+numeric framing. An explicit firmware override supersedes cached qualifiers. Admission is not evidence that the
+device supports SCP or that the handshake succeeds.
 Required initialization and cancellation failures propagate. Old-family import and generation still require
 separate qualification; NEO deletion is unsupported.
 

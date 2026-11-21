@@ -522,7 +522,7 @@ public class PivSessionTests
     public async Task ResetAsync_BlocksPinAndPukThenResets()
     {
         var connection = CreateInitializedConnection(
-            [0x06, 0x01, 0x05, 0x07, 0x01, 0x00, 0x90, 0x00], // Bio supported, not configured
+            [0x06, 0x01, 0x05, 0x09, 0x01, 0xAA, 0x07, 0x01, 0x00, 0x90, 0x00], // Bio unconfigured with a supported unknown tag
             [0x05, 0x01, 0x01, 0x06, 0x02, 0x03, 0x01, 0x90, 0x00], // PIN metadata: 1 retry remaining
             [0x63, 0xC0], // VERIFY empty PIN -> blocked (0 retries)
             [0x63, 0xC0], // RESET RETRY empty PUK/PIN -> blocked (0 retries)
@@ -547,6 +547,7 @@ public class PivSessionTests
     [InlineData("6A82", typeof(ApduException))]
     [InlineData("0601050701010701009000", typeof(ApduException))]
     [InlineData("0601059F810104AA0500000701019000", typeof(ApduException))]
+    [InlineData("0601050701009F810104AA0500000701019000", typeof(ApduException))]
     [InlineData("0601059F2101AA0701019000", typeof(InvalidOperationException))]
     public async Task ResetAsync_WhenBioPreflightRefusesOrFails_DoesNotConsumeRetries(string response, Type error)
     {

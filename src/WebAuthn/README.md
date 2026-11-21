@@ -169,8 +169,12 @@ The demo reads `transportNames` from the original registration. Use
 
 ### Choose an authentication response
 
-With a nonempty allow list, `GetAssertionAsync` probes in device-sized batches and narrows the real
-request to one recognized descriptor; it does not enumerate every allowed credential on the key.
+With a nonempty allow list, `GetAssertionAsync` probes in device-sized batches and keeps the first
+recognized descriptor. If built-in user verification is already selected without a token, a silent
+miss is not conclusive: verified assertions check the eligible entries using the ceremony hash.
+The client does not enumerate every allowed credential. If the selected credential needs a deferred
+extension input, only the follow-up assertion for that credential is returned. A second verified
+command can require another gesture and advance the counter again; the SDK does not cache gestures.
 With no allow list, it can enumerate discoverable assertions for the RP, subject to authenticator
 selection behavior. Handle zero matches before indexing. For one match, retrieve its response with
 `SelectAsync`; for several, show your application's account picker and select the chosen match.
@@ -181,8 +185,12 @@ retrieves a cached response, is idempotent and supports cancellation while waiti
 further device I/O. Cancelling a picker does not undo an assertion or an extension write.
 
 For CTAP2.0 singleton omission compatibility, the client recovers an omitted ID only from the
-single real descriptor in the final request after probing. It rejects missing IDs without that
+single real descriptor sent in the final request. It rejects missing IDs without that
 association and IDs that contradict selection. This does not replace RP verification or account binding.
+
+For registration with built-in verification and no token, a fitting exclude list is checked by
+`MakeCredentialAsync` on the authenticator. A larger list can require separate verified checks before
+the single creation command. An exclusion hidden from an unverified probe is not ignored.
 
 `RegistrationExtensionOutputs` and `AuthenticationExtensionOutputs` are non-positional records. Their init
 properties are optional and default to null; construct them with named object initializers.

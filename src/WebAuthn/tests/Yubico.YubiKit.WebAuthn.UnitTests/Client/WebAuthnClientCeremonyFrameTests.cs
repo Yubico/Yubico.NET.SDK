@@ -75,6 +75,273 @@ public class WebAuthnClientCeremonyFrameTests
 
     private static ReadOnlyMemory<byte> Pin => "123456"u8.ToArray();
 
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public async Task TokenlessUv_AssertionPreservesCandidatesAfterSilentMiss(bool silentHit, bool verifiedMiss)
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(uvSupported: true, maxCredentialCountInList: 2));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        var requests = new List<BackendGetAssertionRequest>();
+        _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(requests.Add), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            bool silent = request.Options?.GetValueOrDefault("up", true) == false;
+            if ((silent && !silentHit) || (!silent && verifiedMiss))
+                throw new CtapException(CtapStatus.NoCredentials);
+            return MockCtap2Responses.CreateMockGetAssertionResponse(b.Id.ToArray());
+        });
+
+        await using var client = _client;
+        var ct = TestContext.Current.CancellationToken;
+        var matches = await client.GetAssertionAsync(WithAllowList(a, b) with
+        {
+            UserVerification = UserVerificationPreference.Required
+        }, cancellationToken: ct);
+
+        Assert.Equal(2, requests.Count);
+        var real = requests[1];
+        Assert.Equal(silentHit ? [b] : new[] { a, b }, real.AllowList);
+        Assert.True(real.Options?.GetValueOrDefault("uv"));
+        Assert.NotEqual(false, real.Options?.GetValueOrDefault("up", true));
+        Assert.Null(real.PinUvAuthParam);
+        Assert.Null(real.PinUvAuthProtocol);
+        Assert.Contains(real.ClientDataHash.ToArray(), value => value != 0);
+        if (verifiedMiss)
+            Assert.Empty(matches);
+        else
+        {
+            var response = await Assert.Single(matches).SelectAsync(ct);
+            Assert.Equal(real.ClientDataHash.ToArray(), response.ClientData.Hash.ToArray());
+            Assert.Equal(b.Id.ToArray(), response.CredentialId.ToArray());
+        }
+    }
+
+    [Fact]
+    public async Task TokenlessUv_RegistrationKeepsFittingProtectedExcludeList()
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(uvSupported: true, maxCredentialCountInList: 2));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<GetAssertionResponse>(new CtapException(CtapStatus.NoCredentials)));
+        var requests = new List<BackendMakeCredentialRequest>();
+        _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(requests.Add), Arg.Any<CancellationToken>()).Returns(call =>
+            call.Arg<BackendMakeCredentialRequest>().ExcludeList?.Contains(b) == true
+                ? throw new CtapException(CtapStatus.CredentialExcluded)
+                : MockCtap2Responses.CreateMockMakeCredentialResponse());
+
+        await using var client = _client;
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(
+            Registration(UserVerificationPreference.Required) with { ExcludeCredentials = [a, b] },
+            cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+        var request = Assert.Single(requests);
+        Assert.Equal(new[] { a, b }, request.ExcludeList);
+        Assert.True(request.Options?.GetValueOrDefault("uv"));
+        Assert.Null(request.PinUvAuthParam);
+        await _backend.DidNotReceive().GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
+    [InlineData("foreign", WebAuthnClientErrorCode.InvalidState)]
+    [InlineData("missing ID", WebAuthnClientErrorCode.InvalidState)]
+    [InlineData("missing UV", WebAuthnClientErrorCode.InvalidState)]
+    [InlineData("missing UP", WebAuthnClientErrorCode.InvalidState)]
+    [InlineData("multiple", WebAuthnClientErrorCode.InvalidState)]
+    [InlineData("denied", WebAuthnClientErrorCode.NotAllowed)]
+    public async Task TokenlessUv_BadInteractiveAssertionStopsBeforeNextChunk(string failure, WebAuthnClientErrorCode expected)
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(uvSupported: true, maxCredentialCountInList: 2));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        var c = new PublicKeyCredentialDescriptor(new byte[] { 3 });
+        var response = MockCtap2Responses.CreateMockGetAssertionResponse(failure == "foreign" ? [3] : [1],
+            numberOfCredentials: failure == "multiple" ? 2u : null, omitCredential: failure == "missing ID",
+            userVerified: failure != "missing UV", userPresent: failure != "missing UP", largeBlobKey: [9]);
+        int real = 0;
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+                throw new CtapException(CtapStatus.NoCredentials);
+            real++;
+            Assert.Equal(new[] { a, b }, request.AllowList);
+            if (failure == "denied")
+                throw new CtapException(CtapStatus.NotAllowed);
+            return response;
+        });
+
+        await using var client = _client;
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(WithAllowList(a, b, c) with
+        {
+            UserVerification = UserVerificationPreference.Required
+        }, cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(expected, error.Code);
+        Assert.Equal(1, real);
+        await _backend.DidNotReceive().GetNextAssertionAsync(Arg.Any<CancellationToken>());
+        if (failure != "denied")
+        {
+            Assert.Equal(-1, response.AuthenticatorDataRaw.Span.IndexOfAnyExcept((byte)0));
+            Assert.Equal(new byte[1], response.LargeBlobKey?.ToArray());
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task TokenlessUv_RegistrationRefinesOversizedCheckWithoutSkipping(bool excluded)
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(uvSupported: true, maxCredentialCountInList: 2));
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        var c = new PublicKeyCredentialDescriptor(new byte[] { 3 });
+        var real = new List<BackendGetAssertionRequest>();
+        var discarded = MockCtap2Responses.CreateMockGetAssertionResponse(omitCredential: true, largeBlobKey: [9]);
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            Assert.Null(request.Extensions);
+            Assert.Null(request.PinUvAuthParam);
+            Assert.Null(request.PinUvAuthProtocol);
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+                throw new CtapException(CtapStatus.NoCredentials);
+
+            real.Add(request);
+            Assert.True(request.Options?.GetValueOrDefault("uv"));
+            Assert.True(request.Options?.GetValueOrDefault("up"));
+            if (request.AllowList?.Count > 1)
+                throw new CtapException(CtapStatus.RequestTooLarge);
+            if (excluded && request.AllowList?.Contains(b) == true)
+                return discarded;
+            throw new CtapException(CtapStatus.NoCredentials);
+        });
+        var creation = new List<BackendMakeCredentialRequest>();
+        _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(creation.Add), Arg.Any<CancellationToken>()).Returns(call =>
+            call.Arg<BackendMakeCredentialRequest>().ExcludeList?.Contains(b) == true
+                ? throw new CtapException(CtapStatus.CredentialExcluded)
+                : MockCtap2Responses.CreateMockMakeCredentialResponse());
+
+        await using var client = _client;
+        var options = Registration(UserVerificationPreference.Required) with { ExcludeCredentials = [a, b, c] };
+        var ct = TestContext.Current.CancellationToken;
+        if (excluded)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(options, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+            Assert.Equal(-1, discarded.AuthenticatorDataRaw.Span.IndexOfAnyExcept((byte)0));
+            Assert.Equal(new byte[1], discarded.LargeBlobKey?.ToArray());
+        }
+        else
+            await client.MakeCredentialAsync(options, cancellationToken: ct);
+
+        Assert.Equal(excluded ? 3 : 4, real.Count);
+        Assert.Equal(new[] { a, b }, real[0].AllowList);
+        Assert.Equal(new[] { a }, real[1].AllowList);
+        Assert.Equal(new[] { b }, real[2].AllowList);
+        if (!excluded)
+            Assert.Equal(new[] { c }, real[3].AllowList);
+        var sent = Assert.Single(creation);
+        Assert.All(real, candidate => Assert.Equal(sent.ClientDataHash.ToArray(), candidate.ClientDataHash.ToArray()));
+        Assert.Contains(sent.ClientDataHash.ToArray(), value => value != 0);
+        Assert.Equal(excluded ? [b] : Array.Empty<PublicKeyCredentialDescriptor>(), sent.ExcludeList);
+    }
+
+    [Theory]
+    [InlineData(195, false)]
+    [InlineData(195, true)]
+    [InlineData(32, false)]
+    public async Task TokenlessUv_RegistrationDoesNotSendAnOversizedMakeCredential(int maxMsgSize, bool excluded)
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(uvSupported: true, maxMsgSize: maxMsgSize));
+        var credential = new PublicKeyCredentialDescriptor(Enumerable.Repeat((byte)4, 100).ToArray());
+        int verified = 0;
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+                throw new CtapException(CtapStatus.NoCredentials);
+            verified++;
+            Assert.Equal(credential, Assert.Single(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(request.AllowList)));
+            return excluded ? MockCtap2Responses.CreateMockGetAssertionResponse(credential.Id.ToArray())
+                : throw new CtapException(CtapStatus.NoCredentials);
+        });
+        var creation = new List<BackendMakeCredentialRequest>();
+        _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(creation.Add), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockMakeCredentialResponse());
+
+        await using var client = _client;
+        var options = Registration(UserVerificationPreference.Required) with { ExcludeCredentials = [credential] };
+        var ct = TestContext.Current.CancellationToken;
+        if (excluded || maxMsgSize == 32)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(options, cancellationToken: ct));
+            Assert.Equal(WebAuthnClientErrorCode.Constraint, error.Code);
+            Assert.Empty(creation);
+        }
+        else
+        {
+            await client.MakeCredentialAsync(options, cancellationToken: ct);
+            Assert.Empty(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(Assert.Single(creation).ExcludeList));
+        }
+        Assert.Equal(maxMsgSize == 32 ? 0 : 1, verified);
+    }
+
+    [Fact]
+    public async Task TokenlessUv_EscalatedRegistrationDoesNotTrustCachedSilentMiss()
+    {
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(new AuthenticatorInfo
+        {
+            Options = new Dictionary<string, bool> { ["uv"] = true, ["makeCredUvNotRqd"] = true }
+        });
+        var a = new PublicKeyCredentialDescriptor(new byte[] { 1 });
+        var b = new PublicKeyCredentialDescriptor(new byte[] { 2 });
+        int silent = 0;
+        int verified = 0;
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            var descriptor = Assert.Single(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(request.AllowList));
+            if (request.Options?.GetValueOrDefault("up", true) == false)
+            {
+                silent++;
+                throw new CtapException(CtapStatus.NoCredentials);
+            }
+            verified++;
+            Assert.True(request.Options?.GetValueOrDefault("uv"));
+            return descriptor == b ? MockCtap2Responses.CreateMockGetAssertionResponse(b.Id.ToArray())
+                : throw new CtapException(CtapStatus.NoCredentials);
+        });
+        var attempts = new List<BackendMakeCredentialRequest>();
+        _backend.MakeCredentialAsync(Arg.Do<BackendMakeCredentialRequest>(attempts.Add), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendMakeCredentialRequest>();
+            if (request.Options?.GetValueOrDefault("uv") == true && request.ExcludeList?.Contains(b) == true)
+                throw new CtapException(CtapStatus.CredentialExcluded);
+            if (attempts.Count == 1)
+                throw new CtapException(CtapStatus.PuatRequired);
+            return MockCtap2Responses.CreateMockMakeCredentialResponse();
+        });
+
+        await using var client = _client;
+        var options = Registration(UserVerificationPreference.Discouraged) with { ExcludeCredentials = [a, b] };
+        var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.MakeCredentialAsync(options,
+            cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(WebAuthnClientErrorCode.InvalidState, error.Code);
+        Assert.Equal(2, silent);
+        Assert.Equal(2, verified);
+        Assert.Equal(2, attempts.Count); // One preexisting escalation, not a replay of the built-in UV creation.
+        Assert.Empty(Assert.IsAssignableFrom<IReadOnlyList<PublicKeyCredentialDescriptor>>(attempts[0].ExcludeList));
+        Assert.Equal(new[] { b }, attempts[1].ExcludeList);
+    }
+
     [Fact]
     public async Task Assertion_UnassociatedSuccessfulProbeIsNotAPrfRetryMiss()
     {
@@ -686,7 +953,7 @@ public class WebAuthnClientCeremonyFrameTests
         var credential = new PublicKeyCredentialDescriptor(RandomNumberGenerator.GetBytes(32));
         var requests = new List<BackendGetAssertionRequest>();
         _backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(requests.Add), Arg.Any<CancellationToken>())
-            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(credential.Id.ToArray()));
+            .Returns(_ => MockCtap2Responses.CreateMockGetAssertionResponse(credential.Id.ToArray()));
 
         await _client.GetAssertionAsync(
             Authentication(UserVerificationPreference.Required) with { AllowCredentials = [credential] }, Pin, TestContext.Current.CancellationToken);

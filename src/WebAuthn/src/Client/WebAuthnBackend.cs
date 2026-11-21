@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cbor;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.LargeBlobs;
 using Yubico.YubiKit.Ctap2.Pin;
@@ -146,40 +147,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
 
         ArgumentNullException.ThrowIfNull(request);
 
-        // Build options
-        var options = new MakeCredentialOptions
-        {
-            ExcludeList = request.ExcludeList?.Select(desc => new PublicKeyCredentialDescriptor(
-                desc.Id,
-                desc.Type,
-                desc.Transports
-            )).ToList(),
-
-            // Absent stays absent, as in GetAssertionAsync: an explicit "uv": false is still the uv
-            // option key, which CTAP §6.1 forbids next to pinUvAuthParam.
-            ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true ? rk : null,
-            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true ? uv : null,
-            EnterpriseAttestation = request.EnterpriseAttestation
-        };
-
-        // Add PIN/UV auth if provided
-        if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
-        {
-            // The copy is load-bearing, not defensive: the finally below zeroes whatever is in
-            // options, and the parameter belongs to the caller, which zeroes it once the ceremony
-            // is done with it. Without the copy this method would be destroying a buffer it does
-            // not own. Unlike GetAssertionAsync there is no multi-call reuse to protect here -
-            // registration builds a fresh request per attempt and sends it once - so ownership,
-            // not reuse, is what makes the copy necessary.
-            options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
-            options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
-        }
-
-        if (request.Extensions is not null)
-        {
-            options.Extensions = request.Extensions;
-        }
-
+        var options = ProjectMakeCredentialOptions(request);
         try
         {
             return await _session.MakeCredentialAsync(
@@ -194,6 +162,49 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         {
             SensitiveMemory.Zero(options.PinUvAuthParam);
         }
+    }
+
+    /// <summary>Checks the full command, including the command byte, without sending it.</summary>
+    internal static bool FitsMakeCredential(BackendMakeCredentialRequest request, AuthenticatorInfo info)
+    {
+        var options = ProjectMakeCredentialOptions(request);
+        byte[]? encoded = null;
+        try
+        {
+            encoded = Ctap2SessionRequestEncoding.BuildMakeCredentialRequest(
+                request.ClientDataHash, request.Rp, request.User, request.PubKeyCredParams, options);
+            return encoded.Length <= (info.MaxMsgSize ?? Ctap2Session.DefaultMaxMessageSize);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(encoded);
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
+    private static MakeCredentialOptions ProjectMakeCredentialOptions(BackendMakeCredentialRequest request)
+    {
+        var options = new MakeCredentialOptions
+        {
+            ExcludeList = request.ExcludeList,
+
+            // Absent stays absent, as in GetAssertionAsync: an explicit "uv": false is still the uv
+            // option key, which CTAP §6.1 forbids next to pinUvAuthParam.
+            ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true ? rk : null,
+            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true ? uv : null,
+            EnterpriseAttestation = request.EnterpriseAttestation,
+            Extensions = request.Extensions
+        };
+
+        // Add PIN/UV auth if provided
+        if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
+        {
+            // The caller owns the source parameter; the backend clears only its projection's copy.
+            options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
+            options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
+        }
+
+        return options;
     }
 
     /// <inheritdoc/>

@@ -49,7 +49,7 @@ namespace Yubico.YubiKit.Ctap2;
 /// </remarks>
 public sealed class Ctap2Session : ApplicationSession, ICtap2Session
 {
-    private const int DefaultMaxMessageSize = 1024;
+    internal const int DefaultMaxMessageSize = 1024;
     private int _maxMessageSize = DefaultMaxMessageSize;
     private int? _maxCredBlobLength;
     /// <summary>

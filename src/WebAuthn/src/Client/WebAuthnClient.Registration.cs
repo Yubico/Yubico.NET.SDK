@@ -19,6 +19,7 @@ using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Attestation;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Cose;
@@ -49,6 +50,11 @@ public sealed partial class WebAuthnClient
     /// extension output processing can occur after the credential has been created; it does not roll
     /// creation back. The timeout signals cooperative cancellation, not a hard completion deadline;
     /// see <see cref="PublicKeyCredentialCreationOptions.Timeout"/>.
+    /// </para>
+    /// <para>
+    /// When built-in verification is used without a token, a fitting exclude list is checked by the
+    /// authenticator during credential creation. Larger lists can require interactive verification
+    /// before the creation command; the SDK does not cache a user gesture across these commands.
     /// </para>
     /// <para>
     /// Capability discovery, PIN/UV token acquisition, transport operations, and extension output
@@ -179,6 +185,16 @@ public sealed partial class WebAuthnClient
         {
             await extensions.PrepareAsync(ct).ConfigureAwait(false);
 
+            if (decision.UvOption is true && auth.Token is null && options.ExcludeCredentials is { Count: > 0 } original)
+            {
+                var eligible = CredentialFilter.Eligible(original, info);
+                var tokenless = BuildMakeCredentialRequest(options, clientData, auth, decision, eligible,
+                    requireResidentKey, info, extensions, out bool hasTokenlessPreviewSign);
+                var created = await MakeCredentialWithTokenlessUvAsync(tokenless, eligible, info, clientData,
+                    probedExcludeList, hasTokenlessPreviewSign, ct).ConfigureAwait(false);
+                return (created, extensions);
+            }
+
             // Exclude-list pre-flight: probe with up:false, with or without a token, and send only
             // the match so the authenticator never sees more than it can process. The final
             // makeCredential still requests user presence before reporting an excluded credential.
@@ -201,6 +217,57 @@ public sealed partial class WebAuthnClient
             var response = await SendMakeCredentialAsync(request, preference, hasPreviewSign, ct).ConfigureAwait(false);
             return (response, extensions);
         }
+    }
+
+    private async Task<MakeCredentialResponse> MakeCredentialWithTokenlessUvAsync(BackendMakeCredentialRequest request,
+        IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info, WebAuthnClientData clientData,
+        IReadOnlyList<PublicKeyCredentialDescriptor>? probedExcludeList, bool hasPreviewSign, CancellationToken ct)
+    {
+        try
+        {
+            // CTAP §6.1.2 checks a fitting exclude list under the requested built-in UV policy.
+            if (!FitsExcludeList(request, eligible, info))
+            {
+                var withoutExclusions = request with { ExcludeList = [] };
+                if (!WebAuthnBackend.FitsMakeCredential(withoutExclusions, info))
+                    throw OversizeMakeCredential();
+
+                // A cached positive is useful; an unverified negative can hide credProtect level 3.
+                var selected = probedExcludeList?.FirstOrDefault();
+                selected ??= await CheckTokenlessUvExclusionsAsync(request.Rp.Id, eligible, info, clientData, ct).ConfigureAwait(false);
+                request = selected is null ? withoutExclusions : request with { ExcludeList = [selected] };
+                if (selected is not null && !WebAuthnBackend.FitsMakeCredential(request, info))
+                    throw OversizeMakeCredential();
+            }
+
+            ct.ThrowIfCancellationRequested();
+            // Use the Required error mapping; an already verified attempt must not replay MakeCredential.
+            return await SendMakeCredentialAsync(request, UserVerificationPreference.Required, hasPreviewSign, ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            Util.SensitiveMemory.Zero(request.Extensions);
+        }
+    }
+
+    private static bool FitsExcludeList(BackendMakeCredentialRequest request,
+        IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info) =>
+        (eligible.Count == 0 || eligible.Count <= CredentialFilter.MaxListCount(info))
+        && WebAuthnBackend.FitsMakeCredential(request, info);
+
+    private static WebAuthnClientError OversizeMakeCredential() => new(WebAuthnClientErrorCode.Constraint,
+        "The makeCredential request exceeds the authenticator's maximum message size.");
+
+    private async Task<PublicKeyCredentialDescriptor?> CheckTokenlessUvExclusionsAsync(string rpId,
+        IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info, WebAuthnClientData clientData, CancellationToken ct)
+    {
+        var match = await FindTokenlessUvCredentialAsync(eligible, info,
+            chunk => _backend.GetAssertionAsync(BuildTokenlessUvAssertion(rpId, clientData, chunk), ct), ct).ConfigureAwait(false);
+        if (match is not { } found)
+            return null;
+
+        CredentialMatcher.ClearUnreturnedAssertion(found.Response);
+        return found.Selected;
     }
 
     private async Task<MakeCredentialResponse> SendMakeCredentialAsync(

@@ -166,8 +166,8 @@ await using var client = await yubiKey.CreateWebAuthnClientAsync(
 ```
 
 Use `matches.Count` to distinguish zero, one, and multiple matches. `MatchedCredential` deliberately has no
-`RequiresSelection` property; selection is a property of the returned list. A nonempty allow list is
-probed and narrowed to one descriptor, not exhaustively enumerated; an absent allow list can yield multiple
+`RequiresSelection` property; selection is a property of the returned list. A nonempty allow list selects
+at most one credential, without continuation; an absent allow list can yield multiple
 discoverable assertions. Device work and extension outputs finish before the public call returns.
 `SelectAsync` retrieves the cached response without device I/O; its internal lazy task wrapper is
 idempotent and cancellation-aware while waiting, not lazy authenticator work. Registration and
@@ -359,12 +359,19 @@ Extensions follow the processor model described in
   client-derived; largeBlob has separate support checks. Inspect optional outputs. Per-processor
   `CborContentException` and `InvalidOperationException` suppress that output as SDK isolation policy,
   not a WebAuthn §9.4 mandate. Other exceptions, including explicit previewSign errors, can propagate.
-- `Client/CredentialFilter` is the shared `up:false` probe for the exclude-list pre-flight and allow-list
-  selection; with an allow list the real getAssertion carries exactly one descriptor.
-  Exclude-list pre-flight also runs without a PIN/UV token: probes omit PIN-auth fields and the final
-  makeCredential carries only the matching descriptor (or an empty list), retaining required user
-  presence. With a token, the probe authenticates a zero client-data hash; registration re-mints
-  afterward before the final command.
+- `Client/CredentialFilter` shares eligibility, ordered chunking and association for allow/exclude checks.
+  Its `up:false` probe uses a zero client-data hash, authenticated only if a token is available;
+  registration re-mints a token after probing. Keep a positive silent selection. When built-in UV
+  is already selected without a token, silence cannot rule out `credProtect` level 3: check allow-list
+  misses with the real ceremony hash, `uv:true` and requested UP. Require both flags and associate the
+  response against the actual sent chunk before passing a selection to `CredentialMatcher`.
+  Send PRF before selection only for a common effective input; defer differing per-ID inputs and
+  unresolved previewSign. Only the selected credential can justify a second verified request. It may
+  cost another gesture or counter advance; never process outputs from a discarded assertion.
+- With tokenless built-in UV and a nonempty exclude list, registration sends the eligible list if the
+  full canonical makeCredential fits count and message-size limits. Otherwise use a positive silent
+  result or interactive verified checks, then send one makeCredential. A silent negative is not
+  evidence of absence. Do not retry creation with a smaller list after a device error.
 
 Adding an extension: a codec, a processor, a line in each session's factory, a property on the typed
 input/output records, unit tests for the codec and for the processor against a mocked backend, and a
@@ -482,7 +489,7 @@ mode (1) only with GetInfo `ep: true`, leaving the enterprise decision to the au
 Client-data escaping follows CCDToString. Attestation Decode
 borrows outer CBOR/statement slices: keep caller input unchanged; parsing is not verification.
 `default(Aaguid)` is the 16-byte all-zero value. For CTAP2.0 singleton omission compatibility, recover
-an omitted final descriptor only from the probed singleton, never a dummy or an original list guess.
+an omitted final descriptor only from the wire singleton, never a dummy or an original list guess.
 
 ## Test Infrastructure
 

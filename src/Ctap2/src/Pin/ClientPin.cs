@@ -337,10 +337,7 @@ public sealed class ClientPin : IDisposable
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
                 .WithBytes(ClientPinParam.PinHashEnc, pinHashEnc);
 
-            var response = await SendClearableRequestAsync(builder.Build(), cancellationToken)
-                .ConfigureAwait(false);
-
-            return DecodePinToken(response, sharedSecret);
+            return await SendTokenRequestAsync(builder.Build(), sharedSecret, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -437,10 +434,7 @@ public sealed class ClientPin : IDisposable
                 builder.WithString(ClientPinParam.RpId, rpId);
             }
 
-            var response = await SendClearableRequestAsync(builder.Build(), cancellationToken)
-                .ConfigureAwait(false);
-
-            return DecodePinToken(response, sharedSecret);
+            return await SendTokenRequestAsync(builder.Build(), sharedSecret, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -502,7 +496,7 @@ public sealed class ClientPin : IDisposable
 
         try
         {
-            var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
+            using var builder = CtapRequestBuilder.Create(CtapCommand.ClientPin)
                 .WithInt(ClientPinParam.PinUvAuthProtocol, _protocol.Version)
                 .WithInt(ClientPinParam.SubCommand, ClientPinSubCommand.GetPinUvAuthTokenUsingUvWithPermissions)
                 .WithMap(ClientPinParam.KeyAgreement, writer => WriteCoseKey(writer, platformKey))
@@ -513,15 +507,32 @@ public sealed class ClientPin : IDisposable
                 builder.WithString(ClientPinParam.RpId, rpId);
             }
 
-            var request = builder.Build();
-            var response = await _session.SendCborRequestAsync(request, cancellationToken)
-                .ConfigureAwait(false);
-
-            return DecodePinToken(response, sharedSecret);
+            return await SendTokenRequestAsync(builder.Build(), sharedSecret, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(sharedSecret);
+        }
+    }
+
+    private async Task<byte[]> SendTokenRequestAsync(byte[] request, byte[] sharedSecret,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            if (_session is Ctap2Session ownedSession)
+            {
+                return await ownedSession.DecodePinTokenResponseAsync(request,
+                    response => DecodePinToken(response, sharedSecret), cancellationToken).ConfigureAwait(false);
+            }
+
+            // A custom session may be lending arbitrary memory; decode without mutating its response.
+            var borrowedResponse = await _session.SendCborRequestAsync(request, cancellationToken).ConfigureAwait(false);
+            return DecodePinToken(borrowedResponse, sharedSecret);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(request);
         }
     }
 

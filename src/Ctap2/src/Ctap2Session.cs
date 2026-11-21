@@ -564,6 +564,21 @@ public sealed class Ctap2Session : ApplicationSession, ICtap2Session
             .ConfigureAwait(false);
     }
 
+    // Unlike ICtap2Session, this session knows that the backend returned an SDK-owned payload.
+    internal async Task<byte[]> DecodePinTokenResponseAsync(ReadOnlyMemory<byte> request,
+        Func<ReadOnlyMemory<byte>, byte[]> decode, CancellationToken cancellationToken)
+    {
+        var response = await SendCborRequestAsync(request, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            return decode(response);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response).Span);
+        }
+    }
+
     private Task<ReadOnlyMemory<byte>> SendWithinMessageLimitAsync(
         ReadOnlyMemory<byte> request,
         UserPresenceNotification notification,

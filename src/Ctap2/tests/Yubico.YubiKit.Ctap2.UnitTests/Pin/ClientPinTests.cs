@@ -14,8 +14,12 @@
 
 using NSubstitute;
 using System.Formats.Cbor;
+using System.Reflection;
 using System.Text;
 using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+using Yubico.YubiKit.Ctap2.Backend;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Pin;
@@ -337,6 +341,84 @@ public sealed class ClientPinTests : IDisposable
         Assert.NotNull(token);
         Assert.Equal(encryptedToken.Length, token.Length);
     }
+
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(1, false)]
+    [InlineData(2, false)]
+    [InlineData(0, true)]
+    [InlineData(1, true)]
+    [InlineData(2, true)]
+    public async Task TokenAcquisition_ClearsConcreteRawResponseEvenOnDecodeFailure(int route, bool malformed)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] getInfo = Convert.FromHexString("A30181684649444F5F325F3003500000000000000000000000000000000004A16E70696E557641757468546F6B656EF5");
+        using var connection = Substitute.For<ISmartCardConnection>();
+        connection.Transport.Returns(Transport.Nfc);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns((ReadOnlyMemory<byte>)new byte[] { 0x90, 0x00 }, (byte[])[0x00, .. getInfo, 0x90, 0x00]);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+
+        byte[] encrypted = Enumerable.Repeat((byte)0xA5, 32).ToArray();
+        var retained = MakeApduResponse(TokenResponse(encrypted, malformed));
+        var protocol = Substitute.For<ISmartCardProtocol>();
+        protocol.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), cancellationToken: ct).Returns(
+            call => call.Arg<ApduCommand>().Data.Span[0] == CtapCommand.GetInfo ? MakeApduResponse(getInfo) :
+                // Key agreement is the first PIN subcommand; token response must be the retained instance.
+                call.Arg<ApduCommand>().Data.Span[5] == 0x02
+                    ? MakeApduResponse(CreateKeyAgreementResponse(CreateMockCoseKey()).Span) : retained);
+        // Keep the real session and backend, retaining the APDU owner that the PC/SC pipeline would hide.
+        var field = typeof(Ctap2Session).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("The session backend field was not found.");
+        field.SetValue(session, new SmartCardBackend(protocol));
+        using var clientPin = new ClientPin(session, _fakeProtocol);
+
+        await AssertTokenResponseAsync(clientPin, route, encrypted, malformed, ct);
+
+        Assert.All(retained.Data.ToArray(), value => Assert.Equal(0, value));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task TokenAcquisition_DoesNotClearCustomSessionResponse(bool malformed)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] encrypted = Enumerable.Repeat((byte)0xA5, 32).ToArray();
+        byte[] borrowed = TokenResponse(encrypted, malformed);
+        byte[] original = borrowed.ToArray();
+        _mockSession.SendCborRequestAsync(default, ct).ReturnsForAnyArgs(
+            CreateKeyAgreementResponse(CreateMockCoseKey()), borrowed);
+        using var clientPin = CreateClientPin();
+
+        await AssertTokenResponseAsync(clientPin, 0, encrypted, malformed, ct);
+
+        Assert.Equal(original, borrowed);
+    }
+
+    private static async Task AssertTokenResponseAsync(ClientPin clientPin, int route, byte[] expected,
+        bool malformed, CancellationToken ct)
+    {
+        byte[] pin = "1234"u8.ToArray();
+        Task<byte[]> AcquireToken() => route switch
+        {
+            0 => clientPin.GetPinTokenAsync(pin, ct),
+            1 => clientPin.GetPinUvAuthTokenUsingPinAsync(pin, PinUvAuthTokenPermissions.MakeCredential, "example.com", ct),
+            _ => clientPin.GetPinUvAuthTokenUsingUvAsync(PinUvAuthTokenPermissions.BioEnrollment, cancellationToken: ct)
+        };
+
+        if (malformed)
+            await Assert.ThrowsAsync<BadResponseException>(AcquireToken);
+        else
+            Assert.Equal(expected, await AcquireToken());
+    }
+
+    private static byte[] TokenResponse(byte[] encrypted, bool malformed) => malformed
+        ? [.. CreatePinTokenResponse(encrypted).Span, 0x00] // An unexpected second CBOR item after the token map.
+        : CreatePinTokenResponse(encrypted).ToArray();
+
+    private static ApduResponse MakeApduResponse(ReadOnlySpan<byte> payload) =>
+        new((byte[])[0x00, .. payload, 0x90, 0x00]);
 
     [Theory]
     [InlineData(0, 1, 16, true)]

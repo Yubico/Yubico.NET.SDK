@@ -53,23 +53,23 @@ follows [AG-32](pass-2-review-decisions.md#ag-32-previewsign-empty-generated-han
 handles are accepted as input; this amends only the nonempty-handle facet of CTAP-IMP-040/AG-11.
 Attended ceremonies and hardware/platform qualification remain pending.
 
-Security Domain delivery: [draft PR #792](https://github.com/Yubico/Yubico.NET.SDK/pull/792). Hardware qualification remains pending.
+Security Domain delivery: [merged PR #792](https://github.com/Yubico/Yubico.NET.SDK/pull/792). Hardware qualification remains pending.
 
-Management software and documentation are in draft [PR #791](https://github.com/Yubico/Yubico.NET.SDK/pull/791),
+Management software and documentation were delivered in [merged PR #791](https://github.com/Yubico/Yubico.NET.SDK/pull/791),
 including the two canonical Core metadata referrals. MGMT-IMP-002, MGMT-IMP-011 and the physical
 Management qualification matrix remain pending; no device or integration execution was performed.
 
-CTAP2 delivery: [draft PR #790](https://github.com/Yubico/Yubico.NET.SDK/pull/790) against `yubikit-pass2-base`.
-Software changes and checks are ready for independent review. CTAP-IMP-030 stays deferred;
+CTAP2 delivery: [merged PR #790](https://github.com/Yubico/Yubico.NET.SDK/pull/790) into `yubikit-pass2-base`.
+CTAP-IMP-030 stays deferred;
 CTAP-IMP-022 and CTAP-DEC-003 are not hardware-qualified by this PR.
 
-OATH delivery: [draft PR #789](https://github.com/Yubico/Yubico.NET.SDK/pull/789) carries the approved software and
+OATH delivery: [merged PR #789](https://github.com/Yubico/Yubico.NET.SDK/pull/789) carries the approved software and
 documentation, including the OATH policy adoptions. OATH-DEC-004/006/007 and secure-reset qualification remain pending;
 the CORE-OATH-X005 fixture changes were compiled but not exercised on hardware.
 
-YubiOTP delivery: [draft PR #793](https://github.com/Yubico/Yubico.NET.SDK/pull/793). Hardware qualification remains pending.
+YubiOTP delivery: [merged PR #793](https://github.com/Yubico/Yubico.NET.SDK/pull/793). Hardware qualification remains pending.
 
-YubiHSM Auth delivery: [draft PR #794](https://github.com/Yubico/Yubico.NET.SDK/pull/794). Hardware qualification remains pending.
+YubiHSM Auth delivery: [merged PR #794](https://github.com/Yubico/Yubico.NET.SDK/pull/794). Hardware qualification remains pending.
 
 ## Cards
 

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System.Buffers.Binary;
 using System.Collections;
@@ -16,6 +17,7 @@ using Yubico.YubiKit.Ctap2.Credentials;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
+[Collection(nameof(Ctap2BackendLifecycleTests))]
 public class Ctap2SessionTests
 {
     [Fact]
@@ -562,6 +564,116 @@ public class Ctap2SessionTests
             connection.TransmittedCommands.Select(command => command[1]).ToArray());
     }
 
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public async Task ResetAsync_HidRequestCallbackFailureRefreshesOnlyAfterSuccessfulDrain(bool success, bool partial)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse(), resetSucceeds: success)
+        {
+            PartialReset = partial
+        };
+        var failure = new InvalidOperationException("presence request failed");
+        var prompt = new RecordingUserPresencePrompt(requestException: failure);
+        await using var session = await Ctap2Session.CreateAsync(connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt }, ct);
+
+        var actual = await Record.ExceptionAsync(() => session.ResetAsync(ct));
+
+        if (partial)
+        {
+            Assert.IsType<InvalidOperationException>(actual);
+            Assert.NotSame(failure, actual);
+        }
+        else
+            Assert.Same(failure, actual);
+        Assert.Equal(success && !partial ? 2 : 1, connection.InitCount);
+        Assert.True(session.IsInitialized);
+        if (success && !partial)
+            Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Theory]
+    [InlineData("Received {Length} bytes in response")]
+    [InlineData("Received CTAP HID command response: {Length} bytes")]
+    public async Task ResetAsync_HidTraceFailureStillRefreshesAfterSuccessfulDrain(string template)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse(), resetSucceeds: true);
+        var failure = new InvalidOperationException("trace provider failed");
+        var provider = new TerminalTraceFailureProvider(template, failure);
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        using var logging = YubiKitLogging.UseTemporary(factory);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+        provider.Armed = true;
+
+        var actual = await Assert.ThrowsAsync<AggregateException>(() => session.ResetAsync(ct));
+
+        Assert.Same(failure, Assert.Single(actual.InnerExceptions));
+        Assert.Equal(2, connection.InitCount);
+        Assert.True(session.IsInitialized);
+        Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("Received {Length} bytes in response")]
+    [InlineData("Received CTAP HID command response: {Length} bytes")]
+    public async Task Reset_HidHandoffFailureClearsOwnedBufferAndConfirmsDrainedSuccess(string? template)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var failure = new InvalidOperationException("host handoff failed");
+        using var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse(), resetSucceeds: true)
+        {
+            ResetPayload = [0x00, 0xA5] // Nonzero sentinel in the accumulated array, not a CTAP Reset output field.
+        };
+        var provider = new TerminalTraceFailureProvider(template, failure);
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        byte[] retained = [];
+        await using var protocol = new FidoHidProtocol(connection, factory.CreateLogger<FidoHidProtocol>(),
+            length => retained = new byte[length]);
+        var backend = new HidBackend(protocol);
+        await protocol.InitializeAsync(ct);
+        await backend.SendCborAsync(new byte[] { CtapCommand.GetInfo }, UserPresenceNotification.None, ct);
+        provider.Armed = template is not null;
+        var prompt = new RecordingUserPresencePrompt(requestException: template is null ? failure : null);
+        var notification = UserPresenceNotification.Create(prompt, new UserPresenceContext
+        {
+            Basis = UserPresenceBasis.PolicyMayRequire,
+            Application = UserPresenceApplications.Fido2
+        });
+        bool confirmed = false;
+
+        var error = await Record.ExceptionAsync(() =>
+            backend.SendCborAsync(new byte[] { CtapCommand.Reset }, notification, ct, () => confirmed = true));
+
+        Assert.Equal(new byte[2], retained);
+        Assert.Same(failure, error is AggregateException aggregate ? Assert.Single(aggregate.InnerExceptions) : error);
+        Assert.True(confirmed);
+    }
+
+    private sealed class TerminalTraceFailureProvider(string? template, Exception failure) : ILoggerProvider, ILogger
+    {
+        public bool Armed { get; set; }
+        public ILogger CreateLogger(string categoryName) => this;
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => logLevel == LogLevel.Trace;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (Armed && state is IReadOnlyList<KeyValuePair<string, object?>> fields &&
+                Equals(fields[^1].Value, template))
+            {
+                Armed = false;
+                throw failure;
+            }
+        }
+        public void Dispose() { }
+    }
+
     [Fact]
     public async Task ResetAsync_HidConfirmationRefreshesEvenWhenPresenceResolutionThrows()
     {
@@ -835,6 +947,8 @@ public class Ctap2SessionTests
         public int PacketSize => CtapConstants.PacketSize;
         public ConnectionType Type => ConnectionType.HidFido;
         public int InitCount { get; private set; }
+        public byte[] ResetPayload { get; init; } = [0x00];
+        public bool PartialReset { get; init; }
 
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default)
         {
@@ -853,12 +967,20 @@ public class Ctap2SessionTests
                 0 => InitResponse(),
                 1 => Packet(0x01020304, CtapConstants.CtapHidCbor, [0x00, .. getInfo]),
                 2 => Packet(0x01020304, CtapConstants.CtapHidKeepAlive, [0x02]),
-                3 when resetSucceeds => Packet(0x01020304, CtapConstants.CtapHidCbor, [0x00]),
+                3 when resetSucceeds => ResetResponse(),
                 4 when resetSucceeds => InitResponse(),
                 5 or 6 when resetSucceeds => Packet(0x01020304, CtapConstants.CtapHidCbor, [0x00, .. getInfo]),
                 _ => Packet(0x01020304, CtapConstants.CtapHidCbor, [(byte)CtapStatus.UserActionTimeout])
             };
             return Task.FromResult<ReadOnlyMemory<byte>>(response);
+        }
+
+        private byte[] ResetResponse()
+        {
+            var packet = Packet(0x01020304, CtapConstants.CtapHidCbor, ResetPayload);
+            if (PartialReset)
+                packet[6] = 60; // Requires a continuation, but the next report is not one.
+            return packet;
         }
 
         private byte[] InitResponse()

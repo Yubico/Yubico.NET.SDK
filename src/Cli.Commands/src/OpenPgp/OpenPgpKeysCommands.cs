@@ -76,6 +76,10 @@ public sealed class KeysAttestSettings : GlobalSettings
     [CommandOption("--pin <PIN>")]
     [Description("User PIN (prompted if not provided).")]
     public string? Pin { get; init; }
+
+    public override ValidationResult Validate() => Key.ToLowerInvariant() is "sig" or "dec" or "aut"
+        ? base.Validate()
+        : ValidationResult.Error("Attestation requires the sig, dec, or aut slot.");
 }
 
 // ── Commands ────────────────────────────────────────────────────────────────
@@ -314,11 +318,12 @@ public sealed class OpenPgpKeysAttestCommand : YkCommandBase<KeysAttestSettings>
         CommandContext context, KeysAttestSettings settings, YkDeviceContext deviceContext)
     {
         var keyRef = ParseKeyRef(settings.Key);
+        if (keyRef == KeyRef.Att)
+            throw new ArgumentException("Attestation requires the sig, dec, or aut slot.");
         using var pin = GetPin(settings.Pin, "Enter User PIN");
         if (pin is null)
         {
-            OutputHelpers.WriteError("User PIN is required.");
-            return ExitCode.GenericError;
+            return ExitCode.UserCancelled;
         }
 
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();

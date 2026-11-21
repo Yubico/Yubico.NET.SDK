@@ -4,6 +4,7 @@
 using Spectre.Console.Cli;
 using System.Buffers;
 using System.Text;
+using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.OpenPgp.Credentials;
@@ -42,6 +43,10 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
 
             await using var session = await selection.Device.CreateOpenPgpSessionAsync();
             return await executeAsync(session);
+        }
+        catch (OperationCanceledException)
+        {
+            return ExitCode.UserCancelled;
         }
         catch (Exception ex)
         {

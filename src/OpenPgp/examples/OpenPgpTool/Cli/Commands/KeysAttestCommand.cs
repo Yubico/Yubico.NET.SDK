@@ -6,6 +6,7 @@ using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Cli.Commands.Infrastructure;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -31,21 +32,31 @@ public sealed class KeysAttestCommand : AsyncCommand<KeysAttestCommand.Settings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        using var pin = OpenPgpCommand<Settings>.GetPin(settings.Pin);
-        if (pin is null)
+        if (settings.Key.ToLowerInvariant() is not ("sig" or "dec" or "aut"))
         {
-            OutputHelpers.WriteError("User PIN is required.");
-            return 1;
+            OutputHelpers.WriteError("Attestation requires the sig, dec, or aut slot.");
+            return ExitCode.GenericError;
         }
 
-        var keyRef = OpenPgpCommand<Settings>.ParseKeyRef(settings.Key);
-        return await OpenPgpCommand<Settings>.WithSessionAsync(async session =>
+        try
         {
-            await session.VerifyPinAsync(pin.Memory);
-            using var certificate = await session.AttestKeyAsync(keyRef);
-            WriteCertificate(certificate);
-            return 0;
-        });
+            using var pin = OpenPgpCommand<Settings>.GetPin(settings.Pin);
+            if (pin is null)
+                return ExitCode.UserCancelled;
+
+            var keyRef = OpenPgpCommand<Settings>.ParseKeyRef(settings.Key);
+            return await OpenPgpCommand<Settings>.WithSessionAsync(async session =>
+            {
+                await session.VerifyPinAsync(pin.Memory);
+                using var certificate = await session.AttestKeyAsync(keyRef);
+                WriteCertificate(certificate);
+                return ExitCode.Success;
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            return ExitCode.UserCancelled;
+        }
     }
 
     private static void WriteCertificate(X509Certificate2 cert)

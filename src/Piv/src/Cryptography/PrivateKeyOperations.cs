@@ -426,22 +426,26 @@ internal static class PrivateKeyOperations
 
     private static byte[] ParseCryptoResponse(ReadOnlyMemory<byte> data)
     {
-        // Parse outer TLV (0x7C - Dynamic Auth Template)
-        using var outer = Tlv.Create(data.Span);
-        if (outer.Tag != TagDynamicAuth || outer.TotalLength != data.Length)
+        // Check the remainder of the original BER, not a TLV's re-encoded length.
+        var remainder = data.Span;
+        var (outerTag, _, outerValue) = Tlv.ParseData(ref remainder);
+        try
         {
-            throw new ApduException("Invalid crypto response format");
-        }
+            if (outerTag != TagDynamicAuth || !remainder.IsEmpty)
+                throw new ApduException("Invalid crypto response format");
 
-        // Parse inner TLV (0x82 - Response data)
-        using var inner = Tlv.Create(outer.Value.Span);
-        if (inner.Tag != TagResponse || inner.TotalLength != outer.Length)
-        {
+            ReadOnlySpan<byte> innerRemainder = outerValue;
+            var (innerTag, _, result) = Tlv.ParseData(ref innerRemainder);
+            if (innerTag == TagResponse && innerRemainder.IsEmpty)
+                return result;
+
+            CryptographicOperations.ZeroMemory(result);
             throw new ApduException("Invalid crypto response - expected exactly one TAG 0x82");
         }
-
-        // Copy the value before the Tlv objects are disposed. The caller owns this buffer until transfer.
-        return inner.Value.ToArray();
+        finally
+        {
+            CryptographicOperations.ZeroMemory(outerValue);
+        }
     }
 
     private static void ValidateSignatureOrRsaResult(KeyType keyType, ReadOnlyMemory<byte> result)

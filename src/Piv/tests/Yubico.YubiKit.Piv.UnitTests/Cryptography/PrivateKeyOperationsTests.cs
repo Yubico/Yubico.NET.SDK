@@ -45,15 +45,14 @@ public class PrivateKeyOperationsTests
         Assert.All(source, b => Assert.Equal(0, b));
     }
 
-    [Fact]
-    public async Task SignOrDecryptAsync_ZeroesOriginalResponseBuffer()
+    [Theory]
+    [InlineData("7C0A82083006020101020102")]
+    [InlineData("7C82000C828200083006020101020102")]
+    public async Task SignOrDecryptAsync_ZeroesOriginalResponseBuffer(string encoded)
     {
         // 7C LL [ 82 LL2 <DER signature> ].
         byte[] payload = Convert.FromHexString("3006020101020102");
-        byte[] inner = [0x82, (byte)payload.Length, .. payload];
-        byte[] wrapped = [0x7C, (byte)inner.Length, .. inner];
-
-        var backend = new CryptoCapturingBackend(wrapped);
+        var backend = new CryptoCapturingBackend(Convert.FromHexString(encoded));
 
         var result = await PrivateKeyOperations.SignOrDecryptAsync(
             backend,

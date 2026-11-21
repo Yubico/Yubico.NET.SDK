@@ -1,6 +1,6 @@
 using NSubstitute;
-using System.Security.Cryptography;
 using System.Reflection;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;

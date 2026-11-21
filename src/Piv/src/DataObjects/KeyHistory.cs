@@ -22,8 +22,7 @@ namespace Yubico.YubiKit.Piv.DataObjects;
 /// </summary>
 /// <remarks>
 /// Callers maintain this record of retired key-management keys and their certificate locations.
-/// The SDK emits/requires four TLVs, including F3 even for a null URL, and validates URL encoding
-/// length rather than the complete SP 800-73-4 Part 1 §3.3.3 profile (retired-key counts and URL form).
+/// This fixed provisioning model follows the count and F3 rules of SP 800-73-4 Part 1 §3.3.3.
 /// Inspect broader valid layouts through IPivSession.GetObjectAsync. Encode returns a new nonsecret buffer.
 /// </remarks>
 public readonly record struct KeyHistory
@@ -66,22 +65,32 @@ public readonly record struct KeyHistory
     /// <param name="offCardCertificates">The number of keys with off-card certificates.</param>
     /// <param name="offCardCertificateUrl">The off-card certificate URL, or <see langword="null"/>.</param>
     /// <exception cref="ArgumentException">
-    /// The UTF-8 encoding of <paramref name="offCardCertificateUrl"/> exceeds 118 bytes.
+    /// The counts exceed 20 in total, the required URL is missing, a URL is supplied for two zero
+    /// counts, or the URL does not match the profile's HTTP DNS-name and ASCII hexadecimal hash format.
     /// </exception>
     public static KeyHistory Create(byte onCardCertificates, byte offCardCertificates, Uri? offCardCertificateUrl = null)
     {
-        if (offCardCertificateUrl is not null)
-        {
-            int byteCount = Encoding.UTF8.GetByteCount(offCardCertificateUrl.AbsoluteUri);
-            if (byteCount > MaximumUrlLength)
-            {
-                throw new ArgumentException(
-                    $"Off-card certificate URL must encode to {MaximumUrlLength} bytes or fewer.",
-                    nameof(offCardCertificateUrl));
-            }
-        }
+        if (onCardCertificates + offCardCertificates > 20)
+            throw new ArgumentException("Key History can describe at most 20 retired keys.", nameof(offCardCertificates));
+        if (offCardCertificateUrl is null ? offCardCertificates > 0
+            : onCardCertificates + offCardCertificates == 0 || !IsProfileUrl(offCardCertificateUrl))
+            throw new ArgumentException("Key History requires the profile's HTTP DNS-name and SHA-256 URL for off-card certificates, and no URL when both counts are zero.",
+                nameof(offCardCertificateUrl));
 
         return new KeyHistory(onCardCertificates, offCardCertificates, offCardCertificateUrl);
+    }
+
+    private static bool IsProfileUrl(Uri url)
+    {
+        if (!url.IsAbsoluteUri || url.Scheme != Uri.UriSchemeHttp || url.HostNameType != UriHostNameType.Dns)
+            return false;
+
+        string text = url.OriginalString;
+        string prefix = $"http://{url.Host}/";
+        return text.Length <= MaximumUrlLength && text.Length == prefix.Length + 64
+            && text.AsSpan().IndexOfAnyInRange('\u0080', char.MaxValue) == -1
+            && text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            && text.AsSpan(prefix.Length).IndexOfAnyExcept("0123456789abcdefABCDEF") == -1;
     }
 
     /// <summary>
@@ -96,17 +105,12 @@ public readonly record struct KeyHistory
             return ReadOnlyMemory<byte>.Empty;
         }
 
-        byte[] urlBytes = OffCardCertificateUrl is null
-            ? []
-            : Encoding.UTF8.GetBytes(OffCardCertificateUrl.AbsoluteUri);
-
-        Tlv[] tlvs =
-        [
-            new Tlv(OnCardTag, [OnCardCertificates]),
-            new Tlv(OffCardTag, [OffCardCertificates]),
-            new Tlv(UrlTag, urlBytes),
-            new Tlv(UnusedTag, ReadOnlySpan<byte>.Empty)
-        ];
+        var onCard = new Tlv(OnCardTag, [OnCardCertificates]);
+        var offCard = new Tlv(OffCardTag, [OffCardCertificates]);
+        var unused = new Tlv(UnusedTag, ReadOnlySpan<byte>.Empty);
+        Tlv[] tlvs = OffCardCertificateUrl is { } url
+            ? [onCard, offCard, new Tlv(UrlTag, Encoding.ASCII.GetBytes(url.OriginalString)), unused]
+            : [onCard, offCard, unused];
 
         return TlvHelper.EncodeAndDisposeList(tlvs).ToArray();
     }
@@ -130,7 +134,7 @@ public readonly record struct KeyHistory
         try
         {
             using var list = TlvHelper.DecodeList(encodedData.Span);
-            if (list.Count != 4)
+            if (list.Count is not (3 or 4))
             {
                 return false;
             }
@@ -145,19 +149,20 @@ public readonly record struct KeyHistory
                 return false;
             }
 
-            if (list[2].Tag != UrlTag)
+            bool hasUrl = list.Count == 4;
+            if (hasUrl && (list[2].Tag != UrlTag || list[2].Length is 0 or > MaximumUrlLength))
             {
                 return false;
             }
 
-            if (list[3].Tag != UnusedTag || list[3].Length != 0)
+            if (list[^1].Tag != UnusedTag || list[^1].Length != 0)
             {
                 return false;
             }
 
             byte onCard = list[0].Value.Span[0];
             byte offCard = list[1].Value.Span[0];
-            Uri? url = list[2].Length > 0
+            Uri? url = hasUrl
                 ? new Uri(Encoding.UTF8.GetString(list[2].Value.Span))
                 : null;
 

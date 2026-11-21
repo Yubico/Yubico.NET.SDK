@@ -338,8 +338,10 @@ outer `53` wrapper handled by the SDK. Prefer defined `DataObject` identifiers; 
 
 CHUID/CCC constructors borrow supplied identifier memory; decoding copies it and encoding returns a new
 nonsecret buffer. Key History counts describe retired keys with on-/off-card certificates. Maintain it
-alongside your provisioning workflow; its parser/constructor validate a narrower shape than a complete
-federal profile. ADMIN flags describe stored software records. Its timestamp currently uses trimmed
+alongside your provisioning workflow. The fixed Key History model checks the 20-key limit and the
+SP 800-73-4 F3 rules: an HTTP DNS-name/hex SHA-256 URL is required with off-card certificates, optional
+with only on-card certificates, and omitted when both counts are zero. Inspect other layouts via raw object access.
+ADMIN flags describe stored software records. Its timestamp currently uses trimmed
 little-endian Unix seconds, differing from Python YubiKey Manager's four-byte big-endian encoding;
 coordinate interoperability before writing timestamps across tools.
 

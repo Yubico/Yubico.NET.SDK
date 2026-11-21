@@ -125,11 +125,13 @@ public sealed class UserPresenceIntentTests
         private static byte[] GetInfo()
         {
             var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-            writer.WriteStartMap(1);
+            writer.WriteStartMap(2);
             writer.WriteInt32(0x01);
             writer.WriteStartArray(1);
             writer.WriteTextString("FIDO_2_0");
             writer.WriteEndArray();
+            writer.WriteInt32(0x03);
+            writer.WriteByteString(new byte[16]);
             writer.WriteEndMap();
             return writer.Encode();
         }

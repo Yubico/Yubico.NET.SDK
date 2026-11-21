@@ -169,7 +169,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
 
     private async Task<Memory<byte>?> ReadBlobAsync(GetAssertionResponse response, CancellationToken cancellationToken)
     {
-        if (response.LargeBlobKey is not { } key)
+        if (response.LargeBlobKey is not { Length: 32 } key)
             return null;
 
         try
@@ -178,7 +178,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
             var blob = await storage.GetBlobAsync(key, cancellationToken).ConfigureAwait(false);
             return blob is null ? (Memory<byte>?)null : blob.AsMemory();
         }
-        catch (Exception ex) when (ex is CtapException or CborContentException or InvalidOperationException)
+        catch (Exception ex) when (ex is CtapException or CborContentException or InvalidOperationException or InvalidDataException)
         {
             return null;
         }

@@ -14,7 +14,10 @@
 
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System.Buffers.Binary;
 using System.Formats.Cbor;
+using System.Security.Cryptography;
+using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.LargeBlobs;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Client;
@@ -238,12 +241,18 @@ public class LargeBlobProcessorTests
     [InlineData(1, false)] // no stored blob
     [InlineData(2, true)] // stored empty blob
     [InlineData(3, false)] // storage failure
+    [InlineData(4, false)] // malformed returned key, no storage I/O
     public async Task Authentication_ReadKeepsTheExtensionPresent(int scenario, bool hasBlob)
     {
         var info = Context().Info;
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
-            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: scenario == 0 ? null : LargeBlobKey));
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: scenario switch
+            {
+                0 => null,
+                4 => [0x42],
+                _ => LargeBlobKey
+            }));
         _storage.GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()).Returns(_ => scenario switch
         {
             3 => throw new Yubico.YubiKit.Ctap2.CtapException(Yubico.YubiKit.Ctap2.CtapStatus.InvalidCbor),
@@ -263,7 +272,59 @@ public class LargeBlobProcessorTests
         var result = Assert.IsType<LargeBlobAuthenticationOutput>(response.ClientExtensionResults?.LargeBlob);
         Assert.Equal(hasBlob, result.Blob.HasValue);
         if (result.Blob is { } blob) Assert.True(blob.IsEmpty);
-        await _storage.Received(scenario == 0 ? 0 : 1).GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        await _storage.Received(scenario is 0 or 4 ? 0 : 1).GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public async Task Authentication_ReadKeepsAssertionWhenDecryptedEntryHasWrongInflatedSize(int declaredSize)
+    {
+        var ctap = Substitute.For<ICtap2Session>();
+        var info = Context().Info;
+        ctap.GetInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
+        var writer = new CborWriter();
+        writer.WriteStartMap(1);
+        writer.WriteInt32(1); // authenticatorLargeBlobs response config
+        writer.WriteByteString(BuildStoredEntry(declaredSize));
+        writer.WriteEndMap();
+        ctap.SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns((ReadOnlyMemory<byte>)writer.Encode());
+        _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
+        _backend.CreateLargeBlobStorage(null).Returns(new LargeBlobStorage(ctap));
+        _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
+            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(credentialId: [0x44], largeBlobKey: LargeBlobKey));
+
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(_backend, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var ct = TestContext.Current.CancellationToken;
+        var matches = await client.GetAssertionAsync(new()
+        {
+            Challenge = new byte[32],
+            RpId = "example.com",
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Read = true })
+        }, cancellationToken: ct);
+        var response = await Assert.Single(matches).SelectAsync(ct);
+        Assert.Equal(new byte[] { 0x44 }, response.CredentialId.ToArray());
+        var output = Assert.IsType<LargeBlobAuthenticationOutput>(response.ClientExtensionResults?.LargeBlob);
+        if (declaredSize == 1)
+            Assert.Equal(new byte[] { 0x41 }, Assert.IsType<Memory<byte>>(output.Blob).ToArray());
+        else
+            Assert.Null(output.Blob);
+        await ctap.Received(1).SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+    }
+
+    private static byte[] BuildStoredEntry(int declaredSize)
+    {
+        ReadOnlySpan<byte> compressed = [0x73, 0x04, 0x00]; // raw DEFLATE for one byte, 0x41
+        Span<byte> aad = stackalloc byte[12];
+        "blob"u8.CopyTo(aad);
+        BinaryPrimitives.WriteUInt64LittleEndian(aad[4..], (ulong)declaredSize);
+        byte[] nonce = new byte[12];
+        byte[] ciphertext = new byte[compressed.Length + 16];
+        using var aes = new AesGcm(LargeBlobKey, 16);
+        aes.Encrypt(nonce, compressed, ciphertext.AsSpan(0, compressed.Length), ciphertext.AsSpan(compressed.Length), aad);
+        return LargeBlobArray.CreateEmpty().WithEntry(new LargeBlobEntry(ciphertext, nonce, (ulong)declaredSize)).Serialize();
     }
 
     [Fact]

@@ -284,6 +284,9 @@ the cancellation request as a device-interruption guarantee.
   SCP handshake with the caller's original parameters if SCP was requested. Keep those parameters and key
   owners alive through session disposal. If refresh fails, the applet is already reset and the session ends;
   open a new session to recover rather than repeating the destructive command.
+- `FirmwareVersion` describes effective feature policy, not a physical version measurement. An explicit override
+  wins, followed by cached device metadata if available, then applet SELECT version data. Unknown or prerelease
+  firmware permits applet operations optimistically; required SELECT errors and cancellation still propagate.
 - Unsupported feature gates throw `NotSupportedException`; on versions 5.6.0–5.7.0 `GetChallengeAsync`
   omits a supplied password.
 - Enrollment, deletion, management-key changes, both CALCULATE methods and both password-change methods

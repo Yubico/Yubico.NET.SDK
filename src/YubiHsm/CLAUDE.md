@@ -36,11 +36,11 @@ enrollment and calculation paths handle management keys, credential passwords an
 ## Firmware Feature Gates
 
 Asymmetric, challenge and password-change operations use feature gates; base operations rely on successful
-applet selection. Initialization uses the caller's firmware override or the SELECT applet version. The
-backend falls back to 5.4.3 when a three-byte version value is unavailable. Reset reselects and refreshes
-version policy, keeping the caller's override. Device metadata and development-build labels alone establish
-neither an operation's availability nor a suitable override.
-Overrides do not skip SELECT, and malformed TLV framing can throw before fallback. A confirmed reset retires
+applet selection. An explicit override wins, else cached device firmware if available, else the applet version
+from SELECT. Major-zero, prerelease and missing/malformed version metadata admit applet gates optimistically.
+The protocol uses the known numeric version for framing, or the 5.4.3 applet floor when it is unknown.
+This feature policy does not prove availability. A failed or cancelled required SELECT still propagates.
+A confirmed reset retires
 the old protocol and clears ready/auth state. The same session reselects over a fresh protocol and reauthenticates
 with the caller's retained SCP parameters, if supplied. A refresh failure ends the session without masking
 the primary exception; completing RESET alone does not establish a new channel.

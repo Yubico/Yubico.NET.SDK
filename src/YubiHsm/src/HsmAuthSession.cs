@@ -105,18 +105,21 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     private IHsmAuthBackend _backend = null!;
     private readonly ProtocolConfiguration? _configuration;
     private readonly FirmwareVersion? _firmwareOverride;
+    private readonly Func<DeviceInfo?>? _readCachedDeviceInfo;
     private readonly ScpKeyParameters? _scpKeyParameters;
     private bool _endingAfterRefreshFailure;
     private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
     private HsmAuthSession(
         ISmartCardConnection connection,
-        SessionCreationOptions? options)
+        SessionCreationOptions? options,
+        Func<DeviceInfo?>? readCachedDeviceInfo)
         : base(connection, options?.UserPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
         _configuration = options?.ProtocolConfiguration;
         _firmwareOverride = options?.FirmwareVersionOverride;
+        _readCachedDeviceInfo = readCachedDeviceInfo;
         _scpKeyParameters = options?.ScpKeyParameters;
     }
 
@@ -125,15 +128,13 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// </summary>
     /// <param name="connection">The borrowed SmartCard connection. The caller closes it after disposing the session.</param>
     /// <param name="options">
-    ///     Optional session settings. A firmware override supplies feature policy; otherwise initialization
-    ///     uses the applet SELECT version, falling back to 5.4.3 when its three-byte version value is absent.
-    ///     An override changes SDK policy; select an override supported by the actual applet.
+    ///     Optional session settings. A firmware override takes precedence over applet version detection.
+    ///     Missing, unparseable or major-zero applet versions admit applet feature gates optimistically.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An initialized <see cref="HsmAuthSession" />.</returns>
     /// <remarks>
-    ///     An override does not skip SELECT; malformed response framing can still fail before version
-    ///     fallback. Keep SCP parameters and their key/certificate owners alive through session disposal:
+    ///     An override does not skip required SELECT. Keep SCP parameters and their key/certificate owners alive through session disposal:
     ///     a confirmed reset uses them again to establish a new channel. Keep other borrowed inputs and
     ///     prompt services alive through complete public tasks,
     ///     including policy lookup, CALCULATE and callbacks, before disposing the session.
@@ -142,10 +143,17 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default) =>
+        CreateAsync(connection, options, null, cancellationToken);
+
+    internal static Task<HsmAuthSession> CreateAsync(
+        ISmartCardConnection connection,
+        SessionCreationOptions? options,
+        Func<DeviceInfo?>? readCachedDeviceInfo,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
-            () => new HsmAuthSession(connection, options),
+            () => new HsmAuthSession(connection, options, readCachedDeviceInfo),
             (session, token) => session.InitializeAsync(token),
             cancellationToken);
 
@@ -158,12 +166,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             .ConfigureAwait(false);
         IHsmAuthBackend backend = new HsmAuthBackend(protocol);
 
-        var initializationFirmwareVersion = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
-        var resolvedFirmwareVersion = _firmwareOverride ?? initializationFirmwareVersion;
+        var selectResponse = await backend.SelectAsync(cancellationToken).ConfigureAwait(false);
+        var (framingVersion, featureVersion) = ResolveFirmware(selectResponse);
 
         var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
-                resolvedFirmwareVersion,
+                framingVersion,
                 _configuration,
                 _scpKeyParameters,
                 cancellationToken)
@@ -175,7 +183,29 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
 
         _backend = backend;
+        FirmwareVersion = featureVersion;
     }
+
+    private (FirmwareVersion Framing, FirmwareVersion Features) ResolveFirmware(ReadOnlyMemory<byte> selectResponse)
+    {
+        var cachedInfo = ReadDeviceInfoWithoutOverride();
+        var knownVersion = _firmwareOverride ?? cachedInfo?.FirmwareVersion;
+        var knownFramingVersion = GetNumericVersion(knownVersion);
+        var appletVersion = knownFramingVersion is null ? HsmAuthBackend.ReadVersion(selectResponse) : null;
+        var version = knownVersion ?? appletVersion;
+        var framing = knownFramingVersion ?? GetNumericVersion(appletVersion) ?? FeatureHsmAuth.Version;
+        var features = IsPrerelease(cachedInfo) ? new FirmwareVersion() : version ?? new FirmwareVersion();
+        return (framing, features);
+    }
+
+    private static FirmwareVersion? GetNumericVersion(FirmwareVersion? version) =>
+        version is { IsAlphaOrBeta: false } ? version : null;
+
+    private DeviceInfo? ReadDeviceInfoWithoutOverride() =>
+        _firmwareOverride is null ? _readCachedDeviceInfo?.Invoke() : null;
+
+    private static bool IsPrerelease(DeviceInfo? deviceInfo) =>
+        deviceInfo?.VersionQualifier?.Type is VersionQualifierType.Alpha or VersionQualifierType.Beta;
 
     /// <summary>
     ///     Validates and encodes a credential label to UTF-8 bytes.

@@ -25,6 +25,65 @@ namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 public class HsmAuthSessionByteLevelTests
 {
+    [Theory]
+    [InlineData("9000")]
+    [InlineData("790305049000")] // Broken optional TLV after successful SELECT.
+    [InlineData("79030000019000")]
+    public async Task CreateAsync_UnknownAppletVersionAdmitsFeatureGates(string selectHex)
+    {
+        using var connection = new RecordingSmartCardConnection(Convert.FromHexString(selectHex), OkResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await HsmAuthSession.CreateAsync(connection, cancellationToken: token);
+        using var password = CredentialPassword.FromUtf8("pass"u8);
+
+        await session.GetChallengeAsync("cred", password, token);
+
+        Assert.True(session.IsSupported(HsmAuthSession.FeaturePasswordChange));
+        Assert.Contains((byte)0x73, CommandData(LastCommand(connection)).ToArray());
+    }
+
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    public async Task CreateAsync_UsesDeviceVersionAndTreatsItsPrereleaseOptimistically(bool prerelease, bool gateOpens)
+    {
+        var deviceVersion = new FirmwareVersion(5, 6, 0);
+        var cached = default(DeviceInfo) with
+        {
+            FirmwareVersion = deviceVersion,
+            VersionQualifier = new VersionQualifier(deviceVersion, prerelease ? VersionQualifierType.Beta : VersionQualifierType.Final, 1)
+        };
+        using var connection = new RecordingSmartCardConnection([0x79, 3, 5, 8, 0, 0x90, 0]);
+        await using var session = await HsmAuthSession.CreateAsync(connection, null, () => cached, TestContext.Current.CancellationToken);
+
+        Assert.Equal(gateOpens, session.IsSupported(HsmAuthSession.FeaturePasswordChange));
+    }
+
+    [Fact]
+    public async Task CreateAsync_ExplicitOverrideBypassesCacheButStillSelects()
+    {
+        using var connection = new RecordingSmartCardConnection(OkResponse());
+        var options = new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 6, 0) };
+        await using var session = await HsmAuthSession.CreateAsync(connection, options,
+            () => throw new InvalidOperationException("The override must bypass the cache."), TestContext.Current.CancellationToken);
+
+        Assert.False(session.IsSupported(HsmAuthSession.FeaturePasswordChange));
+        Assert.Equal(0xA4, Assert.Single(connection.TransmittedCommands)[1]);
+    }
+
+    [Fact]
+    public async Task CreateAsync_UnknownFirmwareStillHonorsForceShortApdus()
+    {
+        using var connection = new ExtendedCardConnection(OkResponse(), OkResponse());
+        var options = new SessionCreationOptions { ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true } };
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await HsmAuthSession.CreateAsync(connection, options, token);
+
+        await session.PutManagementKeyAsync(new byte[16], Sequence(0x20, 16), token);
+
+        Assert.True(session.IsSupported(HsmAuthSession.FeaturePasswordChange));
+        Assert.Equal(36, connection.Recorder.TransmittedCommands[^1][4]); // Short Lc, two 18-byte TLVs.
+    }
     // P-256 base point (SEC 2, section 2.4.2), encoded as 04 || X || Y.
     internal static byte[] P256Point() => Convert.FromHexString(
         "046B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296" +
@@ -550,7 +609,7 @@ public class HsmAuthSessionByteLevelTests
 
     private sealed class CalculateBackend(ApduResponse response) : IHsmAuthBackend
     {
-        public Task<FirmwareVersion> ReadInitialStateAsync(CancellationToken cancellationToken) =>
+        public Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken) =>
             throw new InvalidOperationException("The calculation must not reinitialize the applet.");
 
         public Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError, CancellationToken cancellationToken)

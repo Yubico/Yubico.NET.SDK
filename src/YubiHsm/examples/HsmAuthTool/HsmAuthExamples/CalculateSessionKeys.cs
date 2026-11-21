@@ -4,7 +4,6 @@
 using Spectre.Console;
 using System.Security.Cryptography;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
-using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
 
@@ -31,7 +30,7 @@ public static class CalculateSessionKeys
                 .Title("Select a symmetric credential for session key calculation:")
                 .AddChoices(labels));
 
-        using var credentialPassword = SecureCredential.Prompt("Credential password");
+        using var credentialPassword = OutputHelpers.ReadPassword("Credential password", cancellationToken);
         if (credentialPassword is null)
         {
             OutputHelpers.WriteError("Credential password is required.");
@@ -87,9 +86,9 @@ public static class CalculateSessionKeys
 
             // Diagnostic output exposes session secrets. Use disposable test material and keep key
             // output out of an application's terminal/logging path.
-            OutputHelpers.WriteHex("S-ENC", keys.SEnc);
-            OutputHelpers.WriteHex("S-MAC", keys.SMac);
-            OutputHelpers.WriteHex("S-RMAC", keys.SRmac);
+            OutputHelpers.WriteHex("S-ENC (demo only)", keys.SEnc);
+            OutputHelpers.WriteHex("S-MAC (demo only)", keys.SMac);
+            OutputHelpers.WriteHex("S-RMAC (demo only)", keys.SRmac);
         }
         finally
         {

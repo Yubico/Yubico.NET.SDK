@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
+using System.Buffers;
+using Yubico.YubiKit.Core.Credentials;
 using SharedConfirm = Yubico.YubiKit.Cli.Shared.Output.ConfirmationPrompts;
 using SharedOutput = Yubico.YubiKit.Cli.Shared.Output.OutputHelpers;
 
@@ -13,6 +15,22 @@ namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
 /// </summary>
 public static class OutputHelpers
 {
+    private static readonly ConsoleCredentialReader CredentialReader = new();
+
+    internal static IMemoryOwner<byte>? ReadPassword(string prompt, CancellationToken token) =>
+        ReadMasked(CredentialReaderOptions.ForPassphrase() with { Prompt = prompt + ": " }, token);
+
+    internal static IMemoryOwner<byte>? ReadKey(string prompt, int length, CancellationToken token) =>
+        ReadMasked(CredentialReaderOptions.ForHexKey(length) with { Prompt = prompt + ": " }, token);
+
+    private static IMemoryOwner<byte>? ReadMasked(CredentialReaderOptions options, CancellationToken token)
+    {
+        if (Console.IsInputRedirected || Console.IsOutputRedirected)
+            throw new InvalidOperationException("Secret input requires an interactive console for masking.");
+
+        return CredentialReader.ReadCredential(options, token);
+    }
+
     // -- Delegated to shared library --
 
     /// <inheritdoc cref="SharedOutput.WriteHeader"/>

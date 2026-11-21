@@ -187,10 +187,9 @@ cleanup/readback when persistent credentials or a replacement management key rem
 
 ## Maintenance constraints
 
-Place secret acquisition and cleanup in one failure-safe scope; clearing after an awaited send alone
-leaves exception paths uncovered. The diagnostic example has pre-cleanup parsing/early-return paths, so
-qualify its cleanup claims and preserve its evaluation warning. It prints long-lived/session keys and
-accepts some secrets as visible strings. Its calculation menu always dispatches to the symmetric API.
+The demo tool uses `ConsoleCredentialReader` for passwords and keys and prints generated long-lived/session
+keys with a demo-only warning. It is not a production cleanup or provisioning template. Its calculation menu
+filters to symmetric credentials and wires the shared console user-presence prompt.
 
 Use the retry-checking send helper for operations whose public contract exposes typed retry failures.
 Ordinary backend error throwing bypasses the helper's status parsing, as the current GET_CHALLENGE path

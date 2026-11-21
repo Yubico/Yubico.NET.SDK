@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
-using System.Security.Cryptography;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
@@ -31,9 +30,9 @@ public static class DeleteCredential
                 .Title("Select credential to [red]delete[/]:")
                 .AddChoices(labels));
 
-        var mgmtKeyHex = AnsiConsole.Prompt(
-            new TextPrompt<string>("Management key ([grey]hex, 16 bytes[/]):")
-                .DefaultValue("00000000000000000000000000000000"));
+        using var managementKey = OutputHelpers.ReadKey("Management key (16 bytes, hex)", 16, cancellationToken);
+        if (managementKey is null)
+            return;
 
         if (!AnsiConsole.Confirm($"Delete credential '{label}'?", defaultValue: false))
         {
@@ -41,15 +40,7 @@ public static class DeleteCredential
             return;
         }
 
-        var managementKey = Convert.FromHexString(mgmtKeyHex);
-        try
-        {
-            await session.DeleteCredentialAsync(managementKey, label, cancellationToken);
-            OutputHelpers.WriteSuccess($"Credential '{label}' deleted.");
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(managementKey);
-        }
+        await session.DeleteCredentialAsync(managementKey.Memory, label, cancellationToken);
+        OutputHelpers.WriteSuccess($"Credential '{label}' deleted.");
     }
 }

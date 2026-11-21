@@ -2,9 +2,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 using Spectre.Console;
-using System.Security.Cryptography;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
-using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.HsmAuthExamples;
 
@@ -19,14 +17,13 @@ public static class AddDerivedCredential
         CancellationToken cancellationToken = default)
     {
         var label = AnsiConsole.Ask<string>("Credential [green]label[/]:");
-        using var derivationPassword = SecureCredential.Prompt(
-            "Derivation password (used to derive K-ENC/K-MAC via PBKDF2)");
+        using var derivationPassword = OutputHelpers.ReadPassword("Derivation password (PBKDF2)", cancellationToken);
         if (derivationPassword is null)
         {
             OutputHelpers.WriteError("Derivation password is required.");
             return;
         }
-        using var credentialPassword = SecureCredential.Prompt("Credential password");
+        using var credentialPassword = OutputHelpers.ReadPassword("Credential password", cancellationToken);
         if (credentialPassword is null)
         {
             OutputHelpers.WriteError("Credential password is required.");
@@ -35,29 +32,21 @@ public static class AddDerivedCredential
 
         using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
 
-        var mgmtKeyHex = AnsiConsole.Prompt(
-            new TextPrompt<string>("Management key ([grey]hex, 16 bytes[/]):")
-                .DefaultValue("00000000000000000000000000000000"));
+        using var managementKey = OutputHelpers.ReadKey("Management key (16 bytes, hex)", 16, cancellationToken);
+        if (managementKey is null)
+            return;
 
         var touchRequired = AnsiConsole.Confirm("Require touch?", defaultValue: false);
 
-        var managementKey = Convert.FromHexString(mgmtKeyHex);
-        try
-        {
-            await session.PutCredentialDerivedAsync(
-                managementKey,
-                label,
-                derivationPassword.Memory,
-                password,
-                touchRequired,
-                cancellationToken);
+        await session.PutCredentialDerivedAsync(
+            managementKey.Memory,
+            label,
+            derivationPassword.Memory,
+            password,
+            touchRequired,
+            cancellationToken);
 
-            OutputHelpers.WriteSuccess($"Derived credential '{label}' stored successfully.");
-            OutputHelpers.WriteInfo("Keys were derived using PBKDF2-HMAC-SHA256 (10,000 iterations, salt='Yubico').");
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(managementKey);
-        }
+        OutputHelpers.WriteSuccess($"Derived credential '{label}' stored successfully.");
+        OutputHelpers.WriteInfo("Keys were derived using PBKDF2-HMAC-SHA256 (10,000 iterations, salt='Yubico').");
     }
 }

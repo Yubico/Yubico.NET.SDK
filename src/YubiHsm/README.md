@@ -322,15 +322,11 @@ key/password checks and the application's external HSM authentication. It is not
 
 ## Example
 
-HsmAuthTool is a **diagnostic evaluation sample**. Run it with disposable test credentials: generated symmetric
-keys and calculated session keys are printed, and command-line secrets/visible management-key input can remain
-in process listings, shell history, terminal capture and immutable strings. Its cleanup blocks cover selected
-buffers; some parsing/early-return paths precede those blocks. Use your own secure input/output and total
-cleanup scopes for an application handling valuable keys.
-
-The calculation menu lists all algorithms but always calls the symmetric calculation API; select a symmetric
-credential. It supplies no `IUserPresencePrompt`, and it leaves HSM enrollment and handshake completion to the
-operator's external HSM workflow. The sample lives at `src/YubiHsm/examples/HsmAuthTool/`. From the repository root:
+HsmAuthTool is **demo only, not for production**. It prompts for passwords and keys rather than taking
+them as command-line options. Secret prompts require an interactive console for masked input.
+Generated symmetric keys and calculated session keys are explicitly printed, so use disposable test credentials.
+The calculation menu lists only symmetric credentials and supplies a console touch prompt. It does not enroll
+an HSM or complete the HSM handshake. From the repository root:
 
 ```bash
 dotnet run --project src/YubiHsm/examples/HsmAuthTool/HsmAuthTool.csproj

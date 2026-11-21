@@ -15,7 +15,6 @@
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 using System.Reflection;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 public class SessionKeysTests
 {
@@ -98,21 +97,6 @@ public class SessionKeysTests
 
         keys.Dispose();
         keys.Dispose(); // Should not throw
-    }
-
-    [Fact]
-    public void ZeroApduResponse_ClearsOwnedRawResponseStorage()
-    {
-        var responseBytes = new byte[50];
-        for (var i = 0; i < responseBytes.Length - 2; i++)
-            responseBytes[i] = 0xA5;
-        responseBytes[^2] = 0x90;
-
-        var response = new ApduResponse(responseBytes);
-
-        HsmAuthSession.ZeroApduResponse(response);
-
-        Assert.True(response.RawData.Span.ToArray().All(static b => b == 0));
     }
 
     private static byte[] GetOwnedKeyBuffer(SessionKeys keys, string fieldName) =>

@@ -101,11 +101,23 @@ public sealed class SessionKeys : IDisposable
                 $"CALCULATE response must be exactly {ExpectedResponseLength} bytes, got {response.Length}.",
                 nameof(response));
 
-        var sEnc = response[..KeyLength].ToArray();
-        var sMac = response[KeyLength..(KeyLength * 2)].ToArray();
-        var sRmac = response[(KeyLength * 2)..].ToArray();
-
-        return new SessionKeys(sEnc, sMac, sRmac);
+        byte[]? sEnc = null;
+        byte[]? sMac = null;
+        byte[]? sRmac = null;
+        try
+        {
+            sEnc = response[..KeyLength].ToArray();
+            sMac = response[KeyLength..(KeyLength * 2)].ToArray();
+            sRmac = response[(KeyLength * 2)..].ToArray();
+            return new SessionKeys(sEnc, sMac, sRmac);
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(sEnc);
+            CryptographicOperations.ZeroMemory(sMac);
+            CryptographicOperations.ZeroMemory(sRmac);
+            throw;
+        }
     }
 
     /// <summary>

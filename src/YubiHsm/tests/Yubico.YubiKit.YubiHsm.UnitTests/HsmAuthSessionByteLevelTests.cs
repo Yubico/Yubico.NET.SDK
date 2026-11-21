@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Reflection;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Tests.Shared;
+using Yubico.YubiKit.YubiHsm.Backend;
 namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 public class HsmAuthSessionByteLevelTests
@@ -95,6 +98,29 @@ public class HsmAuthSessionByteLevelTests
             0x78, 0x08, .. Sequence(0x50, 8),
             0x73, 0x10, (byte)'p', (byte)'a', (byte)'s', (byte)'s', .. new byte[12]
         ], CommandData(command).ToArray());
+    }
+
+    [Fact]
+    public async Task CalculateSessionKeysSymmetricAsync_ClearsFinalResponseNotItsSource()
+    {
+        var source = SessionKeyResponse();
+        var response = new ApduResponse(source);
+        using var connection = CreateInitializedConnection();
+        await using var session = await HsmAuthSession.CreateAsync(connection,
+            cancellationToken: TestContext.Current.CancellationToken);
+        // The raw connection cannot witness the final response: ApduResponse clones the transport array.
+        var backend = typeof(HsmAuthSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("Missing applet backend.");
+        backend.SetValue(session, new CalculateBackend(response));
+
+        using var keys = await session.CalculateSessionKeysSymmetricAsync("cred", new byte[16], "pass"u8.ToArray(),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal(Sequence(0xA0, 16), keys.SEnc.ToArray());
+        Assert.Equal(Sequence(0xB0, 16), keys.SMac.ToArray());
+        Assert.Equal(Sequence(0xC0, 16), keys.SRmac.ToArray());
+        Assert.All(response.RawData.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal(SessionKeyResponse(), source);
     }
 
     [Theory]
@@ -355,4 +381,16 @@ public class HsmAuthSessionByteLevelTests
         .. Sequence(0xC0, 16),
         0x90, 0x00
     ];
+
+    private sealed class CalculateBackend(ApduResponse response) : IHsmAuthBackend
+    {
+        public Task<FirmwareVersion> ReadInitialStateAsync(CancellationToken cancellationToken) =>
+            throw new InvalidOperationException("The calculation must not reinitialize the applet.");
+
+        public Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError, CancellationToken cancellationToken)
+        {
+            Assert.Equal(0x03, command.Ins);
+            return Task.FromResult(response);
+        }
+    }
 }

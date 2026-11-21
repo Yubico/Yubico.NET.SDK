@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Core.Credentials;
@@ -918,6 +917,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                             token)
                         .ConfigureAwait(false);
 
+                    // This is the final successful response owner. Earlier transport, fragment and
+                    // decrypted copies, and errors before the send returns, are outside this scope.
                     try
                     {
                         SessionKeys sessionKeys = SessionKeys.Parse(response.Data.Span);
@@ -935,7 +936,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                     }
                     finally
                     {
-                        ZeroApduResponse(response);
+                        response.Clear();
                     }
                 },
                 cancellationToken)
@@ -948,15 +949,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             throw new ArgumentException(
                 $"Management key must be exactly {ManagementKeyLength} bytes, got {managementKey.Length}.",
                 nameof(managementKey));
-    }
-
-    internal static void ZeroApduResponse(ApduResponse response)
-    {
-        // This legacy helper reaches the final response's actual array, including status bytes.
-        // Core now exposes Clear() for that owner. Earlier transport/fragment/decrypted copies remain
-        // separate; retry/backend failures before the caller's try are outside this cleanup scope.
-        if (MemoryMarshal.TryGetArray(response.RawData, out var rawData))
-            CryptographicOperations.ZeroMemory(rawData.AsSpan());
     }
 
     /// <summary>

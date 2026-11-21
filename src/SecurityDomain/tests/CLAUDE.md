@@ -44,7 +44,7 @@ Factories are exercised using mocks or recording connections, including actual s
 encoding. The specialized SCP03 fixture derives keys for one deterministic exchange sequence; its CMAC
 primitive has RFC vectors, but it does not verify the host cryptogram/MAC or establish SCP conformance.
 Unit tests do not establish device interoperability. Certificate bundle tests observe native handles,
-order, identity and caller ownership; the convenience listing test does not directly observe disposal.
+order, identity and caller ownership. The convenience listing test observes exactly-once disposal on its owned connection.
 
 ### Integration tests
 
@@ -65,13 +65,15 @@ The `ResetAsync()` method (in `SecurityDomainSession.cs`):
     - SCP11b (KID=0x13): `INTERNAL AUTHENTICATE`
     - Other references: `PERFORM SECURITY OPERATION`
 3. **At most 65 raw attempts** per processed reference, stopping on `AuthenticationMethodBlocked` or
-   `SecurityStatusNotSatisfied`; ordinary transmission errors are retried and exhaustion itself does not throw
-4. **Reinitializes session**, without verifying factory contents; an empty key listing skips reset
+   `SecurityStatusNotSatisfied`; transmission failures, unexpected statuses and exhaustion produce incomplete outcomes
+4. **Reinitializes the same session** with public default SCP03 after all actionable references stop successfully;
+   an empty listing skips reset, and failure during the attempt/refresh phase ends the session
 
 Custom state may be lost even on failure/cancellation. The vendor's factory SCP03 restoration after
 last-set deletion does not verify every mixed-key/firmware state. The helper uses an unauthenticated reset
 session, disposes it, then creates the test session with the supplied configuration and test firmware.
-That fresh creation avoids relying on reset reinitialization, which currently omits those options.
+That fresh creation is useful when the test requires a specific channel or independent authentication rather
+than the default SCP03 session established after reset.
 
 ## Test Patterns
 

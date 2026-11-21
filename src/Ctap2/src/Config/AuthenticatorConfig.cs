@@ -149,7 +149,9 @@ public sealed class AuthenticatorConfig
     /// Pass null to leave the minimum unchanged. This helper accepts 4-63; device policy and
     /// UTF-8 PIN-byte limits apply separately.</param>
     /// <param name="rpIds">Optional replacement mutable list of RP IDs allowed to receive
-    /// minPinLength extension output. Null omits the field; an empty list removes mutable entries.</param>
+    /// minPinLength extension output. Null omits the field; an empty list is encoded as an empty
+    /// array, not a revocation request. CTAP 2.1/2.3 §6.11.4 updates the stored list only when
+    /// the array contains at least one string.</param>
     /// <param name="forceChangePin">If true, request a PIN change before PIN-token acquisition.
     /// Null omits the field. False is transmitted, but does not clear an already-set flag.</param>
     /// <param name="cancellationToken">The cancellation token.</param>

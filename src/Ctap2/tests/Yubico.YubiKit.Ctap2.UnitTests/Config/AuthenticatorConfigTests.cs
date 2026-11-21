@@ -218,7 +218,9 @@ public class AuthenticatorConfigTests
         Assert.Equal(1, reader.ReadInt32());
         Assert.Equal(3, reader.ReadInt32());
         Assert.Equal(2, reader.ReadInt32());
-        Assert.Equal(new byte[] { 0xA2, 0x02, 0x80, 0x03, 0xF4 }, reader.ReadEncodedValue().ToArray());
+        byte[] parameters = reader.ReadEncodedValue().ToArray();
+        Assert.Equal(new byte[] { 0xA2, 0x02, 0x80, 0x03, 0xF4 }, parameters);
+        Assert.Equal([.. Enumerable.Repeat((byte)0xFF, 32), 0x0D, 0x03, .. parameters], _testProtocol.LastAuthenticateMessage);
     }
 
     [Fact]

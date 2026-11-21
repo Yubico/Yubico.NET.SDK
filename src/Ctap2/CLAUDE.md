@@ -338,7 +338,8 @@ returning partial results. `CredentialManagement.Dispose` rejects subsequent ope
 owns nor clears the borrowed token, and does not end device authorization. Config/bio/storage
 helpers also borrow these dependencies. `SetAlwaysUvAsync` reads current state before sending a toggle;
 after an uncertain outcome, repeat with the same desired state. `SetMinPinLengthAsync` can omit the
-length, send an empty RP list or send explicit false. minPinLength disclosure is not setting policy.
+length, send an empty RP list or send explicit false. An empty list is not a revocation request:
+CTAP updates the stored recipient list only for an array containing at least one string.
 
 Standard bio requests authenticate modality, subcommand and the exact encoded parameter map when present.
 The opt-in prototype command retains its previous wire profile; it is not a fallback.

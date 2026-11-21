@@ -29,6 +29,47 @@ namespace Yubico.YubiKit.OpenPgp.UnitTests;
 
 public sealed class OpenPgpSessionWireTests
 {
+    [Theory]
+    [InlineData("ééé", 6, true)]
+    [InlineData("éééé", 7, false)]
+    [InlineData("12345", 127, false)]
+    public async Task VerifyPin_UsesEncodedByteLimits(string text, byte maximum, bool accepted)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection([
+            OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(userLimit: maximum),
+            [0x81, 0x01, 0x00, 0x90, 0x00], OkResponse()]);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+
+        if (accepted)
+        {
+            await session.VerifyPinAsync(bytes, cancellationToken: token);
+            Assert.Equal(0x20, LastCommand(connection)[1]);
+            Assert.Equal(bytes, CommandData(LastCommand(connection)).ToArray());
+        }
+        else
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => session.VerifyPinAsync(bytes, cancellationToken: token));
+            Assert.Equal(4, connection.TransmittedCommands.Count);
+            Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0x20);
+        }
+        Assert.Equal(System.Text.Encoding.UTF8.GetBytes(text), bytes);
+    }
+
+    [Fact]
+    public async Task VerifyPin_PinBlockFormat_DoesNotSendUtf8ToCard()
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection([
+            OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(userLimit: 0x88),
+            [0x81, 0x01, 0x00, 0x90, 0x00]]);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.VerifyPinAsync("123456"u8.ToArray(), cancellationToken: token));
+        Assert.All(connection.TransmittedCommands, command => Assert.NotEqual(0x20, command[1]));
+    }
+
     [Fact]
     public async Task SignaturePolicy_UnknownResponseIsPreservedButNotAcceptedAsRequest()
     {
@@ -1298,18 +1339,19 @@ public sealed class OpenPgpSessionWireTests
         Uif? aut = null,
         Uif? att = null,
         AlgorithmAttributes? decipherAttributes = null,
-        bool attributesChangeable = true) =>
-        [.. BuildApplicationRelatedData(sig, dec, aut, att, decipherAttributes, attributesChangeable), 0x90, 0x00];
+        bool attributesChangeable = true,
+        byte userLimit = 0x7F) =>
+        [.. BuildApplicationRelatedData(sig, dec, aut, att, decipherAttributes, attributesChangeable, userLimit), 0x90, 0x00];
 
     private static byte[] BuildApplicationRelatedData(Uif? sig, Uif? dec, Uif? aut, Uif? att,
-        AlgorithmAttributes? decipherAttributes, bool attributesChangeable)
+        AlgorithmAttributes? decipherAttributes, bool attributesChangeable, byte userLimit)
     {
         // AID: D276000124010304000612345678 (OpenPGP v3.4, Yubico, serial 12345678).
         byte[] aid = [0xD2, 0x76, 0x00, 0x01, 0x24, 0x01, 0x03, 0x04, 0x00, 0x06, 0x12, 0x34, 0x56, 0x78];
         byte[] historicalBytes = [0x00, 0x73, 0x00, 0x01, 0x80, 0x05, 0x90, 0x00];
         byte[] rsa2048Attributes = [0x01, 0x08, 0x00, 0x00, 0x11, 0x00];
         byte[] extendedCapabilities = [attributesChangeable ? (byte)0x75 : (byte)0x71, 0x00, 0x00, 0xFF, 0x04, 0x80, 0x00, 0xFF, 0x00, 0x00];
-        byte[] pwStatus = [0x00, 0x7F, 0x7F, 0x7F, 0x03, 0x00, 0x03];
+        byte[] pwStatus = [0x00, userLimit, 0x7F, 0x7F, 0x03, 0x00, 0x03];
         var fingerprints = new byte[60];
         var caFingerprints = new byte[60];
         var generationTimes = new byte[12];

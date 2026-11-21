@@ -93,7 +93,7 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     ///     Disposing the result clears its byte storage. A supplied command-line option remains in an immutable
     ///     string and can be exposed through process arguments; prefer application-owned input buffers for secrets.
     ///     A supplied string bypasses reader length limits. The reader path counts UTF-16 code units before
-    ///     UTF-8 encoding; neither path adds card credential-format or encoded-byte-limit validation.
+    ///     UTF-8 encoding. Both paths are subject to the same SDK check of the card's credential profile.
     /// </remarks>
     protected static IMemoryOwner<byte>? GetCredential(string? provided, CredentialReaderOptions options)
     {

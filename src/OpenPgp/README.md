@@ -164,6 +164,11 @@ query, and Reset-Code recovery also recognizes 6A80 as blocked. VERIFY with eith
 the User PIN counter, not the Reset Code counter. A failed status query leaves the count `null`; even a known
 count does not establish that 6982 means a wrong PIN. Diagnose uncertain status before spending another attempt.
 Other statuses and failures during administrator-authenticated recovery retain their general APDU errors.
+
+The SDK checks the credential bytes sent to the card, after any KDF derivation: at least six bytes for
+User PIN, eight for Admin PIN and Reset Code, and no more than the maximum in application data. The
+typed credential methods do not encode PIN block format 2. Console presets count UTF-16 code units
+before UTF-8 encoding; a supplied option can bypass the reader's text limits, not the SDK's byte check.
 A blocked Admin PIN requires destructive application reset; a blocked User PIN has the two recovery routes above.
 
 ## Configure KDF before provisioning keys

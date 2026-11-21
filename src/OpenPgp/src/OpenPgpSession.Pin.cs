@@ -105,7 +105,7 @@ public sealed partial class OpenPgpSession
         try
         {
             using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
-            derivedBytes = kdf.Process(Pw.Reset, resetCode.Span);
+            derivedBytes = EncodeCredential(kdf, Pw.Reset, resetCode, nameof(resetCode));
 
             await PutDataAsync(DataObject.ResettingCode, derivedBytes, cancellationToken)
                 .ConfigureAwait(false);
@@ -154,7 +154,7 @@ public sealed partial class OpenPgpSession
         try
         {
             using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
-            newPinBytes = kdf.Process(Pw.User, newPin.Span);
+            newPinBytes = EncodeCredential(kdf, Pw.User, newPin, nameof(newPin));
 
             // P1=0x02 (admin): Admin PIN (PW3) must have been verified beforehand
             //   by the caller via VerifyAdminAsync. Data = new PIN only.
@@ -167,7 +167,7 @@ public sealed partial class OpenPgpSession
             }
             else
             {
-                resetBytes = kdf.Process(Pw.Reset, resetCode.Span);
+                resetBytes = EncodeCredential(kdf, Pw.Reset, resetCode, nameof(resetCode));
                 data = new byte[resetBytes.Length + newPinBytes.Length];
                 resetBytes.CopyTo(data.AsSpan());
                 newPinBytes.CopyTo(data.AsSpan(resetBytes.Length));
@@ -253,7 +253,7 @@ public sealed partial class OpenPgpSession
         try
         {
             using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
-            derivedBytes = kdf.Process(pw, pin.Span);
+            derivedBytes = EncodeCredential(kdf, pw, pin, nameof(pin));
 
             var command = new ApduCommand(0x00, (int)Ins.Verify, 0x00, p2, derivedBytes);
             await TransmitCredentialAsync(command, pw, cancellationToken).ConfigureAwait(false);
@@ -332,8 +332,8 @@ public sealed partial class OpenPgpSession
         try
         {
             using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
-            currentBytes = kdf.Process(pw, currentPin.Span);
-            newBytes = kdf.Process(pw, newPin.Span);
+            currentBytes = EncodeCredential(kdf, pw, currentPin, nameof(currentPin));
+            newBytes = EncodeCredential(kdf, pw, newPin, nameof(newPin));
 
             combined = new byte[currentBytes.Length + newBytes.Length];
             currentBytes.CopyTo(combined.AsSpan());
@@ -358,5 +358,22 @@ public sealed partial class OpenPgpSession
             if (combined is not null)
                 CryptographicOperations.ZeroMemory(combined);
         }
+    }
+
+    private byte[] EncodeCredential(Kdf kdf, Pw credential, ReadOnlyMemory<byte> input, string parameterName)
+    {
+        var status = _appData.Discretionary.PwStatus;
+        bool usesPinBlock = credential == Pw.Admin ? status.AdminUsesPinBlock2 : status.UserUsesPinBlock2;
+        if (usesPinBlock)
+            throw new NotSupportedException("OpenPGP credential commands support UTF-8 and KDF, not PIN block format 2.");
+
+        int minimum = credential == Pw.User ? 6 : 8;
+        int maximum = status.GetMaxLen(credential);
+        var encoded = kdf.Process(credential, input.Span);
+        if (encoded.Length >= minimum && encoded.Length <= maximum)
+            return encoded;
+
+        CryptographicOperations.ZeroMemory(encoded);
+        throw new ArgumentException($"The encoded {credential} credential must be between {minimum} and {maximum} bytes.", parameterName);
     }
 }

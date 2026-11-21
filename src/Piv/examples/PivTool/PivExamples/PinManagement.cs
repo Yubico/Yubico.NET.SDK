@@ -77,7 +77,7 @@ public static class PinManagement
                 $"Invalid PIN. {ex.RetriesRemaining} retries remaining.",
                 ex.RetriesRemaining);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return PinOperationResult.Failed($"PIN verification failed: {ex.Message}");
         }
@@ -125,7 +125,7 @@ public static class PinManagement
                 $"Invalid current PIN. {ex.RetriesRemaining} retries remaining.",
                 ex.RetriesRemaining);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return PinOperationResult.Failed($"PIN change failed: {ex.Message}");
         }
@@ -158,7 +158,7 @@ public static class PinManagement
                 $"Invalid current PUK. {ex.RetriesRemaining} retries remaining.",
                 ex.RetriesRemaining);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return PinOperationResult.Failed($"PUK change failed: {ex.Message}");
         }
@@ -206,7 +206,7 @@ public static class PinManagement
                 $"Invalid PUK. {ex.RetriesRemaining} retries remaining.",
                 ex.RetriesRemaining);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return PinOperationResult.Failed($"PIN unblock failed: {ex.Message}");
         }
@@ -229,7 +229,7 @@ public static class PinManagement
             var retries = await session.GetPinAttemptsAsync(cancellationToken);
             return PinOperationResult.Succeeded(retries);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return PinOperationResult.Failed($"Failed to get PIN retries: {ex.Message}");
         }
@@ -268,7 +268,7 @@ public static class PinManagement
             await session.AuthenticateAsync(managementKey, cancellationToken);
             return PinOperationResult.Succeeded();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return PinOperationResult.Failed($"Authentication failed: {ex.Message}");
         }
@@ -307,7 +307,7 @@ public static class PinManagement
             await session.SetManagementKeyAsync(keyType, newKey, requireTouch, cancellationToken);
             return PinOperationResult.Succeeded();
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return PinOperationResult.Failed($"Failed to change management key: {ex.Message}");
         }

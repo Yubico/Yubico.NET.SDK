@@ -95,11 +95,7 @@ public static class Signing
             stopwatch.Stop();
             return SigningResult.Succeeded(signature, stopwatch.ElapsedMilliseconds);
         }
-        catch (OperationCanceledException)
-        {
-            return SigningResult.Failed("Touch timeout. Please touch the YubiKey when prompted.");
-        }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return SigningResult.Failed($"Signing failed: {ex.Message}");
         }

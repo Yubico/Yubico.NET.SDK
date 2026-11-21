@@ -94,6 +94,9 @@ output file is selected. With `--output`, signatures/plaintext are binary and ce
 Diagnostics use stderr, while JSON failure objects remain on stdout. Handled operational failure normally
 returns 1; success returns 0. Inspect result fields too: `device-info` can return device data even if the
 PIV retry subquery fails, and verification's exit status describes execution rather than validity.
+Reported cancellation exits 130 and does not diagnose a touch timeout. The certificate/CSR signing
+callback is synchronous by contract and waits for the full PIV task using the outer token; cancellation
+does not interrupt an admitted device exchange or allow early disposal.
 
 ## Choose the supported crypto path
 

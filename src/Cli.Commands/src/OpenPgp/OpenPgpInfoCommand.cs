@@ -71,7 +71,14 @@ public sealed class OpenPgpInfoCommand : YkCommandBase<GlobalSettings>
                 fpString = fpString[..40] + "...";
             }
 
-            var status = fingerprint.Length > 0 ? "[green]Present[/]" : "[grey]Empty[/]";
+            var status = (disc.KeyInformation.TryGetValue(slot, out var keyStatus) ? keyStatus : (KeyStatus?)null) switch
+            {
+                KeyStatus.None => "[grey]Empty[/]",
+                KeyStatus.Generated => "[green]Generated[/]",
+                KeyStatus.Imported => "[green]Imported[/]",
+                { } raw => $"[grey]Unknown (0x{(byte)raw:X2})[/]",
+                null => "[grey]Not reported[/]",
+            };
             table.AddRow(
                 Markup.Escape(FormatSlotShort(slot)),
                 Markup.Escape(algString),

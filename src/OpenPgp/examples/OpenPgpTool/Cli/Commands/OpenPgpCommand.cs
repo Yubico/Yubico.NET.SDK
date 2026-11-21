@@ -24,7 +24,10 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     where TSettings : CommandSettings
 {
-    public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
+    public sealed override Task<int> ExecuteAsync(CommandContext context, TSettings settings) =>
+        WithSessionAsync(session => ExecuteCommandAsync(context, settings, session));
+
+    internal static async Task<int> WithSessionAsync(Func<IOpenPgpSession, Task<int>> executeAsync)
     {
         try
         {
@@ -38,7 +41,7 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
             OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
             await using var session = await selection.Device.CreateOpenPgpSessionAsync();
-            return await ExecuteCommandAsync(context, settings, session);
+            return await executeAsync(session);
         }
         catch (Exception ex)
         {
@@ -58,7 +61,7 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     /// <summary>
     ///     Parses a key argument string (sig/dec/aut/att) into a <see cref="KeyRef" />.
     /// </summary>
-    protected static KeyRef ParseKeyRef(string key) =>
+    protected internal static KeyRef ParseKeyRef(string key) =>
         key.ToLowerInvariant() switch
         {
             "sig" => KeyRef.Sig,
@@ -109,7 +112,7 @@ public abstract class OpenPgpCommand<TSettings> : AsyncCommand<TSettings>
     /// <summary>
     ///     Gets User PIN input; the reader path permits 6–127 UTF-16 code units. Supplied strings bypass those limits.
     /// </summary>
-    protected static IMemoryOwner<byte>? GetPin(string? provided) =>
+    protected internal static IMemoryOwner<byte>? GetPin(string? provided) =>
         GetCredential(provided, OpenPgpCredentialOptions.ForOpenPgpPin());
 
     /// <summary>

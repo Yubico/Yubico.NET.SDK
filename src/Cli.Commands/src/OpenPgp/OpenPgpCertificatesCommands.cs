@@ -71,7 +71,7 @@ public sealed class OpenPgpCertificatesExportCommand : YkCommandBase<Certificate
         await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
 
         var keyRef = ParseKeyRef(settings.Key);
-        var cert = await session.GetCertificateAsync(keyRef);
+        using var cert = await session.GetCertificateAsync(keyRef);
 
         if (cert is null)
         {
@@ -131,6 +131,7 @@ public sealed class OpenPgpCertificatesImportCommand : YkCommandBase<Certificate
             return ExitCode.GenericError;
         }
 
+        using var ownedCertificate = cert;
         OutputHelpers.WriteKeyValue("Subject", cert.Subject);
         OutputHelpers.WriteKeyValue("Issuer", cert.Issuer);
         OutputHelpers.WriteKeyValue("Thumbprint", cert.Thumbprint);

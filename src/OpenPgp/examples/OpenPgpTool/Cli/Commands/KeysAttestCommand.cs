@@ -5,6 +5,7 @@ using Spectre.Console;
 using Spectre.Console.Cli;
 using System.ComponentModel;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Output;
 
 namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
@@ -13,11 +14,9 @@ namespace Yubico.YubiKit.OpenPgp.Examples.OpenPgpTool.Cli.Commands;
 ///     Generates an attestation certificate for a key slot (openpgp keys attest).
 /// </summary>
 /// <remarks>
-///     The current command declares --pin but leaves it unused and calls attestation on a fresh session.
-///     Use the direct SDK to verify the User PIN first and dispose the returned certificate. Attestation
-///     replaces the target certificate; reading output alone establishes no trusted chain or key binding.
+///     Attestation replaces the target certificate; reading output alone establishes no trusted chain or key binding.
 /// </remarks>
-public sealed class KeysAttestCommand : OpenPgpCommand<KeysAttestCommand.Settings>
+public sealed class KeysAttestCommand : AsyncCommand<KeysAttestCommand.Settings>
 {
     public sealed class Settings : CommandSettings
     {
@@ -30,15 +29,27 @@ public sealed class KeysAttestCommand : OpenPgpCommand<KeysAttestCommand.Setting
         public string? Pin { get; init; }
     }
 
-    protected override async Task<int> ExecuteCommandAsync(
-        CommandContext context,
-        Settings settings,
-        IOpenPgpSession session)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        var keyRef = ParseKeyRef(settings.Key);
+        using var pin = OpenPgpCommand<Settings>.GetPin(settings.Pin);
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("User PIN is required.");
+            return 1;
+        }
 
-        var cert = await session.AttestKeyAsync(keyRef);
+        var keyRef = OpenPgpCommand<Settings>.ParseKeyRef(settings.Key);
+        return await OpenPgpCommand<Settings>.WithSessionAsync(async session =>
+        {
+            await session.VerifyPinAsync(pin.Memory);
+            using var certificate = await session.AttestKeyAsync(keyRef);
+            WriteCertificate(certificate);
+            return 0;
+        });
+    }
 
+    private static void WriteCertificate(X509Certificate2 cert)
+    {
         AnsiConsole.MarkupLine("[bold]Attestation Certificate[/]");
         OutputHelpers.WriteKeyValue("Subject", cert.Subject);
         OutputHelpers.WriteKeyValue("Issuer", cert.Issuer);
@@ -59,7 +70,5 @@ public sealed class KeysAttestCommand : OpenPgpCommand<KeysAttestCommand.Setting
         AnsiConsole.WriteLine();
         var pem = PemEncoding.Write("CERTIFICATE", cert.RawData);
         AnsiConsole.WriteLine(new string(pem));
-
-        return 0;
     }
 }

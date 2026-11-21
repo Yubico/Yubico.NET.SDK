@@ -102,15 +102,18 @@ public sealed class OpenPgpKeysSetTouchCommand : YkCommandBase<KeysSetTouchSetti
                 $"Invalid policy: {settings.Policy}. Must be on, off, fixed, cached, or cached-fixed.")
         };
 
+        var fixedPolicyEffect = keyRef == KeyRef.Att
+            ? "Fixed ATT policy survives reset; clearing it requires irreversible ATT key replacement."
+            : "Fixed policy clears only on ordinary key replacement, deletion, or reset.";
         var current = await session.GetUifAsync(keyRef);
         if (current.IsFixed())
         {
-            OutputHelpers.WriteError("Current touch policy is fixed and cannot be changed without factory reset.");
+            OutputHelpers.WriteError(fixedPolicyEffect);
             return ExitCode.GenericError;
         }
 
         if (uif.IsFixed() && !ConfirmAction(
-                "set a PERMANENT touch policy that cannot be changed without factory reset", settings.Force))
+                $"set a fixed touch policy. {fixedPolicyEffect}", settings.Force))
         {
             OutputHelpers.WriteInfo("Touch policy change cancelled.");
             return ExitCode.UserCancelled;
@@ -308,10 +311,17 @@ public sealed class OpenPgpKeysAttestCommand : YkCommandBase<KeysAttestSettings>
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, KeysAttestSettings settings, YkDeviceContext deviceContext)
     {
-        await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
-
         var keyRef = ParseKeyRef(settings.Key);
-        var cert = await session.AttestKeyAsync(keyRef);
+        using var pin = GetPin(settings.Pin, "Enter User PIN");
+        if (pin is null)
+        {
+            OutputHelpers.WriteError("User PIN is required.");
+            return ExitCode.GenericError;
+        }
+
+        await using var session = await deviceContext.Device.CreateOpenPgpSessionAsync();
+        await session.VerifyPinAsync(pin.Memory);
+        using var cert = await session.AttestKeyAsync(keyRef);
 
         AnsiConsole.MarkupLine("[bold]Attestation Certificate[/]");
         OutputHelpers.WriteKeyValue("Subject", cert.Subject);

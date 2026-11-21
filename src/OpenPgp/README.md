@@ -546,14 +546,11 @@ Run the interactive sample from the repository root:
 dotnet run --project src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj
 ```
 
-Treat OpenPgpTool as a sample with current limitations. Its attestation `--pin` option is declared but unused;
-use the direct SDK attestation method above to verify the User PIN explicitly. `info` infers key presence from
-fingerprint length, so use `ListKeyInformationAsync` for state inspection. Command-line PINs and PEM text live in
-immutable strings, even when temporary byte buffers are cleared. Noninteractive device selection takes the first
-SmartCard device, and the tool installs no touch-notification prompt. Certificate command results also need improved
-disposal. Use application-owned input buffers, explicit device selection, complete resource scopes and your UI with
-the direct SDK for those responsibilities. The sample's reset/fixed-policy help strings overstate reset scope;
-apply the ATT exception described above.
+**Demo only.** OpenPgpTool prioritizes readability, not production credential management. Attestation prompts for
+the User PIN (or accepts `--pin`), verifies it in signature mode, and replaces the target certificate. `info` displays
+key status separately from fingerprint bytes. Command-line PINs and PEM text can persist in immutable strings.
+Noninteractive device selection takes the first SmartCard device, and the tool installs no touch-notification prompt.
+Use the direct SDK with application-owned input buffers, explicit device selection, and your application UI in production.
 
 - [Core guide](../Core/README.md): discovery, connections, APDU and TLV.
 - [PIV guide](../Piv/README.md) and [Management guide](../Management/README.md).

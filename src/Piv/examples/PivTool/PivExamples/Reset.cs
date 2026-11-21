@@ -69,7 +69,7 @@ public static class Reset
         {
             return ResetResult.Failed($"Cannot reset: {ex.Message}. Biometrics may be configured.");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return ResetResult.Failed($"Reset failed: {ex.Message}");
         }

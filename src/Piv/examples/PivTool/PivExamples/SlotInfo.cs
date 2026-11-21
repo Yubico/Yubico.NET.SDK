@@ -82,7 +82,7 @@ public static class SlotInfoQuery
             transferred = true;
             return result;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return SlotInfoResult.Failed($"Failed to get slot info: {ex.Message}");
         }
@@ -116,7 +116,7 @@ public static class SlotInfoQuery
             var slotInfo = await GetSlotInfoAsync(session, slot, name, cancellationToken);
             return SlotInfoResult.Succeeded([slotInfo]);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return SlotInfoResult.Failed($"Failed to get slot info: {ex.Message}");
         }

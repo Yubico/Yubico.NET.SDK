@@ -15,12 +15,32 @@
 using NSubstitute;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
 using Yubico.YubiKit.Piv.Examples.PivTool.PivExamples;
 
 namespace Yubico.YubiKit.Piv.UnitTests;
 
 public class PivToolTests
 {
+    [Fact]
+    public async Task ResetCancellation_ReachesCliCancellationExit()
+    {
+        var session = Substitute.For<IPivSession>();
+        using var source = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        source.Cancel();
+        session.ResetAsync(source.Token).Returns(Task.FromCanceled(source.Token));
+        using var errors = new StringWriter();
+
+        int exitCode = await CliRunner.RunWithCancellationExitAsync(async () =>
+        {
+            var result = await Reset.ResetPivApplicationAsync(session, source.Token);
+            return result.Success ? 0 : 1;
+        }, errors);
+
+        Assert.Equal(130, exitCode);
+        Assert.Contains("Operation cancelled.", errors.ToString());
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]

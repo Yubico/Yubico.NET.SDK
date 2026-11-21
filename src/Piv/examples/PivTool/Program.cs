@@ -7,12 +7,7 @@ using var cancellation = new CancellationTokenSource();
 Console.CancelKeyPress += Cancel;
 try
 {
-    return await RunAsync(args, cancellation.Token);
-}
-catch (OperationCanceledException)
-{
-    Console.Error.WriteLine("Operation cancelled.");
-    return 130;
+    return await CliRunner.RunWithCancellationExitAsync(() => RunAsync(args, cancellation.Token), Console.Error);
 }
 finally
 {

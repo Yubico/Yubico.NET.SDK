@@ -113,7 +113,7 @@ public static class Verification
                 ? VerificationResult.Valid(stopwatch.ElapsedMilliseconds)
                 : VerificationResult.Invalid(stopwatch.ElapsedMilliseconds);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return VerificationResult.Failed($"Verification failed: {ex.Message}");
         }

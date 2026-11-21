@@ -31,6 +31,19 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
 /// </summary>
 internal static class CliRunner
 {
+    internal static async Task<int> RunWithCancellationExitAsync(Func<Task<int>> run, TextWriter errors)
+    {
+        try
+        {
+            return await run();
+        }
+        catch (OperationCanceledException)
+        {
+            errors.WriteLine("Operation cancelled.");
+            return 130;
+        }
+    }
+
     internal static async Task<int> RunAsync(string[] args, CancellationToken ct = default)
     {
         var (command, flags) = ParseArgs(args);

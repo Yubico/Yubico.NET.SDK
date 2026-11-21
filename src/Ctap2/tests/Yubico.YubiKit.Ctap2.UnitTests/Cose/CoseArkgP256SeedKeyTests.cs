@@ -28,16 +28,6 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Cose;
 public class CoseArkgP256SeedKeyTests
 {
     [Fact]
-    public void RegistrationOutput_MalformedSeedReturnsNoGeneratedKey()
-    {
-        // Truncated CBOR map: the key is present but its value is missing.
-        var output = new Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput(
-            new byte[] { 1 }, new byte[] { 0xA1, 0x03 }, -9);
-
-        Assert.Null(output.TryGetGeneratedKey());
-    }
-
-    [Fact]
     public void RegistrationOutput_ExtractsReportedAlgorithmInsteadOfSeedMarker()
     {
         byte[] point = [0x04, .. TestKemX, .. TestKemY];

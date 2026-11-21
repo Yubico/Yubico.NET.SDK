@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using System.Formats.Cbor;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Extensions;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
@@ -28,8 +32,53 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 /// Ctap2Canonical supplies ordering: these keys emit 2, 6, 7 externally and 3, -1, -2 in the args map.
 /// </remarks>
 [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
+[Collection(nameof(Ctap2BackendLifecycleTests))] // Serializes temporary process-wide logging changes.
 public class PreviewSignCborTests
 {
+    [Fact]
+    public void TryExtractGeneratedKey_MalformedOutputWarnsWithoutAllowingLoggerFailureToEscape()
+    {
+        var factory = Substitute.For<ILoggerFactory>();
+        var logger = new ThrowingWarningLogger();
+        factory.CreateLogger(nameof(PreviewSignCbor)).Returns(logger);
+        using var logging = YubiKitLogging.UseTemporary(factory);
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+        writer.WriteInt32(1);
+        writer.WriteTextString("none");
+        writer.WriteInt32(2);
+        writer.WriteByteString([.. new byte[32], 0xC5, .. new byte[4 + 16], 0, 1, 0x2A, 0xA0,
+            .. Convert.FromHexString("A16B707265766965775369676EA10328")]);
+        writer.WriteInt32(3);
+        writer.WriteEncodedValue([0xA0]);
+        writer.WriteEndMap();
+
+        var response = MakeCredentialResponse.Decode(writer.Encode());
+
+        Assert.False(PreviewSignCbor.TryExtractGeneratedKey(response, out var key));
+        Assert.Null(key);
+        Assert.Equal(1, logger.Calls);
+
+        // The DTO route takes already-separated parameters. A malformed seed must also be omitted,
+        // even if the logger that was captured on first warning throws.
+        var output = new PreviewSignRegistrationOutput(new byte[] { 1 }, new byte[] { 0xA1, 0x03 }, -9);
+        Assert.Null(output.TryGetGeneratedKey());
+        Assert.Equal(2, logger.Calls);
+    }
+
+    private sealed class ThrowingWarningLogger : ILogger
+    {
+        public int Calls { get; private set; }
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => logLevel == LogLevel.Warning;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            Calls++;
+            throw new InvalidOperationException("Test warning provider failed.");
+        }
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("80")]

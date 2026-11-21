@@ -338,6 +338,9 @@ public static class PreviewSignCbor
 
         reader.ReadEndMap();
 
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the previewSign unsigned registration map.");
+
         if (!innerCbor.HasValue)
         {
             throw new InvalidOperationException("previewSign unsigned output missing attestation object (key 7)");
@@ -371,11 +374,9 @@ public static class PreviewSignCbor
                     authData = reader.ReadByteString();
                     break;
                 case InnerAttestationObjectKeys.AttStmt:
-                    var bytesBefore = reader.BytesRemaining;
-                    reader.SkipValue();
-                    var bytesConsumed = bytesBefore - reader.BytesRemaining;
-                    var offset = innerCbor.Length - bytesBefore;
-                    attStmtRaw = innerCbor.Slice(offset, bytesConsumed);
+                    if (reader.PeekState() != CborReaderState.StartMap)
+                        throw new CborContentException("previewSign inner attestation statement must be a map.");
+                    attStmtRaw = reader.ReadEncodedValue();
                     break;
                 default:
                     reader.SkipValue();
@@ -384,6 +385,9 @@ public static class PreviewSignCbor
         }
 
         reader.ReadEndMap();
+
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("Trailing data after the previewSign inner attestation object.");
 
         if (fmt is null)
         {
@@ -479,22 +483,12 @@ public static class PreviewSignCbor
 
         try
         {
-            if (response.UnsignedExtensionOutputs?.ContainsKey("previewSign") != true)
-            {
+            if (!TryGetRegistrationParts(response, out var signedPreviewSign, out var unsignedPreviewSign))
                 return false;
-            }
-
-            if (response.ExtensionOutputs is not { } signedOutputs ||
-                !ExtensionOutput.Decode(signedOutputs).TryGetRawExtension("previewSign", out var signedPreviewSign))
-            {
-                LogMalformedRegistration();
-                return false;
-            }
             var signedReader = new CborReader(signedPreviewSign, CborConformanceMode.Ctap2Canonical);
             (int algorithm, _) = DecodeRegistrationOutput(signedReader);
 
-            var previewSignCbor = response.UnsignedExtensionOutputs["previewSign"];
-            var innerAttestation = DecodeUnsignedRegistrationOutput(previewSignCbor);
+            var innerAttestation = DecodeUnsignedRegistrationOutput(unsignedPreviewSign);
             var authData = Credentials.AuthenticatorData.Parse(innerAttestation.AuthData);
 
             if (authData.AttestedCredentialData is null)
@@ -524,8 +518,32 @@ public static class PreviewSignCbor
         }
     }
 
-    internal static void LogMalformedRegistration() =>
-        PreviewSignDiagnostics.Logger.LogWarning("Malformed previewSign registration output was ignored.");
+    private static bool TryGetRegistrationParts(
+        Credentials.MakeCredentialResponse response,
+        out ReadOnlyMemory<byte> signed,
+        out Memory<byte> unsigned)
+    {
+        unsigned = default;
+        bool hasUnsigned = response.UnsignedExtensionOutputs?.TryGetValue("previewSign", out unsigned) == true;
+        signed = default;
+        bool hasSigned = response.ExtensionOutputs is { } signedOutputs &&
+            ExtensionOutput.Decode(signedOutputs).TryGetRawExtension("previewSign", out signed);
+        if (hasSigned != hasUnsigned)
+            LogMalformedRegistration();
+        return hasSigned && hasUnsigned;
+    }
+
+    internal static void LogMalformedRegistration()
+    {
+        try
+        {
+            PreviewSignDiagnostics.Logger.LogWarning("Malformed previewSign registration output was ignored.");
+        }
+        catch (Exception)
+        {
+            // Diagnostics are best-effort; a provider must not break the Try contract.
+        }
+    }
 
     private static class PreviewSignDiagnostics
     {

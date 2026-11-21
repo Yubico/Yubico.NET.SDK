@@ -134,6 +134,17 @@ static async Task<int> RunInfoVerbAsync(int? serialNumber, CancellationToken can
 static async Task<int> RunResetVerbAsync(string[] args, int? serialNumber, CancellationToken cancellationToken)
 {
     var force = HasFlag(args, "-f") || HasFlag(args, "--force");
+    var selection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
+    if (selection is null)
+    {
+        OutputHelpers.WriteError("No YubiKey found.");
+        return 1;
+    }
+
+    OutputHelpers.WriteActiveDevice(selection.DisplayName);
+    var resetTransport = ResetMenu.SelectResetTransport(selection.Device.AvailableConnections);
+    var preflight = await ResetAuthenticator.GetPreflightInfoAsync(
+        selection.Device, resetTransport, selection.SerialNumber, cancellationToken);
 
     if (!force)
     {
@@ -142,55 +153,19 @@ static async Task<int> RunResetVerbAsync(string[] args, int? serialNumber, Cance
             OutputHelpers.WriteInfo("Reset cancelled.");
             return 0;
         }
-    }
 
-    if (!force)
-    {
-        // Query a selected device, but this identity is not bound to the later destructive selection.
-        var preSelection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
-        if (preSelection is null)
-        {
-            OutputHelpers.WriteError("No YubiKey found.");
-            return 1;
-        }
-
-        var preResetTransport = ResetMenu.SelectResetTransport(preSelection.Device.AvailableConnections);
-        var preflight = await ResetAuthenticator.GetPreflightInfoAsync(
-            preSelection.Device, preResetTransport, cancellationToken);
-
-        var touchInstruction = preflight?.LongTouchForReset == true
+        var touchInstruction = preflight.LongTouchForReset
             ? "Press and hold for 10 seconds after re-inserting"
             : "Touch your YubiKey after re-inserting";
-
-        AnsiConsole.MarkupLine("[yellow]To perform the reset:[/]");
-        AnsiConsole.MarkupLine("[yellow]  1. Remove your YubiKey[/]");
-        AnsiConsole.MarkupLine("[yellow]  2. Re-insert your YubiKey[/]");
-        AnsiConsole.MarkupLine($"[yellow]  3. {touchInstruction}[/]");
-        AnsiConsole.WriteLine();
-
-        AnsiConsole.MarkupLine("[yellow]Remove your YubiKey now...[/]");
+        AnsiConsole.MarkupLine("[yellow]Remove and re-insert the selected YubiKey.[/]");
+        AnsiConsole.MarkupLine($"[yellow]{touchInstruction}.[/]");
         AnsiConsole.MarkupLine("[grey]Press Enter after re-inserting your YubiKey.[/]");
-        Console.ReadLine();
+        if (Console.ReadLine() is null)
+            return 1;
     }
 
-    var selection = await DeviceSelector.SelectDeviceAsync(serialNumber, cancellationToken);
-    if (selection is null)
-    {
-        OutputHelpers.WriteError("No YubiKey found.");
-        return 1;
-    }
-
-    var resetTransport = ResetMenu.SelectResetTransport(selection.Device.AvailableConnections);
-
-    // Selection is not correlated to the earlier key; another physical device can be reset.
-    // Preflight can fail/default; its message is not authoritative timing/transport qualification.
-    var reinsertedPreflight = await ResetAuthenticator.GetPreflightInfoAsync(
-        selection.Device, resetTransport, cancellationToken);
-
-    var touchMsg = reinsertedPreflight?.TouchMessage ?? "Touch your YubiKey to confirm.";
-    AnsiConsole.MarkupLine($"[yellow]{Markup.Escape(touchMsg)}[/]");
-
-    var result = await ResetAuthenticator.ResetAsync(selection.Device, resetTransport, cancellationToken);
+    AnsiConsole.MarkupLine("[yellow]Follow the selected device's touch instructions.[/]");
+    var result = await ResetAuthenticator.ResetAsync(preflight, cancellationToken);
 
     if (result.Success)
     {

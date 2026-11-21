@@ -71,10 +71,11 @@ FidoTool reset -f
    NFC remaining in reader contact, and product-dependent long touch. CTAP 2.3's enabled long-touch
    option requires at least five seconds, not a universal ten-second press.
 
-The sample independently selects again after reinsert; it does **not** bind that selection to the
-originally confirmed physical key. Another key can be reset. Manually verify the final target and avoid
-ambiguous multi-key setups. Preflight failures/cancellation can be swallowed and defaults displayed;
-missing metadata is not proof of unrestricted transports or a short touch. Existing executable prompts
+The sample retains the selected device view and transport across reinsertion. It checks the live serial
+when a serial was available. Without one it compares GetInfo AAGUID, firmware and supported versions
+on the connection that will send Reset. A matching fingerprint is **not unique device identity**.
+Manually verify the physical target and avoid ambiguous multi-key setups. Failed checks prevent Reset;
+missing optional metadata is not proof of unrestricted transports or a short touch. Existing executable prompts
 still contain overgeneralized five/ten-second wording; follow the qualified product procedure, not those
 messages as a timing authority. `-f` is not an unattended CI reset mode. A failed call does not prove no reset.
 

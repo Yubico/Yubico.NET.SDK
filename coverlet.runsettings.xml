@@ -8,7 +8,7 @@
           <!-- This file is the single definition of coverage policy. The VSTest data collector
                reads it directly; for Microsoft Testing Platform projects, toolchain.cs projects
                these same settings onto coverlet.console flags. Change filters here, not there. -->
-          <Exclude>[*.UnitTests]*,[*.IntegrationTests]*,[*Tests.Shared]*,[PivTool]*</Exclude>
+          <Exclude>[*.UnitTests]*,[*.IntegrationTests]*,[*Tests.Shared]*,[PivTool]*,[HsmAuthTool]*</Exclude>
           <ExcludeByFile>**/tests/**/*.cs</ExcludeByFile> <!-- Globbing filter -->
           <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
           <IncludeTestAssembly>false</IncludeTestAssembly>

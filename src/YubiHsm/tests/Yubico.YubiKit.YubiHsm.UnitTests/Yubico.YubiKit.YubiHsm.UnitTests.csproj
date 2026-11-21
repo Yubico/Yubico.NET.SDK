@@ -28,6 +28,7 @@
     <ProjectReference Include="..\..\src\Yubico.YubiKit.YubiHsm.csproj" />
     <ProjectReference Include="..\..\examples\HsmAuthTool\HsmAuthTool.csproj" />
     <ProjectReference Include="..\..\..\Tests.Shared\Yubico.YubiKit.Tests.Shared.csproj" />
+    <Compile Include="..\..\..\SecurityDomain\tests\Yubico.YubiKit.SecurityDomain.UnitTests\Scp03HandshakeFakeConnection.cs" Link="TestSupport\Scp03HandshakeFakeConnection.cs" />
   </ItemGroup>
 
 </Project>

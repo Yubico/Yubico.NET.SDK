@@ -33,6 +33,58 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.LargeBlob;
 /// </summary>
 public class LargeBlobProcessorTests
 {
+    [Fact]
+    public async Task Authentication_MultiEntryWriteUsesTheSelectedAssertionsStorageKey()
+    {
+        var storage = Context().Backend;
+        storage.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(new Yubico.YubiKit.Ctap2.AuthenticatorInfo
+        {
+            Extensions = ["largeBlobKey"],
+            Options = new Dictionary<string, bool> { ["largeBlobs"] = true, ["clientPin"] = true, ["pinUvAuthToken"] = true }
+        });
+        var permissions = PinUvAuthTokenPermissions.GetAssertion | PinUvAuthTokenPermissions.LargeBlobWrite;
+        var token = new PinUvAuthTokenSession(new TestPinUvAuthProtocol(), new byte[32]);
+        storage.GetPinUvTokenAsync(PinUvAuthMethod.Pin, permissions, "example.com", Arg.Any<ReadOnlyMemory<byte>?>(), Arg.Any<CancellationToken>())
+            .Returns(token);
+        byte[] first = [1];
+        byte[] selected = [2];
+        byte[] payload = [0x33];
+        storage.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(call =>
+        {
+            var request = call.Arg<BackendGetAssertionRequest>();
+            var allowed = Assert.Single(request.AllowList ?? []);
+            if (request.Options?.GetValueOrDefault("up") == false)
+            {
+                if (allowed.Id.Span.SequenceEqual(first))
+                    throw new Yubico.YubiKit.Ctap2.CtapException(Yubico.YubiKit.Ctap2.CtapStatus.NoCredentials);
+                return MockCtap2Responses.CreateMockGetAssertionResponse(selected, largeBlobKey: new byte[32]);
+            }
+            Assert.Equal(selected, allowed.Id.Span);
+            return MockCtap2Responses.CreateMockGetAssertionResponse(selected, largeBlobKey: LargeBlobKey);
+        });
+        _storage.SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                Assert.Equal(LargeBlobKey, call.ArgAt<ReadOnlyMemory<byte>>(0).Span);
+                Assert.Equal(payload, call.ArgAt<ReadOnlyMemory<byte>>(1).Span);
+                return Task.CompletedTask;
+            });
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(storage, origin, new() { RpIdValidator = (_, rpId) => rpId == "example.com" });
+        var ct = TestContext.Current.CancellationToken;
+        var matches = await client.GetAssertionAsync(new()
+        {
+            Challenge = new byte[32], RpId = "example.com",
+            AllowCredentials = [new(first), new(selected)],
+            Extensions = new AuthenticationExtensionInputs(LargeBlob: new LargeBlobInput { Write = payload })
+        }, "123456"u8.ToArray(), ct);
+        var result = await Assert.Single(matches).SelectAsync(ct);
+        Assert.Equal(selected, result.CredentialId.Span);
+        Assert.True(result.ClientExtensionResults?.LargeBlob?.Written);
+        storage.Received(1).CreateLargeBlobStorage(token);
+        await _storage.Received(1).SetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+    }
+
     private static readonly byte[] LargeBlobKey = Enumerable.Repeat((byte)0x4B, 32).ToArray();
     private static readonly byte[] StoredBlob = "stored blob"u8.ToArray();
 

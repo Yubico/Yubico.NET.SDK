@@ -113,13 +113,13 @@ Rules:
   ceremony, and fills the typed output record through a small internal builder. Outputs are typed
   records, not dictionaries. Per-processor `CborContentException` and `InvalidOperationException`
   omit that processor's result. This is SDK exception-isolation policy, not a rule quoted from
-  WebAuthn §9.4. Other exceptions, including CTAP storage failures and explicit previewSign errors,
+  WebAuthn §9.4. Other exceptions, including explicit previewSign errors,
   can propagate after the main authenticator operation succeeded.
 - Processors are **single-use**. A PUAT retry creates a fresh extension session; fresh per-attempt key
   agreement and encrypted salts are prepared after token reacquisition, not derived from the token bytes.
 - `ExtensionContext.Protocol` is available without a token; hmac-secret key agreement need not have
-  a PUAT. The current backend nevertheless uses protocol 2, without protocol-1 negotiation, for this
-  exchange and PIN/UV token acquisition. Do not infer universal CTAP2.0 compatibility from token absence.
+  a PUAT. The backend prefers protocol 2, then protocol 1, from GetInfo for this exchange and for token
+  acquisition. A ceremony that needs neither does not require a mutual protocol.
 
 [WebAuthn L3 REC §9 and §9.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#sctn-extensions)
 describe extension optionality and client input/output transformation, including no output for ignored
@@ -219,29 +219,24 @@ settle the WebAuthn actor, serializer, or result-disclosure policy.
 
 The PRF salt mapping belongs in WebAuthn, but correct domain separation alone does not establish
 conformance. [L3 REC §10.1.4](https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#prf-extension)
-requires the verified-use hmac-secret PRF and a UV override when necessary. The current processor
-preserves caller UV instead. Required is recommended for evaluation, not a complete conformance or
-cleanup remedy.
+requires the verified-use hmac-secret PRF. A supported evaluation forces Required UV and omits results
+if the authenticator did not report verification; registration enablement alone does not force UV.
 
-credProtect currently forwards/parses policy without implementing enforcement. CTAP2.3 §12.1 assigns
-the platform a SHOULD NOT for creating without requested policies 2/3 when enforcement is true;
-checking a returned policy after creation is not equivalent to prevention. LargeBlob Required also
-does not guarantee rejection for every unusable created credential. The original-singleton-allow-list
-write check is missing, and SDK writes always require a token even though CTAP has an
-unconfigured-authenticator exception. Storage errors can propagate after successful assertion;
-nullable Blob is not a unique absence/support/error discriminator. When storage returns a null byte
-array, the current conversion produces a present value of length zero. Nullable presence and length
-therefore do not distinguish missing data from a stored empty blob.
+Enforced credProtect refuses creation when GetInfo does not advertise support. Required largeBlob
+support refuses nondiscoverable creation. A supported read reports a null Blob when no data is
+available; an empty stored blob is present with zero length. Writes use the selected assertion's key
+and require a permission-scoped token. Multi-entry allow lists for writes are an intentional divergence
+from WebAuthn L3 §10.1.5. Callers own and clear the writable PRF and largeBlob plaintext results.
 
 The previewSign processor follows the [vendor draft v4 §10.2.1](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension),
 including multi-credential map coverage and selected-credential lookup. Its generated key is separate
 from the credential key; inner attestation parsing is not trust verification. Explicit missing-output
 client errors can propagate, while decoder CBOR/invalid-operation failures may omit results. The draft's
-permitted empty handles cannot currently pass the signing-params constructor. MinPinLength also has
-an input-handling limitation: presence requests it regardless of Requested=false.
+permitted empty handles cannot currently pass the signing-params constructor. MinPinLength requests
+disclosure only with Requested=true on an authenticator that advertises it.
 
-GetInfo/token acquisition and extension output preparation are not all inside the main command's
-mapping catch. Outputs deliberately run outside UV escalation so a failed read/parse cannot trigger
+GetInfo and token CTAP statuses use the general mapper, separately from the main command's retry
+and previewSign policy. Outputs deliberately run outside UV escalation so a failed read/parse cannot trigger
 another credential creation. Keep these boundaries explicit when revisiting error policy. The
 ceremony timer signals cooperative cancellation; successful device completion can win the race.
 

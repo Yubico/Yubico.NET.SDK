@@ -104,7 +104,7 @@ public sealed partial class OpenPgpSession
         byte[]? derivedBytes = null;
         try
         {
-            var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
+            using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
             derivedBytes = kdf.Process(Pw.Reset, resetCode.Span);
 
             await PutDataAsync(DataObject.ResettingCode, derivedBytes, cancellationToken)
@@ -153,7 +153,7 @@ public sealed partial class OpenPgpSession
         byte[]? data = null;
         try
         {
-            var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
+            using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
             newPinBytes = kdf.Process(Pw.User, newPin.Span);
 
             // P1=0x02 (admin): Admin PIN (PW3) must have been verified beforehand
@@ -244,7 +244,7 @@ public sealed partial class OpenPgpSession
         byte[]? derivedBytes = null;
         try
         {
-            var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
+            using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
             derivedBytes = kdf.Process(pw, pin.Span);
 
             var command = new ApduCommand(0x00, (int)Ins.Verify, 0x00, p2, derivedBytes);
@@ -330,7 +330,7 @@ public sealed partial class OpenPgpSession
         byte[]? combined = null;
         try
         {
-            var kdf = await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
+            using var kdf = await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
             currentBytes = kdf.Process(pw, currentPin.Span);
             newBytes = kdf.Process(pw, newPin.Span);
 

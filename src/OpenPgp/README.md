@@ -94,7 +94,7 @@ aliases while creation uses them. These ownership rules do not establish device/
 SCP version checks alone do not identify the earliest supported OpenPGP firmware. `IsAuthenticated` records SCP setup;
 the card separately enforces User/Admin PIN authorization. See the [Core guide](../Core/README.md) for SCP configuration.
 
-`GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF, while KDF has a separate lazy cache. Typed
+`GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF. Credential operations read F9 separately. Typed
 initialization requires recognized mandatory algorithm attributes. After successful initialization, use `GetDataAsync`
 for raw response inspection when a model omits a field. If typed initialization itself fails, dispose that attempt and
 use a separate [raw SmartCard session](../../docs/architecture/raw-access-tiers.md) for diagnosis.
@@ -133,7 +133,7 @@ static async Task ChangeCredentialsAsync(
 ```
 
 These are separate persistent commands: retain the new User PIN if a later Admin change fails. With KDF active,
-change methods derive **both current and new** inputs using the cached KDF. Plan KDF transitions separately below.
+change methods derive **both current and new** inputs using the current KDF read from the card. Plan KDF transitions separately below.
 
 Recover a blocked User PIN through either the configured Reset Code or prior Admin authentication. The two methods
 below are alternatives; choose the credential your recovery process holds. Each restores the User retry counter.
@@ -232,22 +232,11 @@ static async Task ConfigureInitialKdfAsync(
 }
 ```
 
-The current cache retains the exact object passed to `SetKdfAsync`, and `GetKdfAsync` returns that same instance.
-Keep it undisposed while the session uses it. Session disposal clears its current KDF; replacement/reset currently
-drops the previous reference without disposing it. Keep an enclosing cleanup scope for each supplied object through
-session teardown, and clear separately owned initial hashes and serialized KDF bytes after use. Raw F9 writes require
-a fresh session to reload KDF; refreshing application data leaves the KDF cache unchanged. These lifetime constraints
-describe the current implementation rather than a general cloning/ownership policy.
-
-Synchronous session disposal clears the current KDF before draining the protocol. Asynchronous disposal awaits Core
-teardown first and then clears that KDF, including when teardown fails. Await the complete PIN/KDF workflow before
-either path: protocol drain alone does not cover host derivation or the intervals between exchanges.
-
-The example clears its caller-owned hashes/salts and keeps both KDF objects in enclosing disposal scopes. Internal
-F9 serialization and parsing still leave separate copies without explicit clearing scopes: an intermediate complete
-encoding, the `SetKdfAsync` payload, decoded fields and the read response. Clearing the KDF object or a caller-owned
-encoding does not clear those copies. Initial PIN hashes are authentication material; these cleanup gaps remain
-implementation work.
+`SetKdfAsync` borrows the configuration through the write; it does not retain or dispose it. `GetKdfAsync`
+returns an independent, caller-owned configuration to dispose. When KDF is advertised, each credential
+operation rereads F9; a read or parse error stops the operation instead of sending a raw PIN. Keep the
+fresh-session readback when validating a persistent transition. Await complete PIN/KDF operations before
+starting another operation or disposing the session.
 
 ## Inspect key representation metadata
 

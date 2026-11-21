@@ -38,11 +38,8 @@ SmartCard-only (`ISmartCardConnection`), over USB CCID or NFC. Applet SELECT and
 - Inherited `ApplicationSession.FirmwareVersion` — effective version for protocol configuration and feature gating;
   initialization chooses the override or detected applet version. The detected version is logged, not retained in a `_version` field.
 - `ApplicationRelatedData _appData` — cached card state (refreshable)
-- `Kdf? _kdf` — active KDF configuration (lazy-loaded)
-- `GetKdfAsync` returns the cached instance and `SetKdfAsync` retains its input instance. Session
-  disposal clears the current KDF; replacement/reset currently drops the old reference without disposal.
-  Preserve that present ownership caveat in examples; keep KDF objects alive until session teardown.
-  Application-data refresh leaves KDF unchanged; raw F9 writes require a fresh session to reload it.
+- `GetKdfAsync` reads F9 when advertised and returns a caller-owned configuration. `SetKdfAsync`
+  borrows its input while writing F9. Each credential operation reads and disposes its own configuration.
 - User-presence policy uses the UIF already parsed into cached application-related data. If that per-key
   entry is absent, the operation falls back to one direct UIF read. `SetUifAsync` updates the session cache
 
@@ -60,14 +57,12 @@ split into reset-code and prior-administrator-authentication methods so no input
    metadata and effective configured version distinct, especially on development devices.
 4. Configure the effective override-or-detected version and optional SCP, then rebind the backend if needed.
    Physical-device metadata is not consulted. The override does not skip SELECT/version discovery.
-5. Cache `ApplicationRelatedData` for algorithms/UIF; F9/KDF remains lazy. Publish readiness only after initialization
+5. Cache `ApplicationRelatedData` for algorithms/UIF; F9/KDF is read on demand. Publish readiness only after initialization
    completes. Failed initialization disposes/detaches the session; the device helper cleans up its hidden connection.
 
 Core guards each logical exchange, not whole certificate, key, credential or reset workflows. Await the complete public
 task before another operation or disposal, including parsing and presence callbacks. Keep borrowed inputs/keys and the
-caller-owned prompt alive through that task. Synchronous session disposal clears the current KDF before base protocol
-drain; asynchronous disposal awaits Core teardown and then invokes derived KDF cleanup in finally, even on failure.
-Neither ordering supplies a whole-workflow lease. F9 response/encoding/parser copies retain separate cleanup gaps.
+caller-owned prompt alive through that task. Session disposal does not supply a whole-workflow lease.
 
 ### KDF (Iterated-Salted-S2K)
 Iterated-and-Salted S2K hashes a byte count in one hash context:

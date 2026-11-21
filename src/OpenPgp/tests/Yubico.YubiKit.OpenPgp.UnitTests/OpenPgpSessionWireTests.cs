@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -836,9 +835,7 @@ public sealed class OpenPgpSessionWireTests
     public async Task VerifyPinAsync_TransmitsVerifyWithUserPinPayload()
     {
         var connection = CreateInitializedConnection(
-            // 6A82 means file/application not found. The broad F9 APDU-error catch caches KdfNone,
-            // producing the raw PIN payload asserted below; this response establishes no KDF absence.
-            [0x6A, 0x82],
+            [0x81, 0x01, 0x00, 0x90, 0x00], // F9 explicitly disables KDF.
             OkResponse());
         await using var session = await OpenPgpSession.CreateAsync(
             connection,
@@ -878,7 +875,20 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
-    public async Task DisposeAsync_ZeroesCachedKdfSalt()
+    public async Task VerifyPinAsync_WhenF9ReadIsRejected_DoesNotSendVerify()
+    {
+        var connection = CreateInitializedConnection([0x69, 0x82]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.VerifyPinAsync("123456"u8.ToArray(), cancellationToken: token));
+
+        Assert.Equal((short)0x6982, error.SW);
+        Assert.Equal([0, (byte)Ins.GetData, 0, (byte)DataObject.Kdf], Assert.Single(connection.TransmittedCommands.Skip(3))[..4]);
+    }
+
+    [Fact]
+    public async Task GetKdfAsync_ReadsAgainAndDoesNotOwnReturnedObject()
     {
         using var configuredKdf = new KdfIterSaltedS2k
         {
@@ -888,53 +898,36 @@ public sealed class OpenPgpSessionWireTests
         };
         var connection = CreateInitializedConnection(
             [.. configuredKdf.ToBytes(), 0x90, 0x00],
-            OkResponse());
+            [0x81, 0x01, 0x00, 0x90, 0x00]);
         var session = await OpenPgpSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        await session.VerifyPinAsync(
-            "123456"u8.ToArray(),
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        var cachedKdf = Assert.IsType<KdfIterSaltedS2k>(
-            typeof(OpenPgpSession)
-                .GetField("_kdf", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .GetValue(session));
-        ReadOnlyMemory<byte> salt = cachedKdf.SaltUser;
+        using var first = Assert.IsType<KdfIterSaltedS2k>(await session.GetKdfAsync(TestContext.Current.CancellationToken));
+        using var second = Assert.IsType<KdfNone>(await session.GetKdfAsync(TestContext.Current.CancellationToken));
+        ReadOnlyMemory<byte> salt = first.SaltUser;
         Assert.Contains(salt.ToArray(), value => value != 0);
 
         await session.DisposeAsync();
 
-        Assert.All(salt.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal(configuredKdf.SaltUser.ToArray(), salt.ToArray());
     }
 
     [Fact]
-    public async Task Dispose_ThrowingKdfStillRunsBaseTeardownAndDetachesConnection()
+    public async Task SetKdfAsync_WhenWriteFails_ClearsPayloadAndDoesNotDisposeInput()
     {
-        var expected = new InvalidOperationException("kdf dispose failed");
-        var connection = new RecordingSmartCardConnection(
-            OkResponse(),
-            VersionResponse(),
-            ApplicationRelatedDataResponse(),
-            OkResponse(),
-            OkResponse(),
-            VersionResponse(),
-            ApplicationRelatedDataResponse());
-        var session = await OpenPgpSession.CreateAsync(
+        byte[] encoded = [0x81, 0x01, 0x00];
+        var connection = CreateInitializedConnection([0x69, 0x85]);
+        await using var session = await OpenPgpSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
-        await session.SetKdfAsync(
-            new ThrowingKdf(expected),
-            TestContext.Current.CancellationToken);
-
-        Exception? exception = Record.Exception(session.Dispose);
-
-        Assert.Same(expected, exception);
-        await using var subsequent = await OpenPgpSession.CreateAsync(
-            connection,
-            cancellationToken: TestContext.Current.CancellationToken);
-        Assert.NotNull(subsequent);
+        var kdf = new TrackingKdf(encoded);
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.SetKdfAsync(kdf, TestContext.Current.CancellationToken));
+        Assert.Equal((short)0x6985, error.SW);
+        Assert.Equal([0x81, 0x01, 0x00], CommandData(LastCommand(connection)).ToArray());
+        Assert.All(encoded, value => Assert.Equal(0, value));
+        await session.DisposeAsync();
+        Assert.False(kdf.Disposed);
     }
 
     [Fact]
@@ -1047,16 +1040,17 @@ public sealed class OpenPgpSessionWireTests
         EcdsaDer
     }
 
-    private sealed class ThrowingKdf(Exception exception) : Kdf
+    private sealed class TrackingKdf(byte[] encoding) : Kdf
     {
+        public bool Disposed { get; private set; }
         public override int Algorithm => 0;
 
         public override byte[] Process(Pw pw, ReadOnlySpan<byte> pin) =>
             pin.ToArray();
 
-        public override byte[] ToBytes() => [];
+        public override byte[] ToBytes() => encoding;
 
-        public override void Dispose() => throw exception;
+        public override void Dispose() => Disposed = true;
     }
 
     private sealed class RecordingUserPresencePrompt(

@@ -71,7 +71,6 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     private readonly Dictionary<KeyRef, Uif> _updatedUifs = [];
     private IOpenPgpBackend? _backend;
     private ApplicationRelatedData _appData = null!;
-    private Kdf? _kdf;
 
     // ── Constructor (private — use CreateAsync) ───────────────────────
 
@@ -378,48 +377,24 @@ public sealed partial class OpenPgpSession : ApplicationSession, IOpenPgpSession
     }
 
     /// <summary>
-    ///     Loads and caches the KDF configuration from the card.
+    ///     Reads the current KDF configuration without keeping an alias.
     /// </summary>
-    private async Task<Kdf> GetOrLoadKdfAsync(CancellationToken cancellationToken)
+    private async Task<Kdf> ReadKdfAsync(CancellationToken cancellationToken)
     {
-        if (_kdf is not null)
-            return _kdf;
+        if (!_appData.Discretionary.ExtendedCapabilities.Flags.HasFlag(ExtendedCapabilityFlags.Kdf))
+            return new KdfNone();
 
+        var command = new ApduCommand(0, (int)Ins.GetData, 0, (int)DataObject.Kdf);
+        var response = await TransmitNoThrowAsync(command, cancellationToken).ConfigureAwait(false);
         try
         {
-            var data = await GetDataCoreAsync(DataObject.Kdf, cancellationToken)
-                .ConfigureAwait(false);
-            _kdf = Kdf.Parse(data.Span);
-        }
-        catch (ApduException)
-        {
-            // Any F9 APDU error currently falls back to KdfNone, including errors beyond absence.
-            _kdf = new KdfNone();
-        }
-
-        return _kdf;
-    }
-
-    // ── Disposal ──────────────────────────────────────────────────────
-
-    // Synchronous disposal reaches this cleanup before base protocol drain. Asynchronous disposal awaits
-    // Core protocol/owned-connection teardown first, then invokes this override in finally, even on failure.
-    // Neither path waits for an entire multi-exchange public workflow: callers must await it before disposal.
-    protected override void Dispose(bool disposing)
-    {
-        Kdf? kdf = null;
-        try
-        {
-            if (disposing)
-            {
-                kdf = _kdf;
-                _kdf = null;
-                kdf?.Dispose();
-            }
+            if (!response.IsOK())
+                throw ApduException.FromResponse(response, command, "Reading OpenPGP KDF failed");
+            return Kdf.Parse(response.Data.Span);
         }
         finally
         {
-            base.Dispose(disposing);
+            response.Clear();
         }
     }
 }

@@ -570,11 +570,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Gets the current KDF configuration.
     /// </summary>
     /// <remarks>
-    ///     Lazily reads F9 and returns the same cached instance on later calls. An APDU read error currently
-    ///     caches KdfNone. Treat the result as session-retained: keep it undisposed while the session uses it.
-    ///     The session disposes its current cached KDF during disposal. Refreshing application data leaves it unchanged.
-    ///     Synchronous disposal clears that object before protocol drain; asynchronous disposal clears it after
-    ///     Core teardown, including on failure. Await complete PIN/KDF tasks before either disposal path.
+    ///     Reads F9 on each call when advertised; propagates read and parse errors. The caller owns and
+    ///     disposes the returned object. Credential operations read and dispose their own independent configuration.
     /// </remarks>
     Task<Kdf> GetKdfAsync(
         CancellationToken cancellationToken = default);
@@ -583,10 +580,8 @@ public interface IOpenPgpSession : IApplicationSession
     ///     Sets the KDF configuration. Requires Admin PIN verification.
     /// </summary>
     /// <remarks>
-    ///     This persistent credential transition writes F9 and retains the supplied instance as the session's
-    ///     cache. Keep that object undisposed until session disposal. Replacement/reset currently drops the
-    ///     previous reference without disposing it; retain an explicit cleanup scope for such objects after
-    ///     the session ends. The card profile requires terminal software to align credentials and KDF data;
+    ///     Writes F9 without retaining the supplied object. Keep it alive through the call and dispose it
+    ///     yourself. The card profile requires terminal software to align credentials and KDF data;
     ///     YubiKey's vendor transition restores initial User/Admin values and invalidates the Reset Code.
     ///     Subsequent PIN changes derive both current and new inputs with this KDF. Qualify enable/change/disable
     ///     and recovery on a dedicated device before provisioning production credentials. Configure KDF before

@@ -213,7 +213,7 @@ public sealed class OpenPgpInvalidPinExceptionTests
     // Simulated F9 GET DATA returns 6A82: file or application not found (Card §7.9).
     // The current broad APDU-error fallback caches KdfNone and sends raw PIN bytes;
     // these response bytes establish that fallback behavior, rather than actual KDF absence.
-    private static byte[] KdfNotFoundResponse() => [0x6A, 0x82];
+    private static byte[] KdfNotFoundResponse() => [0x81, 0x01, 0x00, 0x90, 0x00];
 
     private static byte[] PwStatusResponse(int attemptsUser, int attemptsReset = 0, int attemptsAdmin = 3) =>
         [0x00, 0x7F, 0x7F, 0x7F, (byte)attemptsUser, (byte)attemptsReset, (byte)attemptsAdmin, 0x90, 0x00];

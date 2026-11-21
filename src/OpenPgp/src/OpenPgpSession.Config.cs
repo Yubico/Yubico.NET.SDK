@@ -183,7 +183,7 @@ public sealed partial class OpenPgpSession
 
         _logger.LogDebug("Getting KDF configuration");
 
-        return await GetOrLoadKdfAsync(cancellationToken).ConfigureAwait(false);
+        return await ReadKdfAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -196,14 +196,15 @@ public sealed partial class OpenPgpSession
 
         _logger.LogInformation("Setting KDF configuration");
 
-        // ToBytes creates a separate encoding that may contain initial PIN hashes. This call currently
-        // retains no owner to clear that payload; disposing the KDF clears only its own backing arrays.
-        await PutDataAsync(DataObject.Kdf, kdf.ToBytes(), cancellationToken)
-            .ConfigureAwait(false);
-
-        // Retain the supplied instance: later PIN operations derive with this same object.
-        // Replacement currently drops the old reference without disposing it.
-        _kdf = kdf;
+        byte[] encoded = kdf.ToBytes();
+        try
+        {
+            await PutDataAsync(DataObject.Kdf, encoded, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            System.Security.Cryptography.CryptographicOperations.ZeroMemory(encoded);
+        }
     }
 
     // ── Private Helpers ───────────────────────────────────────────────

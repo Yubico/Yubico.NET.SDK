@@ -20,8 +20,8 @@ state in place. This setup does not exercise resetting an SCP session or restori
 Keep comments within each test's actual oracle:
 
 - Wire initialization checks command membership; dedicated key-generation tests check their asserted operation order.
-- Cached-KDF disposal checks an aliased salt after async disposal; the throwing-KDF case checks synchronous detachment.
-  Neither checks a held derivation, replacement/reset cleanup or a complete multi-exchange workflow drain.
+- KDF reads verify independent caller ownership; write failure checks erasure of the retained encoded payload.
+  Those assertions do not establish native transport cleanup or a multi-exchange workflow drain.
 - Signature-helper tests retain actual response arrays for transfer/zeroing assertions. The decrypt completion-callback
   failure test checks exception identity and outcome, not raw-array erasure. Neither establishes cleanup of the full
   transport/chaining/SCP producer graph.

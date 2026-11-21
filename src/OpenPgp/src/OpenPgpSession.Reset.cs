@@ -68,8 +68,6 @@ public sealed partial class OpenPgpSession
         _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
             .ConfigureAwait(false);
         _updatedUifs.Clear();
-        // The previous KDF reference is dropped without disposal; its owner needs a later cleanup scope.
-        _kdf = null;
 
         _logger.LogInformation("OpenPGP factory reset complete");
     }

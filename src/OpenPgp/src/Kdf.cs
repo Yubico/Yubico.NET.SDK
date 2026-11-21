@@ -71,27 +71,40 @@ public abstract class Kdf : IDisposable
     ///     Parses a KDF configuration from the encoded TLV data (DO 0xF9).
     /// </summary>
     /// <remarks>
-    ///     Algorithm 3 requires the modeled S2K fields; absent/other identifiers currently produce KdfNone.
-    ///     Malformed TLV or missing required S2K fields can fail parsing. Retain raw F9 data when inspecting
-    ///     identifiers beyond the model. The returned object is owned by the caller unless retained by a session.
-    ///     Parsing copies TLV fields and clones salts/initial hashes into the result. Result disposal clears
-    ///     its backing arrays, not the caller's encoding or the intermediate dictionary field copies, which
-    ///     currently have no explicit clearing scope.
+    ///     A disabled configuration (algorithm 0) produces KdfNone. Unknown algorithms cannot be used
+    ///     to derive credentials; use raw GET DATA to inspect them. The caller owns the returned object and
+    ///     the supplied encoding separately.
     /// </remarks>
     public static Kdf Parse(ReadOnlySpan<byte> encoded)
     {
-        var data = TlvHelper.DecodeDictionary(encoded);
-
-        if (data.TryGetValue(0x81, out var algorithmData) && algorithmData.Length > 0)
+        var data = new Dictionary<int, ReadOnlyMemory<byte>>();
+        var fields = new List<Tlv>();
+        try
         {
-            var algorithm = algorithmData.Span[0];
-            if (algorithm == KdfIterSaltedS2k.KdfAlgorithm)
+            while (!encoded.IsEmpty)
             {
-                return KdfIterSaltedS2k.ParseData(data);
+                var field = Tlv.Create(encoded);
+                fields.Add(field);
+                if (!data.TryAdd(field.Tag, field.Value))
+                    throw new FormatException("Duplicate OpenPGP KDF field.");
+                encoded = encoded[field.TotalLength..];
             }
-        }
 
-        return new KdfNone();
+            if (!data.TryGetValue(0x81, out var algorithm) || algorithm.Length != 1)
+                throw new FormatException("Missing or malformed OpenPGP KDF algorithm.");
+
+            return algorithm.Span[0] switch
+            {
+                0 => new KdfNone(),
+                KdfIterSaltedS2k.KdfAlgorithm => KdfIterSaltedS2k.ParseData(data),
+                _ => throw new NotSupportedException("Unsupported OpenPGP KDF algorithm."),
+            };
+        }
+        finally
+        {
+            foreach (var field in fields)
+                field.Dispose();
+        }
     }
 }
 
@@ -321,9 +334,15 @@ public sealed class KdfIterSaltedS2k : Kdf
                 tlvs.Add(new Tlv(0x88, hashAdmin.Span));
             }
 
-            // Individual TLVs are disposed below. EncodeList's complete encoding is copied again here;
-            // that intermediate currently has no clearing scope, independently of the caller-owned result.
-            return TlvHelper.EncodeList([.. tlvs]).ToArray();
+            Memory<byte> encoded = TlvHelper.EncodeList([.. tlvs]);
+            try
+            {
+                return encoded.ToArray();
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(encoded.Span);
+            }
         }
         finally
         {

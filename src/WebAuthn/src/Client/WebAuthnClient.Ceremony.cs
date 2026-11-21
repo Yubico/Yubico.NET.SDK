@@ -233,7 +233,7 @@ public sealed partial class WebAuthnClient
 
     private static async Task<(PublicKeyCredentialDescriptor Selected, GetAssertionResponse Response)?> FindTokenlessUvCredentialAsync(
         IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info,
-        Func<IReadOnlyList<PublicKeyCredentialDescriptor>, Task<(bool Fits, GetAssertionResponse? Response)>> getAssertion, CancellationToken ct)
+        Func<IReadOnlyList<PublicKeyCredentialDescriptor>, Task<(bool Fits, CtapStatus Status, GetAssertionResponse? Response)>> getAssertion, CancellationToken ct)
     {
         try
         {

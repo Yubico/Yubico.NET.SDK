@@ -85,7 +85,7 @@ internal static class CredentialFilter
                     Options = new Dictionary<string, bool> { ["up"] = false },
                     PinUvAuthParam = pinUvAuthParam is null ? null : (ReadOnlyMemory<byte>?)pinUvAuthParam,
                     PinUvAuthProtocol = token is null ? null : (byte)token.Protocol.Version
-                }, info, cancellationToken), cancellationToken).ConfigureAwait(false);
+                }, info, cancellationToken, allowLegacyStatuses: true), cancellationToken).ConfigureAwait(false);
             if (result is { } match)
             {
                 CredentialMatcher.ClearUnreturnedAssertion(match.Response);
@@ -119,16 +119,36 @@ internal static class CredentialFilter
     }
 
     /// <summary>Returns a preflight refusal without dispatching, or sends the fitting request.</summary>
-    internal static async Task<(bool Fits, GetAssertionResponse? Response)> SendChunkIfFitsAsync(IWebAuthnBackend backend,
-        BackendGetAssertionRequest request, AuthenticatorInfo info, CancellationToken ct) =>
-        WebAuthnBackend.FitsGetAssertion(request, info)
-            ? (true, await backend.GetAssertionAsync(request, ct).ConfigureAwait(false))
-            : (false, null);
+    internal static async Task<(bool Fits, CtapStatus Status, GetAssertionResponse? Response)> SendChunkIfFitsAsync(
+        IWebAuthnBackend backend, BackendGetAssertionRequest request, AuthenticatorInfo info, CancellationToken ct,
+        bool useSelectionStatus = true, bool allowLegacyStatuses = false)
+    {
+        if (!WebAuthnBackend.FitsGetAssertion(request, info))
+            return (false, default, null);
+
+        if (useSelectionStatus && backend is WebAuthnBackend { HasConcreteSession: true } sdk)
+        {
+            var (status, response) = await sdk.GetAssertionForSelectionAsync(request, ct).ConfigureAwait(false);
+            return (true, status, response);
+        }
+
+        try
+        {
+            return (true, CtapStatus.Success, await backend.GetAssertionAsync(request, ct).ConfigureAwait(false));
+        }
+        catch (CtapException ex) when (useSelectionStatus && (allowLegacyStatuses || backend is not WebAuthnBackend)
+            && ex.Status is CtapStatus.NoCredentials or CtapStatus.RequestTooLarge)
+        {
+            // Legacy silent/custom probes retain their existing contract. The SDK's internal fake
+            // backend seam also simulates statuses this way; a public custom session never enters it.
+            return (true, ex.Status, null);
+        }
+    }
 
     /// <summary>Checks eligible chunks in order and transfers ownership of only an associated success.</summary>
     internal static async Task<(PublicKeyCredentialDescriptor Selected, GetAssertionResponse Response)?> FindAsync(
         IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info, bool requireUvAndUp,
-        Func<IReadOnlyList<PublicKeyCredentialDescriptor>, Task<(bool Fits, GetAssertionResponse? Response)>> getAssertion, CancellationToken ct)
+        Func<IReadOnlyList<PublicKeyCredentialDescriptor>, Task<(bool Fits, CtapStatus Status, GetAssertionResponse? Response)>> getAssertion, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
         if (eligible.Count == 0)
@@ -140,31 +160,27 @@ internal static class CredentialFilter
         {
             ct.ThrowIfCancellationRequested();
             var chunk = eligible.Skip(offset).Take(limit).ToList();
-            (bool fits, GetAssertionResponse? response) result;
-            try
+            var result = await getAssertion(chunk).ConfigureAwait(false);
+            if (!result.Fits)
             {
-                result = await getAssertion(chunk).ConfigureAwait(false);
-            }
-            catch (CtapException ex) when (ex.Status == CtapStatus.NoCredentials)
-            {
-                offset += chunk.Count;
-                continue;
-            }
-            catch (CtapException ex) when (ex.Status == CtapStatus.RequestTooLarge && chunk.Count > 1)
-            {
-                limit = chunk.Count - 1; // Retry from the same offset without losing any candidates.
-                continue;
-            }
-            if (!result.fits)
-            {
-                // Only an explicit preflight result for this command authorizes host-side refinement.
                 if (chunk.Count == 1)
                     throw OversizeAssertion(info);
                 limit = chunk.Count - 1;
                 continue;
             }
+            if (result.Status == CtapStatus.NoCredentials)
+            {
+                offset += chunk.Count;
+                continue;
+            }
+            if (result.Status == CtapStatus.RequestTooLarge && chunk.Count > 1)
+            {
+                limit = chunk.Count - 1; // Retry from the same offset without losing any candidates.
+                continue;
+            }
+            CtapException.ThrowIfError(result.Status);
 
-            var response = result.response ?? throw new InvalidOperationException("The backend did not return an assertion.");
+            var response = result.Response ?? throw new InvalidOperationException("The backend did not return an assertion.");
             return (Associate(response, chunk, requireUvAndUp, ct), response);
         }
 

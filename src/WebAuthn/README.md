@@ -175,6 +175,9 @@ miss is not conclusive: verified assertions check the eligible entries using the
 The client does not enumerate every allowed credential. If the selected credential needs a deferred
 extension input, only the follow-up assertion for that credential is returned. A second verified
 command can require another gesture and advance the counter again; the SDK does not cache gestures.
+When a caller supplies a custom `ICtap2Session`, this verified fallback can use a valid assertion,
+but it stops on thrown statuses rather than guessing that they came from the current exchange.
+The ordinary assertion and silent probe behavior for custom sessions is unchanged.
 With no allow list, it can enumerate discoverable assertions for the RP, subject to authenticator
 selection behavior. Handle zero matches before indexing. For one match, retrieve its response with
 `SelectAsync`; for several, show your application's account picker and select the chosen match.
@@ -191,6 +194,7 @@ association and IDs that contradict selection. This does not replace RP verifica
 For registration with built-in verification and no token, a fitting exclude list is checked by
 `MakeCredentialAsync` on the authenticator. A larger list can require separate verified checks before
 the single creation command. An exclusion hidden from an unverified probe is not ignored.
+The same custom-session limitation applies to these interactive exclusion checks.
 
 `RegistrationExtensionOutputs` and `AuthenticationExtensionOutputs` are non-positional records. Their init
 properties are optional and default to null; construct them with named object initializers.

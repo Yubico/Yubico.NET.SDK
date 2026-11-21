@@ -40,4 +40,8 @@ internal interface ICtap2Backend
         UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default,
         Action? onSuccess = null);
+
+    /// <summary>Returns a retryable wire status only for this assertion exchange after notification resolution.</summary>
+    Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendAssertionForSelectionAsync(
+        ReadOnlyMemory<byte> request, UserPresenceNotification notification, CancellationToken cancellationToken);
 }

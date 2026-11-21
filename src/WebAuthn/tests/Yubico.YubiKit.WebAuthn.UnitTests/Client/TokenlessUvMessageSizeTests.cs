@@ -130,25 +130,30 @@ public class TokenlessUvMessageSizeTests
     private static (PublicKeyCredentialDescriptor A, PublicKeyCredentialDescriptor B) Descriptors(int length) =>
         (new(Enumerable.Repeat((byte)1, length).ToArray()), new(Enumerable.Repeat((byte)2, length).ToArray()));
 
-    [Fact]
-    public async Task TokenlessUvSize_ResolutionFailureFromAnotherSessionDoesNotReplayAssertion()
+    [Theory]
+    [InlineData(null, CtapStatus.Success)]
+    [InlineData(CtapStatus.NoCredentials, CtapStatus.Success)]
+    [InlineData(CtapStatus.RequestTooLarge, CtapStatus.Success)]
+    [InlineData(CtapStatus.NoCredentials, CtapStatus.NoCredentials)]
+    public async Task TokenlessUv_ResolutionFailureFromAnotherSessionDoesNotReplayAssertion(CtapStatus? innerStatus, CtapStatus outerStatus)
     {
         var (a, b) = Descriptors(16);
         var outerWire = new List<byte[]>();
         var innerWire = new List<byte[]>();
-        using var outerConnection = FakeConnection(outerWire, Miss, AssertionSuccess());
-        using var innerConnection = FakeConnection(innerWire);
+        using var outerConnection = FakeConnection(outerWire, Miss, outerStatus == CtapStatus.Success ? AssertionSuccess() : Status(outerStatus));
+        using var innerConnection = FakeConnection(innerWire, innerStatus is { } status ? [Status(status)] : []);
         var ct = TestContext.Current.CancellationToken;
         await using var innerSession = await Ctap2Session.CreateAsync(innerConnection, cancellationToken: ct);
         var prompt = Substitute.For<IUserPresencePrompt>();
-        ArgumentException? innerFailure = null;
-        prompt.OnUserPresenceResolvedAsync(Arg.Any<UserPresenceContext>(), UserPresenceOutcome.Completed, CancellationToken.None)
+        Exception? innerFailure = null;
+        var outcome = outerStatus == CtapStatus.Success ? UserPresenceOutcome.Completed : UserPresenceOutcome.Failed;
+        prompt.OnUserPresenceResolvedAsync(Arg.Any<UserPresenceContext>(), outcome, CancellationToken.None)
             .Returns(_ => ResolveAsync());
         await using var outerSession = await Ctap2Session.CreateAsync(outerConnection,
             new SessionCreationOptions { UserPresencePrompt = prompt }, ct);
         await using var client = CreateClient(outerSession);
 
-        var error = await Assert.ThrowsAnyAsync<ArgumentException>(() => client.GetAssertionAsync(new PublicKeyCredentialRequestOptions
+        var error = await Record.ExceptionAsync(() => client.GetAssertionAsync(new PublicKeyCredentialRequestOptions
         {
             Challenge = new byte[32],
             RpId = RpId,
@@ -156,8 +161,17 @@ public class TokenlessUvMessageSizeTests
             UserVerification = UserVerificationPreference.Required
         }, cancellationToken: ct));
 
-        Assert.Same(innerFailure, error);
-        Assert.Empty(innerWire);
+        Assert.NotNull(innerFailure);
+        if (innerStatus.HasValue)
+        {
+            Assert.Same(innerFailure, Assert.IsType<WebAuthnClientError>(error).InnerException);
+            Assert.Single(innerWire);
+        }
+        else
+        {
+            Assert.Same(innerFailure, error);
+            Assert.Empty(innerWire);
+        }
         Assert.Equal(2, outerWire.Count); // One silent miss, one completed real assertion; no retry or reselection.
         var sent = ReadAssertion(outerWire[1]);
         Assert.Contains(sent.Hash, value => value != 0);
@@ -167,14 +181,112 @@ public class TokenlessUvMessageSizeTests
         {
             try
             {
-                await innerSession.GetAssertionAsync(new string('a', MessageLimit), new byte[32], cancellationToken: ct);
+                await innerSession.GetAssertionAsync(innerStatus.HasValue ? RpId : new string('a', MessageLimit), new byte[32], cancellationToken: ct);
             }
-            catch (ArgumentException ex)
+            catch (Exception ex)
             {
                 innerFailure = ex;
                 throw;
             }
         }
+    }
+
+    private static byte[] Status(CtapStatus status) => [(byte)status, 0x90, 0x00];
+
+    [Theory]
+    [InlineData("valid")]
+    [InlineData("trailing data")]
+    [InlineData("empty")]
+    public async Task TokenlessUv_OnlyCompleteOwnWireStatusesRefineOrAdvance(string reply)
+    {
+        var (a, b) = Descriptors(16);
+        var wire = new List<byte[]>();
+        byte[][] responses = reply switch
+        {
+            "valid" => [Miss, Status(CtapStatus.RequestTooLarge), Miss, AssertionSuccess()],
+            "trailing data" => [Miss, [(byte)CtapStatus.NoCredentials, 0xFF, 0x90, 0x00]],
+            _ => [Miss, [0x90, 0x00]]
+        };
+        using var connection = FakeConnection(wire, responses);
+        var ct = TestContext.Current.CancellationToken;
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+        await using var client = CreateClient(session);
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = new byte[32],
+            RpId = RpId,
+            AllowCredentials = [a, b],
+            UserVerification = UserVerificationPreference.Required
+        };
+
+        if (reply != "valid")
+        {
+            await Assert.ThrowsAsync<BadResponseException>(() => client.GetAssertionAsync(options, cancellationToken: ct));
+            Assert.Equal(2, wire.Count);
+            return;
+        }
+
+        var result = Assert.Single(await client.GetAssertionAsync(options, cancellationToken: ct));
+        var assertion = await result.SelectAsync(ct);
+        Assert.Equal(4, wire.Count);
+        AssertChunk(ReadAssertion(wire[1]), assertion.ClientData.Hash, a, b);
+        AssertChunk(ReadAssertion(wire[2]), assertion.ClientData.Hash, a);
+        AssertChunk(ReadAssertion(wire[3]), assertion.ClientData.Hash, b);
+    }
+
+    [Theory]
+    [InlineData(UserVerificationPreference.Required, CtapStatus.NoCredentials)]
+    [InlineData(UserVerificationPreference.Required, CtapStatus.RequestTooLarge)]
+    [InlineData(UserVerificationPreference.Required, null)]
+    [InlineData(UserVerificationPreference.Discouraged, CtapStatus.NoCredentials)]
+    public async Task TokenlessUv_CustomSessionKeepsSilentPolicyButCannotTriggerVerifiedRetries(
+        UserVerificationPreference preference, CtapStatus? failure)
+    {
+        var (a, b) = Descriptors(16);
+        var custom = Substitute.For<ICtap2Session>();
+        custom.GetInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            MockCtap2Responses.CreateMockAuthenticatorInfo(uvSupported: true, maxCredentialCountInList: 1));
+        int silent = 0, real = 0;
+        var expected = failure is { } status ? new CtapException(status) : null;
+        custom.GetAssertionAsync(RpId, Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<GetAssertionOptions>(), Arg.Any<CancellationToken>())
+            .Returns(call =>
+            {
+                var options = call.Arg<GetAssertionOptions>();
+                if (options.UserPresence is false)
+                {
+                    silent++;
+                    throw new CtapException(CtapStatus.NoCredentials);
+                }
+                real++;
+                if (expected is not null)
+                    throw expected;
+                return MockCtap2Responses.CreateMockGetAssertionResponse(a.Id.ToArray());
+            });
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        await using var client = new WebAuthnClient(custom, origin, new() { RpIdValidator = (_, rp) => rp == RpId });
+        var ct = TestContext.Current.CancellationToken;
+        var options = new PublicKeyCredentialRequestOptions
+        {
+            Challenge = new byte[32],
+            RpId = RpId,
+            AllowCredentials = [a, b],
+            UserVerification = preference
+        };
+
+        if (preference == UserVerificationPreference.Discouraged)
+            Assert.Empty(await client.GetAssertionAsync(options, cancellationToken: ct));
+        else if (expected is not null)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => client.GetAssertionAsync(options, cancellationToken: ct));
+            Assert.Same(expected, error.InnerException);
+        }
+        else
+        {
+            var match = Assert.Single(await client.GetAssertionAsync(options, cancellationToken: ct));
+            Assert.Equal(a.Id.ToArray(), (await match.SelectAsync(ct)).CredentialId.ToArray());
+        }
+        Assert.Equal(2, silent);
+        Assert.Equal(1, real);
     }
 
     private static WebAuthnClient CreateClient(Ctap2Session session)

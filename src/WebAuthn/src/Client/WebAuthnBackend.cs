@@ -244,6 +244,27 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         }
     }
 
+    internal bool HasConcreteSession => _session is Ctap2Session;
+
+    internal async Task<(CtapStatus Status, GetAssertionResponse? Response)> GetAssertionForSelectionAsync(
+        BackendGetAssertionRequest request, CancellationToken ct)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (_session is not Ctap2Session concrete)
+            throw new InvalidOperationException("Selection status requires the SDK CTAP session.");
+
+        var options = ProjectGetAssertionOptions(request);
+        try
+        {
+            return await concrete.GetAssertionForSelectionAsync(request.RpId, request.ClientDataHash, options, ct)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
     private static GetAssertionOptions ProjectGetAssertionOptions(BackendGetAssertionRequest request)
     {
         var options = new GetAssertionOptions();

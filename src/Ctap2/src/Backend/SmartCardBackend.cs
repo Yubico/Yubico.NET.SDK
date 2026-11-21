@@ -70,7 +70,17 @@ internal sealed class SmartCardBackend : ICtap2Backend
         ReadOnlyMemory<byte> request,
         UserPresenceNotification userPresenceNotification,
         CancellationToken cancellationToken = default,
-        Action? onSuccess = null)
+        Action? onSuccess = null) =>
+        (await SendCborCoreAsync(request, userPresenceNotification, cancellationToken, onSuccess, reportSelectionStatus: false)
+            .ConfigureAwait(false)).Data;
+
+    public Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendAssertionForSelectionAsync(
+        ReadOnlyMemory<byte> request, UserPresenceNotification notification, CancellationToken cancellationToken) =>
+        SendCborCoreAsync(request, notification, cancellationToken, onSuccess: null, reportSelectionStatus: true);
+
+    private async Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendCborCoreAsync(
+        ReadOnlyMemory<byte> request, UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken, Action? onSuccess, bool reportSelectionStatus)
     {
         ArgumentNullException.ThrowIfNull(userPresenceNotification);
 
@@ -119,6 +129,14 @@ internal sealed class SmartCardBackend : ICtap2Backend
                 CtapStatus.UserActionTimeout => UserPresenceOutcome.TimedOut,
                 _ => UserPresenceOutcome.Failed
             };
+            if (reportSelectionStatus && status is CtapStatus.NoCredentials or CtapStatus.RequestTooLarge)
+            {
+                if (responseData.Length != 1)
+                    throw new BadResponseException("A CTAP error response must contain only the status byte.");
+                // This status is a normal result, not a primary exception. Resolution failure must propagate.
+                await userPresenceNotification.ResolveAsync(outcome).ConfigureAwait(false);
+                return (status, default); // The finally clears the untransferred response.
+            }
             CtapException.ThrowIfError(status);
             onSuccess?.Invoke();
 
@@ -129,7 +147,7 @@ internal sealed class SmartCardBackend : ICtap2Backend
 
             // Transfer after notification resolution; success here does not guarantee typed decoding.
             responseTransferred = true;
-            return responseData[1..];
+            return (status, responseData[1..]);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {

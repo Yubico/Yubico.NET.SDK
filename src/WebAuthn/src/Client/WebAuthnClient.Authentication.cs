@@ -43,6 +43,8 @@ public sealed partial class WebAuthnClient
     /// is already in effect without a token, a silent miss is checked with real, verified assertions
     /// against the eligible list. A reported count greater than one for a final allow-list request is
     /// rejected before any continuation or extension processing.
+    /// With a custom <see cref="ICtap2Session"/>, the verified fallback accepts a valid assertion but
+    /// does not advance or retry a chunk based on a thrown status that cannot be attributed to that exchange.
     /// If that probe misses and PRF applies to every eligible entry, a configured, caller-supplied PIN
     /// can be used for one additional silent selection pass to find a verification-protected credential.
     /// Without an allow list, the authenticator can return multiple discoverable credentials for the RP,
@@ -246,7 +248,7 @@ public sealed partial class WebAuthnClient
 
         return await CredentialMatcher.MatchAsync(_backend, response, hasAllowList: true, selected, ct).ConfigureAwait(false);
 
-        Task<(bool Fits, GetAssertionResponse? Response)> SendChunkAsync(IReadOnlyList<PublicKeyCredentialDescriptor> chunk)
+        Task<(bool Fits, CtapStatus Status, GetAssertionResponse? Response)> SendChunkAsync(IReadOnlyList<PublicKeyCredentialDescriptor> chunk)
         {
             // The first descriptor is a representative only for PRF inputs common to the entire wire
             // chunk. It is not a selection, and previewSign must wait for the actual credential ID.
@@ -257,7 +259,7 @@ public sealed partial class WebAuthnClient
         }
     }
 
-    private async Task<(bool Fits, GetAssertionResponse? Response)> SendTokenlessUvAssertionAsync(string rpId, WebAuthnClientData clientData,
+    private async Task<(bool Fits, CtapStatus Status, GetAssertionResponse? Response)> SendTokenlessUvAssertionAsync(string rpId, WebAuthnClientData clientData,
         IReadOnlyList<PublicKeyCredentialDescriptor> chunk, AuthenticatorInfo info, AuthenticationExtensionSession extensions,
         bool deferPrf, bool deferPreviewSign, bool allowChunkStatus, CancellationToken ct)
     {
@@ -267,10 +269,14 @@ public sealed partial class WebAuthnClient
         try
         {
             ct.ThrowIfCancellationRequested();
-            return await CredentialFilter.SendChunkIfFitsAsync(_backend, BuildTokenlessUvAssertion(rpId, clientData, chunk, encoded), info, ct)
+            var result = await CredentialFilter.SendChunkIfFitsAsync(_backend, BuildTokenlessUvAssertion(rpId, clientData, chunk, encoded),
+                info, ct, useSelectionStatus: allowChunkStatus)
                 .ConfigureAwait(false);
+            if (result.Status == CtapStatus.RequestTooLarge && chunk.Count == 1)
+                CtapException.ThrowIfError(result.Status);
+            return result;
         }
-        catch (CtapException ex) when (!allowChunkStatus || ex.Status is not (CtapStatus.NoCredentials or CtapStatus.RequestTooLarge))
+        catch (CtapException ex)
         {
             throw MapCeremonyCtapException(ex, hasPreviewSign);
         }

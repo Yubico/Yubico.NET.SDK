@@ -365,6 +365,10 @@ Extensions follow the processor model described in
   is already selected without a token, silence cannot rule out `credProtect` level 3: check allow-list
   misses with the real ceremony hash, `uv:true` and requested UP. Require both flags and associate the
   response against the actual sent chunk before passing a selection to `CredentialMatcher`.
+  Only the concrete CTAP session's current-exchange result can authorize device-status refinement
+  or advancement during verified fallback; arbitrary callback exceptions cannot do so. Custom
+  `ICtap2Session` implementations retain legacy silent behavior, but the verified fallback stops on
+  thrown errors, even when they carry a retryable CTAP status.
   Send PRF before selection only for a common effective input; defer differing per-ID inputs and
   unresolved previewSign. Only the selected credential can justify a second verified request. It may
   cost another gesture or counter advance; never process outputs from a discarded assertion.

@@ -218,6 +218,14 @@ static async Task ConfigureInitialKdfAsync(
             await provisioning.SetKdfAsync(configured, cancellationToken);
         }
         await using var verification = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+        using var readback = await verification.GetKdfAsync(cancellationToken);
+        if (readback is not KdfIterSaltedS2k actual || actual.HashAlgorithm != configured.HashAlgorithm ||
+            actual.IterationCount != configured.IterationCount || !actual.SaltUser.Span.SequenceEqual(saltUser) ||
+            actual.SaltAdmin is not { } actualAdmin || !actualAdmin.Span.SequenceEqual(saltAdmin) ||
+            actual.SaltReset is not { } actualReset || !actualReset.Span.SequenceEqual(saltReset))
+        {
+            throw new InvalidOperationException("The device did not report the expected KDF configuration.");
+        }
         await verification.VerifyAdminAsync(defaultAdminPin, cancellationToken);
         await verification.VerifyPinAsync(defaultUserPin, cancellationToken: cancellationToken);
     }

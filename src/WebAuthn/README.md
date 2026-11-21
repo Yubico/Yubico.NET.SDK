@@ -345,13 +345,13 @@ and inspect registration's `LargeBlob.Supported`. `LargeBlobSupport.Required` wi
 fails before any CTAP request. If `ResidentKey = Preferred`, the authenticator must support discoverable
 credentials. A successful response without a storage key still reports `Supported = false`.
 
-The SDK deliberately accepts multiple original `AllowCredentials` entries for writes, diverging from
-WebAuthn L3 §10.1.5's exact-one requirement. It writes with the storage key returned by the final
-assertion for the selected credential. The SDK requires a PIN/UV token for writes and adds
+Writes require a nonempty original `AllowCredentials` list before device I/O. The SDK deliberately
+accepts multiple entries, diverging from WebAuthn L3 §10.1.5's exact-one requirement. It writes with
+the storage key returned by the final assertion for the selected credential. The SDK requires a PIN/UV token for writes and adds
 `LargeBlobWrite` to the ceremony permissions. The legacy token cannot carry that permission. The SDK
 does not implement CTAP's unconfigured-authenticator write exception. Storage work runs after the
-assertion, before `GetAssertionAsync` returns. A supported read
-with no stored data, no key, or a storage status/decoding failure returns `LargeBlob` with `Blob = null`.
+assertion, before `GetAssertionAsync` returns. A requested read returns `LargeBlob` with `Blob = null`
+if the storage route is unsupported, the data or key is unavailable, or storage I/O or decoding fails.
 A stored empty blob returns a present, zero-length value. Cancellation still propagates.
 The returned writable `LargeBlob.Blob` is caller-owned; clear its span after last use if it contains
 sensitive data. This does not change `credBlob` or the authenticator data needed for RP verification.

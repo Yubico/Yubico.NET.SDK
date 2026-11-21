@@ -286,20 +286,28 @@ public class LargeBlobProcessorTests
     [InlineData(2, true)] // stored empty blob
     [InlineData(3, false)] // storage failure
     [InlineData(4, false)] // malformed returned key, no storage I/O
+    [InlineData(5, false)] // unsupported storage route, even with an unsolicited key
+    [InlineData(6, false)] // transport I/O failure
     public async Task Authentication_ReadKeepsTheExtensionPresent(int scenario, bool hasBlob)
     {
-        var info = Context().Info;
+        var info = Context(largeBlobsSupported: scenario != 5).Info;
         _backend.GetCachedInfoAsync(Arg.Any<CancellationToken>()).Returns(info);
         _backend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>())
-            .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: scenario switch
+            .Returns(call =>
             {
-                0 => null,
-                4 => [0x42],
-                _ => LargeBlobKey
-            }));
+                var request = call.Arg<BackendGetAssertionRequest>();
+                Assert.Equal(scenario != 5, RequestsLargeBlobKey(request.Extensions));
+                return MockCtap2Responses.CreateMockGetAssertionResponse(largeBlobKey: scenario switch
+                {
+                    0 => null,
+                    4 => [0x42],
+                    _ => LargeBlobKey
+                });
+            });
         _storage.GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()).Returns(_ => scenario switch
         {
             3 => throw new Yubico.YubiKit.Ctap2.CtapException(Yubico.YubiKit.Ctap2.CtapStatus.InvalidCbor),
+            6 => throw new IOException("HID read failed"),
             2 => Array.Empty<byte>(),
             _ => (byte[]?)null
         });
@@ -316,7 +324,7 @@ public class LargeBlobProcessorTests
         var result = Assert.IsType<LargeBlobAuthenticationOutput>(response.ClientExtensionResults?.LargeBlob);
         Assert.Equal(hasBlob, result.Blob.HasValue);
         if (result.Blob is { } blob) Assert.True(blob.IsEmpty);
-        await _storage.Received(scenario is 0 or 4 ? 0 : 1).GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
+        await _storage.Received(scenario is 0 or 4 or 5 ? 0 : 1).GetBlobAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]

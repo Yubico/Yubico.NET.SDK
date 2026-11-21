@@ -442,8 +442,9 @@ Keep these conditions attached to public guidance when changing extension flow:
   Required support needs discoverable creation: a discouraged resident key is rejected before GetInfo;
   a preferred resident key needs advertised `rk` support. A missing returned key reports unsupported.
   Writes deliberately accept multi-entry allow lists, unlike L3 §10.1.5. Use the final assertion's
-  credential-bound key, never the first original entry. A supported read preserves the extension with
-  a null Blob on missing key/data or a storage status/decoding failure. Empty stored data is present;
+  credential-bound key, never the first original entry. Reject a missing or empty original allow list
+  for writes before GetInfo. A requested read preserves the extension with a null Blob on unsupported
+  routing, missing key/data, or storage I/O/decoding failure. Empty stored data is present;
   cancellation propagates.
 - Only a minPinLength input with `Requested = true` requests the extension on a supporting key.
   The value reports existing policy only for authorized RP IDs, not a policy-setting operation.

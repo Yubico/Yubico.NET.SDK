@@ -223,9 +223,10 @@ requires the verified-use hmac-secret PRF. A supported evaluation forces Require
 if the authenticator did not report verification; registration enablement alone does not force UV.
 
 Enforced credProtect refuses creation when GetInfo does not advertise support. Required largeBlob
-support refuses nondiscoverable creation. A supported read reports a null Blob when no data is
-available; an empty stored blob is present with zero length. Writes use the selected assertion's key
-and require a permission-scoped token. Multi-entry allow lists for writes are an intentional divergence
+support refuses nondiscoverable creation. A requested read reports a null Blob when the storage route
+is unsupported or the blob cannot be read; an empty stored blob is present with zero length. Writes
+require a nonempty original allow list and use the selected assertion's key with a permission-scoped
+token. Multi-entry allow lists for writes are an intentional divergence
 from WebAuthn L3 §10.1.5. Callers own and clear the writable PRF and largeBlob plaintext results.
 
 The previewSign processor follows the [vendor draft v4 §10.2.1](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension),

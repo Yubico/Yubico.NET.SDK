@@ -101,8 +101,8 @@ internal sealed class AuthenticationExtensionSession : IDisposable
     /// <summary>
     /// Derives the client extension outputs for one assertion, or null when the relying party requested
     /// no extensions. CborContentException or InvalidOperationException from a processor omits that
-    /// processor's output. A supported largeBlob read keeps its output present with a null Blob when
-    /// the returned key is missing or invalid, no data is available, or a known storage or inflation
+    /// processor's output. A requested largeBlob read keeps its output present with a null Blob when
+    /// the storage route is unsupported, the key or data is unavailable, or a known storage or inflation
     /// failure prevents the read. Cancellation and other unhandled errors propagate even when the
     /// assertion itself succeeded.
     /// </summary>

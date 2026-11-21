@@ -83,7 +83,8 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
 
     /// <summary>
     /// L3 §10.1.5 authentication: "If support is present, or if both read and write are present, return
-    /// ... NotSupportedError". An authenticator without the supported storage route is skipped.
+    /// ... NotSupportedError". An unsupported read still initializes the client result, without
+    /// requesting a key or attempting storage I/O.
     /// The SDK deliberately accepts multi-entry allow lists for writes; it uses the final assertion's
     /// credential-bound key. This is a divergence from the L3 exact-one requirement, not validation.
     /// </summary>
@@ -96,7 +97,8 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
                 "largeBlob authentication takes either read or write, never support (WebAuthn L3 §10.1.5)");
         }
 
-        return IsSupported(context) ? new LargeBlobProcessor(input, context, requestKey: true) : null;
+        bool supported = IsSupported(context);
+        return supported || input.Read ? new LargeBlobProcessor(input, context, requestKey: supported) : null;
     }
 
     public string Name => ExtensionIdentifiers.LargeBlobKey;
@@ -118,7 +120,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
     }
 
     public void PrepareInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token) =>
-        builder.WithLargeBlobKey();
+        PrepareInputs(builder, token);
 
     // Report whether this credential returned the requested key, not merely device capability.
     // CTAP §12.3 places it in top-level response key 0x05, not authData.extensions. A missing key
@@ -169,7 +171,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
 
     private async Task<Memory<byte>?> ReadBlobAsync(GetAssertionResponse response, CancellationToken cancellationToken)
     {
-        if (response.LargeBlobKey is not { Length: 32 } key)
+        if (!_requestKey || response.LargeBlobKey is not { Length: 32 } key)
             return null;
 
         try
@@ -178,7 +180,7 @@ internal sealed class LargeBlobProcessor : IRegistrationExtensionProcessor, IAut
             var blob = await storage.GetBlobAsync(key, cancellationToken).ConfigureAwait(false);
             return blob is null ? (Memory<byte>?)null : blob.AsMemory();
         }
-        catch (Exception ex) when (ex is CtapException or CborContentException or InvalidOperationException or InvalidDataException)
+        catch (Exception ex) when (ex is CtapException or CborContentException or InvalidOperationException or InvalidDataException or IOException)
         {
             return null;
         }

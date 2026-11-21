@@ -48,7 +48,7 @@ public static class ResetCommand
         }
         catch (Exception ex)
         {
-            OutputHelpers.WriteError($"Reset failed: {ex.Message}. Device data may already have been erased.");
+            OutputHelpers.WriteError($"Reset workflow failed: {ex.Message} Inspect the applet before retrying.");
             return 1;
         }
         finally

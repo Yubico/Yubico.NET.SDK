@@ -22,9 +22,7 @@ try
 {
     var options = CliOptions.Parse(args);
 
-    int exitCode = await RunCommandAsync(options, cts.Token);
-
-    return exitCode;
+    return options is null ? 0 : await RunCommandAsync(options, cts.Token);
 }
 catch (ArgumentException ex)
 {
@@ -38,7 +36,7 @@ catch (InvalidOperationException ex)
 }
 catch (OperationCanceledException)
 {
-    return 0;
+    return 130;
 }
 
 static Task<int> RunCommandAsync(CliOptions options, CancellationToken ct) =>

@@ -383,18 +383,17 @@ classified OTP HID touch-wait timeout resolves as `TimedOut`; other timeouts are
 
 ## Example
 
-The interactive OtpTool sample lives at src/YubiOtp/examples/OtpTool/. It demonstrates commands, not
-drop-in `ykman` compatibility. Use the SDK recipes above for production-sensitive provisioning:
+**Demo only; not for production.** OtpTool demonstrates commands, not drop-in `ykman` compatibility.
+Use the SDK recipes above for production-sensitive provisioning:
 
 - The static command translates text using `--keyboard-layout` (default `ModHex`). Select the intended
   host layout explicitly for non-modhex text.
-- Calculate requires an explicit hex challenge despite the help's stdin suggestion. `--totp` does not
-  compute a time counter, period, truncation, or code; use your application's agreed HMAC convention instead.
+- Calculate requires an explicit hex challenge and prefers OTP HID on USB. OtpTool does not generate TOTP
+  codes or read a challenge from stdin.
 - Settings sends full masked values, not a patch. Sample programming and settings commands retain a
   supplied current code by default; `--delete-access-code` explicitly requests removal. Swap does not accept a code.
-- Sessions use the SmartCard-first default, with no transport selector or presence prompt. A calculation
-  failure does not establish that the same key cannot calculate over explicitly selected OTP HID.
-- JSON mode bypasses confirmation even without force. Generated secrets/passwords are intentionally
+- No presence prompt is installed. There is no retry on a different transport if opening the selected connection fails.
+- JSON writes require explicit `--force`. Generated secrets/passwords are intentionally
   displayed in human mode; JSON output is not equivalent and omits generated secret material. Calculate
   prints the response. Parser errors can echo input and immutable CLI strings cannot be zeroed: protect
   terminal history, logs and captured output, and do not treat the sample as a hardened secret-input tool.

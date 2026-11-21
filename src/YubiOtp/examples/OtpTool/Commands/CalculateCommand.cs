@@ -17,8 +17,8 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
 /// <summary>
-/// Demonstrates HMAC-SHA1 calculation with a required hex challenge, despite help suggesting stdin.
-/// Uses the default session transport and prints secret-derived output. Response memory is not cleared
+/// Demonstrates HMAC-SHA1 calculation with a required hex challenge, preferring OTP HID.
+/// Prints secret-derived output. Response memory is not cleared
 /// here; use the module README's caller-owned response cleanup pattern in application code.
 /// </summary>
 public static class CalculateCommand
@@ -26,14 +26,14 @@ public static class CalculateCommand
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
     {
         var slot = options.Slot
-                   ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool calculate <1|2> [CHALLENGE]");
+                   ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool calculate <1|2> CHALLENGE");
 
         byte[] challenge = OutputHelper.RequireHex(
             options.Challenge, "CHALLENGE (positional argument after slot)");
 
         try
         {
-            await using var session = await DeviceHelper.CreateSessionAsync(ct);
+            await using var session = await DeviceHelper.CreateSessionAsync(ct, calculate: true);
 
             var response = await session.CalculateHmacSha1Async(slot, challenge, ct);
 

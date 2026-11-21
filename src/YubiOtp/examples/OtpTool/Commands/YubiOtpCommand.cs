@@ -23,7 +23,7 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// <remarks>
 /// Public-ID hex is decoded to raw bytes; the key emits modhex characters. Generated key/private-ID
 /// output in human mode is intentional provisioning output, not safe logging, and differs from JSON.
-/// Current-code authentication alone does not retain write protection because no new code is supplied.
+/// A supplied current code is retained unless removal is explicitly requested.
 /// Parsed secret strings are immutable and parser diagnostics can echo input. The command's finally
 /// clears its acquired AES-key, private-ID and access-code arrays, not those strings or captured output.
 /// </remarks>

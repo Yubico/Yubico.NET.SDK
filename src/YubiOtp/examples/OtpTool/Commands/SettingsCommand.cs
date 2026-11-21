@@ -24,7 +24,7 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// <remarks>
 /// Sends complete masked values, not a patch. Unspecified current flags are not preserved; AppendCr
 /// is already false in this fresh update, irrespective of NoEnter. Current-code authentication alone
-/// does not retain protection: the omitted new code sends zeros where firmware permits removal.
+/// retains a supplied current code unless removal is explicitly requested.
 /// </remarks>
 public static class SettingsCommand
 {

@@ -22,8 +22,8 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// </summary>
 /// <remarks>
 /// Synchronize the preset counter with the verifier; successful programming is not proof of generated
-/// digits. Human output intentionally
-/// displays generated keys. Current-code authentication alone does not retain slot write protection.
+/// digits. Human output intentionally displays generated keys. A supplied current code is retained unless
+/// removal is explicitly requested.
 /// </remarks>
 public static class HotpCommand
 {

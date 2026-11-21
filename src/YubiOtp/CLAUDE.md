@@ -165,8 +165,8 @@ and limited to overlapping known member IDs.
   or a reset from a positive sequence when empty or in the effective [5.0.0, 5.4.3) window.
 - SmartCard data reads return the expected prefix, allowing excess data. HID data reads validate CRC over
   expected length plus two bytes and return the expected prefix; HID writes only check status length here.
-- OtpTool's static command uses its selected layout to translate text. Its TOTP flag is not code
-  generation, settings are not patches, and generated human output intentionally includes secrets. See README.
+- OtpTool's static command uses its selected layout to translate text. It does not generate TOTP codes;
+  settings are not patches, and generated human output intentionally includes secrets. See README.
 
 ## Test Infrastructure
 

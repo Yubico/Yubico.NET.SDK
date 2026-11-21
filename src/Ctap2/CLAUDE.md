@@ -332,7 +332,7 @@ collection count. `ClientPin.GetPinRetriesAsync` and `GetUvRetriesAsync` return 
 behavior.
 
 Use the returned 32-byte RP hash unchanged: RP display text can be truncated. Enumeration eagerly sends
-begin, then `total - 1` next calls. A successful begin must report 1–65535 entries (SDK limit);
+an authenticated begin, then `total - 1` subcommand-only next calls. A successful begin must report 1–65535 entries (SDK limit);
 `NoCredentials` on begin is the empty result. Do not interleave other device operations. A continuation failure throws rather than
 returning partial results. `CredentialManagement.Dispose` rejects subsequent operations but neither
 owns nor clears the borrowed token, and does not end device authorization. Config/bio/storage

@@ -145,17 +145,11 @@ public sealed class CredentialManagement : IDisposable
         int total = ValidateBeginTotal(firstRp.TotalRpCount);
         results.Add(firstRp);
 
-        // Get remaining RPs if any
-        if (total > 1)
+        for (var i = 1; i < total; i++)
         {
-            var nextRequest = BuildCommandRequest(CredManagementSubCommand.EnumerateRPsGetNextRP);
-
-            for (var i = 1; i < total; i++)
-            {
-                response = await SendCredentialManagementCommandAsync(nextRequest, cancellationToken)
-                    .ConfigureAwait(false);
-                results.Add(RelyingPartyInfo.Decode(response));
-            }
+            response = await SendContinuationAsync(CredManagementSubCommand.EnumerateRPsGetNextRP, cancellationToken)
+                .ConfigureAwait(false);
+            results.Add(RelyingPartyInfo.Decode(response));
         }
 
         return new RelyingPartyEnumerationResult(results, total);
@@ -210,17 +204,11 @@ public sealed class CredentialManagement : IDisposable
             results.Add(firstCred);
             int total = ValidateBeginTotal(firstCred.TotalCredentials);
 
-            // Get remaining credentials if any
-            if (total > 1)
+            for (var i = 1; i < total; i++)
             {
-                var nextRequest = BuildCommandRequest(CredManagementSubCommand.EnumerateCredentialsGetNextCredential);
-
-                for (var i = 1; i < total; i++)
-                {
-                    response = await SendCredentialManagementCommandAsync(nextRequest, cancellationToken)
-                        .ConfigureAwait(false);
-                    results.Add(StoredCredentialInfo.Decode(response));
-                }
+                response = await SendContinuationAsync(CredManagementSubCommand.EnumerateCredentialsGetNextCredential, cancellationToken)
+                    .ConfigureAwait(false);
+                results.Add(StoredCredentialInfo.Decode(response));
             }
 
             return new CredentialEnumerationResult(results, total);
@@ -322,13 +310,19 @@ public sealed class CredentialManagement : IDisposable
         }
     }
 
+    private Task<ReadOnlyMemory<byte>> SendContinuationAsync(byte subCommand, CancellationToken cancellationToken)
+    {
+        // CTAP 2.1 §6.8.3–4: next uses the state established by begin. Each send owns its request.
+        using var request = CtapRequestBuilder.Create(CtapCommand.CredentialManagement).WithInt(1, subCommand);
+        return SendCredentialManagementCommandAsync(request.Build(), cancellationToken);
+    }
+
     private byte[] BuildCommandRequest(byte subCommand, byte[]? parameters = null)
     {
         byte[]? tag = null;
         try
         {
             // Credential management authenticates subCommand || parameters, when present.
-            // Preserve the existing authentication behavior for enumeration continuation.
             Span<byte> transcript = parameters is null ? stackalloc byte[1] : new byte[1 + parameters.Length];
             try
             {

@@ -124,6 +124,19 @@ public class PivCertificateObjectIdTests
         Assert.Equal(expected.RawData, actual.RawData);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetCertificateAsync_StopsHighExpansionBeforeLoadingCertificate(bool netId)
+    {
+        var backend = new CertificateBackend(Compress(new byte[64 * 1024 + 1], netId), [0x71, 0x01, 0x01]);
+
+        var failure = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            CertificateProtocol.GetCertificateAsync(backend, Slot.Authentication, TestContext.Current.CancellationToken));
+
+        Assert.Contains("64 KiB", failure.Message);
+    }
+
     private static byte[] Compress(byte[] input, bool netId, int lengthDelta = 0)
     {
         using var output = new MemoryStream();

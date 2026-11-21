@@ -34,6 +34,7 @@ internal static class CertificateProtocol
     private const byte CompressedCertificate = 0x01;
     private const byte UncompressedCertificate = 0x00;
     private const int MaximumUncompressedCertificateLength = 1856;
+    private const int DecompressedCertificateLimit = 64 * 1024;
     private const int CertificateInfoTlvLength = 3;
     private const int LrcTlvLength = 2;
 
@@ -103,7 +104,21 @@ internal static class CertificateProtocol
             ? new ZLibStream(input, CompressionMode.Decompress)
             : new GZipStream(input, CompressionMode.Decompress);
         using var output = new MemoryStream();
-        await decoder.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
+        byte[] chunk = ArrayPool<byte>.Shared.Rent(4096);
+        try
+        {
+            int read;
+            while ((read = await decoder.ReadAsync(chunk.AsMemory(0, 4096), cancellationToken).ConfigureAwait(false)) != 0)
+            {
+                if (read > DecompressedCertificateLimit - output.Length)
+                    throw new InvalidDataException("The decompressed certificate exceeds the SDK's 64 KiB safety limit.");
+                output.Write(chunk, 0, read);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(chunk);
+        }
 
         if (isNetId && output.Length != BinaryPrimitives.ReadUInt16LittleEndian(encoded.AsSpan(2, 2)))
             throw new InvalidDataException("The decompressed certificate does not match the Net iD header length.");

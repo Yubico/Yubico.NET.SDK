@@ -171,6 +171,8 @@ PIV certificate length, rather than a hard storage limit; device capacity still 
 to force GZip even for smaller certificates; the current enum has no force-uncompressed mode.
 The reader supports ordinary DER, GZip, and Net iD zlib (read only). It rejects unknown nonzero
 CertInfo modes rather than treating them as DER.
+Decompression stops if output would exceed 64 KiB. This is an SDK safety limit, not a measured
+hardware limit or a PIV profile requirement.
 Use the raw-object API to inspect unsupported encodings.
 
 ### Verify the PIN, sign and verify on the host

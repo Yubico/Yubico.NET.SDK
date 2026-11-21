@@ -192,6 +192,8 @@ the CORE-OATH-X005 fixture changes were compiled but not exercised on hardware.
 | OTP-IMP-011 | YubiOTP | Medium | Interview (no rule) | Dennis | Reset before each test / AG-13 rule / Overrides Sia's lean (A/B) | AG-12 |
 | OTP-IMP-012 | YubiOTP | none assigned | T1 | T1 hardware | No code decision; device qualification | classification only |
 | OTP-DEP-005 | YubiOTP | Low | A6 | Auto | Inventory resolved (device info via Management; no typed OTP FIPS query or legacy mutator). Docs only. Veto pass: no veto | AG-25 |
+
+YubiOTP delivery: [draft PR #793](https://github.com/Yubico/Yubico.NET.SDK/pull/793). Hardware qualification remains pending.
 | HSM-IMP-001 | YubiHSM Auth | Medium | Interview (G3, G5) | Dennis | A | AG-20 |
 | HSM-IMP-002 | YubiHSM Auth | High | Interview (G1) | Dennis | Approved A on 2026-11-18, then **dropped** under sample rule S1 (Q9, AG-22) | AG-16; amended in AG-21, AG-22 |
 | HSM-IMP-003 | YubiHSM Auth | Medium | Interview (G5) | Auto (AG-19) | M1 | AG-19 |

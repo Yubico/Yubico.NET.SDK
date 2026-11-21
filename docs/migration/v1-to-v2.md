@@ -754,6 +754,12 @@ Migration notes:
 - Each transition spans separate commands without rollback. After failure, inspect objects and credential
   state, reauthenticate with the active key and use your backup to complete recovery. Raw PIN/key/retry changes
   leave related recovery objects unchanged. See the [complete reopen/recover/disable task](../../src/Piv/README.md#enable-reopen-recover-and-disable-pin-protected-administration).
+- Opt in to coordinated recovery metadata with `SetManagementKeyWithMetadataAsync`,
+  `ChangePinWithMetadataAsync`, and `SetPinAttemptsWithMetadataAsync`. Specify `ManagementKeyStorage`
+  explicitly for rotation; this changes storage, not full PIN-only mode or the PUK state. PIN changes
+  re-derive a compatible derived-only key, and retry-limit changes refuse any legacy derivation salt
+  before restoring factory PIN/PUK values on supported configurations. See the
+  [credential-change prerequisites and failure contract](../../src/Piv/README.md#credential-changes-with-pin-only-metadata).
 
 ### OATH: Check Password Protection and Retry a Locked Operation
 

@@ -167,6 +167,23 @@ public interface IPivSession : IApplicationSession
     /// <exception cref="InvalidPinException">Old PIN incorrect.</exception>
     Task ChangePinAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
 
+    /// <summary>Changes the PIN and re-derives a legacy PIN-derived management key, if configured.</summary>
+    /// <param name="currentPin">The current PIN as 6–8 UTF-8 bytes.</param>
+    /// <param name="newPin">The new PIN as 6–8 UTF-8 bytes.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    /// An independent management key, including a PIN-protected stored copy, is left unchanged.
+    /// For legacy Triple-DES derivation, changes the PIN first, authenticates the old derived key,
+    /// verifies the new PIN, and installs the new derived key without touch before recording its fresh salt.
+    /// Mixed stored and derived metadata is not supported by this method. No prior management authentication is required.
+    /// Keep caller-owned inputs stable until the task completes, then clear them. The SDK clears its own secret buffers.
+    /// Steps are not atomic and are not rolled back; a wrong PIN can consume retries.
+    /// </remarks>
+    /// <exception cref="NotSupportedException">Mixed storage and derivation, or incompatible key type for derivation.</exception>
+    /// <exception cref="InvalidOperationException">An operational failure with phase and write-progress context and the original inner exception.</exception>
+    /// <exception cref="OperationCanceledException">Cancellation, with phase and write-progress context.</exception>
+    Task ChangePinWithMetadataAsync(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Change PUK from old PUK to new PUK.
     /// </summary>
@@ -208,6 +225,22 @@ public interface IPivSession : IApplicationSession
     /// <param name="pukAttempts">PUK retry limit (1-255).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task SetPinAttemptsAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default);
+
+    /// <summary>Sets the retry limits, restores factory PIN and PUK values, and clears the ADMIN DATA PUK-blocked flag.</summary>
+    /// <param name="pinAttempts">New PIN retry limit, 1–255.</param>
+    /// <param name="pukAttempts">New PUK retry limit, 1–255.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    /// Authenticate with the active management key and verify the PIN on this card session before calling.
+    /// Legacy PIN-derived management keys (including mixed mode) are refused before mutation. The retry command
+    /// restores PIN <c>123456</c> and PUK <c>12345678</c> even if the limits are unchanged. Set real credentials
+    /// separately. No PRINTED update, credential restoration, or PUK reblocking is performed.
+    /// The retry command and ADMIN DATA write are separate; an ADMIN DATA failure does not undo the credential reset.
+    /// </remarks>
+    /// <exception cref="NotSupportedException">A legacy derivation salt is present.</exception>
+    /// <exception cref="InvalidOperationException">A prerequisite is missing or an operation failed. Operational failures include phase and write-progress context and the original inner exception.</exception>
+    /// <exception cref="OperationCanceledException">Cancellation, with phase and write-progress context.</exception>
+    Task SetPinAttemptsWithMetadataAsync(int pinAttempts, int pukAttempts, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get remaining PIN attempts.
@@ -696,6 +729,36 @@ public interface IPivSession : IApplicationSession
     Task SetManagementKeyAsync(
         KeyType keyType,
         ReadOnlyMemory<byte> newKey,
+        bool requireTouch = false,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Rotates the active management key and updates its ADMIN DATA and PRINTED recovery metadata.</summary>
+    /// <param name="keyType">Replacement management key algorithm.</param>
+    /// <param name="newKey">Replacement key bytes. Back up the key independently before calling.</param>
+    /// <param name="storage">Required intent for storing the replacement key in PIN-gated PRINTED.</param>
+    /// <param name="requireTouch">Require touch on subsequent uses of the replacement key.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <remarks>
+    /// Authenticate with the active management key first. Verify the PIN before creating, replacing or removing a
+    /// protected copy. If ADMIN DATA records no protected copy and <see cref="ManagementKeyStorage.NotStored"/> is
+    /// requested, PRINTED is not inspected or repaired. Rotation clears legacy derivation salt, preserves unrelated
+    /// metadata, and fails before setting the key if required metadata cannot be read or safely edited.
+    /// Unlike <see cref="SetPinOnlyModeAsync"/>, this does not block or unblock the PUK or implicitly restore a default
+    /// management key. Keep the caller-owned key buffer stable until the task completes, then clear it.
+    /// Writes occur in key, ADMIN DATA, PRINTED order where applicable. There is no retry or rollback: inspect card
+    /// state before taking recovery action. An unconfirmed write may have taken effect.
+    /// </remarks>
+    /// <example>
+    /// After authenticating and verifying the PIN, pass <see cref="ManagementKeyStorage.PinProtected"/> to store the
+    /// new key for PIN-gated recovery while retaining the existing PUK state. To change the complete PIN-only mode
+    /// (which can block the PUK or restore the default key), use <see cref="SetPinOnlyModeAsync"/> instead.
+    /// </example>
+    /// <exception cref="InvalidOperationException">A prerequisite is missing or an operation failed. Operational failures include phase and write-progress context and the original inner exception.</exception>
+    /// <exception cref="OperationCanceledException">Cancellation, with phase and write-progress context.</exception>
+    Task SetManagementKeyWithMetadataAsync(
+        KeyType keyType,
+        ReadOnlyMemory<byte> newKey,
+        ManagementKeyStorage storage,
         bool requireTouch = false,
         CancellationToken cancellationToken = default);
 }

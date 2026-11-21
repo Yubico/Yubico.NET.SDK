@@ -280,6 +280,51 @@ instruction is unavailable. The older `63CX` status carries 0–15 retries; succ
 Every call restores PIN `123456` and PUK `12345678`, even for unchanged limits. Change both afterward.
 These are separate commands: retain a recovery plan for a failure between them.
 
+### Credential changes with PIN-only metadata
+
+The raw `SetManagementKeyAsync`, `ChangePinAsync`, and `SetPinAttemptsAsync` do not update ADMIN DATA or
+PRINTED. Opt in on `IPivSession` when managing these recovery objects:
+
+| Method | Persistent effects |
+| --- | --- |
+| `SetManagementKeyWithMetadataAsync` | Installs the replacement, clears any legacy derivation salt, then updates ADMIN DATA and PRINTED as needed. Choose `ManagementKeyStorage.NotStored` or `PinProtected` explicitly. Removing or replacing a recorded protected copy also needs PIN verification. With `NotStored` and no recorded copy, the SDK does not inspect PRINTED or repair an orphaned copy. |
+| `ChangePinWithMetadataAsync` | Changes the PIN. A PIN-protected independent key remains unchanged. For legacy derived Triple-DES, the SDK authenticates with the old derived key after the PIN change, verifies the new PIN, and installs the new derived key without touch before writing a fresh salt. Mixed stored and derived metadata is refused before changing the PIN. |
+| `SetPinAttemptsWithMetadataAsync` | With management authentication and a verified PIN, sets both limits (1–255), restores PIN `123456` and PUK `12345678`, and clears only the ADMIN DATA PUK-blocked flag. Refuses any legacy derivation salt before mutation. Set new credentials separately; there is no automatic reblocking or PRINTED edit. |
+
+Rotation changes **key storage only**. Unlike `SetPinOnlyModeAsync`, it does not block the PUK or
+restore a default key. An already blocked PUK stays blocked. Keep an independent secure backup of the
+replacement. Example for a human-coordinated rotation (the caller supplies and owns the three buffers):
+
+```csharp
+static async Task RotateProtectedAsync(
+    IYubiKey device, KeyType type, byte[] activeKey, byte[] replacement, byte[] pin,
+    CancellationToken cancellationToken)
+{
+    try
+    {
+        await using var session = await device.CreatePivSessionAsync(cancellationToken: cancellationToken);
+        await session.AuthenticateAsync(activeKey, cancellationToken);
+        await session.VerifyPinAsync(pin, cancellationToken);
+        await session.SetManagementKeyWithMetadataAsync(type, replacement, ManagementKeyStorage.PinProtected,
+            cancellationToken: cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(activeKey);
+        CryptographicOperations.ZeroMemory(replacement);
+        CryptographicOperations.ZeroMemory(pin);
+    }
+}
+```
+
+Await each complete workflow before reusing or clearing an input, calling the session again, or disposing it.
+Required metadata reads and parsing fail closed; supported objects keep unrelated fields and raw timestamp
+bytes. Writes are separate, without retries or rollback. The operational exception identifies the failed phase,
+earlier acknowledged persistent writes and whether the current write was not attempted or is unconfirmed.
+Cancellation still raises `OperationCanceledException`; the original cause remains the inner exception.
+Inspect actual card state before retrying or attempting recovery; unconfirmed does not mean unchanged.
+These messages are for people, not a parsing contract. PIN failures can consume retry attempts.
+
 ### Enable, reopen, recover and disable PIN-protected administration
 
 PIN-protected mode stores the **already active** management key in PIN-gated PRINTED storage and records
@@ -506,11 +551,31 @@ command buffers after return: that memory can already belong to another renter. 
 production authentication implementation is unchanged; pre-return pooled-buffer clearing
 has no direct runtime assertion in this fixture.
 
+`PivMetadataMutationTests` in the unit project covers strict reads, APDU order, field preservation,
+derived-key calculation, and partial-failure/cancellation messages. Its clearing checks retain real,
+non-pooled backend response bytes and PUT/SET command payloads.
+
 On an explicitly allowlisted dedicated test key, run smoke with
 `dotnet toolchain.cs -- test --integration --project Yubico.YubiKit.Piv --smoke`, then full unattended
 coverage with `dotnet toolchain.cs -- test --integration --project Yubico.YubiKit.Piv --filter "Category!=RequiresUserPresence"`.
 These tests reset and mutate PIV, including a protected-mode enable/reopen/recover/disable round trip. Touch
 and hotplug tests need separate human coordination; multi-key contention tests need two attached keys.
+
+The three integration cases in `PivMetadataMutationTests` require separate attended authorization and
+provisioning. Use the existing serial allow list with only the intended dedicated fixture eligible, and
+select one exact case at a time. Before each case, confirm the actual PIN is `123456`, the active
+management key has no touch policy, and the ADMIN/PRINTED objects have canonical PIN-only metadata:
+
+- **Derived PIN change:** derived-only ADMIN salt and the matching active Triple-DES key. Leaves the
+  fixture with PIN `678912` and a fresh salt; tests recovery after reopening.
+- **Protected rotation:** protected-only ADMIN and a PRINTED copy matching the active key. Leaves a new
+  AES-192 key recoverable by PIN; tests that reopening recovers it without changing PUK retries.
+- **Derived rotation:** derived-only ADMIN salt and matching Triple-DES key, with PRINTED unoccupied.
+  Leaves a new PIN-protected AES-192 key without the legacy salt; authenticates it after reopening.
+
+These cases do not reset PIV, change retry limits, or write private-key slots or attestation material.
+Inspect state after a failure rather than retrying or resetting automatically. These cases are compiled;
+physical qualification is pending.
 
 Interpret each assertion at its actual boundary. Actual-array observers in crypto/raw-object tests reach managed
 command/response owners, not the full native/chaining/SCP/provider copy graph. Request-callback cancellation is

@@ -91,6 +91,13 @@ the exchange guard and can outlive its drain; this is not OTP's callback-inside-
 checks cancellation before admission, then uses None for constituent traffic. An outer canceled wait does not
 complete the underlying task or permit borrowed-input cleanup; admitted work may still succeed.
 
+The three `WithMetadataAsync` credential methods are opt-in. Keep raw methods and CLI behavior unchanged.
+Use the strict PIN-only edit reader to preserve original child encodings, including opaque tags and timestamps.
+Use a no-data VERIFY status check when a positive PIN prerequisite is not established by a PRINTED read;
+do not use `GetPinAttemptsAsync` or a host flag for verification state. The session reports only completed
+raw write calls as acknowledged. An invoked write that fails is unconfirmed, regardless of exception type;
+canceling before the next write leaves that write not attempted. None of these methods retries or rolls back.
+
 ## Critical Security Requirements
 
 Raw APDU responses have a Core-owned `Clear()` operation. Internal crypto/data-object results stay in owned

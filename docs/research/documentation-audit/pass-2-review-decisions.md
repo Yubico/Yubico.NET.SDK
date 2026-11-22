@@ -48,6 +48,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-31](#ag-31-november-21-follow-up-approvals) | 2026-11-21 | Dennis approved the OATH reset follow-up, CTAP reset rediscovery, WebAuthn continuation limit, PIV adoption of X13 and legacy-derived retry refusal; requested a Rust/Python PIV PIN-only design comparison and directed public NuGet.org sourcing for NativeShims. | Approved within the scope below; PIV PIN-only API design and NativeShims availability verification pending |
 | [AG-32](#ag-32-previewsign-empty-generated-handle) | 2026-11-21 | Dennis explicitly approved accepting an empty but present previewSign signing handle. | Approved: amends only the CTAP-IMP-040 handle-length facet and unblocks WA-IMP-019 |
 | [AG-33](#ag-33-review-adjudication-and-compatibility) | 2026-11-21 | Dennis approved recording human review adjudication, sibling SDK harmony, and compatibility with existing .NET V1 provisioning. | Approved; existing specific decisions stand |
+| [AG-34](#ag-34-core-atr-byte-hashing) | 2026-11-22 | Dennis approved the byte-hash facet of CORE-B6-C016 (FPT-082). | Approved for hashing only; null-operator behavior remains open |
 
 ### AG-8 classification run
 
@@ -704,6 +705,15 @@ Dennis confirmed these directions in chat on 2026-11-21 and instructed the team 
 Keep existing approved decisions. Bring concrete conflicts with security, protocol, or previously
 approved legacy support limits to Dennis rather than reversing those decisions silently. This guidance
 does not commission a new broad audit or hardware test campaign.
+
+### AG-34 Core ATR byte hashing
+
+Dennis explicitly approved the hashing-only facet of `CORE-B6-C016` (`FPT-082`) on 2026-11-22
+(`Interview`). `AnswerToReset.GetHashCode()` uses a local `HashCode`, calls `AddBytes(_bytes)`,
+and returns `ToHashCode()`. The regression checks that independent equal ATRs hash equally and
+that a hash set finds the equal ATR but not a distinct ATR, without requiring distinct hashes.
+The null/null operator question remains open; no equality operator, representation, wire format,
+or provisioning change is approved. This decision does not close the Core pass.
 
 ### AG-14 firmware rule detail
 

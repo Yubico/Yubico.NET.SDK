@@ -33,7 +33,12 @@ public class AnswerToReset
             _ => false
         };
 
-    public override int GetHashCode() => _bytes.GetHashCode();
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.AddBytes(_bytes);
+        return hash.ToHashCode();
+    }
 
     public override string ToString() => BitConverter.ToString([.. _bytes]);
 

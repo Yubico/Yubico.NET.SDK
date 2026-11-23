@@ -175,8 +175,118 @@ public class FindPcscDevicesTests
         Assert.Equal(["Yubico YubiKey OTP", "Generic NFC Reader"], api.StatusReaderNames);
     }
 
+    [Theory]
+    [InlineData(ErrorCode.SCARD_E_NO_READERS_AVAILABLE)]
+    [InlineData(ErrorCode.SCARD_S_SUCCESS)]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task FindAllAsync_WithoutListedReaders_ReleasesContextAndReturnsEmpty(uint listResult)
+    {
+        using var context = new CountingSCardContext();
+        var api = new StatusBlockingSCardApi { Context = context, ListResult = listResult };
+        var finder = new FindPcscDevices(NullLogger<FindPcscDevices>.Instance, api);
+
+        Assert.Empty(await finder.FindAllAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(0, api.StatusChangeCalls);
+        Assert.Equal(1, context.ReleaseAttempts);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task FindAllAsync_ListThrows_ReleasesContextAndPreservesException()
+    {
+        using var context = new CountingSCardContext();
+        var failure = new InvalidOperationException("Injected reader-list failure.");
+        var api = new StatusBlockingSCardApi { Context = context, OnList = () => throw failure };
+        var finder = new FindPcscDevices(NullLogger<FindPcscDevices>.Instance, api);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => finder.FindAllAsync(TestContext.Current.CancellationToken));
+
+        Assert.Same(failure, exception);
+        Assert.Equal(1, context.ReleaseAttempts);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task FindAllAsync_DuplicateWarningThrows_ReleasesContextAndPreservesException()
+    {
+        const string readerName = "Yubico YubiKey OTP+FIDO+CCID";
+        using var context = new CountingSCardContext();
+        var failure = new InvalidOperationException("Injected duplicate-reader warning failure.");
+        var api = new StatusBlockingSCardApi(readerName, readerName) { Context = context };
+        var finder = new FindPcscDevices(new RecordingLogger(failure), api);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => finder.FindAllAsync(TestContext.Current.CancellationToken));
+
+        Assert.Same(failure, exception);
+        Assert.Equal(1, context.ReleaseAttempts);
+    }
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public async Task FindAllAsync_ListHeld_KeepsContextUntilEnumerationCompletes()
+    {
+        const string readerName = "Yubico YubiKey OTP+FIDO+CCID";
+        using var context = new CountingSCardContext();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var caller = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var releaseList = new ManualResetEventSlim();
+        var api = new StatusBlockingSCardApi(readerName)
+        {
+            Context = context,
+            OnList = () =>
+            {
+                entered.SetResult();
+                if (!releaseList.Wait(TimeSpan.FromSeconds(10), cancellationToken))
+                    throw new TimeoutException("The test did not release its reader-list call.");
+                Assert.Equal(0, context.ReleaseAttempts);
+            }
+        };
+        var finder = new FindPcscDevices(NullLogger<FindPcscDevices>.Instance, api);
+        var scan = finder.FindAllAsync(caller.Token);
+        IReadOnlyList<IPcscDevice> devices;
+        try
+        {
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(5), cancellationToken);
+            caller.Cancel();
+            Assert.False(scan.IsCompleted);
+            Assert.Equal(0, context.ReleaseAttempts);
+        }
+        finally
+        {
+            releaseList.Set();
+            // Join the fake call before disposing its gate or context, even if an assertion fails.
+            devices = await scan;
+        }
+
+        Assert.Equal(readerName, Assert.Single(devices).ReaderName);
+        Assert.Equal(0, api.StatusChangeCalls);
+        Assert.Equal(1, context.ReleaseAttempts);
+    }
+
+    private sealed class CountingSCardContext() : SCardContext(new IntPtr(1))
+    {
+        private int _releaseAttempts;
+
+        public int ReleaseAttempts => Volatile.Read(ref _releaseAttempts);
+
+        protected override bool ReleaseHandle()
+        {
+            Interlocked.Increment(ref _releaseAttempts);
+            return true;
+        }
+    }
+
     private sealed class StatusBlockingSCardApi(params string[] readerNames) : ISCardApi
     {
+        public SCardContext Context { get; init; } = new();
+
+        public uint ListResult { get; init; } = ErrorCode.SCARD_S_SUCCESS;
+
+        public Action? OnList { get; init; }
+
         public int EstablishContextCalls { get; private set; }
 
         public int StatusChangeCalls { get; private set; }
@@ -186,14 +296,15 @@ public class FindPcscDevicesTests
         public uint SCardEstablishContext(SCARD_SCOPE scope, out SCardContext context)
         {
             EstablishContextCalls++;
-            context = new SCardContext();
+            context = Context;
             return ErrorCode.SCARD_S_SUCCESS;
         }
 
         public uint SCardListReaders(SCardContext context, string[]? groups, out string[] names)
         {
+            OnList?.Invoke();
             names = readerNames;
-            return ErrorCode.SCARD_S_SUCCESS;
+            return ListResult;
         }
 
         public uint SCardGetStatusChange(
@@ -210,7 +321,7 @@ public class FindPcscDevicesTests
         public uint SCardCancel(SCardContext context) => ErrorCode.SCARD_S_SUCCESS;
     }
 
-    private sealed class RecordingLogger : ILogger<FindPcscDevices>
+    private sealed class RecordingLogger(Exception? warningFailure = null) : ILogger<FindPcscDevices>
     {
         public List<(LogLevel Level, string Message)> Entries { get; } = [];
 
@@ -219,8 +330,13 @@ public class FindPcscDevicesTests
         public bool IsEnabled(LogLevel logLevel) => true;
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state,
-            Exception? exception, Func<TState, Exception?, string> formatter) =>
+            Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel == LogLevel.Warning && warningFailure is not null)
+                throw warningFailure;
+
             Entries.Add((logLevel, formatter(state, exception)));
+        }
     }
 
     private sealed class EmptyHidFinder : IFindHidInterfaces

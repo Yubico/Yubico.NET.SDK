@@ -49,6 +49,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-32](#ag-32-previewsign-empty-generated-handle) | 2026-11-21 | Dennis explicitly approved accepting an empty but present previewSign signing handle. | Approved: amends only the CTAP-IMP-040 handle-length facet and unblocks WA-IMP-019 |
 | [AG-33](#ag-33-review-adjudication-and-compatibility) | 2026-11-21 | Dennis approved recording human review adjudication, sibling SDK harmony, and compatibility with existing .NET V1 provisioning. | Approved; existing specific decisions stand |
 | [AG-34](#ag-34-core-atr-byte-hashing) | 2026-11-22 | Dennis approved the byte-hash facet of CORE-B6-C016 (FPT-082). | Approved for hashing only; null-operator behavior remains open |
+| [AG-35](#ag-35-core-pcsc-enumeration-context) | 2026-11-23 | Dennis approved moving PC/SC enumeration context cleanup earlier, provided the context is no longer needed when disposed or afterward. | Approved for CORE-B1-C002 (FPT-023) within the lifetime bound below |
 
 ### AG-8 classification run
 
@@ -714,6 +715,17 @@ and returns `ToHashCode()`. The regression checks that independent equal ATRs ha
 that a hash set finds the equal ATR but not a distinct ATR, without requiring distinct hashes.
 The null/null operator question remains open; no equality operator, representation, wire format,
 or provisioning change is approved. This decision does not close the Core pass.
+
+### AG-35 Core PC/SC enumeration context
+
+Dennis approved the acquired-context cleanup facet of `CORE-B1-C002` (`FPT-023`) on 2026-11-23
+(`Interview`), provided the context is no longer needed at disposal or later. The enumeration worker
+finishes its synchronous PC/SC calls and returns materialized reader names and copied ATRs, not the
+context. Later connections acquire their own context. Caller cancellation or a bounded wait does not
+end the worker's ownership. Enter the context's `using` scope after successful establishment and
+before listing readers; preserve reader-name cleanup before disposal and leave statuses, exceptions,
+and native release reporting unchanged. This approves a disposal attempt, not native release proof,
+and does not close the Core pass or the separate listener findings.
 
 ### AG-14 firmware rule detail
 

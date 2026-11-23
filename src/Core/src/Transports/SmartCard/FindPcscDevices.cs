@@ -104,6 +104,7 @@ public class FindPcscDevices : IFindPcscDevices
             return [];
         }
 
+        using var ownedContext = context;
         var result = _sCardApi.SCardListReaders(context, null, out var listedNames);
         if (result != ErrorCode.SCARD_S_SUCCESS || listedNames.Length == 0) return [];
 
@@ -168,7 +169,6 @@ public class FindPcscDevices : IFindPcscDevices
         finally
         {
             SCARD_READER_STATE.FreeReaderNames(readerStates, _freeReaderName);
-            context.Dispose();
         }
     }
 

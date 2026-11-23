@@ -7,7 +7,6 @@ on:
       - 'docfx*.json'
       - 'docs/**'
       - 'build/build-docs.py'
-      - 'build/docfx.targets'
       - '.github/workflows/build-docs.yml'
       - '.github/workflows/build.yml'
 

@@ -62,7 +62,6 @@ def generate(args):
     entry['src'][0]['src'] = str(v2)
     entry['output'] = str(ROOT / 'docs' / 'v2-api')
     entry['filter'] = str(ROOT / 'docs' / 'filterConfig.yml')
-    entry['properties']['CustomAfterMicrosoftCommonTargets'] = str(ROOT / 'build' / 'docfx.targets')
     resolved_config = WORK / 'docfx.v2.resolved.json'
     resolved_config.write_text(json.dumps(config, indent=2) + '\n')
     logs = WORK / 'logs'

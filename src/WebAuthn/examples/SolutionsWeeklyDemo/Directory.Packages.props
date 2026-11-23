@@ -1,0 +1,3 @@
+<Project>
+  <!-- Stops repo-wide central package management from applying to this standalone demo. -->
+</Project>

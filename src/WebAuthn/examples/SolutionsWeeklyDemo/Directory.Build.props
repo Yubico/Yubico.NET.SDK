@@ -1,0 +1,3 @@
+<Project>
+  <!-- Stops the repo-wide build settings from applying to this standalone demo. -->
+</Project>

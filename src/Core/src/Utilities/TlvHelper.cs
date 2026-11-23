@@ -107,8 +107,9 @@ public static class TlvHelper
         catch
         {
             CryptographicOperations.ZeroMemory(pending);
-            foreach (var value in tlvs.Values)
-                CryptographicOperations.ZeroMemory(value.Span);
+            // Enumerate the concrete dictionary to avoid allocating its Values collection in cleanup.
+            foreach (var entry in tlvs)
+                CryptographicOperations.ZeroMemory(entry.Value.Span);
 
             throw;
         }

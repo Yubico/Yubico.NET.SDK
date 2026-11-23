@@ -59,12 +59,104 @@ public class TlvHelperTests
         var input = new byte[] { 0x5A, 0x01, 0x01, 0x5A, 0x01, 0x02, 0x9F, 0x33, 0x01, 0xFF };
 
         // Act
-        var dict = TlvHelper.DecodeDictionary(input);
+        IDictionary<int, Memory<byte>> dict = TlvHelper.DecodeDictionary(input.AsSpan());
 
         // Assert
         Assert.Equal(2, dict.Count);
         Assert.True(dict[0x5A].Span.SequenceEqual(new byte[] { 0x02 }));
         Assert.True(dict[0x9F33].Span.SequenceEqual(new byte[] { 0xFF }));
+        dict[0x5A].Span.Clear();
+        Assert.Equal((byte)0x02, input[5]);
+    }
+
+    [Fact]
+    public void TryFindValue_SkippedValueIsCleared()
+    {
+        byte[] input = [0x5A, 0x01, 0xAA, 0x53, 0x01, 0xBB];
+        var parsed = new List<byte[]>();
+
+        Assert.True(TlvHelper.TryFindValue(0x53, input, out _, parsed.Add));
+
+        Assert.Equal(2, parsed.Count);
+        Assert.Equal(new byte[] { 0 }, parsed[0]);
+        Assert.Equal(new byte[] { 0x5A, 0x01, 0xAA, 0x53, 0x01, 0xBB }, input);
+    }
+
+    [Fact]
+    public void TryFindValue_FirstMatchTransfersParsedArrayWithoutInspectingSuffix()
+    {
+        byte[] input = [0x53, 0x01, 0xBB, 0x53, 0x01, 0xCC, 0x5A];
+        var parsed = new List<byte[]>();
+
+        Assert.True(TlvHelper.TryFindValue(0x53, input, out var value, parsed.Add));
+
+        var parsedMatch = Assert.Single(parsed);
+        Assert.Equal((byte)0xBB, value.Span[0]);
+        value.Span[0] = 0;
+        Assert.Equal((byte)0, parsedMatch[0]); // The result is the actual parsed array, not a second copy.
+        Assert.Equal(new byte[] { 0x53, 0x01, 0xBB, 0x53, 0x01, 0xCC, 0x5A }, input);
+    }
+
+    [Fact]
+    public void DecodeDictionary_DuplicateClearsOnlySupersededArrayAndKeepsOrder()
+    {
+        byte[] input = [0x5A, 0x01, 0xAA, 0x53, 0x01, 0xBB, 0x5A, 0x01, 0xCC];
+        var parsed = new List<byte[]>();
+
+        var result = TlvHelper.DecodeDictionary(input, parsed.Add);
+
+        Assert.Equal(new[] { 0x5A, 0x53 }, result.Keys);
+        Assert.Equal(new byte[] { 0 }, parsed[0]);
+        Assert.Equal((byte)0xCC, result[0x5A].Span[0]);
+        Assert.Equal((byte)0xBB, result[0x53].Span[0]);
+        result[0x5A].Span.Clear();
+        Assert.Equal((byte)0, parsed[2][0]);
+        Assert.Equal(new byte[] { 0x5A, 0x01, 0xAA, 0x53, 0x01, 0xBB, 0x5A, 0x01, 0xCC }, input);
+    }
+
+    [Fact]
+    public void DecodeDictionary_MalformedTailClearsPartialValuesButNotEarlierResultOrInput()
+    {
+        byte[] input = [0x5A, 0x01, 0xAA, 0x53, 0x01, 0xBB, 0x5C, 0x02, 0xCC];
+        IDictionary<int, Memory<byte>> earlier = TlvHelper.DecodeDictionary(input.AsMemory(0, 6));
+        var parsed = new List<byte[]>();
+
+        Assert.Throws<ArgumentException>(() => TlvHelper.DecodeDictionary(input, parsed.Add));
+
+        Assert.Equal(2, parsed.Count);
+        Assert.All(parsed, value => Assert.Equal(new byte[] { 0 }, value));
+        Assert.Equal((byte)0xAA, earlier[0x5A].Span[0]);
+        Assert.Equal((byte)0xBB, earlier[0x53].Span[0]);
+        Assert.Equal(new byte[] { 0x5A, 0x01, 0xAA, 0x53, 0x01, 0xBB, 0x5C, 0x02, 0xCC }, input);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Decode_ObserverFailureClearsPendingAndPriorArraysAndPreservesException(bool search)
+    {
+        byte[] input = [0x5A, 0x01, 0xAA, 0x53, 0x01, 0xBB];
+        var parsed = new List<byte[]>();
+        var failure = new InvalidOperationException("Injected TLV observation failure.");
+        void Observe(byte[] value)
+        {
+            parsed.Add(value);
+            if (parsed.Count == 2)
+                throw failure;
+        }
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+        {
+            if (search)
+                TlvHelper.TryFindValue(0x53, input, out _, Observe);
+            else
+                TlvHelper.DecodeDictionary(input, Observe);
+        });
+
+        Assert.Same(failure, exception);
+        Assert.Equal(2, parsed.Count);
+        Assert.All(parsed, value => Assert.Equal(new byte[] { 0 }, value));
+        Assert.Equal(new byte[] { 0x5A, 0x01, 0xAA, 0x53, 0x01, 0xBB }, input);
     }
 
     [Fact]

@@ -261,6 +261,11 @@ public readonly record struct DeviceInfo
     {
         if (!data.TryGetValue(tag, out var value))
             return default;
+        return RequireFieldLength(value, tag, expectedLength);
+    }
+
+    private static ReadOnlyMemory<byte> RequireFieldLength(ReadOnlyMemory<byte> value, int tag, int expectedLength)
+    {
         if (value.Length != expectedLength)
             throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length {value.Length}; expected {expectedLength}.");
         return value;
@@ -315,7 +320,7 @@ public readonly record struct DeviceInfo
         const byte tagType = 0x02;
         const byte tagIteration = 0x03;
 
-        IDictionary<int, ReadOnlyMemory<byte>> data;
+        IDictionary<int, Memory<byte>> data;
         try
         {
             // The container is extensible. Validate its children, not the original 14-byte total.
@@ -328,16 +333,15 @@ public readonly record struct DeviceInfo
 
         if (versionQualifierBytes.IsEmpty)
             throw new BadResponseException($"Invalid device info tag 0x{TAG_VERSION_QUALIFIER:X2} length 0; expected qualifier TLVs.");
-        if (!data.ContainsKey(tagVersion))
+        if (!data.TryGetValue(tagVersion, out var versionBytes))
             throw new BadResponseException($"Missing version qualifier tag 0x{tagVersion:X2}.");
-        if (!data.ContainsKey(tagType))
+        if (!data.TryGetValue(tagType, out var typeBytes))
             throw new BadResponseException($"Missing version qualifier tag 0x{tagType:X2}.");
         if (!data.TryGetValue(tagIteration, out var iterationBytes))
             throw new BadResponseException($"Missing version qualifier tag 0x{tagIteration:X2}.");
 
-        var qualifierVersion = ReadFirmwareVersion(data, tagVersion)
-            ?? throw new BadResponseException($"Missing version qualifier tag 0x{tagVersion:X2}.");
-        var versionType = (VersionQualifierType)ReadByte(data, tagType);
+        var qualifierVersion = FirmwareVersion.FromBytes(RequireFieldLength(versionBytes, tagVersion, 3).Span);
+        var versionType = (VersionQualifierType)RequireFieldLength(typeBytes, tagType, 1).Span[0];
         long iteration = ReadQualifierIteration(iterationBytes.Span, tagIteration);
 
         var versionQualifier = new VersionQualifier(

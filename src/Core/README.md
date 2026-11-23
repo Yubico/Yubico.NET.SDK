@@ -746,7 +746,9 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
   Review providers and output destinations before enabling diagnostics; see [logging](../../docs/LOGGING.md).
 - `Tlv` and the collection from `TlvHelper.DecodeList` own buffers and must be disposed. The encode helpers
   do not clear your source buffers or their own returned encodings; for sensitive data, zero both in a
-  `finally`. Full examples: [TLV processing](../../docs/usage/tlv-processing.md).
+  `finally`. `DecodeDictionary` and `TryFindValue` return independent writable values; clear sensitive
+  results after use. The helpers clear discarded copies, not the supplied input.
+  Full examples: [TLV processing](../../docs/usage/tlv-processing.md).
 - `ApduCommand` stores a reference to your data, not a copy. Keep it unchanged until the original exchange
   task is terminal, then clear sensitive source bytes. Canceling an outer `WaitAsync` wait does not end
   the underlying borrow. Dispose outside callbacks and only after the complete workflow has finished;

@@ -18,10 +18,10 @@ public sealed class PublicReturnContractTests
             "Existing mutable ATR catalog declaration is unrelated low-level device metadata.",
         [Mutable("Yubico.YubiKit.Core.Utilities.MultiString.GetStrings(System.Byte[], System.Text.Encoding): System.String[]", "System.String[]")] =
             "Existing native multi-string decoder returns a detached string array.",
-        [Mutable("Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlyMemory<System.Byte>): System.Collections.Generic.IDictionary<System.Int32, System.ReadOnlyMemory<System.Byte>>", "System.Collections.Generic.IDictionary<System.Int32, System.ReadOnlyMemory<System.Byte>>")] =
-            "Existing low-level TLV decoder intentionally builds a caller-consumed mutable map.",
-        [Mutable("Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlySpan<System.Byte>): System.Collections.Generic.IDictionary<System.Int32, System.ReadOnlyMemory<System.Byte>>", "System.Collections.Generic.IDictionary<System.Int32, System.ReadOnlyMemory<System.Byte>>")] =
-            "Existing low-level TLV decoder intentionally builds a caller-consumed mutable map.",
+        [Mutable("Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlyMemory<System.Byte>): System.Collections.Generic.IDictionary<System.Int32, System.Memory<System.Byte>>", "System.Collections.Generic.IDictionary<System.Int32, System.Memory<System.Byte>>")] =
+            "The low-level TLV decoder returns independent writable values so callers can clear sensitive results.",
+        [Mutable("Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlySpan<System.Byte>): System.Collections.Generic.IDictionary<System.Int32, System.Memory<System.Byte>>", "System.Collections.Generic.IDictionary<System.Int32, System.Memory<System.Byte>>")] =
+            "The low-level TLV decoder returns independent writable values so callers can clear sensitive results.",
         [Tuple("Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(System.Formats.Cbor.CborReader): System.ValueTuple<System.Int32, System.Nullable<System.Int32>>", "System.ValueTuple<System.Int32, System.Nullable<System.Int32>>")] =
             "Existing CBOR helper returns the two decoded protocol fields as a pair.",
         [Tuple("Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol.Encapsulate(System.Collections.Generic.IReadOnlyDictionary<System.Int32, System.Object>): System.ValueTuple<System.Collections.Generic.Dictionary<System.Int32, System.Object>, System.Byte[]>", "System.ValueTuple<System.Collections.Generic.Dictionary<System.Int32, System.Object>, System.Byte[]>")] =

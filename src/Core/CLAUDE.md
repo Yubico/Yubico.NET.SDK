@@ -471,6 +471,9 @@ Contributor rules:
   call; `EncodeList` does not.
 - Neither encoding method clears caller-owned source buffers. `EncodeAndDisposeList` also does not clear its
   returned encoding or a returned encoding used as an intermediate value in nested TLV construction.
+- `DecodeDictionary` and `TryFindValue` return independent writable values. The SDK clears its own
+  discarded value copies before return or on failure; callers clear sensitive returned values and their
+  own input separately. This does not change `Tlv.Value` or `Tlv.AsMemory()` borrowing and disposal.
 - Classify buffers by semantics. For sensitive nested data, clear source buffers plus returned and intermediate
   encodings in `finally`; public or nonsecret encodings do not require special clearing.
 

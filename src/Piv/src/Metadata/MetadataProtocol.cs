@@ -79,14 +79,14 @@ internal static class MetadataProtocol
     }
 
     private static ReadOnlyMemory<byte> RequiredField(
-        IDictionary<int, ReadOnlyMemory<byte>> fields, int tag, int length)
+        IDictionary<int, Memory<byte>> fields, int tag, int length)
     {
         if (!fields.TryGetValue(tag, out var value) || value.Length != length)
             throw new ApduException($"Missing or invalid metadata field 0x{tag:X2}.");
         return value;
     }
 
-    private static IDictionary<int, ReadOnlyMemory<byte>> DecodeMetadataFields(ReadOnlyMemory<byte> data)
+    private static IDictionary<int, Memory<byte>> DecodeMetadataFields(ReadOnlyMemory<byte> data)
     {
         try
         {

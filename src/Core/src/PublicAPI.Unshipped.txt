@@ -1116,8 +1116,8 @@ static Yubico.YubiKit.Core.Utilities.MemoryExtensions.TryGetSpan<TKey, TValue>(t
 static Yubico.YubiKit.Core.Utilities.MultiString.GetBytes(string![]! value, System.Text.Encoding! encoding) -> byte[]!
 static Yubico.YubiKit.Core.Utilities.MultiString.GetStrings(byte[]! value, System.Text.Encoding! encoding) -> string![]!
 static Yubico.YubiKit.Core.Utilities.Tlv.Create(System.ReadOnlySpan<byte> data) -> Yubico.YubiKit.Core.Utilities.Tlv!
-static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlyMemory<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.ReadOnlyMemory<byte>>!
-static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlySpan<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.ReadOnlyMemory<byte>>!
+static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlyMemory<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.Memory<byte>>!
+static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlySpan<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.Memory<byte>>!
 static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeList(System.ReadOnlyMemory<byte> tlvData) -> Yubico.YubiKit.Core.Utilities.DisposableTlvList!
 static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeList(System.ReadOnlySpan<byte> tlvData) -> Yubico.YubiKit.Core.Utilities.DisposableTlvList!
 static Yubico.YubiKit.Core.Utilities.TlvHelper.EncodeAndDisposeList(params Yubico.YubiKit.Core.Utilities.Tlv![]! tlvData) -> System.Memory<byte>

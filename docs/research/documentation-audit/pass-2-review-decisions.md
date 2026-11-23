@@ -50,6 +50,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-33](#ag-33-review-adjudication-and-compatibility) | 2026-11-21 | Dennis approved recording human review adjudication, sibling SDK harmony, and compatibility with existing .NET V1 provisioning. | Approved; existing specific decisions stand |
 | [AG-34](#ag-34-core-atr-byte-hashing) | 2026-11-22 | Dennis approved the byte-hash facet of CORE-B6-C016 (FPT-082). | Approved for hashing only; null-operator behavior remains open |
 | [AG-35](#ag-35-core-pcsc-enumeration-context) | 2026-11-23 | Dennis approved moving PC/SC enumeration context cleanup earlier, provided the context is no longer needed when disposed or afterward. | Approved for CORE-B1-C002 (FPT-023) within the lifetime bound below |
+| [AG-36](#ag-36-core-tlv-decoder-ownership) | 2026-11-23 | Dennis approved writable TLV dictionary results and regression-tested cleanup of unpublished copies. | Approved for CORE-C-C006 (FPT-088) within the ownership scope below |
 
 ### AG-8 classification run
 
@@ -726,6 +727,17 @@ end the worker's ownership. Enter the context's `using` scope after successful e
 before listing readers; preserve reader-name cleanup before disposal and leave statuses, exceptions,
 and native release reporting unchanged. This approves a disposal attempt, not native release proof,
 and does not close the Core pass or the separate listener findings.
+
+### AG-36 Core TLV decoder ownership
+
+Dennis approved the `CORE-C-C006` (`FPT-088`) facet on 2026-11-23 (`Interview`). Both
+`DecodeDictionary` overloads return `IDictionary<int, Memory<byte>>` with independent writable
+values. Callers clear sensitive successful results when needed; the SDK clears replaced values and
+unreturned copies on failure. `TryFindValue` transfers the first matched parser array and clears
+skipped or otherwise unreturned arrays. Borrowed input, parser grammar, and dictionary ordering
+remain unchanged. This supersedes the proposed (never implemented) `MemoryMarshal` helper.
+`Tlv.Value`, `AsMemory()`, and disposal remain unchanged. As in AG-27, the SDK still clears sensitive
+storage it owns; this is not a general zeroing waiver or Core-pass closure.
 
 ### AG-14 firmware rule detail
 

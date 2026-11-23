@@ -51,6 +51,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-34](#ag-34-core-atr-byte-hashing) | 2026-11-22 | Dennis approved the byte-hash facet of CORE-B6-C016 (FPT-082). | Approved for hashing only; null-operator behavior remains open |
 | [AG-35](#ag-35-core-pcsc-enumeration-context) | 2026-11-23 | Dennis approved moving PC/SC enumeration context cleanup earlier, provided the context is no longer needed when disposed or afterward. | Approved for CORE-B1-C002 (FPT-023) within the lifetime bound below |
 | [AG-36](#ag-36-core-tlv-decoder-ownership) | 2026-11-23 | Dennis approved writable TLV dictionary results and regression-tested cleanup of unpublished copies. | Approved for CORE-C-C006 (FPT-088) within the ownership scope below |
+| [AG-37](#ag-37-core-console-credential-cancellation) | 2026-11-23 | Dennis approved simple cancellation checks for queued keys, confirmation, and redirected line reads. | Approved for CORE-C-C004 (FPT-086) within the synchronous scope below |
 
 ### AG-8 classification run
 
@@ -738,6 +739,16 @@ skipped or otherwise unreturned arrays. Borrowed input, parser grammar, and dict
 remain unchanged. This supersedes the proposed (never implemented) `MemoryMarshal` helper.
 `Tlv.Value`, `AsMemory()`, and disposal remain unchanged. As in AG-27, the SDK still clears sensitive
 storage it owns; this is not a general zeroing waiver or Core-pass closure.
+
+### AG-37 Core console credential cancellation
+
+Dennis approved `CORE-C-C004` (`FPT-086`) on 2026-11-23 (`Interview`): “I approve Card 4,
+just dont make it too complex”. Keep cancellation cooperative and local: check before prompting or
+consuming input, around queued key reads and redirected `ReadLine`, before the confirmation entry, and
+before handing off a credential. Retain the existing cleanup for unreturned owners and character buffers.
+An active synchronous `ReadLine` is not interrupted; a returned line can be consumed and rejected, and its
+managed string cannot be cleared. Checks do not make cancellation atomic with input or return. No queue
+flush, background read, async API, or change to credential input policy is approved here.
 
 ### AG-14 firmware rule detail
 

@@ -77,9 +77,13 @@ static async Task ReadAndVerifyPinAsync(
 ```
 
 The example's six-to-eight ASCII-digit preset is an input choice for that task, not a claim about all
-PIV credential forms. Interactive cancellation is checked while waiting for an available key; queued
-keystrokes and redirected `ReadLine` do not supply the same prompt cancellation responsiveness. Keep
-blocking console reads off a UI dispatcher and use a genuinely asynchronous UI adapter for callbacks.
+PIV credential forms. A pre-canceled token throws `OperationCanceledException` without prompting or
+consuming input. The reader checks the token while waiting for interactive keys, around reads (including
+queued keys), and before returning a credential. Escape without token cancellation still returns `null`.
+These are cooperative checks: an active synchronous `ReadLine` cannot be interrupted. If it returns a
+line after cancellation, that line is consumed but not accepted as a credential. Unread keys are not
+flushed. Serialize console reads and keep blocking reads off a UI dispatcher; use a genuinely asynchronous
+UI adapter for callbacks.
 
 ### Reporting presence
 

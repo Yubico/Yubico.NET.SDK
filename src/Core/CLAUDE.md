@@ -390,6 +390,12 @@ resolve after CTAP status or CRC validation. Policy-driven SmartCard operations 
 and resolve at the applet operation boundary. Do not pass nullable prompt/context pairs through
 downstream APIs or create competing lifecycle owners.
 
+### Console credential cancellation
+
+Keep `ConsoleCredentialReader` synchronous. Observe cancellation around input reads and before transferring
+a credential owner; dispose any unreturned owner. Do not detach a blocking `ReadLine` or flush queued keys.
+See [Acquiring credentials](../../docs/usage/user-interaction.md#acquiring-credentials) for caller-visible limits.
+
 ### APDU Processing Pipeline
 
 The APDU processing pipeline composes transmit and response processors. Short mode splits data into

@@ -257,6 +257,9 @@ contexts set `Operation` to a unique constant such as `UserPresenceOperations.Ct
 can switch on it directly. Wrap a call in `UserPresenceIntent.BeginScope("approve the transfer")` to pass the
 application's reason to the prompt as `UserPresenceContext.Intent`.
 
+`ConsoleCredentialReader` checks cancellation even when keys are queued, but cancellation cannot interrupt
+an active redirected line read. See [Acquiring credentials](../../docs/usage/user-interaction.md#acquiring-credentials).
+
 Applet factories share connection binding, protocol preparation, and failure cleanup in `ApplicationSession`.
 SCP requires PC/SC SmartCard: requesting it on a HID connection fails before any initialization commands are
 sent. FIDO HID channels are prepared before applet discovery; SCP is established after selection and firmware

@@ -77,6 +77,18 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 - Example: NEO / YubiKey 4 USB interface reconfiguration removed from the public Management API.
 - YubiKey 6: partial today, expanding (Dennis has a YubiKey 6 for testing).
 - Notes: "Designed for where customers are going, not where they've been."
+- Notes (.NET Framework): v1 targets `netstandard2.0;netstandard2.1;net472`, so it runs on .NET Framework 4.7.2+,
+  .NET Core and Unity-style hosts. v2 is `net10.0` only. No .NET Framework, netstandard or older .NET
+  (Core 3.1/5/6/8). That's a deliberate drop, and the migration docs flag it as the biggest blocker for that group.
+- Notes (what it cost in v1): keeping .NET Framework meant polyfill packages (`Microsoft.Bcl.AsyncInterfaces`,
+  `Microsoft.Bcl.Cryptography`, `Microsoft.Bcl.HashCode`, `System.Memory`, PolySharp, `System.Formats.Cbor` as a
+  package), framework-specific references (e.g. `System.Web` just to parse query strings on net472) and
+  conditional code. One modern target lets v2 use current runtime APIs directly (Span/Memory, modern crypto,
+  async streams) and is what makes Native AOT possible.
+- Notes (what to tell customers): .NET Framework apps stay on v1, which keeps getting security fixes and is
+  forward compatible. Moving to v2 means moving the host app to .NET 10. A netstandard library that wraps the
+  SDK would need to target .NET 10 too.
+- Sources: `docs/v1-to-v2-comparison.md`, `docs/migration/v1-to-v2-gaps.md` (gap #1), v1 `Yubico.YubiKey.csproj`.
 
 ### 5. Install only what you use + Native AOT
 - Ten packages: `Core`, `Management`, `Piv`, `Ctap2`, `WebAuthn`, `Oath`, `YubiOtp`, `OpenPgp`,

@@ -180,6 +180,20 @@ Layout: stepped sequence / timeline, left to right. Step label in bold, one shor
 - Footer line: one prompt implementation covers PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP and YubiHSM Auth.
 - Notes: the SDK always supplies the operation; the intent comes only from the app. If the request callback
   throws, the SDK cleans up safely and skips the resolved callback.
+- Notes (v1 comparison): "v1 had two different touch callbacks covering four applets, with no context and
+  no cancel. v2 has one prompt for six applets that knows what and why."
+
+  | | v1 | v2 |
+  |---|---|---|
+  | Mechanism | Two callbacks: `KeyCollector` with `TouchRequest`, and `UseTouchNotifier(Action)` | One `IUserPresencePrompt` |
+  | Applets | FIDO2, U2F, YubiHSM Auth (KeyCollector); YubiOTP (notifier) | PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, YubiHSM Auth |
+  | Context | None | Operation (SDK) + intent (app) |
+  | Cancel | Not possible; return value ignored, wait for timeout | `CancellationToken` |
+  | End signal | `Release` (KeyCollector only) | Completed, Cancelled, TimedOut or Failed |
+  | Threading | Callback on an SDK background thread | Async `ValueTask` |
+
+  Source: v1 `KeyEntryRequest.cs`, `Fido2Session.MakeCredential.cs`, `CalculateChallengeResponse.cs`
+  (Yubico.NET.SDK-Legacy). No touch notification found in v1 PIV or OATH.
 - Notes (roadmap): `KeyCollector` is gone. Uniform interactive auth (PIN prompts) is in progress: PIV signing
   and key generation first (PR #687, draft), other applets next. "If customers depend on interactive PIN
   flows, tell us — it shapes the rollout."

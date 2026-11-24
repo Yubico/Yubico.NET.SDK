@@ -24,7 +24,7 @@ public class DeviceInfoTests
         Assert.Equal(DeviceCapabilities.Fido2, info.FipsCapabilities);
         Assert.Equal(DeviceCapabilities.Piv, info.FipsApproved);
         Assert.Equal(30, info.AutoEjectTimeout);
-        Assert.Equal(new byte[] { 0x0F }, info.ChallengeResponseTimeout.ToArray());
+        Assert.Equal((byte)0x0F, info.ChallengeResponseTimeout);
         Assert.Equal(DeviceFlags.RemoteWakeup, info.DeviceFlags);
         Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
         Assert.Equal(VersionQualifierType.Final, info.VersionQualifier.Type);
@@ -95,9 +95,6 @@ public class DeviceInfoTests
     [Fact]
     public void Equals_SnapshotsDecodedFromSeparateBuffers_CompareByContent()
     {
-        // Each decode slices ChallengeResponseTimeout from its own response buffer. Monitoring publishes
-        // DeviceUpdated on inequality, so storage-based memory equality would treat equal fresh bytes as a change.
-        // All comparisons occur while both input TLV lists are alive; post-disposal stability is outside this oracle.
         using var firstTlvs = CreateRequiredDeviceInfoTlvs();
         using var secondTlvs = CreateRequiredDeviceInfoTlvs();
         var first = DeviceInfo.CreateFromTlvs(firstTlvs, defaultVersion: null);
@@ -107,8 +104,47 @@ public class DeviceInfoTests
         Assert.True(first == second);
         Assert.Equal(first.GetHashCode(), second.GetHashCode());
 
-        var differentTimeout = first with { ChallengeResponseTimeout = new byte[] { 0x10 } };
+        var differentTimeout = first with { ChallengeResponseTimeout = 0x10 };
         Assert.NotEqual(first, differentTimeout);
+    }
+
+    [Fact]
+    public void CreateFromTlvs_TimeoutSnapshotSurvivesInputDisposal()
+    {
+        using var field = new Tlv(0x07, [0x0F]);
+        using var independentField = new Tlv(0x07, [0x0F]);
+        var firmware = new FirmwareVersion(5, 7, 2);
+        var snapshot = DeviceInfo.CreateFromTlvs([field], firmware);
+        var independent = DeviceInfo.CreateFromTlvs([independentField], firmware);
+        var originalHash = snapshot.GetHashCode();
+        var cached = new HashSet<DeviceInfo> { snapshot };
+
+        Assert.Equal(new byte[] { 0x07, 0x01, 0x0F }, field.AsSpan().ToArray());
+        field.Dispose();
+
+        Assert.Equal((byte)15, snapshot.ChallengeResponseTimeout);
+        Assert.Equal(independent, snapshot);
+        Assert.Equal(originalHash, snapshot.GetHashCode());
+        Assert.True(cached.TryGetValue(independent, out var retained));
+        Assert.Equal(independent, retained);
+    }
+
+    [Fact]
+    public void CreateFromTlvs_TimeoutDistinguishesAbsenceFromReportedByteExtremes()
+    {
+        var firmware = new FirmwareVersion(5, 7, 2);
+        using var zero = new Tlv(0x07, [0x00]);
+        using var maximum = new Tlv(0x07, [0xFF]);
+
+        var absent = DeviceInfo.CreateFromTlvs([], firmware);
+        var reportedZero = DeviceInfo.CreateFromTlvs([zero], firmware);
+        var reportedMaximum = DeviceInfo.CreateFromTlvs([maximum], firmware);
+
+        Assert.Null(absent.ChallengeResponseTimeout);
+        Assert.Equal((byte)0, reportedZero.ChallengeResponseTimeout);
+        Assert.Equal(byte.MaxValue, reportedMaximum.ChallengeResponseTimeout);
+        Assert.NotEqual(absent, reportedZero);
+        Assert.Equal(reportedMaximum, absent with { ChallengeResponseTimeout = byte.MaxValue });
     }
 
     [Fact]

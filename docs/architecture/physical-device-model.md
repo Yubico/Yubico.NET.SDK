@@ -180,8 +180,7 @@ DeviceInfo? lastKnown = device.CachedDeviceInfo; // No I/O or presence check.
 ```
 
 Null means unavailable. Failed metadata reads preserve a successful snapshot, and replacing that snapshot
-preserves the scalar fields in a previously returned value. `ChallengeResponseTimeout` currently aliases its input
-TLV memory, so read-only access does not establish independent storage or stability after owner cleanup.
+preserves the scalar fields in a previously returned value, including the nullable `ChallengeResponseTimeout`.
 The data is not guaranteed current and
 can remain historical on retained objects after configuration changes or disconnection. A replacement
 object does not inherit its predecessor's snapshot. `SerialNumber` keeps its independent identity contract

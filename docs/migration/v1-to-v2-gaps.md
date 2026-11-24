@@ -359,9 +359,8 @@ v2 location: `src/Management/src/**`
   **User impact**: Setting `NfcRestricted` on firmware 5.0.0–5.6.x could hit an on-device protocol failure instead of the clear typed `NotSupportedException` v1 raised pre-flight.
   **Severity**: Minor | **Confidence**: Medium
 
-- **Feature/API**: `ChallengeResponseTimeout` type — `byte` in v1 vs `ReadOnlyMemory<byte>` in v2's read-side `DeviceInfo` (write side correctly uses `byte`)
-  **v2 status**: Behavior-changed (API shape) — unnecessary ergonomic regression for a single-byte value with no secrecy/zeroing rationale.
-  **Severity**: Cosmetic | **Confidence**: Medium
+- **Feature/API**: `ChallengeResponseTimeout` type — `byte` in v1; v2's read-side `DeviceInfo` now uses `byte?` instead of `ReadOnlyMemory<byte>`.
+  **v2 status**: Timeout alias removed. A reported byte is preserved, and omission is `null`. The write-side `DeviceConfig` contract is unchanged.
 
 **Verified improvement, no gap**: full device-info read parity (firmware version, form factor, serial, USB/NFC capability bitmasks, FIPS capable/approved, reset-blocked, PIN complexity, part number, NFC-restricted, auto-eject/challenge-response timeouts, device flags, FPS/STM versions) across SmartCard/FIDO HID/OTP HID transports, including multi-page reads.
 

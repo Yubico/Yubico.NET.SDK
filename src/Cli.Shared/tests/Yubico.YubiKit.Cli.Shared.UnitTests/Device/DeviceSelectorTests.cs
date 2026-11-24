@@ -380,7 +380,7 @@ public sealed class DeviceSelectorTests
         NfcEnabled = DeviceCapabilities.None, NfcSupported = DeviceCapabilities.None,
         ResetBlocked = DeviceCapabilities.None, FipsCapabilities = DeviceCapabilities.None, FipsApproved = DeviceCapabilities.None,
         HasPinComplexity = false, PartNumber = "test-part", IsNfcRestricted = false, AutoEjectTimeout = 0,
-        ChallengeResponseTimeout = ReadOnlyMemory<byte>.Empty, DeviceFlags = DeviceFlags.None,
+        ChallengeResponseTimeout = null, DeviceFlags = DeviceFlags.None,
         FirmwareVersion = new FirmwareVersion(5, 8, 0),
         VersionQualifier = new VersionQualifier(new FirmwareVersion(5, 8, 0), VersionQualifierType.Final, 0)
     };

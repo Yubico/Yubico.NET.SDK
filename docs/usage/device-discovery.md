@@ -162,9 +162,8 @@ the default implementation returns `null`.
 This is **last-known data, not guaranteed-current state**. Monitoring can
 replace the snapshot on a retained object and emit `DeviceUpdated`; a failed metadata read does
 not erase the last successful value. Replacing the snapshot preserves the scalar fields in a value
-already returned to your code. `DeviceInfo.ChallengeResponseTimeout` is a separate storage caveat: it currently
-aliases the input TLV's memory rather than owning an independent copy. Its read-only type does not
-guarantee stable bytes after that owner is changed or cleared. Metadata
+already returned to your code. `DeviceInfo.ChallengeResponseTimeout` is a nullable byte: `null` means
+the device did not report it, not that it reported zero or its default. Metadata
 can be stale after configuration changes, and a retained object can still expose historical data after
 disconnection. Reading the property does not refresh it, and there is no freshness or presence guarantee.
 

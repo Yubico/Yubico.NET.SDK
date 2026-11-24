@@ -161,7 +161,7 @@ public class DeviceInfoFieldLengthTests
         Assert.Null(info.FpsVersion);
         Assert.Null(info.StmVersion);
         Assert.Equal(0, info.AutoEjectTimeout);
-        Assert.True(info.ChallengeResponseTimeout.IsEmpty);
+        Assert.Null(info.ChallengeResponseTimeout);
         Assert.Equal((DeviceFlags)0, info.DeviceFlags);
     }
 

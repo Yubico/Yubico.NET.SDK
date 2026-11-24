@@ -89,8 +89,7 @@ Diffing and metadata refresh occur outside the feed gate, so atomic publication 
 boundary, not transactional isolation of device properties.
 
 `DeviceInfo` scalar fields in a returned value survive snapshot replacement. Its `ChallengeResponseTimeout`
-memory currently aliases an input TLV, however, so read-only metadata is not a general independent-storage
-or post-disposal stability guarantee. See [cached metadata](../usage/device-discovery.md#cached-device-metadata).
+is a nullable byte independent of input TLV storage. See [cached metadata](../usage/device-discovery.md#cached-device-metadata).
 
 ## Publication and subscription
 

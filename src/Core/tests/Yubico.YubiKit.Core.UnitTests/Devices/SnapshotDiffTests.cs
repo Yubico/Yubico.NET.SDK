@@ -98,8 +98,8 @@ public class SnapshotDiffTests
     [Fact]
     public void Apply_EqualMetadataFromSeparateBuffers_DoesNotEmitUpdate()
     {
-        var metadata = default(DeviceInfo) with { SerialNumber = 103, ChallengeResponseTimeout = new byte[] { 0x0F } };
-        var reread = default(DeviceInfo) with { SerialNumber = 103, ChallengeResponseTimeout = new byte[] { 0x0F } };
+        var metadata = default(DeviceInfo) with { SerialNumber = 103, ChallengeResponseTimeout = 0x0F };
+        var reread = default(DeviceInfo) with { SerialNumber = 103, ChallengeResponseTimeout = 0x0F };
         var first = Published("first", "a", metadata);
         var current = SnapshotDiff.Apply([], [first], 1).Next;
 

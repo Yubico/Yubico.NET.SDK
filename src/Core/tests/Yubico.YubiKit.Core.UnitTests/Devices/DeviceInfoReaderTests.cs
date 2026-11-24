@@ -61,7 +61,7 @@ public class DeviceInfoReaderTests
 
         Assert.Equal(0x01020304, info.SerialNumber);
         Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
-        Assert.Equal([0x2A], info.ChallengeResponseTimeout.ToArray());
+        Assert.Equal((byte)0x2A, info.ChallengeResponseTimeout);
         Assert.Equal([0], protocol.RequestedPages);
     }
 

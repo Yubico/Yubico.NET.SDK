@@ -340,7 +340,7 @@ Yubico.YubiKit.Core.Devices.DeviceFlags.TouchEject = 128 -> Yubico.YubiKit.Core.
 Yubico.YubiKit.Core.Devices.DeviceInfo
 Yubico.YubiKit.Core.Devices.DeviceInfo.AutoEjectTimeout.get -> ushort
 Yubico.YubiKit.Core.Devices.DeviceInfo.AutoEjectTimeout.init -> void
-Yubico.YubiKit.Core.Devices.DeviceInfo.ChallengeResponseTimeout.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Devices.DeviceInfo.ChallengeResponseTimeout.get -> byte?
 Yubico.YubiKit.Core.Devices.DeviceInfo.ChallengeResponseTimeout.init -> void
 Yubico.YubiKit.Core.Devices.DeviceInfo.DeviceFlags.get -> Yubico.YubiKit.Core.Devices.DeviceFlags
 Yubico.YubiKit.Core.Devices.DeviceInfo.DeviceFlags.init -> void

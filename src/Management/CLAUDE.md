@@ -553,7 +553,8 @@ The problem with capability changes is **blast radius across the suite**, not de
 It reboots only when requested. The rule is restore what you changed, not prohibit configuration tests:
 
 1. Save every field the test changes, including lock state when testing lock behavior. Do not copy all
-   `DeviceInfo` fields blindly: read/write types differ, notably the challenge-response timeout bytes.
+   `DeviceInfo` fields blindly: read and write policies differ. Read-side challenge-response timeout metadata
+   preserves the reported byte; a write request only accepts 0–60 seconds.
 2. Preserve a usable recovery transport and document the suite-wide effects of disabling an application.
 3. Attempt restoration in `finally`, including after a failed assertion, and read back restored persisted
    settings when possible. A `finally` guarantees an attempt, not successful hardware recovery.
@@ -643,9 +644,8 @@ await state.WithManagementAsync(async (mgmt, info) =>
 fields can have default values. It is not a mutable session cache. Compare the fields relevant to the
 test rather than assuming two snapshots must match every field during reconfiguration.
 
-Content equality does not imply deep storage independence: the current memory-backed timeout value can
-alias across record/result/list copies. Keep its ownership limitation separate from scalar snapshot replacement.
-The following example compares only serial numbers:
+The challenge-response timeout is a nullable byte, independent of input TLV storage. The following example
+compares only serial numbers:
 
 ```csharp
 var info1 = await mgmt.GetDeviceInfoAsync();

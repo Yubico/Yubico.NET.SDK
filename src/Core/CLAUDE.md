@@ -689,8 +689,8 @@ and identity contract remain unchanged, even if a newer metadata snapshot omits 
 coverage is in `YubiKeyDeviceTests` (no connection on access, snapshot replacement, default implementations,
 serial independence) and `SnapshotDiffTests` (retention and replacement isolation).
 
-Snapshot replacement preserves previously returned scalar fields, but `ChallengeResponseTimeout` currently
-aliases an input TLV's memory. Read-only access is not independent ownership or post-clear stability.
+Snapshot replacement preserves previously returned scalar fields, including `ChallengeResponseTimeout`.
+The parser preserves a reported timeout byte as-is and returns `null` when the field is omitted.
 Successful serial-less metadata can remain cached; unchanged scans need not retry it. Identity-cache
 PID checks do not extend to the separate metadata cache's member-ID keyed entries.
 

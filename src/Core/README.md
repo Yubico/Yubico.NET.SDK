@@ -181,11 +181,9 @@ it does not promise to update discovery metadata. Continue using `device.SerialN
 identity: its independent contract can retain a known serial even when the latest snapshot omits it.
 See [cached device metadata](../../docs/usage/device-discovery.md#cached-device-metadata) for details.
 
-`DeviceInfo` copies scalar fields when returned, but `ChallengeResponseTimeout` currently retains read-only
-memory backed by the input TLV. A read-only view prevents writes through that view; it does not create
-independent storage or guarantee stability after the backing owner is cleared. Avoid treating the
-whole value as an immutable cache key. Firmware, enabled-capability fields, and transport presence also
-answer different questions: use the applet operation's prerequisites rather than inferring success
+`ChallengeResponseTimeout` is a nullable byte: a reported value stays independent of input TLV storage,
+and `null` means unreported rather than zero or the hardware default. Firmware, enabled-capability fields,
+and transport presence answer different questions: use the applet operation's prerequisites rather than inferring success
 from any one of them. Major-zero firmware versions, including `0.0.0`, pass optimistic SDK feature
 checks; that is compatibility policy, not evidence that hardware implements every feature.
 

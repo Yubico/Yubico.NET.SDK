@@ -84,7 +84,8 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
   `Microsoft.Bcl.Cryptography`, `Microsoft.Bcl.HashCode`, `System.Memory`, PolySharp, `System.Formats.Cbor` as a
   package), framework-specific references (e.g. `System.Web` just to parse query strings on net472) and
   conditional code. One modern target lets v2 use current runtime APIs directly (Span/Memory, modern crypto,
-  async streams) and is what makes Native AOT possible.
+  async streams) and keeps the code simpler to make trimming- and Native AOT-safe. .NET Framework apps can't
+  use Native AOT at all. (Don't claim v1 is AOT-incompatible; that hasn't been checked.)
 - Notes (what to tell customers): .NET Framework apps stay on v1, which keeps getting security fixes and is
   forward compatible. Moving to v2 means moving the host app to .NET 10. A netstandard library that wraps the
   SDK would need to target .NET 10 too.

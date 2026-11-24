@@ -389,7 +389,9 @@ not a CTAP version or an adopted W3C signing standard. Registration generates a 
 key**, not a way to export or repurpose the WebAuthn credential's private key. Authentication requires
 a nonempty allow list and one signing-parameter map entry per allowed credential; multi-entry lists
 are supported, and the probe-selected credential chooses the corresponding parameters. A normal
-public dictionary is sufficient; the input normalizes credential-ID comparison by byte content.
+dictionary is sufficient: pass it directly to `new PreviewSignAuthenticationInput(mapping)` instead
+of `CreateSignByCredential`. The constructor snapshots credential IDs and rejects duplicates by byte
+content; the signing-parameter buffers remain caller-owned.
 
 Unsupported previewSign requests are omitted, so inspect the optional result before treating signing
 as performed. Some explicit output errors propagate while CBOR/invalid-operation parsing failures

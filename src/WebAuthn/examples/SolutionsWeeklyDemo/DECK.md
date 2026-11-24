@@ -113,6 +113,16 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
   shared `SessionCreationOptions`. Concepts align with YubiKit Android and Python.
 - Applet operations are awaitable; device events via `YubiKeyManager.WatchAsync` as
   `IAsyncEnumerable<DeviceChange>`, no Rx dependency. (Not "async all the way down" — a few low-level paths stay sync.)
+- Notes (why async, DX): v1 had no async at all. Every call blocked its thread, and `KeyCollector` was a
+  synchronous callback invoked in the middle of a multi-step auth flow. In a desktop app that meant pushing work
+  onto a background thread, then marshalling back to the UI thread from inside the callback to show a PIN or
+  touch dialog. v2: just `await`. The app stays responsive while the key waits for USB and the user's touch,
+  cancellation is a standard `CancellationToken` (designed for it, though not every native wait can be
+  interrupted), and it fits ASP.NET Core, MAUI, WPF and `await foreach` device events.
+- Notes (the cost): scripts and small CLIs become async (`async Task Main`); synchronous code paths migrating
+  from v1 must become async, because blocking on async calls (`.Result`) can deadlock in UI contexts.
+  Async doesn't make the hardware faster; it frees your threads.
+- Slide line: "Async where the hardware waits."
 
 ### 8. New capabilities
 - WebAuthn client: builds `clientDataJSON`, handles PIN/UV, processes extensions.

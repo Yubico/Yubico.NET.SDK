@@ -1,0 +1,12 @@
+# Scribe job: NuGet author-sign the NativeShims package built from signed libraries.
+stub: yubico-net-sdk
+releaseType: public
+jobs:
+  - name: nativeshims-packages
+    platform: linux
+    steps:
+      - id: 1
+        action: windows
+        description: Yubico.NativeShims
+        files:
+          - Yubico.NativeShims.*.nupkg

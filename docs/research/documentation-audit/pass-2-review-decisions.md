@@ -59,6 +59,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-42](#ag-42-core-macos-hid-enumeration-null-handles) | 2026-11-24 | Dennis approved treating a null macOS HID manager as a scan error and a null copied device set as empty. | Approved for CORE-B3-C002 (FPT-041) |
 | [AG-43](#ag-43-core-windows-hid-listener-disposed-restart) | 2026-11-24 | Dennis approved refusing to restart a disposed Windows HID listener and testing that it cannot attempt registration. | Approved for the disposed-restart facet of CORE-B4-C002 (FPT-049) only |
 | [AG-44](#ag-44-core-timeout-scalar-ownership) | 2026-11-24 | Dennis approved a nullable scalar for the read-side challenge-response timeout and requested a sibling comparison. | Approved for CORE-A-C003 (FPT-003); Python and Android checked, Rust unverified |
+| [AG-45](#ag-45-core-ordinary-capability-mask-width) | 2026-11-24 | Dennis approved `DeviceCapabilities : uint` and full ordinary-mask decoding with a 32-bit SDK limit. | Approved for the residual width facet of CORE-A-C006 (FPT-006) |
 
 ### AG-8 classification run
 
@@ -829,6 +830,24 @@ reported zero, unsigned byte values, strict one-byte response width, and separat
 [ag44-ykman]: https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/management.py#L353-L355
 [ag44-android]: https://github.com/Yubico/yubikit-android/blob/f46268563437ac52910001222a77741d229b9b99/management/src/main/java/com/yubico/yubikit/management/DeviceInfo.java#L242-L244
 [ag44-android-reader]: https://github.com/Yubico/yubikit-android/blob/f46268563437ac52910001222a77741d229b9b99/management/src/main/java/com/yubico/yubikit/management/DeviceInfo.java#L438-L447
+
+### AG-45 Core ordinary capability mask width
+
+Dennis approved the residual width facet of `CORE-A-C006` (`FPT-006`) on 2026-11-24 (`Interview`).
+Change the alpha enum's public underlying type from `int` to `uint`. Decode the full ordinary big-endian
+mask, accepting leading zeroes and retaining bits 0–31. Nonzero overflow is a tag-specific
+`BadResponseException`, not evidence of malformed firmware data. This is a bounded SDK API, not a raw-byte
+readback contract. Preserve the unsigned two-byte fix in `35590eeee`, the two-byte configuration write
+limit and wire format, and the separate FIPS and duplicate-tag behavior.
+
+**D1 sibling comparison.** [ykman at `4ca60f70`][ag45-ykman] reads the full unsigned integer without a
+32-bit ceiling. [Android at `f4626856`][ag44-android-reader] accumulates into a Java `int` and keeps the
+low 32 bits on overflow. .NET instead rejects overflow. The [Configuration Reference][ag45-vendor] does
+not specify a fixed or future capability-field width. Rust `90940e9bb734e4daec04bdb17dae155ff3c85c57`
+remains unverified because the pinned source checkout was unavailable.
+
+[ag45-ykman]: https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/management.py#L357-L382
+[ag45-vendor]: https://developers.yubico.com/yubikey-manager/Config_Reference.html#_device_information
 
 ### AG-14 firmware rule detail
 

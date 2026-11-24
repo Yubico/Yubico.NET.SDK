@@ -171,6 +171,8 @@ public readonly record struct DeviceInfo
     ///     over tag 0x05, but a present firmware field must still have a valid encoding.
     ///     A qualifier whose type differs from <see cref="VersionQualifierType.Final"/> supplies the effective
     ///     firmware version, including an unnamed qualifier type. An omitted challenge-response timeout is null.
+    ///     Ordinary capability masks are unsigned big-endian integers. Leading zero bytes are accepted and
+    ///     unnamed bits are preserved up to 32 bits; values outside this SDK range are rejected.
     /// </remarks>
     /// <param name="tlvs">Decoded device-information fields. Unknown tags are ignored; duplicate tags are rejected.</param>
     /// <param name="defaultVersion">Version used in preference to tag 0x05, or null to use that tag.</param>
@@ -284,10 +286,11 @@ public readonly record struct DeviceInfo
     {
         if (!data.TryGetValue(tag, out var value))
             return DeviceCapabilities.None;
-        // Accept nonempty fields here; CapabilityMapper.FromApp determines which bytes are interpreted.
         if (value.IsEmpty)
             throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length 0; expected a capability value.");
-        return CapabilityMapper.FromApp(value);
+        if (!CapabilityMapper.TryFromApp(value.Span, out var capabilities))
+            throw new BadResponseException($"Device info tag 0x{tag:X2} exceeds the SDK's 32-bit capability range.");
+        return capabilities;
     }
 
     private static DeviceCapabilities ReadFipsCapabilities(IDictionary<int, ReadOnlyMemory<byte>> data, int tag)
@@ -408,12 +411,21 @@ internal static class CapabilityMapper
         return capabilities;
     }
 
-    public static DeviceCapabilities FromApp(ReadOnlyMemory<byte> appData)
+    public static bool TryFromApp(ReadOnlySpan<byte> appData, out DeviceCapabilities capabilities)
     {
-        if (appData.IsEmpty) return DeviceCapabilities.None;
+        uint mask = 0;
+        foreach (byte b in appData)
+        {
+            if (mask > (uint.MaxValue >> 8))
+            {
+                capabilities = DeviceCapabilities.None;
+                return false;
+            }
 
-        return appData.Length == 1
-            ? (DeviceCapabilities)appData.Span[0]
-            : (DeviceCapabilities)BinaryPrimitives.ReadUInt16BigEndian(appData.Span);
+            mask = (mask << 8) | b;
+        }
+
+        capabilities = (DeviceCapabilities)mask;
+        return true;
     }
 }

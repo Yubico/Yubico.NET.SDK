@@ -117,7 +117,7 @@ public class CapabilityMapperTests
     {
         var buffer = CreateBigEndianBytes(appValue);
 
-        var result = CapabilityMapper.FromApp(buffer);
+        Assert.True(CapabilityMapper.TryFromApp(buffer, out var result));
 
         Assert.Equal(expected, result);
     }
@@ -132,7 +132,7 @@ public class CapabilityMapperTests
     {
         var buffer = new[] { appValue };
 
-        var result = CapabilityMapper.FromApp(buffer);
+        Assert.True(CapabilityMapper.TryFromApp(buffer, out var result));
 
         Assert.Equal(expected, result);
     }
@@ -143,7 +143,7 @@ public class CapabilityMapperTests
         var allCaps = (int)DeviceCapabilities.All;
         var buffer = CreateBigEndianBytes(allCaps);
 
-        var result = CapabilityMapper.FromApp(buffer);
+        Assert.True(CapabilityMapper.TryFromApp(buffer, out var result));
 
         Assert.Equal(DeviceCapabilities.All, result);
     }
@@ -153,7 +153,7 @@ public class CapabilityMapperTests
     {
         var buffer = Array.Empty<byte>();
 
-        var result = CapabilityMapper.FromApp(buffer);
+        Assert.True(CapabilityMapper.TryFromApp(buffer, out var result));
 
         Assert.Equal(DeviceCapabilities.None, result);
     }
@@ -175,7 +175,7 @@ public class CapabilityMapperTests
         var appValue = (int)(DeviceCapabilities.Otp | DeviceCapabilities.U2f);
         var buffer = CreateBigEndianBytes(appValue);
 
-        var result = CapabilityMapper.FromApp(buffer);
+        Assert.True(CapabilityMapper.TryFromApp(buffer, out var result));
 
         Assert.True(result.HasFlag(DeviceCapabilities.Otp));
         Assert.True(result.HasFlag(DeviceCapabilities.U2f));
@@ -228,7 +228,7 @@ public class CapabilityMapperTests
     {
         var buffer = new byte[] { 0x03, 0x00 };
 
-        var result = CapabilityMapper.FromApp(buffer);
+        Assert.True(CapabilityMapper.TryFromApp(buffer, out var result));
 
         var expected = DeviceCapabilities.HsmAuth | DeviceCapabilities.Fido2;
 
@@ -250,7 +250,7 @@ public class CapabilityMapperTests
     {
         ReadOnlyMemory<byte> memory = default;
 
-        var result = CapabilityMapper.FromApp(memory);
+        Assert.True(CapabilityMapper.TryFromApp(memory.Span, out var result));
 
         Assert.Equal(DeviceCapabilities.None, result);
     }

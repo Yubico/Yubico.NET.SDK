@@ -126,6 +126,9 @@ public sealed class AllowList
 
 ### 5. FilterCriteria and Serialization
 
+`YubiKeyTestState` serializes all three capability filters as `uint` to match `DeviceCapabilities`.
+Keep serialization and deserialization paired; restoring a placeholder must not bind a device.
+
 `FilterCriteria` stores all filtering parameters and handles xUnit serialization:
 
 ```csharp

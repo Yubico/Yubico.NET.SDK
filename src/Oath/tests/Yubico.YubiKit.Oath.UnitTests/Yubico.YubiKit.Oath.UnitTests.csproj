@@ -13,6 +13,8 @@
     <!-- Package versions come from Directory.Packages.props -->
     <!-- When using Microsoft Testing Platform, DON'T use Microsoft.NET.Test.Sdk or xunit.runner.visualstudio -->
     <PackageReference Include="xunit.v3" />
+    <!-- Test the shared fixture's v2 serialization contract without running a v2 runner. -->
+    <PackageReference Include="xunit.abstractions" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

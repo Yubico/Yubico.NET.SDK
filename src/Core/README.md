@@ -187,6 +187,11 @@ and transport presence answer different questions: use the applet operation's pr
 from any one of them. Major-zero firmware versions, including `0.0.0`, pass optimistic SDK feature
 checks; that is compatibility policy, not evidence that hardware implements every feature.
 
+`DeviceCapabilities` is now a `uint`-backed flags enum. If you store or cast numeric masks, use unsigned
+32-bit values. Ordinary USB/NFC and reset-blocked masks preserve every reported bit that fits this range,
+including unnamed bits, and accept leading zero bytes. A mask outside the SDK's range fails the metadata
+read with `BadResponseException`. Management configuration writes still use two-byte masks.
+
 ### PC/SC sharing policy and migration
 
 Built-in PC/SC connections default to strict `SmartCardSharing.Exclusive`. If another smart-card client

@@ -771,6 +771,9 @@ Only the sequential producer calls `Apply`. `SnapshotDiff` computes a successor 
 gate; published dictionaries are never mutated. It groups removals before additions before metadata
 updates, retaining the original device unless connection flags or contradicting known serials prove
 replacement. `DeviceInfo` has value equality, so equal metadata produces no update notification.
+Ordinary capability fields decode the full unsigned big-endian value into `DeviceCapabilities : uint`.
+Accept leading zeroes and reject nonzero overflow with tag context. This is an SDK read limit, not a
+firmware width rule; FIPS mapping and the Management two-byte write limit are separate.
 
 `YubiKeyMonitor.WatchAsync` delegates directly to `DeviceChangeFeed.Subscribe`. On first `MoveNextAsync`,
 snapshot capture and subscription registration share the publication gate. Replay happens outside the

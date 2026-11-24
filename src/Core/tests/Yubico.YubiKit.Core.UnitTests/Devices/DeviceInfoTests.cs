@@ -148,6 +148,41 @@ public class DeviceInfoTests
     }
 
     [Fact]
+    public void CreateFromTlvs_OrdinaryMasks_PreserveTheFullUnsignedValue()
+    {
+        using var usbSupported = new Tlv(0x01, [0x00, 0x00, 0x10]);
+        using var usbEnabled = new Tlv(0x03, [0x01, 0x00, 0x01]);
+        using var nfcSupported = new Tlv(0x0D, [0x80, 0x00, 0x00, 0x20]);
+        using var nfcEnabled = new Tlv(0x0E, [0xFF, 0xFF, 0xFF, 0xFF]);
+        using var resetBlocked = new Tlv(0x18, [0x00, 0x00, 0x00, 0x80, 0x00]);
+
+        var info = DeviceInfo.CreateFromTlvs(
+            [usbSupported, usbEnabled, nfcSupported, nfcEnabled, resetBlocked], new FirmwareVersion(5, 7, 2));
+
+        Assert.Equal(DeviceCapabilities.Piv, info.UsbSupported);
+        Assert.Equal(0x10001u, (uint)info.UsbEnabled);
+        Assert.True(info.UsbEnabled.HasFlag(DeviceCapabilities.Otp));
+        Assert.False(info.UsbEnabled.HasFlag(DeviceCapabilities.HsmAuth));
+        Assert.Equal(0x80000020u, (uint)info.NfcSupported);
+        Assert.True(info.NfcSupported.HasFlag(DeviceCapabilities.Oath));
+        Assert.Equal("2147483680", info.NfcSupported.ToString());
+        Assert.Equal(uint.MaxValue, (uint)info.NfcEnabled);
+        Assert.Equal(0x8000u, (uint)info.ResetBlocked);
+    }
+
+    [Fact]
+    public void CreateFromTlvs_OrdinaryMaskExceedsSdkRange_ReportsItsTag()
+    {
+        using var resetBlocked = new Tlv(0x18, [0x01, 0x00, 0x00, 0x00, 0x01]);
+
+        var error = Assert.Throws<BadResponseException>(() =>
+            DeviceInfo.CreateFromTlvs([resetBlocked], new FirmwareVersion(5, 7, 2)));
+
+        Assert.Contains("tag 0x18", error.Message);
+        Assert.Contains("32-bit", error.Message);
+    }
+
+    [Fact]
     public void CreateFromTlvs_DecodesFipsBitsSeparatelyFromApplicationBits()
     {
         using var capable = new Tlv(0x14, [0x20, 0x1F]);

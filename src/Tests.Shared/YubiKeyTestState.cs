@@ -285,9 +285,9 @@ public class YubiKeyTestState : IXunitSerializable
                 RequireUsb = info.GetValue<bool>("FilterRequireUsb"),
                 RequireNfc = info.GetValue<bool>("FilterRequireNfc"),
                 ConnectionType = (ConnectionType)info.GetValue<int>("FilterConnectionType"),
-                Capability = (DeviceCapabilities)info.GetValue<int>("FilterCapability"),
-                FipsCapable = (DeviceCapabilities)info.GetValue<int>("FilterFipsCapable"),
-                FipsApproved = (DeviceCapabilities)info.GetValue<int>("FilterFipsApproved"),
+                Capability = (DeviceCapabilities)info.GetValue<uint>("FilterCapability"),
+                FipsCapable = (DeviceCapabilities)info.GetValue<uint>("FilterFipsCapable"),
+                FipsApproved = (DeviceCapabilities)info.GetValue<uint>("FilterFipsApproved"),
                 CustomFilterTypeName = info.GetValue<string?>("FilterCustomFilterTypeName")
             }.ResolveCustomFilterType();
 
@@ -372,9 +372,9 @@ public class YubiKeyTestState : IXunitSerializable
             info.AddValue("FilterRequireUsb", _filterCriteria.RequireUsb);
             info.AddValue("FilterRequireNfc", _filterCriteria.RequireNfc);
             info.AddValue("FilterConnectionType", (int)_filterCriteria.ConnectionType);
-            info.AddValue("FilterCapability", (int)_filterCriteria.Capability);
-            info.AddValue("FilterFipsCapable", (int)_filterCriteria.FipsCapable);
-            info.AddValue("FilterFipsApproved", (int)_filterCriteria.FipsApproved);
+            info.AddValue("FilterCapability", (uint)_filterCriteria.Capability);
+            info.AddValue("FilterFipsCapable", (uint)_filterCriteria.FipsCapable);
+            info.AddValue("FilterFipsApproved", (uint)_filterCriteria.FipsApproved);
             info.AddValue("FilterCustomFilterTypeName", _filterCriteria.CustomFilterTypeName);
         }
         else

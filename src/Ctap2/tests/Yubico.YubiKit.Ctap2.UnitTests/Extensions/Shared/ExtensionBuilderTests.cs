@@ -22,6 +22,33 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 /// </summary>
 public class ExtensionBuilderTests
 {
+    [Fact]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
+    public void Build_WithPreviewSignRegistration_EncodesExactExtensionMap()
+    {
+        // ES256 and RS256, with the default signing-key policy requiring user presence.
+        var result = new ExtensionBuilder().WithPreviewSign(new PreviewSignRegistrationInput([-7, -257])).Build();
+
+        Assert.NotNull(result);
+        // {"previewSign": {3: [-7, -257], 4: 1}}
+        Assert.Equal(Convert.FromHexString("A16B707265766965775369676EA20382263901000401"), result.Value.ToArray());
+    }
+
+    [Theory]
+    [InlineData(false, "A16B707265766965775369676EA20240064102")] // {"previewSign": {2: h'', 6: h'02'}}
+    [InlineData(true, "A16B707265766965775369676EA302400641020744A1033828")] // Same fields plus 7: h'A1033828'.
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
+    public void Build_WithPreviewSignSigningParams_EncodesExactExtensionMap(bool includeArgs, string expected)
+    {
+        // The synthetic args map {3: -41} is wrapped unchanged as a byte string.
+        var signingParams = includeArgs
+            ? new PreviewSignSigningParams(default, new byte[] { 2 }, Convert.FromHexString("A1033828"))
+            : new PreviewSignSigningParams(default, new byte[] { 2 });
+        var result = new ExtensionBuilder().WithPreviewSign(signingParams).Build();
+
+        Assert.NotNull(result);
+        Assert.Equal(Convert.FromHexString(expected), result.Value.ToArray());
+    }
 
     [Fact]
     public void Build_WithNoExtensions_ReturnsNull()

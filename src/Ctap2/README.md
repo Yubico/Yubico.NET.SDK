@@ -383,6 +383,12 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
 - previewSign is the experimental Yubico sign-extension draft v4, not CTAP v4. Public ARKG helpers are
   **WARNING -- EXPERIMENTAL --**, not ready for production or production cryptographic guidance; their
   actual SDK profile and limited P-256/SHA-256 raw-message verifier are not full draft conformance.
+  Build requests with `ExtensionBuilder.WithPreviewSign(...)`, read registration results with
+  `PreviewSignGeneratedKey.TryFromMakeCredentialResponse(...)`, and read assertion signatures with
+  `ExtensionOutput.TryGetPreviewSign(...)`. These results are parsed, not verified. Encode typed
+  signing arguments with `CoseSignArgs.ToAdditionalArgs()`. If you have the encoded assertion extension
+  value, use `PreviewSignAuthenticationOutput.Decode(...)`. Both previewSign and its ARKG helpers use
+  `YKEXP001`.
 
 ## Example
 

@@ -39,14 +39,51 @@ public class PreviewSignProcessorTests
         new(keyHandle: new byte[] { 0xA0, marker }, tbs: new byte[] { 0xB0, marker });
 
     private static WebAuthnPreviewSign.PreviewSignAuthenticationInput SignBy(params (PublicKeyCredentialDescriptor Credential, byte Marker)[] entries) =>
-        WebAuthnPreviewSign.PreviewSignAuthenticationInput.CreateSignByCredential(
-            entries.ToDictionary(e => e.Credential.Id, e => Params(e.Marker), ByteArrayKeyComparer.Instance));
+        new(entries.ToDictionary(e => e.Credential.Id, e => Params(e.Marker)));
 
     private static AuthenticationExtensionSession Session(
         WebAuthnPreviewSign.PreviewSignAuthenticationInput input,
         IReadOnlyList<PublicKeyCredentialDescriptor>? allowCredentials) =>
         AuthenticationExtensionSession.Create(
             new AuthenticationExtensionInputs(PreviewSign: input), allowCredentials, TestExtensionContext.SupportingAll());
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Authentication_CopiesCredentialIdsAndMappingsBeforeSelection(bool alreadyUsesByteComparer)
+    {
+        byte[] id = CredentialA.Id.ToArray();
+        var source = new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>(
+            alreadyUsesByteComparer ? ByteArrayKeyComparer.Instance : null)
+        {
+            [id] = Params(0xAA)
+        };
+        var input = new PreviewSignAuthenticationInput(source);
+        source.Clear();
+        id[0] ^= 0xFF;
+
+        using var session = Session(input, [CredentialA]);
+        var cbor = session.PrepareInputs(selected: CredentialA, token: null);
+
+        Assert.NotNull(cbor);
+        var (keyHandle, tbs) = ReadPreviewSignInput(cbor.Value);
+        Assert.Equal(new byte[] { 0xA0, 0xAA }, keyHandle);
+        Assert.Equal(new byte[] { 0xB0, 0xAA }, tbs);
+    }
+
+    [Fact]
+    public void Authentication_RejectsAmbiguousMappingsForByteEqualCredentialIds()
+    {
+        var source = new Dictionary<ReadOnlyMemory<byte>, WebAuthnPreviewSign.PreviewSignSigningParams>
+        {
+            [CredentialA.Id.ToArray()] = Params(0xAA),
+            [CredentialA.Id.ToArray()] = Params(0xBB)
+        };
+
+        var error = Assert.Throws<WebAuthnClientError>(() => new PreviewSignAuthenticationInput(source));
+
+        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, error.Code);
+    }
 
     private static (byte[] KeyHandle, byte[] Tbs) ReadPreviewSignInput(ReadOnlyMemory<byte> cbor)
     {

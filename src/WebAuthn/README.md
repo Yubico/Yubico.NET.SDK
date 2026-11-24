@@ -388,8 +388,9 @@ the call sites that use them. Ordinary registration and authentication do not re
 not a CTAP version or an adopted W3C signing standard. Registration generates a **separate signing
 key**, not a way to export or repurpose the WebAuthn credential's private key. Authentication requires
 a nonempty allow list and one signing-parameter map entry per allowed credential; multi-entry lists
-are supported, and the probe-selected credential chooses the corresponding parameters. A normal
-public dictionary is sufficient; the input normalizes credential-ID comparison by byte content.
+are supported, and the probe-selected credential chooses the corresponding parameters. Pass the
+dictionary to `new PreviewSignAuthenticationInput(mapping)`. The constructor snapshots credential IDs
+and rejects duplicates by byte content; the signing-parameter buffers remain caller-owned.
 
 Unsupported previewSign requests are omitted, so inspect the optional result before treating signing
 as performed. Some explicit output errors propagate while CBOR/invalid-operation parsing failures
@@ -401,6 +402,13 @@ it. The selected signing algorithm can differ from the public key's algorithm id
 handle is sent as a byte string under CTAP key 2, even when empty. An empty generated handle relies on
 the selected credential and authenticator-held state; it does not select a global default key. ARKG helper
 conveniences are experimental and not production cryptographic guidance or the generic signing contract.
+
+For experimental ARKG derivation, pattern-match `GeneratedSigningKey.PublicKey` as
+`CoseArkgP256SeedKey`. Construct `ArkgP256GeneratedKey` with the generated key's handle, the typed
+seed, the reported signing algorithm, and `GeneratedSigningKey.AttestationObject.RawCbor`, then call
+`DerivePublicKey`. The derivation helper does not verify the attestation. When signing, use
+`CoseSignArgs.ArkgP256(derivedKey.ArkgKeyHandle, derivedKey.Context).ToAdditionalArgs()` to supply
+`additionalArgs`.
 
 ## RP authorization belongs to the application
 

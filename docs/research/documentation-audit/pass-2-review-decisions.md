@@ -52,6 +52,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-35](#ag-35-core-pcsc-enumeration-context) | 2026-11-23 | Dennis approved moving PC/SC enumeration context cleanup earlier, provided the context is no longer needed when disposed or afterward. | Approved for CORE-B1-C002 (FPT-023) within the lifetime bound below |
 | [AG-36](#ag-36-core-tlv-decoder-ownership) | 2026-11-23 | Dennis approved writable TLV dictionary results and regression-tested cleanup of unpublished copies. | Approved for CORE-C-C006 (FPT-088) within the ownership scope below |
 | [AG-37](#ag-37-core-console-credential-cancellation) | 2026-11-23 | Dennis approved simple cancellation checks for queued keys, confirmation, and redirected line reads. | Approved for CORE-C-C004 (FPT-086) within the synchronous scope below |
+| [AG-38](#ag-38-core-pcsc-post-open-logging) | 2026-11-24 | Dennis chose to skip hardening the three PC/SC slot success logs against exceptions. | Implementation skipped for CORE-B1-C009 (FPT-030); current behavior retained |
 
 ### AG-8 classification run
 
@@ -749,6 +750,15 @@ before handing off a credential. Retain the existing cleanup for unreturned owne
 An active synchronous `ReadLine` is not interrupted; a returned line can be consumed and rejected, and its
 managed string cannot be cleared. Checks do not make cancellation atomic with input or return. No queue
 flush, background read, async API, or change to credential input policy is approved here.
+
+### AG-38 Core PC/SC post-open logging
+
+Dennis decided on 2026-11-24 to skip the proposed `CORE-B1-C009` (`FPT-030`) hardening: “Good skip this one”.
+Retain the current behavior of the three post-open Information logs in `PcscConnectionSlot` (raw,
+built-in registered, and external registered) and the expectation that application logging providers
+do not throw at these sites. No failure was observed here; the source-derived exception and ownership
+gap is neither disproven nor fixed. No factory, registration, native behavior, or broader SDK logging
+policy changes are approved by this decision.
 
 ### AG-14 firmware rule detail
 

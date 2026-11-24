@@ -44,7 +44,7 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 | 4 | Built for today's stack | 1.5 |
 | 5 | Install only what you use + Native AOT | 1 |
 | 6 | Stable API, forward compatible | 1.5 |
-| 7 | One key, one session, one grammar, async | 1.5 |
+| 7 | Architecture at a glance (onion) | 1.5 |
 | 8 | New capabilities | 1 |
 | 9 | Touch prompting: one flow, every applet | 1 |
 | 10 | Remote & virtualized scenarios | 1.5 |
@@ -127,14 +127,53 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 - New CTAP versions, YubiKey features or authenticators don't throw before the SDK catches up.
 - Example: attestation format falls back to `Other(string)`.
 
-### 7. One key, one session, one grammar, async
-- Windows, macOS, Linux; HID and smart card.
-- In-process: 1 physical key → 1 live connection → 1 live session; conflicts throw
-  `ConnectionInUseException` before disturbing running work. Cross-process follows OS sharing rules.
-- All 8 applet sessions created the same way: `IYubiKey.CreateXSessionAsync` or `XSession.CreateAsync`;
-  shared `SessionCreationOptions`. Concepts align with YubiKit Android and Python.
-- Applet operations are awaitable; device events via `YubiKeyManager.WatchAsync` as
-  `IAsyncEnumerable<DeviceChange>`, no Rx dependency. (Not "async all the way down" — a few low-level paths stay sync.)
+### 7. Architecture at a glance: one key, one session, one grammar, async
+Layout: onion diagram, four rings around the YubiKey at the center. Ring name in bold, one line each.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 1  DEVICE         YubiKeyManager → IYubiKey                 │
+│                   find · watch · one physical key           │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │ 2  SESSIONS     PivSession · Ctap2Session · Oath…     │  │
+│  │                 WebAuthnClient · one creation pattern │  │
+│  │  ┌─────────────────────────────────────────────────┐  │  │
+│  │  │ 3  CONNECTION  SmartCard · FIDO HID · OTP HID   │  │  │
+│  │  │                + protocol (APDU, CTAP, SCP)     │  │  │
+│  │  │                1 key → 1 connection → 1 session │  │  │
+│  │  │  ┌───────────────────────────────────────────┐  │  │  │
+│  │  │  │ 4  TRANSPORT  USB (CCID · HID) · NFC      │  │  │  │
+│  │  │  │               PC/SC · OS HID              │  │  │  │
+│  │  │  │               Windows · macOS · Linux     │  │  │  │
+│  │  │  │       ┌──────────────────────────┐        │  │  │  │
+│  │  │  │       │        YubiKey           │        │  │  │  │
+│  │  │  │       │ PIV · FIDO2 · OATH · PGP │        │  │  │  │
+│  │  │  │       │  OTP · HSM Auth · SD     │        │  │  │  │
+│  │  │  │       └──────────────────────────┘        │  │  │  │
+│  │  │  │                                           │  │  │  │
+│  │  │  └───────────────────────────────────────────┘  │  │  │
+│  │  └─────────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| Ring | Contains | Visibility | One-liner |
+|---|---|---|---|
+| 1 Device | `YubiKeyManager`, `IYubiKey` | Public | Find and watch keys. One object per physical key. |
+| 2 Sessions | `XSession`, `WebAuthnClient` | Public | The API you code against, created the same way in every applet. |
+| 3 Connection | Connections + protocol pipeline | Connections: public raw access. Protocol: internal. | Safe ownership: 1 key → 1 connection → 1 session. |
+| 4 Transport | USB interfaces, NFC, PC/SC, OS HID | Internal | One model on Windows, macOS and Linux. |
+
+- Notes: most apps only touch rings 1 and 2. Ring 3 is there for raw access; ring 4 is handled on every platform.
+  The protocol layer sits inside ring 3 and is internal: that's the v1 lesson ("once public, it's a promise").
+- Notes (ring 3): in-process, conflicts throw `ConnectionInUseException` before disturbing running work.
+  Cross-process access follows OS sharing rules. CTAP2 can run over FIDO HID or smart card (NFC, and USB on
+  firmware 5.8+), reusing the same APDU pipeline as PIV.
+- Notes (ring 2): all 8 applet sessions are created the same way: `IYubiKey.CreateXSessionAsync` or
+  `XSession.CreateAsync`, with shared `SessionCreationOptions`. Concepts align with YubiKit Android and Python.
+- Notes (ring 1): device events via `YubiKeyManager.WatchAsync` as `IAsyncEnumerable<DeviceChange>`, no Rx
+  dependency. Applet operations are awaitable. (Not "async all the way down": a few low-level paths stay sync.)
+- Detailed diagrams: `docs/architecture/sdk-architecture-diagrams.md` (rendered: `docs/architecture/images/`).
 - Notes (why async, DX): v1 had no async at all. Every call blocked its thread, and `KeyCollector` was a
   synchronous callback invoked in the middle of a multi-step auth flow. In a desktop app that meant pushing work
   onto a background thread, then marshalling back to the UI thread from inside the callback to show a PIN or

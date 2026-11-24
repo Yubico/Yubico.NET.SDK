@@ -8,7 +8,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using DemoSupport;
+using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Ctap2.Cose;
+using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 
@@ -17,9 +19,13 @@ await using var client = await Demo.OpenClientAsync(yubiKey);
 
 // 1. Register a passkey and ask for a separate signing key bound to it.
 // Nothing is stored on the key: it re-derives the signing key on each use, and keeps no export path.
-var registration = await client.MakeCredentialAsync(Demo.Registration(
-    new RegistrationExtensionInputs(
-        PreviewSign: PreviewSignRegistrationInput.GenerateKey(CoseAlgorithm.ArkgP256))));
+RegistrationResponse registration;
+using (UserPresenceIntent.BeginScope("create a signing key"))
+{
+    registration = await client.MakeCredentialAsync(Demo.Registration(
+        new RegistrationExtensionInputs(
+            PreviewSign: PreviewSignRegistrationInput.GenerateKey(CoseAlgorithm.ArkgP256))));
+}
 
 var signingKey = registration.ClientExtensionResults!.PreviewSign!.GeneratedKey;
 Console.WriteLine("Got a signing key bound to the passkey.");
@@ -36,16 +42,20 @@ var signRequest = new PreviewSignSigningParams(
     publicKey.SignArgs);
 
 // The sign-in signature itself isn't checked here: the extension works within an existing session.
-var matches = await client.GetAssertionAsync(Demo.SignIn(
-    registration.CredentialId,
-    new AuthenticationExtensionInputs(
-        PreviewSign: PreviewSignAuthenticationInput.CreateSignByCredential(
-            new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
-            {
-                [registration.CredentialId] = signRequest
-            }))));
+ReadOnlyMemory<byte> signature;
+using (UserPresenceIntent.BeginScope("sign the payload"))
+{
+    var matches = await client.GetAssertionAsync(Demo.SignIn(
+        registration.CredentialId,
+        new AuthenticationExtensionInputs(
+            PreviewSign: PreviewSignAuthenticationInput.CreateSignByCredential(
+                new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
+                {
+                    [registration.CredentialId] = signRequest
+                }))));
 
-var signature = (await matches[0].SelectAsync()).ClientExtensionResults!.PreviewSign!.Signature;
+    signature = (await matches[0].SelectAsync()).ClientExtensionResults!.PreviewSign!.Signature;
+}
 
 // 4. Verify with plain ECDSA. No WebAuthn data structures involved.
 var valid = publicKey.PublicKey.VerifyData(

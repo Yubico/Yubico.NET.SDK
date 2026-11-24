@@ -49,7 +49,7 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 | 9 | Touch prompting: one flow, every applet | 1 |
 | 10 | Remote & virtualized scenarios | 1.5 |
 | 11 | Live demo | 4 |
-| 12 | Migration cost + v1 continuity | 1 |
+| 12 | Moving to v2, or staying on v1 | 1 |
 | 13 | Roadmap | 0.5 |
 | 14 | Tell us + Q&A | 7–8 |
 
@@ -252,14 +252,17 @@ Layout: stepped sequence / timeline, left to right. Step label in bold, one shor
 - Optional second demo, only if time allows or someone asks: `previewsign-demo.cs` (see backup slide B1).
 - Fallback slide: screenshot of a successful passkey run.
 
-### 12. Migration cost + v1 continuity
-- v2 cost: .NET 10 + async; firmware 5.x floor; U2F/CTAP1 removed (no path for U2F-only);
-  `KeyCollector` removed; code using v1's public low-level utilities needs its own replacement.
-- Docs: `docs/migration/v1-to-v2.md`, changelog, gap list, v1→v2 API map.
-- v1: maintenance mode — security fixes and patches, no new features; all new development in v2.
-- v1 hardened to be forward compatible (lenient with unknown data) so it stays usable for years.
-- Stay on v1 for: .NET Framework/older .NET, firmware < 5, U2F-only, current `KeyCollector` reliance.
-- Notes: "No one is forced to migrate — unless they want proper YubiKey 6 and PQC support."
+### 12. Moving to v2, or staying on v1
+- **What moving to v2 takes:** your app runs on .NET 10 and uses async. Keys need firmware 5 or newer.
+  U2F and `KeyCollector` are gone, and if you used v1's low-level helpers, you'll bring your own.
+- **Help on the way:** a migration guide, a changelog, a list of known gaps and a v1→v2 API map.
+- **v1 isn't going anywhere:** it keeps getting security fixes and patches. New features land in v2 only.
+- **v1 keeps up with new keys:** it passes through data it doesn't recognize instead of breaking,
+  so it stays usable for years.
+- **Stay on v1 if** you're on .NET Framework or older .NET, have keys older than firmware 5,
+  rely on U2F only, or depend on `KeyCollector` today.
+- Notes: "No one has to migrate. You'd move for YubiKey 6 and post-quantum support."
+- Notes: migration docs live in `docs/migration/` (`v1-to-v2.md`, changelog, gaps, API map).
 
 ### 13. Roadmap
 - Now: alpha, public; setup via repo README.

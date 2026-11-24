@@ -7,9 +7,18 @@
     <NoWarn>$(NoWarn);YKEXP001</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!-- Default: this repo's src/ (newer than the published alpha). Pass -p:YubiKitFromSource=false for packages. -->
+  <PropertyGroup>
+    <YubiKitFromSource Condition="'$(YubiKitFromSource)' == ''">true</YubiKitFromSource>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(YubiKitFromSource)' != 'true'">
     <PackageReference Include="Yubico.YubiKit.WebAuthn" Version="2.0.0-alpha.115" />
     <PackageReference Include="Yubico.YubiKit.Management" Version="2.0.0-alpha.115" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(YubiKitFromSource)' == 'true'">
+    <ProjectReference Include="../../../src/Yubico.YubiKit.WebAuthn.csproj" />
+    <ProjectReference Include="../../../../Management/src/Yubico.YubiKit.Management.csproj" />
   </ItemGroup>
 
 </Project>

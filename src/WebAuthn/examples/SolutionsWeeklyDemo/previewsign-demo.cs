@@ -51,7 +51,7 @@ using (UserPresenceIntent.BeginScope("sign the payload"))
     var matches = await client.GetAssertionAsync(Demo.SignIn(
         registration.CredentialId,
         new AuthenticationExtensionInputs(
-            PreviewSign: PreviewSignAuthenticationInput.CreateSignByCredential(
+            PreviewSign: new PreviewSignAuthenticationInput(
                 new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
                 {
                     [registration.CredentialId] = signRequest

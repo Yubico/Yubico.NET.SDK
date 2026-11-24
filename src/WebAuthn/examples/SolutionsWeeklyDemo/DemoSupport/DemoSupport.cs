@@ -1,6 +1,5 @@
 // Shared plumbing for the Solutions Weekly demos, kept out of the demo files so they show only what matters.
 using System.Buffers.Text;
-using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Yubico.YubiKit.Core.Abstractions;
@@ -127,11 +126,14 @@ public static class Arkg
 {
     public static ArkgPublicKey DerivePublicKey(GeneratedSigningKey signingKey, string context)
     {
-        var seed = (CoseArkgP256SeedKey)signingKey.PublicKey;
-        var derived = ToCtap2(signingKey.KeyHandle, seed)
-            .DerivePublicKey(RandomNumberGenerator.GetBytes(32), System.Text.Encoding.UTF8.GetBytes(context));
+        var arkgKey = new ArkgP256GeneratedKey(
+            signingKey.KeyHandle,
+            (CoseArkgP256SeedKey)signingKey.PublicKey,
+            signingKey.Algorithm,
+            signingKey.AttestationObject.RawCbor);
 
-        var signArgs = PreviewSignCbor.EncodeAdditionalArgs(CoseSignArgs.ArkgP256(derived.ArkgKeyHandle, derived.Context));
+        var derived = arkgKey.DerivePublicKey(RandomNumberGenerator.GetBytes(32), System.Text.Encoding.UTF8.GetBytes(context));
+        var signArgs = new ArkgP256SignArgs(derived.ArkgKeyHandle, derived.Context).ToAdditionalArgs();
 
         // The derived key is an ordinary P-256 public key (SEC1 uncompressed: 0x04 || X || Y).
         var point = derived.PublicKey.Span;
@@ -142,18 +144,5 @@ public static class Arkg
         });
 
         return new ArkgPublicKey(signingKey.KeyHandle, signArgs, ecdsa);
-    }
-
-    // Workaround: the type that derives ARKG keys has an internal constructor in this alpha.
-    // Mirrors the SDK's own previewSign integration test.
-    private static PreviewSignGeneratedKey ToCtap2(ReadOnlyMemory<byte> keyHandle, CoseArkgP256SeedKey seed)
-    {
-        var ctor = typeof(PreviewSignGeneratedKey).GetConstructor(
-            BindingFlags.NonPublic | BindingFlags.Instance,
-            null,
-            [typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(CoseAlgorithm)],
-            null)!;
-
-        return (PreviewSignGeneratedKey)ctor.Invoke([keyHandle, seed.BlPublicKey, seed.KemPublicKey, seed.Algorithm]);
     }
 }

@@ -24,8 +24,10 @@ Run each demo once before presenting. The first `dotnet run` compiles it, and la
 
 - `DemoSupport/`: shared helper project, referenced with `#:project`. It holds device discovery, client
   setup, default WebAuthn options, the console touch prompt, the pretend server and ARKG derivation.
-- `nuget.config`: adds the public v2 alpha feed. After the beta reaches nuget.org, remove the alpha feed and
-  bump the versions in `DemoSupport/DemoSupport.csproj`.
+- `DemoSupport` builds against this repo's `src/` by default, because the demos use previewSign API changes
+  that aren't in the published alpha yet. Once a newer package is out, bump the versions in
+  `DemoSupport/DemoSupport.csproj` and build with `-p:YubiKitFromSource=false`.
+- `nuget.config`: adds the public v2 alpha feed, used only for package builds.
 - `Directory.Build.*`, `Directory.Packages.props`: empty on purpose. They stop the repo-wide build settings
   from applying here.
 - `DECK.md`: the Solutions Weekly slide outline.

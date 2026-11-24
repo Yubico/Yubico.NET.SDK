@@ -721,6 +721,9 @@ factories are not called. Filter HID by concrete type before slot creation/topol
 OTP and FIDO necessarily share OS descriptor enumeration. Ignore undefined scope bits like `Matches`.
 Do not reinterpret partial scope as PID completeness or import sibling slots from prior scans.
 
+`FindYubiKeys` and `FindHidInterfaces` are sealed. Their interfaces can still be implemented for
+application-owned composition or tests, but public SDK discovery does not install custom HID backends.
+
 One-shot exit terminally retires its read scope in `finally`, including cancellation and budget expiry.
 This cancels queued identity admission and prevents later opens; already-open native work keeps its
 worker and registry lease until teardown. Do not dispose admission/lease owners at the wait boundary.

@@ -64,6 +64,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-47](#ag-47-core-typed-hid-receive-ownership) | 2026-11-24 | Dennis approved caller-owned arrays for the two typed HID receives and cleanup of consumed reports. | Approved for CORE-B5-C005 (FPT-062) within the two-API exception below |
 | [AG-48](#ag-48-core-scp-key-reference-value) | 2026-11-24 | Dennis approved two-field SCP key references with field-based equality and a zero-pair default encoding. | Approved for CORE-B6-C008 (FPT-074) |
 | [AG-49](#ag-49-core-startup-executioncontext-flow) | 2026-11-24 | Dennis chose to keep current startup `ExecutionContext` flow on four Core thread starts. | Policy only for FPT-031 (CORE-B1-C010 and CORE-B3-C006); no runtime change |
+| [AG-50](#ag-50-core-custom-hid-fallback-and-sealed-finders) | 2026-11-24 | Dennis retained the custom HID fallback disposal policy and requested sealing the two concrete finders. | CORE-B1-C005 (FPT-026): retain fallback behavior; seal `FindYubiKeys` and `FindHidInterfaces` |
 
 ### AG-8 classification run
 
@@ -909,6 +910,20 @@ potential Windows PC/SC caller-identity behavior informed the decision; it does 
 identity behavior. The desktop PC/SC listener, other task and reactor paths, and the existing
 Windows/Linux HID suppression policies are outside this decision and unchanged. This is not a
 global context-flow policy or Core-pass closure.
+
+### AG-50 Core custom HID fallback and sealed finders
+
+Dennis chose on 2026-11-24 (`Interview`) to retain release-on-disposal-failure for the registered
+FIDO/OTP compatibility wrappers (`CORE-B1-C005`, `FPT-026`). Public SDK discovery cannot inject a
+custom HID backend; the three built-in backends bypass these wrappers and own their native claims.
+The existing FIDO test marks fake teardown complete before throwing; it does not show a live handle
+escaping cleanup. The conditional ownership gap is neither disproven nor fixed, and the separate
+custom discovery-lease behavior is unchanged. Revisit only if an explicit design change adds a
+registered custom HID path.
+
+Dennis expects no further implementations through these concrete finders. Seal `FindYubiKeys` and
+`FindHidInterfaces`; the built-in HID implementations and registered wrappers are already sealed.
+Keep the finder interfaces, constructors, internal seams, and caller-supplied raw connection contracts.
 
 ### AG-14 firmware rule detail
 

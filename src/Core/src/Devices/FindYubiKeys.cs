@@ -38,7 +38,7 @@ public interface IFindYubiKeys
 ///     cancellation token to cancel their waits. Enumeration timeouts omit only the affected transport;
 ///     caller cancellation throws <see cref="OperationCanceledException" />, and other enumeration failures propagate.
 /// </summary>
-public class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
+public sealed class FindYubiKeys : IFindYubiKeys, IMonitoredDiscovery
 {
     private static readonly ILogger Logger = YubiKitLogging.CreateLogger<FindYubiKeys>();
 

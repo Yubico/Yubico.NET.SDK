@@ -419,6 +419,10 @@ connection disposal reports the stored error. Scope-disposal completion alone is
 universal transaction-success signal. Keep scope end, native completion, disconnect/context release,
 and the final connection disposal outcome distinct when deciding whether to reopen.
 
+`FindYubiKeys` and `FindHidInterfaces` are sealed. For application-owned discovery, implement
+`IFindYubiKeys` or `IFindHidInterfaces` rather than subclassing; these interfaces do not register
+a backend with SDK discovery.
+
 `IYubiKey` represents a physical key; `FindHidInterfaces` returns operating-system-exposed
 `IHidInterface` report interfaces, not necessarily one per physical USB interface. An opened
 `IHidConnection` provides report I/O; built-in Windows connections delegate native lifetime to

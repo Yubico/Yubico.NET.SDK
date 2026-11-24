@@ -523,7 +523,7 @@ jobs:
     name: Publish to internal NuGet
     runs-on: windows-2022
     needs: [build-artifacts, verify-signed-packages]
-    if: ${{ !cancelled() && !failure() && inputs.push-to-dev }}
+    if: ${{ !cancelled() && !failure() && inputs.push-to-dev && (needs.verify-signed-packages.result == 'success' || !(inputs.sign || inputs.release)) }}
     # Requires write permission to publish NuGet packages
     permissions:
       packages: write       # Required to publish to GitHub Packages

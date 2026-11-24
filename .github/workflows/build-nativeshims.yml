@@ -363,7 +363,8 @@ jobs:
 
   sign-libraries:
     name: Sign Windows libraries
-    if: ${{ inputs.sign || inputs.release }}
+    # Release preflight is skipped outside releases; without a status check that skip would skip every job after it.
+    if: ${{ !cancelled() && needs.build-windows.result == 'success' && (inputs.sign || inputs.release) }}
     needs: build-windows
     runs-on: ubuntu-latest
     timeout-minutes: 360 # Waits for Scribe approvals.
@@ -415,7 +416,7 @@ jobs:
     runs-on: windows-2022
     needs: [build-windows, build-linux-amd64, build-linux-arm64, build-macos, sign-libraries]
     # sign-libraries is skipped unless signing; the builds are skipped when the release preflight fails.
-    if: ${{ !cancelled() && !failure() && needs.build-windows.result == 'success' }}
+    if: ${{ !cancelled() && !failure() && needs.build-windows.result == 'success' && (needs.sign-libraries.result == 'success' || !(inputs.sign || inputs.release)) }}
     env:
       PACKAGE_VERSION: ${{ inputs.version != '' && inputs.version || format('0.0.0-prerelease.{0}.{1}', github.run_id, github.run_attempt) }}
       GITHUB_REPO_URL: https://github.com/${{ github.repository }}
@@ -556,6 +557,7 @@ jobs:
   verify-native-aot:
     name: Native AOT (${{ matrix.rid }})
     needs: pack
+    if: ${{ !cancelled() && needs.pack.result == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -727,7 +729,7 @@ jobs:
 
   sign-package:
     name: Sign package
-    if: ${{ inputs.sign || inputs.release }}
+    if: ${{ !cancelled() && needs.verify-native-aot.result == 'success' && (inputs.sign || inputs.release) }}
     needs: verify-native-aot
     runs-on: ubuntu-latest
     timeout-minutes: 360 # Waits for Scribe approvals.
@@ -770,6 +772,7 @@ jobs:
   verify-signed-package:
     name: Verify signed package
     needs: sign-package
+    if: ${{ !cancelled() && needs.sign-package.result == 'success' }}
     runs-on: windows-2022
     permissions:
       contents: read
@@ -867,7 +870,7 @@ jobs:
     environment: Internal NuGet feed
     permissions:
       packages: write
-    if: ${{ !cancelled() && !failure() && github.event_name == 'workflow_dispatch' && inputs.push-to-dev }}
+    if: ${{ !cancelled() && !failure() && github.event_name == 'workflow_dispatch' && inputs.push-to-dev && (needs.verify-signed-package.result == 'success' || !(inputs.sign || inputs.release)) }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1

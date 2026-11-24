@@ -68,7 +68,20 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 - Almost everything public (TLV, codecs, crypto hooks) → most internal fixes were breaking changes.
 - Ambition to support any smart-card device/authenticator via a public core layer — dropped for now;
   v2 focuses on YubiKeys.
+- v1's architecture differed from the sibling SDKs (YubiKit Android/Java, Python `yubikey-manager`), so
+  teams couldn't easily share work across them.
 - Notes: "Once something is public it's a promise." v1 made too many promises and got slow to move.
+- Notes (sibling SDK harmony): v1 looked different from the other Yubico SDKs, and its layers were partly upside
+  down by comparison. That made it hard to review each other's code across teams, coordinate changes, and
+  estimate work: a change that was small in Android or Python could be large in .NET.
+  v2 uses the same concepts (sessions, connections, applets) and layering, so
+  - engineers can read and review sibling implementations,
+  - features and fixes can be ported and compared directly,
+  - planning is more predictable across SDKs,
+  - new features (e.g. YubiKey 6, post-quantum) can be coordinated and released together.
+- Notes (evidence in practice): the v2 applet audit compares each applet against pinned versions of the Python
+  and Java SDKs (as precedent, not authority), and the team has tooling to port from YubiKit Android and compare
+  protocol bytes between SDKs.
 
 ### 4. Built for today's stack
 - Teams adopting v2 run current .NET and current YubiKeys.

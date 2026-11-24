@@ -192,6 +192,9 @@ checks; that is compatibility policy, not evidence that hardware implements ever
 including unnamed bits, and accept leading zero bytes. A mask outside the SDK's range fails the metadata
 read with `BadResponseException`. Management configuration writes still use two-byte masks.
 
+Repeated known device-information fields fail decoding. Well-formed unknown fields are ignored,
+even if they repeat. This does not relax TLV encoding checks or preserve the ignored fields in the snapshot.
+
 ### PC/SC sharing policy and migration
 
 Built-in PC/SC connections default to strict `SmartCardSharing.Exclusive`. If another smart-card client

@@ -60,6 +60,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-43](#ag-43-core-windows-hid-listener-disposed-restart) | 2026-11-24 | Dennis approved refusing to restart a disposed Windows HID listener and testing that it cannot attempt registration. | Approved for the disposed-restart facet of CORE-B4-C002 (FPT-049) only |
 | [AG-44](#ag-44-core-timeout-scalar-ownership) | 2026-11-24 | Dennis approved a nullable scalar for the read-side challenge-response timeout and requested a sibling comparison. | Approved for CORE-A-C003 (FPT-003); Python and Android checked, Rust unverified |
 | [AG-45](#ag-45-core-ordinary-capability-mask-width) | 2026-11-24 | Dennis approved `DeviceCapabilities : uint` and full ordinary-mask decoding with a 32-bit SDK limit. | Approved for the residual width facet of CORE-A-C006 (FPT-006) |
+| [AG-46](#ag-46-core-duplicate-device-information-tags) | 2026-11-24 | Dennis approved ignoring repeated unknown device-information tags under the forward-compatibility policy. | Approved for the top-level duplicate facet of CORE-A-C016 (FPT-016) |
 
 ### AG-8 classification run
 
@@ -848,6 +849,26 @@ remains unverified because the pinned source checkout was unavailable.
 
 [ag45-ykman]: https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/management.py#L357-L382
 [ag45-vendor]: https://developers.yubico.com/yubikey-manager/Config_Reference.html#_device_information
+
+### AG-46 Core duplicate device-information tags
+
+Dennis approved the top-level duplicate facet of `CORE-A-C016` (`FPT-016`) on 2026-11-24 (`Interview`),
+conditioned on forward compatibility. Ignore well-formed unknown fields even when they repeat. Reject
+repeats of any field the top-level decoder consumes, even if identical, with `ArgumentException`.
+Malformed TLV encoding is still rejected; per-page continuation checks and nested qualifier behavior
+are unchanged. This replaces the blanket top-level duplicate rule retained by AG-45 without
+changing mask width or timeout handling. Raw response and unknown-field preservation remain open.
+At Dennis's request, log ignored tags at Trace with tag ID and length only, never value bytes.
+Known duplicates already carry the tag in the exception and are not logged here.
+
+**D1 sibling comparison.** [ykman at `4ca60f70`][ag46-ykman] and [Android at `f4626856`][ag46-android]
+overwrite duplicates within and across pages. .NET retains rejection of ambiguous known metadata rather
+than silently choosing a value. The [Configuration Reference][ag45-vendor] says “once for each TAG” for
+listed fields, but does not prescribe a duplicate error or a rule for unknown tags. The pinned Rust
+checkout was unavailable; no Rust behavior or three-way consensus is asserted here.
+
+[ag46-ykman]: https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/management.py#L655-L662
+[ag46-android]: https://github.com/Yubico/yubikit-android/blob/f46268563437ac52910001222a77741d229b9b99/management/src/main/java/com/yubico/yubikit/management/ManagementSession.java#L381-L389
 
 ### AG-14 firmware rule detail
 

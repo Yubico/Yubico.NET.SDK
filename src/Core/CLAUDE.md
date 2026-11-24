@@ -691,6 +691,9 @@ serial independence) and `SnapshotDiffTests` (retention and replacement isolatio
 
 Snapshot replacement preserves previously returned scalar fields, including `ChallengeResponseTimeout`.
 The parser preserves a reported timeout byte as-is and returns `null` when the field is omitted.
+The top-level `DeviceInfo` decoder ignores unknown fields, including repeats, and rejects repeats of
+fields it consumes. Wire TLV validation and the reader's per-page continuation checks run separately.
+Trace logs for ignored fields include only the tag and length, not the value.
 Successful serial-less metadata can remain cached; unchanged scans need not retry it. Identity-cache
 PID checks do not extend to the separate metadata cache's member-ID keyed entries.
 

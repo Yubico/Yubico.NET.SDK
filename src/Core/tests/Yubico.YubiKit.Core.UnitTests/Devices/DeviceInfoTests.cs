@@ -183,6 +183,40 @@ public class DeviceInfoTests
     }
 
     [Fact]
+    public void CreateFromTlvs_RepeatedUnknownTagsDoNotChangeKnownMetadata()
+    {
+        using var known = new Tlv(0x07, [0x0F]);
+        using var firstUnknown = new Tlv(0x7E, [0xAA]);
+        using var secondUnknown = new Tlv(0x7E, [0xBB]);
+        var firmware = new FirmwareVersion(5, 7, 2);
+        var expected = DeviceInfo.CreateFromTlvs([known], firmware);
+
+        var result = DeviceInfo.CreateFromTlvs([firstUnknown, known, secondUnknown], firmware);
+
+        Assert.Equal(expected, result);
+        Assert.Equal((byte)0xAA, firstUnknown.Value.Span[0]);
+        Assert.Equal((byte)0xBB, secondUnknown.Value.Span[0]);
+    }
+
+    [Theory]
+    [InlineData(0x0F, 0x0F, false)]
+    [InlineData(0x0F, 0x10, false)]
+    [InlineData(0x0F, 0x10, true)]
+    public void CreateFromTlvs_RepeatedKnownTagIsRejectedRegardlessOfValues(int first, int second, bool malformedFirst)
+    {
+        ReadOnlySpan<byte> firstValue = malformedFirst ? [0, (byte)first] : [(byte)first];
+        using var firstTimeout = new Tlv(0x07, firstValue);
+        using var secondTimeout = new Tlv(0x07, [(byte)second]);
+        var firmware = new FirmwareVersion(5, 7, 2);
+
+        var error = Assert.Throws<ArgumentException>(() => DeviceInfo.CreateFromTlvs([firstTimeout, secondTimeout], firmware));
+        Assert.Contains("tag 0x07", error.Message);
+        Assert.Equal("tlvs", error.ParamName);
+        if (malformedFirst)
+            Assert.Throws<ArgumentException>(() => DeviceInfo.CreateFromTlvs([secondTimeout, firstTimeout], firmware));
+    }
+
+    [Fact]
     public void CreateFromTlvs_DecodesFipsBitsSeparatelyFromApplicationBits()
     {
         using var capable = new Tlv(0x14, [0x20, 0x1F]);

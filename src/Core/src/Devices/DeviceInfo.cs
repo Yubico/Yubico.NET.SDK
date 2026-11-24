@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Buffers.Binary;
 using System.Text;
 using Yubico.YubiKit.Core.Utilities;
@@ -27,6 +28,8 @@ namespace Yubico.YubiKit.Core.Devices;
 /// </remarks>
 public readonly record struct DeviceInfo
 {
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DeviceInfo>();
+
     private const int TAG_USB_SUPPORTED = 0x01;
     private const int TAG_SERIAL_NUMBER = 0x02;
     private const int TAG_USB_ENABLED = 0x03;
@@ -174,14 +177,16 @@ public readonly record struct DeviceInfo
     ///     Ordinary capability masks are unsigned big-endian integers. Leading zero bytes are accepted and
     ///     unnamed bits are preserved up to 32 bits; values outside this SDK range are rejected.
     /// </remarks>
-    /// <param name="tlvs">Decoded device-information fields. Unknown tags are ignored; duplicate tags are rejected.</param>
+    /// <param name="tlvs">Decoded device-information fields. Unknown tags are ignored, even when repeated.</param>
     /// <param name="defaultVersion">Version used in preference to tag 0x05, or null to use that tag.</param>
     /// <returns>The decoded metadata.</returns>
-    /// <exception cref="ArgumentException">The collection contains duplicate tags.</exception>
+    /// <exception cref="ArgumentException">The collection repeats a known top-level device-information tag.</exception>
     /// <exception cref="BadResponseException">A known field is malformed or no firmware version is available.</exception>
     public static DeviceInfo CreateFromTlvs(IReadOnlyCollection<Tlv> tlvs, FirmwareVersion? defaultVersion)
     {
-        var tlvDict = tlvs.ToDictionary(tlv => tlv.Tag, tlv => tlv.Value);
+        ArgumentNullException.ThrowIfNull(tlvs);
+
+        var tlvDict = IndexKnownFields(tlvs);
 
         var snBytes = ReadFixedField(tlvDict, TAG_SERIAL_NUMBER, 4);
         int? serialNumber = snBytes.IsEmpty ? null : BinaryPrimitives.ReadInt32BigEndian(snBytes.Span);
@@ -246,6 +251,32 @@ public readonly record struct DeviceInfo
             StmVersion = stmVersion
         };
     }
+
+    private static Dictionary<int, ReadOnlyMemory<byte>> IndexKnownFields(IReadOnlyCollection<Tlv> tlvs)
+    {
+        var fields = new Dictionary<int, ReadOnlyMemory<byte>>();
+        foreach (var tlv in tlvs)
+        {
+            if (!IsKnownDeviceInfoTag(tlv.Tag))
+            {
+                if (Logger.IsEnabled(LogLevel.Trace))
+                    Logger.LogTrace("Ignoring unknown device-info tag 0x{Tag:X2} ({Length} bytes).", tlv.Tag, tlv.Length);
+                continue;
+            }
+
+            if (!fields.TryAdd(tlv.Tag, tlv.Value))
+                throw new ArgumentException($"Duplicate device info tag 0x{tlv.Tag:X2}.", nameof(tlvs));
+        }
+        return fields;
+    }
+
+    // Keep this list in sync with the top-level fields consumed by the decoder.
+    private static bool IsKnownDeviceInfoTag(int tag) => tag is
+        TAG_USB_SUPPORTED or TAG_SERIAL_NUMBER or TAG_USB_ENABLED or TAG_FORMFACTOR or
+        TAG_FIRMWARE_VERSION or TAG_AUTO_EJECT_TIMEOUT or TAG_CHALLENGE_RESPONSE_TIMEOUT or TAG_DEVICE_FLAGS or
+        TAG_NFC_SUPPORTED or TAG_NFC_ENABLED or TAG_CONFIG_LOCKED or TAG_PART_NUMBER or
+        TAG_FIPS_CAPABLE or TAG_FIPS_APPROVED or TAG_PIN_COMPLEXITY or TAG_NFC_RESTRICTED or
+        TAG_RESET_BLOCKED or TAG_VERSION_QUALIFIER or TAG_FPS_VERSION or TAG_STM_VERSION;
 
     // Fixed widths follow the YubiKey configuration reference (serial/version/timeout/scalars).
     // Absence is not a malformed value: older firmware and non-NFC devices omit optional metadata.

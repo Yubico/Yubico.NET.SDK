@@ -60,6 +60,7 @@ public sealed class PreviewSignSigningParams
         if (AdditionalArgs is { } args)
         {
             writer.WriteInt32(additionalArgsKey);
+            // Key 7 wraps the already-encoded COSE_Sign_Args map in a byte string.
             writer.WriteByteString(args.Span);
         }
         writer.WriteEndMap();

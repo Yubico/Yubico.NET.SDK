@@ -50,11 +50,13 @@ public class PreviewSignAuthenticationOutputTests
 
     [Fact]
     public void Decode_WithTrailingData_Throws() =>
+        // {6: h'12'} followed by a second item (integer zero).
         Assert.Throws<CborContentException>(() => PreviewSignAuthenticationOutput.Decode(Convert.FromHexString("A106411200")));
 
     [Fact]
     public void TryGetPreviewSign_OnRegistrationOutput_ThrowsInsteadOfTreatingItAsAbsent()
     {
+        // {"previewSign": {3: -9}} carries the signing algorithm, not a signature.
         var extensions = ExtensionOutput.Decode(Convert.FromHexString("A16B707265766965775369676EA10328"));
 
         Assert.Throws<InvalidOperationException>(() => extensions.TryGetPreviewSign(out _));

@@ -20,11 +20,11 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 public class PreviewSignSigningParamsTests
 {
     [Theory]
-    [InlineData("")]
-    [InlineData("80")]
-    [InlineData("A000")]
-    [InlineData("A101")]
-    [InlineData("A201020103")]
+    [InlineData("")] // No encoded value.
+    [InlineData("80")] // Empty array, not a map.
+    [InlineData("A000")] // Empty map followed by integer zero.
+    [InlineData("A101")] // One-entry map missing its value.
+    [InlineData("A201020103")] // Map with duplicate key 1.
     public void SigningParams_RejectAdditionalArgsThatAreNotExactlyOneMap(string hex)
     {
         byte[] additionalArgs = Convert.FromHexString(hex);

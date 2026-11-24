@@ -104,9 +104,11 @@ public class PreviewSignCodecTests
     {
         using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
         ECPoint point = ecdsa.ExportParameters(false).Q;
-        byte[] sec1 = [4, .. Assert.IsType<byte[]>(point.X), .. Assert.IsType<byte[]>(point.Y)];
+        // Uncompressed P-256 point: 0x04 || X || Y.
+        byte[] sec1 = [0x04, .. Assert.IsType<byte[]>(point.X), .. Assert.IsType<byte[]>(point.Y)];
         var seed = new CoseArkgP256SeedKey(CoseAlgorithm.ArkgP256SeedKey, CoseAlgorithm.Esp256, sec1, sec1);
-        byte[] seedKey = arkg ? seed.Encode() : [0xA2, 0x01, 0x18, 0x63, 0x03, 0x28]; // unmodeled kty 99
+        // {1: 99, 3: -9} is an unmodeled key type with the ESP256 algorithm.
+        byte[] seedKey = arkg ? seed.Encode() : [0xA2, 0x01, 0x18, 0x63, 0x03, 0x28];
         var algorithm = arkg ? CoseAlgorithm.ArkgP256 : CoseAlgorithm.Esp256;
         var extensionWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);
         extensionWriter.WriteStartMap(1);
@@ -116,6 +118,9 @@ public class PreviewSignCodecTests
         extensionWriter.WriteInt32(algorithm.Value);
         extensionWriter.WriteEndMap();
         extensionWriter.WriteEndMap();
+        // After the 32-byte relying-party hash, 0x45 sets presence, verification and attested data;
+        // 0xC5 also sets the extension-data bit. The 4-byte counter and 16-byte model identifier
+        // precede the outer credential identifier h'2A', distinct from the empty generated-key handle.
         byte[] outerAuthData = signed
             ? [.. new byte[32], 0xC5, .. new byte[4 + 16], 0, 1, 0x2A, .. seedKey,
                  .. extensionWriter.Encode()]
@@ -123,23 +128,23 @@ public class PreviewSignCodecTests
 
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(unsigned ? 4 : 3);
-        writer.WriteInt32(1);
+        writer.WriteInt32(1); // fmt
         writer.WriteTextString("none");
-        writer.WriteInt32(2);
+        writer.WriteInt32(2); // authData
         writer.WriteByteString(outerAuthData);
-        writer.WriteInt32(3);
-        writer.WriteEncodedValue([0xA0]);
+        writer.WriteInt32(3); // attStmt
+        writer.WriteEncodedValue([0xA0]); // Empty statement for format "none".
         if (unsigned)
         {
             byte[] inner = BuildAttestationObject(seedKey, WebAuthnPreviewSign.PreviewSignFlags.RequireUserVerification, []);
-            if (malformation == 1) inner = [.. inner, 0xF5];
+            if (malformation == 1) inner = [.. inner, 0xF5]; // Append a second CBOR item (true).
             if (malformation == 2) inner[^1] = 0x80; // Replace {} with [].
 
-            writer.WriteInt32(6);
+            writer.WriteInt32(6); // unsignedExtensionOutputs
             writer.WriteStartMap(1);
             writer.WriteTextString("previewSign");
             writer.WriteStartMap(1);
-            writer.WriteInt32(7);
+            writer.WriteInt32(7); // att-obj, wrapped as a byte string
             writer.WriteByteString(inner);
             writer.WriteEndMap();
             writer.WriteEndMap();

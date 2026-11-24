@@ -85,8 +85,8 @@ public class ArkgP256SignArgsTests
     }
 
     [Theory]
-    [InlineData("", "40")]
-    [InlineData("ARKG-P256.test vectors", "56")]
+    [InlineData("", "40")] // Empty byte string.
+    [InlineData("ARKG-P256.test vectors", "56")] // 22-byte string.
     public void ToAdditionalArgs_EncodesExactSigningAlgorithmAndArguments(string label, string contextHeader)
     {
         // Synthetic wire fixture: 16-byte tag and 65-byte uncompressed point, not a valid key.

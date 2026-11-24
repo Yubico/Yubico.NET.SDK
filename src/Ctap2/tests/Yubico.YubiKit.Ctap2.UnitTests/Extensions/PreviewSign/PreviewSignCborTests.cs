@@ -36,6 +36,7 @@ public class PreviewSignCborTests
     [Fact]
     public void DecodeRegistrationOutput_MissingAlgorithm_Throws()
     {
+        // {4: 1}: presence policy without the required algorithm at key 3.
         var reader = new CborReader(Convert.FromHexString("A10401"), CborConformanceMode.Ctap2Canonical);
 
         Assert.Throws<InvalidOperationException>(() => PreviewSignCbor.DecodeRegistrationOutput(reader));

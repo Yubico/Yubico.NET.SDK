@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class ArkgP256GeneratedKeyTests
 {
-    // Reuse fixed public-seed/derivation fixtures also used by Core; no device ceremony is involved.
+    // Same known-answer vector as Core's ArkgP256Tests. The points are uncompressed: 0x04 || X || Y.
     private static readonly byte[] PkBl = HexToBytes(
         "046d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df" +
         "65ed42169c69675f936ff7de5f9bd93adbc8ea73036b16e8d90adbfabdaddba7");
@@ -101,7 +101,7 @@ public class ArkgP256GeneratedKeyTests
         new byte[32],
         new CoseArkgP256SeedKey(CoseAlgorithm.ArkgP256SeedKey, CoseAlgorithm.Esp256, PkKem, PkBl),
         CoseAlgorithm.ArkgP256,
-        // Attestation is not interpreted by offline derivation.
+        // 0xA0 is an empty CBOR map. Offline derivation does not interpret the attestation bytes.
         new byte[] { 0xA0 });
 
     private static byte[] HexToBytes(string hex)

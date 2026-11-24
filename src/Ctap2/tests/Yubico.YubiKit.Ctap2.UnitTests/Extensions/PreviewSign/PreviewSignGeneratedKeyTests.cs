@@ -32,15 +32,23 @@ public class PreviewSignGeneratedKeyTests
         var logger = new ThrowingWarningLogger();
         factory.CreateLogger(typeof(PreviewSignGeneratedKey).FullName ?? throw new InvalidOperationException()).Returns(logger);
         using var logging = YubiKitLogging.UseTemporary(factory);
+
+        // A MakeCredential response with a signed previewSign value, but no unsigned attestation.
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(3);
-        writer.WriteInt32(1);
+        writer.WriteInt32(1); // fmt
         writer.WriteTextString("none");
-        writer.WriteInt32(2);
-        writer.WriteByteString([.. new byte[32], 0xC5, .. new byte[4 + 16], 0, 1, 0x2A, 0xA0,
-            .. Convert.FromHexString("A16B707265766965775369676EA10328")]);
-        writer.WriteInt32(3);
-        writer.WriteEncodedValue([0xA0]);
+        writer.WriteInt32(2); // authData
+        writer.WriteByteString([
+            .. new byte[32], // Relying-party identifier hash.
+            0xC5, // User present and verified; attested credential data and extensions follow.
+            .. new byte[4 + 16], // Signature counter and authenticator model identifier.
+            0, 1, 0x2A, // Big-endian credential identifier length, then the one-byte identifier.
+            0xA0, // Empty credential public-key map; this test does not decode the key.
+            .. Convert.FromHexString("A16B707265766965775369676EA10328") // {"previewSign": {3: -9}}
+        ]);
+        writer.WriteInt32(3); // attStmt
+        writer.WriteEncodedValue([0xA0]); // Empty statement for format "none".
         writer.WriteEndMap();
 
         var response = MakeCredentialResponse.Decode(writer.Encode());

@@ -23,7 +23,10 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 internal static class PreviewSignCbor
 {
     /// <summary>Decodes the signing algorithm from the signed extension value.</summary>
-    /// <remarks>The draft puts policy flags in the inner attestation, not the signed outer map.</remarks>
+    /// <remarks>
+    /// The parser tolerates flags at key 4 of the signed outer map, but the draft puts signing-policy
+    /// flags in the inner attestation.
+    /// </remarks>
     internal static (int Algorithm, int? Flags) DecodeRegistrationOutput(CborReader reader)
     {
         const int algorithmKey = 3;
@@ -146,6 +149,7 @@ internal static class PreviewSignCbor
         writer.WriteTextString("authData");
         writer.WriteByteString(inner.AuthData.Span);
         writer.WriteTextString("attStmt");
+        // The statement is a map, not a byte string containing a map.
         writer.WriteEncodedValue(inner.AttStmtRawCbor.Span);
         writer.WriteEndMap();
         return writer.Encode();

@@ -434,10 +434,10 @@ not CTAP v4 or an adopted W3C signing standard.
 - [Versioned vendor draft](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension) — input/output and actor requirements
 
 **Architectural Note:** The CTAP2 input types encode directly through `ExtensionBuilder`, and the
-WebAuthn codec shares the internal CTAP2 registration and signature decoders. WebAuthn still owns its typed
-attestation and error mapping. Generic signing params carry raw `additionalArgs`; replace the former
-`PreviewSignCbor.EncodeAdditionalArgs(...)` call with `CoseSignArgs.ToAdditionalArgs()` on the typed
-arguments. ARKG stays under the same `YKEXP001` opt-in, not production guidance.
+WebAuthn codec shares the internal CTAP2 registration and signature decoders. WebAuthn owns its typed
+attestation and error mapping. Generic signing params carry raw `additionalArgs`; call
+`CoseSignArgs.ToAdditionalArgs()` to encode typed arguments. ARKG and previewSign use `YKEXP001` and
+are not production guidance.
 
 ### Extension policy and result-lifetime limitations
 

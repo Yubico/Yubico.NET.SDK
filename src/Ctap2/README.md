@@ -385,10 +385,10 @@ Core chooses APDU format from connection support before its ordinary `ForceShort
   actual SDK profile and limited P-256/SHA-256 raw-message verifier are not full draft conformance.
   Build requests with `ExtensionBuilder.WithPreviewSign(...)`, read registration results with
   `PreviewSignGeneratedKey.TryFromMakeCredentialResponse(...)`, and read assertion signatures with
-  `ExtensionOutput.TryGetPreviewSign(...)`. These results are parsed, not verified. If migrating from
-  the former `PreviewSignCbor` helpers, use those result methods and `args.ToAdditionalArgs()` for typed
-  signing arguments. Use `PreviewSignAuthenticationOutput.Decode(...)` if you already have the encoded
-  assertion extension value. Both previewSign and its ARKG helpers use `YKEXP001`.
+  `ExtensionOutput.TryGetPreviewSign(...)`. These results are parsed, not verified. Encode typed
+  signing arguments with `CoseSignArgs.ToAdditionalArgs()`. If you have the encoded assertion extension
+  value, use `PreviewSignAuthenticationOutput.Decode(...)`. Both previewSign and its ARKG helpers use
+  `YKEXP001`.
 
 ## Example
 

@@ -257,11 +257,10 @@ is not full-profile conformance; the draft's stated expiry is 2026-08-31. Signin
 identifiers remain distinct; the convenience verifier handles raw
 messages with P-256/SHA-256 and strict DER signatures, not arbitrary generic TBS algorithms.
 
-Use `PreviewSignGeneratedKey.TryFromMakeCredentialResponse` in place of `PreviewSignCbor.TryExtractGeneratedKey`
-or the older CTAP2 `PreviewSignRegistrationOutput.TryGetGeneratedKey`. The result carries the outer signing algorithm,
-the inner handle and decoded public key, and the draft's text-keyed attestation encoding. Match
-`ArkgP256GeneratedKey` before calling `DerivePublicKey`; `DerivedKeyAlgorithm` now comes from its
-seed key, not the outer response. Other key types can use the generic result without derivation.
+Read the generated key with `PreviewSignGeneratedKey.TryFromMakeCredentialResponse`. The result carries
+the outer signing algorithm, the inner handle and decoded public key, and the draft's text-keyed attestation
+encoding. Match `ArkgP256GeneratedKey` before calling `DerivePublicKey`; its `DerivedKeyAlgorithm` comes
+from the seed key, not the outer response. Other key types use the generic result without derivation.
 Read a returned assertion signature with `ExtensionOutput.TryGetPreviewSign`. The input types write directly
 into `ExtensionBuilder`'s writer; the internal registration parser and signature decoder reuse
 `CtapResponseParser.ReadIntKeyMap` and share the wire decoding with WebAuthn.

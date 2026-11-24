@@ -25,9 +25,10 @@ response material, preferably in `finally`. It zeroes the complete owned respons
 obtained views, without changing constructor input. Read/check status before clearing. Aliasing a response
 shares its owner; there is no default empty response or synthesized value equality.
 
-Clearing this owner leaves constructor inputs, transport staging, earlier response fragments, and any
-separate decrypted temporary outside its reach. Clear caller-owned copies separately; this API is not
-an end-to-end erasure guarantee.
+For chained responses, Core separately clears consumed fragments and the live assembly buffer, leaving
+the returned response intact. Constructor inputs, retired assembly arrays, transport staging, and
+separate decrypted temporaries are outside that cleanup. Clear caller-owned copies separately; this
+API is not an end-to-end erasure guarantee.
 
 ## Requirements
 

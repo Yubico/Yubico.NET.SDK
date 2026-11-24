@@ -19,8 +19,8 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
 // Assemble 0x61 responses using fixed-zero CLA/P1/P2/Le and the configured remaining-data instruction.
 // This receiver neither retries 0x6C corrected lengths nor imposes a total response-size/fragment budget.
-// Each fragment owner and the final copied owner have separate cleanup scopes; Clear on the result
-// does not clear discarded fragment owners. The writer is currently cleared only after successful assembly.
+// Clear consumed fragments and the current assembly buffer; the returned owner remains intact.
+// Clearing the writer cannot reach backing arrays it has already replaced during growth.
 internal class ChainedResponseReceiver(
     FirmwareVersion? firmwareVersion,
     IApduProcessor apduTransmitter,
@@ -47,33 +47,39 @@ internal class ChainedResponseReceiver(
         if (response.SW1 != Sw1HasMoreData)
             return response;
 
-        var buffer = new ArrayBufferWriter<byte>();
-        while (response.SW1 == Sw1HasMoreData) // Partial response, more data available
+        ArrayBufferWriter<byte>? buffer = null;
+        try
         {
+            buffer = new ArrayBufferWriter<byte>();
+            while (response.SW1 == Sw1HasMoreData) // Partial response, more data available
+            {
+                buffer.Write(response.Data.Span);
+                response.Clear();
+                try
+                {
+                    response = await apduTransmitter.TransmitAsync(_getMoreDataApdu, useScp, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    // A protected transmitter may already have reported this failure; plain
+                    // continuations bypass it and must still notify the recovery owner.
+                    if (!useScp || reportProtectedFailures)
+                        onContinuationFailure?.Invoke(ex);
+                    throw;
+                }
+            }
+
             buffer.Write(response.Data.Span);
-            try
-            {
-                response = await apduTransmitter.TransmitAsync(_getMoreDataApdu, useScp, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                // A protected transmitter may already have reported this failure; plain
-                // continuations bypass it and must still notify the recovery owner.
-                if (!useScp || reportProtectedFailures)
-                    onContinuationFailure?.Invoke(ex);
-                throw;
-            }
+            buffer.Write([response.SW1]);
+            buffer.Write([response.SW2]);
+            return new ApduResponse(buffer.WrittenMemory);
         }
-
-        buffer.Write(response.Data.Span);
-        buffer.Write([response.SW1]);
-        buffer.Write([response.SW2]);
-
-        var completeResponse = new ApduResponse(buffer.WrittenMemory);
-        buffer.Clear();
-
-        return completeResponse;
+        finally
+        {
+            response.Clear();
+            buffer?.Clear();
+        }
     }
 
     public void Dispose() => (apduTransmitter as IDisposable)?.Dispose();

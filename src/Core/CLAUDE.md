@@ -404,6 +404,11 @@ The current formatters append Le, including zero; zero is not an absent-Le repre
 continuations use the configured remaining instruction and fixed zero CLA/P1/P2/Le. There is no
 automatic `6Cxx` corrected-length retry.
 
+`ChainedResponseReceiver` transfers a single response intact. For a chain it clears consumed
+`ApduResponse` owners after copying their data and terminal status, and clears the live assembly
+buffer in `finally`. The assembled result owns a separate copy. Writer arrays replaced during growth
+and transport or SCP temporaries are outside this cleanup scope.
+
 ```
 ApduCommand
     ↓

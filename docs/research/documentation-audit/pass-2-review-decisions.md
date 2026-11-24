@@ -53,6 +53,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-36](#ag-36-core-tlv-decoder-ownership) | 2026-11-23 | Dennis approved writable TLV dictionary results and regression-tested cleanup of unpublished copies. | Approved for CORE-C-C006 (FPT-088) within the ownership scope below |
 | [AG-37](#ag-37-core-console-credential-cancellation) | 2026-11-23 | Dennis approved simple cancellation checks for queued keys, confirmation, and redirected line reads. | Approved for CORE-C-C004 (FPT-086) within the synchronous scope below |
 | [AG-38](#ag-38-core-pcsc-post-open-logging) | 2026-11-24 | Dennis chose to skip hardening the three PC/SC slot success logs against exceptions. | Implementation skipped for CORE-B1-C009 (FPT-030); current behavior retained |
+| [AG-39](#ag-39-core-chained-apdu-response-cleanup) | 2026-11-24 | Dennis approved clearing consumed APDU response fragments and the live assembly buffer. | Approved for the receiver-only facet of CORE-B6-C002 (FPT-068) |
 
 ### AG-8 classification run
 
@@ -759,6 +760,15 @@ built-in registered, and external registered) and the expectation that applicati
 do not throw at these sites. No failure was observed here; the source-derived exception and ownership
 gap is neither disproven nor fixed. No factory, registration, native behavior, or broader SDK logging
 policy changes are approved by this decision.
+
+### AG-39 Core chained APDU response cleanup
+
+Dennis approved the receiver-only facet of `CORE-B6-C002` (`FPT-068`) on 2026-11-24 (`Interview`).
+Clear consumed fragment owners after copying their data, including the terminal fragment after copying
+its status. Clear the current assembly buffer on all chained exits, including continuation failure.
+Keep the original single-response owner and the independent assembled result intact for the caller.
+Wire behavior and recovery notification are unchanged. Retired writer arrays, transport and formatter
+buffers, and separate SCP copies remain open; this does not close the compound finding.
 
 ### AG-14 firmware rule detail
 

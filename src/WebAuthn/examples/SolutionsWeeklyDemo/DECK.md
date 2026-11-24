@@ -104,10 +104,8 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 ### 8. New capabilities
 - WebAuthn client: builds `clientDataJSON`, handles PIN/UV, processes extensions.
 - OpenPGP: key provisioning, PIN recovery, sign/decrypt/agree, certificates, touch policy.
-- previewSign (experimental, opt-in `YKEXP001`): separate signing key bound to a passkey;
-  Yubico WebAuthn sign-extension draft v4. Teaser only; no value claims until framing is agreed (see below).
-- Notes: PENDING Emil Lundberg — what previewSign adds over putting the transaction in the challenge,
-  target scenarios (identity wallets, document signing, payments?), and what is safe to say on a recording.
+- Also in preview: raw signing with a key bound to a passkey (previewSign). One line only; details live in
+  the optional demo and backup slide B1.
 
 ### 9. Touch prompting + interactive auth roadmap
 - `IUserPresencePrompt` across 6 applets: PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, YubiHSM Auth.
@@ -125,19 +123,13 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 - Ask: "Who has that setup and can help us test?"
 
 ### 11. Live demo
-- Code: branch `yubikit-solweekly-demo`, `src/WebAuthn/examples/SolutionsWeeklyDemo/solutions-weekly-demo.cs`.
-  Run: `dotnet run solutions-weekly-demo.cs`. Packages: alpha feed, `2.0.0-alpha.115`.
-- Main story (passkey): detect key → device info → register passkey → sign in with app intent
-  ("unlock your notes") → pretend server verifies. Two touches.
+- Code: branch `yubikit-solweekly-demo`, folder `src/WebAuthn/examples/SolutionsWeeklyDemo/`.
+  Packages: alpha feed, `2.0.0-alpha.115`.
+- Main demo: `passkey-demo.cs` (run: `dotnet run passkey-demo.cs`). Detect key → device info →
+  register passkey → sign in with app intent ("unlock your notes") → pretend server verifies. Two touches.
 - On screen: the touch prompt shows the SDK operation and the app intent; the server verifies, not the SDK.
-- Teaser (previewSign, labelled "preview"): the same sign-in touch also signs a document with a separate
-  key bound to the passkey. Expected output:
-  `Document "I approve transfer #4711" signature verified: True`.
-  Script line: "Experimental. Talk to us if your customers need signing."
-- PENDING Emil Lundberg: whether the transfer example fits, or a better scenario (and whether to show
-  key derivation happening elsewhere to make the ARKG benefit visible).
-- Keep `ArkgBridge` (reflection workaround for an internal constructor in this alpha) off screen.
-- Fallback slide: screenshot of a successful run.
+- Optional second demo, only if time allows or someone asks: `previewsign-demo.cs` (see backup slide B1).
+- Fallback slide: screenshot of a successful passkey run.
 
 ### 12. Migration cost + v1 continuity
 - v2 cost: .NET 10 + async; firmware 5.x floor; U2F/CTAP1 removed (no path for U2F-only);
@@ -161,6 +153,32 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 - Who can help test Windows→Windows VMs?
 - Feedback: **#ask-tla** Slack channel.
 
+## Backup slides (not presented; for Q&A or the optional demo)
+
+### B1. previewSign: hardware-bound signatures for any protocol (experimental)
+- Signs the **raw input**. A normal WebAuthn signature covers authenticator data + a hash of client data,
+  so verifiers must be adapted (as OpenSSH did). previewSign output drops into existing protocols
+  (e.g. OpenPGP messages, digital identity credentials) with unchanged verifiers.
+- **Separate key** from the passkey, so it can't be used to sign sign-in challenges for other sites.
+- **No storage on the key**: signing keys are re-derived on each use from the credential's internal secret
+  (credRandom, the same value PRF uses). The key handle works like an encrypted external key. No export.
+- **ARKG**: the relying party can create fresh, unlinkable public keys without the YubiKey present
+  (BIP32-inspired). Currently the only previewSign algorithm YubiKeys support.
+- Primary use case: wallets (wwWallet, EU digital identity wallet) signing transactions and credential
+  presentations without the protocols needing FIDO support.
+- Notes: "Mainly valuable for security protocol designers. For customers: more uses for their YubiKeys,
+  with interoperable signatures."
+- Notes: **not transaction confirmation**. The key never displays the data; it is opaque bytes.
+  The app can request a signature within an existing session without verifying the sign-in signature.
+- Source: Emil Lundberg; explainer https://github.com/w3c/webauthn/blob/main/explainers/raw-signing-extension.md
+
+## Demos (done)
+
+- `passkey-demo.cs` (37 lines) and `previewsign-demo.cs` (53 lines), sharing `DemoSupport/` via `#:project`.
+- Both verified on a YubiKey 5 NFC, firmware 5.8.0 (2026-11-24).
+- previewSign demo: signing key at registration → ARKG public key derived without the YubiKey → raw payload
+  signed → verified with plain ECDSA. No sign-in verification, no "approve transfer" wording.
+
 ## Demo prep checklist
 
 - Demo verified on a YubiKey 5 NFC, firmware 5.8.0 (Linux workstation, 2026-11-24).
@@ -173,6 +191,7 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 - Each run stores a test passkey for `example.com`; clean up with `ykman fido credentials list` / `delete`.
 - Bring a second key. Rehearse on the presenting machine with screen sharing.
 - Capture a success screenshot for the fallback slide.
+- A missed or late touch fails with "Operation denied". Touch promptly.
 - Optional polish: registration intent text (e.g. "create your passkey"); friendlier form-factor name.
 - If the beta lands on nuget.org before the session: bump `#:package` versions and drop the alpha feed.
 
@@ -181,5 +200,3 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 - Date on title slide.
 - Confirm "~500k downloads" wording (approximate is fine).
 - Confirm Dec 16 beta date is safe to state on a recording.
-- previewSign framing and example scenario after talking to Emil Lundberg (slides 8 and 11).
-- SDK gap to raise: ARKG key derivation from the WebAuthn layer needs an internal constructor (demo uses reflection).

@@ -98,6 +98,15 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
   no .NET runtime required.
 - Notes: runtime AOT evidence — core discovery on macOS, Windows, Linux; deeper testing mostly macOS;
   some applets link-verified only. Do not say "full support".
+- Notes (AOT benefit): you ship one native executable. No .NET runtime to install, fast startup with no JIT
+  warm-up, and a smaller footprint (trimmed to what you use, which pairs with the ten-package split).
+- Notes (who benefits):
+  - CLI and agent tooling, and SEs prototyping: a single binary that PowerShell or Bash can call.
+  - Locked-down endpoints (government, finance, healthcare) where installing a runtime needs approval.
+  - Containers and short-lived jobs, where startup time and image size matter.
+  - Less so for long-running server or desktop apps that already ship with a runtime.
+- Notes (the cost): one build per OS and CPU architecture, and the app's own code must be AOT-safe
+  (no runtime reflection or dynamic code). The SDK being AOT-compatible doesn't make the whole app so.
 
 ### 6. Stable API, forward compatible
 - High-level sessions public; commands, TLV parsing, codecs internal.

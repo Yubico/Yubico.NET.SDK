@@ -368,6 +368,10 @@ The current merged inventory incorporates upstream discovery/monitor changes; se
 
 Background listeners and native/resource-manager retry loops must block, back off, exit, or throttle on every failure path. Do not ignore native return values inside loops unless another call in the same path provides a bounded wait. Persistent failures such as stale PC/SC handles must have no-hardware fault-injection tests that prove call cadence is backoff-bounded.
 
+The PC/SC listener waits out the remainder of its 1,000 ms status interval after successful native
+calls, including PnP-only calls. Stop wakes this managed wait separately from native cancel and
+join. Do not treat either wake or cancel as evidence that the worker has exited.
+
 If a change touches Core runtime loops, polling paths, recovery logic, or listener lifecycle cleanup, run `dotnet toolchain.cs -- resilience --fast` in addition to the normal focused tests. Prefer adding or extending no-hardware `Category=RuntimeResilience` coverage before considering live diagnostics.
 
 ### User-presence notification ownership

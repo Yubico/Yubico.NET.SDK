@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 
@@ -23,7 +24,8 @@ namespace Yubico.YubiKit.Core.Transports.SmartCard;
 /// </summary>
 /// <remarks>
 /// Uses a dedicated background thread and a 1,000 ms maximum native status wait. Fresh UNAWARE reader
-/// states can return immediately; this timeout is not a minimum polling interval or a shutdown deadline.
+/// states can return immediately. Successful calls wait out any remainder of that interval before the next
+/// reader-list check, unless stopped. This is not a bound on native work or shutdown.
 /// On Windows, also watches for PnP notifications via the special <c>\\?\PnP?\Notification</c> reader.
 /// <para>
 /// The listener does not auto-start. Call <see cref="Start"/> after setting up <see cref="Changed"/>
@@ -40,6 +42,8 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
 
     private readonly ISCardApi _sCardApi;
     private readonly Action<TimeSpan> _sleep;
+    private readonly Func<object, TimeSpan, bool> _cadenceWait;
+    private readonly object _cadenceGate = new();
     private readonly Lock _syncLock = new();
     private SCardContext? _context;
     private Thread? _listenerThread;
@@ -59,13 +63,15 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
     /// </summary>
     public static DesktopSmartCardDeviceListener Create() => new(NativeSCardApi.Instance, Thread.Sleep);
 
-    internal DesktopSmartCardDeviceListener(ISCardApi sCardApi, Action<TimeSpan> sleep)
+    internal DesktopSmartCardDeviceListener(
+        ISCardApi sCardApi, Action<TimeSpan> sleep, Func<object, TimeSpan, bool>? cadenceWait = null)
     {
         ArgumentNullException.ThrowIfNull(sCardApi);
         ArgumentNullException.ThrowIfNull(sleep);
 
         _sCardApi = sCardApi;
         _sleep = sleep;
+        _cadenceWait = cadenceWait ?? Monitor.Wait;
     }
 
     /// <inheritdoc />
@@ -159,7 +165,11 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
 
     private void StopListening()
     {
-        _shouldStop = true;
+        lock (_cadenceGate)
+        {
+            _shouldStop = true;
+            Monitor.PulseAll(_cadenceGate);
+        }
 
         SCardContext? context;
         Thread? listenerThread;
@@ -265,7 +275,7 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
 
                 _knownReaders = currentReaderSet;
 
-                // Supply a maximum wait. Recreated UNAWARE states can return immediately on success.
+                // Fresh UNAWARE states may succeed immediately; the wait also paces those replies.
                 WaitForStatusChange(currentReaders);
             }
         }
@@ -290,6 +300,7 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
         var pnpState = SCARD_READER_STATE.Create(PnpNotificationReaderName);
         var states = new[] { pnpState };
 
+        var started = Stopwatch.GetTimestamp();
         var result = _sCardApi.SCardGetStatusChange(
             _context,
             (int)CheckForChangesWaitTime.TotalMilliseconds,
@@ -305,6 +316,11 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
         if (pnpState.ReaderName != IntPtr.Zero)
         {
             Marshal.FreeHGlobal(pnpState.ReaderName);
+        }
+
+        if (result == ErrorCode.SCARD_S_SUCCESS)
+        {
+            WaitForStatusCycleRemainder(started);
         }
     }
 
@@ -324,9 +340,12 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
         Array.Copy(readerStates, allStates, readerStates.Length);
         allStates[^1] = SCARD_READER_STATE.Create(PnpNotificationReaderName);
 
+        uint result;
+        long started;
         try
         {
-            var result = _sCardApi.SCardGetStatusChange(
+            started = Stopwatch.GetTimestamp();
+            result = _sCardApi.SCardGetStatusChange(
                 _context,
                 (int)CheckForChangesWaitTime.TotalMilliseconds,
                 allStates,
@@ -346,6 +365,28 @@ public sealed class DesktopSmartCardDeviceListener : IDeviceChangeListener
                 {
                     Marshal.FreeHGlobal(state.ReaderName);
                 }
+            }
+        }
+
+        if (result == ErrorCode.SCARD_S_SUCCESS)
+        {
+            WaitForStatusCycleRemainder(started);
+        }
+    }
+
+    private void WaitForStatusCycleRemainder(long started)
+    {
+        lock (_cadenceGate)
+        {
+            while (!_shouldStop)
+            {
+                var remaining = CheckForChangesWaitTime - Stopwatch.GetElapsedTime(started);
+                if (remaining <= TimeSpan.Zero)
+                {
+                    return;
+                }
+
+                _ = _cadenceWait(_cadenceGate, remaining);
             }
         }
     }

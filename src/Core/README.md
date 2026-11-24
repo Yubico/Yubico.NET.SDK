@@ -101,6 +101,8 @@ stop/restart mode: dispose the monitor and create a new one to recover from term
 process-global monitoring lifetime or device cache.
 
 Transport listeners share payload-less `IDeviceChangeListener.Changed` hints, not physical-device truth.
+After a successful PC/SC status call, the listener waits out any remainder of its one-second interval
+before checking reader names again. Transient changes between checks can be missed.
 The monitor reconciles scans. Listener startup failure leads to logging and cleanup attempts; later
 listener attempts depend on logging returning. If construction completes without listeners, interval
 discovery remains available. An enumeration timeout is

@@ -55,6 +55,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-38](#ag-38-core-pcsc-post-open-logging) | 2026-11-24 | Dennis chose to skip hardening the three PC/SC slot success logs against exceptions. | Implementation skipped for CORE-B1-C009 (FPT-030); current behavior retained |
 | [AG-39](#ag-39-core-chained-apdu-response-cleanup) | 2026-11-24 | Dennis approved clearing consumed APDU response fragments and the live assembly buffer. | Approved for the receiver-only facet of CORE-B6-C002 (FPT-068) |
 | [AG-40](#ag-40-core-scp03-pre-handoff-key-cleanup) | 2026-11-24 | Dennis approved disposing derived SCP03 session keys on pre-handoff failure. | Approved for the pre-handoff facet of CORE-B6-C006 (FPT-072) |
+| [AG-41](#ag-41-core-pcsc-listener-success-cadence) | 2026-11-24 | Dennis approved a 1,000 ms combined native and managed interval after successful PC/SC listener status calls. | Approved for CORE-B1-C003 (FPT-024), including PnP-only success |
 
 ### AG-8 classification run
 
@@ -779,6 +780,15 @@ Immediately after derivation returns, the small internal `CompleteScp03Init` ste
 success, without changing the supplied static keys. This does not change cryptogram derivation,
 response admission or the optional-DEK contract, or address failures before derivation returns or
 other provider-owned copies. The remaining facets stay open.
+
+### AG-41 Core PC/SC listener success cadence
+
+Dennis approved `CORE-B1-C003` (`FPT-024`) on 2026-11-24 (`Interview`). Keep the native status
+timeout at 1,000 ms. On success, including PnP-only calls, wait only the positive remainder of that
+interval before the next reader-list check. Failure backoff, reader-name hints, and native state flags
+are unchanged. Reader-list checks may be delayed by up to the remainder; transient changes between
+checks may be missed. Stop wakes the managed wait but must still cancel and join the native worker
+as before. This wake is not native drain proof. Partial startup and timed-out restart remain open.
 
 ### AG-14 firmware rule detail
 

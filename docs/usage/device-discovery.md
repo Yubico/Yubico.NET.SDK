@@ -365,9 +365,10 @@ their own lifetimes.
 - Disposal waits for the in-flight scan within its discovery budgets; cancellation is not proof of native
   release. See [monitor lifecycle](../architecture/event-driven-device-discovery.md#monitor-lifecycle-and-disposal).
 
-If a PC/SC listener consumes unexpected CPU, remember that its native timeout is a maximum wait,
-not a minimum sleep: an UNAWARE-state query can return success immediately. The current success-loop
-cadence and partial-start/timeout cleanup paths have separate implementation limitations. Repeated
+The PC/SC listener's native timeout is a maximum wait: an UNAWARE-state query can succeed immediately.
+After success, the listener waits out any remainder of the one-second interval before checking the
+reader list again. This can delay hints, and transient changes between checks can be missed. Stop wakes
+the managed wait but does not prove native drain; partial-start and timeout cleanup are separate. Repeated
 empty discovery is likewise not a native health check: service availability, enumeration context cleanup,
 and nullable macOS manager/device-set handling need their own diagnostics. Preserve the actual backend
 code and outcome rather than inferring a physical disconnect or successful native release from an empty list.

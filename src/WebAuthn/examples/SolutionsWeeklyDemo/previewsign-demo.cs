@@ -32,15 +32,16 @@ var signingKey = registration.ClientExtensionResults!.PreviewSign!.GeneratedKey;
 Console.WriteLine("Got a signing key bound to the passkey.");
 
 // 2. Without the YubiKey: derive a fresh public key (ARKG). Repeat for as many unlinkable keys as you need.
+// Arkg.DerivePublicKey (DemoSupport): returns the derived P-256 public key plus the key handle and sign args the YubiKey needs.
 var publicKey = Arkg.DerivePublicKey(signingKey, context: "solutions-weekly");
 Console.WriteLine("Derived a fresh public key, no YubiKey involved.");
 
 // 3. Ask the YubiKey to sign raw bytes from any protocol. The key never shows the data to the user.
 var payload = Encoding.UTF8.GetBytes("""{"iss":"wallet","nonce":"8f2c"}""");
 var signRequest = new PreviewSignSigningParams(
-    publicKey.KeyHandle,
+    publicKey.KeyHandle, // which signing key: from registration
     SHA256.HashData(payload), // this algorithm signs a digest
-    publicKey.SignArgs);
+    publicKey.SignArgs); // ARKG inputs that let the YubiKey sign for the derived public key
 
 // The sign-in signature itself isn't checked here: the extension works within an existing session.
 ReadOnlyMemory<byte> signature;

@@ -745,6 +745,8 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
 ## Security notes
 
 - Dispose SCP parameters and their contained owners as described above; clear source buffers separately.
+  SCP03 clears derived session keys if startup fails after derivation and before handing off session state;
+  this does not clear supplied static keys.
 - Keep keys and credentials out of diagnostics. Ordinary APDU trace templates record headers and lengths,
   while SELECT records caller-supplied identifier bytes and exception text has its own provenance.
   Review providers and output destinations before enabling diagnostics; see [logging](../../docs/LOGGING.md).

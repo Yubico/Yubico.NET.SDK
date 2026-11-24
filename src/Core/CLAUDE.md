@@ -451,6 +451,9 @@ wrapper intact. Record `with` copies share these owners. Keep parameters alive t
 and any reset reuse, and clear source buffers independently. See the complete scoped
 [SCP example](README.md#use-a-secure-channel).
 
+After SCP03 derives a `SessionKeys` owner, `CompleteScp03Init` disposes it on pre-return failure or
+transfers it to the returned state. The initializer separately owns cleanup after state handoff.
+
 The implementation uses a fixed P-256/AES-128 SCP11 profile. Constructor admission alone establishes
 neither a complete profile/trust check nor applet authorization. `IsAuthenticated` reflects protocol
 setup; SCP11b is card-to-host authentication, and a/c setup completion is distinct from the device's

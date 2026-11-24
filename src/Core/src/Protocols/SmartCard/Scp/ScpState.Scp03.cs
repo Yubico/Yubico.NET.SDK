@@ -41,8 +41,8 @@ internal partial class ScpState
     ///     bytes plus a three-byte sequence counter for pseudo-random challenge generation. This parser consumes
     ///     the 29-byte prefix without validating that profile or key-info fields; diversification bytes are unused,
     ///     so supplied static keys must already be per-card.
-    ///     The caller owns returned state and cryptogram. The initializer's post-return cleanup does not cover
-    ///     provider failures during cryptogram derivation after this method has allocated SessionKeys.
+    ///     The caller owns returned state and cryptogram. If startup fails after session-key derivation
+    ///     but before returning state, this method disposes the derived keys without changing the static inputs.
     /// </remarks>
     /// <exception cref="BadResponseException">
     ///     The response is shorter than 29 bytes, or the card cryptogram does not match (wrong key set).
@@ -82,21 +82,34 @@ internal partial class ScpState
         cardChallenge.CopyTo(context[8..]);
 
         var sessionKeys = keyParams.Keys.Derive(context);
+        return CompleteScp03Init(sessionKeys, context, cardCryptogram);
+    }
 
-        Span<byte> genCardCryptogram = stackalloc byte[8];
-        StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeCardCryptogram, context, DerivationContextLength,
-            genCardCryptogram);
+    /// <summary>Verifies the card cryptogram and prepares the state and host cryptogram.</summary>
+    /// <remarks>Takes ownership of <paramref name="sessionKeys"/> on entry. Transfers it to the returned state
+    /// on success and disposes it on failure. The context and card cryptogram are borrowed.</remarks>
+    internal static (ScpState State, byte[] HostCryptogram) CompleteScp03Init(
+        SessionKeys sessionKeys, ReadOnlySpan<byte> context, ReadOnlySpan<byte> cardCryptogram)
+    {
+        try
+        {
+            Span<byte> genCardCryptogram = stackalloc byte[8];
+            StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeCardCryptogram, context, DerivationContextLength,
+                genCardCryptogram);
 
-        if (!CryptographicOperations.FixedTimeEquals(genCardCryptogram, cardCryptogram))
+            if (!CryptographicOperations.FixedTimeEquals(genCardCryptogram, cardCryptogram))
+                throw new BadResponseException("Wrong SCP03 key set - card cryptogram verification failed");
+
+            Span<byte> hostCryptogramBytes = stackalloc byte[8];
+            StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeHostCryptogram, context, DerivationContextLength,
+                hostCryptogramBytes);
+
+            return (new ScpState(sessionKeys, new byte[16]), hostCryptogramBytes.ToArray());
+        }
+        catch
         {
             sessionKeys.Dispose();
-            throw new BadResponseException("Wrong SCP03 key set - card cryptogram verification failed");
+            throw;
         }
-
-        Span<byte> hostCryptogramBytes = stackalloc byte[8];
-        StaticKeys.DeriveKey(sessionKeys.Smac, DerivationTypeHostCryptogram, context, DerivationContextLength,
-            hostCryptogramBytes);
-
-        return (new ScpState(sessionKeys, new byte[16]), hostCryptogramBytes.ToArray());
     }
 }

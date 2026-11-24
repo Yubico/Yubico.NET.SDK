@@ -54,6 +54,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-37](#ag-37-core-console-credential-cancellation) | 2026-11-23 | Dennis approved simple cancellation checks for queued keys, confirmation, and redirected line reads. | Approved for CORE-C-C004 (FPT-086) within the synchronous scope below |
 | [AG-38](#ag-38-core-pcsc-post-open-logging) | 2026-11-24 | Dennis chose to skip hardening the three PC/SC slot success logs against exceptions. | Implementation skipped for CORE-B1-C009 (FPT-030); current behavior retained |
 | [AG-39](#ag-39-core-chained-apdu-response-cleanup) | 2026-11-24 | Dennis approved clearing consumed APDU response fragments and the live assembly buffer. | Approved for the receiver-only facet of CORE-B6-C002 (FPT-068) |
+| [AG-40](#ag-40-core-scp03-pre-handoff-key-cleanup) | 2026-11-24 | Dennis approved disposing derived SCP03 session keys on pre-handoff failure. | Approved for the pre-handoff facet of CORE-B6-C006 (FPT-072) |
 
 ### AG-8 classification run
 
@@ -769,6 +770,15 @@ its status. Clear the current assembly buffer on all chained exits, including co
 Keep the original single-response owner and the independent assembled result intact for the caller.
 Wire behavior and recovery notification are unchanged. Retired writer arrays, transport and formatter
 buffers, and separate SCP copies remain open; this does not close the compound finding.
+
+### AG-40 Core SCP03 pre-handoff key cleanup
+
+Dennis approved the pre-handoff facet of `CORE-B6-C006` (`FPT-072`) on 2026-11-24 (`Interview`).
+Immediately after derivation returns, the small internal `CompleteScp03Init` step takes the derived
+`SessionKeys` owner. It disposes those keys on failure or transfers them to the returned state on
+success, without changing the supplied static keys. This does not change cryptogram derivation,
+response admission or the optional-DEK contract, or address failures before derivation returns or
+other provider-owned copies. The remaining facets stay open.
 
 ### AG-14 firmware rule detail
 

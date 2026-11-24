@@ -576,19 +576,19 @@ public class OtpHidProtocolTests
     [Fact]
     public async Task ReadStatusAsync_ReturnsStatusBytes()
     {
-        var mock = new MockHidConnection();
-        var protocol = CreateProtocolWithMock(mock);
-
-        // Queue status report for ReadStatusAsync
-        mock.QueueReport([0x00, 0x05, 0x04, 0x03, 0x01, 0x02, 0x03, 0x00]);
+        var connection = new RetainingOtpHidConnection();
+        byte[] initialization = Status(versionMajor: 5);
+        byte[] report = [0x00, 0x05, 0x04, 0x03, 0x01, 0x02, 0x03, 0x00];
+        connection.Enqueue(initialization);
+        connection.Enqueue(report);
+        var protocol = new OtpHidProtocol(connection);
 
         var status = await protocol.ReadStatusAsync(TestContext.Current.CancellationToken);
 
-        // Should return bytes 1-6 (skip first and last)
-        Assert.Equal(6, status.Length);
-        Assert.Equal(0x05, status.Span[0]); // Major version
-        Assert.Equal(0x04, status.Span[1]); // Minor version
-        Assert.Equal(0x03, status.Span[2]); // Patch version
+        ReadOnlyMemory<byte> expectedView = report.AsMemory(1, 6);
+        Assert.True(expectedView.Equals(status));
+        Assert.Equal<byte>([0x05, 0x04, 0x03, 0x01, 0x02, 0x03], status.ToArray());
+        Assert.All(initialization, value => Assert.Equal(0, value));
     }
 
     [Fact]
@@ -680,10 +680,14 @@ public class OtpHidProtocolTests
     {
         var connection = new RetainingOtpHidConnection();
         QueueExchangePrelude(connection);
-        connection.Enqueue(BusyReport());
-        connection.Enqueue(DataReport(sequence: 0, startValue: 1));
-        connection.Enqueue(DataReport(sequence: 1, startValue: 8));
-        connection.Enqueue(DataReport(sequence: 0, startValue: 0));
+        byte[] busy = BusyReport();
+        byte[] first = DataReport(sequence: 0, startValue: 1);
+        byte[] next = DataReport(sequence: 1, startValue: 8);
+        byte[] terminal = DataReport(sequence: 0, startValue: 0);
+        connection.Enqueue(busy);
+        connection.Enqueue(first);
+        connection.Enqueue(next);
+        connection.Enqueue(terminal);
         var protocol = new OtpHidProtocol(connection);
 
         ReadOnlyMemory<byte> response = await protocol.SendAndReceiveAsync(
@@ -692,6 +696,8 @@ public class OtpHidProtocolTests
             TestContext.Current.CancellationToken);
 
         Assert.Equal(Enumerable.Range(1, 14).Select(value => (byte)value), response.ToArray());
+        Assert.All(new[] { busy, first, next, terminal }, report =>
+            Assert.All(report, value => Assert.Equal(0, value)));
     }
 
     [Theory]
@@ -702,15 +708,12 @@ public class OtpHidProtocolTests
     {
         var connection = new RetainingOtpHidConnection();
         QueueExchangePrelude(connection);
+        byte[] rejected = DataReport(sequence: firstPacketIsSequenceZero ? (byte)2 : (byte)1, startValue: 8);
         if (firstPacketIsSequenceZero)
         {
             connection.Enqueue(DataReport(sequence: 0, startValue: 1));
-            connection.Enqueue(DataReport(sequence: 2, startValue: 8));
         }
-        else
-        {
-            connection.Enqueue(DataReport(sequence: 1, startValue: 1));
-        }
+        connection.Enqueue(rejected);
         var protocol = new OtpHidProtocol(connection);
 
         await Assert.ThrowsAsync<BadResponseException>(() => protocol.SendAndReceiveAsync(
@@ -719,6 +722,7 @@ public class OtpHidProtocolTests
             TestContext.Current.CancellationToken));
 
         Assert.Equal(OtpConstants.DummyReportWrite, connection.SentReportSnapshots[^1][OtpConstants.FeatureReportDataSize]);
+        Assert.All(rejected, value => Assert.Equal(0, value));
     }
 
     [Fact]
@@ -874,7 +878,7 @@ public class OtpHidProtocolTests
 
     private sealed class RetainingOtpHidConnection : IOtpHidConnection
     {
-        private readonly Queue<ReadOnlyMemory<byte>> _reports = new();
+        private readonly Queue<byte[]> _reports = new();
 
         public int FeatureReportSize => 8;
         public ConnectionType Type => ConnectionType.HidOtp;
@@ -882,7 +886,7 @@ public class OtpHidProtocolTests
         public List<ReadOnlyMemory<byte>> RetainedSentReports { get; } = [];
         public List<byte[]> SentReportSnapshots { get; } = [];
 
-        public void Enqueue(ReadOnlyMemory<byte> report) => _reports.Enqueue(report);
+        public void Enqueue(byte[] report) => _reports.Enqueue(report);
 
         public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
         {
@@ -898,7 +902,7 @@ public class OtpHidProtocolTests
             return Task.CompletedTask;
         }
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(_reports.Dequeue());

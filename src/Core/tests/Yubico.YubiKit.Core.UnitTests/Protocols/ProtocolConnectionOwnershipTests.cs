@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
@@ -70,8 +69,8 @@ public class ProtocolConnectionOwnershipTests
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(Array.Empty<byte>());
 
         public void Dispose() => DisposeCount++;
 
@@ -92,8 +91,8 @@ public class ProtocolConnectionOwnershipTests
         public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
             => Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
+            => Task.FromResult(Array.Empty<byte>());
 
         public void Dispose() => DisposeCount++;
 

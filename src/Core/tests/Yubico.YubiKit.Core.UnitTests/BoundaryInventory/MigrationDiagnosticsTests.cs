@@ -8,8 +8,8 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Text;
-using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native.Desktop.SCard;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.Otp.Hid;
@@ -349,16 +349,16 @@ public class MigrationDiagnosticsTests
             return Task.CompletedTask;
         }
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             int read = ++_reads;
             if (read == 1)
-                return Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 0, 5, 4, 3, 0, 0, 0, 0 });
+                return Task.FromResult(new byte[] { 0, 5, 4, 3, 0, 0, 0, 0 });
             if (FrameSent && ResponseRead)
                 throw new IOException("native response failed");
             // Initial status and ready-to-write status; report body is opaque to diagnostics.
             ResponseRead = true;
-            return Task.FromResult<ReadOnlyMemory<byte>>(response);
+            return Task.FromResult(response.AsSpan().ToArray());
         }
 
         public void Dispose() { }
@@ -396,7 +396,7 @@ public class MigrationDiagnosticsTests
             return Task.CompletedTask;
         }
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             byte[] packet = new byte[CtapConstants.PacketSize];
             BinaryPrimitives.WriteUInt32BigEndian(packet, _reads == 0 ? CtapConstants.BroadcastChannelId : 0x01020304);
@@ -414,7 +414,7 @@ public class MigrationDiagnosticsTests
             packet[6] = (byte)payload.Length;
             payload.AsSpan().CopyTo(packet.AsSpan(CtapConstants.InitHeaderSize));
             _reads++;
-            return Task.FromResult<ReadOnlyMemory<byte>>(packet);
+            return Task.FromResult(packet);
         }
 
         public void Dispose() { }

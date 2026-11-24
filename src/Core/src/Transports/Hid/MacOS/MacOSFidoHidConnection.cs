@@ -51,7 +51,7 @@ internal sealed class MacOSFidoHidConnection : IFidoHidConnection, ITerminalWake
         return _owner.SendAsync(packet, cancellationToken);
     }
     internal Task SendReportAsync(ReadOnlyMemory<byte> report) => _owner.SendAsync(report, CancellationToken.None);
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
         _owner.ReceiveAsync(cancellationToken);
     public void RequestTerminalWake() => _owner.Terminal(MacOSFidoHidNativeOwner.ShutdownTerminalReason);
     public void Dispose()

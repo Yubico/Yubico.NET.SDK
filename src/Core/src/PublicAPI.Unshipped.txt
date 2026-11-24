@@ -507,7 +507,7 @@ Yubico.YubiKit.Core.PlatformInteropException.PlatformInteropException(string! me
 Yubico.YubiKit.Core.ProductAtrs
 Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection
 Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.PacketSize.get -> int
-Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
 Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.SendAsync(System.ReadOnlyMemory<byte> packet, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Core.Protocols.Otp.Hid.ChecksumUtils
 Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants
@@ -696,7 +696,7 @@ Yubico.YubiKit.Core.Transports.Hid.IHidInterface.DescriptorInfo.get -> Yubico.Yu
 Yubico.YubiKit.Core.Transports.Hid.IHidInterface.InterfaceType.get -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
 Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection
 Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.FeatureReportSize.get -> int
-Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
 Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.SendAsync(System.ReadOnlyMemory<byte> report, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator
 Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetCharacters(byte[]! hidCodes) -> System.Collections.Generic.IEnumerable<char>!

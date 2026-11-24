@@ -61,6 +61,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-44](#ag-44-core-timeout-scalar-ownership) | 2026-11-24 | Dennis approved a nullable scalar for the read-side challenge-response timeout and requested a sibling comparison. | Approved for CORE-A-C003 (FPT-003); Python and Android checked, Rust unverified |
 | [AG-45](#ag-45-core-ordinary-capability-mask-width) | 2026-11-24 | Dennis approved `DeviceCapabilities : uint` and full ordinary-mask decoding with a 32-bit SDK limit. | Approved for the residual width facet of CORE-A-C006 (FPT-006) |
 | [AG-46](#ag-46-core-duplicate-device-information-tags) | 2026-11-24 | Dennis approved ignoring repeated unknown device-information tags under the forward-compatibility policy. | Approved for the top-level duplicate facet of CORE-A-C016 (FPT-016) |
+| [AG-47](#ag-47-core-typed-hid-receive-ownership) | 2026-11-24 | Dennis approved caller-owned arrays for the two typed HID receives and cleanup of consumed reports. | Approved for CORE-B5-C005 (FPT-062) within the two-API exception below |
 
 ### AG-8 classification run
 
@@ -869,6 +870,20 @@ checkout was unavailable; no Rust behavior or three-way consensus is asserted he
 
 [ag46-ykman]: https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/management.py#L655-L662
 [ag46-android]: https://github.com/Yubico/yubikit-android/blob/f46268563437ac52910001222a77741d229b9b99/management/src/main/java/com/yubico/yubikit/management/ManagementSession.java#L381-L389
+
+### AG-47 Core typed HID receive ownership
+
+Dennis approved `CORE-B5-C005` (`FPT-062`) on 2026-11-24 (`Interview`): the two typed HID
+`ReceiveAsync` methods return `Task<byte[]>`; all other buffer APIs follow existing memory rules.
+This API-specific exception covers `IFidoHidConnection.ReceiveAsync`, `IOtpHidConnection.ReceiveAsync`,
+and their direct implementation/forwarding paths. Built-in owners already publish whole arrays; the
+synchronous expert facades can transfer these without backing-array recovery or an extra copy.
+
+Successful receive transfers independent unpooled storage. Custom typed providers must not reuse it;
+SDK adapters copy validated legacy reports without mutating potentially shared provider storage.
+Protocols clear consumed reports and retain the published OTP status backing array and successful
+logical results. Native admission, drain, framing, `IHidConnection.GetReport()` and logical response
+contracts are unchanged. This is managed ownership evidence, not platform qualification or all-copy erasure.
 
 ### AG-14 firmware rule detail
 

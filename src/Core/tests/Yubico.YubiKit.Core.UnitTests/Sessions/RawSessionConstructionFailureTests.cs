@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Protocols.Otp.Hid;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
@@ -149,7 +148,7 @@ public class RawSessionConstructionFailureTests
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
         public void Dispose() => DisposeCount++;
@@ -170,7 +169,7 @@ public class RawSessionConstructionFailureTests
         public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
         public void Dispose() => DisposeCount++;

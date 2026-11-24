@@ -1,7 +1,6 @@
 // Copyright 2025 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Devices;
 
@@ -34,12 +33,7 @@ internal sealed class MacOSHidFeatureReportConnection : IHidConnection
 
     public byte[] GetReport()
     {
-        ReadOnlyMemory<byte> report = _connection.GetReportAsync().GetAwaiter().GetResult();
-        // The OTP owner allocates one whole array per GET and relinquishes it to the caller.
-        if (!MemoryMarshal.TryGetArray(report, out ArraySegment<byte> segment) || segment.Array is not { } array ||
-            segment.Offset != 0 || segment.Count != array.Length)
-            throw new InvalidOperationException("OTP report owner did not return a whole array.");
-        return array;
+        return _connection.GetReportAsync().GetAwaiter().GetResult();
     }
 
     public void SetReport(byte[] report)

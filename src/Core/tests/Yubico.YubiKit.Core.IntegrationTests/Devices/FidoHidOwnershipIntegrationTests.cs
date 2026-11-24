@@ -17,7 +17,6 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Tests.Shared;
-using Yubico.YubiKit.Tests.Shared.Infrastructure;
 
 namespace Yubico.YubiKit.Core.IntegrationTests.Devices;
 
@@ -93,7 +92,7 @@ public class FidoHidOwnershipIntegrationTests
         for (var attempt = 0; attempt < 8; attempt++)
         {
             var response = await connection.ReceiveAsync(cancellationToken);
-            var span = response.Span;
+            var span = response.AsSpan();
 
             if (span.Length < 7 + NonceLength)
                 continue;

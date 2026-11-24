@@ -356,6 +356,9 @@ finally
 
 `RawCtapHidSession` and `RawOtpHidSession` are the HID equivalents, created with
 `device.CreateRawCtapHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
+The lower-level typed FIDO and OTP `ReceiveAsync` methods transfer independent `byte[]` reports;
+clear sensitive report bytes after use. Logical raw-session responses and the legacy `GetReport()`
+contract are unchanged. See [typed HID receive ownership](../../docs/MEMORY-MANAGEMENT.md#typed-hid-receive-ownership).
 
 `RawCtapHidSession` (formerly `RawFidoHidSession`) exchanges shared CTAPHID commands, not
 CTAP2 operations. FIDO HID connection types and `ConnectionType.HidFido` retain their names.

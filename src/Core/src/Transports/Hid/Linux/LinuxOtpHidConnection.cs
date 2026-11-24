@@ -81,7 +81,7 @@ internal sealed class LinuxOtpHidConnection : IOtpHidConnection
     /// </remarks>
     /// <param name="cancellationToken">Cancels GET only before native dispatch.</param>
     /// <returns>A task yielding eight caller-owned payload bytes after native GET completes.</returns>
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
         _owner.ReceiveAsync(cancellationToken);
 
     /// <summary>Stops admission and synchronously waits for the shared native shutdown outcome.</summary>

@@ -77,7 +77,7 @@ internal sealed class RegisteredFidoHidConnection(
     public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
         inner.SendAsync(packet, cancellationToken);
 
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
         inner.ReceiveAsync(cancellationToken);
 
     public void Dispose() => _disposal.Dispose(inner.Dispose);
@@ -99,7 +99,7 @@ internal sealed class RegisteredOtpHidConnection(
     public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
         inner.SendAsync(report, cancellationToken);
 
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
         inner.ReceiveAsync(cancellationToken);
 
     public void Dispose() => _disposal.Dispose(inner.Dispose);

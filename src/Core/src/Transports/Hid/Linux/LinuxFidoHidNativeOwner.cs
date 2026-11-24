@@ -45,7 +45,7 @@ internal sealed class LinuxFidoHidNativeOwner
     private Exception? _workerFailure;
     private LinuxFileSafeHandle? _handle;
     private ILinuxHidReadRegistration? _registration;
-    private TaskCompletionSource<ReadOnlyMemory<byte>>? _reader;
+    private TaskCompletionSource<byte[]>? _reader;
     private CancellationTokenRegistration _readerCancellation;
     private bool _typedReader;
     private bool _active;
@@ -302,13 +302,13 @@ internal sealed class LinuxFidoHidNativeOwner
     /// mean immutable or automatically erased. Sensitive successful output requires caller-managed
     /// backing-storage cleanup; copying it does not erase the original. Continuations run asynchronously.
     /// </remarks>
-    internal Task<ReadOnlyMemory<byte>> ReceiveAsync(bool typed, CancellationToken token)
+    internal Task<byte[]> ReceiveAsync(bool typed, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         lock (_sync)
         {
             Admit();
-            var reader = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var reader = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
             _reader = reader;
             _typedReader = typed;
             if (_reports.TryDequeue(out var report)) CompleteReadLocked(report);
@@ -323,7 +323,7 @@ internal sealed class LinuxFidoHidNativeOwner
         }
     }
 
-    private void CancelRead(TaskCompletionSource<ReadOnlyMemory<byte>> reader, CancellationToken token)
+    private void CancelRead(TaskCompletionSource<byte[]> reader, CancellationToken token)
     {
         lock (_sync)
         {

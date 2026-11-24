@@ -124,7 +124,7 @@ public class RawOtpHidSessionTests
 
     private sealed class ScriptedOtpConnection : IOtpHidConnection
     {
-        private readonly Queue<ReadOnlyMemory<byte>> _reports = new();
+        private readonly Queue<byte[]> _reports = new();
         private TaskCompletionSource? _receiveHold;
 
         public List<byte[]> SentReports { get; } = [];
@@ -134,7 +134,7 @@ public class RawOtpHidSessionTests
         public TaskCompletionSource ReceiveStarted { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        public void Enqueue(ReadOnlyMemory<byte> report) => _reports.Enqueue(report);
+        public void Enqueue(byte[] report) => _reports.Enqueue(report);
 
         public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
         {
@@ -143,7 +143,7 @@ public class RawOtpHidSessionTests
             return Task.CompletedTask;
         }
 
-        public async Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public async Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             TaskCompletionSource? hold = _receiveHold;

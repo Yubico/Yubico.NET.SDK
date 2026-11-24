@@ -1023,7 +1023,7 @@ public class Ctap2SessionTests
             return Task.CompletedTask;
         }
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             byte[] response = _responseCount++ switch
             {
@@ -1035,7 +1035,7 @@ public class Ctap2SessionTests
                 5 or 6 when resetSucceeds => Packet(0x01020304, CtapConstants.CtapHidCbor, [0x00, .. getInfo]),
                 _ => Packet(0x01020304, CtapConstants.CtapHidCbor, [(byte)CtapStatus.UserActionTimeout])
             };
-            return Task.FromResult<ReadOnlyMemory<byte>>(response);
+            return Task.FromResult(response);
         }
 
         private byte[] ResetResponse()

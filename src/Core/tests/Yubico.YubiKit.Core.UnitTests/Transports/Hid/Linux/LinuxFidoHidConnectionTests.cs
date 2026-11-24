@@ -374,7 +374,7 @@ public class LinuxFidoHidConnectionTests
             api.Reports.Enqueue(report);
         }
         for (int i = 0; i < 5; i++) reactor.Ready();
-        for (int i = 0; i < 129; i++) Assert.Equal((byte)i, (await connection.ReceiveAsync(Token)).Span[0]);
+        for (int i = 0; i < 129; i++) Assert.Equal((byte)i, (await connection.ReceiveAsync(Token))[0]);
         Assert.False(reactor.RemovalRequested);
     }
 

@@ -137,8 +137,8 @@ public class PhysicalYubiKeyTests
         public Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(Array.Empty<byte>());
 
         public void Dispose() { }
 

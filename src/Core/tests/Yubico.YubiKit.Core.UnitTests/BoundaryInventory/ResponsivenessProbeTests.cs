@@ -198,7 +198,7 @@ public class ResponsivenessProbeTests
         try { probe.AssertResponsive(); }
         finally { await probe.ReleaseAndDrainAsync(); }
         var receiving = await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
-        Assert.Equal(8, (await ((Task<ReadOnlyMemory<byte>>)receiving).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Length);
+        Assert.Equal(8, (await Assert.IsType<Task<byte[]>>(receiving).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Length);
     }
 
     private sealed class BlockingHidConnection(WithheldNativeProbe probe, int reportSize = 8) : IHidConnection

@@ -31,7 +31,7 @@ internal sealed class LinuxOtpHidNativeOwner
     private Action? _work;
     // Independent of the dispatch delegate: loop failure must terminalize accepted work.
     private TaskCompletionSource? _workCompletion;
-    private TaskCompletionSource<ReadOnlyMemory<byte>>? _reader;
+    private TaskCompletionSource<byte[]>? _reader;
     private byte[]? _outputCopy;
     private byte[]? _inputCopy;
     private LinuxFileSafeHandle? _handle;
@@ -250,10 +250,10 @@ internal sealed class LinuxOtpHidNativeOwner
     /// copy alone does not erase the original. A successful GET can complete successfully despite
     /// cancellation after dispatch. Admission is locked, overlap is rejected, and continuations run asynchronously.
     /// </remarks>
-    internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken token)
+    internal Task<byte[]> ReceiveAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var reader = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var reader = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (_sync)
         {
             Admit();
@@ -264,7 +264,7 @@ internal sealed class LinuxOtpHidNativeOwner
         return reader.Task;
     }
 
-    private void Receive(CancellationToken token, TaskCompletionSource<ReadOnlyMemory<byte>> reader)
+    private void Receive(CancellationToken token, TaskCompletionSource<byte[]> reader)
     {
         Exception? error = null;
         bool cancelled = token.IsCancellationRequested;

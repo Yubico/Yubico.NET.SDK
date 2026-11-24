@@ -48,7 +48,7 @@ public sealed class HidConnectionCompatibilityTests
     private static async Task ExerciseReportsAsync(
         ConsumerConnection consumer,
         Func<ReadOnlyMemory<byte>, CancellationToken, Task> send,
-        Func<CancellationToken, Task<ReadOnlyMemory<byte>>> receive)
+        Func<CancellationToken, Task<byte[]>> receive)
     {
         byte[] callerInput = new byte[consumer.OutputReportSize];
         callerInput[0] = 0x5a;
@@ -59,10 +59,15 @@ public sealed class HidConnectionCompatibilityTests
         Assert.All(sdkCopy, value => Assert.Equal(0, value));
         Assert.Equal(0x5a, callerInput[0]);
 
-        ReadOnlyMemory<byte> response = await receive(CancellationToken.None);
+        byte[] response = await receive(CancellationToken.None);
         Assert.Equal(1, consumer.ReceiveCount);
         Assert.Equal(consumer.InputReportSize, response.Length);
-        Assert.Equal(0x37, response.Span[0]);
+        Assert.Equal(0x37, response[0]);
+        Array.Clear(response);
+        byte[] next = await receive(CancellationToken.None);
+        Assert.Equal(2, consumer.ReceiveCount);
+        Assert.NotSame(response, next);
+        Assert.Equal(0x37, next[0]);
     }
 
     private sealed class ConsumerConnection(int size, ConnectionType type) : IHidConnection

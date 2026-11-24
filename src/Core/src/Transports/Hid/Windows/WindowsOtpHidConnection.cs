@@ -53,7 +53,7 @@ internal sealed class WindowsOtpHidConnection : IOtpHidConnection
     /// not cleared at disposal; the caller owns its sensitive-data cleanup. Cancellation cannot detach
     /// a dispatched GET. HidD success supplies no actual transfer count.
     /// </remarks>
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
         _owner.ReceiveAsync(cancellationToken);
 
     /// <summary>Synchronously drains the shared native lifetime, with no timeout and no worker self-wait.</summary>

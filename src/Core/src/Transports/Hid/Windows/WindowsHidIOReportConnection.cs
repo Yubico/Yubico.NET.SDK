@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
 using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
@@ -46,11 +45,7 @@ internal sealed class WindowsHidIOReportConnection : IHidConnection
     public byte[] GetReport()
     {
         _owner.ThrowIfWorkerThread();
-        var report = _owner.ReceiveAsync(false, CancellationToken.None).GetAwaiter().GetResult();
-        // Transfer the exact independent payload array, not native report-ID framing or a second copy.
-        return MemoryMarshal.TryGetArray(report, out var segment) && segment.Array is { } array &&
-            segment.Offset == 0 && segment.Count == array.Length
-            ? array : throw new InvalidOperationException("Windows HID owner did not return an exact owned report.");
+        return _owner.ReceiveAsync(false, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     public void SetReport(byte[] report)

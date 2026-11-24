@@ -41,7 +41,7 @@ internal sealed class WindowsFidoHidConnection : IFidoHidConnection, ITerminalWa
 
     /// <summary>Transfers independent validated payload storage through the actual operation TCS task.</summary>
     /// <remarks>Caller owns successful storage and its sensitive-data clearing. Cancellation waits for native completion.</remarks>
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
         _owner.ReceiveAsync(true, cancellationToken);
 
     /// <summary>Stops admission and requests cancellation; native completion still controls retirement.</summary>

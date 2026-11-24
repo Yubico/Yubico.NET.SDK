@@ -370,6 +370,13 @@ L6a changed no shipping source sites; its historical 219-site snapshot remains d
 The current merged inventory incorporates upstream discovery/monitor changes; see the boundary-inventory README. See
 [managed evidence and remaining L6b scope](../../docs/research/linux-managed-acceptance.md).
 
+### Typed HID report ownership
+
+Typed FIDO/OTP `ReceiveAsync` transfers whole independent report arrays under the two-API exception
+in [typed HID receive ownership](../../docs/MEMORY-MANAGEMENT.md#typed-hid-receive-ownership).
+Clear consumed reports, not borrowed legacy provider arrays or published logical results. Keep the
+existing native owner task-completion and drain boundaries when forwarding a report.
+
 ### Listener and Native Retry Loops
 
 Background listeners and native/resource-manager retry loops must block, back off, exit, or throttle on every failure path. Do not ignore native return values inside loops unless another call in the same path provides a bounded wait. Persistent failures such as stale PC/SC handles must have no-hardware fault-injection tests that prove call cadence is backoff-bounded.

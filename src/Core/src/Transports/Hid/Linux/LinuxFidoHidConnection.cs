@@ -83,7 +83,7 @@ internal sealed class LinuxFidoHidConnection : IFidoHidConnection, ITerminalWake
     /// </remarks>
     /// <param name="cancellationToken">Cancels this pending receive, not the device's protocol exchange.</param>
     /// <returns>A task yielding 64 caller-owned payload bytes, with no synthetic report-ID prefix.</returns>
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
         _owner.ReceiveAsync(true, cancellationToken);
 
     /// <summary>Terminates input and wakes a pending reader without waiting for native release.</summary>

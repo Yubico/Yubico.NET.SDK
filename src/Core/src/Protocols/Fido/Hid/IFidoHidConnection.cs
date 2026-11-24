@@ -66,6 +66,7 @@ public interface IFidoHidConnection : IConnection
     ///     alone does not make a raw protocol exchange reusable.
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The received packet (64 bytes).</returns>
-    Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default);
+    /// <returns>The complete, independent, unpooled 64-byte packet, transferred to the caller. The provider
+    /// must not reuse, modify, or clear it after transfer. The caller clears sensitive bytes after use.</returns>
+    Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default);
 }

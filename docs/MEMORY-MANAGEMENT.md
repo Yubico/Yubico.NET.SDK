@@ -9,6 +9,8 @@ This is the JIT reference for buffer choices, APDU handling, and allocation anti
 
 ## Decision Tree
 
+The only exception for the typed HID receive paths is documented below; all other buffer APIs follow the existing memory rules.
+
 ```
 Need byte buffer?
 ├─ Synchronous?
@@ -21,6 +23,22 @@ Need byte buffer?
    ├─ Caller provides? → Accept Span<byte> or Memory<byte> ✅
    └─ Must allocate? → new byte[] ⚠️ LAST RESORT
 ```
+
+## Typed HID receive ownership
+
+`IFidoHidConnection.ReceiveAsync` and `IOtpHidConnection.ReceiveAsync` return `Task<byte[]>`, including
+their direct implementation and forwarding paths. This exception does not apply to other buffer APIs.
+A successful receive transfers the complete, independent, unpooled report array to the caller. The
+provider no longer writes, reuses, or clears it; only unpublished storage remains provider-owned.
+Transfer proves that the provider has finished using that array, not that the connection has drained.
+Clear sensitive returned reports after their last use, and keep successful logical outputs alive for
+their callers. Use spans or memory views when borrowing array regions, not array ranges that copy.
+
+The six built-in owners already publish whole arrays. Sharing that result type with the synchronous
+`IHidConnection.GetReport()` facades avoids backing-array recovery, extra copies, and task-conversion
+wrappers. The legacy `GetReport()` contract itself is unchanged: custom providers may reuse their
+storage. SDK adapters validate and then copy that borrowed array without clearing the source. Direct
+implementers of the typed interfaces must supply an independent array on every successful receive.
 
 ## Hierarchy (most preferred to least)
 

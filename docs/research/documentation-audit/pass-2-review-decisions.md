@@ -62,6 +62,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-45](#ag-45-core-ordinary-capability-mask-width) | 2026-11-24 | Dennis approved `DeviceCapabilities : uint` and full ordinary-mask decoding with a 32-bit SDK limit. | Approved for the residual width facet of CORE-A-C006 (FPT-006) |
 | [AG-46](#ag-46-core-duplicate-device-information-tags) | 2026-11-24 | Dennis approved ignoring repeated unknown device-information tags under the forward-compatibility policy. | Approved for the top-level duplicate facet of CORE-A-C016 (FPT-016) |
 | [AG-47](#ag-47-core-typed-hid-receive-ownership) | 2026-11-24 | Dennis approved caller-owned arrays for the two typed HID receives and cleanup of consumed reports. | Approved for CORE-B5-C005 (FPT-062) within the two-API exception below |
+| [AG-48](#ag-48-core-scp-key-reference-value) | 2026-11-24 | Dennis approved two-field SCP key references with field-based equality and a zero-pair default encoding. | Approved for CORE-B6-C008 (FPT-074) |
 
 ### AG-8 classification run
 
@@ -884,6 +885,15 @@ SDK adapters copy validated legacy reports without mutating potentially shared p
 Protocols clear consumed reports and retain the published OTP status backing array and successful
 logical results. Native admission, drain, framing, `IHidConnection.GetReport()` and logical response
 contracts are unchanged. This is managed ownership evidence, not platform qualification or all-copy erasure.
+
+### AG-48 Core SCP key reference value
+
+Dennis approved `CORE-B6-C008` (`FPT-074`) on 2026-11-24 (`Interview`). Store only KID and KVN;
+encode the current fields into a new two-byte buffer and compare by field values. Zero initialization,
+parameterless construction, and explicit `(0, 0)` all encode `00 00`; the named factory default is still
+`01 FF`. For tag `83`, this replaces an empty encoding with `83 02 00 00` for zero initialization and
+does not imply device acceptance. Explicit reference byte order, nullable OCE absence and fallback,
+and the separate AG-30 `KeyReplacement` policy are unchanged.
 
 ### AG-14 firmware rule detail
 

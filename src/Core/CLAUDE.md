@@ -461,6 +461,9 @@ Core owns SCP key-parameter types, handshake processing, and the secure PC/SC pr
 Applet session factories accept the key parameters and establish the channel through the internal
 `PcscProtocol.InitializeScpAsync` capability; consumers cannot construct the decorator directly.
 
+`KeyReference` stores only KID and KVN; each encoding uses a new two-byte buffer in that order.
+Zero initialization encodes `00 00`, unlike the named factory reference `KeyReference.Default` (`01 FF`).
+
 Parameters retain contained owners. `StaticKeys` clones its source spans; `Scp03KeyParameters` retains
 and disposes that exact object. `Scp11KeyParameters` copies the certificate collection but retains its
 key/certificate objects, disposing the OCE private key and certificates while leaving the SD public

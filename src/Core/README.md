@@ -760,6 +760,8 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
 
 ## Security notes
 
+- `KeyReference` compares by KID and KVN and encodes those current values into a new two-byte buffer.
+  `default(KeyReference)` encodes `00 00`; the named factory reference `KeyReference.Default` is `01 FF`.
 - Dispose SCP parameters and their contained owners as described above; clear source buffers separately.
   SCP03 clears derived session keys if startup fails after derivation and before handing off session state;
   this does not clear supplied static keys.

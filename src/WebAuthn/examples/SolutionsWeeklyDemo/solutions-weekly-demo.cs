@@ -24,57 +24,45 @@ using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 using Yubico.YubiKit.WebAuthn.Preferences;
 
-// 1. Wait for a YubiKey to be plugged in.
+// 1. Wait for a YubiKey and ask it what it is.
 Console.WriteLine("Plug in a YubiKey...");
-var yubiKey = await WaitForYubiKeyAsync();
+var yubiKey = (await YubiKeyManager.WatchAsync().OfType<DeviceAdded>().FirstAsync()).Device;
 
-// 2. Ask the key what it is.
 var info = await yubiKey.GetDeviceInfoAsync();
 Console.WriteLine($"YubiKey {info.FormFactor}, firmware {info.FirmwareVersion}");
 
-// 3. Open a WebAuthn client for our (pretend) website.
-if (!WebAuthnOrigin.TryParse("https://example.com", out var origin))
-{
-    throw new InvalidOperationException("Invalid WebAuthn origin.");
-}
-
-var sessionOptions = new SessionCreationOptions { UserPresencePrompt = new ConsoleTouchPrompt() };
+// 2. Open a WebAuthn client, with one touch prompt for every operation.
+WebAuthnOrigin.TryParse("https://example.com", out var origin); // demo: known-good origin
 var clientOptions = new WebAuthnClientOptions
 {
     // The app decides which websites may use which RP IDs. Demo: exactly one pair.
     RpIdValidator = (o, rpId) => o.StringValue == "https://example.com" && rpId == "example.com"
 };
+var sessionOptions = new SessionCreationOptions { UserPresencePrompt = new ConsoleTouchPrompt() };
 
-await using var client = await yubiKey.CreateWebAuthnClientAsync(origin, clientOptions, sessionOptions);
+await using var client = await yubiKey.CreateWebAuthnClientAsync(origin!, clientOptions, sessionOptions);
 
-// 4. Register a passkey. Also ask the key for a separate signing key (previewSign, experimental).
-// Challenges normally come from your server, fresh for every ceremony.
+// 3. Register a passkey, plus a separate signing key bound to it (previewSign, experimental).
 var registration = await client.MakeCredentialAsync(new PublicKeyCredentialCreationOptions
 {
-    Challenge = RandomNumberGenerator.GetBytes(32),
+    Challenge = RandomNumberGenerator.GetBytes(32), // normally from your server
     Rp = new PublicKeyCredentialRpEntity("example.com", "Example"),
     User = new PublicKeyCredentialUserEntity(RandomNumberGenerator.GetBytes(16), "ada", "Ada"),
     PubKeyCredParams = [CoseAlgorithm.Es256],
-    UserVerification = UserVerificationPreference.Discouraged,
+    UserVerification = UserVerificationPreference.Discouraged, // touch only, no PIN
     Extensions = new RegistrationExtensionInputs(
         PreviewSign: PreviewSignRegistrationInput.GenerateKey(CoseAlgorithm.ArkgP256))
 });
-
 Console.WriteLine($"Registered passkey {Convert.ToHexString(registration.CredentialId.Span)[..16]}...");
 
-// The key silently skips extensions it doesn't support, so check before relying on it.
-var signingKey = registration.ClientExtensionResults?.PreviewSign?.GeneratedKey;
-Console.WriteLine(signingKey is null
-    ? "This key does not support previewSign; skipping the document signature."
-    : "Got a separate signing key bound to the passkey (previewSign).");
+var signingKey = registration.ClientExtensionResults!.PreviewSign!.GeneratedKey;
 
-// 5. The server prepares a document for the key to sign alongside the sign-in.
-var document = Encoding.UTF8.GetBytes("I approve transfer #4711");
-var signRequest = signingKey is null ? null : PretendServer.PrepareSignRequest(signingKey, document);
-
-// 6. Sign in. The SDK knows *what* the key is doing (a sign-in);
-// only the app knows *why*, so the app attaches its intent around the call.
+// 4. Sign in, and sign a document in the same touch.
+// The SDK knows *what* the key is doing; only the app knows *why*, so the app adds its intent.
+var document = "I approve transfer #4711";
+var signRequest = PretendServer.PrepareSignRequest(signingKey, document);
 var signInChallenge = RandomNumberGenerator.GetBytes(32);
+
 IReadOnlyList<MatchedCredential> matches;
 using (UserPresenceIntent.BeginScope("unlock your notes"))
 {
@@ -84,44 +72,18 @@ using (UserPresenceIntent.BeginScope("unlock your notes"))
         RpId = "example.com",
         AllowCredentials = [new PublicKeyCredentialDescriptor(registration.CredentialId)],
         UserVerification = UserVerificationPreference.Discouraged,
-        Extensions = signRequest is null
-            ? null
-            : new AuthenticationExtensionInputs(
-                PreviewSign: PreviewSignAuthenticationInput.CreateSignByCredential(
-                    new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
-                    {
-                        [registration.CredentialId] = signRequest.SigningParams
-                    }))
+        Extensions = new AuthenticationExtensionInputs(
+            PreviewSign: signRequest.ForCredential(registration.CredentialId))
     });
 }
-
 var assertion = await matches[0].SelectAsync();
 
-// 7. Your server does this part. We do it here so you can see it check out.
-var signedIn = PretendServer.VerifyAssertion(registration.PublicKey, signInChallenge, assertion);
-Console.WriteLine(signedIn ? "Unlocked. Sign-in signature verified." : "Sign-in signature did NOT verify.");
+// 5. Your server checks both signatures. We do it here so you can see them check out.
+var signedIn = PretendServer.VerifySignIn(registration.PublicKey, signInChallenge, assertion);
+var documentSigned = signRequest.Verify(assertion.ClientExtensionResults!.PreviewSign!.Signature);
 
-var documentSignature = assertion.ClientExtensionResults?.PreviewSign?.Signature;
-if (signRequest is not null)
-{
-    Console.WriteLine(documentSignature is { } sig && signRequest.Verify(document, sig.Span)
-        ? "Document signature verified."
-        : "Document signature missing or did NOT verify.");
-}
-
-static async Task<Yubico.YubiKit.Core.Abstractions.IYubiKey> WaitForYubiKeyAsync()
-{
-    await foreach (var change in YubiKeyManager.WatchAsync())
-    {
-        if (change is DeviceAdded added)
-        {
-            Console.WriteLine("YubiKey detected.");
-            return added.Device;
-        }
-    }
-
-    throw new InvalidOperationException("Device monitoring stopped.");
-}
+Console.WriteLine($"Sign-in verified: {signedIn}");
+Console.WriteLine($"Document \"{document}\" signature verified: {documentSigned}");
 
 /// <summary>
 /// Tells the user to touch the key. One prompt, registered once per session, works for
@@ -131,19 +93,8 @@ internal sealed class ConsoleTouchPrompt : IUserPresencePrompt
 {
     public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken)
     {
-        // What the key is doing. The SDK tells us.
-        var operation = context.Operation switch
-        {
-            UserPresenceOperations.Ctap2.MakeCredential => "passkey registration",
-            UserPresenceOperations.Ctap2.GetAssertion => "sign-in",
-            _ => "key operation"
-        };
-
-        // Why the user is doing it. Only the app knows; it comes from UserPresenceIntent.BeginScope.
-        Console.WriteLine(context.Intent is { } intent
-            ? $"  -> Touch your YubiKey to {intent} ({operation})"
-            : $"  -> Touch your YubiKey to confirm the {operation}");
-
+        // Operation: what the key is doing (from the SDK). Intent: why (from the app's BeginScope).
+        Console.WriteLine($"  -> Touch your YubiKey to {context.Intent ?? "continue"} ({context.Operation})");
         return ValueTask.CompletedTask;
     }
 
@@ -160,40 +111,32 @@ internal sealed class ConsoleTouchPrompt : IUserPresencePrompt
 /// </summary>
 internal static class PretendServer
 {
-    public static bool VerifyAssertion(CoseKey publicKey, ReadOnlySpan<byte> expectedChallenge, AuthenticationResponse assertion)
+    public static bool VerifySignIn(CoseKey publicKey, ReadOnlySpan<byte> expectedChallenge, AuthenticationResponse assertion)
     {
         // Is this a sign-in, for the challenge we just issued? (An old, replayed response fails here.)
         using var clientData = JsonDocument.Parse(assertion.ClientData.JsonBytes);
-        var type = clientData.RootElement.GetProperty("type").GetString();
-        var challenge = clientData.RootElement.GetProperty("challenge").GetString();
-        if (type != "webauthn.get" || challenge != Base64Url.EncodeToString(expectedChallenge))
-        {
-            return false;
-        }
+        var isFreshSignIn =
+            clientData.RootElement.GetProperty("type").GetString() == "webauthn.get" &&
+            clientData.RootElement.GetProperty("challenge").GetString() == Base64Url.EncodeToString(expectedChallenge);
 
-        if (publicKey is not CoseEc2Key ec2)
-        {
-            return false;
-        }
-
+        // WebAuthn signs authenticatorData || SHA-256(clientDataJSON) with the passkey's P-256 key.
+        var key = (CoseEc2Key)publicKey;
         using var ecdsa = ECDsa.Create(new ECParameters
         {
             Curve = ECCurve.NamedCurves.nistP256,
-            Q = new ECPoint { X = ec2.X.ToArray(), Y = ec2.Y.ToArray() }
+            Q = new ECPoint { X = key.X.ToArray(), Y = key.Y.ToArray() }
         });
-
-        // WebAuthn signs authenticatorData || SHA-256(clientDataJSON).
         byte[] signedData = [.. assertion.RawAuthenticatorData.Span, .. assertion.ClientData.Hash.Span];
 
-        return ecdsa.VerifyData(signedData, assertion.Signature.Span, HashAlgorithmName.SHA256,
-            DSASignatureFormat.Rfc3279DerSequence);
+        return isFreshSignIn && ecdsa.VerifyData(signedData, assertion.Signature.Span,
+            HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
     }
 
     /// <summary>
     /// ARKG: from the seed key the YubiKey returned at registration, the server derives a fresh public key
     /// and tells the key how to sign with the matching private key. EXPERIMENTAL; not production guidance.
     /// </summary>
-    public static SignRequest PrepareSignRequest(GeneratedSigningKey signingKey, byte[] document)
+    public static SignRequest PrepareSignRequest(GeneratedSigningKey signingKey, string document)
     {
         var seed = (CoseArkgP256SeedKey)signingKey.PublicKey;
         var derived = ArkgBridge.ToCtap2(signingKey.KeyHandle, seed)
@@ -201,15 +144,20 @@ internal static class PretendServer
 
         var signingParams = new PreviewSignSigningParams(
             signingKey.KeyHandle,
-            SHA256.HashData(document),
+            SHA256.HashData(Encoding.UTF8.GetBytes(document)),
             Arkg.PreviewSignCbor.EncodeAdditionalArgs(Arkg.CoseSignArgs.ArkgP256(derived.ArkgKeyHandle, derived.Context)));
 
-        return new SignRequest(signingParams, derived);
+        return new SignRequest(document, signingParams, derived);
     }
 
-    internal sealed record SignRequest(PreviewSignSigningParams SigningParams, Arkg.PreviewSignDerivedKey DerivedKey)
+    internal sealed record SignRequest(string Document, PreviewSignSigningParams SigningParams, Arkg.PreviewSignDerivedKey DerivedKey)
     {
-        public bool Verify(byte[] document, ReadOnlySpan<byte> signature) => DerivedKey.VerifySignature(document, signature);
+        public PreviewSignAuthenticationInput ForCredential(ReadOnlyMemory<byte> credentialId) =>
+            PreviewSignAuthenticationInput.CreateSignByCredential(
+                new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams> { [credentialId] = SigningParams });
+
+        public bool Verify(ReadOnlyMemory<byte> signature) =>
+            DerivedKey.VerifySignature(Encoding.UTF8.GetBytes(Document), signature.Span);
     }
 }
 
@@ -225,7 +173,7 @@ internal static class ArkgBridge
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
             null,
             [typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(CoseAlgorithm)],
-            null) ?? throw new InvalidOperationException("Arkg.PreviewSignGeneratedKey constructor not found.");
+            null)!;
 
         return (Arkg.PreviewSignGeneratedKey)ctor.Invoke([keyHandle, seed.BlPublicKey, seed.KemPublicKey, seed.Algorithm]);
     }

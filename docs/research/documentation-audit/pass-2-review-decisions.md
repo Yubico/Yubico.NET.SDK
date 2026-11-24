@@ -56,6 +56,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-39](#ag-39-core-chained-apdu-response-cleanup) | 2026-11-24 | Dennis approved clearing consumed APDU response fragments and the live assembly buffer. | Approved for the receiver-only facet of CORE-B6-C002 (FPT-068) |
 | [AG-40](#ag-40-core-scp03-pre-handoff-key-cleanup) | 2026-11-24 | Dennis approved disposing derived SCP03 session keys on pre-handoff failure. | Approved for the pre-handoff facet of CORE-B6-C006 (FPT-072) |
 | [AG-41](#ag-41-core-pcsc-listener-success-cadence) | 2026-11-24 | Dennis approved a 1,000 ms combined native and managed interval after successful PC/SC listener status calls. | Approved for CORE-B1-C003 (FPT-024), including PnP-only success |
+| [AG-42](#ag-42-core-macos-hid-enumeration-null-handles) | 2026-11-24 | Dennis approved treating a null macOS HID manager as a scan error and a null copied device set as empty. | Approved for CORE-B3-C002 (FPT-041) |
 
 ### AG-8 classification run
 
@@ -789,6 +790,15 @@ interval before the next reader-list check. Failure backoff, reader-name hints, 
 are unchanged. Reader-list checks may be delayed by up to the remainder; transient changes between
 checks may be missed. Stop wakes the managed wait but must still cancel and join the native worker
 as before. This wake is not native drain proof. Partial startup and timed-out restart remain open.
+
+### AG-42 Core macOS HID enumeration null handles
+
+Dennis approved `CORE-B3-C002` (`FPT-041`) on 2026-11-24 (`Interview`). A null result from
+`IOHIDManagerCreate` fails the scan with `PlatformApiException`. A null result from
+`IOHIDManagerCopyDevices` yields an empty HID snapshot. It does not distinguish an absent device set
+from every possible native failure; Dennis accepted that the empty result can remove previously
+published HID interfaces. Guard before native use and release only acquired handles. The small internal
+enumeration seam supplies portable managed coverage, not macOS native qualification.
 
 ### AG-14 firmware rule detail
 

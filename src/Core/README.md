@@ -110,6 +110,9 @@ handled per path: one-shot `Find…Async` logs a warning and returns the other t
 call; a monitor never publishes a partial scan, so the timeout fails `CreateMonitorAsync` on the first scan
 and, after initialization, keeps the previous snapshot until a later scan succeeds.
 
+On macOS, a null HID manager fails the scan. A null copied HID device set instead counts as an empty
+HID result and can remove previously published interfaces; it does not prove that no device is attached.
+
 Share one host-owned monitor between long-lived components rather than letting each component take over
 tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a
 monitor for selection, but must explicitly read Management for current configuration.

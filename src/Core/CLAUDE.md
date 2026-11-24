@@ -146,6 +146,12 @@ creation-only SCP parameters to the callback rather than retaining them on the s
 its own default SCP03 parameters after confirmed reset, not the caller's original parameters. Base `Protocol`
 remains the disposal owner even while applet setup is incomplete.
 
+### macOS HID enumeration
+
+macOS HID enumeration fails on a null `IOHIDManagerCreate` result and treats a null copied
+device set as empty, not as proof that no physical device is attached. `MacOSHidEnumeration` owns
+both temporary references; its platform-neutral boundary supports managed tests without IOKit.
+
 ### Built-in macOS FIDO lifetime
 
 The built-in macOS FIDO report connection opens asynchronously through

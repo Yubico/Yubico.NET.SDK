@@ -55,57 +55,41 @@ internal sealed class MacOSHidInterface : IHidInterface
     /// <returns>
     ///     An enumerable list of all the supported Yubico HID devices present on the system.
     /// </returns>
-    public static IReadOnlyList<IHidInterface> GetList()
+    public static IReadOnlyList<IHidInterface> GetList() => MacOSHidEnumeration.GetList(
+        static () => IOKitNativeMethods.IOHIDManagerCreate(0, 0),
+        static manager => IOKitNativeMethods.IOHIDManagerSetDeviceMatching(manager, 0),
+        IOKitNativeMethods.IOHIDManagerCopyDevices,
+        CFNativeMethods.CFRelease,
+        ReadDeviceSet);
+
+    private static IReadOnlyList<IHidInterface> ReadDeviceSet(nint deviceSet)
     {
-        nint manager = 0;
-        nint deviceSet = 0;
+        long deviceSetCount = CFNativeMethods.CFSetGetCount(deviceSet);
 
-        try
+        var devices = new IntPtr[deviceSetCount];
+        CFNativeMethods.CFSetGetValues(deviceSet, devices);
+
+        var result = new List<IHidInterface>((int)deviceSetCount);
+        foreach (var device in devices)
         {
-            manager = IOKitNativeMethods.IOHIDManagerCreate(IntPtr.Zero, 0);
-            IOKitNativeMethods.IOHIDManagerSetDeviceMatching(manager, IntPtr.Zero);
-
-            deviceSet = IOKitNativeMethods.IOHIDManagerCopyDevices(manager);
-
-            long deviceSetCount = CFNativeMethods.CFSetGetCount(deviceSet);
-
-            var devices = new IntPtr[deviceSetCount];
-            CFNativeMethods.CFSetGetValues(deviceSet, devices);
-
-            var result = new List<IHidInterface>((int)deviceSetCount);
-            foreach (var device in devices)
+            var descriptorInfo = new HidDescriptorInfo
             {
-                var descriptorInfo = new HidDescriptorInfo
-                {
-                    VendorId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyVendorId) ?? 0),
-                    ProductId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyProductId) ?? 0),
-                    Usage = (ushort)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsage) ?? 0),
-                    UsagePage = (ushort)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsagePage) ?? 0),
-                    DevicePath = GetEntryId(device).ToString(CultureInfo.InvariantCulture)
-                };
+                VendorId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyVendorId) ?? 0),
+                ProductId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyProductId) ?? 0),
+                Usage = (ushort)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsage) ?? 0),
+                UsagePage = (ushort)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsagePage) ?? 0),
+                DevicePath = GetEntryId(device).ToString(CultureInfo.InvariantCulture)
+            };
 
-                // Only include Yubico devices with supported interface types
-                if (descriptorInfo.VendorId == HidConstants.YubicoVendorId &&
-                    HidInterfaceClassifier.IsSupported(descriptorInfo))
-                {
-                    result.Add(new MacOSHidInterface(GetEntryId(device), descriptorInfo));
-                }
-            }
-
-            return result;
-        }
-        finally
-        {
-            if (manager != IntPtr.Zero)
+            // Only include Yubico devices with supported interface types
+            if (descriptorInfo.VendorId == HidConstants.YubicoVendorId &&
+                HidInterfaceClassifier.IsSupported(descriptorInfo))
             {
-                CFNativeMethods.CFRelease(manager);
-            }
-
-            if (deviceSet != IntPtr.Zero)
-            {
-                CFNativeMethods.CFRelease(deviceSet);
+                result.Add(new MacOSHidInterface(GetEntryId(device), descriptorInfo));
             }
         }
+
+        return result;
     }
 
     /// <summary>

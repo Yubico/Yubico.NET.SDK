@@ -57,6 +57,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-40](#ag-40-core-scp03-pre-handoff-key-cleanup) | 2026-11-24 | Dennis approved disposing derived SCP03 session keys on pre-handoff failure. | Approved for the pre-handoff facet of CORE-B6-C006 (FPT-072) |
 | [AG-41](#ag-41-core-pcsc-listener-success-cadence) | 2026-11-24 | Dennis approved a 1,000 ms combined native and managed interval after successful PC/SC listener status calls. | Approved for CORE-B1-C003 (FPT-024), including PnP-only success |
 | [AG-42](#ag-42-core-macos-hid-enumeration-null-handles) | 2026-11-24 | Dennis approved treating a null macOS HID manager as a scan error and a null copied device set as empty. | Approved for CORE-B3-C002 (FPT-041) |
+| [AG-43](#ag-43-core-windows-hid-listener-disposed-restart) | 2026-11-24 | Dennis approved refusing to restart a disposed Windows HID listener and testing that it cannot attempt registration. | Approved for the disposed-restart facet of CORE-B4-C002 (FPT-049) only |
 
 ### AG-8 classification run
 
@@ -799,6 +800,15 @@ Dennis approved `CORE-B3-C002` (`FPT-041`) on 2026-11-24 (`Interview`). A null r
 from every possible native failure; Dennis accepted that the empty result can remove previously
 published HID interfaces. Guard before native use and release only acquired handles. The small internal
 enumeration seam supplies portable managed coverage, not macOS native qualification.
+
+### AG-43 Core Windows HID listener disposed restart
+
+Dennis approved only the disposed-restart facet of `CORE-B4-C002` (`FPT-049`) and its registration-attempt
+regression on 2026-11-24 (`Interview`). Windows HID `Start()` throws `ObjectDisposedException` before
+allocating callback state or attempting registration on a disposed listener. This does not change `Stop()`,
+disposal, live restart, or platform-wide lifecycle contracts. Failed unregister, callback rooting and
+exception handling, partial startup, and finalizer lifetime issues remain open. The fake registration
+test is managed evidence only. This is the last initial engineering candidate, not Core-pass closure.
 
 ### AG-14 firmware rule detail
 

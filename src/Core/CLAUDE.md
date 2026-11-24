@@ -800,6 +800,9 @@ listener's Trace logging; callbacks are diagnostic rescan hints, never physical-
 `YubiKeyMonitor.WatchAsync` remains snapshot-diffed output after a rescan. Unknown HID removals still
 trigger a rescan rather than being suppressed: they may be the only native signal for a device diff.
 
+Windows HID `Start()` rejects disposed listeners before allocating callback state or calling the native
+registration API. This guard does not change how unregister results are handled or prove callback drain.
+
 `HotplugSignals` owns listener creation and teardown and carries transport hints in a capacity-one
 drop-write channel into the monitor's single-reader loop. Each listener starts independently. A listener
 that throws or reports a post-`Start()` status other than `Started` is logged, stopped/disposed, and skipped,

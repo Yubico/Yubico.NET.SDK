@@ -13,14 +13,13 @@
 // limitations under the License.
 
 using System.Runtime.InteropServices;
+using Yubico.YubiKit.Core.Native.Windows.Cfgmgr32;
 using Yubico.YubiKit.Core.Transports.Hid.Windows;
 
 namespace Yubico.YubiKit.Core.UnitTests.Transports.Hid;
 
 /// <summary>
-/// Verifies <see cref="WindowsHidDeviceListener.ReadSymbolicLink"/> never reads past the
-/// event payload reported by the native notification, even when the buffer is not
-/// NUL-terminated. Pure memory parsing with no P/Invoke, so it runs on all platforms.
+/// Verifies listener admission and bounded notification parsing without calling Windows native APIs.
 /// </summary>
 public class WindowsHidDeviceListenerTests
 {
@@ -29,6 +28,29 @@ public class WindowsHidDeviceListenerTests
     /// <see cref="WindowsHidDeviceListener"/>.
     /// </summary>
     private const int SymbolicLinkOffset = 24;
+
+    [Fact]
+    [Trait("Category", "RuntimeResilience")]
+    public void Start_AfterDisposal_DoesNotAttemptRegistration()
+    {
+        var attempts = new List<(bool HasFilter, bool HasListenerContext, bool HasCallback)>();
+        using var listener = new WindowsHidDeviceListener((
+            IntPtr filter, IntPtr context, NativeMethods.CM_NOTIFY_CALLBACK callback, out IntPtr notificationHandle) =>
+        {
+            attempts.Add((filter != IntPtr.Zero,
+                context != IntPtr.Zero && GCHandle.FromIntPtr(context).Target is WindowsHidDeviceListener,
+                callback is not null));
+            notificationHandle = IntPtr.Zero;
+            return NativeMethods.CmErrorCode.CR_FAILURE;
+        });
+        listener.Dispose();
+
+        var error = Record.Exception(listener.Start);
+
+        Assert.Empty(attempts);
+        Assert.IsType<ObjectDisposedException>(error);
+        Assert.Equal(DeviceListenerStatus.Stopped, listener.Status);
+    }
 
     [Fact]
     public void ReadSymbolicLink_NulTerminatedWithinPayload_ReturnsPath()

@@ -258,7 +258,7 @@ jobs:
 
   build-macos:
     name: Build macOS
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
@@ -474,7 +474,7 @@ jobs:
             runner: macos-15-intel
             os: macos
           - rid: osx-arm64
-            runner: macos-14
+            runner: macos-15
             os: macos
     runs-on: ${{ matrix.runner }}
     steps:

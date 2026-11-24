@@ -147,8 +147,8 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 - Slide line: "Async where the hardware waits."
 
 ### 8. New capabilities
-- **Passkeys in native apps:** a complete WebAuthn client, the part a browser normally plays, for desktop,
-  CLI and service apps. Full registration and sign-in in a few calls.
+- **Passkeys in native apps:** a complete WebAuthn client for desktop, CLI and service apps.
+  Registration and sign-in in a few calls.
 - **Extensions built in:** PRF (derive encryption keys from a passkey), large blobs, credential protection,
   credBlob, credProps, min PIN length, plus experimental previewSign.
 - **OpenPGP, for the first time:** key provisioning, PIN recovery, sign/decrypt/agree, certificates, touch policy.

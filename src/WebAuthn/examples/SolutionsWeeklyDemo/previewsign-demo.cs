@@ -22,6 +22,7 @@ await using var client = await Demo.OpenClientAsync(yubiKey);
 RegistrationResponse registration;
 using (UserPresenceIntent.BeginScope("create a signing key"))
 {
+    // Demo.Registration: standard WebAuthn creation options for example.com (RP, user, ES256, touch only).
     registration = await client.MakeCredentialAsync(Demo.Registration(
         new RegistrationExtensionInputs(
             PreviewSign: PreviewSignRegistrationInput.GenerateKey(CoseAlgorithm.ArkgP256))));
@@ -45,6 +46,7 @@ var signRequest = new PreviewSignSigningParams(
 ReadOnlyMemory<byte> signature;
 using (UserPresenceIntent.BeginScope("sign the payload"))
 {
+    // Demo.SignIn: standard WebAuthn request options for example.com, allowing only this passkey.
     var matches = await client.GetAssertionAsync(Demo.SignIn(
         registration.CredentialId,
         new AuthenticationExtensionInputs(

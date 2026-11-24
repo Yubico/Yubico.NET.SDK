@@ -23,6 +23,7 @@ await using var client = await Demo.OpenClientAsync(yubiKey);
 RegistrationResponse registration;
 using (UserPresenceIntent.BeginScope("create your passkey"))
 {
+    // Demo.Registration: standard WebAuthn creation options for example.com (RP, user, ES256, touch only).
     registration = await client.MakeCredentialAsync(Demo.Registration());
 }
 Console.WriteLine($"Registered passkey {Convert.ToHexString(registration.CredentialId.Span)[..16]}...");
@@ -33,6 +34,7 @@ var challenge = RandomNumberGenerator.GetBytes(32); // normally from your server
 IReadOnlyList<MatchedCredential> matches;
 using (UserPresenceIntent.BeginScope("unlock your notes"))
 {
+    // Demo.SignIn: standard WebAuthn request options for example.com, allowing only this passkey.
     matches = await client.GetAssertionAsync(Demo.SignIn(registration.CredentialId, challenge: challenge));
 }
 var assertion = await matches[0].SelectAsync();

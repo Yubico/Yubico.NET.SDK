@@ -63,6 +63,7 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-46](#ag-46-core-duplicate-device-information-tags) | 2026-11-24 | Dennis approved ignoring repeated unknown device-information tags under the forward-compatibility policy. | Approved for the top-level duplicate facet of CORE-A-C016 (FPT-016) |
 | [AG-47](#ag-47-core-typed-hid-receive-ownership) | 2026-11-24 | Dennis approved caller-owned arrays for the two typed HID receives and cleanup of consumed reports. | Approved for CORE-B5-C005 (FPT-062) within the two-API exception below |
 | [AG-48](#ag-48-core-scp-key-reference-value) | 2026-11-24 | Dennis approved two-field SCP key references with field-based equality and a zero-pair default encoding. | Approved for CORE-B6-C008 (FPT-074) |
+| [AG-49](#ag-49-core-startup-executioncontext-flow) | 2026-11-24 | Dennis chose to keep current startup `ExecutionContext` flow on four Core thread starts. | Policy only for FPT-031 (CORE-B1-C010 and CORE-B3-C006); no runtime change |
 
 ### AG-8 classification run
 
@@ -894,6 +895,20 @@ parameterless construction, and explicit `(0, 0)` all encode `00 00`; the named 
 `01 FF`. For tag `83`, this replaces an empty encoding with `83 02 00 00` for zero initialization and
 does not imply device acceptance. Explicit reference byte order, nullable OCE absence and fallback,
 and the separate AG-30 `KeyReplacement` policy are unchanged.
+
+### AG-49 Core startup ExecutionContext flow
+
+Dennis chose to “Keep current behaviour” for `FPT-031` (`CORE-B1-C010` and `CORE-B3-C006`) on
+2026-11-24. Retain the current thread-start behavior for the lazy PC/SC connection owner, the macOS
+FIDO and OTP connection owners, and the macOS HID listener. When flow is enabled, `Thread.Start`
+captures the starting caller's execution context; already-suppressed flow remains suppressed.
+
+A long-lived thread can retain startup `AsyncLocal` values and other ambient state. This is a
+documented mechanism, not a confirmed bug or a promise of per-operation correlation. Preserving
+potential Windows PC/SC caller-identity behavior informed the decision; it does not qualify native
+identity behavior. The desktop PC/SC listener, other task and reactor paths, and the existing
+Windows/Linux HID suppression policies are outside this decision and unchanged. This is not a
+global context-flow policy or Core-pass closure.
 
 ### AG-14 firmware rule detail
 

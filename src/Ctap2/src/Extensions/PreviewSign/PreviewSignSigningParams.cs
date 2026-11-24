@@ -31,7 +31,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// signing inputs and are encoded unchanged.
 /// Pass <c>null</c> to omit key 7; a present value must encode one complete CBOR map.
 /// Experimental typed helpers such as <see cref="CoseSignArgs"/> can be converted to raw
-/// <c>additionalArgs</c> bytes with <see cref="PreviewSignCbor.EncodeAdditionalArgs"/>.
+/// <c>additionalArgs</c> bytes with <see cref="CoseSignArgs.ToAdditionalArgs"/>.
 /// The map's algorithm-specific semantics are the caller's responsibility. Tbs may be raw data
 /// or a digest depending on the selected algorithm; the encoder does not hash it.
 /// </para>
@@ -46,6 +46,25 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed class PreviewSignSigningParams
 {
+    internal void Encode(CborWriter writer)
+    {
+        const int keyHandleKey = 2;
+        const int toBeSignedKey = 6;
+        const int additionalArgsKey = 7;
+
+        writer.WriteStartMap(AdditionalArgs.HasValue ? 3 : 2);
+        writer.WriteInt32(keyHandleKey);
+        writer.WriteByteString(KeyHandle.Span);
+        writer.WriteInt32(toBeSignedKey);
+        writer.WriteByteString(Tbs.Span);
+        if (AdditionalArgs is { } args)
+        {
+            writer.WriteInt32(additionalArgsKey);
+            writer.WriteByteString(args.Span);
+        }
+        writer.WriteEndMap();
+    }
+
     /// <summary>
     /// Gets the key handle from registration output.
     /// </summary>

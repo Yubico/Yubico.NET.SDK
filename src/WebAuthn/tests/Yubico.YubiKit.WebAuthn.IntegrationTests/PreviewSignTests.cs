@@ -170,10 +170,9 @@ public class PreviewSignTests
             [credentialId] = new PreviewSignSigningParams(
                 keyHandle: keyHandle,
                 tbs: toBeSigned,
-                additionalArgs: Fido2Extensions.PreviewSignCbor.EncodeAdditionalArgs(
-                    Fido2Extensions.CoseSignArgs.ArkgP256(
-                        derivedKey.ArkgKeyHandle,
-                        derivedKey.Context)))
+                additionalArgs: Fido2Extensions.CoseSignArgs.ArkgP256(
+                    derivedKey.ArkgKeyHandle,
+                    derivedKey.Context).ToAdditionalArgs())
         };
 
         var authOptions = new PublicKeyCredentialRequestOptions
@@ -288,6 +287,7 @@ public class PreviewSignTests
         new(
             keyHandle: credential.KeyHandle,
             tbs: SHA256.HashData(message),
-            additionalArgs: Fido2Extensions.PreviewSignCbor.EncodeAdditionalArgs(
-                Fido2Extensions.CoseSignArgs.ArkgP256(credential.DerivedKey.ArkgKeyHandle, credential.DerivedKey.Context)));
+            additionalArgs: Fido2Extensions.CoseSignArgs.ArkgP256(
+                credential.DerivedKey.ArkgKeyHandle,
+                credential.DerivedKey.Context).ToAdditionalArgs());
 }

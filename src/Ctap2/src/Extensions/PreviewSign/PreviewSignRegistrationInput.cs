@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Formats.Cbor;
+
 namespace Yubico.YubiKit.Ctap2.Extensions;
 
 /// <summary>
@@ -67,5 +69,23 @@ public sealed class PreviewSignRegistrationInput
 
         Algorithms = algorithms;
         Flags = flags;
+    }
+
+    internal void Encode(CborWriter writer)
+    {
+        const int algorithmKey = 3;
+        const int flagsKey = 4;
+
+        writer.WriteStartMap(2);
+        writer.WriteInt32(algorithmKey);
+        writer.WriteStartArray(Algorithms.Count);
+        foreach (var algorithm in Algorithms)
+        {
+            writer.WriteInt32(algorithm);
+        }
+        writer.WriteEndArray();
+        writer.WriteInt32(flagsKey);
+        writer.WriteInt32(Flags);
+        writer.WriteEndMap();
     }
 }

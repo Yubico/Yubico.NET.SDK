@@ -407,7 +407,9 @@ conveniences are experimental and not production cryptographic guidance or the g
 For experimental ARKG derivation, pattern-match `GeneratedSigningKey.PublicKey` as
 `CoseArkgP256SeedKey`. Construct `ArkgP256GeneratedKey` with the generated key's handle, the typed
 seed, the reported signing algorithm, and `GeneratedSigningKey.AttestationObject.RawCbor`, then call
-`DerivePublicKey`. The derivation helper does not verify the attestation.
+`DerivePublicKey`. The derivation helper does not verify the attestation. When signing, use
+`CoseSignArgs.ArkgP256(derivedKey.ArkgKeyHandle, derivedKey.Context).ToAdditionalArgs()` to supply
+`additionalArgs`, in place of the former `PreviewSignCbor.EncodeAdditionalArgs(...)` call.
 
 ## RP authorization belongs to the application
 

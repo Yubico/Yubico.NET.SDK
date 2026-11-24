@@ -30,7 +30,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// perform RP-side ARKG-P256 public key derivation via <see cref="DerivePublicKey"/>.
 /// </para>
 /// <para>
-/// <see cref="PreviewSignCbor.TryExtractGeneratedKey"/> returns this specialization when the
+/// <see cref="PreviewSignGeneratedKey.TryFromMakeCredentialResponse"/> returns this specialization when the
 /// generated public key is a <see cref="CoseArkgP256SeedKey"/>.
 /// </para>
 /// <para>

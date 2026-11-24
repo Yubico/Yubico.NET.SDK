@@ -22,6 +22,31 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 /// </summary>
 public class ExtensionBuilderTests
 {
+    [Fact]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
+    public void Build_WithPreviewSignRegistration_EncodesExactExtensionMap()
+    {
+        var result = new ExtensionBuilder().WithPreviewSign(new PreviewSignRegistrationInput([-7, -257])).Build();
+
+        Assert.NotNull(result);
+        Assert.Equal(Convert.FromHexString("A16B707265766965775369676EA20382263901000401"), result.Value.ToArray());
+    }
+
+    [Theory]
+    [InlineData(false, "A16B707265766965775369676EA20240064102")]
+    [InlineData(true, "A16B707265766965775369676EA302400641020744A1033828")]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
+    public void Build_WithPreviewSignSigningParams_EncodesExactExtensionMap(bool includeArgs, string expected)
+    {
+        // The extra arguments are an encoded map, wrapped unchanged as a byte string.
+        var signingParams = includeArgs
+            ? new PreviewSignSigningParams(default, new byte[] { 2 }, Convert.FromHexString("A1033828"))
+            : new PreviewSignSigningParams(default, new byte[] { 2 });
+        var result = new ExtensionBuilder().WithPreviewSign(signingParams).Build();
+
+        Assert.NotNull(result);
+        Assert.Equal(Convert.FromHexString(expected), result.Value.ToArray());
+    }
 
     [Fact]
     public void Build_WithNoExtensions_ReturnsNull()

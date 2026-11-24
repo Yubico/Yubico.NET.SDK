@@ -311,7 +311,7 @@ public class Ctap2PreviewSignTests
                 Assert.NotEmpty(credentialId);
 
                 // Extract previewSign generated key using the proper helper
-                bool extracted = Extensions.PreviewSignCbor.TryExtractGeneratedKey(
+                bool extracted = Extensions.PreviewSignGeneratedKey.TryFromMakeCredentialResponse(
                     makeCredResult,
                     out var generatedKey);
 
@@ -337,10 +337,9 @@ public class Ctap2PreviewSignTests
                 var signingParams = new Extensions.PreviewSignSigningParams(
                     keyHandle: derivedKey.DeviceKeyHandle,
                     tbs: message,
-                    additionalArgs: Extensions.PreviewSignCbor.EncodeAdditionalArgs(
-                        Extensions.CoseSignArgs.ArkgP256(
-                            derivedKey.ArkgKeyHandle,
-                            derivedKey.Context)));
+                    additionalArgs: Extensions.CoseSignArgs.ArkgP256(
+                        derivedKey.ArkgKeyHandle,
+                        derivedKey.Context).ToAdditionalArgs());
 
                 var authExtensions = new Extensions.ExtensionBuilder()
                     .WithPreviewSign(signingParams)
@@ -366,44 +365,16 @@ public class Ctap2PreviewSignTests
                 Assert.True(assertion.AuthenticatorData.HasExtensions);
                 Assert.NotNull(assertion.AuthenticatorData.Extensions);
 
-                var assertionExtensionsCbor = assertion.AuthenticatorData.Extensions.Value;
-                var authOutputReader = new CborReader(assertionExtensionsCbor, CborConformanceMode.Ctap2Canonical);
-
-                byte[]? signature = null;
-                int? mapSize = authOutputReader.ReadStartMap();
-                for (int i = 0; i < mapSize; i++)
-                {
-                    string key = authOutputReader.ReadTextString();
-                    if (key == "previewSign")
-                    {
-                        int? innerMapSize = authOutputReader.ReadStartMap();
-                        for (int j = 0; j < innerMapSize; j++)
-                        {
-                            int innerKey = authOutputReader.ReadInt32();
-                            if (innerKey == 6) // signature key
-                            {
-                                signature = authOutputReader.ReadByteString();
-                            }
-                            else
-                            {
-                                authOutputReader.SkipValue();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        authOutputReader.SkipValue();
-                    }
-                }
-
-                Assert.NotNull(signature);
-                Assert.NotEmpty(signature);
+                var assertionExtensions = Extensions.ExtensionOutput.Decode(assertion.AuthenticatorData.Extensions.Value);
+                Assert.True(assertionExtensions.TryGetPreviewSign(out var signingOutput));
+                Assert.NotNull(signingOutput);
+                Assert.False(signingOutput.Signature.IsEmpty);
 
                 // Step D: Offline verify signature
                 // Pass RAW message — VerifySignature uses ECDsa.VerifyData which hashes internally.
                 // tbs sent to firmware is SHA256(messageRaw); firmware signs tbs as-is (treats as digest).
                 // Verifier must hash messageRaw once → SHA256(messageRaw) → matches what firmware signed.
-                bool verified = derivedKey.VerifySignature(messageRaw, signature);
+                bool verified = derivedKey.VerifySignature(messageRaw, signingOutput.Signature.Span);
                 Assert.True(verified);
 
                 // Success-path token clearing only; failure-path ownership remains unfinished test work.
@@ -708,7 +679,7 @@ public class Ctap2PreviewSignTests
                 Assert.NotEmpty(credentialId);
 
                 // Extract previewSign generated key
-                bool extracted = Extensions.PreviewSignCbor.TryExtractGeneratedKey(
+                bool extracted = Extensions.PreviewSignGeneratedKey.TryFromMakeCredentialResponse(
                     makeCredResult,
                     out var generatedKey);
 

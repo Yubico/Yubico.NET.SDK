@@ -148,7 +148,7 @@ public class PreviewSignCodecTests
 
         var response = MakeCredentialResponse.Decode(writer.Encode());
         var authData = WebAuthnAuthenticatorData.Decode(response.AuthenticatorDataRaw);
-        bool extracted = PreviewSignCbor.TryExtractGeneratedKey(response, out var ctapKey);
+        bool extracted = PreviewSignGeneratedKey.TryFromMakeCredentialResponse(response, out var ctapKey);
         WebAuthnPreviewSign.PreviewSignRegistrationOutput? ExtractWebAuthn() =>
             PreviewSignCodec.ParseRegistrationOutput(authData, response.UnsignedExtensionOutputs);
 
@@ -299,11 +299,13 @@ public class PreviewSignCodecTests
         Assert.Equal(selected.Id.ToArray(), (await match.SelectAsync(ct)).CredentialId.ToArray());
     }
 
-    [Fact(Timeout = 5000)]
-    public void PreviewSign_Authentication_OutputSignaturePopulated()
+    [Theory(Timeout = 5000)]
+    [InlineData(0)]
+    [InlineData(64)]
+    public void PreviewSign_Authentication_PreservesSignatureByteString(int signatureLength)
     {
         // Arrange - mock authenticator data with previewSign extension containing signature
-        var signatureBytes = RandomNumberGenerator.GetBytes(64);  // Mock algorithm-specific signature bytes
+        var signatureBytes = RandomNumberGenerator.GetBytes(signatureLength); // Mock algorithm-specific signature bytes.
 
         // Build previewSign extension output (authentication form: key 6 = signature)
         var extensionWriter = new CborWriter(CborConformanceMode.Ctap2Canonical);

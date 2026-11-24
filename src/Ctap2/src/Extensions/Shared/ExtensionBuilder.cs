@@ -429,95 +429,16 @@ public sealed class ExtensionBuilder
         if (_previewSignRegistration is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
-            EncodePreviewSignRegistrationInput(writer, _previewSignRegistration);
+            _previewSignRegistration.Encode(writer);
         }
         else if (_previewSignAuthentication is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
-            EncodePreviewSignSigningParams(writer, _previewSignAuthentication);
+            _previewSignAuthentication.Encode(writer);
         }
 #pragma warning restore YKEXP001
 
         writer.WriteEndMap();
-    }
-
-    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
-    private static void EncodePreviewSignRegistrationInput(CborWriter writer, PreviewSignRegistrationInput input)
-    {
-        var encodedBytes = PreviewSignCbor.EncodeRegistrationInput(input);
-        var reader = new CborReader(encodedBytes, CborConformanceMode.Ctap2Canonical);
-
-        // Copy the CBOR map directly
-        CopyCborValue(reader, writer);
-    }
-
-    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
-    private static void EncodePreviewSignSigningParams(CborWriter writer, PreviewSignSigningParams signingParams)
-    {
-        var encodedBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
-        var reader = new CborReader(encodedBytes, CborConformanceMode.Ctap2Canonical);
-
-        // Copy the CBOR map directly
-        CopyCborValue(reader, writer);
-    }
-
-    private static void CopyCborValue(CborReader reader, CborWriter writer)
-    {
-        var state = reader.PeekState();
-
-        switch (state)
-        {
-            case CborReaderState.StartMap:
-                int? mapSize = reader.ReadStartMap();
-                writer.WriteStartMap(mapSize);
-                for (int i = 0; i < mapSize; i++)
-                {
-                    CopyCborValue(reader, writer);
-                    CopyCborValue(reader, writer);
-                }
-                reader.ReadEndMap();
-                writer.WriteEndMap();
-                break;
-
-            case CborReaderState.StartArray:
-                int? arraySize = reader.ReadStartArray();
-                writer.WriteStartArray(arraySize);
-                for (int i = 0; i < arraySize; i++)
-                {
-                    CopyCborValue(reader, writer);
-                }
-                reader.ReadEndArray();
-                writer.WriteEndArray();
-                break;
-
-            case CborReaderState.UnsignedInteger:
-                writer.WriteUInt64(reader.ReadUInt64());
-                break;
-
-            case CborReaderState.NegativeInteger:
-                writer.WriteInt64(reader.ReadInt64());
-                break;
-
-            case CborReaderState.ByteString:
-                writer.WriteByteString(reader.ReadByteString());
-                break;
-
-            case CborReaderState.TextString:
-                writer.WriteTextString(reader.ReadTextString());
-                break;
-
-            case CborReaderState.Boolean:
-                writer.WriteBoolean(reader.ReadBoolean());
-                break;
-
-            case CborReaderState.Null:
-                reader.ReadNull();
-                writer.WriteNull();
-                break;
-
-            default:
-                throw new InvalidOperationException($"Unsupported CBOR state: {state}");
-        }
     }
 
     private bool HasExtensions()

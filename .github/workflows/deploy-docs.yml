@@ -15,6 +15,16 @@ on:
         type: string
         description: Image tag to deploy
         required: true
+  workflow_call:
+    inputs:
+      gitops-branch:
+        type: string
+        description: Environment to deploy to (dev or prod)
+        required: true
+      image-tag:
+        type: string
+        description: Image tag to deploy
+        required: true
 
 permissions:
   id-token: write

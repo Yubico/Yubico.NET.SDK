@@ -1,0 +1,16 @@
+# Scribe job: NuGet author-sign the SDK packages and symbol packages built from signed assemblies.
+# Paths are relative to the directory holding the downloaded package artifacts.
+stub: yubico-net-sdk
+releaseType: public
+jobs:
+  - name: sdk-packages
+    platform: linux
+    steps:
+      - id: 1
+        action: windows
+        description: Yubico .NET SDK
+        files:
+          - Yubico.Core/src/bin/Release/Yubico.Core.*.nupkg
+          - Yubico.Core/src/bin/Release/Yubico.Core.*.snupkg
+          - Yubico.YubiKey/src/bin/Release/Yubico.YubiKey.*.nupkg
+          - Yubico.YubiKey/src/bin/Release/Yubico.YubiKey.*.snupkg

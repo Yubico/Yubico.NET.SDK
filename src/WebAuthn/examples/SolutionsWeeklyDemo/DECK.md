@@ -147,10 +147,25 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 - Slide line: "Async where the hardware waits."
 
 ### 8. New capabilities
-- WebAuthn client: builds `clientDataJSON`, handles PIN/UV, processes extensions.
-- OpenPGP: key provisioning, PIN recovery, sign/decrypt/agree, certificates, touch policy.
-- Also in preview: raw signing with a key bound to a passkey (previewSign). One line only; details live in
-  the optional demo and backup slide B1.
+- **Passkeys in native apps:** a complete WebAuthn client, the part a browser normally plays, for desktop,
+  CLI and service apps. Full registration and sign-in in a few calls.
+- **Extensions built in:** PRF (derive encryption keys from a passkey), large blobs, credential protection,
+  credBlob, credProps, min PIN length, plus experimental previewSign.
+- **OpenPGP, for the first time:** key provisioning, PIN recovery, sign/decrypt/agree, certificates, touch policy.
+- Notes (what the WebAuthn client does for you): v1 only had the CTAP2 layer, so apps had to assemble
+  WebAuthn themselves. The v2 client:
+  - builds and hashes `clientDataJSON` and runs each step of the ceremony;
+  - acquires PIN/UV tokens, with an SDK-owned PIN retry loop that zeroes rejected PINs and re-prompts with
+    retries remaining (via `ICredentialPrompt`);
+  - processes typed extension inputs and outputs;
+  - handles account selection when several passkeys match (`MatchedCredential`);
+  - applies attestation policy, including enterprise attestation when the key allows it;
+  - works over USB (HID) and NFC/smart card.
+- Notes (where it fits): thick clients and kiosk apps, CLI tools, and test harnesses: anywhere a browser isn't
+  in the loop. PRF ties to "unlock your notes": a passkey can unlock local encryption keys, not just sign in.
+- Notes (boundaries): the app supplies the origin and decides which RP IDs it may use (`RpIdValidator`).
+  The relying party still verifies every response; the SDK is client-side only.
+- Notes: keep previewSign to its one mention here; details live in the optional demo and backup slide B1.
 
 ### 9. Touch prompting + interactive auth roadmap
 - `IUserPresencePrompt` across 6 applets: PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, YubiHSM Auth.

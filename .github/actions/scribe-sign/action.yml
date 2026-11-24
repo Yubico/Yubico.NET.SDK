@@ -53,15 +53,7 @@ runs:
   steps:
     - name: Prepare files
       shell: bash
-      env:
-        DIRECTORY: ${{ inputs.directory }}
-      run: |
-        set -euo pipefail
-        rm -rf scribe-download
-        # Scribe picks the signature type by file extension and does not know .snupkg. A symbol
-        # package is a NuGet package, so submit it as .snupkg.nupkg and rename it back afterwards.
-        # Remove once Yubico/yes-scribe#771 is deployed.
-        find "$DIRECTORY" -type f -name '*.snupkg' -exec mv '{}' '{}.nupkg' \;
+      run: rm -rf scribe-download
 
     - name: Submit to Scribe and wait for the signed files
       shell: bash
@@ -150,8 +142,4 @@ runs:
     - name: Clean up
       if: always()
       shell: bash
-      env:
-        DIRECTORY: ${{ inputs.directory }}
-      run: |
-        rm -rf scribe-download
-        find "$DIRECTORY" -type f -name '*.snupkg.nupkg' -exec sh -c 'mv "$1" "${1%.nupkg}"' _ '{}' \;
+      run: rm -rf scribe-download

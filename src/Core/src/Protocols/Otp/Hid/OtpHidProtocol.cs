@@ -401,9 +401,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                 report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var rawResponse = responseBuffer.AsSpan(0, responseLength).ToArray();
-            _logger.LogDebug("{Length} bytes read over HID", rawResponse.Length);
-            return rawResponse;
+            _logger.LogDebug("{Length} bytes read over HID", responseLength);
+            return responseBuffer.AsSpan(0, responseLength).ToArray();
         }
         finally
         {

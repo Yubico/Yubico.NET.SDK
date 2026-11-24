@@ -71,15 +71,11 @@ internal sealed class LinuxFidoHidConnection : IFidoHidConnection, ITerminalWake
 
     /// <inheritdoc cref="IFidoHidConnection.ReceiveAsync" />
     /// <remarks>
-    ///     Successful receipt transfers an exact-length array to the caller through a read-only view; the
-    ///     connection no longer owns or clears it, including on disposal. The view does not make the backing
-    ///     storage immutable or provide automatic sensitive-data cleanup. The caller owns its lifetime and
-    ///     clearing of sensitive contents. Cancellation detaches only this reader; native input remains active.
-    ///     A non-64-byte report terminates input rather than returning a partial typed packet.
-    ///     For these built-in array-backed results, use <c>MemoryMarshal.TryGetArray</c> to obtain the owned
-    ///     segment, then <c>CryptographicOperations.ZeroMemory(segment.AsSpan())</c> after use. Clearing a
-    ///     separate copy does not clear the original. Do not apply this ownership assumption to arbitrary
-    ///     custom-provider results without that provider's contract.
+    ///     Successful receipt transfers the whole independent, unpooled array to the caller; the connection
+    ///     no longer owns or clears it, including on disposal. Clear sensitive contents directly with
+    ///     <c>CryptographicOperations.ZeroMemory(report)</c> after use. Cancellation detaches only this
+    ///     reader; native input remains active. A non-64-byte report terminates input rather than returning
+    ///     a partial typed packet.
     /// </remarks>
     /// <param name="cancellationToken">Cancels this pending receive, not the device's protocol exchange.</param>
     /// <returns>A task yielding 64 caller-owned payload bytes, with no synthetic report-ID prefix.</returns>

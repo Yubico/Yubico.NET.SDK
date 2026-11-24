@@ -242,12 +242,11 @@ internal sealed class LinuxOtpHidNativeOwner
 
     /// <summary>Admits one feature GET into worker-allocated eight-byte storage and returns its actual completion task.</summary>
     /// <param name="token">Checked at entry and dispatch; cancellation cannot detach a submitted GET or free its operation slot.</param>
-    /// <returns>Caller-owned exact eight-byte array storage exposed through a read-only view after a complete native GET.</returns>
+    /// <returns>A whole independent, unpooled eight-byte array transferred after a complete native GET.</returns>
     /// <remarks>
     /// Failed/partial staging is cleared before failure. Successfully returned storage is transferred
-    /// to the caller and never cleared by this owner, including at shutdown. The view provides no
-    /// disposal/zeroing API; sensitive output requires caller-managed backing-storage cleanup, and a
-    /// copy alone does not erase the original. A successful GET can complete successfully despite
+    /// to the caller and never cleared by this owner, including at shutdown. The caller clears sensitive
+    /// contents directly with <c>CryptographicOperations.ZeroMemory(report)</c> after use. A GET can succeed despite
     /// cancellation after dispatch. Admission is locked, overlap is rejected, and continuations run asynchronously.
     /// </remarks>
     internal Task<byte[]> ReceiveAsync(CancellationToken token)

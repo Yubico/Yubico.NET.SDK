@@ -46,7 +46,7 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
 | 6 | Stable API, forward compatible | 1.5 |
 | 7 | One key, one session, one grammar, async | 1.5 |
 | 8 | New capabilities | 1 |
-| 9 | Touch prompting + interactive auth roadmap | 1 |
+| 9 | Touch prompting: one flow, every applet | 1 |
 | 10 | Remote & virtualized scenarios | 1.5 |
 | 11 | Live demo | 4 |
 | 12 | Migration cost + v1 continuity | 1 |
@@ -167,14 +167,22 @@ Source of truth for SDK facts: branch `yubikit-pass2-base` — `docs/v2-highligh
   The relying party still verifies every response; the SDK is client-side only.
 - Notes: keep previewSign to its one mention here; details live in the optional demo and backup slide B1.
 
-### 9. Touch prompting + interactive auth roadmap
-- `IUserPresencePrompt` across 6 applets: PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP, YubiHSM Auth.
-- Operation (SDK): stable ID of what the key is doing. Intent (app): why the user touches,
-  via `UserPresenceIntent.BeginScope("Unlock your notes")`.
-- Requested → resolved callbacks; UI always cleared, even on cancellation.
-- `KeyCollector` is gone. Uniform interactive auth in progress: PIV signing + key generation first
-  (PR #687, draft), other applets next.
-- Notes: "If customers depend on interactive PIN flows, tell us — it shapes the rollout."
+### 9. Touch prompting: one flow, every applet
+Layout: stepped sequence / timeline, left to right. Step label in bold, one short line under each.
+1. **App sets the intent:** `UserPresenceIntent.BeginScope("unlock your notes")`. Why the user touches.
+2. **App calls the SDK:** e.g. `GetAssertionAsync`. Same pattern in every applet.
+3. **SDK asks for a touch:** `OnUserPresenceRequestedAsync` with the operation (what the key is doing)
+   and the app's intent.
+4. **App shows the prompt:** "Touch your YubiKey to unlock your notes".
+5. **User touches the key:** the operation completes.
+6. **SDK reports the outcome:** `OnUserPresenceResolvedAsync`: Completed, Cancelled, TimedOut or Failed.
+   The app clears the prompt, even after cancellation.
+- Footer line: one prompt implementation covers PIV, FIDO2/WebAuthn, OATH, OpenPGP, YubiOTP and YubiHSM Auth.
+- Notes: the SDK always supplies the operation; the intent comes only from the app. If the request callback
+  throws, the SDK cleans up safely and skips the resolved callback.
+- Notes (roadmap): `KeyCollector` is gone. Uniform interactive auth (PIN prompts) is in progress: PIV signing
+  and key generation first (PR #687, draft), other applets next. "If customers depend on interactive PIN
+  flows, tell us — it shapes the rollout."
 
 ### 10. Remote & virtualized scenarios
 - Tested: Windows VMs on Linux and macOS hosts, USB passthrough / smart card redirection,

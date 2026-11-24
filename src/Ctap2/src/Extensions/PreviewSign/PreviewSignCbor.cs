@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core;
 
@@ -461,23 +462,23 @@ public static class PreviewSignCbor
     /// otherwise, <c>null</c>.
     /// </param>
     /// <returns>
-    /// <c>true</c> if syntactic extraction yields the SDK's experimental ARKG-P256 seed-key carrier;
-    /// otherwise, <c>false</c>.
+    /// <c>true</c> if both registration outputs and the inner attested credential data can be decoded;
+    /// otherwise, <c>false</c>. Unmodeled public keys are returned on the generic result.
     /// </returns>
     /// <remarks>
     /// <para>
-    /// Parses unsignedExtensionOutputs["previewSign"], extracts the inner attested credential data
-    /// and decodes its COSE seed-key carrier. It does not verify attestation, device identity,
-    /// signed algorithm agreement, generated-key binding or inner UP/UV policy.
+    /// Reads the selected algorithm from the outer authenticator data, and the key handle and public
+    /// key from the inner attested credential data. The inner attestation is re-encoded with WebAuthn
+    /// text keys, preserving the authenticator data and attestation statement bytes. This does not
+    /// verify attestation, device identity, algorithm agreement, key binding or inner UP/UV policy.
     /// </para>
     /// <para>
-    /// Returns false for absent output, malformed present output or another key carrier. Malformed
-    /// output is diagnosed without logging its contents. The reported algorithm is not verified here.
+    /// Malformed output is diagnosed without logging its contents.
     /// </para>
     /// </remarks>
     public static bool TryExtractGeneratedKey(
         Credentials.MakeCredentialResponse response,
-        out PreviewSignGeneratedKey? generatedKey)
+        [NotNullWhen(true)] out PreviewSignGeneratedKey? generatedKey)
     {
         generatedKey = null;
 
@@ -498,16 +499,11 @@ public static class PreviewSignCbor
             }
 
             var coseKey = Cose.CoseKey.Decode(authData.AttestedCredentialData.CredentialPublicKey);
-            if (coseKey is not Cose.CoseArkgP256SeedKey arkgSeedKey)
-            {
-                return false;
-            }
-
-            generatedKey = new PreviewSignGeneratedKey(
+            generatedKey = PreviewSignGeneratedKey.Create(
                 authData.AttestedCredentialData.CredentialId,
-                arkgSeedKey.BlPublicKey,
-                arkgSeedKey.KemPublicKey,
-                new Cose.CoseAlgorithm(algorithm));
+                coseKey,
+                new Cose.CoseAlgorithm(algorithm),
+                EncodeWebAuthnAttestationObject(innerAttestation));
 
             return true;
         }
@@ -516,6 +512,20 @@ public static class PreviewSignCbor
             LogMalformedRegistration();
             return false;
         }
+    }
+
+    private static byte[] EncodeWebAuthnAttestationObject(InnerAttestationObject inner)
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+        writer.WriteTextString("fmt");
+        writer.WriteTextString(inner.Fmt);
+        writer.WriteTextString("authData");
+        writer.WriteByteString(inner.AuthData.Span);
+        writer.WriteTextString("attStmt");
+        writer.WriteEncodedValue(inner.AttStmtRawCbor.Span);
+        writer.WriteEndMap();
+        return writer.Encode();
     }
 
     private static bool TryGetRegistrationParts(
@@ -533,7 +543,7 @@ public static class PreviewSignCbor
         return hasSigned && hasUnsigned;
     }
 
-    internal static void LogMalformedRegistration()
+    private static void LogMalformedRegistration()
     {
         try
         {

@@ -58,12 +58,6 @@ public class PreviewSignCborTests
         Assert.False(PreviewSignCbor.TryExtractGeneratedKey(response, out var key));
         Assert.Null(key);
         Assert.Equal(1, logger.Calls);
-
-        // The DTO route takes already-separated parameters. A malformed seed must also be omitted,
-        // even if the logger that was captured on first warning throws.
-        var output = new PreviewSignRegistrationOutput(new byte[] { 1 }, new byte[] { 0xA1, 0x03 }, -9);
-        Assert.Null(output.TryGetGeneratedKey());
-        Assert.Equal(2, logger.Calls);
     }
 
     private sealed class ThrowingWarningLogger : ILogger

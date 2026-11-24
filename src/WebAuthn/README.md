@@ -404,6 +404,11 @@ handle is sent as a byte string under CTAP key 2, even when empty. An empty gene
 the selected credential and authenticator-held state; it does not select a global default key. ARKG helper
 conveniences are experimental and not production cryptographic guidance or the generic signing contract.
 
+For experimental ARKG derivation, pattern-match `GeneratedSigningKey.PublicKey` as
+`CoseArkgP256SeedKey`. Construct `ArkgP256GeneratedKey` with the generated key's handle, the typed
+seed, the reported signing algorithm, and `GeneratedSigningKey.AttestationObject.RawCbor`, then call
+`DerivePublicKey`. The derivation helper does not verify the attestation.
+
 ## RP authorization belongs to the application
 
 `RpIdValidator(WebAuthnOrigin origin, string rpId)` is synchronous and required. It is called once

@@ -28,7 +28,7 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <para>
 /// This class contains the derived public key and handles needed for the
 /// ESP256-split-ARKG previewSign helper path. Instances are obtained
-/// by calling <see cref="PreviewSignGeneratedKey.DerivePublicKey"/> with
+/// by calling <see cref="ArkgP256GeneratedKey.DerivePublicKey"/> with
 /// application-provided input keying material and a context string.
 /// </para>
 /// <para>

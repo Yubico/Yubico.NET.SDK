@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Extensions;
@@ -20,7 +19,7 @@ using Yubico.YubiKit.Ctap2.Extensions;
 namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 
 /// <summary>
-/// Tests for <see cref="PreviewSignGeneratedKey"/> ARKG derivation.
+/// Tests for <see cref="ArkgP256GeneratedKey"/> ARKG derivation.
 /// </summary>
 /// <remarks>
 /// WARNING -- EXPERIMENTAL -- test only: ARKG previewSign derivation is not ready for production use and must not
@@ -29,26 +28,8 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 /// signature verification, uniqueness for every context or full Internet-Draft conformance.
 /// </remarks>
 [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
-public class PreviewSignGeneratedKeyTests
+public class ArkgP256GeneratedKeyTests
 {
-    [Fact]
-    public void VerifySignature_RejectsBytesAfterTheDerSequenceOrItsComponents()
-    {
-        using var ecdsa = ECDsa.Create(ECCurve.NamedCurves.nistP256);
-        var point = ecdsa.ExportParameters(false).Q;
-        byte[] publicKey = [4, .. (point.X ?? throw new InvalidOperationException()), .. (point.Y ?? throw new InvalidOperationException())];
-        var derived = new PreviewSignDerivedKey(publicKey, default, default, default);
-        var message = "previewSign test message"u8;
-        byte[] signature = ecdsa.SignData(message, HashAlgorithmName.SHA256, DSASignatureFormat.Rfc3279DerSequence);
-        Assert.True(derived.VerifySignature(message, signature));
-        Assert.False(derived.VerifySignature("other message"u8, signature));
-        Assert.False(derived.VerifySignature(message, [.. signature, 0x05, 0x00]));
-
-        byte[] withExtraComponent = [.. signature, 0x02, 0x01, 0x01];
-        withExtraComponent[1] += 3;
-        Assert.False(derived.VerifySignature(message, withExtraComponent));
-    }
-
     // Reuse fixed public-seed/derivation fixtures also used by Core; no device ceremony is involved.
     private static readonly byte[] PkBl = HexToBytes(
         "046d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df" +
@@ -69,11 +50,7 @@ public class PreviewSignGeneratedKeyTests
     public void DerivePublicKey_WithKnownKATVector_ProducesExpectedDerivedKey()
     {
         // Arrange
-        var generatedKey = new PreviewSignGeneratedKey(
-            keyHandle: new byte[32], // arbitrary
-            blindingPublicKey: PkBl,
-            kemPublicKey: PkKem,
-            derivedKeyAlgorithm: CoseAlgorithm.ArkgP256);
+        var generatedKey = CreateGeneratedKey();
 
         // Act
         var derived = generatedKey.DerivePublicKey(IkmA, CtxA);
@@ -89,11 +66,7 @@ public class PreviewSignGeneratedKeyTests
     public void DerivePublicKey_DifferentIkm_ProducesDifferentDerivedKeys()
     {
         // Arrange
-        var generatedKey = new PreviewSignGeneratedKey(
-            keyHandle: new byte[32],
-            blindingPublicKey: PkBl,
-            kemPublicKey: PkKem,
-            derivedKeyAlgorithm: CoseAlgorithm.ArkgP256);
+        var generatedKey = CreateGeneratedKey();
 
         var ikmB = HexToBytes("606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f");
 
@@ -110,11 +83,7 @@ public class PreviewSignGeneratedKeyTests
     public void DerivePublicKey_DifferentContext_ProducesDifferentDerivedKeys()
     {
         // Arrange
-        var generatedKey = new PreviewSignGeneratedKey(
-            keyHandle: new byte[32],
-            blindingPublicKey: PkBl,
-            kemPublicKey: PkKem,
-            derivedKeyAlgorithm: CoseAlgorithm.ArkgP256);
+        var generatedKey = CreateGeneratedKey();
 
         var ctxB = Encoding.ASCII.GetBytes("ARKG-P256.alt context");
 
@@ -127,6 +96,13 @@ public class PreviewSignGeneratedKeyTests
         // ArkgKeyHandle also differs because it includes context-derived material
         Assert.NotEqual(derivedA.ArkgKeyHandle.ToArray(), derivedC.ArkgKeyHandle.ToArray());
     }
+
+    private static ArkgP256GeneratedKey CreateGeneratedKey() => new(
+        new byte[32],
+        new CoseArkgP256SeedKey(CoseAlgorithm.ArkgP256SeedKey, CoseAlgorithm.Esp256, PkKem, PkBl),
+        CoseAlgorithm.ArkgP256,
+        // Attestation is not interpreted by offline derivation.
+        new byte[] { 0xA0 });
 
     private static byte[] HexToBytes(string hex)
     {

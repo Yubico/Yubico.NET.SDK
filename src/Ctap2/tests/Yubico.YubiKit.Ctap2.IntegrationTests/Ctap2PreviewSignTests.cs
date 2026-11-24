@@ -14,6 +14,7 @@
 
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Ctap2.Pin;
@@ -315,13 +316,14 @@ public class Ctap2PreviewSignTests
                     out var generatedKey);
 
                 Assert.True(extracted, "TryExtractGeneratedKey should succeed for ARKG-P256 previewSign response");
-                Assert.NotNull(generatedKey);
+                var arkgKey = Assert.IsType<Extensions.ArkgP256GeneratedKey>(generatedKey);
+                Assert.Equal(CoseAlgorithm.ArkgP256, arkgKey.Algorithm);
 
                 // Step B: Offline derive public key using RNG (modern SDK convention)
                 byte[] ikm = System.Security.Cryptography.RandomNumberGenerator.GetBytes(32);
                 byte[] ctx = System.Text.Encoding.ASCII.GetBytes("integration-test-ctx");
 
-                var derivedKey = generatedKey.DerivePublicKey(ikm, ctx);
+                var derivedKey = arkgKey.DerivePublicKey(ikm, ctx);
                 Assert.Equal(65, derivedKey.PublicKey.Length); // SEC1 uncompressed
                 Assert.NotEmpty(derivedKey.ArkgKeyHandle.Span.ToArray());
 
@@ -711,13 +713,14 @@ public class Ctap2PreviewSignTests
                     out var generatedKey);
 
                 Assert.True(extracted, "TryExtractGeneratedKey should succeed");
-                Assert.NotNull(generatedKey);
+                var arkgKey = Assert.IsType<Extensions.ArkgP256GeneratedKey>(generatedKey);
+                Assert.Equal(CoseAlgorithm.ArkgP256, arkgKey.Algorithm);
 
                 // Derive offline key (so we have the key handle)
                 byte[] ikm = System.Security.Cryptography.RandomNumberGenerator.GetBytes(32);
                 byte[] ctx = System.Text.Encoding.ASCII.GetBytes("test-missing-args");
 
-                var derivedKey = generatedKey.DerivePublicKey(ikm, ctx);
+                var derivedKey = arkgKey.DerivePublicKey(ikm, ctx);
 
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(pinToken);
 

@@ -147,10 +147,11 @@ public class PreviewSignTests
         byte[] ikm = RandomNumberGenerator.GetBytes(32);
         byte[] ctx = Encoding.ASCII.GetBytes("integration-test-ctx");
 
-        // Convert WebAuthn GeneratedSigningKey to CTAP2 PreviewSignGeneratedKey.
-        var fido2GeneratedKey = ConvertToCtap2GeneratedKey(keyHandle, arkgSeedKey);
+        // Use the generated WebAuthn key with the experimental ARKG derivation helper.
+        var arkgKey = new Ctap2.Extensions.ArkgP256GeneratedKey(
+            keyHandle, arkgSeedKey, generatedKey.Algorithm, generatedKey.AttestationObject.RawCbor);
 
-        var derivedKey = fido2GeneratedKey.DerivePublicKey(ikm, ctx);
+        var derivedKey = arkgKey.DerivePublicKey(ikm, ctx);
         Assert.Equal(65, derivedKey.PublicKey.Length); // SEC1 uncompressed
         Assert.NotEmpty(derivedKey.ArkgKeyHandle.Span.ToArray());
 
@@ -164,8 +165,7 @@ public class PreviewSignTests
         var messageBytes = Encoding.UTF8.GetBytes("Hello from previewSign integration test!");
         var toBeSigned = SHA256.HashData(messageBytes);
 
-        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(
-            ByteArrayKeyComparer.Instance)
+        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
         {
             [credentialId] = new PreviewSignSigningParams(
                 keyHandle: keyHandle,
@@ -232,7 +232,7 @@ public class PreviewSignTests
 
         var messageA = Encoding.UTF8.GetBytes("message for credential A");
         var messageB = Encoding.UTF8.GetBytes("message for credential B");
-        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
         {
             [first.CredentialId] = SigningParamsFor(first, messageA),
             [second.CredentialId] = SigningParamsFor(second, messageB)
@@ -278,7 +278,8 @@ public class PreviewSignTests
         }, pin);
         var generatedKey = response.ClientExtensionResults!.PreviewSign!.GeneratedKey;
         var seedKey = Assert.IsType<Ctap2.Cose.CoseArkgP256SeedKey>(generatedKey.PublicKey);
-        var derived = ConvertToCtap2GeneratedKey(generatedKey.KeyHandle, seedKey)
+        var derived = new Ctap2.Extensions.ArkgP256GeneratedKey(
+            generatedKey.KeyHandle, seedKey, generatedKey.Algorithm, generatedKey.AttestationObject.RawCbor)
             .DerivePublicKey(RandomNumberGenerator.GetBytes(32), Encoding.ASCII.GetBytes("two-credential-ctx"));
         return new ArkgCredential(response.CredentialId, generatedKey.KeyHandle, derived);
     }
@@ -289,41 +290,4 @@ public class PreviewSignTests
             tbs: SHA256.HashData(message),
             additionalArgs: Fido2Extensions.PreviewSignCbor.EncodeAdditionalArgs(
                 Fido2Extensions.CoseSignArgs.ArkgP256(credential.DerivedKey.ArkgKeyHandle, credential.DerivedKey.Context)));
-
-    /// <summary>
-    /// Converts WebAuthn GeneratedSigningKey to CTAP2 PreviewSignGeneratedKey for this test.
-    /// </summary>
-    /// <remarks>
-    /// WARNING -- EXPERIMENTAL -- test only: this ARKG bridge exists for integration-test coverage and must not be
-    /// treated as production cryptographic guidance.
-    /// <para>
-    /// This bridges the WebAuthn layer (which exposes CoseKey directly) to the CTAP2 layer
-    /// (which has the DerivePublicKey method). Uses reflection because PreviewSignGeneratedKey's
-    /// constructor is internal to the CTAP2 assembly.
-    /// </para>
-    /// </remarks>
-    private static Ctap2.Extensions.PreviewSignGeneratedKey ConvertToCtap2GeneratedKey(
-        ReadOnlyMemory<byte> keyHandle,
-        Ctap2.Cose.CoseArkgP256SeedKey arkgSeedKey)
-    {
-        var generatedKeyType = typeof(Ctap2.Extensions.PreviewSignGeneratedKey);
-        var constructor = generatedKeyType.GetConstructor(
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
-            null,
-            [typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(Ctap2.Cose.CoseAlgorithm)],
-            null);
-
-        if (constructor is null)
-        {
-            throw new InvalidOperationException(
-                "PreviewSignGeneratedKey constructor not found. This indicates a breaking change in the Fido2 layer.");
-        }
-
-        return (Ctap2.Extensions.PreviewSignGeneratedKey)constructor.Invoke([
-            keyHandle,
-            arkgSeedKey.BlPublicKey,
-            arkgSeedKey.KemPublicKey,
-            arkgSeedKey.Algorithm
-        ]);
-    }
 }

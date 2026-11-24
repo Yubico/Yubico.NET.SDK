@@ -257,6 +257,12 @@ is not full-profile conformance; the draft's stated expiry is 2026-08-31. Signin
 identifiers remain distinct; the convenience verifier handles raw
 messages with P-256/SHA-256 and strict DER signatures, not arbitrary generic TBS algorithms.
 
+Use `PreviewSignCbor.TryExtractGeneratedKey` in place of the removed CTAP2
+`PreviewSignRegistrationOutput.TryGetGeneratedKey`. The result carries the outer signing algorithm,
+the inner handle and decoded public key, and the draft's text-keyed attestation encoding. Match
+`ArkgP256GeneratedKey` before calling `DerivePublicKey`; `DerivedKeyAlgorithm` now comes from its
+seed key, not the outer response. Other key types can use the generic result without derivation.
+
 #### Example Usage
 
 ```csharp

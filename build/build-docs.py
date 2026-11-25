@@ -1,5 +1,29 @@
 #!/usr/bin/env python3
-"""Generate V1 and V2 metadata with their own SDKs, then render one DocFX site."""
+"""Generate V1 and V2 metadata with their own SDKs, then render one DocFX site.
+
+High-level build steps:
+1. Check the existing V2 checkout and both .NET SDKs, and install the expected
+   DocFX version if needed. This helper does not clone V2 or install .NET SDKs.
+2. Resolve V2's source paths and clear old generated API YAML and website output,
+   preserving handwritten Markdown.
+3. Restore dependencies for both SDKs.
+4. Generate V1 and V2 API metadata separately in their respective build environments,
+   writing YAML directly into the documentation folders.
+5. Check that the expected API metadata exists and render it with the handwritten
+   pages into one website at docs/_site/.
+6. Record the source commits and DocFX version in build-info.json (created before
+   rendering so it is included in the site), and save logs in .docbuild/logs/.
+
+This helper builds the site; publishing and deployment belong to the workflows.
+
+After yubikit is merged into develop/main:
+Once both SDK versions are in the same checkout and metadata generation has been
+validated in one DocFX run, combine their metadata entries in docfx.json. 
+Instead of running this helper, run `docfx docfx.json` to generate the documentation.
+However, the branch merge alone does not make this helper redundant.
+Before removing the helper, decide where to retain stale-file cleanup, metadata completeness
+checks, and build-info.json generation, then update and validate both workflows.
+"""
 import argparse
 import json
 import os

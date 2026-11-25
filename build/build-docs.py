@@ -37,9 +37,33 @@ WORK = ROOT / '.docbuild'
 DOCFX_VERSION = '2.81.0'
 
 
-def run(command, cwd=ROOT, env=None):
-    print('+ ' + ' '.join(map(str, command)), flush=True)
-    subprocess.run(list(map(str, command)), cwd=cwd, env=env, check=True)
+def run(command, cwd=ROOT, env=None, log_path=None):
+    command = list(map(str, command))
+    heading = '+ ' + ' '.join(command)
+    print(heading, flush=True)
+    if log_path is None:
+        subprocess.run(command, cwd=cwd, env=env, check=True)
+        return
+    # Merge stderr into stdout so both the console and saved log receive diagnostics.
+    # Credentials remain in the process environment, which is never logged here.
+    with log_path.open('w', encoding='utf-8') as log:
+        log.write(f'{heading}\nWorking directory: {cwd}\n\n')
+        log.flush()
+        try:
+            with subprocess.Popen(command, cwd=cwd, env=env, stdout=subprocess.PIPE,
+                                  stderr=subprocess.STDOUT, text=True,
+                                  encoding='utf-8', errors='replace') as process:
+                for line in process.stdout:
+                    print(line, end='', flush=True)
+                    log.write(line)
+                    log.flush()
+                returncode = process.wait()
+        except OSError as error:
+            log.write(f'Could not start command: {error}\n')
+            raise RuntimeError(f'Could not start command; see {log_path}: {error}') from error
+        log.write(f'\nExit code: {returncode}\n')
+    if returncode:
+        raise subprocess.CalledProcessError(returncode, command)
 
 
 def revision(path):
@@ -68,6 +92,11 @@ def sdk_environment(executable):
 
 def generate(args):
     WORK.mkdir(exist_ok=True)
+    logs = WORK / 'logs'
+    logs.mkdir(exist_ok=True)
+    # Clear previous-run logs even if prerequisite checks or restores fail early.
+    for old in logs.glob('*.log'):
+        old.unlink()
     v2 = Path(args.v2_source).resolve()
     if not (v2 / 'global.json').is_file():
         raise RuntimeError(f'V2 checkout missing at {v2}. See contributordocs/documentation-system/building-docs-and-running.md.')
@@ -96,8 +125,6 @@ def generate(args):
     entry['filter'] = str(ROOT / 'docs' / 'filterConfig.yml')
     resolved_config = WORK / 'docfx.v2.resolved.json'
     resolved_config.write_text(json.dumps(config, indent=2) + '\n')
-    logs = WORK / 'logs'
-    logs.mkdir(exist_ok=True)
     # Replace only generated YAML in API folders; preserve authored Markdown.
     for folder in ['core-api', 'yubikey-api', 'v2-api']:
         destination = ROOT / 'docs' / folder
@@ -112,13 +139,16 @@ def generate(args):
     # Restore all V1 frameworks to preserve the shared multi-framework lockfile.
     # docfx.json still selects netstandard2.0 for API metadata generation.
     for project in ['Yubico.Core/src/Yubico.Core.csproj', 'Yubico.YubiKey/src/Yubico.YubiKey.csproj']:
-        run([v1_dotnet, 'restore', project], env=v1_env)
+        run([v1_dotnet, 'restore', project], env=v1_env,
+            log_path=logs / f'restore-v1-{Path(project).stem}.log')
     for project in projects:
-        run([v2_dotnet, 'restore', project, '-p:TargetFramework=net10.0'], cwd=v2, env=v2_env)
+        run([v2_dotnet, 'restore', project, '-p:TargetFramework=net10.0'], cwd=v2, env=v2_env,
+            log_path=logs / f'restore-v2-{Path(project).stem}.log')
 
     def docfx_run(stage, config_path, cwd, env, log_name):
         run([docfx, stage, config_path, '--logLevel', 'warning', '--warningsAsErrors',
-             '--log', logs / log_name], cwd=cwd, env=env)
+             '--log', logs / log_name], cwd=cwd, env=env,
+            log_path=logs / f'{Path(log_name).stem}-console.log')
 
     docfx_run('metadata', ROOT / 'docfx.json', ROOT, v1_env, 'v1-metadata.log')
     docfx_run('metadata', resolved_config, v2, v2_env, 'v2-metadata.log')

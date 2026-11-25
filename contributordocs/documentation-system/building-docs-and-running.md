@@ -69,6 +69,34 @@ only V1 metadata. Use the helper to ensure both versions are present. After a su
 build, `.docbuild/tools/docfx build docfx.json` can render prose-only changes without
 regenerating APIs.
 
+## Troubleshooting logs
+
+When a documentation build fails, start with the error in the terminal or GitHub
+Actions step output. The helper also saves logs in `.docbuild/logs/` for inspection
+or sharing with someone investigating the failure.
+
+| Log file | What to use it for |
+| --- | --- |
+| `restore-v1-<project>.log` | V1 dependency-restore failures, such as missing packages, feed authentication errors, or incompatible dependency versions. |
+| `restore-v2-<project>.log` | The same dependency-restore diagnostics for a V2 project. |
+| `v1-metadata-console.log` | V1 API metadata-generation failures, including output from DocFX's internal dependency restores. |
+| `v2-metadata-console.log` | V2 API metadata-generation failures, including output from DocFX's internal dependency restores. |
+| `site-console.log` | Failures while rendering the combined website from API metadata and Markdown. |
+| `v1-metadata.log`, `v2-metadata.log`, `site.log` | DocFX's own diagnostic logs for each stage. Consult these alongside the console logs; they may not include dependency-restore console output. |
+
+`<project>` is the project filename without `.csproj`, for example
+`restore-v2-Yubico.YubiKit.Core.log`. Restore and console logs include the command,
+working directory, standard output, error output, and exit code when the command
+finishes. Output still appears in the terminal, and a failed command stops the build.
+
+In GitHub Actions, download **Documentation log** from a full build or
+**Documentation preview logs** from a PR preview run's **Artifacts** section.
+Only stages that were reached can produce logs; an early setup failure may leave
+no log files, in which case use the Actions console output.
+
+Previous `*.log` files are cleared at the start of each helper run. Copy any logs
+you want to keep before rebuilding. These local files are ignored by Git.
+
 ## Preview locally
 
 ```shell

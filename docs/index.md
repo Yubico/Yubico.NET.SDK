@@ -28,11 +28,12 @@ The documentation for the .NET YubiKey SDK is organized into the following secti
   encounter while working with the SDK and the YubiKey. It provides a general outline of
   how to use the SDK. Tutorials and walk-throughs can be found here as well.
 - [V1 API Documentation](yubikey-api/index.md) is where detailed descriptions of the classes and
-  interfaces of the SDK reside.
+  interfaces of the v1 SDK reside.
+- [V1 Core API documentation](core-api/index.md) describes the shared infrastructure and
+  platform support used by the V1 SDK.
+- [V2 API documentation (alpha)](v2-api/index.md) provides the API reference for version 2 of the YubiKey .NET SDK.
 
-- [V2 API documentation (alpha)](v2-api/index.md) covers the next-generation YubiKit SDK.
-
-The platform and application descriptions below apply to V1.
+The platform and application descriptions below apply to V1. Alpha documentation for V2 is available in the [V2 SDK README](https://github.com/Yubico/Yubico.NET.SDK/blob/yubikit/README.md).
 
 ## Supported platforms
 

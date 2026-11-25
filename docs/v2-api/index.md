@@ -4,7 +4,7 @@ uid: YubiKitV2ApiIndexPage
 
 # YubiKit V2 API reference
 
-API reference for the next generation of the YubiKey .NET SDK.
+API reference for version 2 of the YubiKey .NET SDK.
 
 > [!IMPORTANT]
 > **Alpha documentation**

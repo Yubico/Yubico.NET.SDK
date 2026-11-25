@@ -46,6 +46,14 @@ def revision(path):
     return subprocess.check_output(['git', '-C', str(path), 'rev-parse', 'HEAD'], text=True).strip()
 
 
+def branch_name(path):
+    name = subprocess.check_output(
+        ['git', '-C', str(path), 'rev-parse', '--abbrev-ref', 'HEAD'],
+        text=True,
+    ).strip()
+    return None if name == 'HEAD' else name
+
+
 def sdk_environment(executable):
     resolved = shutil.which(executable)
     if not resolved:
@@ -121,7 +129,7 @@ def generate(args):
         if not (ROOT / 'docs' / folder / (namespace + '.yml')).is_file():
             raise RuntimeError(f'Missing API namespace metadata: {namespace}')
     info = {'v1Commit': revision(ROOT), 'v2Commit': revision(v2),
-            'v2Ref': 'yubikit', 'docfxVersion': DOCFX_VERSION}
+            'v2Ref': branch_name(v2), 'docfxVersion': DOCFX_VERSION}
     (WORK / 'build-info.json').write_text(json.dumps(info, indent=2) + '\n')
     docfx_run('build', ROOT / 'docfx.json', ROOT, v1_env, 'site.log')
     for folder in ['core-api', 'yubikey-api', 'v2-api']:
@@ -129,8 +137,9 @@ def generate(args):
             raise RuntimeError(f'Missing API landing page: {folder}')
     summary = os.environ.get('GITHUB_STEP_SUMMARY')
     if summary:
+        v2_label = info['v2Ref'] or 'detached HEAD'
         with open(summary, 'a', encoding='utf-8') as stream:
-            stream.write(f"\n### Documentation sources\n\n- V1: `{info['v1Commit']}`\n- V2 (yubikit): `{info['v2Commit']}`\n- DocFX: `{DOCFX_VERSION}`\n")
+            stream.write(f"\n### Documentation sources\n\n- V1: `{info['v1Commit']}`\n- V2 ({v2_label}): `{info['v2Commit']}`\n- DocFX: `{DOCFX_VERSION}`\n")
     print(f'Combined documentation: {site}')
 
 

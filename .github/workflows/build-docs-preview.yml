@@ -1,0 +1,66 @@
+# Validate the combined V1 + V2 documentation and provide a downloadable preview.
+# This workflow does not publish or deploy the documentation website.
+name: Build documentation preview
+
+on:
+  pull_request:
+    # By default, runs when a PR is opened, reopened, or updated with new commits.
+    # Both the PR's target branch and its changed files must match these filters.
+    branches: [main, 'develop**', 'release**']
+    paths:
+      - 'docfx*.json'
+      - 'docs/**'
+      - 'build/build-docs.py'
+      - '.github/workflows/build-docs-preview.yml'
+      - '.github/workflows/build.yml'
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  docs:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: yubikit
+          path: .docbuild/yubikit
+          persist-credentials: false
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        with:
+          global-json-file: .docbuild/yubikit/global.json
+      - name: Build combined documentation
+        run: python build/build-docs.py
+        env:
+          NuGetPackageSourceCredentials_Yubico_GH: ${{ github.event.pull_request.head.repo.full_name == github.repository && format('Username={0};Password={1}', github.actor, secrets.GITHUB_TOKEN) || '' }}
+      # Preserve available diagnostic logs even if the documentation build fails.
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: Documentation preview logs
+          path: .docbuild/logs/
+          if-no-files-found: warn
+      # After a successful build, attach the site to this Actions run as an artifact.
+      # To download artifacts:
+      # 1. Open the repository's Actions tab and select "Build documentation preview".
+      # 2. Open the run for your PR's latest commit, then select its Summary page.
+      # 3. In Artifacts, download "Documentation preview" (available on success) or
+      #    "Documentation preview logs" (available when the build produced log files).
+      # Sign in to GitHub with access to the repository to download the ZIP files.
+      # To view the site, extract the preview ZIP and run this from the extracted folder:
+      #   python3 -m http.server 8080 --bind 127.0.0.1
+      # Then open http://localhost:8080/ in a browser. On Windows, use python instead.
+      - name: Upload preview
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: Documentation preview
+          path: docs/_site/
+          if-no-files-found: error

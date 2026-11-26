@@ -12,40 +12,106 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Building the docs and running
+# Building the combined V1 and V2 documentation
 
-We use DocFX to build the documentation for the Yubico.YubiKey project. This is a tool that
-generates documentation from comments in the source code. The comments are written in Markdown
-format.
+The existing site contains the V1 manual and API references, plus the V2 YubiKit API
+reference. V1 URLs remain unchanged; V2 pages are under `v2-api/`.
 
-In order to build the documentation, use either of the following methods: 
-1. Command Line: `docfx build docfx.json`
-2. VS Code: Run the build task `DocFXBuild` using [VS Code Tasks](https://code.visualstudio.com/docs/editor/tasks) 
-   
-> Note: In order to run `docfx` commands, you need to have docfx installed. Install `docfx` using the following command: `dotnet tool install -g docfx`
+## Prerequisites
 
-The result is in `docs/_site`. The home page is `index.html`.
+Install Python 3.9 or newer, Git, and both .NET SDKs specified by the V1 and V2
+`global.json` files (currently .NET 9 and .NET 10). The build helper installs
+DocFX 2.81.0 into `.docbuild/tools`; a global DocFX install is unnecessary.
 
-There might be placeholders for content we will have to write but you can click on "Api Documentation"
-to get to the classes. The comments you wrote will be reflected in the documentation.
-
-Note that even if there is a class and/or method with no documentation, there is an entry for it.
-Everything is there except the content.
-
-
-## Local web server
-
-Note that there is another way to launch DocFX:
+From the repository root, create the isolated V2 checkout:
 
 ```shell
-$ docfx docfx.json --serve
+git clone --depth 1 --branch yubikit https://github.com/Yubico/Yubico.NET.SDK.git .docbuild/yubikit
+python3 build/build-docs.py
 ```
 
-Now open a browser and go to [http://localhost:8080](http://localhost:8080). There you see your home
-page for this project.
+On Windows, use `python` instead of `python3`. To refresh an existing checkout,
+run `git -C .docbuild/yubikit pull --ff-only` before building. CI checks out the
+latest `yubikit` commit on every run. A local build uses the supplied checkout as-is.
 
-## Git
+For a checkout or SDK installed elsewhere:
 
-Git should be set up so that the `docfx.json` file along with a few others (such as the subdirectory
-`namespaces` with its contents) will be part of the repo. However, the html results should not be
-added/committed/pushed.
+```shell
+python3 build/build-docs.py --v2-source /path/to/yubikit --v2-dotnet /path/to/dotnet
+```
+
+V2 restores using its own `nuget.config`. If the selected source requires private
+Yubico packages, configure the corresponding feed credentials locally; never put
+tokens in a tracked file. CI uses its existing package-read token.
+
+V1 restores all project target frameworks using the normal project lockfile;
+DocFX selects `netstandard2.0` when generating API metadata. There is no separate
+documentation lockfile. As with a normal SDK restore, changes to dependencies,
+target frameworks, or the restore environment may update the project lockfile.
+
+## Generation and configuration
+
+- `docfx.json` defines V1 metadata and the combined site.
+- `docfx.v2.json` explicitly selects the ten V2 SDK library projects. Update this
+  list and the V2 landing page when adding a module. CLI and test projects are excluded.
+- `build/build-docs.py` restores the projects, generates each version's metadata
+  from its own working directory/SDK, then renders one site with warnings as errors.
+- Metadata is generated directly into `docs/core-api/`, `docs/yubikey-api/`, and
+  `docs/v2-api/`. Before generation, the helper removes generated `*.yml` files in
+  those folders and clears `docs/_site/` to remove obsolete pages. Authored Markdown
+  is preserved. Both versions' metadata must pass validation before rendering the site.
+  If generation fails, rerun the helper successfully before using the output.
+- Logs are in `.docbuild/logs/`. `docs/_site/build-info.json` records the two source
+  commit IDs and DocFX version. Uncommitted local changes are included in a local build.
+
+Do not run the bare `docfx docfx.json` command for a fresh combined build: it generates
+only V1 metadata. Use the helper to ensure both versions are present. After a successful
+build, `.docbuild/tools/docfx build docfx.json` can render prose-only changes without
+regenerating APIs.
+
+## Troubleshooting logs
+
+When a documentation build fails, start with the error in the terminal or GitHub
+Actions step output. The helper also saves logs in `.docbuild/logs/` for inspection
+or sharing with someone investigating the failure.
+
+| Log file | What to use it for |
+| --- | --- |
+| `restore-v1-<project>.log` | V1 dependency-restore failures, such as missing packages, feed authentication errors, or incompatible dependency versions. |
+| `restore-v2-<project>.log` | The same dependency-restore diagnostics for a V2 project. |
+| `v1-metadata-console.log` | V1 API metadata-generation failures, including output from DocFX's internal dependency restores. |
+| `v2-metadata-console.log` | V2 API metadata-generation failures, including output from DocFX's internal dependency restores. |
+| `site-console.log` | Failures while rendering the combined website from API metadata and Markdown. |
+| `v1-metadata.log`, `v2-metadata.log`, `site.log` | DocFX's own diagnostic logs for each stage. Consult these alongside the console logs; they may not include dependency-restore console output. |
+
+`<project>` is the project filename without `.csproj`, for example
+`restore-v2-Yubico.YubiKit.Core.log`. Restore and console logs include the command,
+working directory, standard output, error output, and exit code when the command
+finishes. Output still appears in the terminal, and a failed command stops the build.
+
+In GitHub Actions, download **Documentation log** from a full build or
+**Documentation preview logs** from a PR preview run's **Artifacts** section.
+Only stages that were reached can produce logs; an early setup failure may leave
+no log files, in which case use the Actions console output.
+
+Previous `*.log` files are cleared at the start of each helper run. Copy any logs
+you want to keep before rebuilding. These local files are ignored by Git.
+
+## Preview locally
+
+```shell
+python3 -m http.server 8080 --bind 127.0.0.1 --directory docs/_site
+```
+
+Open [the V2 API reference](http://localhost:8080/v2-api/index.html), or
+[the site home page](http://localhost:8080/). This serves the generated site locally;
+production adds the existing `/yesdk/` prefix.
+
+## CI and publishing
+
+The main build uploads the combined site as the existing `Documentation` artifact.
+Documentation-only pull requests get a separate preview build. Both workflows keep
+logs on failure, and neither publishes an incomplete combined site. The existing
+upload and deployment controls still determine when the site goes live.
+
+Generated source checkouts, tools, metadata, and HTML must not be committed.

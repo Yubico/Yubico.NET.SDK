@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Formats.Cbor;
 using Yubico.YubiKit.Ctap2.Cose;
 
 namespace Yubico.YubiKit.Ctap2.Extensions;
@@ -111,5 +112,21 @@ public sealed record class ArkgP256SignArgs : CoseSignArgs
 
         KeyHandle = keyHandle;
         Context = context;
+    }
+
+    internal override void EncodeMap(CborWriter writer)
+    {
+        const int algorithmKey = 3;
+        const int arkgKeyHandleKey = -1;
+        const int contextKey = -2;
+
+        writer.WriteStartMap(3);
+        writer.WriteInt32(algorithmKey);
+        writer.WriteInt32(Algorithm);
+        writer.WriteInt32(arkgKeyHandleKey);
+        writer.WriteByteString(KeyHandle.Span);
+        writer.WriteInt32(contextKey);
+        writer.WriteByteString(Context.Span);
+        writer.WriteEndMap();
     }
 }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Formats.Cbor;
 
 namespace Yubico.YubiKit.Ctap2.Extensions;
@@ -221,6 +222,25 @@ public sealed class ExtensionOutput
 
         var reader = new CborReader(data, CborConformanceMode.Lax);
         minLength = reader.ReadInt32();
+        return true;
+    }
+
+    /// <summary>Decodes the previewSign authentication output from an assertion.</summary>
+    /// <param name="output">The decoded, unverified signature output when present.</param>
+    /// <returns><see langword="true"/> if the extension is present; otherwise, <see langword="false"/>.</returns>
+    /// <exception cref="InvalidOperationException">The extension is present but has the wrong shape or no usable signature.</exception>
+    /// <exception cref="CborContentException">The extension contains invalid CBOR.</exception>
+    /// <exception cref="OverflowException">An extension value's map key is outside the range of a 32-bit signed integer.</exception>
+    [Experimental("YKEXP001")]
+    public bool TryGetPreviewSign([NotNullWhen(true)] out PreviewSignAuthenticationOutput? output)
+    {
+        output = null;
+        if (!_extensions.TryGetValue(ExtensionIdentifiers.PreviewSign, out var data))
+        {
+            return false;
+        }
+
+        output = PreviewSignAuthenticationOutput.Decode(data);
         return true;
     }
 

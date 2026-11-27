@@ -394,7 +394,7 @@ var signingParams = new PreviewSignSigningParams(
     additionalArgs: algorithmSpecificAdditionalArgs);
 
 var authenticationExtensions = new AuthenticationExtensionInputs(
-    PreviewSign: PreviewSignAuthenticationInput.CreateSignByCredential(
+    PreviewSign: new PreviewSignAuthenticationInput(
         new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
         {
             [credentialId] = signingParams
@@ -415,7 +415,7 @@ not CTAP v4 or an adopted W3C signing standard.
 **Key Features:**
 - **Registration:** Generates a new signing key pair, returns public key + keyHandle
 - **Authentication:** Signs algorithm-specific `tbs` (to-be-signed) bytes using keyHandle and optional raw `additionalArgs`
-- **Multi-credential probe:** A nonempty allow list needs one signing-parameter map entry per descriptor; the probe-selected credential chooses its parameters. The public input normalizes dictionary comparison by byte content; keep key buffers unchanged during the operation.
+- **Multi-credential probe:** A nonempty allow list needs one signing-parameter map entry per descriptor; the probe-selected credential chooses its parameters. The public input snapshots the credential IDs and compares them by byte content. It rejects duplicate IDs and borrows the signing-parameter buffers.
 - **Algorithm agility:** `tbs` and `additionalArgs` are algorithm-specific values and are passed through unchanged
 
 **Current Status:**
@@ -433,10 +433,11 @@ not CTAP v4 or an adopted W3C signing standard.
 - `src/Extensions/PreviewSign/PreviewSignAuthenticationInput.cs` — WebAuthn authentication input
 - [Versioned vendor draft](https://yubicolabs.github.io/webauthn-sign-extension/4/#sctn-sign-extension) — input/output and actor requirements
 
-**Architectural Note:** `Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor` owns wire CBOR encoding.
-WebAuthn's processor/codec translates client types and delegates rather than duplicating that encoder.
-Generic signing params carry raw `additionalArgs`; ARKG helpers can be converted with
-`PreviewSignCbor.EncodeAdditionalArgs(...)`. Those helpers remain experimental, not production guidance.
+**Architectural Note:** The CTAP2 input types encode directly through `ExtensionBuilder`, and the
+WebAuthn codec shares the internal CTAP2 registration and signature decoders. WebAuthn owns its typed
+attestation and error mapping. Generic signing params carry raw `additionalArgs`; call
+`CoseSignArgs.ToAdditionalArgs()` to encode typed arguments. ARKG and previewSign use `YKEXP001` and
+are not production guidance.
 
 ### Extension policy and result-lifetime limitations
 

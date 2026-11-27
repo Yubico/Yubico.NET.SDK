@@ -14,6 +14,7 @@
 
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.IntegrationTests.TestExtensions;
 using Yubico.YubiKit.Ctap2.Pin;
@@ -310,18 +311,19 @@ public class Ctap2PreviewSignTests
                 Assert.NotEmpty(credentialId);
 
                 // Extract previewSign generated key using the proper helper
-                bool extracted = Extensions.PreviewSignCbor.TryExtractGeneratedKey(
+                bool extracted = Extensions.PreviewSignGeneratedKey.TryFromMakeCredentialResponse(
                     makeCredResult,
                     out var generatedKey);
 
                 Assert.True(extracted, "TryExtractGeneratedKey should succeed for ARKG-P256 previewSign response");
-                Assert.NotNull(generatedKey);
+                var arkgKey = Assert.IsType<Extensions.ArkgP256GeneratedKey>(generatedKey);
+                Assert.Equal(CoseAlgorithm.ArkgP256, arkgKey.Algorithm);
 
                 // Step B: Offline derive public key using RNG (modern SDK convention)
                 byte[] ikm = System.Security.Cryptography.RandomNumberGenerator.GetBytes(32);
                 byte[] ctx = System.Text.Encoding.ASCII.GetBytes("integration-test-ctx");
 
-                var derivedKey = generatedKey.DerivePublicKey(ikm, ctx);
+                var derivedKey = arkgKey.DerivePublicKey(ikm, ctx);
                 Assert.Equal(65, derivedKey.PublicKey.Length); // SEC1 uncompressed
                 Assert.NotEmpty(derivedKey.ArkgKeyHandle.Span.ToArray());
 
@@ -335,10 +337,9 @@ public class Ctap2PreviewSignTests
                 var signingParams = new Extensions.PreviewSignSigningParams(
                     keyHandle: derivedKey.DeviceKeyHandle,
                     tbs: message,
-                    additionalArgs: Extensions.PreviewSignCbor.EncodeAdditionalArgs(
-                        Extensions.CoseSignArgs.ArkgP256(
-                            derivedKey.ArkgKeyHandle,
-                            derivedKey.Context)));
+                    additionalArgs: Extensions.CoseSignArgs.ArkgP256(
+                        derivedKey.ArkgKeyHandle,
+                        derivedKey.Context).ToAdditionalArgs());
 
                 var authExtensions = new Extensions.ExtensionBuilder()
                     .WithPreviewSign(signingParams)
@@ -364,44 +365,16 @@ public class Ctap2PreviewSignTests
                 Assert.True(assertion.AuthenticatorData.HasExtensions);
                 Assert.NotNull(assertion.AuthenticatorData.Extensions);
 
-                var assertionExtensionsCbor = assertion.AuthenticatorData.Extensions.Value;
-                var authOutputReader = new CborReader(assertionExtensionsCbor, CborConformanceMode.Ctap2Canonical);
-
-                byte[]? signature = null;
-                int? mapSize = authOutputReader.ReadStartMap();
-                for (int i = 0; i < mapSize; i++)
-                {
-                    string key = authOutputReader.ReadTextString();
-                    if (key == "previewSign")
-                    {
-                        int? innerMapSize = authOutputReader.ReadStartMap();
-                        for (int j = 0; j < innerMapSize; j++)
-                        {
-                            int innerKey = authOutputReader.ReadInt32();
-                            if (innerKey == 6) // signature key
-                            {
-                                signature = authOutputReader.ReadByteString();
-                            }
-                            else
-                            {
-                                authOutputReader.SkipValue();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        authOutputReader.SkipValue();
-                    }
-                }
-
-                Assert.NotNull(signature);
-                Assert.NotEmpty(signature);
+                var assertionExtensions = Extensions.ExtensionOutput.Decode(assertion.AuthenticatorData.Extensions.Value);
+                Assert.True(assertionExtensions.TryGetPreviewSign(out var signingOutput));
+                Assert.NotNull(signingOutput);
+                Assert.False(signingOutput.Signature.IsEmpty);
 
                 // Step D: Offline verify signature
                 // Pass RAW message — VerifySignature uses ECDsa.VerifyData which hashes internally.
                 // tbs sent to firmware is SHA256(messageRaw); firmware signs tbs as-is (treats as digest).
                 // Verifier must hash messageRaw once → SHA256(messageRaw) → matches what firmware signed.
-                bool verified = derivedKey.VerifySignature(messageRaw, signature);
+                bool verified = derivedKey.VerifySignature(messageRaw, signingOutput.Signature.Span);
                 Assert.True(verified);
 
                 // Success-path token clearing only; failure-path ownership remains unfinished test work.
@@ -706,18 +679,19 @@ public class Ctap2PreviewSignTests
                 Assert.NotEmpty(credentialId);
 
                 // Extract previewSign generated key
-                bool extracted = Extensions.PreviewSignCbor.TryExtractGeneratedKey(
+                bool extracted = Extensions.PreviewSignGeneratedKey.TryFromMakeCredentialResponse(
                     makeCredResult,
                     out var generatedKey);
 
                 Assert.True(extracted, "TryExtractGeneratedKey should succeed");
-                Assert.NotNull(generatedKey);
+                var arkgKey = Assert.IsType<Extensions.ArkgP256GeneratedKey>(generatedKey);
+                Assert.Equal(CoseAlgorithm.ArkgP256, arkgKey.Algorithm);
 
                 // Derive offline key (so we have the key handle)
                 byte[] ikm = System.Security.Cryptography.RandomNumberGenerator.GetBytes(32);
                 byte[] ctx = System.Text.Encoding.ASCII.GetBytes("test-missing-args");
 
-                var derivedKey = generatedKey.DerivePublicKey(ikm, ctx);
+                var derivedKey = arkgKey.DerivePublicKey(ikm, ctx);
 
                 System.Security.Cryptography.CryptographicOperations.ZeroMemory(pinToken);
 

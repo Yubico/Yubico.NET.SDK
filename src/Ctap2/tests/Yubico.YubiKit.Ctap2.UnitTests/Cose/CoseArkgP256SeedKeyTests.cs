@@ -27,20 +27,7 @@ namespace Yubico.YubiKit.Ctap2.UnitTests.Cose;
 [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class CoseArkgP256SeedKeyTests
 {
-    [Fact]
-    public void RegistrationOutput_ExtractsReportedAlgorithmInsteadOfSeedMarker()
-    {
-        byte[] point = [0x04, .. TestKemX, .. TestKemY];
-        var seed = new CoseArkgP256SeedKey(new CoseAlgorithm(-65700), new CoseAlgorithm(-9), point, point);
-        var output = new Yubico.YubiKit.Ctap2.Extensions.PreviewSignRegistrationOutput(new byte[] { 1 }, seed.Encode(), -9);
-
-        var generated = output.TryGetGeneratedKey();
-
-        Assert.NotNull(generated);
-        Assert.Equal(-9, generated.DerivedKeyAlgorithm.Value);
-    }
-
-    // Same public seed points as the ARKG derivation vector in PreviewSignGeneratedKeyTests.
+    // Same public seed points as the ARKG derivation vector in ArkgP256GeneratedKeyTests.
     private static readonly byte[] TestKemX = Convert.FromHexString("c38bbdd7286196733fa177e43b73cfd3d6d72cd11cc0bb2c9236cf85a42dcff5");
     private static readonly byte[] TestKemY = Convert.FromHexString("dfa339c1e07dfcdfda8d7be2a5a3c7382991f387dfe332b1dd8da6e0622cfb35");
     private static readonly byte[] TestBlX = Convert.FromHexString("6d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df");

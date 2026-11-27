@@ -190,8 +190,9 @@ internal static class PreviewSignCodec
             return null;
         }
 
-        // Decode signature via the CTAP2 decoder.
-        ReadOnlyMemory<byte> signature = Ctap2.Extensions.PreviewSignCbor.DecodeAuthenticationOutput(rawCbor);
+        // Decode signature via the shared CTAP2 parser without applying CTAP2's typed result policy.
+        var reader = new System.Formats.Cbor.CborReader(rawCbor, System.Formats.Cbor.CborConformanceMode.Ctap2Canonical);
+        ReadOnlyMemory<byte> signature = Ctap2.Extensions.PreviewSignAuthenticationOutput.DecodeSignature(reader);
 
         return new PreviewSign.PreviewSignAuthenticationOutput(signature);
     }

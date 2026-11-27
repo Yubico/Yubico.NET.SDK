@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Formats.Cbor;
+
 namespace Yubico.YubiKit.Ctap2.Extensions;
 
 /// <summary>
@@ -28,13 +30,12 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <para>
 /// This helper is not the generic previewSign contract. Generic previewSign signing accepts raw
 /// <see cref="PreviewSignSigningParams.AdditionalArgs"/> bytes. Use
-/// <see cref="PreviewSignCbor.EncodeAdditionalArgs"/> to convert this experimental typed helper
+/// <see cref="ToAdditionalArgs"/> to convert this experimental typed helper
 /// to those raw bytes when testing ARKG flows in v2.
 /// </para>
 /// <para>
 /// This is a closed helper hierarchy: the constructor is <c>private protected</c>, so external
-/// assemblies cannot extend it. <see cref="PreviewSignCbor.EncodeCoseSignArgs"/> exhaustively
-/// pattern-matches the known subtypes and throws on unknown runtime types.
+/// assemblies cannot extend it. Each subtype supplies its own algorithm-specific map encoding.
 /// </para>
 /// </remarks>
 [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
@@ -60,4 +61,18 @@ public abstract record class CoseSignArgs
     /// <returns>A typed <see cref="ArkgP256SignArgs"/>.</returns>
     public static CoseSignArgs ArkgP256(ReadOnlyMemory<byte> keyHandle, ReadOnlyMemory<byte> context)
         => new ArkgP256SignArgs(keyHandle, context);
+
+    /// <summary>
+    /// Encodes this value as a canonical <c>COSE_Sign_Args</c> map for
+    /// <see cref="PreviewSignSigningParams.AdditionalArgs"/>.
+    /// </summary>
+    /// <returns>A new array containing the encoded map, without its outer byte-string wrapper.</returns>
+    public byte[] ToAdditionalArgs()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        EncodeMap(writer);
+        return writer.Encode();
+    }
+
+    internal abstract void EncodeMap(CborWriter writer);
 }

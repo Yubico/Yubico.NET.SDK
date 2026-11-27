@@ -98,7 +98,7 @@ Yubico.YubiKit.Ctap2/
 │   │   ├── CredBlob/               # credBlob inputs and outputs
 │   │   ├── HmacSecret/             # hmac-secret inputs and outputs
 │   │   ├── MinPinLength/           # minPinLength inputs and outputs
-│   │   └── PreviewSign/            # previewSign types and canonical CBOR encoder
+│   │   └── PreviewSign/            # previewSign types and internal registration wire parser
 │   ├── BioEnrollment/              # Fingerprint APIs; standard and opt-in prototype requests
 │   │   ├── BioEnrollmentSubCommand.cs
 │   │   ├── BioEnrollmentModels.cs
@@ -248,14 +248,22 @@ RP policy or perform a ceremony. Client-side WebAuthn transformations belong in 
 WebAuthn-layer type. Generic `tbs` and optional `additionalArgs` are encoded unchanged; callers must
 provide algorithm-appropriate TBS/prehashing and a CBOR COSE_Sign_Args map when required. Inner attestation
 is parsed, not trust-verified. **WARNING -- EXPERIMENTAL --** Public ARKG conveniences are not ready for
-production and must not be treated as production cryptographic guidance. Convert arguments with
-`PreviewSignCbor.EncodeAdditionalArgs(...)`. The seed algorithm placeholder -65700 and BL=-1/KEM=-2
+production and must not be treated as production cryptographic guidance. Convert typed arguments with
+`CoseSignArgs.ToAdditionalArgs()`. The seed algorithm placeholder -65700 and BL=-1/KEM=-2
 labels agree with ARKG Internet-Draft -10, as does the example's derived ESP256=-9. The SDK's outer kty=2
 and byte-string-wrapped nested maps differ from the draft's kty=-65537/direct maps; the SDK also requires
 an integer derived algorithm where the draft permits an optional int/text value. This partial agreement
 is not full-profile conformance; the draft's stated expiry is 2026-08-31. Signing and derived-key
 identifiers remain distinct; the convenience verifier handles raw
 messages with P-256/SHA-256 and strict DER signatures, not arbitrary generic TBS algorithms.
+
+Read the generated key with `PreviewSignGeneratedKey.TryFromMakeCredentialResponse`. The result carries
+the outer signing algorithm, the inner handle and decoded public key, and the draft's text-keyed attestation
+encoding. Match `ArkgP256GeneratedKey` before calling `DerivePublicKey`; its `DerivedKeyAlgorithm` comes
+from the seed key, not the outer response. Other key types use the generic result without derivation.
+Read a returned assertion signature with `ExtensionOutput.TryGetPreviewSign`. The input types write directly
+into `ExtensionBuilder`'s writer; the internal registration parser and signature decoder reuse
+`CtapResponseParser.ReadIntKeyMap` and share the wire decoding with WebAuthn.
 
 #### Example Usage
 

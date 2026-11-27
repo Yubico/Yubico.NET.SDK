@@ -32,7 +32,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <para>
 /// The CTAP2 ARKG typed helpers are experimental conveniences, not the generic previewSign contract
 /// or production cryptographic guidance. Their output can be converted to raw bytes with
-/// <see cref="Ctap2.Extensions.PreviewSignCbor.EncodeAdditionalArgs"/> before constructing this type.
+/// <see cref="Ctap2.Extensions.CoseSignArgs.ToAdditionalArgs"/> before constructing this type.
 /// </para>
 /// <para>
 /// The constructor retains supplied memory without copying or taking ownership. Keep backing buffers

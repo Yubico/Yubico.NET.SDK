@@ -129,6 +129,43 @@ public class WebAuthnClientGetAssertionTests
         await _mockBackend.Received(2).GetNextAssertionAsync(Arg.Any<CancellationToken>());
     }
 
+    [Theory]
+    [InlineData(1024u, 1024)]
+    [InlineData(1025u, 0)]
+    [InlineData(uint.MaxValue, 0)]
+    [InlineData(0u, 1)]
+    [InlineData(null, 1)]
+    public async Task GetAssertion_BoundsHostEnumerationWithoutChangingReportedCount(uint? reported, int expected)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] key = Enumerable.Repeat((byte)0xA5, 32).ToArray();
+        var first = MockCtap2Responses.CreateMockGetAssertionResponse(numberOfCredentials: reported, largeBlobKey: key);
+        _mockBackend.GetAssertionAsync(Arg.Any<BackendGetAssertionRequest>(), Arg.Any<CancellationToken>()).Returns(first);
+        if (expected == 0)
+            _mockBackend.GetNextAssertionAsync(Arg.Any<CancellationToken>())
+                .Returns<GetAssertionResponse>(_ => throw new Xunit.Sdk.XunitException("An excessive count must not send a continuation."));
+        else
+            _mockBackend.GetNextAssertionAsync(Arg.Any<CancellationToken>())
+                .Returns(MockCtap2Responses.CreateMockGetAssertionResponse());
+
+        var options = new PublicKeyCredentialRequestOptions { Challenge = new byte[32], RpId = "example.com" };
+        if (expected == 0)
+        {
+            var error = await Assert.ThrowsAsync<WebAuthnClientError>(() => _client.GetAssertionAsync(options, null, ct));
+            Assert.Equal(WebAuthnClientErrorCode.Constraint, error.Code);
+            Assert.Equal(new byte[32], Assert.IsType<Memory<byte>>(first.LargeBlobKey).ToArray());
+            Assert.Equal(new byte[first.AuthenticatorDataRaw.Length], first.AuthenticatorDataRaw.ToArray());
+        }
+        else
+        {
+            Assert.Equal(expected, (await _client.GetAssertionAsync(options, null, ct)).Count);
+        }
+
+        Assert.Equal(reported, first.NumberOfCredentials);
+        Assert.All(key, value => Assert.Equal(0xA5, value));
+        await _mockBackend.Received(Math.Max(0, expected - 1)).GetNextAssertionAsync(Arg.Any<CancellationToken>());
+    }
+
     [Fact]
     public async Task GetAssertion_MatchedCredential_SelectAsync_IsIdempotent()
     {
@@ -152,7 +189,8 @@ public class WebAuthnClientGetAssertionTests
         var response1 = await matched.SelectAsync(TestContext.Current.CancellationToken);
         var response2 = await matched.SelectAsync(TestContext.Current.CancellationToken);
 
-        // Assert - same instance or value-equal
+        // Repeated selections have equal CredentialId and Signature bytes;
+        // the fixture observes one backend GetAssertion call in total.
         Assert.Equal(response1.CredentialId.ToArray(), response2.CredentialId.ToArray());
         Assert.Equal(response1.Signature.ToArray(), response2.Signature.ToArray());
 
@@ -380,7 +418,7 @@ public class WebAuthnClientGetAssertionTests
     }
 
     /// <summary>
-    /// Control for <see cref="GetAssertion_WhenExtensionBuildFails_NeverComputesPinUvAuthParam"/>:
+    /// Control for <see cref="GetAssertion_InvalidExtensionInput_IsRejectedBeforeAnyTokenIsMinted"/>:
     /// proves the protocol double actually records the tags it issues.
     /// </summary>
     /// <remarks>
@@ -495,7 +533,7 @@ public class WebAuthnClientGetAssertionTests
     [Fact(Timeout = 5000)]
     public async Task MatchedCredential_SelectAsync_HonorsCancellationToken()
     {
-        // Arrange - Create a MatchedCredential with a slow-completing factory
+        // An internal slow factory tests waiting semantics; production matches already hold built responses.
         var credentialId = RandomNumberGenerator.GetBytes(32);
         var tcs = new TaskCompletionSource<AuthenticationResponse>();
 
@@ -512,7 +550,6 @@ public class WebAuthnClientGetAssertionTests
             User = null
         };
 
-        // Use reflection or create via internal constructor pattern
         var match = new MatchedCredential(
             credentialId,
             user: null,

@@ -39,6 +39,10 @@ public static class Crt
     /// <summary>
     ///     CRT for the Attestation key slot.
     /// </summary>
+    /// <remarks>
+    ///     Yubico's attestation extension nests tag 84 inside B6 (B6 03 84 01 81). Target-key attestation
+    ///     uses a separate command. Treat this static memory as borrowed read-only data.
+    /// </remarks>
     public static ReadOnlyMemory<byte> Att { get; } = BuildAttCrt();
 
     private static byte[] BuildCrt(int tag)
@@ -50,7 +54,7 @@ public static class Crt
     private static byte[] BuildAttCrt()
     {
         using var inner = new Tlv(0x84, [0x81]);
-        using var outer = new Tlv(0xB6, inner.Value.Span);
+        using var outer = new Tlv(0xB6, inner.AsSpan());
         return outer.AsSpan().ToArray();
     }
 }

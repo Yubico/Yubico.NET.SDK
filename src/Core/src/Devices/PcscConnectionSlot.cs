@@ -89,8 +89,9 @@ internal sealed class PcscConnectionSlot : IYubiKeyConnectionSlot, IDiscoveryCon
         }
         catch
         {
-            // External factories own partial-open cleanup until they return a connection. An ordinary failure
-            // therefore releases this managed claim; factories that cannot prove cleanup signal that explicitly.
+            // Ordinary factory failures promise partial-open cleanup. This catch also covers post-open
+            // logging/wrapper failures: it releases the registration but does not dispose a returned local.
+            // Keep that exceptional path distinct from the factory's cleanup contract.
             registration.Dispose();
             throw;
         }

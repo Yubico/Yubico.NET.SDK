@@ -1,6 +1,6 @@
 # Yubico.YubiKit.Ctap2
 
-The FIDO application on a YubiKey is a CTAP 2.1/2.3 authenticator. This package speaks CTAP2 directly: read
+This package exposes CTAP2 operations and selected CTAP 2.1/2.3 features on YubiKey authenticators: read
 capabilities, create and assert credentials, manage the PIN, and drive the credential, biometric, large-blob,
 and config sub-systems. `Yubico.YubiKit.WebAuthn` builds the WebAuthn client API on top of it.
 
@@ -11,15 +11,22 @@ and config sub-systems. `Yubico.YubiKit.WebAuthn` builds the WebAuthn client API
 
 - .NET 10. On Linux, install PC/SC and the udev rules described in [linux-setup.md](../../docs/linux-setup.md).
 - YubiKey 5 series, Security Key series, or YubiKey Bio series with firmware 5.0.0 or later.
-- Transports: HID FIDO over USB, or SmartCard (CCID) where the FIDO AID is exposed - NFC always, USB on 5.8.0+.
+- Transports: HID FIDO over USB, or SmartCard (CCID) where the connected authenticator exposes the FIDO AID.
+  NFC requires a current PC/SC connection reporting `Transport.Nfc`; USB SmartCard uses the SDK's 5.8.0+ gate.
 
-| Feature | Minimum firmware |
+| Feature | SDK firmware threshold |
 |---------|------------------|
-| CTAP2 (CTAP2) | 5.0.0 |
+| CTAP2 (`FeatureFido2`) | 5.0.0 |
 | Credential management, fingerprint bio enrollment | 5.2.0 |
 | Authenticator config, hmac-secret-mc extension | 5.4.0 |
 | credBlob extension | 5.5.0 |
 | CTAP2 over USB SmartCard | 5.8.0 |
+
+These thresholds are SDK metadata, not a device-support or standards-conformance matrix. Check the actual
+`GetInfoAsync` versions, extensions and options, configured state, transport and required authorization.
+Fingerprint enrollment also needs sensor hardware. Early credential-management support can be a prototype;
+`CredentialManagement` sends the standard command only. The hmac-secret-mc threshold does not establish its
+earliest support on every family; request it only when advertised.
 
 ## Installation
 
@@ -51,8 +58,15 @@ var info = await session.GetInfoAsync();
 Console.WriteLine($"CTAP versions: {string.Join(", ", info.Versions)}");
 ```
 
-Later snippets assume these directives and a `device` obtained the same way. `GetInfoAsync` needs no touch and no PIN;
-`info.Options`, `info.Extensions`, and `info.Aaguid` describe the rest. For a single read, the one-shot `device.GetCtap2InfoAsync()` opens and closes a session for you.
+Later snippets use these directives and the same open `session`. `GetInfoAsync` needs no touch or PIN and
+makes a fresh query; it does not refresh the session's construction-time firmware configuration.
+Options can describe state: `clientPin: false` means PIN support with no PIN set, not no PIN support.
+For a one-shot read, use `device.GetCtap2InfoAsync()` **instead of** opening this session, or after disposing
+it. The helper opens/closes its own session and performs an initialization probe plus the requested read.
+
+For decoded encrypted GetInfo metadata, absent `EncIdentifier` and `EncCredStoreState` fields are
+`null`. An encoded empty byte string is present with length zero. Presence does not establish that
+the bytes can be decrypted. The original CBOR is available in `info.RawData`.
 
 ## Common operations
 
@@ -67,28 +81,64 @@ still say **FIDO2 PIN**, while operation identifiers use names such as `Ctap2.Ma
 
 ### Create a credential
 
-This asks for a touch and nothing else; `UserVerification` and credProtect need a PIN token, so they appear in the PIN flow below.
+This is a protocol demonstration on a dedicated evaluation key, not RP account registration. It creates
+a persistent credential. The random hash and user handle below are stand-ins; they cannot produce a
+verifiable WebAuthn registration. Use the PIN flow below when the device's configured policy requires
+authorization. Built-in UV is a separate, capability-dependent route, not PIN collection.
 
 ```csharp
-byte[] clientDataHash = SHA256.HashData(Encoding.UTF8.GetBytes("""{"challenge":"replace-me"}"""));
+byte[] registrationHash = RandomNumberGenerator.GetBytes(32); // Demo only, not collected client data.
 var rp = new PublicKeyCredentialRpEntity("example.com", "Example Corp");
 var user = new PublicKeyCredentialUserEntity(
     RandomNumberGenerator.GetBytes(32), "user@example.com", "Example User");
 
 var response = await session.MakeCredentialAsync(
-    clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()],
-    new MakeCredentialOptions { ResidentKey = true });
-ReadOnlyMemory<byte> credentialId = response.AuthenticatorData.AttestedCredentialData!.CredentialId;
+    registrationHash, rp, user, [PublicKeyCredentialParameters.CreateES256()],
+    new MakeCredentialOptions { ResidentKey = false });
+var attested = response.AuthenticatorData.AttestedCredentialData
+    ?? throw new InvalidOperationException("No attested credential data was returned.");
+ReadOnlyMemory<byte> credentialId = attested.CredentialId;
+ReadOnlyMemory<byte> publicKeyCbor = attested.CredentialPublicKey;
 ```
 
 ### Get an assertion
 
 ```csharp
-var assertion = await session.GetAssertionAsync("example.com", clientDataHash, new GetAssertionOptions());
+byte[] authenticationHash = RandomNumberGenerator.GetBytes(32); // A separate demo ceremony.
+var assertion = await session.GetAssertionAsync("example.com", authenticationHash,
+    new GetAssertionOptions { AllowList = [new PublicKeyCredentialDescriptor(credentialId)] });
 Console.WriteLine($"Signature: {Convert.ToHexString(assertion.Signature.Span)}");
 ```
 
-Leave `AllowList` unset to search discoverable credentials; if `NumberOfCredentials` exceeds one, call `GetNextAssertionAsync`.
+The allow list targets the preceding credential. Leave it unset to search discoverable credentials
+for the RP instead. This alternative requires an existing discoverable credential for `example.com`;
+the preceding nonresident credential is not eligible for that search. Collect all responses before
+selecting an account or issuing any other device command:
+
+```csharp
+// Alternative to the allow-list assertion above, not an additional use of its ceremony hash.
+var first = await session.GetAssertionAsync("example.com", authenticationHash, new GetAssertionOptions());
+var assertions = new List<GetAssertionResponse> { first };
+int total = first.NumberOfCredentials ?? 1;
+for (int index = 1; index < total; index++)
+{
+    assertions.Add(await session.GetNextAssertionAsync());
+}
+```
+
+Issue the `total - 1` next calls promptly and consecutively: no intervening GetInfo, PIN, administrative
+or raw command, including from another caller. The SDK does not reserve the entire sequence or track its
+count/timer. Interrupted, expired or exhausted device state can produce `NotAllowed`; CTAP's greater-than-
+30-second timer steps are optional over NFC. An absent count means one response, not proof of one account.
+
+For application integration, obtain fresh registration/authentication challenges, RP options and the
+stable account user handle from your RP protocol. Hash the **exact serialized collected client-data bytes**
+for each ceremony with SHA-256; do not hash just the challenge or reserialize the bytes before submission.
+Send those same bytes and the credential/attestation or assertion data to the RP. The RP independently
+checks ceremony type, challenge freshness, origin, RP ID hash, UP/UV, credential/account binding, signature,
+counter policy and attestation trust where required. Retain credential ID/public key in the RP record only
+after verification. A decoded response or printed signature is not registration or sign-in. The
+[WebAuthn package](../WebAuthn/README.md) supplies client orchestration, not RP-server acceptance.
 
 Credential-management enumeration returns `RelyingPartyEnumerationResult` or `CredentialEnumerationResult`.
 Read the owned, read-only `RelyingParties` or `Credentials` collection and use `ReportedTotal` when the
@@ -97,6 +147,7 @@ Dispose credential results after use because each `StoredCredentialInfo` owns a 
 can contain a large-blob key:
 
 ```csharp
+// Existing helper and hash supplied by the caller; see the authorization prerequisites below.
 using var credentialResult = await credentialManagement.EnumerateCredentialsAsync(rpIdHash);
 foreach (StoredCredentialInfo credential in credentialResult.Credentials)
 {
@@ -113,19 +164,37 @@ clears the model's private clone and is not an end-to-end response cleanup guara
 
 ### Verify the user with a PIN
 
-A verified ceremony carries a PIN token: acquire one for the permission you need, authenticate the same
-`clientDataHash` you send, and set both `PinUvAuthParam` and `PinUvAuthProtocol`. Setting `UserVerification` alone is rejected. `ClientPin` also has `SetPinAsync`, `ChangePinAsync`, and `GetPinRetriesAsync`.
+For PIN authorization, acquire a token for the operation and RP, authenticate the exact hash sent with
+that command, and set `PinUvAuthParam` and `PinUvAuthProtocol`. **Omit `UserVerification` entirely** when
+supplying token authentication: even `uv:false` must not accompany `pinUvAuthParam`. `UserVerification=true`
+without token authentication requests configured built-in UV on a capable authenticator; the SDK does
+not reject it categorically. Inspect returned flags and leave independent ceremony verification to the RP.
+
+Choose a mutually supported protocol from `info.PinUvAuthProtocols`; this example requires protocol 2 and
+an already configured, known evaluation PIN. It does not set a PIN. If `pinUvAuthToken` is not true,
+`ClientPin` uses the legacy token command with the same supplied protocol, dropping requested permissions
+and RP scope. This is not protocol-1 negotiation or a guarantee of administrative authorization.
 
 `GetPinRetriesAsync` and `GetUvRetriesAsync` return `PinRetryStatus` and
-`UserVerificationRetryStatus`; read `RetriesRemaining` and `PowerCycleRequired` from those results.
+`UserVerificationRetryStatus`. Both require a retry count. PIN `PowerCycleRequired` is nullable:
+use `is true` to act on an affirmative indication; `null` means the authenticator did not report it.
+CTAP defines no such UV power-cycle field. Stop on blocked states rather than blindly retrying: temporary `PinAuthBlocked`
+differs from exhausted `PinBlocked`. `ClientPin` also exposes PIN set/change operations. PIN bytes must
+be unpadded UTF-8. The SDK normalizes new PINs to NFC, then checks at least four Unicode code points,
+at most 63 UTF-8 bytes, and no trailing NUL. For non-ASCII new PINs, enable .NET globalization support
+for NFC; invariant mode cannot normalize them. The authenticator can apply stricter policy. Existing PIN
+bytes are validated as UTF-8 and hashed unchanged.
 
 ```csharp
 byte[] pin = Encoding.UTF8.GetBytes("123456");
 byte[]? pinToken = null;
+byte[]? authParam = null;
 try
 {
     using var protocol = new PinUvAuthProtocolV2();
     using var clientPin = new ClientPin(session, protocol);
+    byte[] pinRegistrationHash = RandomNumberGenerator.GetBytes(32); // Separate demo creation.
+    byte[] pinAuthenticationHash = RandomNumberGenerator.GetBytes(32); // Separate demo assertion.
     pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
         pin, PinUvAuthTokenPermissions.MakeCredential, "example.com");
     var options = new MakeCredentialOptions
@@ -133,41 +202,70 @@ try
         ResidentKey = true,
         Extensions = new ExtensionBuilder().WithCredProtect(CredProtectPolicy.UserVerificationRequired).Build()
     };
-    options.WithPinUvAuth(protocol.Authenticate(pinToken, clientDataHash), protocol.Version);
-    options.WithUserVerification(true);
-    await session.MakeCredentialAsync(
-        clientDataHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options);
+    authParam = protocol.Authenticate(pinToken, pinRegistrationHash);
+    options.WithPinUvAuth(authParam, protocol.Version); // uv remains absent.
+    var created = await session.MakeCredentialAsync(
+        pinRegistrationHash, rp, user, [PublicKeyCredentialParameters.CreateES256()], options);
+    var createdData = created.AuthenticatorData.AttestedCredentialData
+        ?? throw new InvalidOperationException("No attested credential data was returned.");
+
+    // The first token requested only MakeCredential permission. Authorize the separate assertion.
+    CryptographicOperations.ZeroMemory(authParam);
+    CryptographicOperations.ZeroMemory(pinToken);
+    pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
+        pin, PinUvAuthTokenPermissions.GetAssertion, "example.com");
+    authParam = protocol.Authenticate(pinToken, pinAuthenticationHash);
+    var assertionOptions = new GetAssertionOptions
+    {
+        AllowList = [new PublicKeyCredentialDescriptor(createdData.CredentialId)]
+    };
+    assertionOptions.WithPinUvAuth(authParam, protocol.Version);
+    var verified = await session.GetAssertionAsync("example.com", pinAuthenticationHash, assertionOptions);
 }
 finally
 {
     CryptographicOperations.ZeroMemory(pin);
-    CryptographicOperations.ZeroMemory(pinToken);
+    if (pinToken is not null) CryptographicOperations.ZeroMemory(pinToken);
+    if (authParam is not null) CryptographicOperations.ZeroMemory(authParam);
 }
 ```
 
-The assertion side is the same shape with a `GetAssertion` token:
+The literal PIN is only an evaluation convenience; an immutable string cannot be securely erased.
+The builder forwards credProtect but does not implement `enforcePolicy`. If policy failure must prevent
+creation, assess support before sending; inspecting output afterward does not undo creation.
 
-```csharp
-// Inside the same try block: a token is bound to its permission, so acquire a fresh one.
-CryptographicOperations.ZeroMemory(pinToken);
-pinToken = await clientPin.GetPinUvAuthTokenUsingPinAsync(
-    pin, PinUvAuthTokenPermissions.GetAssertion, "example.com");
-var assertionOptions = new GetAssertionOptions();
-assertionOptions.WithPinUvAuth(protocol.Authenticate(pinToken, clientDataHash), protocol.Version);
-assertionOptions.WithUserVerification(true);
-var verified = await session.GetAssertionAsync("example.com", clientDataHash, assertionOptions);
-```
+Administrative helpers borrow the session, protocol and token; keep them alive and token bytes unchanged
+through awaited calls, then clear the caller-owned token. Credential-management enumeration is eager and
+must not be interleaved with other device operations. Route credentials using the returned `RpIdHash`,
+not a hash recalculated from possibly truncated RP display text. Deletion has no undo or automatic
+associated-blob cleanup; updating names keeps the existing user handle and does not update the RP account.
+`AuthenticatorConfig` requires advertised subcommand support and appropriate authorization; `alwaysUv`
+is a toggle, not an idempotent desired-state setter. Re-read GetInfo to reconcile state after an uncertain
+outcome before another toggle. Setting minimum PIN policy is separate from the `minPinLength` extension,
+which only discloses the current code-point minimum to authorized RPs during creation.
 
-`CredentialManagement`, `FingerprintBioEnrollment`, `LargeBlobStorage`, and `AuthenticatorConfig` are built the same way: session, protocol, and a token with the matching permission.
+`FingerprintBioEnrollment` uses the CTAP 2.1 standard request format by default. This is not a device
+interoperability qualification. The opt-in prototype command retains its prior wire profile.
+Keep the begin template ID independently for continuation. A decoded remaining count of zero is not
+verified enrollment completion; cancellation of a .NET token is not `EnrollCancelAsync`.
+
+For blobs, request `WithLargeBlobKey()`, read the top-level response `LargeBlobKey`, and use
+`LargeBlobStorage` for the shared storage array. The alternative direct `largeBlob` extension is standard
+but not implemented by this builder/storage route. Writes require the SDK's protocol/token path and
+`LargeBlobWrite` authorization; coordinate the whole read-modify-write sequence and re-read after failures.
 
 ## User interaction
 
-`MakeCredentialAsync`, `GetAssertionAsync`, `SelectionAsync`, and `ResetAsync` require a touch; `GetInfoAsync`
-and the `ClientPin` commands are silent. Pass a `cancellationToken` to request cancellation;
+Ordinary creation and default assertions request user presence; assertions can request `up:false`.
+Selection/reset have device-specific presence requirements, and NFC presence need not mean a fresh button
+touch. Built-in UV token acquisition can require biometric interaction even though generic `ClientPin`
+traffic has no modeled SDK presence notification. GetInfo itself needs neither PIN nor touch.
+Pass a `cancellationToken` to request cancellation;
 it does not instantly stop an admitted device exchange or undo a command already sent. On HID,
 the SDK sends `CTAPHID_CANCEL` when it observes cancellation during a keep-alive, then waits
-for and drains a valid terminal response before reporting cancellation. On SmartCard, admitted
-exchanges run to completion.
+for and drains a valid terminal response. Success can win the cancellation race. On SmartCard, admitted
+exchanges run to completion. Callback or decode failure may follow successful device side effects; a failed
+call is not rollback evidence. Await calls without overlap and preserve stateful-command adjacency.
 
 ```csharp
 sealed class TouchPrompt : IUserPresencePrompt
@@ -178,11 +276,22 @@ sealed class TouchPrompt : IUserPresencePrompt
 ```
 
 ```csharp
-await using var promptingSession = await device.CreateCtap2SessionAsync(
+// Replace the original session factory above; do not open a second session while it is live.
+await using var session = await device.CreateCtap2SessionAsync(
     new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
 ```
 
-The prompt shows the indication and returns without waiting. Over HID the request carries `UserPresenceBasis.DeviceWaiting` on the first keep-alive; SmartCard has no in-flight signal, so MakeCredential and GetAssertion report `PolicyRequires` before the command.
+The prompt shows the indication and returns without waiting. Over HID the request carries
+`UserPresenceBasis.DeviceWaiting` on the first user-presence-needed keep-alive (`0x02`); SmartCard has no
+in-flight signal, so ordinary MakeCredential/GetAssertion report `PolicyRequires` before the command.
+Notification completion reflects the exchange status before typed decoding, not proof of gesture, UV or
+RP acceptance. See [user interaction](../../docs/usage/user-interaction.md) for callback contracts.
+
+Keep the caller-owned prompt usable through terminal callbacks. Resolution uses an uncancelled token
+and can delay return after cancellation. A failed request callback receives no resolution callback.
+Cancellation requests neither interrupt a baseline Windows synchronous HID read nor impose a native
+completion deadline. If framing, transport or teardown leaves exchange state uncertain, dispose and
+reopen the connection rather than assuming it is reusable.
 
 ## Constraints
 
@@ -190,28 +299,96 @@ Core's [cryptographic catalog](../Core/README.md#cryptographic-metadata) exposes
 `Core.Cryptography.Cose.CoseKeyInfo` (kty/crv, not alg). Core `CoseAlgorithmIdentifier` uses
 `Es256`, `Es384`, `Es512`, `EdDsa`, `Rs256`, and `EcdhEsHkdf256`. CTAP2's `CoseAlgorithm` remains open-valued
 with its existing PascalCase constants and unknown-value preservation. A Core COSE mapping is not CTAP2
-operation/profile support; PIN/UV curve and algorithm checks remain strict. Operation applicability in the
-catalog must never broaden CTAP2 profile checks or restrict unknown numeric response identifiers.
+operation/profile support. CTAP's PIN/UV key-agreement profile requires EC2/P-256, alg=-25, 32-byte X/Y
+coordinates, an on-curve point and no other optional key parameters. The current helper checks coordinate
+storage types and lengths and requires peer `kty = 2`, `alg = -25`, and `crv = 1` before importing
+the point as P-256 through the provider. The SDK ignores unknown extra labels and does not echo them
+in its platform key. These checks are specific to PIN/UV key agreement, not general COSE catalog lookup.
 
 Session creation selects the FIDO applet before GetInfo on SmartCard. On HID, GetInfo follows channel
 preparation directly; there is no applet-selection step.
 
-- The default transport is HID FIDO, falling back to SmartCard; `SessionCreationOptions.PreferredConnectionType`
+The USB SmartCard gate uses cached device firmware and its qualifier when available, otherwise GetInfo
+firmware. A present non-final qualifier or a major-zero version (including missing firmware) passes the
+SDK's permissive feature policy, not a verified modern-firmware check. GetInfo must still succeed.
+`FirmwareVersionOverride` changes session/protocol configuration, not the gate. Without it, numeric
+GetInfo firmware takes precedence over a major-zero cache for APDU configuration. SCP uses the explicit
+override if supplied; otherwise unverified firmware (non-final qualifier or major zero) permits an SCP
+attempt without changing APDU framing. HID INIT vendor bytes,
+GetInfo firmware and Management firmware are separate observations. Later GetInfo reads do not reconfigure the session.
+Initial SmartCard SELECT/GetInfo precede options-based configuration. For major-zero firmware,
+Core chooses APDU format from connection support before its ordinary `ForceShortApdus` handling.
+
+- The default selects HID FIDO when exposed, otherwise SmartCard; it never retries another transport after
+  opening/initialization failure. `SessionCreationOptions.PreferredConnectionType`
   forces one. `ConnectionType.HidOtp` throws `ArgumentException`, an unexposed one `NotSupportedException`.
 - SCP runs only over SmartCard. `ScpKeyParameters` without an explicit preference selects SmartCard; pairing
   them with `ConnectionType.HidFido` throws `NotSupportedException` during initialization.
-- A physical YubiKey admits one live connection across all of its interfaces, and one session per connection;
-  a second session throws `ConnectionInUseException` until the first is disposed.
+- SDK-managed opens claim the selected device view's known member interface IDs in this process.
+  An overlapping claim throws `ConnectionInUseException`; disjoint scoped views, direct connection
+  factories and other processes need separate coordination. Each connection admits one live session.
 - Sessions from `device.CreateCtap2SessionAsync()` own the connection they opened; `Ctap2Session.CreateAsync`
   borrows yours and you dispose it. Use `await using` for both; there is no finalizer backstop.
-- `ResetAsync` erases every credential and the PIN, irreversibly, and is refused unless it arrives within five
-  seconds of insertion. Firmware gates throw `NotSupportedException`.
+- Serialize and fully await complete operations and helper workflows before disposing the session,
+  protocol, token or borrowed connection. Core drains an admitted exchange, not a whole PIN-token,
+  begin/next, blob read-modify-write or post-exchange decoding/notification workflow. Callbacks must
+  not dispose or reenter the session whose operation is awaiting them.
+- SmartCard SCP setup follows plain FIDO selection/GetInfo, then rebinds the backend without another
+  SELECT or a protected CTAP probe. Setup success and `IsAuthenticated` do not establish device-side
+  authentication phase completion, applet-selection survival, FIDO-over-SCP product qualification or
+  PIN/UV permissions. Keep caller-owned SCP parameters in an outer scope around session creation;
+  their key/certificate owners are separate from the session's derived keys.
+- `ResetAsync` invalidates generated credentials, including non-discoverable/U2F credentials, erases
+  discoverable credentials and clears the PIN. Storage/configuration effects depend on the applicable
+  protocol/product. CTAP 2.1/2.3 require receipt within ten seconds of power-up for displayless devices;
+  Yubico documents five seconds before firmware 5.5.2 and ten on 5.5.4+, without classifying 5.5.2/5.5.3
+  in that passage. The separate USB presence wait and any long-touch requirement still apply. The SDK
+  does not orchestrate a power cycle or enforce a local reset timer. See the
+  [reset procedure and sample limitations](examples/FidoTool/README.md#reset).
 
 ## Security notes
 
-- PINs and PIN tokens are borrowed buffers; zero yours with `CryptographicOperations.ZeroMemory` in a `finally`.
-- `ClientPin` zeroes what it derives internally and `PinUvAuthProtocolV2` zeroes the raw ECDH output.
+- Caller PIN buffers are borrowed; returned ClientPin tokens are caller-owned (administrative helpers
+  borrow them). Clear each with `CryptographicOperations.ZeroMemory` after the final await, in a `finally`.
+- `ClientPin` disposes the supplied protocol, not the session. Its named PIN/hash/shared-secret buffers
+  have scoped cleanup. The single-use request builder clears its input copies, and ClientPin clears
+  its PIN-bearing request arrays after sending. This is not an end-to-end zeroing guarantee. Protocol
+  disposal does not clear caller-owned returned tokens or outputs.
 - Never log PINs, PIN tokens, or secret-derived extension outputs such as hmac-secret and PRF results.
+- `MakeCredentialResponse` and `GetAssertionResponse` are not disposable. Their `LargeBlobKey`, signed
+  `AuthenticatorDataRaw` and (for registration) encoded `UnsignedExtensionOutputs` are caller-owned
+  `Memory<byte>` buffers. Use them unchanged for verification, then zero their spans when finished.
+  `ExtensionOutputs` aliases `AuthenticatorDataRaw`, so clearing the latter also clears signed outputs.
+  Disposing a session does not clear returned buffers or copies made by downstream decoders.
+- Registration responses require attested credential data. When the ED flag is set, the signed
+  suffix must contain exactly one CBOR map. Assertion credential counts use the unsigned wire
+  width (`uint?`); decoding still does not verify a ceremony or reserve an assertion sequence.
+- The legacy `TryGetLargeBlobSupport` reads a registration support boolean, not a write result.
+  The synthetic large-blob DTO and key accessor are removed; use `LargeBlobKey` on the credential
+  response for the implemented storage route.
+- Typed `MakeCredentialAsync` rejects empty `credBlob` inputs and values beyond the device's
+  GetInfo-advertised capacity before sending; raw requests remain the caller's responsibility.
+- `GetAssertionResponse.User` is native account-picker data, not a browser-filtered result. The application
+  decides what to disclose to the relying party. Use the opaque user ID for account binding and do not
+  forward display names or other identifying device metadata indiscriminately.
+- Fingerprint feedback `0x0B`, `0x0D` and `0x0E` are `Exists`, `NoUserActivity` and `NoUpTransition`.
+  `DatabaseFull` (`0x0C`) follows python-fido2; CTAP 2.1 leaves that value unused. The former
+  `FingerprintSensorInfo.MaxTemplateCount` was an unqualified interpretation of key 4; that key
+  remains available through `RawData` but is not advertised as a capacity.
+- hmac-secret derives from credential-scoped random secrets, with distinct verified/unverified modes.
+  WebAuthn PRF adds client-side input hashing and requires the verified variant when supported
+  evaluation applies. At authentication the selected credential's entry or fallback input determines
+  whether PRF requires UV. See the [WebAuthn PRF guide](../WebAuthn/README.md#evaluate-prf-inputs-deliberately)
+  for result ownership and cleanup.
+- previewSign is the experimental Yubico sign-extension draft v4, not CTAP v4. Public ARKG helpers are
+  **WARNING -- EXPERIMENTAL --**, not ready for production or production cryptographic guidance; their
+  actual SDK profile and limited P-256/SHA-256 raw-message verifier are not full draft conformance.
+  Build requests with `ExtensionBuilder.WithPreviewSign(...)`, read registration results with
+  `PreviewSignGeneratedKey.TryFromMakeCredentialResponse(...)`, and read assertion signatures with
+  `ExtensionOutput.TryGetPreviewSign(...)`. These results are parsed, not verified. Encode typed
+  signing arguments with `CoseSignArgs.ToAdditionalArgs()`. If you have the encoded assertion extension
+  value, use `PreviewSignAuthenticationOutput.Decode(...)`. Both previewSign and its ARKG helpers use
+  `YKEXP001`.
 
 ## Example
 

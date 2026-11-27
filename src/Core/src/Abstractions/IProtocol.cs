@@ -37,6 +37,8 @@ namespace Yubico.YubiKit.Core.Abstractions;
 ///         Implementations admit one logical exchange at a time. An overlapping operation throws
 ///         <see cref="InvalidOperationException" /> immediately because YubiKey transports maintain chained
 ///         APDU, CTAP HID, OTP HID, or SCP state across packets.
+///         This admission covers an exchange rather than a complete multi-exchange public workflow;
+///         callers await the whole workflow before disposal or competing work.
 ///     </para>
 ///     <para>
 ///         Application sessions keep the effective protocol for the session lifetime and dispose it when

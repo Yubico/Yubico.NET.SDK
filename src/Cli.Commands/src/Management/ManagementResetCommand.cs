@@ -20,50 +20,41 @@ public sealed class ManagementResetSettings : GlobalSettings
 }
 
 /// <summary>
-///     Factory resets the YubiKey, erasing all credentials, keys, and configuration.
-///     Requires firmware 5.6.0 or later. Prompts for double confirmation unless --force is used.
+///     Requests Bio Multi-protocol Edition combined FIDO/PIV reset, retaining the F9 attestation slot.
+///     Uses SmartCard only. The session checks firmware 5.6.0; the device determines product eligibility.
+///     Does not establish Management configuration-lock recovery.
 /// </summary>
 public sealed class ManagementResetCommand : YkCommandBase<ManagementResetSettings>
 {
-    private static readonly FirmwareVersion MinimumResetVersion = new(5, 6, 0);
+    private static readonly Feature ResetFeature = new("Device Reset", 5, 6, 0);
 
     protected override ConnectionType[] AppletTransports =>
-        [ConnectionType.SmartCard, ConnectionType.HidFido, ConnectionType.HidOtp];
+        [ConnectionType.SmartCard];
 
     protected override async Task<int> ExecuteCommandAsync(
         CommandContext context, ManagementResetSettings settings, YkDeviceContext deviceContext)
     {
-        var info = await deviceContext.ReadLiveInfoAsync();
-        if (info is null)
+        await using var session = await deviceContext.Device.CreateManagementSessionAsync(
+            deviceContext.SessionOptions);
+        if (!session.IsSupported(ResetFeature))
         {
-            OutputHelpers.WriteError("Could not retrieve device information.");
-            return ExitCode.GenericError;
-        }
-
-        var deviceInfo = info.Value;
-
-        if (deviceInfo.FirmwareVersion < MinimumResetVersion)
-        {
-            OutputHelpers.WriteError(
-                $"Factory reset requires firmware 5.6.0 or later. Device firmware is {deviceInfo.VersionName}.");
+            OutputHelpers.WriteError($"Device reset requires firmware {ResetFeature.Version} or later. Device firmware is {session.FirmwareVersion}.");
             return ExitCode.FeatureUnsupported;
         }
 
         if (!settings.Force)
         {
             if (!ConfirmationPrompts.ConfirmDestructive(
-                    "factory reset this YubiKey, erasing ALL credentials, keys, and configuration"))
+                    "reset Bio MPE FIDO and PIV data and the shared PIN, retaining the F9 attestation slot"))
             {
                 OutputHelpers.WriteInfo("Reset cancelled.");
                 return ExitCode.UserCancelled;
             }
         }
 
-        await using var session = await deviceContext.Device.CreateManagementSessionAsync(
-            deviceContext.SessionOptions);
         await session.ResetDeviceAsync();
 
-        OutputHelpers.WriteSuccess("Device has been factory reset.");
+        OutputHelpers.WriteSuccess("Combined FIDO/PIV reset confirmed.");
         return ExitCode.Success;
     }
 }

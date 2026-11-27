@@ -28,9 +28,10 @@ internal interface IEcdhPrimitives
     /// <remarks>
     /// <paramref name="localPrivateKey"/> must contain a private value (<see cref="ECParameters.D"/>) and a
     /// public point (<see cref="ECParameters.Q"/>) that correspond to the same key pair, such as the value
-    /// returned by exporting an existing key's parameters with its private component included. Passing a
-    /// public point that does not correspond to the private value produces an invalid shared secret and may
-    /// be rejected by some platform crypto backends.
+    /// returned by exporting an existing key's parameters with its private component included. The default
+    /// implementation imports through the runtime provider; rejection of inconsistent components depends
+    /// on that provider. Inputs are borrowed. The caller owns the returned
+    /// shared-secret array and must clear it after use; provider disposal does not clear that result.
     /// </remarks>
     byte[] ComputeSharedSecret(ECParameters localPrivateKey, ECParameters remotePublicKey);
 }

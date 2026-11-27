@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -20,7 +21,8 @@ internal partial class PcscProtocol
 {
     internal async Task<PcscProtocolScp> InitializeScpAsync(
         ScpKeyParameters keyParams,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        FirmwareVersion? scpEligibilityFirmwareVersion = null)
     {
         ArgumentNullException.ThrowIfNull(keyParams);
 
@@ -34,7 +36,8 @@ internal partial class PcscProtocol
                         InsSendRemaining,
                         keyParams,
                         exchangeToken,
-                        MarkRecoveryRequired);
+                        MarkRecoveryRequired,
+                        scpEligibilityFirmwareVersion);
                 },
                 cancellationToken)
             .ConfigureAwait(false);

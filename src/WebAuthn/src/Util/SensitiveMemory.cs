@@ -14,6 +14,7 @@
 
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using Yubico.YubiKit.WebAuthn.Extensions.Outputs;
 
 namespace Yubico.YubiKit.WebAuthn.Util;
 
@@ -23,6 +24,15 @@ namespace Yubico.YubiKit.WebAuthn.Util;
 /// </summary>
 internal static class SensitiveMemory
 {
+    public static void ZeroPrf(PrfEvaluationResults? results)
+    {
+        if (results is null)
+            return;
+        CryptographicOperations.ZeroMemory(results.First.Span);
+        if (results.Second is { } second)
+            CryptographicOperations.ZeroMemory(second.Span);
+    }
+
     /// <summary>
     /// Zeroes <paramref name="memory"/> in place. Null and empty are no-ops.
     /// </summary>

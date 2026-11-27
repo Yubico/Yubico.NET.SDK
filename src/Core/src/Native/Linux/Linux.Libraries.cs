@@ -17,5 +17,8 @@ namespace Yubico.YubiKit.Core.Native.Linux;
 internal static class Libraries
 {
     internal const string LinuxKernelLib = "libc.so.6";
+    // This import requires the unversioned name. A runtime package containing only libudev.so.1 may
+    // not satisfy it (Ubuntu noble supplies the unversioned link in libudev-dev). Verify deployment;
+    // FindHidInterfaces logs a missing-library failure and returns no Linux HID interfaces.
     internal const string LinuxUdevLib = "libudev.so";
 }

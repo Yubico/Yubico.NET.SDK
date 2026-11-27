@@ -19,13 +19,20 @@ namespace Yubico.YubiKit.WebAuthn.Extensions;
 /// <summary>
 /// Extension outputs from WebAuthn registration (MakeCredential).
 /// </summary>
+/// <remarks>
+/// A null input container produces null client extension results. A supplied container produces this
+/// record even if every property is null. An individual null result can mean unrequested,
+/// unsupported, absent, or omitted after a parsing failure. Explicit false results, such as
+/// <c>Prf.Enabled</c> or <c>LargeBlob.Supported</c>, are distinct from an absent result. Not every
+/// extension error is suppressed; explicit previewSign errors can fail response construction.
+/// </remarks>
 public sealed record class RegistrationExtensionOutputs
 {
     /// <summary>Gets the credential protection policy output.</summary>
     public Outputs.CredProtectOutput? CredProtect { get; init; }
     /// <summary>Gets the credential blob storage result.</summary>
     public CredBlobMakeCredentialOutput? CredBlob { get; init; }
-    /// <summary>Gets the minimum PIN length output.</summary>
+    /// <summary>Gets the reported minimum PIN length in Unicode code points, when authorized for this RP ID.</summary>
     public MinPinLengthOutput? MinPinLength { get; init; }
     /// <summary>Gets the large blob support result.</summary>
     public Outputs.LargeBlobRegistrationOutput? LargeBlob { get; init; }
@@ -34,20 +41,38 @@ public sealed record class RegistrationExtensionOutputs
     /// <summary>Gets the credential properties output.</summary>
     public Outputs.CredPropsOutput? CredProps { get; init; }
     /// <summary>Gets the generated signing key details.</summary>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public PreviewSign.PreviewSignRegistrationOutput? PreviewSign { get; init; }
 }
 
 /// <summary>
 /// Extension outputs from WebAuthn authentication (GetAssertion).
 /// </summary>
+/// <remarks>
+/// <para>
+/// A null input container produces null client extension results. A supplied container produces this
+/// record even when all properties are null. Individual null results can mean unrequested,
+/// unsupported, absent, unavailable evaluation, or omitted output after a parsing failure. They are
+/// not a universal indication of success or failure; some output-preparation errors propagate after
+/// the assertion succeeds. A false write result is distinct from an absent largeBlob result.
+/// </para>
+/// <para>
+/// PRF results are derived secrets; credential blobs and decrypted large blobs can contain sensitive
+/// application data. Callers own the writable PRF and largeBlob plaintext buffers and clear them
+/// after last use; client disposal does not clear them. Record copies alias those buffers. Do not log
+/// sensitive result contents.
+/// </para>
+/// </remarks>
 public sealed record class AuthenticationExtensionOutputs
 {
-    /// <summary>Gets the retrieved credential blob data.</summary>
+    /// <summary>Gets retrieved credential blob data; an empty blob is distinct from an absent result.</summary>
+    /// <remarks>The returned bytes may share storage with the signed authenticator data; do not modify them.</remarks>
     public CredBlobAssertionOutput? CredBlob { get; init; }
     /// <summary>Gets the large blob operation result.</summary>
     public Outputs.LargeBlobAuthenticationOutput? LargeBlob { get; init; }
     /// <summary>Gets the PRF evaluation results.</summary>
     public Outputs.PrfAuthenticationOutput? Prf { get; init; }
     /// <summary>Gets the signature over the to-be-signed data.</summary>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public PreviewSign.PreviewSignAuthenticationOutput? PreviewSign { get; init; }
 }

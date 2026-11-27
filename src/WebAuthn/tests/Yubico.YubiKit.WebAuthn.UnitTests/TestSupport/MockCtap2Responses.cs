@@ -34,11 +34,14 @@ internal static class MockCtap2Responses
 
     public static GetAssertionResponse CreateMockGetAssertionResponse(
         byte[]? credentialId = null,
-        int? numberOfCredentials = null,
+        uint? numberOfCredentials = null,
         byte[]? signature = null,
         PublicKeyCredentialUserEntity? user = null,
         byte[]? authDataExtensionsCbor = null,
-        byte[]? largeBlobKey = null)
+        byte[]? largeBlobKey = null,
+        bool omitCredential = false,
+        bool userVerified = true,
+        bool userPresent = true)
     {
         credentialId ??= RandomNumberGenerator.GetBytes(32);
         signature ??= RandomNumberGenerator.GetBytes(64);
@@ -47,7 +50,7 @@ internal static class MockCtap2Responses
 
         // credential (1) + authData (2) + signature (3) + optional user (4) + optional
         // numberOfCredentials (5) + optional largeBlobKey (7)
-        var keyCount = 3;
+        var keyCount = omitCredential ? 2 : 3;
         if (user is not null) keyCount++;
         if (numberOfCredentials is not null) keyCount++;
         if (largeBlobKey is not null) keyCount++;
@@ -55,17 +58,20 @@ internal static class MockCtap2Responses
         writer.WriteStartMap(keyCount);
 
         // 0x01: credential
-        writer.WriteInt32(1);
-        writer.WriteStartMap(2);
-        writer.WriteTextString("id");
-        writer.WriteByteString(credentialId);
-        writer.WriteTextString("type");
-        writer.WriteTextString("public-key");
-        writer.WriteEndMap();
+        if (!omitCredential)
+        {
+            writer.WriteInt32(1);
+            writer.WriteStartMap(2);
+            writer.WriteTextString("id");
+            writer.WriteByteString(credentialId);
+            writer.WriteTextString("type");
+            writer.WriteTextString("public-key");
+            writer.WriteEndMap();
+        }
 
         // 0x02: authData
         writer.WriteInt32(2);
-        writer.WriteByteString(BuildAuthData(authDataExtensionsCbor));
+        writer.WriteByteString(BuildAuthData(authDataExtensionsCbor, userVerified, userPresent));
 
         // 0x03: signature
         writer.WriteInt32(3);
@@ -85,7 +91,7 @@ internal static class MockCtap2Responses
         if (numberOfCredentials is not null)
         {
             writer.WriteInt32(5);
-            writer.WriteInt32(numberOfCredentials.Value);
+            writer.WriteUInt32(numberOfCredentials.Value);
         }
 
         // 0x07: largeBlobKey (optional, CTAP §12.3)
@@ -104,11 +110,11 @@ internal static class MockCtap2Responses
     /// Bare authenticator data: rpIdHash (32) + flags UP|UV (1) + signCount (4), with no attested
     /// credential data.
     /// </summary>
-    public static byte[] BuildAuthData(byte[]? extensionsCbor = null)
+    public static byte[] BuildAuthData(byte[]? extensionsCbor = null, bool userVerified = true, bool userPresent = true)
     {
         var authData = new byte[37 + (extensionsCbor?.Length ?? 0)];
         SHA256.HashData("example.com"u8, authData.AsSpan(0, 32));
-        authData[32] = (byte)(0x05 | (extensionsCbor is null ? 0 : 0x80)); // UP | UV, ED when extensions follow
+        authData[32] = (byte)((userPresent ? 0x01 : 0) | (userVerified ? 0x04 : 0) | (extensionsCbor is null ? 0 : 0x80));
         authData[36] = 0x01;
         extensionsCbor?.CopyTo(authData.AsSpan(37));
         return authData;
@@ -127,7 +133,10 @@ internal static class MockCtap2Responses
         int? minPinLength = null,
         bool residentKeySupported = false,
         IReadOnlyList<string>? extensions = null,
-        bool largeBlobsSupported = false)
+        bool largeBlobsSupported = false,
+        bool pinUvAuthToken = false,
+        int? maxCredentialCountInList = null,
+        int? maxMsgSize = null)
     {
         extensions ??= DefaultExtensions;
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -137,8 +146,11 @@ internal static class MockCtap2Responses
         if (uvSupported) optionsCount++;
         if (residentKeySupported) optionsCount++;
         if (largeBlobsSupported) optionsCount++;
+        if (pinUvAuthToken) optionsCount++;
 
         var mapSize = (optionsCount > 0 ? 4 : 3) + (minPinLength.HasValue ? 1 : 0);
+        if (maxCredentialCountInList.HasValue) mapSize++;
+        if (maxMsgSize.HasValue) mapSize++;
         writer.WriteStartMap(mapSize);
 
         // 0x01: versions
@@ -192,7 +204,24 @@ internal static class MockCtap2Responses
                 writer.WriteBoolean(true);
             }
 
+            if (pinUvAuthToken)
+            {
+                writer.WriteTextString("pinUvAuthToken");
+                writer.WriteBoolean(true);
+            }
             writer.WriteEndMap();
+        }
+
+        if (maxMsgSize is { } size)
+        {
+            writer.WriteInt32(5);
+            writer.WriteInt32(size);
+        }
+
+        if (maxCredentialCountInList is { } count)
+        {
+            writer.WriteInt32(7);
+            writer.WriteInt32(count);
         }
 
         // 0x0D: minimum PIN length in Unicode code points (optional)
@@ -263,11 +292,12 @@ internal static class MockCtap2Responses
         return [.. data];
     }
 
-    public static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format, byte[]? largeBlobKey = null)
+    public static byte[] BuildMakeCredentialResponseCbor(byte[] authData, string format, byte[]? largeBlobKey = null,
+        byte[]? unsignedExtensions = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        writer.WriteStartMap(largeBlobKey is null ? 3 : 4);
+        writer.WriteStartMap(3 + (largeBlobKey is null ? 0 : 1) + (unsignedExtensions is null ? 0 : 1));
 
         // 0x01: fmt
         writer.WriteInt32(1);
@@ -287,6 +317,12 @@ internal static class MockCtap2Responses
         {
             writer.WriteInt32(5);
             writer.WriteByteString(largeBlobKey);
+        }
+
+        if (unsignedExtensions is not null)
+        {
+            writer.WriteInt32(6);
+            writer.WriteEncodedValue(unsignedExtensions);
         }
 
         writer.WriteEndMap();

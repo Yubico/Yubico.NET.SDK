@@ -99,22 +99,23 @@ public class ExtensionOutputTests
         Assert.Equal(6, minLength);
     }
 
-    [Fact]
-    public void Decode_WithLargeBlobKey_ParsesCorrectly()
+    [Theory]
+    [InlineData("F5", true, true)]
+    [InlineData("F4", true, false)]
+    [InlineData("A1677772697474656EF5", false, false)]
+    public void Decode_LargeBlobSupport_OnlyReadsLegacyRegistrationBoolean(string encoded, bool found, bool supported)
     {
-        var key = new byte[32];
-        Random.Shared.NextBytes(key);
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
         writer.WriteStartMap(1);
-        writer.WriteTextString("largeBlobKey");
-        writer.WriteByteString(key);
+        writer.WriteTextString("largeBlob");
+        writer.WriteEncodedValue(Convert.FromHexString(encoded));
         writer.WriteEndMap();
         var data = writer.Encode();
 
         var output = ExtensionOutput.DecodeWithRawData(data);
 
-        Assert.True(output.TryGetLargeBlobKey(out var result));
-        Assert.Equal(key, result.ToArray());
+        Assert.Equal(found, output.TryGetLargeBlobSupport(out bool result));
+        Assert.Equal(supported, result);
     }
 
     [Fact]
@@ -165,6 +166,56 @@ public class ExtensionOutputTests
         Assert.False(result);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void HmacSecretRegistration_PreservesBooleanWithoutTreatingItAsCiphertext(bool enabled)
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(1);
+        writer.WriteTextString("hmac-secret");
+        writer.WriteBoolean(enabled);
+        writer.WriteEndMap();
+        var output = ExtensionOutput.Decode(writer.Encode());
+
+        Assert.True(output.TryGetHmacSecretRegistration(out bool value));
+        Assert.Equal(enabled, value);
+        Assert.False(output.TryGetHmacSecret(out _));
+    }
+
+    [Theory]
+    [InlineData("C1F93C00")] // Tagged half-precision float.
+    [InlineData("1BFFFFFFFFFFFFFFFF")]
+    [InlineData("A16178F7")] // Nested simple value.
+    public void Decode_PreservesUnknownValuesFromEitherOverload(string valueHex)
+    {
+        byte[] value = Convert.FromHexString(valueHex);
+        byte[] encoded = [0xA1, 0x61, 0x78, .. value];
+
+        foreach (var output in new[]
+        {
+            ExtensionOutput.Decode(encoded),
+            ExtensionOutput.Decode(new CborReader(encoded, CborConformanceMode.Strict))
+        })
+        {
+            Assert.True(output.TryGetRawExtension("x", out var raw));
+            Assert.Equal(value, raw.ToArray());
+            Assert.True(System.Runtime.InteropServices.MemoryMarshal.TryGetArray(raw, out var slice));
+            Assert.Same(encoded, slice.Array);
+            Assert.Equal(3, slice.Offset);
+        }
+    }
+
+    [Theory]
+    [InlineData("A26178F46178F5")]
+    [InlineData("A161784201")]
+    public void Decode_RejectsDuplicateOrMalformedValues(string mapHex)
+    {
+        byte[] encoded = Convert.FromHexString(mapHex);
+        Assert.Throws<CborContentException>(() => ExtensionOutput.Decode(encoded));
+        Assert.Throws<CborContentException>(() => ExtensionOutput.Decode(new CborReader(encoded, CborConformanceMode.Lax)));
+    }
+
     [Fact]
     public void Decode_WithMultipleExtensions_ParsesAll()
     {
@@ -201,6 +252,7 @@ public class ExtensionOutputTests
     [Fact]
     public void ExtensionOutput_WithUnsupportedExtension_YieldsEmptyOutputMap()
     {
+        // Despite the retained name, this supplies empty input, not an unsupported identifier/value.
         var emptyExtensions = ReadOnlyMemory<byte>.Empty;
 
         var output = ExtensionOutput.Decode(emptyExtensions);

@@ -15,15 +15,21 @@
 using Spectre.Console;
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
 namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 
 /// <summary>
 /// Programs a static password on a slot (ykman otp static SLOT).
 /// </summary>
+/// <remarks>
+/// The layout-aware configuration translates text to HID scan codes. It cannot erase its immutable
+/// source string; raw translated mutable scan codes
+/// permit source-buffer cleanup. Generated passwords are intentionally displayed only in human mode.
+/// </remarks>
 public static class StaticCommand
 {
-    // ModHex characters that map to US keyboard scan codes the YubiKey can type.
+    // Layout-friendly characters still need translation; UTF-8/ASCII values are not HID scan codes.
     private const string ModHexChars = "cbdefghijklnrtuv";
 
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
@@ -31,28 +37,32 @@ public static class StaticCommand
         var slot = options.Slot
                    ?? throw new ArgumentException("SLOT argument is required. Usage: OtpTool static <1|2>");
 
-        byte[] scanCodes;
+        string layoutName = options.KeyboardLayout ?? nameof(KeyboardLayout.ModHex);
+        if (!Enum.TryParse<KeyboardLayout>(layoutName, ignoreCase: true, out var layout) || !Enum.IsDefined(layout))
+        {
+            throw new ArgumentException($"Unsupported keyboard layout: {layoutName}.");
+        }
+
+        string password;
 
         if (options.Generate)
         {
             int length = options.Length ?? 38;
-            string generated = GenerateStaticPassword(length);
+            password = GenerateStaticPassword(length);
 
             if (!options.Json)
             {
-                OutputHelper.WriteKeyValue("Generated password", generated);
+                OutputHelper.WriteKeyValue("Generated password", password);
             }
-
-            scanCodes = Encoding.UTF8.GetBytes(generated);
         }
         else
         {
-            string password = options.Password
+            password = options.Password
                               ?? throw new ArgumentException(
                                   "--password or --generate is required for static command.");
-            scanCodes = Encoding.UTF8.GetBytes(password);
         }
 
+        using var config = new StaticPasswordSlotConfiguration(password, layout);
         byte[] accessCode = OutputHelper.ParseHex(options.AccessCode, "access-code") ?? [];
 
         try
@@ -70,9 +80,8 @@ public static class StaticCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            using var config = new StaticPasswordSlotConfiguration(scanCodes);
-
-            await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
+            await session.PutConfigurationAsync(slot, config, options.DeleteAccessCode ? default : accessCode,
+                accessCode, ct);
 
             if (options.Json)
             {
@@ -92,7 +101,6 @@ public static class StaticCommand
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(scanCodes);
             CryptographicOperations.ZeroMemory(accessCode);
         }
     }

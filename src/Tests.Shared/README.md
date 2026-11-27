@@ -6,7 +6,8 @@ This project provides shared infrastructure for YubiKey integration tests across
 
 The test infrastructure provides:
 
-- **Safety-first allow list** - hard-fails when no device is explicitly authorized.
+- **Allow-list authorization** - exits on empty configuration unless unknown serials are enabled;
+  filters rejected devices and raises `SkipException` at row binding when no authorized fixture remains.
 - **Lazy device discovery** - discovers and binds devices at test execution time, not discovery time.
 - **Declarative device filtering** - filters by firmware, form factor, connection type, capabilities, FIPS state, and custom predicates.
 - **Parameterized testing** - standard xUnit `[Theory]` tests receive `YubiKeyTestState` values from `[WithYubiKey]`.
@@ -18,6 +19,8 @@ The test infrastructure provides:
 ```csharp
 using Yubico.YubiKit.Tests.Shared;
 using Yubico.YubiKit.Tests.Shared.Infrastructure;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
+using Xunit;
 
 public class MyIntegrationTests
 {
@@ -36,17 +39,28 @@ public class MyIntegrationTests
     [WithYubiKey(MinFirmware = "5.7.0")]
     public async Task ModernFeatures_RequireFirmware570(YubiKeyTestState state)
     {
+        using var scpKeyParams = Scp03KeyParameters.Default;
         await state.WithManagementAsync(async (mgmt, deviceInfo) =>
         {
-            Assert.True(deviceInfo.FirmwareVersion.IsAtLeast(5, 7, 0));
-        }, Scp03KeyParameters.Default);
+            var fresh = await mgmt.GetDeviceInfoAsync();
+            Assert.Equal(deviceInfo.SerialNumber, fresh.SerialNumber);
+        }, scpKeyParams: scpKeyParams);
     }
 }
 ```
 
+The SCP example requires a SmartCard-capable dedicated key configured with those SCP03 keys; firmware
+alone does not establish that prerequisite. Each attribute yields one placeholder bound to the first
+matching authorized key. Multiple attributes bind independently, not once per connected key. Helpers
+pass cached `state.DeviceInfo`; query the session explicitly when testing fresh persisted settings.
+The caller owns the SCP parameters. The using scope outlives the awaited helper call, so the helper's
+session and connection are disposed before the parameters clear their owned key arrays.
+
 ## Safety: Allow List
 
-All integration tests verify the device serial number against an allow list before running any hardware operation.
+The harness checks authorization before exposing a fixture to a test body. Discovery and live Management
+reads can already open interfaces and query devices before this check; the allow list does not prevent
+all communication with an unauthorized device. Connect only dedicated test hardware to the test rig.
 
 Add test device serial numbers to `appsettings.json` in the integration test project:
 
@@ -63,10 +77,14 @@ Add test device serial numbers to `appsettings.json` in the integration test pro
 
 Behavior:
 
-- If no devices are found, tests are skipped.
-- If device serial cannot be read, the process hard-fails with `Environment.Exit(-1)`.
-- If a device serial is not in the allow list, the process hard-fails with `Environment.Exit(-1)`.
-- If the allow list is empty, the process hard-fails before tests can run.
+- An empty serial allow list exits with `Environment.Exit(-1)` unless `AllowUnknownSerials` is enabled.
+- Discovery reads Management information before filtering individual devices. A missing/disallowed
+  serial or failed metadata read normally removes that view from the fixture list, rather than exiting.
+- `AllowUnknownSerials=true` also authorizes serial-less views with readable metadata. Keep it false
+  unless every attached serial-less device is dedicated test hardware.
+- An empty authorized list is cached. Binding a test row then throws `SkipException`; use
+  `[SkippableTheory]` where that exception must become a skipped result. Exhausted transient scan
+  retries instead propagate as an initialization failure.
 
 This prevents accidentally running destructive or stateful tests on production YubiKeys.
 
@@ -74,8 +92,8 @@ This prevents accidentally running destructive or stateful tests on production Y
 
 The keys listed in `AllowedSerialNumbers` are dedicated test hardware, not production keys.
 State mutation, PIV reset, and key generation on them are authorized and need no per-run
-approval. The allow list itself is the safety boundary — a key that is not on it hard-fails
-before any hardware operation runs, so there is no second gate to add.
+approval. The allow list authorizes test-body use, not the discovery/identification reads that precede
+filtering. Keep unauthorized hardware off the rig rather than relying on this filter to prevent I/O.
 
 What still requires a human is timing and presence, not destruction: User Presence and touch
 ceremonies, User Verification, and insert/remove sequences cannot be driven unattended. Mark
@@ -104,6 +122,12 @@ Test method
 - Provides filtered `YubiKeyTestState` test data for xUnit theories.
 - Supports filters such as `MinFirmware`, `FormFactor`, `RequireUsb`, `RequireNfc`, `ConnectionType`, `Capability`, `FipsCapable`, `FipsApproved`, and `CustomFilter`.
 - Returns placeholders during discovery so test discovery does not touch hardware.
+
+Use three-component firmware criteria such as `"5.7.0"`; malformed strings are currently ignored.
+`RequireUsb` and `Capability` are independent: the latter accepts an application enabled over USB or NFC.
+Current Core FIPS-tag decoding uses the wrong bit mapping, so the FIPS masks and derived filters cannot
+establish application approval. Product flag bits can remain in `FormFactor`, causing exact base-enum
+filters to miss flagged devices. `IsFips` is a separate manufacturing indicator, not an operating mode.
 
 **YubiKeyTestState**
 
@@ -144,11 +168,25 @@ public async Task GetDeviceInfo_AllDevices_ReturnsValidData(YubiKeyTestState sta
 
 ### Filtered Test
 
+This example uses the SecurityDomain integration project's helper, not a helper shipped in Tests.Shared.
+To compile it, reference `Yubico.YubiKit.SecurityDomain.IntegrationTests` and its normal dependencies,
+or link that project's actual [TestStateExtensions.cs](../SecurityDomain/tests/Yubico.YubiKit.SecurityDomain.IntegrationTests/TestExtensions/TestStateExtensions.cs)
+with a SecurityDomain project reference. Import the helper namespace shown below.
+
+Execution requires a dedicated, allow-listed SmartCard key supporting Security Domain and SCP03, with
+device state suitable for the helper's reset and subsequent authentication using SCP03 defaults. The
+helper resets Security Domain before reading key information, destroying custom Security Domain key
+configuration. The 5.3.0 minimum and exposed SmartCard filter do not prove application support, key
+configuration or successful reset; the helper explicitly opens SmartCard rather than relying on the filter to pin it.
+
 ```csharp
+using Yubico.YubiKit.SecurityDomain.IntegrationTests.TestExtensions;
+
 [SkippableTheory]
-[WithYubiKey(MinFirmware = "5.7.2", Capability = DeviceCapabilities.SecurityDomain)]
-public async Task Scp11_ModernDevice_ReturnsKeyInfo(YubiKeyTestState state)
+[WithYubiKey(MinFirmware = "5.3.0", ConnectionType = ConnectionType.SmartCard)]
+public async Task Scp03_AfterReset_ReturnsKeyInfo(YubiKeyTestState state)
 {
+    using var scpKeyParams = Scp03KeyParameters.Default;
     await state.WithSecurityDomainSessionAsync(
         resetBeforeUse: true,
         async session =>
@@ -156,33 +194,64 @@ public async Task Scp11_ModernDevice_ReturnsKeyInfo(YubiKeyTestState state)
             var keyInfo = await session.ListKeyInformationAsync();
             Assert.NotEmpty(keyInfo);
         },
-        scpKeyParams: Scp03KeyParameters.Default);
+        scpKeyParams: scpKeyParams);
 }
 ```
+
+Keep the caller-owned SCP parameters alive through the awaited helper; that helper disposes its
+sessions/connection, not the supplied parameters. This example supplies SCP03 defaults and reads key
+information; it does not demonstrate an SCP11 handshake.
 
 ### Custom Filter
 
 ```csharp
-public sealed class ProductionKeysOnly : IYubiKeyFilter
+public sealed class SerialRangeFilter : IYubiKeyFilter
 {
     public bool Matches(YubiKeyTestState device) => device.SerialNumber > 10_000_000;
-    public string GetDescription() => "Production keys";
+    public string GetDescription() => "Dedicated test keys in the selected serial range";
 }
 
-[SkippableTheory]
-[WithYubiKey(CustomFilter = typeof(ProductionKeysOnly))]
-public async Task RunsOnlyOnProductionKeyRange(YubiKeyTestState state)
+public sealed class SerialRangeTests
 {
-    await state.WithManagementAsync(async (mgmt, info) =>
+    [SkippableTheory]
+    [WithYubiKey(CustomFilter = typeof(SerialRangeFilter))]
+    public async Task RunsOnAuthorizedSerialRange(YubiKeyTestState state)
     {
-        Assert.True(info.SerialNumber > 10_000_000);
-    });
+        await state.WithManagementAsync(async (mgmt, info) =>
+        {
+            var freshInfo = await mgmt.GetDeviceInfoAsync();
+            Assert.True(freshInfo.SerialNumber > 10_000_000);
+            Assert.Equal(info.SerialNumber, freshInfo.SerialNumber);
+        });
+    }
 }
 ```
 
 ## Common Helper Pattern
 
-Application helpers should create the transport explicitly, create the session, invoke the action, and dispose in the same visible flow:
+Application helpers should keep connection/session ownership visible. The Management helper uses its
+device extension to create an owned session, passes cached `state.DeviceInfo`, and disposes that session
+and hidden connection when the callback completes. Its optional arguments are `configuration`,
+`scpKeyParams`, `preferredConnection` and `cancellationToken`, in that order. Name policy arguments.
+To test a transport, filter one concrete row, pin it and assert what was opened:
+
+```csharp
+[SkippableTheory]
+[WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
+public async Task ReadMetadata_OverOtpHid(YubiKeyTestState state)
+{
+    await state.WithManagementAsync(async (mgmt, _) =>
+    {
+        Assert.Equal(ConnectionType.HidOtp, mgmt.ConnectionType);
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
+    }, preferredConnection: state.ConnectionType);
+}
+```
+
+An unfiltered state's connection set may have multiple flags and is not a valid single preference.
+Default Management selection chooses one exposed interface (SmartCard, HID FIDO, then HID OTP), with
+no fallback after open/initialization failure. For a SmartCard-only applet, direct borrowing is useful:
 
 ```csharp
 public static async Task WithOathAsync(
@@ -195,28 +264,35 @@ public static async Task WithOathAsync(
 
     await using var session = await OathSession.CreateAsync(
         connection,
-        scpKeyParams: scpKeyParams,
+        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
         cancellationToken: cancellationToken);
 
     await action(session, state.DeviceInfo);
 }
 ```
 
+For **OATH reset setup**, the module's `WithOathSessionAsync` uses a separate owned connection for setup and
+disposes it before opening the body session. This isolates the fixture's setup from the test body; successful
+`ResetAsync` itself refreshes the same session and keeps its connection. See [OATH reset migration](../Oath/README.md#migrating-reset-callers).
+
 ## Byte-Level Unit Test Recorder
 
-Use `RecordingSmartCardConnection` in module unit tests that need to verify exact SmartCard APDU bytes:
+Use `RecordingSmartCardConnection` in module unit tests that need to verify exact SmartCard APDU bytes.
+This composable test fragment requires a test method and the Tests.Shared and xUnit imports:
 
 ```csharp
-var connection = new RecordingSmartCardConnection(
-    [0x90, 0x00],
-    [0x01, 0x02, 0x90, 0x00]);
+await using var connection = new RecordingSmartCardConnection([0x90, 0x00]);
+byte[] command = [0x00, 0xA4, 0x04, 0x00, 0x00]; // Nonsecret synthetic fixture.
+ReadOnlyMemory<byte> response = await connection.TransmitAndReceiveAsync(command);
 
-await using var session = await SomeSession.CreateAsync(connection, cancellationToken: ct);
-
-Assert.Contains(connection.TransmittedCommands, command => command[1] == expectedInstruction);
+Assert.Equal(command, Assert.Single(connection.TransmittedCommands));
+Assert.Equal(new byte[] { 0x90, 0x00 }, response.ToArray());
 ```
 
 This helper is intentionally narrow: queued responses in, transmitted APDUs out. It does not replace `[WithYubiKey]`, allow-list checks, or integration-test hardware coordination.
+The helper copies commands but retains the supplied response arrays. Disposal only increments a counter;
+it does not clear recorded commands or responses. Use nonsecret fixtures, or clear each owned array
+after its last use. These assertions check the recorder, not applet selection or device interoperability.
 
 ## Running Tests
 
@@ -236,9 +312,10 @@ Do not run raw `dotnet test` directly.
 
 Tests that connect two or more keys of the same model should read
 [Device Discovery Guarantees](../../docs/architecture/device-discovery-guarantees.md) first. Some
-conservative outcomes are documented platform bounds with pinning tests rather than bugs - notably
-that serial-less multi-interface keys cannot be grouped on macOS or Linux, and that partially
-enumerated same-PID keys can transiently share a composite. Assertions like `Assert.Single` on a
+conservative outcomes follow incomplete grouping evidence: the current macOS/Linux topology resolver
+supplies no topology key, so serial-less views can remain separate. This does not mean those operating
+systems have no topology APIs. Partially enumerated same-PID keys can also transiently share a composite;
+there is no guarantee that one later scan splits every previously merged view. Assertions like `Assert.Single` on a
 discovery result only hold on a single-key rig; prefer key-count-agnostic invariants
 (conservation, completeness per PID, stability across scans).
 
@@ -254,5 +331,8 @@ discovery result only hold on a single-key rig; prefer key-count-agnostic invari
 ## Known Limitations
 
 - Devices must be connected before the test runner starts.
-- Allow-list violations call `Environment.Exit(-1)` by design.
-- Each `[WithYubiKey]` attribute produces one placeholder that binds to a matching authorized device at execution.
+- An empty configured serial list exits with `Environment.Exit(-1)` unless `AllowUnknownSerials` is
+  enabled. Rejected devices and failed identification reads are filtered; an empty fixture list raises
+  `SkipException` at row binding, rather than exiting the process.
+- Each `[WithYubiKey]` attribute produces one placeholder that binds to the first matching authorized
+  device at execution; multiple attributes are not deduplicated by physical key.

@@ -85,10 +85,16 @@ internal static class UvDecisionLogic
             Method: null,
             Permissions: requestedPermissions);
 
-        if (!ShouldUseUv(info, preference, requestedPermissions, uvConfigured))
+        bool requiresPermissions = (requestedPermissions & ~CeremonyPermissions) != 0;
+        if (!requiresPermissions && !ShouldUseUv(info, preference, requestedPermissions, uvConfigured))
         {
             return noUv;
         }
+
+        bool permissionTokens = IsOptionEnabled(info, "pinUvAuthToken");
+        if (requiresPermissions && !permissionTokens)
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "The authenticator cannot issue a token with the requested permissions.");
 
         // User verification is wanted. Pick a method: PIN first, then built-in UV. Either way the
         // pinUvAuthToken carries the verification, so the "uv" option key stays absent: CTAP 2.1-2.3
@@ -106,6 +112,9 @@ internal static class UvDecisionLogic
 
         if (builtInUvConfigured)
         {
+            if (!permissionTokens)
+                return noUv with { UseUv = true, UvOption = true };
+
             return new UvDecision(
                 UseToken: true,
                 UseUv: true,
@@ -115,7 +124,7 @@ internal static class UvDecisionLogic
         }
 
         // Wanted, but nothing can satisfy it.
-        if (preference == UserVerificationPreference.Required)
+        if (preference == UserVerificationPreference.Required || requiresPermissions)
         {
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.NotAllowed,
@@ -143,10 +152,9 @@ internal static class UvDecisionLogic
         {
             UserVerificationPreference.Required => true,
 
-            // WebAuthn L2 5.4.2 allows Preferred to proceed without verification when none is
-            // available, so only enabled verification methods count as configured here. This
-            // intentionally differs from implementations that treat an advertised false option as
-            // available verification.
+            // WebAuthn L2 §5.8.6 (UserVerificationRequirement) prefers UV if possible without failing
+            // solely because UV is absent. This SDK first checks enabled methods, then chooses a
+            // usable PIN or built-in UV; a configured but unobtainable PIN can still yield no UV.
             UserVerificationPreference.Preferred => uvConfigured,
 
             UserVerificationPreference.Discouraged =>

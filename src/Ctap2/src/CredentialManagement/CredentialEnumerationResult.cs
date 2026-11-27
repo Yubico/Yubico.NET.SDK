@@ -30,6 +30,8 @@ public sealed class CredentialEnumerationResult : IDisposable
     /// <summary>
     /// Gets the total reported by the first authenticator response, if present.
     /// </summary>
+    /// <remarks>This is copied, not recomputed or checked against Credentials.Count.
+    /// A null total does not establish that the returned collection is complete.</remarks>
     public int? ReportedTotal { get; }
 
     internal CredentialEnumerationResult(List<StoredCredentialInfo> credentials, int? reportedTotal)
@@ -41,6 +43,11 @@ public sealed class CredentialEnumerationResult : IDisposable
     /// <summary>
     /// Disposes every credential owned by this result.
     /// </summary>
+    /// <remarks>
+    /// Clears the entries' owned response copies. Collection and total access remain
+    /// available, but entries' RawData and LargeBlobKey properties reject access after disposal.
+    /// Independently decoded user, descriptor and public-key data are not cleared.
+    /// </remarks>
     public void Dispose()
     {
         if (_disposed)

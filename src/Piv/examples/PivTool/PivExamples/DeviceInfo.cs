@@ -35,7 +35,7 @@ public static class DeviceInfoQuery
     /// <returns>Result containing retry information or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await DeviceInfoQuery.GetPivRetryInfoAsync(session, ct);
     /// if (result.Success)
@@ -60,7 +60,7 @@ public static class DeviceInfoQuery
             {
                 pinRetries = await session.GetPinAttemptsAsync(cancellationToken);
             }
-            catch
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // Ignore errors getting PIN retries
             }
@@ -74,7 +74,7 @@ public static class DeviceInfoQuery
             {
                 // Metadata not supported on older firmware
             }
-            catch
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // Ignore other errors
             }
@@ -83,7 +83,7 @@ public static class DeviceInfoQuery
             // so we return a partial result with just retry info
             return DeviceInfoResult.RetryInfoOnly(pinRetries, pukRetries);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return DeviceInfoResult.Failed($"Failed to get PIV info: {ex.Message}");
         }

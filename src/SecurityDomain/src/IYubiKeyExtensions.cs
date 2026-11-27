@@ -14,8 +14,6 @@
 
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -36,11 +34,19 @@ public static class IYubiKeyExtensions
         /// <returns>A new <see cref="SecurityDomainSession" /> instance.</returns>
         /// <remarks>
         ///     The returned session owns the underlying connection and will dispose it when the session is disposed.
-        ///     Always use a <c>using</c> statement or call <see cref="IDisposable.Dispose" /> when finished.
+        ///     Use an await using scope. Only SmartCard transport (USB CCID or NFC) is supported.
+        ///     The caller retains ownership of supplied SCP parameters and disposes them after the session.
+        ///     An explicit firmware override takes precedence over cached device info. The Security Domain
+        ///     has no version read of its own. Without either source, the protocol uses 5.3.0 framing and
+        ///     admits firmware-gated attempts. Major-zero versions and cached, present non-final qualifiers
+        ///     (including unnamed values) also admit them.
+        ///     This policy does not prove device support and does not change known numeric framing.
+        ///     Reset reapplies the protocol configuration and firmware policy with default SCP03 keys.
         /// </remarks>
         /// <exception cref="SecureChannelException">
-        ///     Secure-channel parameters were supplied and establishing the SCP secure channel failed.
-        ///     The original failure is available as <see cref="Exception.InnerException" />.
+        ///     SCP parameters were supplied and secure-channel configuration threw ApduException,
+        ///     BadResponseException, or NotSupportedException. The original failure is InnerException.
+        ///     Earlier protocol preparation/application selection failures and cancellation are not wrapped here.
         /// </exception>
         public async Task<SecurityDomainSession> CreateSecurityDomainSessionAsync(
             SessionCreationOptions? options = null,
@@ -53,14 +59,16 @@ public static class IYubiKeyExtensions
                 ConnectionType.SmartCard);
             var sessionOptions = (options ?? new SessionCreationOptions())
                 .WithPreferredConnectionType(transport);
+            var cachedDeviceInfo = sessionOptions.FirmwareVersionOverride is null ? yubiKey.CachedDeviceInfo : null;
 
             return await yubiKey.CreateSessionOverTransportAsync(
                     transport,
                     async (connection, ct) =>
                     {
-                        var session = await SecurityDomainSession.CreateAsync(
+                        var session = await SecurityDomainSession.CreateForDeviceAsync(
                                 (ISmartCardConnection)connection,
                                 sessionOptions,
+                                cachedDeviceInfo,
                                 ct)
                             .ConfigureAwait(false);
                         session.OwnConnection();

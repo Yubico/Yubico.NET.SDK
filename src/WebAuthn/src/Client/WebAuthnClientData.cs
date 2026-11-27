@@ -27,12 +27,13 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// to the authenticator.
 /// </para>
 /// <para>
-/// Per WebAuthn spec, the JSON key order MUST be: type, challenge, origin, crossOrigin
-/// (when present), topOrigin (when present).
+/// WebAuthn L3 §5.8.1.1 orders the JSON keys as type, challenge, origin, crossOrigin, then topOrigin
+/// when present. This builder always emits crossOrigin, using false when it is unspecified.
 /// </para>
 /// </remarks>
 public sealed class WebAuthnClientData
 {
+    private static readonly UTF8Encoding StrictUtf8 = new(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
     /// <summary>
     /// Gets the raw client data JSON bytes.
     /// </summary>
@@ -71,6 +72,14 @@ public sealed class WebAuthnClientData
     /// validates this before building client data.
     /// </param>
     /// <returns>A WebAuthnClientData instance with populated JSON and hash.</returns>
+    /// <remarks>
+    /// This is a low-level builder, not ceremony validation: it accepts any nonblank type and does not
+    /// enforce the relationship between crossOrigin and topOrigin. The client's ceremony methods
+    /// validate their options separately. String escaping follows CCDToString (L3 §5.8.1.1):
+    /// quotes and backslashes are escaped, and U+0000 through U+001F use four lowercase hex digits.
+    /// Unicode is not normalized or replaced.
+    /// </remarks>
+    /// <exception cref="EncoderFallbackException">A string contains an unpaired UTF-16 surrogate.</exception>
     public static WebAuthnClientData Create(
         string type,
         ReadOnlyMemory<byte> challenge,
@@ -82,7 +91,7 @@ public sealed class WebAuthnClientData
         ArgumentNullException.ThrowIfNull(origin);
 
         var json = BuildJson(type, challenge.Span, origin.StringValue, crossOrigin, topOrigin);
-        var jsonBytes = Encoding.UTF8.GetBytes(json);
+        var jsonBytes = StrictUtf8.GetBytes(json);
 
         Span<byte> hash = stackalloc byte[32];
         SHA256.HashData(jsonBytes, hash);
@@ -91,11 +100,10 @@ public sealed class WebAuthnClientData
     }
 
     /// <summary>
-    /// Hand-builds JSON with exact key ordering per WebAuthn spec.
+    /// Builds JSON in WebAuthn L3 §5.8.1.1 key order.
     /// </summary>
     /// <remarks>
-    /// Key order MUST be: type, challenge, origin, crossOrigin (if not null), topOrigin (if not null).
-    /// String escaping uses System.Text.Json.JsonEncodedText for spec-compliant output.
+    /// Always writes type, challenge, origin, and crossOrigin; appends topOrigin when supplied.
     /// </remarks>
     private static string BuildJson(
         string type,
@@ -124,7 +132,7 @@ public sealed class WebAuthnClientData
         sb.Append(",\"crossOrigin\":");
         sb.Append(crossOrigin == true ? "true" : "false");
 
-        // "topOrigin": only present for cross-origin requests (WebAuthn L3 §5.8.1)
+        // The ceremony validates that topOrigin is supplied only with crossOrigin:true (L3 §5.8.1).
         if (topOrigin is not null)
         {
             sb.Append(",\"topOrigin\":");
@@ -142,43 +150,19 @@ public sealed class WebAuthnClientData
     {
         sb.Append('"');
 
-        // Escape special characters per JSON spec
         foreach (var c in value)
         {
-            switch (c)
+            if (c is '"' or '\\')
             {
-                case '"':
-                    sb.Append("\\\"");
-                    break;
-                case '\\':
-                    sb.Append("\\\\");
-                    break;
-                case '\b':
-                    sb.Append("\\b");
-                    break;
-                case '\f':
-                    sb.Append("\\f");
-                    break;
-                case '\n':
-                    sb.Append("\\n");
-                    break;
-                case '\r':
-                    sb.Append("\\r");
-                    break;
-                case '\t':
-                    sb.Append("\\t");
-                    break;
-                default:
-                    if (char.IsControl(c))
-                    {
-                        // Unicode escape for control characters
-                        sb.Append($"\\u{(int)c:x4}");
-                    }
-                    else
-                    {
-                        sb.Append(c);
-                    }
-                    break;
+                sb.Append('\\').Append(c);
+            }
+            else if (c <= '\u001f')
+            {
+                sb.Append($"\\u{(int)c:x4}");
+            }
+            else
+            {
+                sb.Append(c);
             }
         }
 

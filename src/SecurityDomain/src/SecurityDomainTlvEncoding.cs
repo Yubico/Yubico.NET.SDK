@@ -27,11 +27,12 @@ internal static class SecurityDomainTlvEncoding
         var kid = keyReference.Kid;
         var kvn = keyReference.Kvn;
 
-        if (kid == 0 && kvn == 0)
-            throw new ArgumentException("At least one of KID or KVN must be non-zero", nameof(keyReference));
-
         if (kid is 0x01 or 0x02 or 0x03)
             kid = 0;
+
+        if (kid == 0 && kvn == 0)
+            throw new ArgumentException("Deletion requires a nonzero filter; SCP03 requires a nonzero KVN.",
+                nameof(keyReference));
 
         return (kid, kvn);
     }

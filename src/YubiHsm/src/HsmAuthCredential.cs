@@ -15,17 +15,22 @@
 namespace Yubico.YubiKit.YubiHsm;
 
 /// <summary>
-///     Represents a credential stored in the YubiHSM Auth applet.
-///     Parsed from the LIST command response (TAG_LABEL_LIST).
+///     Describes a credential at the time of a YubiHSM Auth LIST response.
 /// </summary>
+/// <remarks>
+///     LIST preserves unknown algorithm identifiers and represents unknown touch values as <c>null</c>.
+///     The constructor and init properties accept supplied metadata without enrollment validation.
+///     Record equality compares all four properties, including the case-sensitive label.
+///     Sorting compares labels using ordinal, case-insensitive ordering, so two unequal records can
+///     have a comparison result of zero.
+/// </remarks>
 /// <param name="Label">The credential label (1-64 UTF-8 bytes).</param>
 /// <param name="Algorithm">The algorithm used by this credential.</param>
 /// <param name="RetriesRemaining">
-///     The number of authentication attempts remaining before this credential is permanently deleted by
-///     the device. Hardware-verified: decrements on each failed credential-password authentication
-///     attempt (observed 8 to 7 after one failed <see cref="IHsmAuthSession.CalculateSessionKeysSymmetricAsync"/>
-///     attempt). Behavior on successful authentication was not separately hardware-verified; per the
-///     YubiHSM Auth applet's design it is not expected to change on success. A fresh credential starts at 8.
+///     A snapshot of the attempts remaining before the applet permanently deletes this credential.
+///     A fresh credential starts at eight. Yubico's YubiHSM Auth overview describes failed password
+///     authentication as decrementing the counter and successful authentication before deletion as
+///     restoring it to eight. Refresh the list to observe later changes.
 /// </param>
 /// <param name="TouchRequired">Whether touch is required to use this credential, or <c>null</c> if unknown.</param>
 public sealed record HsmAuthCredential(
@@ -34,7 +39,9 @@ public sealed record HsmAuthCredential(
     int RetriesRemaining,
     bool? TouchRequired) : IComparable<HsmAuthCredential>
 {
-    /// <inheritdoc />
+    /// <summary>
+    ///     Compares labels using ordinal, case-insensitive ordering. A non-null credential sorts after null.
+    /// </summary>
     public int CompareTo(HsmAuthCredential? other)
     {
         if (other is null)

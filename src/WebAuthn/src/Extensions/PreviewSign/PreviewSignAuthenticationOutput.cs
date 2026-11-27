@@ -22,9 +22,12 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// Contains the raw signature over the to-be-signed data. The signature format is
 /// algorithm-specific and is returned unchanged from the previewSign authentication
 /// extension output.
+/// Verify it using the generated signing key and the selected signing algorithm's rules; the selected
+/// algorithm identifier can differ from the public key's identifier for split-role algorithms.
 /// </para>
 /// </remarks>
 /// <param name="Signature">
 /// Algorithm-specific signature bytes.
 /// </param>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class PreviewSignAuthenticationOutput(ReadOnlyMemory<byte> Signature);

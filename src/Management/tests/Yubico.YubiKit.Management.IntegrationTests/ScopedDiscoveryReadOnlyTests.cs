@@ -220,7 +220,8 @@ public class ScopedDiscoveryReadOnlyTests : IAsyncLifetime
 
     internal static void AssertMetadataMatches(DeviceInfo expected, DeviceInfo actual)
     {
-        // Compare semantic fields, not record equality over independently-owned ReadOnlyMemory values.
+        // Compare this suite's selected semantic fields. DeviceInfo has content equality, but timeout
+        // storage can alias across copies; these assertions do not prove deep snapshot independence.
         Assert.Equal(expected.SerialNumber, actual.SerialNumber);
         Assert.Equal(expected.FirmwareVersion, actual.FirmwareVersion);
         Assert.Equal(expected.FormFactor, actual.FormFactor);

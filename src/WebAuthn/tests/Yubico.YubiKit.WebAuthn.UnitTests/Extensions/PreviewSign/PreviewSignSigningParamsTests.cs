@@ -21,8 +21,10 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Extensions.PreviewSign;
 /// </summary>
 /// <remarks>
 /// Validates that WebAuthn keeps the generic previewSign API algorithm-agile: <c>additionalArgs</c>
-/// is caller-provided algorithm-specific data and is exposed unchanged.
+/// is caller-provided algorithm-specific data and is exposed unchanged. These arbitrary fixture
+/// bytes test pass-through, not semantic validity as a CBOR COSE_Sign_Args map.
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignSigningParamsTests
 {
     [Fact]
@@ -60,16 +62,7 @@ public class PreviewSignSigningParamsTests
         Assert.Null(sut.AdditionalArgs);
     }
 
-    [Fact]
-    public void Constructor_EmptyKeyHandle_ThrowsInvalidRequest()
-    {
-        var ex = Assert.Throws<WebAuthnClientError>(
-            () => new WebAuthnPreviewSign.PreviewSignSigningParams(
-                keyHandle: ReadOnlyMemory<byte>.Empty,
-                tbs: new byte[32]));
-        Assert.Equal(WebAuthnClientErrorCode.InvalidRequest, ex.Code);
-    }
-
+    /// <summary>Records the SDK's local nonempty-TBS restriction, not a generic draft length requirement.</summary>
     [Fact]
     public void Constructor_EmptyTbs_ThrowsInvalidRequest()
     {

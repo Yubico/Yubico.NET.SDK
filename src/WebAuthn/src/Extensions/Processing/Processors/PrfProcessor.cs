@@ -26,30 +26,35 @@ using Yubico.YubiKit.WebAuthn.Util;
 namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 
 /// <summary>
-/// WebAuthn prf (L3 §10.1.4) over CTAP hmac-secret (§12.7) and hmac-secret-mc (§12.8). Registration asks
+/// WebAuthn prf (L3 §10.1.4) over CTAP hmac-secret (2.1 §12.5; 2.2–2.3 §12.7) and
+/// hmac-secret-mc (2.2–2.3 §12.8). Registration asks
 /// for <c>hmac-secret: true</c> (plus a creation-time evaluation when the authenticator advertises
 /// hmac-secret-mc) and reports <c>enabled</c>;
 /// authentication hashes the relying party's inputs into salts, performs one key agreement, sends the
 /// salts encrypted and authenticated under the shared secret, and decrypts the result with it.
 /// </summary>
 /// <remarks>
-/// The relying party's <c>UserVerification</c> is not overridden for PRF. CTAP keeps separate PRFs for
-/// verified and unverified use, so relying parties that need stable PRF output across ceremonies must
-/// request <c>userVerification: required</c>.
+/// WebAuthn L3 REC 2026-08-25 §10.1.4 requires the verified PRF and a UV-preference override if needed.
+/// Supported evaluation makes the ceremony require UV. Enablement alone does not. Results are not
+/// exposed unless the authenticator data reports UV.
 /// </remarks>
 internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor, IDisposable
 {
+    public static bool RequiresVerifiedCreationEvaluation(PrfInput? input, ExtensionContext context) =>
+        input?.First is not null && context.Supports(ExtensionIdentifiers.HmacSecret)
+        && context.Supports(ExtensionIdentifiers.HmacSecretMakeCredential);
+
+    public static bool RequiresVerifiedAssertionEvaluation(PrfInput? input, ExtensionContext context, PublicKeyCredentialDescriptor? selected) =>
+        input is not null && context.Supports(ExtensionIdentifiers.HmacSecret) && SelectInputs(input, selected) is not null;
     private readonly PrfInput _input;
     private readonly ExtensionContext _context;
-    private readonly bool _registration;
     private readonly bool _evaluateAtCreation;
     private PinUvSharedSecret? _sharedSecret;
 
-    private PrfProcessor(PrfInput input, ExtensionContext context, bool registration, bool evaluateAtCreation)
+    private PrfProcessor(PrfInput input, ExtensionContext context, bool evaluateAtCreation)
     {
         _input = input;
         _context = context;
-        _registration = registration;
         _evaluateAtCreation = evaluateAtCreation;
     }
 
@@ -66,7 +71,7 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
         // L3 §10.1.4: evaluation at creation needs "a future extension to [FIDO-CTAP]"; CTAP 2.2 §12.8
         // hmac-secret-mc is that extension.
         bool evaluateAtCreation = input.First is not null && context.Supports(ExtensionIdentifiers.HmacSecretMakeCredential);
-        return new PrfProcessor(input, context, registration: true, evaluateAtCreation);
+        return new PrfProcessor(input, context, evaluateAtCreation);
     }
 
     /// <summary>
@@ -101,7 +106,7 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
             }
         }
 
-        return new PrfProcessor(input, context, registration: false, evaluateAtCreation: false);
+        return new PrfProcessor(input, context, evaluateAtCreation: false);
     }
 
     private static bool TryDecodeCredentialId(string key, out byte[] id)
@@ -126,14 +131,38 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
     public string Name => ExtensionIdentifiers.HmacSecret;
     public PinUvAuthTokenPermissions Permissions => PinUvAuthTokenPermissions.None;
 
-    private bool NeedsSharedSecret => _registration
-        ? _evaluateAtCreation
-        : _input.First is not null || _input.EvalByCredential is { Count: > 0 };
-
     /// <summary>One key agreement per attempt, performed only when salts will be sent.</summary>
-    public async ValueTask PrepareAsync(CancellationToken cancellationToken)
+    public ValueTask PrepareAsync(CancellationToken cancellationToken) => PrepareSecretAsync(_evaluateAtCreation, cancellationToken);
+
+    public ValueTask PrepareAsync(PublicKeyCredentialDescriptor? selected, CancellationToken cancellationToken) =>
+        PrepareSecretAsync(SelectInputs(_input, selected) is not null, cancellationToken);
+
+    internal bool InputsDiffer(IReadOnlyList<PublicKeyCredentialDescriptor> chunk)
     {
-        if (NeedsSharedSecret && _sharedSecret is null)
+        var first = SelectInputs(_input, chunk[0]);
+        for (int i = 1; i < chunk.Count; i++)
+        {
+            if (!SameInputs(first, SelectInputs(_input, chunk[i])))
+                return true;
+        }
+        return false;
+    }
+
+    internal bool HasInput(PublicKeyCredentialDescriptor selected) => SelectInputs(_input, selected) is not null;
+
+    private static bool SameInputs(PrfInputValues? left, PrfInputValues? right)
+    {
+        if (left is null || right is null)
+            return left is null && right is null;
+
+        return CryptographicOperations.FixedTimeEquals(left.First.Span, right.First.Span)
+            && left.Second.HasValue == right.Second.HasValue
+            && CryptographicOperations.FixedTimeEquals(left.Second.GetValueOrDefault().Span, right.Second.GetValueOrDefault().Span);
+    }
+
+    private async ValueTask PrepareSecretAsync(bool needsSecret, CancellationToken cancellationToken)
+    {
+        if (needsSecret && _sharedSecret is null)
         {
             _sharedSecret = await _context.Backend.EncapsulateAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -154,9 +183,19 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
     }
 
     public void PrepareInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, PinUvAuthTokenSession? token)
+        => PrepareAssertionInputs(builder, selected, omit: false);
+
+    internal void PrepareAssertionInputs(ExtensionBuilder builder, PublicKeyCredentialDescriptor? selected, bool omit)
     {
-        var ev = SelectInputs(selected);
-        if (ev is null || _sharedSecret is null)
+        var ev = omit ? null : SelectInputs(_input, selected);
+        if (ev is null)
+        {
+            // A previous rejected chunk may have needed key agreement. An assertion that carries no
+            // PRF input must not use that secret to process an unsolicited hmac-secret output.
+            Dispose();
+            return;
+        }
+        if (_sharedSecret is null)
         {
             return;
         }
@@ -168,13 +207,14 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
 
     private delegate void SaltAction(ReadOnlySpan<byte> salt1, ReadOnlySpan<byte> salt2);
 
-    /// <summary>L3 §10.1.4: salt = SHA-256("WebAuthn PRF" || 0x00 || input); salts are zeroed after use.</summary>
+    /// <summary>L3 §10.1.4: salt = SHA-256("WebAuthn PRF" || 0x00 || input); these salt arrays are zeroed after use.</summary>
     private static void WithSalts(ReadOnlyMemory<byte> first, ReadOnlyMemory<byte>? second, SaltAction action)
     {
         var salt1 = PrfInput.ComputeSalt(first.Span);
-        var salt2 = second is { } s ? PrfInput.ComputeSalt(s.Span) : null;
+        byte[]? salt2 = null;
         try
         {
+            salt2 = second is { } s ? PrfInput.ComputeSalt(s.Span) : null;
             action(salt1, salt2);
         }
         finally
@@ -192,16 +232,17 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
     /// encoding of the credential ID that will be returned, let ev be the value of that entry. If ev is
     /// null and eval is present, then let ev be the value of eval."
     /// </summary>
-    private PrfInputValues? SelectInputs(PublicKeyCredentialDescriptor? selected)
+    private static PrfInputValues? SelectInputs(PrfInput input, PublicKeyCredentialDescriptor? selected)
     {
         if (selected is not null
-            && _input.EvalByCredential is { } byCredential
-            && byCredential.TryGetValue(Base64Url.Encode(selected.Id.Span), out var forCredential))
+            && input.EvalByCredential is { } byCredential
+            && byCredential.TryGetValue(Base64Url.Encode(selected.Id.Span), out var forCredential)
+            && forCredential is not null)
         {
             return forCredential;
         }
 
-        return _input.First is { } first ? new PrfInputValues { First = first, Second = _input.Second } : null;
+        return input.First is { } first ? new PrfInputValues { First = first, Second = input.Second } : null;
     }
 
     public ValueTask PrepareOutputsAsync(
@@ -212,7 +253,8 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
         CancellationToken cancellationToken)
     {
         var output = PrfCodec.ParseRegistrationOutput(authData.ParsedExtensions);
-        var results = _evaluateAtCreation ? DecryptOutput(authData, ExtensionIdentifiers.HmacSecretMakeCredential) : null;
+        var results = _evaluateAtCreation && authData.UserVerified
+            ? DecryptOutput(authData, ExtensionIdentifiers.HmacSecretMakeCredential) : null;
         outputs.Prf = output with { Results = results };
         return ValueTask.CompletedTask;
     }
@@ -224,7 +266,7 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
         AuthenticationExtensionOutputsBuilder outputs,
         CancellationToken cancellationToken)
     {
-        var results = DecryptOutput(authData, ExtensionIdentifiers.HmacSecret);
+        var results = authData.UserVerified ? DecryptOutput(authData, ExtensionIdentifiers.HmacSecret) : null;
         outputs.Prf = results is null ? null : new PrfAuthenticationOutput(results);
         return ValueTask.CompletedTask;
     }
@@ -242,7 +284,15 @@ internal sealed class PrfProcessor : IRegistrationExtensionProcessor, IAuthentic
             return null;
         }
 
-        return PrfCodec.DecryptResults(_context.Protocol, _sharedSecret.SharedSecret.Span, reader.ReadByteString());
+        var ciphertext = reader.ReadByteString();
+        try
+        {
+            return PrfCodec.DecryptResults(_context.Protocol, _sharedSecret.SharedSecret.Span, ciphertext);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(ciphertext);
+        }
     }
 
     public void Dispose()

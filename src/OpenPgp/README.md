@@ -1,235 +1,574 @@
 # Yubico.YubiKit.OpenPgp
 
-This package implements the OpenPGP card application (specification 3.4) on the YubiKey. It manages the signature,
-decryption, and authentication key slots and their certificates, signs, decrypts, and authenticates on the device, and
-administers the PINs, reset code, and touch policy. It is a smart-card applet beside PIV; the two share no credentials.
+Use this package to provision OpenPGP card keys, sign messages, perform raw decipher/agreement operations,
+store certificates, and administer PINs and touch policy on a YubiKey. The host application handles OpenPGP
+packet/file processing, key fingerprints and certificate trust decisions. OpenPGP and PIV have separate credentials.
 
-> The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for the current status and
-> constraints.
+> The v2 SDK is a pre-release alpha; see the [repository README](../../README.md) for its evaluation status.
 
-## Requirements
+## Requirements and installation
 
-- .NET 10. Linux additionally needs PC/SC and udev rules; see [Linux setup](../../docs/linux-setup.md).
-- SmartCard transport only, over USB CCID or NFC. The applet has no HID interface.
-- Basic OpenPGP operation is available from firmware 1.0.0; individual features are gated as follows.
-
-| Feature | Minimum firmware |
-|---|---|
-| Factory reset | 1.0.6 |
-| Touch policy (UIF) | 4.2.0 |
-| Elliptic-curve keys | 5.2.0 |
-| Per-slot certificates | 5.2.0 |
-| Key attestation | 5.2.0 |
-| Supported-algorithm query | 5.2.0 |
-| PIN unverify | 5.6.0 |
-
-## Installation
+Use .NET 10 and SmartCard transport over USB CCID or NFC. Linux needs PC/SC and udev rules; see
+[Linux setup](../../docs/linux-setup.md). This applet has no HID interface.
 
 ```bash
 dotnet nuget add source https://yubico.github.io/Yubico.NET.SDK/alpha/index.json -n yubikit-alpha
 dotnet add package Yubico.YubiKit.OpenPgp --prerelease
 ```
 
-`Yubico.YubiKit.Core` is installed transitively.
+Core is installed transitively. The current SDK checks these version thresholds for the indicated paths:
 
-`GetSupportedAlgorithmsAsync` returns an ordered `IReadOnlyList<SupportedAlgorithm>`. Read each entry's
-`KeyRef` and `Attributes`; do not collapse the list into a dictionary because one slot can report multiple
-supported algorithms.
+| SDK check | Version |
+|---|---|
+| Application reset | 1.0.6 |
+| UIF read/write | 4.2.0 |
+| EC generation/import, ordinary per-slot certificates, attestation, algorithm-list query | 5.2.0 |
+| Corrected SELECT DATA framing; earlier supported versions use a length-prefix workaround | 5.4.4 |
+| User PIN unverification | 5.6.0 |
 
-## Getting started
+Match these checks with the card's advertised capabilities, supported algorithms, slot and policy support.
+They describe this SDK's checks rather than a blanket availability guarantee. In particular, cached/ATT touch
+policies need additional device support, and retry/challenge commands leave some capability checks to the card.
+Session configuration prefers an explicit override, then cached physical-device firmware, then the OpenPGP
+applet's own GET VERSION. Those last two sources can differ. Prerelease or unknown versions admit local
+feature checks without guaranteeing command support. Protocol framing uses a known numeric version when
+available; otherwise it starts with the legacy profile, not a qualified minimum firmware claim.
+Unknown or prerelease firmware and a present non-final cached qualifier admit an SCP attempt without changing
+numeric framing. An explicit firmware override supersedes cached qualifiers. Admission is not evidence that the
+device supports SCP or that the handshake succeeds.
+Required initialization and cancellation failures propagate. Old-family import and generation still require
+separate qualification; NEO deletion is unsupported.
+
+For RSA generation, follow [YSA-2017-01](https://www.yubico.com/support/security-advisories/ysa-2017-01/):
+the advisory identifies on-device OpenPGP RSA generation on 4.2.6–4.3.4 as affected by ROCA and 4.3.5 as corrected.
+Like the Python SDK, this SDK conservatively blocks on-card RSA generation in `[4.2.0, 4.3.5)` before
+writing algorithm attributes. This is not a claim that 4.2.0–4.2.5 are affected. Independently generated
+RSA keys can still be imported; the guard does not block corrected 4.3.5 firmware.
+
+## Open and inspect a session
+
+This complete read-only example selects the first discoverable key. Applications managing several keys should
+select and confirm the intended device before any write. Every later C# block is a **composable method**: place
+it in a class with the directives below and supply its typed parameters from your application. Methods that use
+the device open and dispose their own session; the catalog-only example uses local metadata. Parameters containing credentials, private-key input or message data are borrowed;
+the caller keeps them valid through completion and clears sensitive source buffers afterward.
 
 ```csharp
 using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
-using System.Text;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 using Yubico.YubiKit.Core.Abstractions;
-using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
-using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.OpenPgp;
 
 IYubiKey device = await YubiKeyManager.FindFirstAsync();
 await using var session = await device.CreateOpenPgpSessionAsync();
-ApplicationRelatedData appData = await session.GetApplicationRelatedDataAsync();
-Console.WriteLine($"OpenPGP card {appData.Aid.Version.Major}.{appData.Aid.Version.Minor}, serial {appData.Aid.Serial}");
-```
-
-Later snippets assume these directives and a `device` obtained the same way. `GetApplicationRelatedDataAsync` needs no
-PIN and no touch. There is no one-shot extension: every operation runs on a session you open.
-
-## Common operations
-
-PINs cross the API as UTF-8 `ReadOnlyMemory<byte>`. The factory defaults are `123456` and `12345678`; change both before the key is used for anything real.
-
-### Inspect key metadata
-
-```csharp
-KeyInformation keyInformation = await session.ListKeyInformationAsync();
-KeyFingerprints keyFingerprints = await session.GetKeyFingerprintsAsync();
-
-if (keyFingerprints.TryGetValue(KeyRef.Sig, out ReadOnlyMemory<byte> fingerprint))
+ApplicationRelatedData data = await session.GetApplicationRelatedDataAsync();
+Console.WriteLine($"Card spec {data.Aid.Version}, effective firmware policy {session.FirmwareVersion}");
+foreach (var entry in await session.ListKeyInformationAsync())
 {
-    Console.WriteLine(Convert.ToHexString(fingerprint.Span));
+    Console.WriteLine($"{entry.Key}: {entry.Value}");
 }
 ```
 
-`KeyInformation`, `KeyFingerprints`, and `GenerationTimes` are named read-only dictionaries: callers can index,
-look up, and enumerate entries but cannot mutate collection storage. `ApplicationRelatedData.Discretionary` exposes
-the same values through `KeyInformation`, `KeyFingerprints`, and `CaKeyFingerprints`.
+The device extension owns the connection it opens. `OpenPgpSession.CreateAsync(connection, ...)` uses an existing
+SmartCard connection; keep that connection alive through session disposal and dispose it afterward. Await operations
+sequentially on a session, and await each complete public task before disposal. Core excludes overlapping logical
+exchanges, including chaining and SCP processing, but a public method can span several exchanges plus parsing,
+cache changes and callbacks. For example, certificate occurrence selection and its read/write are separate exchanges.
+Keep borrowed keys, input buffers and prompt services alive through the complete task, not just its last transmit.
 
-### Verify the user PIN
+Creation binds the session before device I/O, selects the applet and resolves firmware, then configures framing and
+optional SCP before parsing application data. A failed factory disposes/detaches the session; a direct factory leaves
+your connection open, while the device extension cleans up its hidden connection. `FirmwareVersionOverride` sets
+the effective feature policy and bypasses cached metadata. A numeric production override also sets framing;
+a major-zero override can use an observed numeric applet version for framing. Cached NEO firmware retains its physical framing
+profile but uses the applet version for reset and PIN-attempt checks. `session.FirmwareVersion` reports
+the effective feature policy, not the detected applet version or the numeric framing version. The AID
+reports the Card specification version, not physical-device firmware.
 
-`extended: false` authorizes signing and `extended: true` authorizes decryption and internal authentication. They are
-separate states on the card, so a session that does both verifies twice.
+For SCP, supply `SessionCreationOptions.ScpKeyParameters` for your provisioned key/profile. Keep those parameters and
+their contained resources alive through session disposal, including reset reauthentication. The session does not
+dispose those borrowed parameters. SCP03 parameter disposal clears its retained
+`StaticKeys`, not your original source arrays. SCP11 parameters retain the supplied key/certificate objects: disposal
+disposes the retained OCE private key and certificates, but not the SD public key. Avoid independently disposing shared
+aliases while the session uses them. These ownership rules do not establish device/profile support or trust. Generic Core
+SCP version checks alone do not identify the earliest supported OpenPGP firmware. `IsAuthenticated` records SCP setup;
+the card separately enforces User/Admin PIN authorization. See the [Core guide](../Core/README.md) for SCP configuration.
 
-```csharp
-await using var session = await device.CreateOpenPgpSessionAsync();
-byte[] pin = Encoding.UTF8.GetBytes("123456");
-try
-{
-    await session.VerifyPinAsync(pin, extended: false);
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(pin);
-}
-```
+`GetApplicationRelatedDataAsync` refreshes cached algorithms and UIF. Credential operations read F9 separately. Typed
+initialization preserves well-formed unmodeled algorithms and rejects malformed known fields. Use `GetDataAsync`
+for raw response inspection when a model omits a field. If typed initialization itself fails, dispose that attempt and
+use a separate [raw SmartCard session](../../docs/architecture/raw-access-tiers.md) for diagnosis.
 
-A rejected PIN throws `OpenPgpInvalidPinException`, whose `RetriesRemaining` reports the attempts left, or `0` when the
-PIN is now blocked. `ChangePinAsync` and `ChangeAdminAsync` take a current and a new PIN under the same borrow-and-zero
-contract; `ResetPinUsingResetCodeAsync` and `ResetPinUsingAdminAuthenticationAsync` recover a blocked user PIN.
+`KeyInformation`, `KeyFingerprints`, and `GenerationTimes` are read-only dictionaries. Their slots reflect the
+card's reported data. Use key status to inspect presence: an unset fingerprint can still occupy a 20-byte zero-filled
+field. `GetSupportedAlgorithmsAsync` returns an ordered list with repeated slots; preserve that multiplicity.
 
-### Generate a key
+## Change credentials and prepare recovery
 
-Key generation needs admin authentication first. Use `RsaAttributes.Create` for RSA and `EcAttributes.Create` for
-elliptic curves, using Core's concrete `KeyType` identities.
+Pass PINs as UTF-8 bytes from your credential reader. The public factory defaults are User `123456` and Admin
+`12345678`; change both before real use. Apply the card's byte-length/profile rules as well as reader limits.
+Avoid creating immutable strings for production secrets, and clear owned credential buffers in `finally`.
+`OpenPgpCredentialOptions` configures reader lengths in UTF-16 code units before UTF-8 encoding; those counts are
+distinct from card byte limits. The byte-taking PIN methods add no general credential-format/length validation.
 
-```csharp
-await using var session = await device.CreateOpenPgpSessionAsync();
-byte[] adminPin = Encoding.UTF8.GetBytes("12345678");
-try
-{
-    await session.VerifyAdminAsync(adminPin);
-    await session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa2048));
-    await session.GenerateKeyAsync(KeyRef.Dec, EcAttributes.Create(KeyRef.Dec, KeyType.P256));
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(adminPin);
-}
-```
+The same User PIN (PW1) authorizes two separate card states: `extended: false` selects signature mode (VERIFY P2=81),
+and `extended: true` selects decryption/authentication mode (P2=82). Both use the User KDF salt and retry counter. The Reset Code
+is a separate recovery credential, even though its `Pw.Reset` enum value also happens to be 82.
 
-### Sign and decrypt
-
-`SignAsync` takes the message, not a digest: it hashes with the named algorithm and, for RSA, wraps the hash in a
-PKCS#1 v1.5 `DigestInfo` before the card signs. ECDSA signatures come back DER-encoded.
+Change a known PIN without prior verification; the command checks the current value. The following method also
+installs a recovery code under the new Admin PIN. All five credential inputs are borrowed buffers that the caller clears.
 
 ```csharp
-await using var session = await device.CreateOpenPgpSessionAsync();
-byte[] pin = Encoding.UTF8.GetBytes("123456");
-try
+static async Task ChangeCredentialsAsync(
+    IYubiKey device, ReadOnlyMemory<byte> currentUserPin, ReadOnlyMemory<byte> newUserPin,
+    ReadOnlyMemory<byte> currentAdminPin, ReadOnlyMemory<byte> newAdminPin,
+    ReadOnlyMemory<byte> resetCode, CancellationToken cancellationToken)
 {
-    await session.VerifyPinAsync(pin, extended: false);
-    ReadOnlyMemory<byte> message = Encoding.UTF8.GetBytes("hello");
-    ReadOnlyMemory<byte> signature = await session.SignAsync(message, HashAlgorithmName.SHA256);
-
-    await session.VerifyPinAsync(pin, extended: true);
-    ReadOnlyMemory<byte> ciphertext = await File.ReadAllBytesAsync("message.gpg");
-    ReadOnlyMemory<byte> plaintext = await session.DecryptAsync(ciphertext);
-}
-finally
-{
-    CryptographicOperations.ZeroMemory(pin);
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.ChangePinAsync(currentUserPin, newUserPin, cancellationToken);
+    await session.ChangeAdminAsync(currentAdminPin, newAdminPin, cancellationToken);
+    await session.VerifyAdminAsync(newAdminPin, cancellationToken);
+    await session.SetResetCodeAsync(resetCode, cancellationToken);
 }
 ```
 
-For an RSA key, `ciphertext` is the raw encrypted block; for an EC key, it is the sender's ephemeral public key and the
-result is the ECDH shared secret.
+These are separate persistent commands: retain the new User PIN if a later Admin change fails. With KDF active,
+change methods derive **both current and new** inputs using the current KDF read from the card. Plan KDF transitions separately below.
 
-### Attest a key
-
-`AttestKeyAsync` (firmware 5.2.0+) has the YubiKey sign a statement about a generated key with its attestation key
-and returns the resulting certificate. It needs the User PIN, and **it overwrites the cardholder certificate stored
-for that key**: the device writes the attestation statement into the key's certificate slot. Read the existing
-certificate with `GetCertificateAsync` first if you need it; restoring it with `PutCertificateAsync` needs the Admin
-PIN.
+Recover a blocked User PIN through either the configured Reset Code or prior Admin authentication. The two methods
+below are alternatives; choose the credential your recovery process holds. Each restores the User retry counter.
 
 ```csharp
-await session.VerifyPinAsync(userPin, extended: false);
-X509Certificate2 attestation = await session.AttestKeyAsync(KeyRef.Sig);
-```
-
-## User interaction
-
-This module never asks the application for a credential; pass PINs to the methods that need them. Touch is a card
-policy, set per slot with `SetUifAsync` (admin PIN, firmware 4.2.0 or later) and reported to your
-`IUserPresencePrompt` implementation:
-
-```csharp
-sealed class TouchPrompt : IUserPresencePrompt
+static async Task RecoverWithResetCodeAsync(
+    IYubiKey device, ReadOnlyMemory<byte> resetCode, ReadOnlyMemory<byte> newUserPin,
+    CancellationToken cancellationToken)
 {
-    public ValueTask OnUserPresenceRequestedAsync(UserPresenceContext context, CancellationToken cancellationToken) =>
-        new(Console.Out.WriteLineAsync($"Touch your YubiKey for {context.Application} {context.Scope}."));
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.ResetPinUsingResetCodeAsync(resetCode, newUserPin, cancellationToken);
+}
+
+static async Task RecoverWithAdminAsync(
+    IYubiKey device, ReadOnlyMemory<byte> adminPin, ReadOnlyMemory<byte> newUserPin,
+    CancellationToken cancellationToken)
+{
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.VerifyAdminAsync(adminPin, cancellationToken);
+    await session.ResetPinUsingAdminAuthenticationAsync(newUserPin, cancellationToken);
 }
 ```
 
+VERIFY, CHANGE and Reset-Code recovery map only recognized credential statuses to `OpenPgpInvalidPinException`.
+Inspect its `SW` and command header as well as `RetriesRemaining`. Before firmware 4.0, VERIFY 63Cx supplies a
+count and CHANGE 6985 triggers a status query. SW 6983 reports a blocked credential, 6982 triggers a status
+query, and Reset-Code recovery also recognizes 6A80 as blocked. VERIFY with either User PIN reference queries
+the User PIN counter, not the Reset Code counter. A failed status query leaves the count `null`; even a known
+count does not establish that 6982 means a wrong PIN. Diagnose uncertain status before spending another attempt.
+Other statuses and failures during administrator-authenticated recovery retain their general APDU errors.
+
+The SDK checks the credential bytes sent to the card, after any KDF derivation: at least six bytes for
+User PIN, eight for Admin PIN and Reset Code, and no more than the maximum in application data. The
+typed credential methods do not encode PIN block format 2. Console presets count UTF-16 code units
+before UTF-8 encoding; a supplied option can bypass the reader's text limits, not the SDK's byte check.
+A blocked Admin PIN requires destructive application reset; a blocked User PIN has the two recovery routes above.
+
+## Configure KDF before provisioning keys
+
+Check `ExtendedCapabilityFlags.Kdf` in the card's Extended Capabilities before planning a KDF configuration.
+The KDF derives credential bytes on the host using Iterated-and-Salted S2K (SHA-256 or SHA-512).
+`IterationCount` counts input bytes fed into a hash, with at least one full salt-plus-PIN copy. Card F9 stores the
+expanded count in four bytes; RFC 9580 §3.7.1.3 describes the primitive, not a newer packet profile for this API.
+
+Treat enable/change/disable as provisioning operations with a recovery plan, before key generation/import.
+`SetKdfAsync` writes F9; the card can refuse the configuration with conditions-not-satisfied (6985) depending on
+its state. The generic Card specification assigns credential/F9 alignment to terminal software. YubiKey's vendor
+transition restores initial User/Admin values and invalidates the Reset Code, so establish the new credentials
+and recovery code under the selected KDF afterward. Qualify same- and fresh-session behavior for your device/profile
+before deployment; a successful same-PIN change alone establishes little about the transition.
+
+This provisioning fragment configures distinct salts and initial default-PIN hashes on an authorized, empty,
+KDF-capable YubiKey. Supply the currently valid Admin PIN and the UTF-8 default User/Admin buffers (`123456` and
+`12345678`). It closes the provisioning session before fresh-session verification. Change default credentials and
+install a new Reset Code afterward, then provision keys. This sequence checks ordinary User/Admin access only.
+A state-dependent refusal requires inspection rather than an automatic reset/retry.
+
 ```csharp
-await using var session = await device.CreateOpenPgpSessionAsync(
-    new SessionCreationOptions { UserPresencePrompt = new TouchPrompt() });
+static async Task ConfigureInitialKdfAsync(
+    IYubiKey device, ReadOnlyMemory<byte> currentAdminPin,
+    ReadOnlyMemory<byte> defaultUserPin, ReadOnlyMemory<byte> defaultAdminPin,
+    CancellationToken cancellationToken)
+{
+    byte[] saltUser = RandomNumberGenerator.GetBytes(8);
+    byte[] saltReset = RandomNumberGenerator.GetBytes(8);
+    byte[] saltAdmin = RandomNumberGenerator.GetBytes(8);
+    byte[] hashUser = [];
+    byte[] hashAdmin = [];
+    try
+    {
+        using var derivation = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,
+            SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin
+        };
+        hashUser = derivation.Process(Pw.User, defaultUserPin.Span);
+        hashAdmin = derivation.Process(Pw.Admin, defaultAdminPin.Span);
+        using var configured = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256, IterationCount = 100000,
+            SaltUser = saltUser, SaltReset = saltReset, SaltAdmin = saltAdmin,
+            InitialHashUser = hashUser, InitialHashAdmin = hashAdmin
+        };
+        await using (var provisioning = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken))
+        {
+            await provisioning.VerifyAdminAsync(currentAdminPin, cancellationToken);
+            await provisioning.SetKdfAsync(configured, cancellationToken);
+        }
+        await using var verification = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+        using var readback = await verification.GetKdfAsync(cancellationToken);
+        if (readback is not KdfIterSaltedS2k actual || actual.HashAlgorithm != configured.HashAlgorithm ||
+            actual.IterationCount != configured.IterationCount || !actual.SaltUser.Span.SequenceEqual(saltUser) ||
+            actual.SaltAdmin is not { } actualAdmin || !actualAdmin.Span.SequenceEqual(saltAdmin) ||
+            actual.SaltReset is not { } actualReset || !actualReset.Span.SequenceEqual(saltReset))
+        {
+            throw new InvalidOperationException("The device did not report the expected KDF configuration.");
+        }
+        await verification.VerifyAdminAsync(defaultAdminPin, cancellationToken);
+        await verification.VerifyPinAsync(defaultUserPin, cancellationToken: cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(hashUser);
+        CryptographicOperations.ZeroMemory(hashAdmin);
+        CryptographicOperations.ZeroMemory(saltUser);
+        CryptographicOperations.ZeroMemory(saltReset);
+        CryptographicOperations.ZeroMemory(saltAdmin);
+    }
+}
 ```
 
-Signing, decryption, internal authentication, and attestation notify before their APDU, with the `KeyRef` name as scope; attestation reports `KeyRef.Att` because the attestation key performs that operation. `Uif.On` and `Uif.Fixed` report `PolicyRequires`, `Uif.Cached` and `Uif.CachedFixed` report `PolicyMayRequire`, and `Uif.Off` is silent, as is firmware that cannot configure UIF at all. A UIF read that fails for any reason other than cancellation degrades to `PolicyMayRequire` rather than failing the operation. Outcomes are `Completed`, `Cancelled`, or `Failed`; no OpenPGP status word is treated as a touch timeout. Cancelling the operation's token does not interrupt a SmartCard exchange already admitted or roll back a command already sent.
+`SetKdfAsync` borrows the configuration through the write; it does not retain or dispose it. `GetKdfAsync`
+returns an independent, caller-owned configuration to dispose. When KDF is advertised, each credential
+operation rereads F9; a read or parse error stops the operation instead of sending a raw PIN. Keep the
+fresh-session readback when validating a persistent transition. Await complete PIN/KDF operations before
+starting another operation or disposing the session.
 
-## Constraints
+## Inspect key representation metadata
 
-Shared key/curve/operation metadata is available through Core's `CryptographicDefinitions`. Optional OpenPGP
-representation metadata is owned by this package:
+Use Core's `CryptographicDefinitions` to inspect shared key, curve and operation metadata. This package
+provides optional OpenPGP representation metadata through `KeyInfo.GetOpenPgpInfo()`:
 
 ```csharp
-using Yubico.YubiKit.Core.Cryptography;
-using Yubico.YubiKit.OpenPgp;
-
-KeyInfo keyInfo = CryptographicDefinitions.Keys.Ed25519;
-OpenPgpKeyInfo? openPgpInfo = keyInfo.GetOpenPgpInfo();
-Console.WriteLine(openPgpInfo?.CurveOid); // 1.3.6.1.4.1.11591.15.1 (OpenPGP)
-Console.WriteLine(keyInfo.Asn1?.AlgorithmOid); // 1.3.101.112 (RFC 8410)
-EcAttributes attributes = EcAttributes.Create(KeyRef.Sig, KeyType.Ed25519); // EdDSA, 0x16
+static void ShowKeyMetadata()
+{
+    KeyInfo keyInfo = CryptographicDefinitions.Keys.Ed25519;
+    OpenPgpKeyInfo? openPgpInfo = keyInfo.GetOpenPgpInfo();
+    Console.WriteLine(openPgpInfo?.CurveOid); // 1.3.6.1.4.1.11591.15.1 (OpenPGP)
+    Console.WriteLine(keyInfo.Asn1?.AlgorithmOid); // 1.3.101.112 (RFC 8410)
+    EcAttributes attributes = EcAttributes.Create(KeyRef.Sig, KeyType.Ed25519); // EdDSA, 0x16
+    Console.WriteLine(attributes.AlgorithmId);
+}
 ```
 
-This metadata does **not** imply hardware capability or select a slot/import format. RSA metadata includes
-2048/3072/4096 only; `CryptographicDefinitions.Keys.Rsa1024.GetOpenPgpInfo()` returns null, as do AES/Triple DES.
-For ordinary EC keys, the slot determines ECDSA versus ECDH; Ed25519 and X25519 select their constructions.
-Parsed attributes retain their received algorithm byte and import format, even when they differ from factory
-choices. OpenPGP OIDs on the wire contain DER value octets only, not the ASN.1 tag and length.
+The caller checks the card's supported algorithms and chooses the slot and import format separately.
+RSA metadata includes 2048/3072/4096; `CryptographicDefinitions.Keys.Rsa1024.GetOpenPgpInfo()` returns null,
+as do AES/Triple DES. For ordinary EC keys, the slot determines ECDSA versus ECDH; Ed25519 and X25519
+select their constructions. Parsed attributes retain their received algorithm byte and import format,
+even when they differ from factory choices. OpenPGP OIDs on the wire contain DER value octets only.
 
-- SmartCard only. Asking for `ConnectionType.HidFido` or `ConnectionType.HidOtp` through `SessionCreationOptions.PreferredConnectionType` throws `ArgumentException`.
-- A physical YubiKey admits one live connection and one session over it. A session from `CreateOpenPgpSessionAsync` owns the connection it opened; `OpenPgpSession.CreateAsync` borrows yours and you dispose it. Use `await using` for both.
-- `ResetAsync` is destructive: it deliberately blocks both PINs, terminates the applet, and reactivates it, erasing every key, certificate, and setting and restoring the default PINs.
-- `GenerateKeyAsync`, `PutKeyAsync`, and `DeleteKeyAsync` overwrite slot key material irrecoverably, and `SetAlgorithmAttributesAsync`, `SetKdfAsync`, `SetPinAttemptsAsync`, and `SetUifAsync` change persistent configuration.
-- PIN blocking is persistent: once the user PIN is exhausted, only the reset code or an admin-authenticated reset brings it back. Firmware-gated operations throw `NotSupportedException` before any APDU is sent.
+## Generate or import an ordinary-slot key
 
-## Security notes
+Verify the Admin PIN, then choose a supported algorithm for `Sig`, `Dec` or `Aut`. Generation and import write
+attributes before the private-key operation. Attribute changes can erase or disable the previous key even if a later
+command fails. The sequence has no rollback; after failure/cancellation, inspect fresh application data, key status
+and public key before retrying. A cache-refresh error can occur after successful provisioning.
 
-- PINs, reset codes, and imported key material are borrowed `ReadOnlyMemory<byte>`; zero your buffers with `CryptographicOperations.ZeroMemory` in a `finally`.
-- The SDK zeroes the APDU payloads it builds, the KDF-derived bytes it computes, and the raw card responses behind signatures and plaintexts. The values returned to you are yours to clear.
-- Treat the default PINs as public knowledge. Change both before provisioning keys.
-- Never log PINs, reset codes, plaintexts, or key material; slot names, algorithm identifiers, and lengths are safe.
+```csharp
+static async Task GenerateSigningKeyAsync(
+    IYubiKey device, ReadOnlyMemory<byte> adminPin, CancellationToken cancellationToken)
+{
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.VerifyAdminAsync(adminPin, cancellationToken);
+    await session.GenerateKeyAsync(KeyRef.Sig,
+        EcAttributes.Create(KeyRef.Sig, KeyType.P256), cancellationToken);
+    Console.WriteLine((await session.ListKeyInformationAsync(cancellationToken))[KeyRef.Sig]);
+}
+```
 
-## Example
+Use `RsaAttributes.Create(RsaSize.Rsa2048)` for RSA, subject to the ROCA guidance above. Use `EcAttributes.Create`
+with Core's concrete `KeyType` identities for EC, subject to the SDK's 5.2.0 check and the card's advertised curve
+support. ATT uses the vendor extension's nested CRT; ordinary target-key attestation below is a separate
+operation. Replacing the factory ATT private key would irreversibly lose manufacturer
+attestation provenance, even if its public certificate had been saved.
 
-The interactive OpenPgpTool sample lives at `src/OpenPgp/examples/OpenPgpTool/`.
+Import overwrites any existing private key in the selected slot. There is no add-only mode or pre-read.
+Supply an SDK `IPrivateKey` with a modeled OpenPGP representation: RSA 2048/3072/4096 with exponent
+65537, NIST P-256/P-384/P-521, secp256k1, Brainpool P256r1/P384r1/P512r1, Ed25519 or X25519 as appropriate for
+the slot. Confirm host-provider and card support for the chosen key. This method accepts **borrowed PKCS#8 DER
+containing an RSA key**, creates its own disposable private-key object, and leaves the source DER for its caller to clear.
+
+```csharp
+static async Task ImportRsaSigningKeyAsync(
+    IYubiKey device, ReadOnlyMemory<byte> adminPin, byte[] pkcs8Der,
+    CancellationToken cancellationToken)
+{
+    using var privateKey = RSAPrivateKey.CreateFromPkcs8(pkcs8Der);
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.VerifyAdminAsync(adminPin, cancellationToken);
+    await session.PutKeyAsync(KeyRef.Sig, privateKey, cancellationToken);
+}
+```
+
+Generation/import manages the key, while certificates, fingerprints and timestamps are separate tasks.
+The host computes the card-profile fingerprint and writes exactly 20 bytes with `SetKeyFingerprintAsync`; use
+`SetGenerationTimeAsync` for unsigned four-byte seconds since 1970-01-01 UTC. Zero marks an unspecified time;
+pass zero to clear the date metadata. These host-written fields alone establish no provenance.
+`DeleteKeyAsync` destructively switches attributes to RSA 4096 then RSA 2048; NEO's vendor deletion strategy differs
+and remains separately unqualified. Delete certificates separately when that is your intent.
+
+## Sign and verify on the host
+
+`SignAsync` and `AuthenticateAsync` accept messages/challenges with algorithm-specific handling:
+
+| Slot algorithm | SDK input processing | Returned signature |
+|---|---|---|
+| RSA | Hash with the named algorithm; supply DigestInfo; card applies PKCS#1 v1.5 padding | Raw modulus-sized bytes |
+| ECDSA | Hash with the named algorithm | DER sequence of integers `(r, s)` |
+| Ed25519/EdDSA | Send the raw message; `hashAlgorithm` is unused | Raw 64 bytes |
+
+RSA/ECDSA accept SHA-1, SHA-256, SHA-384 and SHA-512; choose a current algorithm suitable for your protocol.
+Passing SHA-256 with Ed25519 still performs ordinary Ed25519, rather than selecting a prehashed variant.
+
+This P-256 method reads the card's 7F49 public-key template, decodes field 86, and verifies the returned DER signature
+on the host. The helper is included; the input message and PIN remain borrowed. Use a separately trusted public key
+when verifying identity—the card read establishes which key verifies the signature, not who owns the device.
+
+```csharp
+static ECParameters DecodeP256PublicKey(ReadOnlyMemory<byte> template)
+{
+    using var outer = Tlv.Create(template.Span);
+    if (outer.Tag != 0x7F49)
+        throw new CryptographicException("Expected a card public-key template.");
+    var point = TlvHelper.DecodeDictionary(outer.Value.Span)[0x86];
+    if (point.Length != 65 || point.Span[0] != 0x04)
+        throw new CryptographicException("Expected an uncompressed P-256 point.");
+    return new ECParameters
+    {
+        Curve = ECCurve.NamedCurves.nistP256,
+        Q = new ECPoint { X = point.Slice(1, 32).ToArray(), Y = point.Slice(33, 32).ToArray() }
+    };
+}
+
+static async Task<bool> SignAndVerifyP256Async(
+    IYubiKey device, ReadOnlyMemory<byte> userPin, ReadOnlyMemory<byte> message,
+    CancellationToken cancellationToken)
+{
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    var attributes = await session.GetAlgorithmAttributesAsync(KeyRef.Sig, cancellationToken);
+    if (attributes is not EcAttributes { KeyType: KeyType.P256 })
+        throw new InvalidOperationException("Provision a P-256 signing key first.");
+    using var verifier = ECDsa.Create(DecodeP256PublicKey(
+        await session.GetPublicKeyAsync(KeyRef.Sig, cancellationToken)));
+    await session.VerifyPinAsync(userPin, cancellationToken: cancellationToken);
+    ReadOnlyMemory<byte> signature = await session.SignAsync(message, HashAlgorithmName.SHA256, cancellationToken);
+    try
+    {
+        return verifier.VerifyData(message.Span, signature.Span, HashAlgorithmName.SHA256,
+            DSASignatureFormat.Rfc3279DerSequence);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(signature).Span);
+    }
+}
+```
+
+`PinPolicy.Always` requires User PIN verification for each signature; `Once` retains authorization until the card
+access state ends. `UnverifyPinAsync` clears both User modes using the SDK's 5.6.0 check. For `AuthenticateAsync`,
+verify with `extended: true`, then pass your challenge and verify the result with the Authentication public key.
+
+## Decipher an RSA block or derive an ECDH secret
+
+`DecryptAsync` operates at the raw private-key layer. For RSA, supply a single modulus-sized RSAES-PKCS1-v1_5
+ciphertext block; the card checks/removes padding and returns plaintext. For NIST-curve ECDH, supply the sender's
+uncompressed point `04 || X || Y`; the SDK adds `A6 { 7F49 { 86 point } }` and returns raw shared-secret material.
+The host performs shared-secret KDF, packet processing and content decryption. A complete `.gpg` file and an RSA OAEP
+block are outside this contract. For X25519, supply the raw 32-byte peer public key; the SDK adds the same
+EC wrapper. Wire tests establish encoding, not device agreement or firmware qualification.
+
+This composable raw-operation method accepts an application callback that consumes the result before cleanup.
+The callback must finish using the memory before returning; any retained secret copy needs its own clearing scope.
+When migrating from `Task<ReadOnlyMemory<byte>>`, use `Task<Memory<byte>>` for the operation and clear the
+returned `Memory<byte>.Span` directly. Read-only consumers can still borrow it as `ReadOnlyMemory<byte>`.
+
+```csharp
+static async Task DecipherAndConsumeAsync(
+    IYubiKey device, ReadOnlyMemory<byte> userPin, ReadOnlyMemory<byte> rawCiphertextOrPoint,
+    Func<ReadOnlyMemory<byte>, CancellationToken, Task> consume,
+    CancellationToken cancellationToken)
+{
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.VerifyPinAsync(userPin, extended: true, cancellationToken: cancellationToken);
+    Memory<byte> result = await session.DecryptAsync(rawCiphertextOrPoint, cancellationToken);
+    try
+    {
+        await consume(result, cancellationToken);
+    }
+    finally
+    {
+        CryptographicOperations.ZeroMemory(result.Span);
+    }
+}
+```
+
+The caller owns this writable result; clear the actual backing storage with `CryptographicOperations.ZeroMemory(result.Span)`.
+Use that technique only for SDK outputs whose storage you own, rather than arbitrary borrowed read-only inputs.
+Clearing a `ToArray()` copy would leave the original secret intact. The SDK clears its raw decipher response after
+copying the successful result. RSA/EdDSA signatures instead transfer response storage to the caller; ECDSA returns
+new DER storage and clears the raw response. Keep caller-owned result cleanup in both cases.
+These are local response-owner scopes. Transport return arrays, earlier chained-response fragments and SCP
+plaintext/protected intermediates have separate owners; clearing the final output does not establish their erasure.
+
+## Store certificates and attest a generated key
+
+Certificates are independent public objects: storing one leaves the private key unchanged, and the host decides
+whether its public key matches. Ordinary slot access uses the SDK's 5.2.0 certificate check. `GetCertificateAsync`
+returns `null` for a successful empty read or ordinary-slot GET DATA status 6A88; selection errors and other failures
+propagate. ATT uses its separate FC object and propagates every APDU failure.
+
+This method borrows DER, owns both loaded/read-back certificate objects, and returns exported public bytes.
+To remove a certificate instead, authenticate Admin and call `DeleteCertificateAsync(slot)`.
+
+```csharp
+static async Task<byte[]> StoreAndReadCertificateAsync(
+    IYubiKey device, KeyRef slot, ReadOnlyMemory<byte> adminPin, ReadOnlyMemory<byte> certificateDer,
+    CancellationToken cancellationToken)
+{
+    using var certificate = X509CertificateLoader.LoadCertificate(certificateDer.Span);
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.VerifyAdminAsync(adminPin, cancellationToken);
+    await session.PutCertificateAsync(slot, certificate, cancellationToken);
+    using var readBack = await session.GetCertificateAsync(slot, cancellationToken);
+    return readBack?.RawData ?? throw new InvalidOperationException("Certificate was absent after writing.");
+}
+```
+
+`AttestKeyAsync` asks ATT to certify a **generated** Sig/Dec/Aut key and overwrites that target's cardholder
+certificate. Save any existing certificate first; restore it with Admin authentication if required. The following
+method leaves the new attestation stored and returns its DER for an application-specific verifier.
+
+```csharp
+static async Task<byte[]> AttestGeneratedKeyAsync(
+    IYubiKey device, KeyRef slot, ReadOnlyMemory<byte> userPin, CancellationToken cancellationToken)
+{
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.VerifyPinAsync(userPin, extended: false, cancellationToken: cancellationToken);
+    using var attestation = await session.AttestKeyAsync(slot, cancellationToken);
+    return attestation.RawData;
+}
+```
+
+Ordinary User PIN verification is the vendor CLI/test route; ATT's UIF controls touch. Retrieval can fail after
+the certificate overwrite. The SDK decodes X.509 but leaves public-key binding and trusted CA-chain validation to
+the verifier. Mutable names, fingerprints and dates alone prove no provenance. See the vendor
+[attestation extension](https://developers.yubico.com/PGP/Attestation.html) for verification and trust-store guidance.
+
+## Configure touch and signature policy
+
+Verify the Admin PIN before policy writes. This method chooses changeable `On` and per-signature PIN verification:
+
+```csharp
+static async Task ConfigureSigningPolicyAsync(
+    IYubiKey device, ReadOnlyMemory<byte> adminPin, CancellationToken cancellationToken)
+{
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.VerifyAdminAsync(adminPin, cancellationToken);
+    await session.SetUifAsync(KeyRef.Sig, Uif.On, cancellationToken);
+    await session.SetSignaturePinPolicyAsync(PinPolicy.Always, cancellationToken);
+    Console.WriteLine(await session.GetUifAsync(KeyRef.Sig, cancellationToken));
+}
+```
+
+Choose fixed policy only with an explicit replacement/recovery plan. Ordinary fixed UIF clears on key
+replacement/deletion or application reset. **Fixed ATT UIF survives reset and needs ATT key replacement**,
+which loses factory private-key provenance.
+The SDK's general UIF gate is 4.2.0; cached/ATT policies need additional support (the Python vendor implementation
+uses 5.2.1 checks). `SetPinAttemptsAsync` likewise needs a device-specific plan: NEO can restore default PINs.
+`SetAlgorithmAttributesAsync` can invalidate a key and leaves cached algorithms stale; explicitly refresh
+application data before crypto use. Prefer generation/import methods for complete provisioning tasks.
+
+Supply `SessionCreationOptions.UserPresencePrompt` when creating the session to display your application's touch
+notification. Implement `IUserPresencePrompt` using your UI; the session retains the prompt but leaves its lifetime
+with the caller. Sign/decrypt/authenticate use their slot's UIF; attestation uses ATT. `On`/`Fixed` report
+`PolicyRequires`, cached policies report `PolicyMayRequire`, and `Off` stays silent. The session uses cached UIF
+first, reads directly if absent, and falls back to `PolicyMayRequire` on a failed read other than cancellation.
+Firmware without UIF support stays silent. See [user interaction](../../docs/usage/user-interaction.md).
+
+Terminal notifications are `Completed`, `Cancelled` or `Failed`. Device APDU errors resolve as `Failed`; the SDK
+currently leaves OpenPGP statuses, including 6600, outside its `TimedOut` classification. Keep the application-owned
+prompt alive until full operation and callback completion, and avoid reentering or disposing the session from a
+callback. Sign/authenticate resolve completion before transferring the signature; decrypt resolves before copying
+the caller's result and clears the raw response even if resolution fails. Attestation creates its certificate before
+the outer completion callback and disposes that certificate if completion fails before transfer to the caller.
+
+Cancellation is checked before each logical exchange is admitted. After admission, constituent SmartCard work uses
+`CancellationToken.None`; a later exchange in the same public method can still reject the canceled token. Ending an
+outer wait does not stop that work or make borrowed inputs safe to clear. Await the actual public task and teardown,
+then inspect state through a fresh session before retrying a mutation. A canceled token supplies no rollback guarantee.
+
+## Reset an application deliberately
+
+Authorize reset only when loss of ordinary keys/certificates and configuration is acceptable. A successful device
+reset restores the application's ordinary defaults. **ATT key/certificate and fixed ATT policy survive.** Saving a
+public ATT certificate preserves that certificate, not a recoverable factory private key or manufacturer trust.
+
+`ResetAsync` confirms PIN blocking, TERMINATE and ACTIVATE, using the SDK's 1.0.6 check. A normal return
+alone proves too little: independently inspect key status, certificates, PIN acceptance/retries, KDF and UIF afterward.
+Cancellation/failure can leave blocked PINs or partial state. `ResetAsync` refreshes the session's application-data
+cache without returning metadata. The `ResetAndInspectAsync` example below makes a separate application-data read
+and returns that result for part of the inspection; your application supplies authorization and full verification.
+
+After confirmation, the same session reselects and rereads the applet using the original options. Configured SCP
+uses a fresh handshake; keep the caller-owned parameters alive for the life of the session. A refresh failure
+ends the session. After an uncertain reset, dispose/reopen and inspect persistent state before retrying.
+
+```csharp
+static async Task<ApplicationRelatedData> ResetAndInspectAsync(
+    IYubiKey device, CancellationToken cancellationToken)
+{
+    await using var session = await device.CreateOpenPgpSessionAsync(cancellationToken: cancellationToken);
+    await session.ResetAsync(cancellationToken);
+    return await session.GetApplicationRelatedDataAsync(cancellationToken);
+}
+```
+
+## Example tool and further reading
+
+Run the interactive sample from the repository root:
 
 ```bash
 dotnet run --project src/OpenPgp/examples/OpenPgpTool/OpenPgpTool.csproj
 ```
 
-## Related
+**Demo only.** OpenPgpTool prioritizes readability, not production credential management. Attestation prompts for
+the User PIN (or accepts `--pin`), verifies it in signature mode, and replaces the target certificate. `info` displays
+key status separately from fingerprint bytes. Command-line PINs and PEM text can persist in immutable strings.
+Noninteractive device selection takes the first SmartCard device, and the tool installs no touch-notification prompt.
+Use the direct SDK with application-owned input buffers, explicit device selection, and your application UI in production.
 
-- [../Core/README.md](../Core/README.md) - device discovery, smart-card connections, APDU, and TLV.
-- [../Piv/README.md](../Piv/README.md) - the other smart-card key applet, with its own PIN and slots.
-- [../Management/README.md](../Management/README.md) - enabling or disabling the OpenPGP application.
-- [user-interaction.md](../../docs/usage/user-interaction.md) and [device-discovery.md](../../docs/usage/device-discovery.md).
-- The [OpenPGP smart card application 3.4](https://gnupg.org/ftp/specs/OpenPGP-smart-card-application-3.4.pdf) specification.
-- [Developer guide](../../docs/DEV-GUIDE.md): building, testing, and contributing.
+- [Core guide](../Core/README.md): discovery, connections, APDU and TLV.
+- [PIV guide](../Piv/README.md) and [Management guide](../Management/README.md).
+- [OpenPGP Card specification](https://gnupg.org/ftp/specs/OpenPGP-smart-card-application-3.4.pdf):
+  *Functional Specification of the OpenPGP application on ISO Smart Card Operating Systems*, Version **3.4.1,
+  March 18, 2020** (the URL retains “3.4”). Relevant clauses: §4.3.2 KDF, §4.4.3.9 attributes, §§7.2.2–4 PINs,
+  §§7.2.10–11 crypto, §7.2.14 key generation and §§7.2.16–17 lifecycle.
+- [RFC 9580 §3.7.1.3](https://www.rfc-editor.org/rfc/rfc9580.html#section-3.7.1.3): S2K primitive;
+  [RFC 8017](https://www.rfc-editor.org/rfc/rfc8017.html): RSA encodings;
+  [RFC 8032](https://www.rfc-editor.org/rfc/rfc8032.html): Ed25519.
+- [Vendor touch/reset guidance](https://docs.yubico.com/software/yubikey/tools/ykman/OpenPGP_Commands.html).
+- [Developer guide](../../docs/DEV-GUIDE.md): build, test and contribution workflow.

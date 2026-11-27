@@ -98,7 +98,7 @@ internal static partial class NativeMethods
 public enum CmacBlockCipherAlgorithm
 {
     /// <summary>
-    ///     Use this enum value in order to specify CMAC with AES-128.
+    ///     Local sentinel for an unspecified algorithm. KeyLength and MacLength reject it; select Aes128 explicitly.
     /// </summary>
     Unknown = 0,
 
@@ -159,9 +159,13 @@ internal class SafeEvpCmacCtx : SafeHandle
 }
 
 /// <summary>
-///     An OpenSSL implementation of the ICmacPrimitives interface, exposing CMAC
-///     primitives to the SDK.
+///     Retained OpenSSL CMAC helper. The active ICmacPrimitives default uses the AesCmac helper with runtime AES-128.
 /// </summary>
+/// <remarks>
+///     Disposal frees the native context. CmacFinal's managed output staging is a separate array
+///     that is not explicitly cleared, including on failure. Clear caller-owned MAC output according
+///     to its use; native context disposal does not clear that output or establish provider-wide erasure.
+/// </remarks>
 internal sealed class CmacPrimitivesOpenSsl : IDisposable
 {
     private readonly SafeEvpCmacCtx _cmacCtx;

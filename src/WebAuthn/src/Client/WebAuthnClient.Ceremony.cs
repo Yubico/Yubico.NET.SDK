@@ -28,9 +28,6 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// </content>
 public sealed partial class WebAuthnClient
 {
-    private static readonly PinUvAuthTokenPermissions MakeCredentialCeremonyPermissions =
-        PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion;
-
     /// <summary>
     /// Owns the PIN/UV token and the prompted PIN for one ceremony. The token is replaced on escalation
     /// and on re-mint; the pinUvAuthParam it signs is zeroed when superseded or on dispose; the prompted
@@ -60,8 +57,9 @@ public sealed partial class WebAuthnClient
         }
 
         /// <summary>
-        /// Replaces the token with a fresh one. CTAP 2.1 §6.5.5.7 lets an authenticator consume
-        /// permissions on use, so a token spent on an up:false probe may be refused by the next command.
+        /// Replaces the token with a fresh one. CTAP 2.1 §6.5.2 token state and §6.1.2/§6.2.2 command
+        /// checks govern permission reuse; a token used for an up:false probe may be refused by the
+        /// following makeCredential. Token acquisition itself is described in §6.5.5.7.
         /// </summary>
         public async Task RemintAsync(UvDecision decision, PinUvAuthTokenPermissions permissions, CancellationToken cancellationToken)
         {
@@ -108,7 +106,8 @@ public sealed partial class WebAuthnClient
     /// <summary>
     /// Runs one ceremony attempt and, if the authenticator answers CTAP2_ERR_PUAT_REQUIRED to a
     /// request made without required verification, runs it once more with verification required.
-    /// Any other CTAP failure is mapped to a typed <see cref="WebAuthnClientError"/>.
+    /// Only the initial credential command leaves an eligible PUAT_REQUIRED unmapped. Preparation,
+    /// probes and continuations handle their CTAP statuses separately and cannot retry that command.
     /// </summary>
     /// <remarks>
     /// The attempt must end at the authenticator's answer. Follow-up work that may itself fail with a
@@ -120,34 +119,44 @@ public sealed partial class WebAuthnClient
         UserVerificationPreference preference,
         PinUvAuthTokenPermissions permissions,
         CeremonyAuth auth,
-        bool hasPreviewSign,
-        Func<UvDecision, CancellationToken, Task<TAttempt>> attempt,
+        Func<UvDecision, UserVerificationPreference, CancellationToken, Task<TAttempt>> attempt,
         CancellationToken cancellationToken)
     {
         while (true)
         {
             var decision = UvDecisionLogic.Decide(info, preference, auth.PinAvailable, permissions);
-            await auth.AcquireAsync(decision, cancellationToken).ConfigureAwait(false);
+            await AcquireCeremonyTokenAsync(auth, decision, cancellationToken).ConfigureAwait(false);
 
             try
             {
-                return await attempt(decision, cancellationToken).ConfigureAwait(false);
+                return await attempt(decision, preference, cancellationToken).ConfigureAwait(false);
             }
             catch (CtapException ex) when (ShouldRetryWithRequiredUv(ex, preference))
             {
                 preference = UserVerificationPreference.Required;
             }
-            catch (CtapException ex)
-            {
-                throw MapCeremonyCtapException(ex, hasPreviewSign);
-            }
+        }
+    }
+
+    private async Task AcquireCeremonyTokenAsync(CeremonyAuth auth, UvDecision decision, CancellationToken ct)
+    {
+        try
+        {
+            if (decision.UseToken)
+                _ = _backend.Protocol;
+            await auth.AcquireAsync(decision, ct).ConfigureAwait(false);
+        }
+        catch (CtapException ex)
+        {
+            throw MapCtapStatusToWebAuthnError(ex);
         }
     }
 
     /// <summary>
     /// Probes <paramref name="candidates"/> with up:false (exclude-list pre-flight, allow-list selection).
-    /// Probe failures other than "no match" are reported as <see cref="WebAuthnClientErrorCode.Unknown"/>
-    /// and never escalate verification.
+    /// Probe CTAP failures other than "no match" map to <see cref="WebAuthnClientErrorCode.Unknown"/>.
+    /// Unassociated successful responses fail with <see cref="WebAuthnClientErrorCode.InvalidState"/>.
+    /// Neither failure can trigger verification escalation.
     /// </summary>
     /// <param name="rpId">The relying party identifier.</param>
     /// <param name="candidates">The descriptors to probe.</param>
@@ -155,10 +164,10 @@ public sealed partial class WebAuthnClient
     /// <param name="auth">The ceremony's token owner.</param>
     /// <param name="decision">The UV decision in force (its method is reused for a re-mint).</param>
     /// <param name="remintPermissions">
-    /// When set, the token is re-minted with these permissions after the probe. Authenticators may refuse
-    /// to reuse a token consumed by a getAssertion(up:false) probe for a following makeCredential, so
-    /// registration passes <c>MakeCredential</c>; a following getAssertion accepts the same token, so
-    /// selection passes null.
+    /// When set and a token exists, the token is re-minted with these permissions after the probe.
+    /// Registration passes <c>MakeCredential</c>; authentication selection passes null and reuses its
+    /// existing token for the final assertion. This is the SDK's reuse choice, not a guarantee of
+    /// authenticator acceptance; the authenticator's token state and expiry conditions still apply.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     private async Task<PublicKeyCredentialDescriptor?> ProbeCredentialsAsync(
@@ -187,10 +196,54 @@ public sealed partial class WebAuthnClient
 
         if (auth.Token is not null && remintPermissions is { } permissions)
         {
-            await auth.RemintAsync(decision, permissions, cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await auth.RemintAsync(decision, permissions, cancellationToken).ConfigureAwait(false);
+            }
+            catch (CtapException ex)
+            {
+                throw MapCtapStatusToWebAuthnError(ex);
+            }
         }
 
         return match;
+    }
+
+    private async Task<AuthenticatorInfo> GetCeremonyInfoAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (CtapException ex)
+        {
+            throw MapCtapStatusToWebAuthnError(ex);
+        }
+    }
+
+    private static BackendGetAssertionRequest BuildTokenlessUvAssertion(string rpId, WebAuthnClientData clientData,
+        IReadOnlyList<PublicKeyCredentialDescriptor> chunk, ReadOnlyMemory<byte>? extensions = null) => new()
+        {
+            RpId = rpId,
+            ClientDataHash = clientData.Hash,
+            AllowList = chunk,
+            Options = new Dictionary<string, bool> { ["uv"] = true, ["up"] = true },
+            Extensions = extensions
+        };
+
+    private static async Task<(PublicKeyCredentialDescriptor Selected, GetAssertionResponse Response)?> FindTokenlessUvCredentialAsync(
+        IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info,
+        Func<IReadOnlyList<PublicKeyCredentialDescriptor>, Task<(bool Fits, CtapStatus Status, GetAssertionResponse? Response)>> getAssertion, CancellationToken ct)
+    {
+        try
+        {
+            return await CredentialFilter.FindAsync(eligible, info, requireUvAndUp: true, getAssertion, ct).ConfigureAwait(false);
+        }
+        catch (CtapException ex)
+        {
+            // This branch already requested built-in UV: failure cannot cause UV escalation or PIN acquisition.
+            throw MapCeremonyCtapException(ex, hasPreviewSign: false);
+        }
     }
 
     /// <summary>CTAP "uv" option key from the decision, plus "rk" for registration; null when neither applies.</summary>
@@ -211,8 +264,8 @@ public sealed partial class WebAuthnClient
     }
 
     /// <summary>
-    /// Maps a CTAP failure of the main command to the typed error the module promises: CredentialExcluded
-    /// is WebAuthn L3 §5.1.3's InvalidStateError; previewSign requests use the previewSign mapper; the rest
+    /// Maps a caught CTAP failure of the ceremony attempt: CredentialExcluded
+    /// is WebAuthn L3 §5.1.3's InvalidStateError; commands carrying previewSign use its mapper; the rest
     /// go through <see cref="MapCtapStatusToWebAuthnError"/>.
     /// </summary>
     private static WebAuthnClientError MapCeremonyCtapException(CtapException ex, bool hasPreviewSign)

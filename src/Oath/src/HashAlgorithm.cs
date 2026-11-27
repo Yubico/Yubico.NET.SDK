@@ -30,7 +30,7 @@ public enum OathHashAlgorithm : byte
     Sha256 = 0x02,
 
     /// <summary>
-    ///     SHA-512 (512-bit digest, 128-byte block size).
+    ///     SHA-512 (512-bit digest, 128-byte block size). Requires YubiKey firmware 4.3.1 or later.
     /// </summary>
     Sha512 = 0x03
 }

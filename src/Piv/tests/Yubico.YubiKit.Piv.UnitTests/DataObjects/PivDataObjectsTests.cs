@@ -194,14 +194,17 @@ public class PivDataObjectsTests
         Assert.Equal(Salt16, decoded.Salt!.Value.ToArray());
     }
 
-    [Fact]
-    public void AdminData_WithPinLastUpdated_RoundTripsExactly()
+    [Theory]
+    [InlineData(0x04030201, "8009810100830401020304")]
+    [InlineData(0x030201, "80088101008303010203")]
+    public void AdminData_WithPinLastUpdated_RoundTripsV1LittleEndianWireBytes(long seconds, string expected)
     {
-        var updated = DateTimeOffset.FromUnixTimeSeconds(1_700_000_000);
+        var updated = DateTimeOffset.FromUnixTimeSeconds(seconds);
         var adminData = AdminData.Create(pukBlocked: false, pinProtected: false, pinLastUpdated: updated);
 
         var encoded = adminData.Encode();
-        Assert.True(AdminData.TryDecode(encoded, out var decoded));
+        Assert.Equal(expected, Convert.ToHexString(encoded.Span));
+        Assert.True(AdminData.TryDecode(Convert.FromHexString(expected), out var decoded));
 
         Assert.Equal(updated, decoded.PinLastUpdated);
     }
@@ -266,15 +269,17 @@ public class PivDataObjectsTests
 
     // === KeyHistory (ISC-21) ===
 
-    [Fact]
-    public void KeyHistory_TryDecode_NoUrl_GoldenVector_ProducesExpectedFields()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(2)]
+    public void KeyHistory_TryDecode_NoUrl_GoldenVector_ProducesExpectedFields(byte onCard)
     {
-        byte[] golden = [0xC1, 0x01, 0x02, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00];
+        byte[] golden = [0xC1, 0x01, onCard, 0xC2, 0x01, 0x00, 0xFE, 0x00];
 
         Assert.True(KeyHistory.TryDecode(golden, out var keyHistory));
 
         Assert.False(keyHistory.IsEmpty);
-        Assert.Equal(2, keyHistory.OnCardCertificates);
+        Assert.Equal(onCard, keyHistory.OnCardCertificates);
         Assert.Equal(0, keyHistory.OffCardCertificates);
         Assert.Null(keyHistory.OffCardCertificateUrl);
     }
@@ -282,7 +287,7 @@ public class PivDataObjectsTests
     [Fact]
     public void KeyHistory_Encode_NoUrl_RoundTripsGoldenVectorExactly()
     {
-        byte[] golden = [0xC1, 0x01, 0x02, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00];
+        byte[] golden = [0xC1, 0x01, 0x02, 0xC2, 0x01, 0x00, 0xFE, 0x00];
         Assert.True(KeyHistory.TryDecode(golden, out var keyHistory));
 
         Assert.Equal(golden, keyHistory.Encode().ToArray());
@@ -291,7 +296,7 @@ public class PivDataObjectsTests
     [Fact]
     public void KeyHistory_WithUrl_RoundTripsExactly()
     {
-        var url = new Uri("https://example.com/certs");
+        var url = new Uri("http://example.com/" + new string('a', 64));
         var keyHistory = KeyHistory.Create(1, 2, url);
 
         var encoded = keyHistory.Encode();
@@ -312,8 +317,36 @@ public class PivDataObjectsTests
     [Fact]
     public void KeyHistory_Create_UrlTooLong_Throws()
     {
-        string longUrl = "https://example.com/" + new string('a', 118);
-        Assert.Throws<ArgumentException>(() => KeyHistory.Create(0, 0, new Uri(longUrl)));
+        string longUrl = "http://" + new string('a', 55) + ".example/" + new string('a', 64);
+        Assert.Throws<ArgumentException>(() => KeyHistory.Create(0, 1, new Uri(longUrl)));
+    }
+
+    [Theory]
+    [InlineData("C10100C20101FE00")] // Off-card certificates require F3.
+    [InlineData("C10110C20105FE00")] // Total exceeds twenty.
+    [InlineData("C10100C20100F300FE00")] // Both counts zero; F3 must be absent.
+    [InlineData("C10100C20101F30178FE00")] // Invalid URL.
+    public void KeyHistory_TryDecode_RejectsInvalidProvisioningProfile(string raw)
+    {
+        Assert.False(KeyHistory.TryDecode(Convert.FromHexString(raw), out var value));
+        Assert.True(value.IsEmpty);
+    }
+
+    [Theory]
+    [InlineData("cert-host.example", true)]
+    [InlineData("cert_host.example", false)]
+    [InlineData("cert-.example", false)]
+    [InlineData("-cert.example", false)]
+    [InlineData("cert..example", false)]
+    [InlineData("cert.example.", true)]
+    [InlineData("cert.example..", false)]
+    public void KeyHistory_ReadsOnlyAsciiDnsLabelsInProfileUrl(string host, bool accepted)
+    {
+        byte[] url = System.Text.Encoding.ASCII.GetBytes($"http://{host}/{new string('a', 64)}");
+        byte[] raw = [0xC1, 0x01, 0, 0xC2, 0x01, 1, 0xF3, (byte)url.Length, .. url, 0xFE, 0];
+        Assert.Equal(accepted, KeyHistory.TryDecode(raw, out var value));
+        if (accepted)
+            Assert.Equal(raw, value.Encode().ToArray());
     }
 
     // === ISC-22 / ISC-22.1: typed read/write match raw GetObjectAsync/PutObjectAsync ===
@@ -381,7 +414,7 @@ public class PivDataObjectsTests
     [Fact]
     public async Task GetKeyHistoryAsync_MatchesRawGetObjectAsync()
     {
-        byte[] golden = [0xC1, 0x01, 0x02, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00];
+        byte[] golden = [0xC1, 0x01, 0x02, 0xC2, 0x01, 0x00, 0xFE, 0x00];
         var connection = CreateInitializedConnection([0x53, (byte)golden.Length, .. golden, 0x90, 0x00]);
         await using var session = await PivSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken);
 

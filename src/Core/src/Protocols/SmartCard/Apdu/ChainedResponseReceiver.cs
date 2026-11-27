@@ -17,6 +17,10 @@ using Yubico.YubiKit.Core.Devices;
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
+// Assemble 0x61 responses using fixed-zero CLA/P1/P2/Le and the configured remaining-data instruction.
+// This receiver neither retries 0x6C corrected lengths nor imposes a total response-size/fragment budget.
+// Each fragment owner and the final copied owner have separate cleanup scopes; Clear on the result
+// does not clear discarded fragment owners. The writer is currently cleared only after successful assembly.
 internal class ChainedResponseReceiver(
     FirmwareVersion? firmwareVersion,
     IApduProcessor apduTransmitter,

@@ -125,7 +125,7 @@ internal sealed class WindowsCtapReportApi : IWindowsHidReportApi, IDisposable
     }
 
     internal void EmitInfo() => Emit(Response(Channel, 0x90,
-        [(byte)InfoStatus, 0xA1, 1, 0x81, 0x68, 0x46, 0x49, 0x44, 0x4F, 0x5F, 0x32, 0x5F, 0x30]));
+        [(byte)InfoStatus, 0xA2, 1, 0x81, 0x68, .. "FIDO_2_0"u8, 3, 0x50, .. new byte[16]]));
     internal void ReleaseCancelResponse() => Emit(Response(Channel, 0, []));
 
     private void Emit(byte[] report)

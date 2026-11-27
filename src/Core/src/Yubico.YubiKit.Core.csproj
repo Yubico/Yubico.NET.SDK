@@ -34,6 +34,9 @@
     <InternalsVisibleTo Include="Yubico.YubiKit.Tests.Shared" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Ctap2" />
     <InternalsVisibleTo Include="Yubico.YubiKit.Management" />
+    <!-- The in-repo reset demo and its tests distinguish a vanished macOS HID entry from other open failures. -->
+    <InternalsVisibleTo Include="FidoTool" />
+    <InternalsVisibleTo Include="Yubico.YubiKit.Cli.Commands.UnitTests" />
   </ItemGroup>
 
   <!--

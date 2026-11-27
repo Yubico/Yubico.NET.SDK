@@ -10,6 +10,8 @@ namespace Yubico.YubiKit.Management.Examples.ManagementTool.Cli.Menus;
 
 /// <summary>
 /// CLI menu for configuring device timeouts.
+/// The prompted ceilings are SDK limits, not firmware maxima. Auto-eject is a CCID inactivity timer
+/// requiring TouchEject in CCID-only mode; assigning the timeout does not set that flag.
 /// </summary>
 public static class TimeoutsMenu
 {
@@ -36,7 +38,7 @@ public static class TimeoutsMenu
 
         var info = infoResult.DeviceInfo.Value;
 
-        // Display current timeouts
+        // Display the live query's timeout view; copying DeviceInfo does not clone its timeout bytes.
         AnsiConsole.MarkupLine("[bold]Current Timeouts[/]");
         OutputHelpers.WriteKeyValue("Auto-Eject Timeout", info.AutoEjectTimeout > 0 ? $"{info.AutoEjectTimeout} seconds" : "Disabled (0)");
         OutputHelpers.WriteKeyValue("Challenge-Response Timeout", info.ChallengeResponseTimeout.Length > 0 ? $"{info.ChallengeResponseTimeout.Span[0]} seconds" : "Unknown");
@@ -64,7 +66,7 @@ public static class TimeoutsMenu
         if (info.IsLocked)
         {
             AnsiConsole.WriteLine();
-            lockCode = LockCodePrompt.PromptForLockCode("Device is locked. Enter lock code to proceed:");
+            lockCode = LockCodePrompt.PromptForLockCode("Device is locked. Enter lock code to proceed", cancellationToken);
             if (lockCode is null)
             {
                 return;

@@ -21,12 +21,6 @@ public class OpenPgpDecryptTests
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
     public async Task Decrypt_RsaPkcs1_RecoverPlaintext(YubiKeyTestState state)
     {
-        if (state.FirmwareVersion >= new FirmwareVersion(4, 2, 0) &&
-            state.FirmwareVersion <= new FirmwareVersion(4, 3, 5))
-        {
-            return;
-        }
-
         await state.WithOpenPgpSessionAsync(
             resetBeforeUse: true,
             action: async session =>

@@ -42,7 +42,7 @@ The `YubiKeyManager` class is a **static-only API** - no dependency injection or
 
 | Application | Recommended path |
 |---|---|
-| Short CLI command or script | `FindFirstAsync` / `FindAllAsync`; no background cleanup |
+| Short CLI command or script | `FindFirstAsync` / `FindAllAsync`; no caller-owned monitor or start/stop lifetime |
 | Optional hardware feature | `FindFirstOrDefaultAsync`; null means no matching key now |
 | CCID-only utility | `Find…Async(interfaces: ConnectionType.SmartCard)` to avoid HID probing |
 | One device-change consumer | `YubiKeyManager.WatchAsync(ct)`; enumeration owns the monitor |
@@ -161,7 +161,10 @@ the default implementation returns `null`.
 
 This is **last-known data, not guaranteed-current state**. Monitoring can
 replace the snapshot on a retained object and emit `DeviceUpdated`; a failed metadata read does
-not erase the last successful value. A snapshot already returned to your code does not change. Metadata
+not erase the last successful value. Replacing the snapshot preserves the scalar fields in a value
+already returned to your code. `DeviceInfo.ChallengeResponseTimeout` is a separate storage caveat: it currently
+aliases the input TLV's memory rather than owning an independent copy. Its read-only type does not
+guarantee stable bytes after that owner is changed or cleared. Metadata
 can be stale after configuration changes, and a retained object can still expose historical data after
 disconnection. Reading the property does not refresh it, and there is no freshness or presence guarantee.
 
@@ -172,6 +175,19 @@ When current configuration matters, use the existing Management live-read API,
 Keep using `device.SerialNumber` for durable physical identity. Its independent identity contract is
 unchanged: once known, it remains known on that object even if the latest cached metadata omits the serial.
 Do not substitute `device.CachedDeviceInfo?.SerialNumber` for it.
+
+Interpret fields according to their provenance. Firmware can be detected, inferred by an applet, or
+overridden for session policy; a major-zero version passes optimistic feature checks. Supported and
+enabled capabilities describe different device reports, while `AvailableConnections` describes only
+observed interfaces. None alone establishes that an operation is authorized or will succeed. Missing
+fields can use defaults, unknown tags are ignored, and the typed metadata is not a complete raw-response
+archive. For current applet prerequisites, use the applet's guide and handle the operation's result.
+
+Within a monitor, failed reads are retried on later scans, but a successful metadata read without a
+serial can be cached. An unchanged scan therefore need not retry that serial-less result. Hotplug hints
+or observed absence invalidate evidence; a new one-shot Find supplies independent evidence. The identity
+cache checks USB Product ID changes, whereas the metadata cache currently does not independently bind
+its successful value to a Product ID. Stable interface paths alone are not a freshness proof.
 
 ## Selection in the CLI examples
 
@@ -283,10 +299,12 @@ locally. Monitoring scans all interfaces; there is no public interval or force-r
 ### Several consumers: a host-owned singleton
 
 Applications using `Microsoft.Extensions.Hosting` can register one initialized monitor. The SDK itself
-does not depend on hosting. The three-line adapter below stops monitoring at graceful host shutdown;
-`await using` also cleans up if host startup or execution fails. Register consumers after this adapter.
-Their watch loops may still be enumerating when `StopAsync` disposes the monitor; those enumerations end
-normally, so consumers need no extra coordination beyond handling the end of the stream.
+does not depend on hosting. The three-line adapter below awaits monitor disposal at graceful host
+shutdown; `await using` also awaits disposal if host startup or execution fails. Register consumers
+after this adapter. Watch loops may still be enumerating when `StopAsync` disposes the monitor.
+When cleanup reaches feed completion, healthy uncanceled streams can drain and end normally;
+existing terminal-failure or overflow errors remain observable. Consumers still handle their own
+errors and queued application work. The ordered-cleanup conditions below also apply to this adapter.
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
@@ -308,8 +326,10 @@ sealed class MonitorLifetime(YubiKeyMonitor monitor) : IHostedService
 }
 ```
 
-The factory starts listeners and awaits the loop's first publication. Empty success is ready; first-scan
-failure fails fast and cleans up partial ownership. Its token cancels initialization only. After return,
+The factory starts listeners and awaits the loop's first publication. Empty success is ready. A failed
+first scan prevents successful creation; failure or cancellation of the first-publication wait awaits
+constructed-monitor disposal before rethrowing. Cleanup failure can replace the earlier error and
+prevent later cleanup stages. Its token cancels initialization only. After return,
 the monitor runs even without subscribers until disposed. There is no pause/restart: create a new instance.
 
 On first enumeration, capture and subscription registration are atomic. Replay does not occupy the
@@ -317,17 +337,23 @@ On first enumeration, capture and subscription registration are atomic. Replay d
 with `InvalidOperationException`: clear its projection and re-enumerate the same monitor. Cancellation
 or disposing a subscription does not stop a shared monitor. Consumer code never runs inline on publication.
 
-Disposal is sequential: stop/dispose listeners, cancel and await the scan loop, retire discovery, complete
-the feed. There is no disposal timeout or abandoned managed loop. In-flight scan waits are bounded by the
-discovery budgets, not a hard total wall-clock limit; already-open native work keeps its lease until actual
-teardown. Healthy streams can drain committed history and end normally; new enumerations after disposal
-end empty. Disposal is idempotent and does not dispose caller-owned sessions or connections.
+Disposal caches one task and follows an ordered path: attempt listener callback-clear/stop/dispose,
+cancel and await the scan loop, retire discovery, then complete the feed. Later stages depend on earlier
+calls returning. Listener cleanup exceptions are caught and logged, but a throwing logger can interrupt
+those attempts or signal-channel completion before loop cancellation/join, retirement, and feed completion.
+Logging after feed completion can also fault disposal even though earlier stages ran. The loop-await
+stage has no separate drain timeout. Discovery budgets bound individual waits, not total disposal;
+already-open native work keeps its lease until actual teardown. If cleanup reaches feed completion,
+healthy uncanceled streams can drain committed history and end normally, existing subscription errors
+remain observable, and later enumerations end empty. Caller-owned sessions and connections retain
+their own lifetimes.
 
 ### Technical troubleshooting
 
 - Logger category: `Yubico.YubiKit.Core.Devices.YubiKeyMonitor`; see [logging setup](../LOGGING.md).
-- Listener startup failure is logged and cleaned up independently. The other listener and five-second
-  interval fallback continue; listeners are hints, not physical-device truth.
+- Listener startup failure is logged, followed by callback-clear/stop/dispose attempts. Later listener
+  attempts depend on logging returning; a throwing logger can interrupt startup or cleanup. If construction
+  completes without listeners, the five-second interval fallback remains; listeners are hints, not device truth.
 - A monitor never publishes a partial scan. If a transport's enumeration exceeds its budget during creation,
   `CreateMonitorAsync` fails with `TimeoutException`; after initialization the scan is logged and the previous
   snapshot stands until a later scan succeeds. Successful initialization does not prove that every interface
@@ -338,6 +364,13 @@ end empty. Disposal is idempotent and does not dispose caller-owned sessions or 
   coalescing. Without hints, same-interface swaps can remain stale until a scan observes absence.
 - Disposal waits for the in-flight scan within its discovery budgets; cancellation is not proof of native
   release. See [monitor lifecycle](../architecture/event-driven-device-discovery.md#monitor-lifecycle-and-disposal).
+
+If a PC/SC listener consumes unexpected CPU, remember that its native timeout is a maximum wait,
+not a minimum sleep: an UNAWARE-state query can return success immediately. The current success-loop
+cadence and partial-start/timeout cleanup paths have separate implementation limitations. Repeated
+empty discovery is likewise not a native health check: service availability, enumeration context cleanup,
+and nullable macOS manager/device-set handling need their own diagnostics. Preserve the actual backend
+code and outcome rather than inferring a physical disconnect or successful native release from an empty list.
 
 ### UI thread marshaling
 
@@ -509,6 +542,8 @@ Key changes:
 - `Find*` operations are fully thread-safe and use fresh evidence per call.
 - Concurrent `WatchAsync` enumerations are safe; manager enumerations own independent producers,
   monitor enumerations share one producer with independent buffers.
-- `DisposeAsync` may overlap active `WatchAsync` enumerations; they end normally. It must not be called
-  concurrently with itself, and a monitor is not reusable after it.
+- `DisposeAsync` may overlap active `WatchAsync` enumerations. If cleanup reaches feed completion,
+  healthy uncanceled streams can drain and end normally; existing terminal/overflow errors remain
+  observable, and later enumerations end empty. Do not call disposal concurrently with itself or reuse
+  the disposed monitor.
 - Changes may be consumed on any thread; marshal application state changes as needed.

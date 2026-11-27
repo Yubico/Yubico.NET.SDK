@@ -21,8 +21,9 @@ namespace Yubico.YubiKit.Core.Utilities;
 ///     A disposable collection of TLV objects that ensures all contained TLVs are properly disposed.
 /// </summary>
 /// <remarks>
-///     This class is used to manage the lifetime of multiple TLV objects, ensuring that sensitive
-///     cryptographic data is properly zeroed out when no longer needed.
+///     Construction copies the collection, while retaining the same <see cref="Tlv"/> objects.
+///     Disposing the list clears those objects' encodings, including views held elsewhere. Source
+///     buffers used to construct the TLVs and independently returned encodings have separate owners.
 /// </remarks>
 public sealed class DisposableTlvList : IDisposable, IReadOnlyList<Tlv>
 {

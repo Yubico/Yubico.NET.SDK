@@ -96,7 +96,8 @@ public class DeviceInfoTests
     public void Equals_SnapshotsDecodedFromSeparateBuffers_CompareByContent()
     {
         // Each decode slices ChallengeResponseTimeout from its own response buffer. Monitoring publishes
-        // DeviceUpdated on inequality, so reference-based memory equality would report a change on every rescan.
+        // DeviceUpdated on inequality, so storage-based memory equality would treat equal fresh bytes as a change.
+        // All comparisons occur while both input TLV lists are alive; post-disposal stability is outside this oracle.
         using var firstTlvs = CreateRequiredDeviceInfoTlvs();
         using var secondTlvs = CreateRequiredDeviceInfoTlvs();
         var first = DeviceInfo.CreateFromTlvs(firstTlvs, defaultVersion: null);
@@ -110,6 +111,28 @@ public class DeviceInfoTests
         Assert.NotEqual(first, differentTimeout);
     }
 
+    [Fact]
+    public void CreateFromTlvs_DecodesFipsBitsSeparatelyFromApplicationBits()
+    {
+        using var capable = new Tlv(0x14, [0x20, 0x1F]);
+        using var approved = new Tlv(0x15, [0x80]);
+        var info = DeviceInfo.CreateFromTlvs([capable, approved], new FirmwareVersion(5, 7, 0));
+
+        Assert.Equal(DeviceCapabilities.Fido2 | DeviceCapabilities.Piv | DeviceCapabilities.OpenPgp |
+            DeviceCapabilities.Oath | DeviceCapabilities.HsmAuth, info.FipsCapabilities);
+        Assert.Equal(DeviceCapabilities.None, info.FipsApproved);
+        Assert.False(info.IsFips);
+    }
+
+    [Theory]
+    [InlineData(0x14)]
+    [InlineData(0x15)]
+    public void CreateFromTlvs_RejectsOversizedFipsField(int tag)
+    {
+        using var field = new Tlv(tag, [0, 0, 1]);
+        _ = Assert.Throws<BadResponseException>(() => DeviceInfo.CreateFromTlvs([field], new FirmwareVersion(5, 7, 0)));
+    }
+
     private static DisposableTlvList CreateRequiredDeviceInfoTlvs(params Tlv[] additionalTlvs) => new(
     [
         new(0x0A, [0x00]),
@@ -119,8 +142,8 @@ public class DeviceInfoTests
         new(0x01, [0x03, 0x3B]),
         new(0x0E, [0x10]),
         new(0x0D, [0x30]),
-        new(0x14, [0x02, 0x00]),
-        new(0x15, [0x00, 0x10]),
+        new(0x14, [0x01]),
+        new(0x15, [0x00, 0x02]),
         new(0x06, [0x00, 0x1E]),
         new(0x07, [0x0F]),
         new(0x08, [(byte)DeviceFlags.RemoteWakeup]),

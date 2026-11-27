@@ -12,21 +12,451 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Buffers.Binary;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
+using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Core.Utilities;
+using Yubico.YubiKit.OpenPgp.Backend;
 using Yubico.YubiKit.Tests.Shared;
 
 namespace Yubico.YubiKit.OpenPgp.UnitTests;
 
+[CollectionDefinition("GlobalLogging", DisableParallelization = true)]
+public sealed class GlobalLoggingCollection;
+
+[Collection("GlobalLogging")]
 public sealed class OpenPgpSessionWireTests
 {
+    [Theory]
+    [InlineData(5, false)]
+    [InlineData(6, true)]
+    public async Task Reset_CachedNeo_ChecksAppletFloorBeforeReadingOrBlockingPins(byte patch, bool supported)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection(OkResponse(), [1, 0, patch, 0x90, 0],
+            ApplicationRelatedDataResponse(), [0x6A, 0x88]);
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection, null,
+            () => default(DeviceInfo) with { FirmwareVersion = new FirmwareVersion(3, 4, 0) }, token);
+        if (supported)
+        {
+            var error = await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(token));
+            Assert.Equal((short)0x6A88, error.SW);
+            Assert.Equal(0xC4, LastCommand(connection)[3]);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.ResetAsync(token));
+            Assert.Equal(3, connection.TransmittedCommands.Count);
+        }
+        Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0x20);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Initialize_ApplicationDataAcceptsLongFormBerButRejectsTrailingData(bool trailing)
+    {
+        var token = TestContext.Current.CancellationToken;
+        var canonical = ApplicationRelatedDataResponse();
+        Assert.Equal(0x81, canonical[1]);
+        // BER permits a redundant leading zero in the definite length.
+        byte[] wire = [0x6E, 0x82, 0, .. canonical.AsSpan(2, canonical.Length - 4),
+            .. (trailing ? new byte[] { 0 } : []), 0x90, 0x00];
+        using var connection = new RecordingSmartCardConnection(OkResponse(), VersionResponse(), wire, wire);
+        if (trailing)
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => OpenPgpSession.CreateAsync(connection, cancellationToken: token));
+        }
+        else
+        {
+            await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+            Assert.Equal(wire[..^2], (await session.GetApplicationRelatedDataAsync(token)).Raw.ToArray());
+        }
+    }
+
+    [Fact]
+    public async Task SetResetCode_EmptyAndKdfDisabled_SendsZeroLengthResetCodeWrite()
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnection([0x81, 0x01, 0x00, 0x90, 0x00], OkResponse());
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.SetResetCodeAsync(ReadOnlyMemory<byte>.Empty, token);
+
+        Assert.Equal([0x00, 0xDA, 0x00, 0xD3, 0x00], LastCommand(connection));
+    }
+
+    [Fact]
+    public async Task SetResetCode_EmptyAndKdfActive_WritesResetSaltDigest()
+    {
+        var token = TestContext.Current.CancellationToken;
+        // SHA-256 S2K, 32 input octets, with distinct User, Reset and Admin salts.
+        byte[] f9 = Convert.FromHexString("81010382010883040000002084080102030405060708" +
+            "85081112131415161718860821222324252627289000");
+        using var connection = CreateInitializedConnection(f9, OkResponse());
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        int before = connection.TransmittedCommands.Count;
+
+        await session.SetResetCodeAsync(ReadOnlyMemory<byte>.Empty, token);
+
+        var commands = connection.TransmittedCommands.Skip(before).ToArray();
+        Assert.Equal(2, commands.Length);
+        Assert.Equal([0x00, 0xCA, 0x00, 0xF9, 0x00], commands[0]);
+        // Known answer: hashlib.sha256(bytes.fromhex("1112131415161718") * 4).
+        Assert.Equal("00DA00D3205A46361778970AD85966A8839A6D0B0B97AB54C74C3177B51BFE88930DB793CC00",
+            Convert.ToHexString(commands[1]));
+    }
+
+    [Theory]
+    [InlineData("0100069000", false)]
+    [InlineData("0100079000", true)]
+    [InlineData("6985", true)] // Advisory version failure: Q6 admits the local gate.
+    public async Task CachedNeo_UsesAppletVersionForRetryCommand(string version, bool allowed)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection(
+            [OkResponse(), Convert.FromHexString(version), ApplicationRelatedDataResponse(), OkResponse()]);
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection, null,
+            () => default(DeviceInfo) with { FirmwareVersion = new FirmwareVersion(3, 4, 0) }, token);
+        Assert.Equal(new FirmwareVersion(3, 4, 0), session.FirmwareVersion);
+        Assert.Equal(0xF1, connection.TransmittedCommands[1][1]);
+        if (allowed)
+        {
+            await session.SetPinAttemptsAsync(3, 4, 5, token);
+            Assert.Equal(0xF2, LastCommand(connection)[1]);
+            Assert.Equal(new byte[] { 3, 4, 5 }, CommandData(LastCommand(connection)).ToArray());
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => session.SetPinAttemptsAsync(3, 4, 5, token));
+            Assert.Equal(3, connection.TransmittedCommands.Count);
+        }
+    }
+
+    [Theory]
+    [InlineData("82020800", "830400000100", "84080102030405060708", false)]
+    [InlineData("820108", "83050000010000", "84080102030405060708", false)]
+    [InlineData("820108", "830400000100", "8400", false)]
+    [InlineData("820108", "830400000100", "84080102030405060708870100", false)]
+    [InlineData("8201FF", "830400000100", "84080102030405060708", true)]
+    public async Task MalformedF9_NeverSendsVerify(string hash, string count, string saltsAndHashes, bool unsupported)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnection(Convert.FromHexString("810103" + hash + count + saltsAndHashes + "9000"));
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        Task Verify() => session.VerifyPinAsync("123456"u8.ToArray(), cancellationToken: token);
+        if (unsupported)
+            await Assert.ThrowsAsync<NotSupportedException>(Verify);
+        else
+            await Assert.ThrowsAsync<FormatException>(Verify);
+        Assert.Equal(4, connection.TransmittedCommands.Count);
+        Assert.Equal(0xF9, LastCommand(connection)[3]);
+    }
+
+    [Theory]
+    [InlineData("FB08C106010800001100", false)]
+    [InlineData("FA08C10601080000110000", false)]
+    [InlineData("FA09C106010800001100", false)]
+    [InlineData("FA0BC106010800001100", false)]
+    [InlineData("FA0AC106010800001100", true)]
+    [InlineData("FA8109C18106010800001100", true)]
+    public async Task AlgorithmInformation_ConsumesOriginalBerEnvelope(string encoded, bool accepted)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnection(Convert.FromHexString(encoded + "9000"));
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        if (accepted)
+        {
+            var entry = Assert.Single(await session.GetSupportedAlgorithmsAsync(token));
+            Assert.Equal(KeyRef.Sig, entry.KeyRef);
+            Assert.Equal(2048, Assert.IsType<RsaAttributes>(entry.Attributes).NLen);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => session.GetSupportedAlgorithmsAsync(token));
+        }
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Reset_WithScp03_ReauthenticatesUsingOriginalKeysOrEndsSession(bool rejectRehandshake)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var card = new ResetScp03Card(rejectRehandshake);
+        using var keys = card.CreateKeyParameters();
+        await using var session = await OpenPgpSession.CreateAsync(card, new SessionCreationOptions
+        {
+            FirmwareVersionOverride = new FirmwareVersion(5, 8, 0),
+            ScpKeyParameters = keys,
+        }, token);
+
+        if (rejectRehandshake)
+        {
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetAsync(token));
+            Assert.Contains("session ended", error.Message);
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetPinStatusAsync(token));
+            Assert.Equal(11, card.Exchanges);
+        }
+        else
+        {
+            await session.ResetAsync(token);
+            Assert.Equal(3, (await session.GetPinStatusAsync(token)).AttemptsUser);
+            Assert.Equal(14, card.Exchanges);
+        }
+    }
+
+    // Card-side fixture scoped to this flow. Derives challenge-bound keys independently of ScpState
+    // and checks C-MACs (including EXTERNAL AUTHENTICATE), then produces encrypted R-MACed replies.
+    private sealed class ResetScp03Card(bool rejectRehandshake) : ISmartCardConnection
+    {
+        private readonly byte[] _enc = Convert.FromHexString("112233445566778899AABBCCDDEEFF00");
+        private readonly byte[] _mac = Convert.FromHexString("0FFEEDDCCBBAA9988776655443322110");
+        private byte[] _chain = new byte[16];
+        private byte[] _senc = [], _smac = [], _srmac = [], _hostCryptogram = [];
+        private int _counter;
+
+        public int Exchanges { get; private set; }
+        public Transport Transport => Transport.Usb;
+        public ConnectionType Type => ConnectionType.SmartCard;
+        public bool SupportsExtendedApdu() => false;
+        public Scp03KeyParameters CreateKeyParameters() => new(new KeyReference(0, 0x21), new StaticKeys(_enc, _mac, _enc));
+
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var wire = command.Span;
+            var step = Exchanges++;
+            byte[] response = (step, wire[1]) switch
+            {
+                (0 or 9, 0xA4) when wire[0] == 0 => OkResponse(),
+                (1, 0x50) => Initialize(wire, 0x10),
+                (10, 0x50) => rejectRehandshake ? [0x69, 0x85] : Initialize(wire, 0x20),
+                (2 or 11, 0x82) => Authenticate(wire),
+                (3 or 12, 0xCA) when wire[3] == 0x6E => Protect(wire, ApplicationRelatedDataResponse()[..^2]),
+                (4, 0xCA) when wire[3] == 0xC4 => Protect(wire, [0, 127, 127, 127, 1, 0, 1]),
+                (5 or 6, 0x20) => Protect(wire, [], 0x69, 0x83),
+                (7, 0xE6) => Protect(wire, []),
+                (8, 0x44) => Protect(wire, []),
+                (13, 0xCA) when wire[3] == 0xC4 => Protect(wire, [0, 127, 127, 127, 3, 0, 3]),
+                _ => throw new InvalidOperationException($"Unexpected reset step {step}, INS {wire[1]:X2}."),
+            };
+            return Task.FromResult<ReadOnlyMemory<byte>>(response);
+        }
+
+        private byte[] Initialize(ReadOnlySpan<byte> wire, byte challengeStart)
+        {
+            Assert.Equal(0x21, wire[2]);
+            Assert.Equal(8, wire[4]);
+            byte[] challenge = [challengeStart, 1, 2, 3, 4, 5, 6, 7];
+            byte[] context = [.. wire.Slice(5, 8), .. challenge];
+            _senc = Derive(_enc, 4, 16, context);
+            _smac = Derive(_mac, 6, 16, context);
+            _srmac = Derive(_mac, 7, 16, context);
+            _hostCryptogram = Derive(_smac, 1, 8, context);
+            var cardCryptogram = Derive(_smac, 0, 8, context);
+            _counter = 1;
+            Array.Clear(_chain);
+            return [.. new byte[10], 0x21, 0x02, 0x00, .. challenge, .. cardCryptogram, 0x90, 0x00];
+        }
+
+        private byte[] Authenticate(ReadOnlySpan<byte> wire)
+        {
+            Assert.Equal(0x84, wire[0]);
+            Assert.Equal(0x33, wire[2]);
+            Assert.True(CryptographicOperations.FixedTimeEquals(_hostCryptogram, wire.Slice(5, 8)));
+            VerifyCommandMac(wire);
+            return OkResponse();
+        }
+
+        private byte[] Protect(ReadOnlySpan<byte> wire, ReadOnlySpan<byte> plaintext, byte sw1 = 0x90, byte sw2 = 0x00)
+        {
+            Assert.Equal(0x04, wire[0]);
+            VerifyCommandMac(wire);
+            int counter = _counter++;
+            byte[] encrypted = [];
+            if (!plaintext.IsEmpty)
+            {
+                using var aes = Aes.Create();
+                aes.Key = _senc;
+                Span<byte> ivInput = stackalloc byte[16];
+                ivInput.Clear();
+                ivInput[0] = 0x80;
+                BinaryPrimitives.WriteInt32BigEndian(ivInput[12..], counter);
+                var iv = aes.EncryptEcb(ivInput, PaddingMode.None);
+                byte[] padded = new byte[(plaintext.Length / 16 + 1) * 16];
+                plaintext.CopyTo(padded);
+                padded[plaintext.Length] = 0x80;
+                encrypted = aes.EncryptCbc(padded, iv, PaddingMode.None);
+            }
+            var rmac = Mac(_srmac, [.. _chain, .. encrypted, sw1, sw2]);
+            return [.. encrypted, .. rmac.AsSpan(0, 8), sw1, sw2];
+        }
+
+        private void VerifyCommandMac(ReadOnlySpan<byte> wire)
+        {
+            int macOffset = 5 + wire[4] - 8;
+            _chain = Mac(_smac, [.. _chain, .. wire[..macOffset]]);
+            Assert.True(CryptographicOperations.FixedTimeEquals(_chain.AsSpan(0, 8), wire.Slice(macOffset, 8)));
+        }
+
+        private static byte[] Derive(byte[] key, byte type, int length, ReadOnlySpan<byte> context)
+        {
+            Span<byte> input = stackalloc byte[32];
+            input.Clear();
+            input[11] = type;
+            input[14] = (byte)(length * 8);
+            input[15] = 1;
+            context.CopyTo(input[16..]);
+            return Mac(key, input)[..length];
+        }
+
+        private static byte[] Mac(byte[] key, ReadOnlySpan<byte> input)
+        {
+            // Same RFC 4493 construction as the Security Domain handshake fake; no SDK SCP helpers.
+            using var aes = Aes.Create();
+            aes.Key = key;
+            var subkey = aes.EncryptEcb(new byte[16], PaddingMode.None);
+            DoubleCmacSubkey(subkey);
+            var lastLength = (input.Length - 1) % 16 + 1;
+            byte[] blocks = new byte[input.Length - lastLength + 16];
+            input.CopyTo(blocks);
+            if (lastLength != 16)
+            {
+                blocks[input.Length] = 0x80;
+                DoubleCmacSubkey(subkey);
+            }
+            for (int i = 0; i < 16; i++)
+                blocks[blocks.Length - 16 + i] ^= subkey[i];
+
+            return aes.EncryptCbc(blocks, new byte[16], PaddingMode.None)[^16..];
+        }
+
+        private static void DoubleCmacSubkey(Span<byte> block)
+        {
+            var highBit = (block[0] & 0x80) != 0;
+            for (int i = 0; i < 15; i++)
+                block[i] = (byte)((block[i] << 1) | (block[i + 1] >> 7));
+            block[15] = (byte)((block[15] << 1) ^ (highBit ? 0x87 : 0));
+        }
+
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => throw new NotSupportedException();
+        public void Dispose() { }
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData("ééé", 6, true)]
+    [InlineData("éééé", 7, false)]
+    [InlineData("12345", 127, false)]
+    public async Task VerifyPin_UsesEncodedByteLimits(string text, byte maximum, bool accepted)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection([
+            OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(userLimit: maximum),
+            [0x81, 0x01, 0x00, 0x90, 0x00], OkResponse()]);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+
+        if (accepted)
+        {
+            await session.VerifyPinAsync(bytes, cancellationToken: token);
+            Assert.Equal(0x20, LastCommand(connection)[1]);
+            Assert.Equal(bytes, CommandData(LastCommand(connection)).ToArray());
+        }
+        else
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() => session.VerifyPinAsync(bytes, cancellationToken: token));
+            Assert.Equal(4, connection.TransmittedCommands.Count);
+            Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0x20);
+        }
+        Assert.Equal(System.Text.Encoding.UTF8.GetBytes(text), bytes);
+    }
+
+    [Fact]
+    public async Task VerifyPin_PinBlockFormat_DoesNotSendUtf8ToCard()
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection([
+            OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(userLimit: 0x88),
+            [0x81, 0x01, 0x00, 0x90, 0x00]]);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.VerifyPinAsync("123456"u8.ToArray(), cancellationToken: token));
+        Assert.All(connection.TransmittedCommands, command => Assert.NotEqual(0x20, command[1]));
+    }
+
+    [Fact]
+    public async Task SignaturePolicy_UnknownResponseIsPreservedButNotAcceptedAsRequest()
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnection([0xA7, 0x86, 0x0C, 0x88, 3, 0, 3, 0x90, 0x00]);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var status = await session.GetPinStatusAsync(token);
+
+        Assert.Equal(0xA7, (int)status.SignaturePinPolicy);
+        Assert.Equal(6, status.MaxLenUser);
+        Assert.Equal(12, status.MaxLenReset);
+        Assert.Equal(8, status.MaxLenAdmin);
+        Assert.True(status.UserUsesPinBlock2);
+        Assert.True(status.AdminUsesPinBlock2);
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.SetSignaturePinPolicyAsync(
+            status.SignaturePinPolicy, token));
+        Assert.Equal(4, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task UnknownRequiredCurve_AllowsSessionReadbackButCannotBeResentAsAttributes()
+    {
+        var token = TestContext.Current.CancellationToken;
+        byte[] unknown = [0x12, 0x2B, 0x06, 0x04, 0x01, 0x7F];
+        var appData = ApplicationRelatedDataResponse(decipherAttributes: AlgorithmAttributes.Parse(unknown));
+        using var connection = new RecordingSmartCardConnection([OkResponse(), VersionResponse(), appData, appData]);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var parsed = await session.GetApplicationRelatedDataAsync(token);
+
+        Assert.Equal(appData[..^2], parsed.Raw.ToArray());
+        Assert.Equal(unknown, parsed.Discretionary.AlgorithmAttributesDec.ToBytes());
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.SetAlgorithmAttributesAsync(
+            KeyRef.Dec, parsed.Discretionary.AlgorithmAttributesDec, token));
+        Assert.Equal(4, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
+    [InlineData(0u, "00000000")]
+    [InlineData(0x7FFF_FFFFu, "7FFFFFFF")]
+    [InlineData(0x8000_0000u, "80000000")]
+    [InlineData(0xFFFF_FFFFu, "FFFFFFFF")]
+    public async Task GenerationTime_WriteAndReadback_UsesUnsignedBigEndianSeconds(uint seconds, string hex)
+    {
+        var token = TestContext.Current.CancellationToken;
+        byte[] value = Convert.FromHexString(hex);
+        byte[] appData = ApplicationRelatedDataResponse();
+        // DO CD is the last TLV in this fixture; SIG is first of three four-byte values.
+        value.CopyTo(appData.AsSpan(appData.Length - 14, 4));
+        using var connection = CreateInitializedConnection(OkResponse(), appData);
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.SetGenerationTimeAsync(KeyRef.Sig, seconds, token);
+        var command = LastCommand(connection);
+        Assert.Equal(new byte[] { 0x00, 0xDA, 0x00, 0xCE }, command[..4]);
+        Assert.Equal(value, CommandData(command).ToArray());
+        Assert.Equal(seconds, (await session.GetGenerationTimesAsync(token))[KeyRef.Sig]);
+    }
+
     [Fact]
     public async Task CreateAsync_AppletProbeFailure_DoesNotDisposeTheBorrowedConnection()
     {
@@ -35,9 +465,7 @@ public sealed class OpenPgpSessionWireTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             OpenPgpSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
-        // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // The factory borrows this connection; session teardown leaves its disposal with the caller.
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -250,13 +678,14 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal([(byte)PinPolicy.Once], CommandData(command).ToArray());
     }
 
-    [Fact]
-    public async Task GenerateKeyAsync_SetsAlgorithmAttributesBeforeGeneratingKeyPair()
+    [Theory]
+    [InlineData(0x01, 0x09)] // 4.1.9, just below the conservative policy
+    [InlineData(0x03, 0x05)] // corrected 4.3.5
+    public async Task GenerateKeyAsync_OutsideRocaPolicy_WritesAttributesBeforeGeneration(byte minor, byte patch)
     {
-        var connection = CreateInitializedConnection(
-            OkResponse(),
-            [0x90, 0x00],
-            ApplicationRelatedDataResponse());
+        var connection = new RecordingSmartCardConnection(
+            [OkResponse(), [0x04, minor, patch, 0x90, 0x00], ApplicationRelatedDataResponse(),
+                OkResponse(), OkResponse(), ApplicationRelatedDataResponse()]);
         await using var session = await OpenPgpSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
@@ -274,6 +703,75 @@ public sealed class OpenPgpSessionWireTests
         Assert.Equal(0x80, operationCommands[1][2]);
         Assert.Equal(0xCA, operationCommands[2][1]);
         Assert.Equal(0x6E, operationCommands[2][3]);
+    }
+
+    [Theory]
+    [InlineData(0x02, 0x00)]
+    [InlineData(0x02, 0x06)]
+    [InlineData(0x03, 0x04)]
+    public async Task GenerateKeyAsync_InsideRocaPolicy_SendsNoOperationApdu(byte minor, byte patch)
+    {
+        var connection = new RecordingSmartCardConnection(
+            [OkResponse(), [0x04, minor, patch, 0x90, 0x00], ApplicationRelatedDataResponse()]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        int before = connection.TransmittedCommands.Count;
+
+        var error = await Assert.ThrowsAsync<NotSupportedException>(() =>
+            session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa2048), token));
+
+        Assert.Contains("ROCA", error.Message, StringComparison.Ordinal);
+        Assert.Equal(before, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(VersionQualifierType.Beta)]
+    public async Task NeoFixedAttributes_GeneratesWithoutAttributeWriteAndRefusesDeletion(VersionQualifierType? qualifier)
+    {
+        byte[] appData = ApplicationRelatedDataResponse(attributesChangeable: false);
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x03, 0x04, 0x00, 0x90, 0x00], appData,
+            OkResponse(), appData);
+        var token = TestContext.Current.CancellationToken;
+        var physical = new FirmwareVersion(3, 4, 0);
+        DeviceInfo? cached = qualifier is { } type ? default(DeviceInfo) with
+        {
+            FirmwareVersion = physical,
+            VersionQualifier = new VersionQualifier(physical, type, 0),
+        } : null;
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection, null, () => cached, token);
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.DeleteKeyAsync(KeyRef.Sig, token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa4096), token));
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+
+        await session.GenerateKeyAsync(KeyRef.Sig, RsaAttributes.Create(RsaSize.Rsa2048), token);
+
+        Assert.Equal([0x47, 0xCA], connection.TransmittedCommands.Skip(3).Select(c => c[1]).ToArray());
+    }
+
+    [Fact]
+    public async Task AttestationKey_ReadAndGenerate_SendNestedCrt()
+    {
+        var connection = CreateInitializedConnection(
+            OkResponse(), OkResponse(), OkResponse(), ApplicationRelatedDataResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.GetPublicKeyAsync(KeyRef.Att, token);
+        await session.GenerateKeyAsync(KeyRef.Att, RsaAttributes.Create(RsaSize.Rsa2048), token);
+
+        byte[][] commands = connection.TransmittedCommands.Where(command => command[1] == 0x47).ToArray();
+        Assert.Collection(commands,
+            command =>
+            {
+                Assert.Equal(0x81, command[2]);
+                Assert.Equal([0xB6, 0x03, 0x84, 0x01, 0x81], CommandData(command).ToArray());
+            },
+            command =>
+            {
+                Assert.Equal(0x80, command[2]);
+                Assert.Equal([0xB6, 0x03, 0x84, 0x01, 0x81], CommandData(command).ToArray());
+            });
     }
 
     [Theory]
@@ -371,8 +869,10 @@ public sealed class OpenPgpSessionWireTests
         Assert.All(prompt.Resolved, entry => Assert.Equal(UserPresenceOutcome.Completed, entry.Outcome));
     }
 
-    [Fact]
-    public async Task SignAsync_WhenUifReadFails_NotifiesMayRequireAndStillSigns()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SignAsync_WhenUifReadFails_NotifiesMayRequireAndStillSigns(bool loggerThrows)
     {
         var connection = CreateInitializedConnection([0x6A, 0x88], CryptoResponse());
         var prompt = new RecordingUserPresencePrompt(connection);
@@ -380,6 +880,14 @@ public sealed class OpenPgpSessionWireTests
             connection,
             new SessionCreationOptions { UserPresencePrompt = prompt },
             TestContext.Current.CancellationToken);
+
+        if (loggerThrows)
+        {
+            // Replace this session's diagnostic logger only; don't change the process-global factory.
+            var loggerField = typeof(OpenPgpSession).GetField("_logger", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?? throw new InvalidOperationException("Missing session logger.");
+            loggerField.SetValue(session, new ThrowingUifLogger());
+        }
 
         var signature = await session.SignAsync(
             "message"u8.ToArray(),
@@ -676,6 +1184,71 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
+    public async Task DecryptAsync_X25519_WrapsRfc7748PeerPointInCipherDo()
+    {
+        // RFC 7748 §6.1 Bob public key and shared secret. The fake supplies the response;
+        // the assertion qualifies SDK framing and response transfer, not device agreement.
+        byte[] point = Convert.FromHexString("DE9EDB7D7B7DC1B4D35B61C2ECE435373F8343C85B78674DADFC7E146F882B4F");
+        byte[] secret = Convert.FromHexString("4A5D9D5BA4CE2DE1728E3BF480350F25E07E21C947D19E3376F09B3C1E161742");
+        var connection = new RecordingSmartCardConnection(
+            [OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(dec: Uif.Off,
+                decipherAttributes: EcAttributes.Create(KeyRef.Dec, KeyType.X25519)), [.. secret, 0x90, 0x00]]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var result = await session.DecryptAsync(point, token);
+
+        byte[] command = Assert.Single(connection.TransmittedCommands.Skip(3));
+        Assert.Equal([0x00, 0x2A, 0x80, 0x86], command[..4]);
+        Assert.Equal([0xA6, 0x25, 0x7F, 0x49, 0x22, 0x86, 0x20, .. point], CommandData(command).ToArray());
+        Assert.Equal(secret, result.ToArray());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ResolveAndCopyDecipherResponseAsync_ClearsOwnedBytesAndNeverClearsInput(bool resolutionFails)
+    {
+        byte[] source = [0x34, 0x56, 0x90, 0x00];
+        var response = new ApduResponse(source);
+        var raw = response.RawData;
+        var command = new ApduCommand(0, 0x2A, 0x80, 0x86);
+        var expected = new InvalidOperationException("resolution failed");
+        if (resolutionFails)
+        {
+            var actual = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                OpenPgpSession.ResolveAndCopyDecipherResponseAsync(response, command,
+                    () => ValueTask.FromException(expected)));
+            Assert.Same(expected, actual);
+        }
+        else
+        {
+            Memory<byte> plaintext = await OpenPgpSession.ResolveAndCopyDecipherResponseAsync(response, command,
+                () => ValueTask.CompletedTask);
+            Assert.Equal(new byte[] { 0x34, 0x56 }, plaintext.ToArray());
+            CryptographicOperations.ZeroMemory(plaintext.Span);
+        }
+
+        Assert.All(raw.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal([0x34, 0x56, 0x90, 0x00], source);
+    }
+
+    [Fact]
+    public async Task ResolveAndCopyDecipherResponseAsync_WhenCardRejects_ClearsOwnedBytesAndPreservesStatus()
+    {
+        var response = new ApduResponse(new byte[] { 0x34, 0x56, 0x69, 0x82 });
+        var retainedBytes = response.RawData;
+        var command = new ApduCommand(0, 0x2A, 0x80, 0x86);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() =>
+            OpenPgpSession.ResolveAndCopyDecipherResponseAsync(response, command,
+                () => throw new InvalidOperationException("A rejected command cannot resolve as Completed.")));
+
+        Assert.Equal((short)0x6982, error.SW);
+        Assert.All(retainedBytes.ToArray(), value => Assert.Equal(0, value));
+    }
+
+    [Fact]
     public async Task DecryptAsync_WhenResolutionFailsAfterSuccess_PropagatesResolutionException()
     {
         var expected = new InvalidOperationException("resolution failed");
@@ -696,6 +1269,54 @@ public sealed class OpenPgpSessionWireTests
 
         Assert.Same(expected, actual);
         Assert.Equal(UserPresenceOutcome.Completed, Assert.Single(prompt.Resolved).Outcome);
+    }
+
+    [Fact]
+    public async Task DecryptAsync_WhenCardResolutionAndLoggingFail_PreservesExactApduErrorAndClearsBuffers()
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = CreateInitializedConnectionWithUifs(sig: null, dec: Uif.On, aut: null, att: null);
+        var callbackFailure = new InvalidOperationException("Resolution callback failed.");
+        var loggerFailure = new InvalidOperationException("Resolution logger failed.");
+        var prompt = new RecordingUserPresencePrompt(connection, resolutionException: callbackFailure);
+        await using var session = await OpenPgpSession.CreateAsync(connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt }, token);
+        var backend = new DecipherRejectionBackend();
+        var field = typeof(OpenPgpSession).GetField("_backend", BindingFlags.Instance | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("Missing session backend.");
+        field.SetValue(session, backend);
+
+        // Observe the instance at the throw site before notification cleanup can replace it.
+        ApduException? original = null;
+        void Capture(object? sender, FirstChanceExceptionEventArgs args)
+        {
+            if (args.Exception is ApduException { SW: 0x6982, Ins: 0x2A, P1: 0x80, P2: 0x86 } decipher)
+                Interlocked.CompareExchange(ref original, decipher, null);
+        }
+
+        using var factory = new FailingResolutionLoggerFactory(loggerFailure);
+        using var logging = YubiKitLogging.UseTemporary(factory);
+        byte[] ciphertext = [0x12, 0x34];
+        AppDomain.CurrentDomain.FirstChanceException += Capture;
+        ApduException actual;
+        try
+        {
+            actual = await Assert.ThrowsAsync<ApduException>(() => session.DecryptAsync(ciphertext, token));
+        }
+        finally
+        {
+            AppDomain.CurrentDomain.FirstChanceException -= Capture;
+        }
+
+        Assert.NotNull(original);
+        Assert.Same(original, actual); // The captured exception matched the SW and DECIPHER header above.
+        Assert.Equal<byte?>(0x00, actual.Cla);
+        Assert.Same(callbackFailure, actual.Data["UserPresenceResolutionException"]);
+        Assert.Same(loggerFailure, actual.Data["UserPresenceLoggingException"]);
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.All(backend.Response.RawData.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal(new byte[3], backend.CommandData.ToArray());
+        Assert.Equal(new byte[] { 0x12, 0x34 }, ciphertext);
     }
 
     [Fact]
@@ -728,8 +1349,7 @@ public sealed class OpenPgpSessionWireTests
     public async Task VerifyPinAsync_TransmitsVerifyWithUserPinPayload()
     {
         var connection = CreateInitializedConnection(
-            // KDF DO absent: session falls back to raw PIN bytes through KdfNone.
-            [0x6A, 0x82],
+            [0x81, 0x01, 0x00, 0x90, 0x00], // F9 explicitly disables KDF.
             OkResponse());
         await using var session = await OpenPgpSession.CreateAsync(
             connection,
@@ -748,7 +1368,41 @@ public sealed class OpenPgpSessionWireTests
     }
 
     [Fact]
-    public async Task DisposeAsync_ZeroesCachedKdfSalt()
+    public async Task VerifyPinAsync_ExtendedWithDistinctKdfSalts_SendsUserHashToReference82()
+    {
+        using var kdf = new KdfIterSaltedS2k
+        {
+            HashAlgorithm = KdfHashAlgorithm.Sha256,
+            IterationCount = 32,
+            SaltUser = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 },
+            SaltReset = new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 },
+        };
+        var connection = CreateInitializedConnection([.. kdf.ToBytes(), 0x90, 0x00], OkResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.VerifyPinAsync("123456"u8.ToArray(), extended: true, cancellationToken: token);
+
+        byte[] command = LastCommand(connection);
+        Assert.Equal([0x00, 0x20, 0x00, 0x82], command[..4]);
+        Assert.Equal(kdf.Process(Pw.User, "123456"u8), CommandData(command).ToArray());
+    }
+
+    [Fact]
+    public async Task VerifyPinAsync_WhenF9ReadIsRejected_DoesNotSendVerify()
+    {
+        var connection = CreateInitializedConnection([0x69, 0x82]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.VerifyPinAsync("123456"u8.ToArray(), cancellationToken: token));
+
+        Assert.Equal((short)0x6982, error.SW);
+        Assert.Equal([0, (byte)Ins.GetData, 0, (byte)DataObject.Kdf], Assert.Single(connection.TransmittedCommands.Skip(3))[..4]);
+    }
+
+    [Fact]
+    public async Task GetKdfAsync_ReadsAgainAndDoesNotOwnReturnedObject()
     {
         using var configuredKdf = new KdfIterSaltedS2k
         {
@@ -758,53 +1412,36 @@ public sealed class OpenPgpSessionWireTests
         };
         var connection = CreateInitializedConnection(
             [.. configuredKdf.ToBytes(), 0x90, 0x00],
-            OkResponse());
+            [0x81, 0x01, 0x00, 0x90, 0x00]);
         var session = await OpenPgpSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        await session.VerifyPinAsync(
-            "123456"u8.ToArray(),
-            cancellationToken: TestContext.Current.CancellationToken);
-
-        var cachedKdf = Assert.IsType<KdfIterSaltedS2k>(
-            typeof(OpenPgpSession)
-                .GetField("_kdf", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .GetValue(session));
-        ReadOnlyMemory<byte> salt = cachedKdf.SaltUser;
+        using var first = Assert.IsType<KdfIterSaltedS2k>(await session.GetKdfAsync(TestContext.Current.CancellationToken));
+        using var second = Assert.IsType<KdfNone>(await session.GetKdfAsync(TestContext.Current.CancellationToken));
+        ReadOnlyMemory<byte> salt = first.SaltUser;
         Assert.Contains(salt.ToArray(), value => value != 0);
 
         await session.DisposeAsync();
 
-        Assert.All(salt.ToArray(), value => Assert.Equal(0, value));
+        Assert.Equal(configuredKdf.SaltUser.ToArray(), salt.ToArray());
     }
 
     [Fact]
-    public async Task Dispose_ThrowingKdfStillRunsBaseTeardownAndDetachesConnection()
+    public async Task SetKdfAsync_WhenWriteFails_ClearsPayloadAndDoesNotDisposeInput()
     {
-        var expected = new InvalidOperationException("kdf dispose failed");
-        var connection = new RecordingSmartCardConnection(
-            OkResponse(),
-            VersionResponse(),
-            ApplicationRelatedDataResponse(),
-            OkResponse(),
-            OkResponse(),
-            VersionResponse(),
-            ApplicationRelatedDataResponse());
-        var session = await OpenPgpSession.CreateAsync(
+        byte[] encoded = [0x81, 0x01, 0x00];
+        var connection = CreateInitializedConnection([0x69, 0x85]);
+        await using var session = await OpenPgpSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
-        await session.SetKdfAsync(
-            new ThrowingKdf(expected),
-            TestContext.Current.CancellationToken);
-
-        Exception? exception = Record.Exception(session.Dispose);
-
-        Assert.Same(expected, exception);
-        await using var subsequent = await OpenPgpSession.CreateAsync(
-            connection,
-            cancellationToken: TestContext.Current.CancellationToken);
-        Assert.NotNull(subsequent);
+        var kdf = new TrackingKdf(encoded);
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.SetKdfAsync(kdf, TestContext.Current.CancellationToken));
+        Assert.Equal((short)0x6985, error.SW);
+        Assert.Equal([0x81, 0x01, 0x00], CommandData(LastCommand(connection)).ToArray());
+        Assert.All(encoded, value => Assert.Equal(0, value));
+        await session.DisposeAsync();
+        Assert.False(kdf.Disposed);
     }
 
     [Fact]
@@ -829,6 +1466,194 @@ public sealed class OpenPgpSessionWireTests
 
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), VersionResponse(), ApplicationRelatedDataResponse(), .. trailingResponses]);
+
+    [Fact]
+    public async Task LegacyFirmware_UsesBuiltInAlgorithmsAndRejectsUnsupportedUifBeforeWrite()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x04, 0x04, 0x00, 0x90, 0x00], ApplicationRelatedDataResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+        var algorithms = await session.GetSupportedAlgorithmsAsync(token);
+        Assert.Equal([KeyRef.Sig, KeyRef.Dec, KeyRef.Aut], algorithms.Select(algorithm => algorithm.KeyRef).ToArray());
+        Assert.All(algorithms, algorithm => Assert.Equal(2048, Assert.IsType<RsaAttributes>(algorithm.Attributes).NLen));
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.SetUifAsync(KeyRef.Sig, Uif.Cached, token));
+        await Assert.ThrowsAsync<NotSupportedException>(() => session.SetUifAsync(KeyRef.Att, Uif.On, token));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => session.GetChallengeAsync(256, token));
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task Initialize_WithExplicitOverride_DoesNotConsultCacheOrSendGetVersion()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), ApplicationRelatedDataResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection,
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(4, 3, 5) },
+            () => throw new InvalidOperationException("The override bypasses cached metadata."), token);
+
+        Assert.False(session.IsSupported(OpenPgpSession.FeatureEc));
+        Assert.Equal([0xA4, 0xCA], connection.TransmittedCommands.Select(command => command[1]).ToArray());
+    }
+
+    [Fact]
+    public async Task Initialize_WithUnsuccessfulVersionRead_UsesOptimisticFeaturesButStillReadsAppData()
+    {
+        var connection = new RecordingSmartCardConnection(OkResponse(), [0x69, 0x85], ApplicationRelatedDataResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        Assert.True(session.IsSupported(OpenPgpSession.FeatureUnverify));
+        Assert.Equal([0xA4, 0xF1, 0xCA], connection.TransmittedCommands.Select(command => command[1]).ToArray());
+    }
+
+    [Theory]
+    [InlineData(VersionQualifierType.Final, false, false)]
+    [InlineData(null, false, false)]
+    [InlineData(VersionQualifierType.Beta, false, true)]
+    [InlineData((VersionQualifierType)3, false, true)]
+    [InlineData(VersionQualifierType.Beta, true, false)]
+    public async Task Initialize_ScpEligibilityKeepsNumericForcedShortFraming(
+        VersionQualifierType? qualifier, bool useOverride, bool expectHandshake)
+    {
+        var token = TestContext.Current.CancellationToken;
+        var numeric = new FirmwareVersion(5, 2, 0);
+        var info = default(DeviceInfo) with { FirmwareVersion = numeric };
+        if (qualifier is { } type)
+            info = info with { VersionQualifier = new VersionQualifier(numeric, type, 0) };
+        using var recording = new RecordingSmartCardConnection(OkResponse(), [0x69, 0x82]);
+        using var connection = new ExtendedProbeConnection(recording);
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            FirmwareVersionOverride = useOverride ? numeric : null,
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true },
+            ScpKeyParameters = keys,
+        };
+
+        Task Create() => OpenPgpSession.CreateWithDeviceInfoAsync(connection, options,
+            () => useOverride ? throw new InvalidOperationException("Override must bypass cached metadata.") : info, token);
+        if (expectHandshake)
+        {
+            var error = await Assert.ThrowsAsync<ApduException>(Create);
+            Assert.Equal((short)0x6982, error.SW);
+            Assert.Equal([0xA4, 0x50], recording.TransmittedCommands.Select(command => command[1]).ToArray());
+            var initialize = recording.TransmittedCommands[^1];
+            Assert.Equal(8, initialize[4]); // Short Lc despite an extended-capable reader.
+            Assert.Equal(14, initialize.Length);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(Create);
+            Assert.Equal(0xA4, Assert.Single(recording.TransmittedCommands)[1]);
+        }
+    }
+
+    [Theory]
+    [InlineData("6985")]
+    [InlineData("0000009000")]
+    public async Task Initialize_UnknownAppletVersion_AttemptsScpAndPropagatesHandshakeRejection(string version)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var connection = new RecordingSmartCardConnection(OkResponse(), Convert.FromHexString(version), [0x69, 0x82]);
+        using var keys = Scp03KeyParameters.Default;
+        var error = await Assert.ThrowsAsync<ApduException>(() => OpenPgpSession.CreateAsync(connection,
+            new SessionCreationOptions { ScpKeyParameters = keys }, token));
+
+        Assert.Equal((short)0x6982, error.SW);
+        Assert.Equal([0xA4, 0xF1, 0x50], connection.TransmittedCommands.Select(command => command[1]).ToArray());
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Initialize_PreviewOverrideAdmitsScpWhileAppletVersionControlsFraming(bool usePreviewOverride)
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var recording = new RecordingSmartCardConnection(OkResponse(), [0x05, 0x02, 0, 0x90, 0], [0x69, 0x82]);
+        using var connection = new ExtendedProbeConnection(recording);
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            FirmwareVersionOverride = usePreviewOverride ? FirmwareVersion.Default : null,
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true },
+            ScpKeyParameters = keys,
+        };
+
+        Task Create() => OpenPgpSession.CreateAsync(connection, options, token);
+        if (usePreviewOverride)
+        {
+            var error = await Assert.ThrowsAsync<ApduException>(Create);
+            Assert.Equal((short)0x6982, error.SW);
+            Assert.Equal([0xA4, 0xF1, 0x50], recording.TransmittedCommands.Select(command => command[1]).ToArray());
+            Assert.Equal(8, recording.TransmittedCommands[^1][4]);
+            Assert.Equal(14, recording.TransmittedCommands[^1].Length);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(Create);
+            Assert.Equal([0xA4, 0xF1], recording.TransmittedCommands.Select(command => command[1]).ToArray());
+        }
+    }
+
+    private sealed class ExtendedProbeConnection(RecordingSmartCardConnection inner) : ISmartCardConnection
+    {
+        public Transport Transport => inner.Transport;
+        public ConnectionType Type => inner.Type;
+        public bool SupportsExtendedApdu() => true;
+        public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(ReadOnlyMemory<byte> command, CancellationToken cancellationToken = default) =>
+            inner.TransmitAndReceiveAsync(command, cancellationToken);
+        public IDisposable BeginTransaction(CancellationToken cancellationToken = default) => inner.BeginTransaction(cancellationToken);
+        public void Dispose() => inner.Dispose();
+        public ValueTask DisposeAsync() => inner.DisposeAsync();
+    }
+
+    [Theory]
+    [InlineData(0x20, 1)] // unrelated VERIFY error
+    [InlineData(0xE6, 3)] // TERMINATE refusal
+    [InlineData(0x44, 4)] // ACTIVATE refusal
+    public async Task ResetAsync_WhenCommandIsRejected_StopsAtThatCommand(byte instruction, int precedingSuccesses)
+    {
+        byte[][] responses = [PwStatusResponse(), [0x69, 0x83], [0x69, 0x83], OkResponse(), OkResponse()];
+        var connection = CreateInitializedConnection([.. responses.Take(precedingSuccesses), [0x6A, 0x80]]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.ResetAsync(token));
+
+        Assert.Equal((short)0x6A80, error.SW);
+        Assert.Equal(4 + precedingSuccesses, connection.TransmittedCommands.Count);
+        Assert.Equal(instruction, LastCommand(connection)[1]);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ResetAsync_ConfirmedReset_ReselectsAndRequiresSuccessfulRefresh(bool refreshFails)
+    {
+        var connection = CreateInitializedConnection(PwStatusResponse(), [0x69, 0x83], [0x69, 0x83],
+            OkResponse(), OkResponse(), OkResponse(), VersionResponse(),
+            refreshFails ? [0x6A, 0x80] : ApplicationRelatedDataResponse(), PwStatusResponse());
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        if (refreshFails)
+        {
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetAsync(token));
+            Assert.Equal((short)0x6A80, Assert.IsType<ApduException>(error.InnerException).SW);
+            Assert.False(session.IsInitialized);
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetPinStatusAsync(token));
+        }
+        else
+        {
+            await session.ResetAsync(token);
+            Assert.True(session.IsInitialized);
+            Assert.False(session.IsAuthenticated);
+            Assert.Equal(3, (await session.GetPinStatusAsync(token)).AttemptsUser);
+        }
+
+        Assert.Equal([0xCA, 0x20, 0x20, 0xE6, 0x44, 0xA4, 0xF1, 0xCA],
+            connection.TransmittedCommands.Skip(3).Take(8).Select(command => command[1]).ToArray());
+    }
 
     private static RecordingSmartCardConnection CreateCertificateReadConnection(KeyRef keyRef, byte[] response) =>
         keyRef is KeyRef.Att
@@ -917,16 +1742,62 @@ public sealed class OpenPgpSessionWireTests
         EcdsaDer
     }
 
-    private sealed class ThrowingKdf(Exception exception) : Kdf
+    private sealed class TrackingKdf(byte[] encoding) : Kdf
     {
+        public bool Disposed { get; private set; }
         public override int Algorithm => 0;
 
         public override byte[] Process(Pw pw, ReadOnlySpan<byte> pin) =>
             pin.ToArray();
 
-        public override byte[] ToBytes() => [];
+        public override byte[] ToBytes() => encoding;
 
-        public override void Dispose() => throw exception;
+        public override void Dispose() => Disposed = true;
+    }
+
+    private sealed class DecipherRejectionBackend : IOpenPgpBackend
+    {
+        public ApduResponse Response { get; } = new(new byte[] { 0x56, 0x78, 0x69, 0x82 });
+        public ReadOnlyMemory<byte> CommandData { get; private set; }
+        public Task SelectForInitializationAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<FirmwareVersion?> ReadVersionAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
+
+        public Task<ApduResponse> SendAsync(ApduCommand command, bool throwOnError = true,
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Assert.False(throwOnError);
+            Assert.True(CryptographicOperations.FixedTimeEquals([0x00, 0x12, 0x34], command.Data.Span));
+            CommandData = command.Data;
+            return Task.FromResult(Response);
+        }
+    }
+
+    private sealed class FailingResolutionLoggerFactory(Exception failure) : ILoggerFactory, ILogger
+    {
+        public ILogger CreateLogger(string categoryName) =>
+            categoryName.EndsWith(".UserPresenceNotification", StringComparison.Ordinal)
+                ? this : NullLogger.Instance;
+        public void AddProvider(ILoggerProvider provider) { }
+        public void Dispose() { }
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter) => throw failure;
+    }
+
+    private sealed class ThrowingUifLogger : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (exception is ApduException)
+                throw new InvalidOperationException("UIF diagnostics failed.");
+        }
     }
 
     private sealed class RecordingUserPresencePrompt(
@@ -983,17 +1854,21 @@ public sealed class OpenPgpSessionWireTests
         Uif? sig = null,
         Uif? dec = null,
         Uif? aut = null,
-        Uif? att = null) =>
-        [.. BuildApplicationRelatedData(sig, dec, aut, att), 0x90, 0x00];
+        Uif? att = null,
+        AlgorithmAttributes? decipherAttributes = null,
+        bool attributesChangeable = true,
+        byte userLimit = 0x7F) =>
+        [.. BuildApplicationRelatedData(sig, dec, aut, att, decipherAttributes, attributesChangeable, userLimit), 0x90, 0x00];
 
-    private static byte[] BuildApplicationRelatedData(Uif? sig, Uif? dec, Uif? aut, Uif? att)
+    private static byte[] BuildApplicationRelatedData(Uif? sig, Uif? dec, Uif? aut, Uif? att,
+        AlgorithmAttributes? decipherAttributes, bool attributesChangeable, byte userLimit)
     {
         // AID: D276000124010304000612345678 (OpenPGP v3.4, Yubico, serial 12345678).
         byte[] aid = [0xD2, 0x76, 0x00, 0x01, 0x24, 0x01, 0x03, 0x04, 0x00, 0x06, 0x12, 0x34, 0x56, 0x78];
         byte[] historicalBytes = [0x00, 0x73, 0x00, 0x01, 0x80, 0x05, 0x90, 0x00];
         byte[] rsa2048Attributes = [0x01, 0x08, 0x00, 0x00, 0x11, 0x00];
-        byte[] extendedCapabilities = [0x75, 0x00, 0x00, 0xFF, 0x04, 0x80, 0x00, 0xFF, 0x00, 0x00];
-        byte[] pwStatus = [0x00, 0x7F, 0x7F, 0x7F, 0x03, 0x00, 0x03];
+        byte[] extendedCapabilities = [attributesChangeable ? (byte)0x75 : (byte)0x71, 0x00, 0x00, 0xFF, 0x04, 0x80, 0x00, 0xFF, 0x00, 0x00];
+        byte[] pwStatus = [0x00, userLimit, 0x7F, 0x7F, 0x03, 0x00, 0x03];
         var fingerprints = new byte[60];
         var caFingerprints = new byte[60];
         var generationTimes = new byte[12];
@@ -1002,7 +1877,7 @@ public sealed class OpenPgpSessionWireTests
         {
             new(0xC0, extendedCapabilities),
             new(0xC1, rsa2048Attributes),
-            new(0xC2, rsa2048Attributes),
+            new(0xC2, decipherAttributes?.ToBytes() ?? rsa2048Attributes),
             new(0xC3, rsa2048Attributes),
             new(0xC4, pwStatus),
             new(0xC5, fingerprints),

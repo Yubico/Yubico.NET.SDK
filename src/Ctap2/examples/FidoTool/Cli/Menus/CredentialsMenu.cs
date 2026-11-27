@@ -22,9 +22,14 @@ using Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 
 /// <summary>
-/// Interactive menu for credential management: list and delete discoverable credentials.
-/// Mirrors ykman's "fido credentials" command group.
+/// Interactive credential-management subset: list, delete, metadata and user-name updates.
 /// </summary>
+/// <remarks>
+/// The support probe can mask errors/cancellation as unsupported. Prompts are synchronous. Returned
+/// hashes route RP enumeration even when display text is truncated, and owned credential results are
+/// disposed after display. "Remaining slots" is an estimate, not a reservation. Update must preserve
+/// the existing user ID; it changes names, not RP account binding. Delete has no undo/blob cleanup.
+/// </remarks>
 public static class CredentialsMenu
 {
     /// <summary>
@@ -147,7 +152,7 @@ public static class CredentialsMenu
 
             OutputHelpers.WriteHex("    RP ID Hash", rp.RpIdHash);
 
-            // Enumerate credentials for this RP
+            // Use the returned hash unchanged; display RP text may be truncated.
             using var credResult = await CredentialManagementExample.EnumerateCredentialsAsync(
                 device, pinOwner.Memory, rp.RpIdHash, cancellationToken);
 

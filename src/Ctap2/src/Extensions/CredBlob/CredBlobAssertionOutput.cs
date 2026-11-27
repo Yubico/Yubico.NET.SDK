@@ -29,7 +29,10 @@ public sealed class CredBlobAssertionOutput
     /// </summary>
     /// <remarks>
     /// The blob data that was stored during makeCredential.
-    /// Empty if no blob was stored.
+    /// Empty if no blob was stored; an empty byte string is distinct from an absent extension.
+    /// Direct init borrows supplied storage; Decode creates an independent byte-array copy.
+    /// Keep borrowed storage stable during use. This DTO has no disposal/zeroing boundary;
+    /// disposing the session or clearing the source response does not clear that copy.
     /// </remarks>
     public ReadOnlyMemory<byte> Blob { get; init; }
 

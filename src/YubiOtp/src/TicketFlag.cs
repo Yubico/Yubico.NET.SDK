@@ -17,6 +17,10 @@ namespace Yubico.YubiKit.YubiOtp;
 /// <summary>
 /// Ticket flags (TKTFLAG) controlling OTP ticket generation behavior.
 /// </summary>
+/// <remarks>
+/// Keyboard flags and their legacy delay behavior depend on mode/firmware. Use a mode-specific builder;
+/// combining raw flag names does not establish a supported device configuration.
+/// </remarks>
 [Flags]
 public enum TicketFlag : byte
 {

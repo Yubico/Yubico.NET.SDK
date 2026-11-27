@@ -22,6 +22,8 @@ namespace Yubico.YubiKit.Ctap2.Backend;
 /// <remarks>
 /// This allows Ctap2Session to be transport-agnostic while supporting both
 /// SmartCard (CCID) and FIDO HID (CTAPHID) communication.
+/// Backends borrow protocols; the session manages their lifecycle. CTAP status handling and
+/// notification resolution precede transfer of the response view, not model or RP verification.
 /// </remarks>
 internal interface ICtap2Backend
 {
@@ -31,9 +33,15 @@ internal interface ICtap2Backend
     /// <param name="request">The serialized CTAP request (command byte + CBOR payload).</param>
     /// <param name="userPresenceNotification">The non-null notification handle for this operation.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
+    /// <param name="onSuccess">Internal acknowledgement of a successful wire status, before notifying the caller's prompt.</param>
     /// <returns>The response data (status byte has already been validated).</returns>
     Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,
         UserPresenceNotification userPresenceNotification,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        Action? onSuccess = null);
+
+    /// <summary>Returns a retryable wire status only for this assertion exchange after notification resolution.</summary>
+    Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendAssertionForSelectionAsync(
+        ReadOnlyMemory<byte> request, UserPresenceNotification notification, CancellationToken cancellationToken);
 }

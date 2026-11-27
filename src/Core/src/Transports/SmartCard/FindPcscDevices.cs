@@ -6,11 +6,19 @@ using Yubico.YubiKit.Core.Native.Desktop.SCard;
 
 namespace Yubico.YubiKit.Core.Transports.SmartCard;
 
+/// <summary>Finds PC/SC interfaces recognized as YubiKeys in one enumeration.</summary>
 public interface IFindPcscDevices
 {
+    /// <summary>Returns a snapshot of recognized reader interfaces.</summary>
+    /// <remarks>
+    ///     Cancellation is checked before worker admission. Once admitted, the returned task awaits the actual
+    ///     enumeration; canceling a separate wait does not stop that worker. Integrated USB readers are
+    ///     recognized by name; generic/NFC readers require card-status and ATR probing.
+    /// </remarks>
     Task<IReadOnlyList<IPcscDevice>> FindAllAsync(CancellationToken cancellationToken = default);
 }
 
+/// <summary>Enumerates recognized USB and card-present generic/NFC PC/SC interfaces.</summary>
 public class FindPcscDevices : IFindPcscDevices
 {
     /// <summary>
@@ -42,6 +50,7 @@ public class FindPcscDevices : IFindPcscDevices
         _freeReaderName = freeReaderName ?? Marshal.FreeHGlobal;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<IPcscDevice>> FindAllAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -170,6 +179,7 @@ public class FindPcscDevices : IFindPcscDevices
             && ReaderNamePidParser.ExpectedConnectionsForPid(value).SupportsConnection(ConnectionType.SmartCard);
     }
 
+    /// <summary>Creates a one-shot PC/SC finder with the supplied logger or a no-op logger.</summary>
     public static FindPcscDevices Create(ILogger<FindPcscDevices>? logger = null) =>
         new(logger ?? NullLogger<FindPcscDevices>.Instance);
 }

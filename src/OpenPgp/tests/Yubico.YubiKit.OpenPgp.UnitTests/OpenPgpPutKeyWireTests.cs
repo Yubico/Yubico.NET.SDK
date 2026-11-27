@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Cryptography;
+using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Utilities;
 using Yubico.YubiKit.Tests.Shared;
 
@@ -43,6 +44,7 @@ public sealed class OpenPgpPutKeyWireTests
     [InlineData(KeyRef.Sig)]
     [InlineData(KeyRef.Dec)]
     [InlineData(KeyRef.Aut)]
+    [InlineData(KeyRef.Att)]
     public async Task Rsa2048_OnFirmware5_SetsStandardAttributesThenImportsEPQIntoTheRequestedSlot(KeyRef keyRef)
     {
         using var rsa = RSA.Create(2048);
@@ -64,6 +66,52 @@ public sealed class OpenPgpPutKeyWireTests
         Assert.Equal([0x01, 0x00, 0x01], values[..3]);
         Assert.Equal(PadLeft(rsa.ExportParameters(true).P!, 128), values[3..131]);
         Assert.Equal(PadLeft(rsa.ExportParameters(true).Q!, 128), values[131..]);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(VersionQualifierType.Alpha)]
+    public async Task RsaImport_Neo_UsesCrtWithModulusFormatAndModulusComponent(VersionQualifierType? qualifier)
+    {
+        using var rsa = RSA.Create(2048);
+        using var key = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
+        var connection = CreateConnection(afterAttributeWrite: true, importChunks: 4,
+            versionResponse: [0x03, 0x04, 0x00, 0x90, 0x00]);
+        var token = TestContext.Current.CancellationToken;
+        var physical = new FirmwareVersion(3, 4, 0);
+        DeviceInfo? cached = qualifier is { } type ? default(DeviceInfo) with
+        {
+            FirmwareVersion = physical,
+            VersionQualifier = new VersionQualifier(physical, type, 0),
+        } : null;
+        await using var session = await OpenPgpSession.CreateWithDeviceInfoAsync(connection, null, () => cached, token);
+        await session.PutKeyAsync(KeyRef.Sig, key, token);
+
+        byte[] attributes = Assert.Single(connection.TransmittedCommands, command => command[1] == InsPutData);
+        Assert.Equal(0x03, ApduData(attributes).Span[^1]);
+        var (crt, headers, values) = ParseImport(connection);
+        Assert.Equal(CrtSig, crt);
+        Assert.Equal([0x91, 0x03, 0x92, 0x81, 0x80, 0x93, 0x81, 0x80, 0x94, 0x81, 0x80,
+            0x95, 0x81, 0x80, 0x96, 0x81, 0x80, 0x97, 0x82, 0x01, 0x00], headers);
+        Assert.Equal(rsa.ExportParameters(false).Modulus, values[^256..]);
+    }
+
+    [Fact]
+    public async Task RsaImport_InsideRocaGenerationPolicy_SendsPrivateKeyTemplate()
+    {
+        using var rsa = RSA.Create(2048);
+        using var key = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(includePrivateParameters: true));
+        var connection = CreateConnection(afterAttributeWrite: true, importChunks: 2,
+            versionResponse: [0x04, 0x02, 0x06, 0x90, 0x00]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await OpenPgpSession.CreateAsync(connection, cancellationToken: token);
+
+        await session.PutKeyAsync(KeyRef.Sig, key, token);
+
+        var (crt, headers, _) = ParseImport(connection);
+        Assert.Equal(CrtSig, crt);
+        Assert.Equal([0x91, 0x03, 0x92, 0x81, 0x80, 0x93, 0x81, 0x80], headers);
+        Assert.DoesNotContain(connection.TransmittedCommands, command => command[1] == 0x47);
     }
 
     [Fact]
@@ -184,6 +232,7 @@ public sealed class OpenPgpPutKeyWireTests
     {
         KeyRef.Sig => CrtSig,
         KeyRef.Dec => CrtDec,
+        KeyRef.Att => [0xB6, 0x03, 0x84, 0x01, 0x81],
         _ => CrtAut,
     };
 
@@ -243,9 +292,9 @@ public sealed class OpenPgpPutKeyWireTests
         using var outer = Tlv.Create(data);
         Assert.Equal(0x4D, outer.Tag);
         var inner = outer.Value.Span;
-        byte[] crt = inner[..2].ToArray();
-        var dict = TlvHelper.DecodeDictionary(inner[2..]);
-        return (crt, dict[0x7F48].ToArray(), dict[0x5F48].ToArray());
+        using var crt = Tlv.Create(inner);
+        var dict = TlvHelper.DecodeDictionary(inner[crt.TotalLength..]);
+        return (crt.AsSpan().ToArray(), dict[0x7F48].ToArray(), dict[0x5F48].ToArray());
     }
 
     private static ReadOnlyMemory<byte> ApduData(byte[] apdu) =>
@@ -259,10 +308,11 @@ public sealed class OpenPgpPutKeyWireTests
     }
 
     /// <summary>SELECT, version, application data; then one OK per attribute write and per import chunk; then the refresh.</summary>
-    private static RecordingSmartCardConnection CreateConnection(bool afterAttributeWrite, int importChunks = 1, byte capabilityFlags = 0x75)
+    private static RecordingSmartCardConnection CreateConnection(bool afterAttributeWrite, int importChunks = 1,
+        byte capabilityFlags = 0x75, byte[]? versionResponse = null)
     {
         byte[] appData = ApplicationData(capabilityFlags);
-        List<byte[]> responses = [[0x90, 0x00], [0x05, 0x08, 0x00, 0x90, 0x00], appData];
+        List<byte[]> responses = [[0x90, 0x00], versionResponse ?? [0x05, 0x08, 0x00, 0x90, 0x00], appData];
         if (afterAttributeWrite) responses.Add([0x90, 0x00]);
         for (int i = 0; i < importChunks; i++) responses.Add([0x90, 0x00]);
         responses.Add(appData);

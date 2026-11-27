@@ -44,11 +44,12 @@ public class Fido2ExtensionAuditReproTests
     }
 
     /// <summary>
-    ///     The CTAP layer carries one credential's previewSign parameters (draft v4 §10.2.1 key-handle = 2, tbs = 6);
+    ///     The CTAP layer carries one credential's previewSign parameters (Yubico Labs v4 Editor's Draft §10.2.1: key-handle = 2, tbs = 6);
     ///     choosing among a signByCredential map is the WebAuthn client's job after credential selection.
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public void YESDK1634_PreviewSignBuilderEncodesTheGivenCredentialsParameters()
     {
         var extensions = new ExtensionBuilder()

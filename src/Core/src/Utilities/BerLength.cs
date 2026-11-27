@@ -15,8 +15,9 @@
 namespace Yubico.YubiKit.Core.Utilities;
 
 /// <summary>
-/// Utility for BER-TLV length encoding and decoding.
+/// Sizes and writes definite BER-TLV lengths from 0 through 65535.
 /// </summary>
+/// <remarks>Validate that the length is nonnegative before calling; these helpers do not reject negative inputs.</remarks>
 public static class BerLength
 {
     /// <summary>

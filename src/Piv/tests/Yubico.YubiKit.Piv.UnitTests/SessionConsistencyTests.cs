@@ -175,12 +175,14 @@ public class SessionConsistencyTests
         Assert.Equal(3, connection.TransmittedCommands.Count);
     }
 
-    [Fact]
-    public async Task Import_RocaFirmware_RemainsAllowedAndUsesPivWireIdentifier()
+    [Theory]
+    [InlineData(2, 0)]
+    [InlineData(3, 4)]
+    public async Task Import_RsaGenerationExcludedFirmware_RemainsAllowedAndUsesPivWireIdentifier(int minor, int patch)
     {
         var connection = Connection([0x90, 0x00], [0x90, 0x00], [0x90, 0x00]);
         await using var session = await PivSession.CreateAsync(connection,
-            new SessionCreationOptions { FirmwareVersionOverride = new(4, 3, 4) }, TestContext.Current.CancellationToken);
+            new SessionCreationOptions { FirmwareVersionOverride = new(4, minor, patch) }, TestContext.Current.CancellationToken);
         typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
         using var rsa = RSA.Create(2048);
         using var privateKey = RSAPrivateKey.CreateFromParameters(rsa.ExportParameters(true));
@@ -309,18 +311,42 @@ public class SessionConsistencyTests
         Assert.Equal(4, connection.TransmittedCommands.Count);
     }
 
-    [Fact]
-    public async Task Generate_RocaFirmware_IsRejectedBeforeMutation()
+    [Theory]
+    [InlineData(2, 0, KeyType.Rsa1024)]
+    [InlineData(2, 5, KeyType.Rsa2048)]
+    [InlineData(2, 6, KeyType.Rsa1024)]
+    [InlineData(3, 4, KeyType.Rsa2048)]
+    public async Task Generate_FirmwareInConservativeRsaExclusion_IsRejectedBeforeMutation(int minor, int patch, KeyType keyType)
     {
         var connection = Connection();
         await using var session = await PivSession.CreateAsync(connection,
-            new SessionCreationOptions { FirmwareVersionOverride = new(4, 3, 4) }, TestContext.Current.CancellationToken);
+            new SessionCreationOptions { FirmwareVersionOverride = new(4, minor, patch) }, TestContext.Current.CancellationToken);
         typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
 
         await Assert.ThrowsAsync<NotSupportedException>(() => session.GenerateKeyAsync(
-            Slot.Authentication, KeyType.Rsa2048, cancellationToken: TestContext.Current.CancellationToken));
+            Slot.Authentication, keyType, cancellationToken: TestContext.Current.CancellationToken));
 
         Assert.Equal(3, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
+    [InlineData(1, 9, KeyType.Rsa1024, 0x06)]
+    [InlineData(3, 5, KeyType.Rsa2048, 0x07)]
+    public async Task Generate_FirmwareOutsideConservativeRsaExclusion_ReachesCard(int minor, int patch, KeyType keyType, byte algorithm)
+    {
+        // The fake refuses the command. This tests SDK admission, not device support or key generation.
+        var connection = Connection([0x69, 0x85]);
+        var token = TestContext.Current.CancellationToken;
+        await using var session = await PivSession.CreateAsync(connection,
+            new SessionCreationOptions { FirmwareVersionOverride = new(4, minor, patch) }, token);
+        typeof(PivSession).GetField("_isAuthenticated", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(session, true);
+
+        var error = await Assert.ThrowsAsync<ApduException>(() => session.GenerateKeyAsync(
+            Slot.Authentication, keyType, cancellationToken: token));
+
+        Assert.Equal((short)0x6985, error.SW);
+        var command = Assert.Single(connection.TransmittedCommands.Skip(3));
+        Assert.Equal<byte>([0x00, 0x47, 0x00, (byte)Slot.Authentication, 0x05, 0xAC, 0x03, 0x80, 0x01, algorithm], command.Take(10));
     }
 
     [Fact]
@@ -328,7 +354,8 @@ public class SessionConsistencyTests
     {
         var connection = new RecordingSmartCardConnection(
             [0x90, 0x00], [0x05, 0x07, 0x00, 0x90, 0x00], [0x6D, 0x00],
-            [0x69, 0x83], [0x69, 0x83], [0x90, 0x00], [0x6D, 0x00]);
+            [0x6D, 0x00], [0x69, 0x83], [0x69, 0x83], [0x90, 0x00],
+            [0x90, 0x00], [0x05, 0x07, 0x00, 0x90, 0x00], [0x6D, 0x00]);
         await using var session = await PivSession.CreateAsync(connection,
             new SessionCreationOptions { FirmwareVersionOverride = new(4, 3, 0) }, TestContext.Current.CancellationToken);
 

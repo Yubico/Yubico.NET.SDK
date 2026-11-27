@@ -21,6 +21,24 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 public class WebAuthnClientDataTests
 {
     [Fact]
+    public void Create_UsesExactCcdToStringEscapesAndHash()
+    {
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        var type = "test" + new string(Enumerable.Range(0, 32).Select(value => (char)value).ToArray())
+            + "\"\\\u007f\u0085é😀";
+        var expected = """
+            {"type":"test\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000a\u000b\u000c\u000d\u000e\u000f\u0010\u0011\u0012\u0013\u0014\u0015\u0016\u0017\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f\"\\
+            """ + "\u007f\u0085é😀" + """
+            ","challenge":"AQ","origin":"https://example.com","crossOrigin":false}
+            """;
+
+        var data = WebAuthnClientData.Create(type, new byte[] { 1 }, origin);
+
+        Assert.Equal(expected, Encoding.UTF8.GetString(data.JsonBytes.Span));
+        Assert.Equal(SHA256.HashData(Encoding.UTF8.GetBytes(expected)), data.Hash.Span);
+    }
+
+    [Fact]
     public void Create_ProducesCorrectJson_WithKeyOrdering()
     {
         // Arrange
@@ -103,6 +121,8 @@ public class WebAuthnClientDataTests
     [Fact]
     public void Create_WithTopOrigin_AppendsTopOriginField()
     {
+        // Intentionally inconsistent crossOrigin/topOrigin values exercise only the low-level builder.
+        // The public ceremony methods reject this combination; it is not a valid ceremony example.
         // Arrange
         var origin = WebAuthnOrigin.TryParse("https://example.com", out var o) ? o : throw new InvalidOperationException();
         var challenge = new byte[] { 0xCC };
@@ -145,6 +165,29 @@ public class WebAuthnClientDataTests
 
         // Assert - Backslash-escaped quote
         Assert.Contains("\"test\\\"type\"", json);
+    }
+
+    [Theory]
+    [InlineData(true, 0xD800)]
+    [InlineData(false, 0xDC00)]
+    public void Create_RejectsUnpairedSurrogatesRatherThanHashingReplacementCharacters(bool inType, int surrogate)
+    {
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        var malformed = $"a{(char)surrogate}b";
+        Assert.Throws<System.Text.EncoderFallbackException>(() => WebAuthnClientData.Create(
+            inType ? malformed : "webauthn.get", new byte[] { 1 }, origin,
+            crossOrigin: true, topOrigin: inType ? null : malformed));
+    }
+
+    [Fact]
+    public void Create_PreservesUnicodeAndLowercaseControlEscaping()
+    {
+        Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
+        var data = WebAuthnClientData.Create("e\u0301\U0001f600\u000a", new byte[] { 1 }, origin,
+            crossOrigin: true, topOrigin: "https://\u00e9.example");
+        byte[] expected = "{\"type\":\"e\u0301\U0001f600\\u000a\",\"challenge\":\"AQ\",\"origin\":\"https://example.com\",\"crossOrigin\":true,\"topOrigin\":\"https://\u00e9.example\"}"u8.ToArray();
+        Assert.Equal(expected, data.JsonBytes.ToArray());
+        Assert.Equal(SHA256.HashData(expected), data.Hash.ToArray());
     }
 
     [Fact]

@@ -9,14 +9,20 @@ password protecting them. The programmable OTP slots belong to [Yubico.YubiKit.Y
 
 ## Requirements
 
-- .NET 10. On Linux, install PC/SC and the udev rules described in [docs/linux-setup.md](../../docs/linux-setup.md).
-- A YubiKey 4 or 5 series device with OATH enabled. The SDK implements no YubiKey NEO workarounds. Two
-  operations need newer firmware:
+- .NET 10. On Linux, configure [PC/SC and reader support](../../docs/linux-setup.md#pcsc-for-smartcard-access)
+  for USB CCID or an NFC reader.
+- A YubiKey 4 or 5 series device with OATH enabled. Feature requirements and SDK gates are:
 
-  | Feature | Minimum firmware |
-  |---------|------------------|
-  | Rename credential | 5.3.1 |
-  | SCP03 for OATH | 5.6.3 |
+  | Feature | Firmware condition |
+  |---------|--------------------|
+  | Touch-required credentials | Device requirement: 4.2.4+; not preflight-checked by the SDK |
+  | SHA-512 credentials | Device requirement: 4.3.1+; not preflight-checked by the SDK |
+  | Rename credential | SDK gate: effective version 5.3.1+ |
+  | Secure-channel session | SDK gate: effective version 5.6.3+ for any SCP parameters; SCP11 also requires 5.7.2+ in Core |
+
+  OATH has no general session-open firmware floor. SDK gates use the detected applet version unless
+  `SessionCreationOptions.FirmwareVersionOverride` supplies the effective version. The 5.6.3 SCP gate
+  describes current SDK behavior, not a confirmed earliest hardware version for OATH over SCP.
 
 - Transport: SmartCard only, over USB CCID or NFC. Setting `PreferredConnectionType` to anything other than
   `ConnectionType.SmartCard` throws `ArgumentException`.
@@ -38,26 +44,49 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Oath;
 
-IYubiKey device = await YubiKeyManager.FindFirstAsync();
+IYubiKey device = await YubiKeyManager.FindFirstAsync(
+    predicate: key => key.SupportsConnection(ConnectionType.SmartCard));
 await using var session = await device.CreateOathSessionAsync();
 IReadOnlyList<Credential> credentials = await session.ListCredentialsAsync();
 Console.WriteLine(string.Join('\n', credentials.Select(c => $"{c.Issuer}:{c.Name} ({c.OathType})")));
 ```
 
-Later snippets assume these directives and a `device` obtained the same way. The one-shot
+This uses default All discovery, then selects a SmartCard-capable result. SmartCard-scoped discovery
+is a different census choice; it omits other interfaces rather than merely filtering a full result.
+Later snippets are independent alternatives, each assuming these directives and a `device` obtained
+the same way, after the previous session/connection scope has ended. The one-shot
 `device.ListOathCredentialsAsync()` extension does the same listing and owns its own session.
 
 ## Common operations
 
 ### Add a TOTP credential from an otpauth URI
 
-`CredentialData` owns the decoded secret, so dispose it. `requireTouch: true` makes every calculation wait for touch.
+`ParseUri` returns a `CredentialData` that owns its decoded secret bytes. Dispose it after use.
+`PutCredentialAsync` adds the credential or overwrites the existing credential with the same raw credential ID,
+produced by `GetId()`. Use a different ID if you want to keep both.
+Set `requireTouch: true` to require touch for individual calculations (firmware 4.2.4+). Bulk calculations return
+`null` for these entries, as described below.
+
+`ParseUri` and PUT require digits from 6 through 8, a positive TOTP period, and a HOTP counter from 0 through
+`Int32.MaxValue`. A missing HOTP counter defaults to zero. HOTP ignores the period; TOTP ignores the counter.
+In a URI, a query-string issuer takes precedence over the label issuer. Numeric query values must still parse
+as `Int32`, including fields the selected OATH type ignores.
+These are SDK input policies, not strict Google Authenticator Key URI Format validation: the SDK accepts
+seven digits and an omitted HOTP counter, and does not require the two issuer fields to agree.
+
+Base32 secrets accept ASCII upper/lower case and literal spaces, with either no padding or complete trailing
+padding. Invalid characters, impossible terminal lengths, and incomplete or embedded padding are rejected;
+unused bits in the last symbol remain permissive. OATH requires nonempty decoded material, even though the
+shared Core decoder accepts empty input. Short nonempty seeds retain the SDK's 14-byte storage padding;
+that padding is not an entropy requirement.
 
 ```csharp
 using var credentialData = CredentialData.ParseUri(
@@ -91,10 +120,34 @@ finally
 }
 ```
 
+### Credential names and renaming
+
+PUT and rename require an identity that survives UTF-8 encoding and parsing through the SDK's host naming
+convention without changing its name, issuer, or TOTP period. Use a nonempty name and either a nonempty issuer
+or `null`. The complete ID must fit **64 UTF-8 bytes**, including the issuer, colon, and any nondefault TOTP
+period prefix such as `60/`; this is not a 64-character name limit.
+
+Colons and slashes are not banned: `issuer` with name `a:b` is representable, but name `a:b` without an issuer
+would be parsed differently and is rejected. Likewise, a default-period TOTP name `30/demo` without an issuer
+loses the `30/` part when parsed and is rejected. These checks apply to outgoing identities, not general
+validation of raw IDs read from the device. Failed preflight sends no PUT or RENAME and leaves the credential's
+seed unchanged. A successful `RenameCredentialAsync` returns a new credential; the supplied one is unchanged.
+
 ### Calculate codes
 
-`CalculateAllAsync` returns a `null` code for HOTP and touch-requiring credentials; get those individually. A TOTP
-`Code.ValidTo` is a Unix timestamp, but a HOTP code never expires and reports `long.MaxValue`, so do not format it.
+`CalculateAllAsync` returns a `null` code for HOTP and touch-required credentials; get those individually with
+`CalculateCodeAsync`. Both methods accept an optional `timestamp` in Unix seconds, defaulting to the current UTC
+time. It determines the TOTP challenge and nominal generation window. For an individual HOTP calculation, the
+device uses its stored counter; the timestamp only sets `Code.ValidFrom`.
+
+Timestamps must be nonnegative; zero means the Unix epoch. For TOTP, the inclusive start and exclusive end
+of the generation window must fit in `long`. The SDK rejects an invalid timestamp before calculation when
+the period is known. In an aggregate calculation, a custom period is learned from the response and checked
+before individual recalculation. There is no calendar-year limit imposed by `DateTimeOffset`.
+
+For TOTP, `Code.ValidFrom` and `Code.ValidTo` are the inclusive start and exclusive end of the nominal generation
+window, in Unix seconds. For HOTP, `ValidTo` is `long.MaxValue`, a no-time-expiry sentinel, not a date to format.
+These values do not guarantee verifier acceptance: the verifier applies its own time-window, replay, or counter rules.
 
 ```csharp
 await using var session = await device.CreateOathSessionAsync();
@@ -108,9 +161,25 @@ Code hotpCode = await session.CalculateCodeAsync(hotp);
 Console.WriteLine($"HOTP code {hotpCode.Value}");
 ```
 
+For a full HMAC rather than a formatted OTP, use `CalculateAsync` with your challenge. It returns fresh,
+writable, caller-owned `Memory<byte>` containing only the HMAC, without the protocol's digit-count header. The SDK borrows the
+credential and challenge without modifying them; keep the challenge unchanged until the call completes.
+Clear a returned result named `hmac` in a `finally` block with
+`CryptographicOperations.ZeroMemory(hmac.Span)`.
+You also remain responsible for clearing your challenge storage when appropriate, after the call completes.
+
+After TLV decoding, known responses must contain the structure required by the operation. Missing full-response
+header/payload, incomplete LIST or aggregate entries, and invalid truncated values produce `BadResponseException`.
+Aggregate wire validation runs before invalid-period entries are omitted or custom-period values recalculated.
+
 ### Protect the application with a password
 
-`DeriveKey` runs PBKDF2 over the device salt, so it needs a live session. Both buffers are yours to zero.
+Use `DeriveKey` on an open OATH session to derive an access key from a UTF-8-encoded password. The method uses
+the device’s salt.
+
+You own both the password buffer and the returned key. Clear each with `CryptographicOperations.ZeroMemory`
+when it is no longer needed, including when an operation fails. The example below uses a `finally` block to clear
+both buffers.
 
 ```csharp
 byte[] password = Encoding.UTF8.GetBytes("correct horse battery staple");
@@ -131,6 +200,12 @@ finally
 ```
 
 `UnsetKeyAsync` removes the password. `AuthenticateAndRetryAsync` retries a locked operation once after your callback supplies the password.
+
+If the device's authentication HMAC does not match, `ValidateAsync` throws `BadResponseException`. The SDK
+keeps the session open, leaves `IsLocked` true, and retains the original device challenge. This is SDK state,
+not confirmation that the applet is still locked or that the password was wrong. You can attempt validation
+again with the same key in the same session. The SDK sends a fresh host challenge but cannot guarantee the
+applet will accept the retry.
 
 ### Delete a credential
 
@@ -164,16 +239,55 @@ The context uses application `OATH`, basis `PolicyRequires`, and the public `iss
 `CalculateAllAsync` is silent. Cancelling the token before the calculation's SmartCard exchange is admitted
 resolves a requested notification as cancelled; once admitted, the exchange runs to completion and cancellation
 does not interrupt the device or necessarily change the notification outcome.
+Await the complete public task before starting an independent operation on the session, disposing it, or clearing
+inputs. `CalculateAllAsync` can issue followup calculations, and the operation delegate passed to
+`AuthenticateAndRetryAsync` can use the same session as part of that workflow. Keep prompt/provider resources
+alive until the workflow finishes. Do not start independent operations from prompt callbacks or dispose the
+session from within a workflow.
 
 ## Constraints
 
-- SmartCard transport only. A physical YubiKey admits one live connection and one session per connection; a second
-  attempt throws `ConnectionInUseException`. Whoever opens a connection disposes it.
+- SmartCard transport only. Within this process, grouped views admit one live connection across known
+  member IDs, and each connection admits one session. Disjoint scoped views are not coordinated solely
+  by matching serials. See [connection ownership](../../docs/architecture/connection-ownership-and-contention.md).
+  Whoever opens a connection disposes it.
 - A session from `device.CreateOathSessionAsync(...)` owns the connection it opened; `OathSession.CreateAsync(connection, ...)` borrows yours. Use `await using` for both.
-- `ResetAsync` erases every credential and the access key; `DeleteCredentialAsync`, `SetKeyAsync`, and `UnsetKeyAsync` are also irreversible.
-- `RenameCredentialAsync` throws `NotSupportedException` through `EnsureSupports` below firmware 5.3.1, and so does
-  passing `ScpKeyParameters` below 5.6.3. While the applet is locked, protected operations fail with an `OathException`
+- `ResetAsync` erases every credential and the access key. `DeleteCredentialAsync` erases the selected credential.
+  `SetKeyAsync` sets or changes password protection; `UnsetKeyAsync` removes it. Neither changes stored credentials.
+  After confirmed RESET, the SDK discards old applet and secure-channel state, reselects, reads fresh applet
+  metadata, and re-establishes SCP if configured. If reinitialization fails, the session ends and the error
+  distinguishes that failure from a failed RESET. Cancellation after confirmed RESET does not interrupt
+  reinitialization; a transport/device error during RESET does not prove that no mutation occurred.
+  An `InvalidOperationException` alone does not confirm RESET: the protocol may refuse the exchange before
+  transmission. If reinitialization fails on a connection you supplied, close and reopen it before creating
+  another session; it may be out of sync.
+- `RenameCredentialAsync` throws `NotSupportedException` through `EnsureSupports` below effective version 5.3.1,
+  as does passing any non-null `ScpKeyParameters` below 5.6.3. Core additionally requires 5.7.2+ for SCP11.
+  While the applet is locked, protected operations fail with an `OathException`
   whose `Reason` is `OathFailureReason.Locked` until `ValidateAsync` succeeds.
+- `IsAuthenticated` records SCP setup, not OATH unlock or ongoing channel health. Cached applet properties
+  describe this session's observations and can remain readable after disposal. `Salt` borrows session-owned
+  storage that reset or disposal clears. Read `Salt` and `DeviceId` again after reset.
+- Synthetic secure-reset tests exercise key-array cleanup, reinitialization and command order, not outbound
+  encryption/MAC correctness or live SCP reset. Empty LIST/RESET and protected continuations also depend
+  on Core's APDU/SCP profile; passing the synthetic cleanup test is not wire-conformance qualification.
+
+### Migrating reset callers
+
+After `ResetAsync` returns successfully, continue using the same session and connection. Treat `Credential`
+objects read before reset as stale. Only reset a device whose OATH credentials and access key you intend to erase.
+
+This composable fragment assumes the selected `IYubiKey device` above and a caller-supplied
+`CancellationToken ct`. No earlier session remains open.
+
+```csharp
+await using var session = await device.CreateOathSessionAsync(cancellationToken: ct);
+await session.ResetAsync(ct);
+var credentials = await session.ListCredentialsAsync(ct);
+```
+
+For SCP, keep the caller-owned key parameters alive and unchanged through session disposal. OATH reset
+does not reset Security Domain keys, so reinitialization uses the original parameters, not default keys.
 
 ## Security notes
 
@@ -187,11 +301,14 @@ does not interrupt the device or necessarily change the notification outcome.
 - `ParseUri` clears decoded temporary buffers on success and failure. Immutable URI/Base32 strings and literal
   demo seeds cannot be erased; avoid retaining or logging them and prefer securely acquired byte input in production.
 - `DeriveKey` takes a borrowed UTF-8 password and returns a 16-byte key you own and must zero; `AuthenticateAndRetryAsync` zeroes the key it derives, not the bytes your callback returned.
+- `OathCredentialOptions.ForOathPassword` configures the console reader's 1..128 **UTF-16 code-unit** UI
+  limit before UTF-8 encoding, not a firmware/password-byte limit. Direct byte inputs bypass that preset.
+  Immutable redirected strings have a different cleanup lifetime from returned mutable password buffers.
 - Never log secrets, passwords, derived access keys, or calculated codes.
 
 ## Example
 
-The interactive OathTool sample lives at src/Oath/examples/OathTool/.
+The interactive OathTool sample lives at src/Oath/examples/OathTool/. It is for demonstration only, not for production.
 
 ```bash
 dotnet run --project src/Oath/examples/OathTool/OathTool.csproj

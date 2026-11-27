@@ -1,4 +1,4 @@
-// Copyright 2025 Yubico AB
+// Copyright Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -12,108 +12,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Text;
-using Yubico.YubiKit.Ctap2.Cose;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using System.Formats.Cbor;
+using Yubico.YubiKit.Core;
+using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Extensions;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 
-/// <summary>
-/// Tests for <see cref="PreviewSignGeneratedKey"/> ARKG derivation.
-/// </summary>
-/// <remarks>
-/// WARNING -- EXPERIMENTAL -- test only: ARKG previewSign derivation is not ready for production use and must not
-/// be treated as production cryptographic guidance.
-/// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
+[Collection(nameof(Ctap2BackendLifecycleTests))] // Serializes temporary process-wide logging changes.
 public class PreviewSignGeneratedKeyTests
 {
-    // Reuse Phase B KAT vectors from Core
-    private static readonly byte[] PkBl = HexToBytes(
-        "046d3bdf31d0db48988f16d47048fdd24123cd286e42d0512daa9f726b4ecf18df" +
-        "65ed42169c69675f936ff7de5f9bd93adbc8ea73036b16e8d90adbfabdaddba7");
-
-    private static readonly byte[] PkKem = HexToBytes(
-        "04c38bbdd7286196733fa177e43b73cfd3d6d72cd11cc0bb2c9236cf85a42dcff5" +
-        "dfa339c1e07dfcdfda8d7be2a5a3c7382991f387dfe332b1dd8da6e0622cfb35");
-
-    private static readonly byte[] IkmA = HexToBytes(
-        "404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f");
-    private static readonly byte[] CtxA = Encoding.ASCII.GetBytes("ARKG-P256.test vectors");
-    private static readonly byte[] ExpectedDerivedA = HexToBytes(
-        "04572a111ce5cfd2a67d56a0f7c684184b16ccd212490dc9c5b579df749647d107" +
-        "dac2a1b197cc10d2376559ad6df6bc107318d5cfb90def9f4a1f5347e086c2cd");
-
     [Fact]
-    public void DerivePublicKey_WithKnownKATVector_ProducesExpectedDerivedKey()
+    public void TryFromMakeCredentialResponse_MalformedOutputWarnsWithoutAllowingLoggerFailureToEscape()
     {
-        // Arrange
-        var generatedKey = new PreviewSignGeneratedKey(
-            keyHandle: new byte[32], // arbitrary
-            blindingPublicKey: PkBl,
-            kemPublicKey: PkKem,
-            derivedKeyAlgorithm: CoseAlgorithm.ArkgP256);
+        var factory = Substitute.For<ILoggerFactory>();
+        var logger = new ThrowingWarningLogger();
+        factory.CreateLogger(typeof(PreviewSignGeneratedKey).FullName ?? throw new InvalidOperationException()).Returns(logger);
+        using var logging = YubiKitLogging.UseTemporary(factory);
 
-        // Act
-        var derived = generatedKey.DerivePublicKey(IkmA, CtxA);
+        // A MakeCredential response with a signed previewSign value, but no unsigned attestation.
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartMap(3);
+        writer.WriteInt32(1); // fmt
+        writer.WriteTextString("none");
+        writer.WriteInt32(2); // authData
+        writer.WriteByteString([
+            .. new byte[32], // Relying-party identifier hash.
+            0xC5, // User present and verified; attested credential data and extensions follow.
+            .. new byte[4 + 16], // Signature counter and authenticator model identifier.
+            0, 1, 0x2A, // Big-endian credential identifier length, then the one-byte identifier.
+            0xA0, // Empty credential public-key map; this test does not decode the key.
+            .. Convert.FromHexString("A16B707265766965775369676EA10328") // {"previewSign": {3: -9}}
+        ]);
+        writer.WriteInt32(3); // attStmt
+        writer.WriteEncodedValue([0xA0]); // Empty statement for format "none".
+        writer.WriteEndMap();
 
-        // Assert
-        Assert.Equal(ExpectedDerivedA, derived.PublicKey.ToArray());
-        Assert.NotEmpty(derived.ArkgKeyHandle.ToArray()); // Should be 16+65 bytes
-        Assert.Equal(generatedKey.KeyHandle.ToArray(), derived.DeviceKeyHandle.ToArray());
-        Assert.Equal(CtxA, derived.Context.ToArray());
+        var response = MakeCredentialResponse.Decode(writer.Encode());
+
+        Assert.False(PreviewSignGeneratedKey.TryFromMakeCredentialResponse(response, out var key));
+        Assert.Null(key);
+        Assert.Equal(1, logger.Calls);
     }
 
-    [Fact]
-    public void DerivePublicKey_DifferentIkm_ProducesDifferentDerivedKeys()
+    private sealed class ThrowingWarningLogger : ILogger
     {
-        // Arrange
-        var generatedKey = new PreviewSignGeneratedKey(
-            keyHandle: new byte[32],
-            blindingPublicKey: PkBl,
-            kemPublicKey: PkKem,
-            derivedKeyAlgorithm: CoseAlgorithm.ArkgP256);
+        public int Calls { get; private set; }
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => logLevel == LogLevel.Warning;
 
-        var ikmB = HexToBytes("606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f");
-
-        // Act
-        var derivedA = generatedKey.DerivePublicKey(IkmA, CtxA);
-        var derivedB = generatedKey.DerivePublicKey(ikmB, CtxA);
-
-        // Assert
-        Assert.NotEqual(derivedA.PublicKey.ToArray(), derivedB.PublicKey.ToArray());
-        Assert.NotEqual(derivedA.ArkgKeyHandle.ToArray(), derivedB.ArkgKeyHandle.ToArray());
-    }
-
-    [Fact]
-    public void DerivePublicKey_DifferentContext_ProducesDifferentDerivedKeys()
-    {
-        // Arrange
-        var generatedKey = new PreviewSignGeneratedKey(
-            keyHandle: new byte[32],
-            blindingPublicKey: PkBl,
-            kemPublicKey: PkKem,
-            derivedKeyAlgorithm: CoseAlgorithm.ArkgP256);
-
-        var ctxB = Encoding.ASCII.GetBytes("ARKG-P256.alt context");
-
-        // Act
-        var derivedA = generatedKey.DerivePublicKey(IkmA, CtxA);
-        var derivedC = generatedKey.DerivePublicKey(IkmA, ctxB);
-
-        // Assert
-        Assert.NotEqual(derivedA.PublicKey.ToArray(), derivedC.PublicKey.ToArray());
-        // ArkgKeyHandle also differs because it includes context-derived material
-        Assert.NotEqual(derivedA.ArkgKeyHandle.ToArray(), derivedC.ArkgKeyHandle.ToArray());
-    }
-
-    private static byte[] HexToBytes(string hex)
-    {
-        byte[] bytes = new byte[hex.Length / 2];
-        for (int i = 0; i < bytes.Length; i++)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
-            bytes[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
+            Calls++;
+            throw new InvalidOperationException("Test warning provider failed.");
         }
-
-        return bytes;
     }
 }

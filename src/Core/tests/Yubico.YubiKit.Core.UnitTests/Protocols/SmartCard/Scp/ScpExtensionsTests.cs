@@ -170,14 +170,14 @@ public class PcscProtocolScpInitializationTests
         var keyParams = new Scp03KeyParameters(new KeyReference(0x01, 0xFF), staticKeys);
 
         // Act & Assert
-        // Should proceed to initialization (will fail, but not due to firmware check)
+        // Null firmware fails ScpInitializer's configured-processor admission before the support branch.
+        // This broad exception assertion does not establish that the branch or handshake was reached.
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
             await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
 
-        // Should NOT be NotSupportedException about firmware requirements
+        // The conditional message assertion below does not require the current ArgumentException outcome.
         if (ex is NotSupportedException notSupported)
-            // If it IS NotSupportedException, it should be from device (CLA_NOT_SUPPORTED),
-            // not from firmware version check
+            // For a NotSupportedException, it only excludes this firmware threshold from the message.
             Assert.DoesNotContain("5.3.0", notSupported.Message);
     }
 
@@ -213,11 +213,13 @@ public class PcscProtocolScpInitializationTests
             publicKey
         );
 
+        // Null firmware fails configured-processor admission before the SCP11 support branch or handshake.
+        // The broad exception assertion below does not require that current ArgumentException outcome.
         // Act & Assert
         var ex = await Assert.ThrowsAnyAsync<Exception>(async () =>
             await protocol.InitializeScpAsync(keyParams, TestContext.Current.CancellationToken));
 
-        // Should NOT be NotSupportedException about firmware requirements
+        // This conditional check only excludes the firmware threshold if the exception has this type.
         if (ex is NotSupportedException notSupported) Assert.DoesNotContain("5.7.2", notSupported.Message);
     }
 }

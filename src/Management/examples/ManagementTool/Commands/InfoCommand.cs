@@ -44,7 +44,7 @@ public static class InfoCommand
             OutputHelpers.WriteKeyValue("Part Number", info.PartNumber);
         }
 
-        OutputHelpers.WriteKeyValue("FIPS Mode", info.IsFips ? "Yes" : "No");
+        OutputHelpers.WriteKeyValue("FIPS manufacturing indicator", info.IsFips ? "Yes" : "No");
         OutputHelpers.WriteKeyValue("Security Key", info.IsSky ? "Yes" : "No");
         OutputHelpers.WriteKeyValue("Configuration Locked", info.IsLocked ? "Yes" : "No");
 

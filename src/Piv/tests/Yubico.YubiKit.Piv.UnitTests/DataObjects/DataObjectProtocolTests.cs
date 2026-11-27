@@ -21,13 +21,48 @@ namespace Yubico.YubiKit.Piv.UnitTests.DataObjects;
 
 /// <summary>
 /// Security regression test: <see cref="DataObjectProtocol.PutObjectAsync"/> builds its outgoing
-/// command payload in an internal <c>ArrayBufferWriter&lt;byte&gt;</c>. Per <see cref="ApduCommand"/>'s
+/// command payload in an owned byte array. Per <see cref="ApduCommand"/>'s
 /// documented ownership contract, whoever owns that buffer must zero it after transmission if it may
 /// carry sensitive material (PIV PIN-only mode routes a plaintext management key through this exact
 /// path via <c>PutObjectAsync(PrintedInformation, ...)</c>).
 /// </summary>
 public class DataObjectProtocolTests
 {
+    [Theory]
+    [InlineData(0, "5C0100")]
+    [InlineData(1, "5C0101")]
+    [InlineData(0x100, "5C020100")]
+    [InlineData(0x10000, "5C03010000")]
+    [InlineData(0xFFFFFF, "5C03FFFFFF")]
+    public async Task RawObjectCommands_EncodeIdentifiersWithoutAliasing(int objectId, string identifierTlv)
+    {
+        var commands = new List<string>();
+        var backend = new CapturingBackend { OnSend = command => commands.Add(Convert.ToHexString(command.Data.Span)) };
+        var token = TestContext.Current.CancellationToken;
+
+        await DataObjectProtocol.GetObjectAsync(backend, objectId, token);
+        await DataObjectProtocol.PutObjectAsync(backend, objectId, null, token);
+
+        Assert.Equal([identifierTlv, identifierTlv + "5300"], commands);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(int.MinValue)]
+    [InlineData(0x1000000)]
+    public async Task RawObjectCommands_RejectOutOfWidthIdentifiersBeforeTransmission(int objectId)
+    {
+        var backend = new CapturingBackend();
+        var token = TestContext.Current.CancellationToken;
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>("objectId", () =>
+            DataObjectProtocol.GetObjectAsync(backend, objectId, token));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>("objectId", () =>
+            DataObjectProtocol.PutObjectAsync(backend, objectId, null, token));
+
+        Assert.Null(backend.LastCommand);
+    }
+
     [Fact]
     public async Task PutObjectAsync_ZeroesInternalWriteBufferAfterTransmission()
     {
@@ -43,7 +78,7 @@ public class DataObjectProtocolTests
         Assert.NotNull(backend.LastCommand);
         Assert.True(MemoryMarshal.TryGetArray(backend.LastCommand!.Value.Data, out var segment));
 
-        // The full backing array (not just the logical Data slice) must be zeroed - the writer
+        // The full backing array (not just the logical Data slice) must be zeroed - the payload
         // buffer is not shared with anything else after the command is sent.
         Assert.All(segment.Array!.AsSpan(segment.Offset, segment.Count).ToArray(), b => Assert.Equal(0, b));
     }
@@ -120,8 +155,8 @@ public class DataObjectProtocolTests
         Assert.Equal(printedInner, result.ToArray());
 
         Assert.NotNull(backend.CapturedRawDataArray);
-        // RawData includes the trailing 2 SW bytes, which are not part of the unwrapped payload
-        // and are not required to be zeroed; only the response's Data portion must be.
+        // Clear zeroes the response owner's full storage, including SW. This assertion observes only
+        // its Data portion; it does not check the trailing status bytes or the constructor's source array.
         int dataLength = backend.CapturedCount - 2;
         Assert.All(
             backend.CapturedRawDataArray!.AsSpan(backend.CapturedOffset, dataLength).ToArray(),
@@ -131,9 +166,8 @@ public class DataObjectProtocolTests
     [Fact]
     public async Task GetObjectAsync_UnwrappedResponse_DoesNotZeroReturnedBuffer()
     {
-        // The "not wrapped" branch returns the original buffer directly (no extra copy is made),
-        // so GetObjectAsync must NOT zero it here - the returned value IS the caller's deliverable,
-        // and zeroing it would corrupt the data the caller asked for.
+        // The unwrapped branch also returns a distinct owned copy, then clears the raw response.
+        // This assertion checks the deliverable survives that cleanup.
         byte[] notWrapped = [0x30, 0x02, 0xAA, 0xBB]; // does not start with 0x53
 
         var backend = new GetDataCapturingBackend(notWrapped);

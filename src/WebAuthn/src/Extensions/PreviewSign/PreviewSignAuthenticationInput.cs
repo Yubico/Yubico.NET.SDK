@@ -22,7 +22,17 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// Maps credential IDs to their corresponding signing parameters. Each entry specifies the key
 /// handle, to-be-signed value, and optional algorithm-specific arguments for one credential.
 /// </para>
+/// <para>
+/// Supply a nonempty <c>AllowCredentials</c> list with exactly one mapping for every entry, including
+/// multi-credential lists. The client selects a credential and uses its matching signing parameters.
+/// Unsupported previewSign requests can be omitted; inspect the returned extension result.
+/// </para>
+/// <para>
+/// Construction copies the mapping and credential ID bytes. IDs are compared by byte content.
+/// Signing-parameter buffers are still borrowed; keep them unchanged until the ceremony completes.
+/// </para>
 /// </remarks>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class PreviewSignAuthenticationInput
 {
     /// <summary>
@@ -38,11 +48,14 @@ public sealed record class PreviewSignAuthenticationInput
     /// </summary>
     /// <param name="signByCredential">Dictionary mapping credential IDs to signing parameters.</param>
     /// <exception cref="WebAuthnClientError">
-    /// Thrown when the dictionary is empty (InvalidRequest).
+    /// Thrown when the dictionary is empty, contains a null value, or maps the same credential ID
+    /// more than once by byte content (InvalidRequest).
     /// </exception>
+    /// <exception cref="ArgumentNullException">The dictionary is null.</exception>
     public PreviewSignAuthenticationInput(
         IReadOnlyDictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams> signByCredential)
     {
+        ArgumentNullException.ThrowIfNull(signByCredential);
         if (signByCredential.Count == 0)
         {
             throw new WebAuthnClientError(
@@ -50,47 +63,18 @@ public sealed record class PreviewSignAuthenticationInput
                 "previewSign authentication requires at least one credential mapping");
         }
 
-        // Defensively rebuild dictionary with ByteArrayKeyComparer if needed
-        if (signByCredential is Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams> dict &&
-            !ReferenceEquals(dict.Comparer, ByteArrayKeyComparer.Instance))
+        var copy = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(
+            signByCredential.Count, ByteArrayKeyComparer.Instance);
+        foreach (var (id, signingParams) in signByCredential)
         {
-            var rebuilt = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(
-                signByCredential.Count,
-                ByteArrayKeyComparer.Instance);
-            foreach (var kvp in signByCredential)
+            if (signingParams is null || !copy.TryAdd(id.ToArray(), signingParams))
             {
-                rebuilt[kvp.Key] = kvp.Value;
+                throw new WebAuthnClientError(
+                    WebAuthnClientErrorCode.InvalidRequest,
+                    "previewSign authentication requires one non-null mapping per credential ID");
             }
-            SignByCredential = rebuilt;
         }
-        else if (signByCredential is not Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>)
-        {
-            // Not a Dictionary, rebuild to ensure correct comparer
-            var rebuilt = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(
-                signByCredential.Count,
-                ByteArrayKeyComparer.Instance);
-            foreach (var kvp in signByCredential)
-            {
-                rebuilt[kvp.Key] = kvp.Value;
-            }
-            SignByCredential = rebuilt;
-        }
-        else
-        {
-            SignByCredential = signByCredential;
-        }
-    }
 
-    /// <summary>
-    /// Creates an authentication input with a credential-to-params mapping.
-    /// </summary>
-    /// <param name="signByCredential">Dictionary mapping credential IDs to signing parameters.</param>
-    /// <returns>A <see cref="PreviewSignAuthenticationInput"/> instance.</returns>
-    /// <remarks>
-    /// Use <see cref="ByteArrayKeyComparer.Instance"/> when constructing the dictionary to ensure
-    /// correct equality semantics for byte array keys.
-    /// </remarks>
-    public static PreviewSignAuthenticationInput CreateSignByCredential(
-        IReadOnlyDictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams> signByCredential) =>
-        new(signByCredential);
+        SignByCredential = copy.AsReadOnly();
+    }
 }

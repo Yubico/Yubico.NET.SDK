@@ -15,15 +15,20 @@
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Ctap2.Config;
-using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.FidoExamples;
 
 /// <summary>
 /// Authenticator configuration operations: enterprise attestation, always-UV, min PIN length.
-/// Requires firmware 5.4+ and the authnrCfg authenticator option.
+/// Needs advertised subcommand support, configured state and appropriate authorization.
 /// </summary>
+/// <remarks>
+/// Firmware thresholds alone do not establish support. These paths select protocol 2 without negotiation,
+/// borrow caller PIN input and finally-clear returned tokens. General catches flatten cancellation and
+/// error provenance; a failed result is not evidence that persistent configuration remained unchanged.
+/// AuthenticatorConfig borrows session/protocol/token and does not verify or roll back resulting state.
+/// </remarks>
 public static class ConfigManagement
 {
     /// <summary>
@@ -85,6 +90,11 @@ public static class ConfigManagement
     /// <summary>
     /// Toggles the always-UV setting on the authenticator.
     /// </summary>
+    /// <remarks>
+    /// This affects credential ceremonies, not every CTAP operation. Read fresh GetInfo state before
+    /// deciding to toggle; after an uncertain result re-read before retrying, which could invert the intent.
+    /// Disabling can be refused by device policy. This method performs no post-command verification.
+    /// </remarks>
     public static async Task<ConfigResult> ToggleAlwaysUvAsync(
         IYubiKey yubiKey,
         ReadOnlyMemory<byte> pin,
@@ -105,7 +115,13 @@ public static class ConfigManagement
                 cancellationToken: cancellationToken);
 
             var config = new AuthenticatorConfig(session, protocol, pinToken);
-            await config.ToggleAlwaysUvAsync(cancellationToken);
+            var info = await session.GetInfoAsync(cancellationToken);
+            if (!info.Options.TryGetValue("alwaysUv", out bool current))
+            {
+                return ConfigResult.Failed("The authenticator does not advertise always-UV support.");
+            }
+
+            await config.SetAlwaysUvAsync(!current, cancellationToken);
 
             return ConfigResult.Succeeded();
         }
@@ -127,8 +143,13 @@ public static class ConfigManagement
     }
 
     /// <summary>
-    /// Sets the minimum PIN length on the authenticator.
+    /// Sets minimum-PIN policy in Unicode code points, not the PIN itself.
     /// </summary>
+    /// <remarks>
+    /// Increasing the minimum can force a PIN change even when forceChangePin is false. Supplied RP IDs
+    /// replace mutable disclosure entries; null lists are omitted by the
+    /// helper. An empty list does not clear recipients. minPinLength extension output only reports policy.
+    /// </remarks>
     public static async Task<ConfigResult> SetMinPinLengthAsync(
         IYubiKey yubiKey,
         ReadOnlyMemory<byte> pin,
@@ -178,7 +199,7 @@ public static class ConfigManagement
     }
 
     /// <summary>
-    /// Checks if the authenticator supports authenticator configuration.
+    /// Returns the authnrCfg boolean from a successful query, or false for any caught failure/cancellation.
     /// </summary>
     public static async Task<bool> IsSupported(
         IYubiKey yubiKey,

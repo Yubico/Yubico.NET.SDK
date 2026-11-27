@@ -45,7 +45,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     private readonly DisposalGate _disposalGate = new();
     private readonly ILogger<OtpHidProtocol> _logger;
     private readonly ArrayPool<byte> _bufferPool;
-    // Production keeps the device's 14-second touch window; the internal override makes timeout tests deterministic.
+    // The SDK uses a local 14-second touch deadline; native report calls can outlast that deadline.
     private readonly TimeSpan _touchTimeout;
     private FirmwareVersion? _firmwareVersion;
     private Exception? _resetFailure;
@@ -116,7 +116,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             }
             catch when (_resetFailure is null)
             {
-                // Expected to fail - the scan map command should be rejected
+                // Rejection is expected, but this filter also suppresses other refresh failures when no
+                // reset failure is latched. Successful initialization here is not proof of a refreshed sequence.
             }
             finally
             {
@@ -191,7 +192,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             var programmingSequence = await SendFrameAsync(
                 slot, payload, exchangeToken, () => wireAttempted = true).ConfigureAwait(false);
 
-            // Read response using Java-style single polling loop
+            // Poll for completion or pending data, then assemble command-specific response bytes.
             return await ReadFrameJavaStyleAsync(
                     programmingSequence,
                     userPresenceNotification,
@@ -215,9 +216,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     }
 
     /// <summary>
-    /// Reads one frame response using the legacy C# approach:
-    /// 1. First wait for ReadPending flag (like WaitForReadPending)
-    /// 2. Then read data packets using the frame reader pattern
+    /// Polls until response data is pending or the programming sequence indicates status-only completion,
+    /// then reads sequenced seven-byte data chunks when present.
     /// </summary>
     /// <param name="programmingSequence">The programming sequence before the command was sent.</param>
     /// <param name="userPresenceNotification">The non-null handle for the SDK operation.</param>
@@ -231,7 +231,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     {
         _logger.LogDebug("ReadFrameJavaStyleAsync starting, programmingSequence={ProgSeq}", programmingSequence);
 
-        // Phase 1: Wait for ReadPending flag (legacy C# WaitForReadPending approach)
+        // Wait for pending data or status-only completion.
         var (firstReport, hasData) = await WaitForReadyToReadAsync(
                 programmingSequence,
                  () => userPresenceNotification.RequestAsync(UserPresenceBasis.DeviceWaiting, callerToken),
@@ -247,13 +247,14 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             return statusResponse;
         }
 
-        // Phase 2: Read data packets (legacy C# frame reader pattern)
+        // Assemble the pending data reports.
         return await ReadDataPacketsAsync(firstReport, exchangeToken).ConfigureAwait(false);
     }
 
     /// <summary>
     /// Waits for the device to be ready to read (ReadPending flag set) or command complete.
-    /// Uses tight polling - the write-side delays provide sufficient device processing time.
+    /// Unchanged status and busy reports are polled without a delay. The local three-second deadline is
+    /// checked between reads, so it does not bound native GET duration or guarantee asynchronous invocation.
     /// </summary>
     private async Task<(ReadOnlyMemory<byte> Report, bool HasData)> WaitForReadyToReadAsync(
         int programmingSequence,
@@ -322,7 +323,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
 
     /// <summary>
     /// Reads data packets after ReadPending was detected.
-    /// Uses the legacy C# frame reader pattern.
+    /// The accumulation buffer is cleared and returned; individual connection-returned report storage has
+    /// a separate lifetime and is not cleared by this reader.
     /// </summary>
     private async Task<ReadOnlyMemory<byte>> ReadDataPacketsAsync(
         ReadOnlyMemory<byte> firstReport,
@@ -537,7 +539,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             payload.CopyTo(frame.AsSpan());
             frame[OtpConstants.SlotDataSize] = slot;
 
-            // Calculate and write CRC (little-endian)
+            // CRC covers the padded 64-byte payload; write it uncomplemented, little-endian.
             var crc = ChecksumUtils.CalculateCrc(payload, payload.Length);
             BinaryPrimitives.WriteUInt16LittleEndian(frame.AsSpan(OtpConstants.SlotDataSize + 1), crc);
             // Last 3 bytes are filler (already zero)
@@ -589,7 +591,8 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     }
 
     /// <summary>
-    /// Resets the state of YubiKey from reading.
+    /// Sends the invalid-sequence dummy report to end response reading; this is protocol cleanup,
+    /// not a persistent applet or factory reset.
     /// </summary>
     private async Task ResetStateAsync(CancellationToken cancellationToken)
     {

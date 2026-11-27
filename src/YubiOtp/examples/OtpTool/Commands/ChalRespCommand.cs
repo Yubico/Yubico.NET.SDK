@@ -20,6 +20,10 @@ namespace Yubico.YubiKit.YubiOtp.Examples.OtpTool.Commands;
 /// <summary>
 /// Programs HMAC-SHA1 challenge-response on a slot (ykman otp chalresp SLOT).
 /// </summary>
+/// <remarks>
+/// Generated keys are intentionally shown in human mode, not JSON mode. This is provisioning output,
+/// not safe logging. The TOTP option sets touch/short mode only; time/counter/code generation is absent.
+/// </remarks>
 public static class ChalRespCommand
 {
     public static async Task<int> RunAsync(CliOptions options, CancellationToken ct)
@@ -47,6 +51,7 @@ public static class ChalRespCommand
 
         try
         {
+            using var config = new HmacSha1SlotConfiguration(hmacKey);
             if (!options.Force && !options.Json)
             {
                 if (!AnsiConsole.Confirm(
@@ -60,19 +65,13 @@ public static class ChalRespCommand
 
             await using var session = await DeviceHelper.CreateSessionAsync(ct);
 
-            using var config = new HmacSha1SlotConfiguration(hmacKey);
-
-            if (options.RequireTouch || options.Totp)
+            if (options.RequireTouch)
             {
                 config.RequireTouch();
             }
 
-            if (options.Totp)
-            {
-                config.UseShortChallenge();
-            }
-
-            await session.PutConfigurationAsync(slot, config, currentAccessCode: accessCode, cancellationToken: ct);
+            await session.PutConfigurationAsync(slot, config, options.DeleteAccessCode ? default : accessCode,
+                accessCode, ct);
 
             if (options.Json)
             {
@@ -81,8 +80,7 @@ public static class ChalRespCommand
                     status = "ok",
                     slot = FormatSlot(slot),
                     type = "chalresp",
-                    touch = options.RequireTouch || options.Totp,
-                    totp = options.Totp
+                    touch = options.RequireTouch
                 });
             }
             else

@@ -17,13 +17,13 @@ public static class ResetMenu
     {
         OutputHelpers.WriteHeader("Reset PIV Application");
 
-        OutputHelpers.WriteError("WARNING: This will delete ALL PIV data including:");
-        AnsiConsole.MarkupLine("  • All private keys");
-        AnsiConsole.MarkupLine("  • All certificates");
+        OutputHelpers.WriteError("WARNING: This deletes ordinary PIV keys, certificates, and data objects.");
+        AnsiConsole.MarkupLine("  • The F9 attestation key and certificate are retained");
         AnsiConsole.MarkupLine("  • PIN, PUK, and management key will be reset to defaults");
         AnsiConsole.WriteLine();
 
-        if (!AnsiConsole.Confirm("[red]Are you sure you want to proceed?[/]", defaultValue: false))
+        if (!await new ConfirmationPrompt("[red]Are you sure you want to proceed?[/]") { DefaultValue = false }
+            .ShowAsync(AnsiConsole.Console, cancellationToken))
         {
             OutputHelpers.WriteInfo("Reset cancelled");
             return;
@@ -34,7 +34,8 @@ public static class ResetMenu
         OutputHelpers.WriteInfo("This requires entering wrong values 3+ times each.");
         AnsiConsole.WriteLine();
 
-        if (!AnsiConsole.Confirm("Continue with reset process?", defaultValue: false))
+        if (!await new ConfirmationPrompt("Continue with reset process?") { DefaultValue = false }
+            .ShowAsync(AnsiConsole.Console, cancellationToken))
         {
             OutputHelpers.WriteInfo("Reset cancelled");
             return;

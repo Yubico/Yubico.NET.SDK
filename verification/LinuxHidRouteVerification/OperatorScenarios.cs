@@ -9,8 +9,10 @@ using Yubico.YubiKit.Ctap2;
 
 namespace LinuxHidRouteVerification;
 
-// Built but deliberately NOT executed without separately coordinated operator availability.
-// Selection is read-only: never MakeCredential/GetAssertion/PIN or device provisioning.
+// These modes require separately coordinated operator actions; building this host does not execute them.
+// No persistent provisioning or MakeCredential/GetAssertion/PIN operation is requested; setup can
+// still open interfaces and select an applet. The assertions
+// cover paired notification and selected GetInfo/reopen outcomes, not a native interruption deadline.
 internal static class OperatorScenarios
 {
     internal static async Task<int> RunAsync(string mode, IYubiKey selected, int serial, Evidence evidence)

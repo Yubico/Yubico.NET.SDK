@@ -22,8 +22,14 @@ namespace Yubico.YubiKit.Ctap2.Examples.FidoTool.Cli.Menus;
 
 /// <summary>
 /// Interactive menu for authenticator configuration operations.
-/// Mirrors ykman's "fido config" command group.
+/// Uses ykman-like grouping, not command compatibility.
 /// </summary>
+/// <remarks>
+/// Support probes also return false for caught errors/cancellation; firmware metadata is not complete
+/// subcommand support. Prompts are synchronous. Current executable always-UV wording overstates scope:
+/// it affects credential ceremonies, not GetInfo/every operation. Re-read state before repeating an
+/// uncertain toggle. Minimum length is a code-point policy and may force change even with the flag false.
+/// </remarks>
 public static class ConfigMenu
 {
     /// <summary>
@@ -41,7 +47,7 @@ public static class ConfigMenu
 
         OutputHelpers.WriteActiveDevice(selection.DisplayName);
 
-        // Check feature support
+        // Probe boolean support; false also masks connection/read/cancellation failures.
         var supported = await ConfigManagement.IsSupported(selection.Device, cancellationToken);
         if (!supported)
         {

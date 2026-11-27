@@ -36,7 +36,10 @@ public sealed class RawCtapHidSession : ApplicationSession
     }
 
     /// <summary>Creates a raw FIDO HID session that borrows <paramref name="connection" />.</summary>
-    /// <remarks>CTAP HID channel initialization is deferred until the first operation.</remarks>
+    /// <remarks>
+    ///     Creation attaches the session without wire I/O and sets IsInitialized. The first exchange initializes
+    ///     the channel; the session's inherited FirmwareVersion remains unknown (0.0.0).
+    /// </remarks>
     public static Task<RawCtapHidSession> CreateAsync(
         IFidoHidConnection connection,
         CancellationToken cancellationToken = default)
@@ -58,8 +61,17 @@ public sealed class RawCtapHidSession : ApplicationSession
 
     /// <summary>Sends one caller-defined CTAP HID command and returns its correlated response payload.</summary>
     /// <remarks>
+    ///     Use a request/response CTAPHID command, not a CTAP2 operation code. CANCEL (0x11) has no response of
+    ///     its own and is not an ordinary exchange for this method. Channel-control sequences require their own
+    ///     protocol handling. After a partial framing or transport failure, dispose and reopen the connection.
+    ///     Caller cancellation is observed between reads: after a keep-alive the protocol can send CANCEL and
+    ///     drain the original response. Without another report, the operation can remain pending indefinitely.
+    ///     CTAPHID cancellation is defined for active CBOR requests; vendor commands have their own semantics.
+    ///     Keep payload storage unchanged until the actual returned task is terminal, including lazy INIT and
+    ///     incremental packet sends. Canceling an outer wait does not end this borrow.
     ///     SDK-owned outgoing packet copies are cleared after use; caller-owned <paramref name="payload" /> is not
-    ///     modified. Returned memory remains live after return and is caller-owned for sensitive-data handling.
+    ///     modified. Returned memory survives session disposal; the caller must clear its actual backing storage
+    ///     when sensitive bytes are no longer needed. This cleanup does not reach intermediate received reports.
     /// </remarks>
     public Task<ReadOnlyMemory<byte>> SendAndReceiveAsync(
         byte command,

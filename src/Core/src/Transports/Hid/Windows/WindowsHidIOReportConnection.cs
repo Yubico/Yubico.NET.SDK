@@ -22,6 +22,9 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Windows;
 /// Construction, reports and disposal wait for the owner's actual native last use. Direct reports use
 /// descriptor payload sizes rather than typed FIDO64; SET must match the output descriptor exactly.
 /// Returned arrays belong to the caller, including sensitive-data clearing. Disposal has no drain timeout.
+/// Descriptor lengths include the report-ID byte; these payload sizes exclude it. The owner clears its
+/// separate native staging after last use; that does not clear returned payloads or protocol/application
+/// output. Direct opens acquire no implicit grouped SDK claim.
 /// </remarks>
 internal sealed class WindowsHidIOReportConnection : IHidConnection
 {

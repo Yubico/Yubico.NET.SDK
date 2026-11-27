@@ -556,10 +556,9 @@ public class FidoHidProtocolTests
     }
 
     /// <summary>
-    /// Abandoning a ceremony while the authenticator is asking for a touch must tell the
-    /// authenticator, or it keeps that request pending on a channel nobody is servicing and the
-    /// key stays unusable until it is physically re-plugged. The cancel is sent once, not on
-    /// every keep-alive frame that follows it, and the channel is left immediately reusable.
+    /// Checks one CANCEL, original-response drain, and a subsequent scripted exchange after cancellation
+    /// during keep-alive. The vendor-command script is a managed lifetime oracle, not normative CBOR
+    /// cancellation behavior or evidence that a physical key requires re-plugging.
     /// </summary>
     /// <remarks>
     /// The caller is abandoned mid-exchange rather than up front: <see cref="ExchangeGuard"/>
@@ -579,8 +578,8 @@ public class FidoHidProtocolTests
         var context = CreateUserPresenceContext();
         using var cts = new CancellationTokenSource();
 
-        // The authenticator reports it is waiting for a touch, then answers the cancel with
-        // CTAP2_ERR_KEEPALIVE_CANCEL (0x2D).
+        // The script reports a touch wait, then terminates the original vendor command with byte 0x2D.
+        // CTAPHID CANCEL itself has no response; normative KEEPALIVE_CANCEL belongs to a CBOR response.
         connection.QueueResponsePackets([
             .. Enumerable.Range(0, keepAliveCount).Select(_ =>
                 CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded])),
@@ -607,8 +606,7 @@ public class FidoHidProtocolTests
         Assert.Single(prompt.Requested);
         Assert.Empty(prompt.Resolved);
 
-        // The symptom the fix exists to prevent: before it, the abandoned user-presence request
-        // left the channel busy and the next exchange failed until the key was re-plugged.
+        // A later scripted response checks that the original response was consumed before reuse.
         connection.OnResponseDequeued = null;
         connection.QueueResponsePackets(
             CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, [0xAA]));
@@ -692,10 +690,8 @@ public class FidoHidProtocolTests
     }
 
     /// <summary>
-    /// A touch landing at the same moment the caller abandons makes the authenticator's answer a
-    /// real multi-packet response rather than the one-byte cancel acknowledgement. Every
-    /// continuation frame must still be drained before cancellation is surfaced, or the next
-    /// exchange reads the leftovers as its own response.
+    /// Checks that a multi-packet vendor response is drained before surfacing cancellation. The later
+    /// scripted exchange must receive its own bytes rather than the original response's continuation.
     /// </summary>
     [Fact]
     [Trait("Category", "RuntimeResilience")]
@@ -741,10 +737,10 @@ public class FidoHidProtocolTests
     }
 
     /// <summary>
-    /// A touch that lands as the caller abandons produces a real CTAP success instead of
-    /// CTAP2_ERR_KEEPALIVE_CANCEL. CTAP 2.3 §11.2.9.1.5 says a cancelled request "will reply with"
-    /// 0x2D; it never says to discard a success. The authenticator did the work, so the answer is
-    /// returned (python-fido2 hid/__init__.py _do_call behaves the same).
+    /// Checks the SDK's policy of returning a scripted CBOR success that races caller cancellation.
+    /// CTAP 2.3 Proposed Standard (February 26, 2026), §11.2.9.1.5 requires the authenticator to return
+    /// KEEPALIVE_CANCEL for canceled CBOR work and forbids a reply to CANCEL itself. Returning the raced
+    /// success here is an SDK nonrollback policy, rather than a host requirement from that passage.
     /// </summary>
     [Fact]
     [Trait("Category", "RuntimeResilience")]

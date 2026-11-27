@@ -19,10 +19,13 @@ using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.Pin;
 using Yubico.YubiKit.WebAuthn.Attestation;
+using Yubico.YubiKit.WebAuthn.Client.Authentication;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
 using Yubico.YubiKit.WebAuthn.Client.UserVerification;
 using Yubico.YubiKit.WebAuthn.Cose;
+using Yubico.YubiKit.WebAuthn.Extensions;
 using Yubico.YubiKit.WebAuthn.Extensions.Processing;
+using Yubico.YubiKit.WebAuthn.Preferences;
 
 namespace Yubico.YubiKit.WebAuthn.Client;
 
@@ -41,7 +44,26 @@ public sealed partial class WebAuthnClient
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The registration response with credential details.</returns>
-    /// <exception cref="WebAuthnClientError">Thrown on validation or operation failure.</exception>
+    /// <remarks>
+    /// <para>
+    /// The response must be verified by the RP server before registration is accepted. A failure during
+    /// extension output processing can occur after the credential has been created; it does not roll
+    /// creation back. The timeout signals cooperative cancellation, not a hard completion deadline;
+    /// see <see cref="PublicKeyCredentialCreationOptions.Timeout"/>.
+    /// </para>
+    /// <para>
+    /// When built-in verification is used without a token, a fitting exclude list is checked by the
+    /// authenticator during credential creation. Larger lists can require interactive verification
+    /// before the creation command; the SDK does not cache a user gesture across these commands.
+    /// </para>
+    /// <para>
+    /// Capability discovery, PIN/UV token acquisition, transport operations, and extension output
+    /// processing can propagate lower-level exceptions; not every failure is normalized to
+    /// <see cref="WebAuthnClientError"/>.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="WebAuthnClientError">Request validation or a mapped ceremony failure occurred.</exception>
+    /// <exception cref="OperationCanceledException">The operation observed caller cancellation.</exception>
     public async Task<RegistrationResponse> MakeCredentialAsync(
         PublicKeyCredentialCreationOptions options,
         ReadOnlyMemory<byte>? pinBytes = null,
@@ -54,6 +76,13 @@ public sealed partial class WebAuthnClient
         ValidateRegistrationOptions(options);
         EnsureRpIdAuthorized(options.Rp.Id);
 
+        if (options.ResidentKey == Preferences.ResidentKeyPreference.Discouraged
+            && options.Extensions?.LargeBlob?.Support == Extensions.Inputs.LargeBlobSupport.Required)
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "Required largeBlob storage needs a discoverable credential.");
+        }
+
         using var deadline = CeremonyDeadline.Start(options.Timeout, cancellationToken);
         try
         {
@@ -61,7 +90,7 @@ public sealed partial class WebAuthnClient
         }
         catch (OperationCanceledException ex) when (deadline.Expired)
         {
-            throw CeremonyTimedOut(options.Timeout, ex);
+            throw CeremonyTimedOut(deadline.EffectiveTimeout, ex);
         }
     }
 
@@ -83,7 +112,7 @@ public sealed partial class WebAuthnClient
             topOrigin: options.TopOrigin);
 
         // Get authenticator info
-        var info = await _backend.GetCachedInfoAsync(cancellationToken).ConfigureAwait(false);
+        var info = await GetCeremonyInfoAsync(cancellationToken).ConfigureAwait(false);
 
         // Resolve the resident-key preference against the authenticator (WebAuthn L3 §5.4.6):
         // required → rk, preferred → rk only if the authenticator can, discouraged → omit.
@@ -101,32 +130,48 @@ public sealed partial class WebAuthnClient
         };
 
         // Extension processors are created per attempt; their permissions join the token request.
-        var context = new ExtensionContext(info, _backend.Protocol, _backend);
-        var permissions = MakeCredentialCeremonyPermissions
+        var context = new ExtensionContext(info, null, _backend);
+        var permissions = PinUvAuthTokenPermissions.MakeCredential
+            | (options.ExcludeCredentials is { Count: > 0 } ? PinUvAuthTokenPermissions.GetAssertion : PinUvAuthTokenPermissions.None)
             | RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context).Permissions;
-        bool hasPreviewSign = options.Extensions?.PreviewSign is not null;
+        var uvPreference = Extensions.Processing.Processors.PrfProcessor.RequiresVerifiedCreationEvaluation(options.Extensions?.Prf, context)
+            ? Preferences.UserVerificationPreference.Required : options.UserVerification;
 
         using var auth = new CeremonyAuth(this, options.Rp.Id, callerPinBytes);
         IReadOnlyList<PublicKeyCredentialDescriptor>? probedExcludeList = null;
 
         var (ctapResponse, extensions) = await RunWithUvEscalationAsync(
-            info, options.UserVerification, permissions, auth, hasPreviewSign, AttemptAsync, cancellationToken)
+            info, uvPreference, permissions, auth, AttemptAsync, cancellationToken)
             .ConfigureAwait(false);
 
         // Outputs are prepared outside the escalation scope, while the token is still live.
         using (extensions)
         {
-            return await BuildRegistrationResponseAsync(ctapResponse, info, clientData, options, extensions, auth.Token, cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                return await BuildRegistrationResponseAsync(ctapResponse, info, clientData, options, extensions, auth.Token, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(ctapResponse.AuthenticatorDataRaw.Span);
+                throw;
+            }
+            finally
+            {
+                if (ctapResponse.LargeBlobKey is { } key)
+                    System.Security.Cryptography.CryptographicOperations.ZeroMemory(key.Span);
+                ClearUnsignedRegistrationOutputs(ctapResponse.UnsignedExtensionOutputs);
+            }
         }
 
         async Task<(MakeCredentialResponse Response, RegistrationExtensionSession Extensions)> AttemptAsync(
-            UvDecision decision, CancellationToken ct)
+            UvDecision decision, UserVerificationPreference preference, CancellationToken ct)
         {
             var extensions = RegistrationExtensionSession.Create(options.Extensions, options, requireResidentKey, context);
             try
             {
-                return await AttemptWithAsync(extensions, decision, ct).ConfigureAwait(false);
+                return await AttemptWithAsync(extensions, decision, preference, ct).ConfigureAwait(false);
             }
             catch
             {
@@ -136,9 +181,19 @@ public sealed partial class WebAuthnClient
         }
 
         async Task<(MakeCredentialResponse Response, RegistrationExtensionSession Extensions)> AttemptWithAsync(
-            RegistrationExtensionSession extensions, UvDecision decision, CancellationToken ct)
+            RegistrationExtensionSession extensions, UvDecision decision, UserVerificationPreference preference, CancellationToken ct)
         {
             await extensions.PrepareAsync(ct).ConfigureAwait(false);
+
+            if (decision.UvOption is true && auth.Token is null && options.ExcludeCredentials is { Count: > 0 } original)
+            {
+                var eligible = CredentialFilter.Eligible(original, info);
+                var tokenless = BuildMakeCredentialRequest(options, clientData, auth, decision, eligible,
+                    requireResidentKey, info, extensions, out bool hasTokenlessPreviewSign);
+                var created = await MakeCredentialWithTokenlessUvAsync(tokenless, eligible, info, clientData,
+                    probedExcludeList, hasTokenlessPreviewSign, ct).ConfigureAwait(false);
+                return (created, extensions);
+            }
 
             // Exclude-list pre-flight: probe with up:false, with or without a token, and send only
             // the match so the authenticator never sees more than it can process. The final
@@ -157,10 +212,89 @@ public sealed partial class WebAuthnClient
                 excludeList = probedExcludeList = matched is null ? [] : [matched];
             }
 
-            var request = BuildMakeCredentialRequest(options, clientData, auth, decision, excludeList, requireResidentKey, extensions);
-            var response = await _backend.MakeCredentialAsync(request, ct).ConfigureAwait(false);
+            var request = BuildMakeCredentialRequest(options, clientData, auth, decision, excludeList,
+                requireResidentKey, info, extensions, out bool hasPreviewSign);
+            var response = await SendMakeCredentialAsync(request, preference, hasPreviewSign, ct).ConfigureAwait(false);
             return (response, extensions);
         }
+    }
+
+    private async Task<MakeCredentialResponse> MakeCredentialWithTokenlessUvAsync(BackendMakeCredentialRequest request,
+        IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info, WebAuthnClientData clientData,
+        IReadOnlyList<PublicKeyCredentialDescriptor>? probedExcludeList, bool hasPreviewSign, CancellationToken ct)
+    {
+        try
+        {
+            // CTAP §6.1.2 checks a fitting exclude list under the requested built-in UV policy.
+            if (!FitsExcludeList(request, eligible, info))
+            {
+                var withoutExclusions = request with { ExcludeList = [] };
+                if (!WebAuthnBackend.FitsMakeCredential(withoutExclusions, info))
+                    throw OversizeMakeCredential();
+
+                // A cached positive is useful; an unverified negative can hide credProtect level 3.
+                var selected = probedExcludeList?.FirstOrDefault();
+                selected ??= await CheckTokenlessUvExclusionsAsync(request.Rp.Id, eligible, info, clientData, ct).ConfigureAwait(false);
+                request = selected is null ? withoutExclusions : request with { ExcludeList = [selected] };
+                if (selected is not null && !WebAuthnBackend.FitsMakeCredential(request, info))
+                    throw OversizeMakeCredential();
+            }
+
+            ct.ThrowIfCancellationRequested();
+            // Use the Required error mapping; an already verified attempt must not replay MakeCredential.
+            return await SendMakeCredentialAsync(request, UserVerificationPreference.Required, hasPreviewSign, ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            Util.SensitiveMemory.Zero(request.Extensions);
+        }
+    }
+
+    private static bool FitsExcludeList(BackendMakeCredentialRequest request,
+        IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info) =>
+        (eligible.Count == 0 || eligible.Count <= CredentialFilter.MaxListCount(info))
+        && WebAuthnBackend.FitsMakeCredential(request, info);
+
+    private static WebAuthnClientError OversizeMakeCredential() => new(WebAuthnClientErrorCode.Constraint,
+        "The makeCredential request exceeds the authenticator's maximum message size.");
+
+    private async Task<PublicKeyCredentialDescriptor?> CheckTokenlessUvExclusionsAsync(string rpId,
+        IReadOnlyList<PublicKeyCredentialDescriptor> eligible, AuthenticatorInfo info, WebAuthnClientData clientData, CancellationToken ct)
+    {
+        var match = await FindTokenlessUvCredentialAsync(eligible, info,
+            chunk => CredentialFilter.SendChunkIfFitsAsync(_backend, BuildTokenlessUvAssertion(rpId, clientData, chunk), info, ct), ct)
+            .ConfigureAwait(false);
+        if (match is not { } found)
+            return null;
+
+        CredentialMatcher.ClearUnreturnedAssertion(found.Response);
+        return found.Selected;
+    }
+
+    private async Task<MakeCredentialResponse> SendMakeCredentialAsync(
+        BackendMakeCredentialRequest request, UserVerificationPreference preference, bool hasPreviewSign, CancellationToken ct)
+    {
+        try
+        {
+            return await _backend.MakeCredentialAsync(request, ct).ConfigureAwait(false);
+        }
+        catch (CtapException ex) when (!ShouldRetryWithRequiredUv(ex, preference))
+        {
+            throw MapCeremonyCtapException(ex, hasPreviewSign);
+        }
+        finally
+        {
+            Util.SensitiveMemory.Zero(request.Extensions);
+        }
+    }
+
+    private static void ClearUnsignedRegistrationOutputs(IReadOnlyDictionary<string, Memory<byte>>? unsigned)
+    {
+        // PreviewSign decodes the byte-string payload into independent storage; no published output
+        // retains any of these outer dictionary values. Run after the last processor has used them.
+        if (unsigned is not null)
+            foreach (var encoded in unsigned.Values)
+                System.Security.Cryptography.CryptographicOperations.ZeroMemory(encoded.Span);
     }
 
     private static BackendMakeCredentialRequest BuildMakeCredentialRequest(
@@ -170,14 +304,16 @@ public sealed partial class WebAuthnClient
         UvDecision decision,
         IReadOnlyList<PublicKeyCredentialDescriptor>? excludeList,
         bool requireResidentKey,
-        RegistrationExtensionSession extensions)
+        AuthenticatorInfo info,
+        RegistrationExtensionSession extensions,
+        out bool hasPreviewSign)
     {
         var pubKeyCredParams = options.PubKeyCredParams
             .Select(alg => new PublicKeyCredentialParameters { Algorithm = (CoseAlgorithmIdentifier)alg.Value })
             .ToList();
 
         // Extension inputs first: an input that cannot be built must fail before any pinUvAuthParam exists.
-        var extensionsCbor = extensions.PrepareInputs(auth.Token);
+        var extensionsCbor = extensions.PrepareInputs(auth.Token, out hasPreviewSign);
         var (pinUvAuthParam, pinUvAuthProtocol) = auth.SignClientData(clientData.Hash.Span);
 
         return new BackendMakeCredentialRequest
@@ -189,6 +325,8 @@ public sealed partial class WebAuthnClient
             ExcludeList = excludeList,
             Extensions = extensionsCbor,
             Options = CtapOptions(decision, requireResidentKey),
+            EnterpriseAttestation = options.Attestation == Preferences.AttestationPreference.Enterprise
+                && info.Options.TryGetValue("ep", out var ep) && ep ? 1 : null,
             PinUvAuthParam = pinUvAuthParam,
             PinUvAuthProtocol = pinUvAuthProtocol
         };
@@ -213,7 +351,7 @@ public sealed partial class WebAuthnClient
         // client replaces any statement that is not a self attestation with fmt "none" and an empty
         // attStmt, so the RP never sees the attestation certificate chain it declined. The AAGUID is
         // kept as the authenticator returned it, as L3 specifies. Indirect, Direct and
-        // Enterprise pass the authenticator's statement through.
+        // Enterprise pass the authenticator's statement through. Indirect has no anonymization service.
         var webAuthnStatement = ctapResponse.AttestationStatement;
         if (options.Attestation == Preferences.AttestationPreference.None
             && !IsSelfAttestation(attestedCred.Aaguid, webAuthnStatement))
@@ -222,15 +360,23 @@ public sealed partial class WebAuthnClient
         }
 
         // Wrap authenticator data
-        var webAuthnAuthData = WebAuthnAuthenticatorData.Decode(ctapResponse.AuthenticatorDataRaw);
+        var webAuthnAuthData = WebAuthnAuthenticatorData.FromOwned(ctapResponse.AuthenticatorData);
 
         // Create attestation object from the (possibly replaced) statement so AttestationObject,
         // RawAttestationObject and AttestationStatement agree.
         var attestationObject = WebAuthnAttestationObject.Create(webAuthnAuthData, webAuthnStatement);
-
-        // Parse extension outputs via pipeline
-        var extensionOutputs = await extensions.PrepareOutputsAsync(ctapResponse, webAuthnAuthData, tokenSession, cancellationToken)
-            .ConfigureAwait(false);
+        RegistrationExtensionOutputs? extensionOutputs;
+        try
+        {
+            extensionOutputs = await extensions.PrepareOutputsAsync(ctapResponse, webAuthnAuthData, tokenSession, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch
+        {
+            // Create made an independent, unpublished copy of the signed authenticator data.
+            Util.SensitiveMemory.Zero(attestationObject.RawCbor);
+            throw;
+        }
 
         return new RegistrationResponse
         {

@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
 /// <summary>
 /// Non-interactive CLI mode entry point.
 ///
-/// All commands write results to stdout. Errors and diagnostics go to stderr.
+/// Commands write results to stdout, including JSON error fields. Separate diagnostics go to stderr.
 /// Exit code 0 = success, 1 = failure.
 ///
 /// SECURITY NOTE: Credentials supplied via CLI flags (--pin, --puk, --management-key)
@@ -31,7 +31,21 @@ namespace Yubico.YubiKit.Piv.Examples.PivTool.Cli.Commands;
 /// </summary>
 internal static class CliRunner
 {
-    internal static async Task<int> RunAsync(string[] args, CancellationToken ct = default)
+    internal static async Task<int> RunWithCancellationExitAsync(Func<Task<int>> run, TextWriter errors)
+    {
+        try
+        {
+            return await run();
+        }
+        catch (OperationCanceledException)
+        {
+            errors.WriteLine("Operation cancelled.");
+            return 130;
+        }
+    }
+
+    internal static async Task<int> RunAsync(string[] args, CancellationToken ct = default, TextReader? resetInput = null,
+        Func<int?, CancellationToken, Task<IPivSession?>>? openResetSession = null)
     {
         var (command, flags) = ParseArgs(args);
 
@@ -68,7 +82,8 @@ internal static class CliRunner
             "attest" => await HandleAttestAsync(flags, serial, useJson, ct),
             "attest-intermediate" => await HandleAttestIntermediateAsync(flags, serial, useJson, ct),
             "slot-info" => await HandleSlotInfoAsync(flags, serial, useJson, ct),
-            "reset" => await HandleResetAsync(flags, serial, useJson, ct),
+            "reset" => await HandleResetAsync(flags, serial, useJson, resetInput ?? Console.In,
+                openResetSession ?? OpenResetSessionAsync, ct),
             "help" or "--help" or "-h" or "-?" => PrintHelp(),
             _ => PrintUnknownCommand(command)
         };
@@ -373,6 +388,7 @@ internal static class CliRunner
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await PivExamples.Certificates.GetCertificateAsync(session, slot.Value, ct);
+        using var certificate = result.Certificate;
 
         if (useJson)
         {
@@ -407,6 +423,7 @@ internal static class CliRunner
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await PivExamples.Certificates.ExportCertificatePemAsync(session, slot.Value, ct);
+        using var certificate = result.Certificate;
 
         if (!result.Success)
         {
@@ -415,7 +432,7 @@ internal static class CliRunner
             return 1;
         }
 
-        var pem = result.Certificate?.ExportCertificatePem() ?? string.Empty;
+        var pem = certificate?.ExportCertificatePem() ?? string.Empty;
 
         if (outputPath is not null)
         {
@@ -521,6 +538,7 @@ internal static class CliRunner
             }
 
             var result = await PivExamples.Certificates.GenerateSelfSignedAsync(session, slot.Value, subject, validityDays, ct);
+            using var certificate = result.Certificate;
             if (useJson) JsonOutput.Write(result);
             else if (result.Success) Console.WriteLine("Self-signed certificate generated successfully.");
             else Console.Error.WriteLine($"Error: {result.ErrorMessage}");
@@ -622,6 +640,12 @@ internal static class CliRunner
     private static async Task<int> HandleSignAsync(
         Dictionary<string, string?> flags, int? serial, bool useJson, CancellationToken ct)
     {
+        if (!DeviceHelper.TryParseSigningHash(flags, out var hashAlgorithm))
+        {
+            Console.Error.WriteLine("Error: --hash requires sha256, sha384, or sha512. Omit it for Ed25519.");
+            return 1;
+        }
+
         var slot = DeviceHelper.ParseSlot(DeviceHelper.GetFlag(flags, "slot"));
         var pin = DeviceHelper.ParseCredentialBytes(DeviceHelper.GetFlag(flags, "pin"), "pin");
         var inputPath = DeviceHelper.GetFlag(flags, "input");
@@ -641,7 +665,6 @@ internal static class CliRunner
             return 1;
         }
 
-        var hashAlg = DeviceHelper.ParseHashAlgorithm(DeviceHelper.GetFlag(flags, "hash"));
         var outputPath = DeviceHelper.GetFlag(flags, "output");
         var dataToSign = await File.ReadAllBytesAsync(inputPath, ct);
 
@@ -659,7 +682,7 @@ internal static class CliRunner
                 return 1;
             }
 
-            var result = await Signing.SignDataAsync(session, slot.Value, dataToSign, hashAlg, ct);
+            var result = await Signing.SignDataAsync(session, slot.Value, dataToSign, hashAlgorithm, ct);
 
             if (outputPath is not null && result.Success)
             {
@@ -800,6 +823,8 @@ internal static class CliRunner
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await Attestation.GetAttestationAsync(session, slot.Value, ct);
+        using var attested = result.AttestationCertificate;
+        using var intermediate = result.IntermediateCertificate;
 
         if (!result.Success)
         {
@@ -838,6 +863,8 @@ internal static class CliRunner
 
         await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
         var result = await Attestation.GetIntermediateCertificateAsync(session, ct);
+        using var certificate = result.AttestationCertificate;
+        using var intermediate = result.IntermediateCertificate;
 
         if (!result.Success)
         {
@@ -885,38 +912,50 @@ internal static class CliRunner
             result = await SlotInfoQuery.GetAllSlotsInfoAsync(session, ct);
         }
 
-        if (useJson)
+        try
         {
-            JsonOutput.Write(result);
-        }
-        else
-        {
-            foreach (var s in result.Slots)
+            if (useJson)
             {
-                Console.WriteLine($"Slot {s.Slot} ({s.Name}): HasKey={s.HasKey} HasCert={s.HasCertificate}");
-                if (s.Metadata is SlotMetadata m)
+                JsonOutput.Write(result);
+            }
+            else
+            {
+                foreach (var s in result.Slots)
                 {
-                    Console.WriteLine($"  Key type:   {m.KeyType}");
-                    Console.WriteLine($"  PIN Policy:  {m.PinPolicy}");
-                    Console.WriteLine($"  Touch Policy:{m.TouchPolicy}");
-                    Console.WriteLine($"  Generated:   {m.IsGenerated}");
+                    Console.WriteLine($"Slot {s.Slot} ({s.Name}): HasKey={s.HasKey} HasCert={s.HasCertificate}");
+                    if (s.Metadata is SlotMetadata m)
+                    {
+                        Console.WriteLine($"  Key type:   {m.KeyType}");
+                        Console.WriteLine($"  PIN Policy:  {m.PinPolicy}");
+                        Console.WriteLine($"  Touch Policy:{m.TouchPolicy}");
+                        Console.WriteLine($"  Generated:   {m.IsGenerated}");
+                    }
                 }
             }
+        }
+        finally
+        {
+            foreach (var slot in result.Slots)
+                slot.Certificate?.Dispose();
         }
 
         return result.Success ? 0 : 1;
     }
 
     private static async Task<int> HandleResetAsync(
-        Dictionary<string, string?> flags, int? serial, bool useJson, CancellationToken ct)
+        Dictionary<string, string?> flags, int? serial, bool useJson, TextReader input,
+        Func<int?, CancellationToken, Task<IPivSession?>> openSession, CancellationToken ct)
     {
         bool force = DeviceHelper.HasFlag(flags, "force");
 
         if (!force && !useJson)
         {
-            Console.Write("WARNING: This will reset the PIV application and delete all keys. Type 'RESET' to confirm: ");
-            var input = Console.ReadLine();
-            if (!string.Equals(input, "RESET", StringComparison.Ordinal))
+            Console.Write("WARNING: This deletes ordinary PIV keys, certificates, and data objects, but retains F9 attestation. Type 'RESET' to confirm: ");
+            // Console.In can block synchronously even through ReadLineAsync. Only this one-shot
+            // pre-device read can be left behind when the process exits, not an admitted SDK task.
+            string? reply = await Task.Run(input.ReadLine, ct).WaitAsync(ct);
+            ct.ThrowIfCancellationRequested();
+            if (!string.Equals(reply, "RESET", StringComparison.Ordinal))
             {
                 Console.WriteLine("Reset cancelled.");
                 return 0;
@@ -929,10 +968,9 @@ internal static class CliRunner
             return 1;
         }
 
-        var device = await DeviceHelper.GetDeviceAsync(serial, ct);
-        if (device is null) return 1;
-
-        await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
+        ct.ThrowIfCancellationRequested();
+        await using var session = await openSession(serial, ct);
+        if (session is null) return 1;
         var result = await Reset.ResetPivApplicationAsync(session, ct);
 
         if (useJson) JsonOutput.Write(result);
@@ -940,6 +978,12 @@ internal static class CliRunner
         else Console.Error.WriteLine($"Error: {result.ErrorMessage}");
 
         return result.Success ? 0 : 1;
+    }
+
+    private static async Task<IPivSession?> OpenResetSessionAsync(int? serial, CancellationToken ct)
+    {
+        var device = await DeviceHelper.GetDeviceAsync(serial, ct);
+        return device is null ? null : await device.CreatePivSessionAsync(cancellationToken: ct);
     }
 
     // ── Help ─────────────────────────────────────────────────────────────────

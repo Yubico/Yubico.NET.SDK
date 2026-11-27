@@ -15,6 +15,7 @@
 // ReSharper disable InconsistentNaming
 namespace Yubico.YubiKit.Core.Transports.Hid.Keyboard;
 
+/// <summary>Identifies an SDK keyboard translation table, not a detected or validated host locale.</summary>
 public enum KeyboardLayout
 {
     ModHex = 0,

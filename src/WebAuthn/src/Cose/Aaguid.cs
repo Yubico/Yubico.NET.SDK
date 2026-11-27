@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Runtime.InteropServices;
 using Yubico.YubiKit.Ctap2.Cbor;
 
 namespace Yubico.YubiKit.WebAuthn.Cose;
@@ -23,12 +22,13 @@ namespace Yubico.YubiKit.WebAuthn.Cose;
 /// <remarks>
 /// WebAuthn AAGUID is a 16-byte big-endian UUID. See
 /// <see href="https://www.w3.org/TR/webauthn-3/#aaguid">WebAuthn AAGUID</see>.
+/// The default value represents the all-zero AAGUID, equivalent to constructing it from <see cref="Guid.Empty"/>.
 /// </remarks>
 public readonly struct Aaguid : IEquatable<Aaguid>
 {
-    // NOTE: AAGUID is a public identifier per WebAuthn spec, not sensitive —
-    // byte[] storage in struct is intentional and safe per CLAUDE.md exception.
-    private readonly byte[] _bytes;
+    // AAGUID is a public identifier, so its byte storage does not require secret zeroing.
+    private static readonly byte[] ZeroBytes = new byte[16];
+    private readonly byte[]? _bytes;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Aaguid"/> struct from raw bytes.
@@ -57,10 +57,10 @@ public readonly struct Aaguid : IEquatable<Aaguid>
     }
 
     /// <summary>
-    /// Gets the AAGUID as a span of bytes (big-endian, 16 bytes).
+    /// Gets the AAGUID bytes in big-endian order.
     /// </summary>
-    /// <returns>A read-only span containing the 16-byte AAGUID.</returns>
-    public ReadOnlySpan<byte> AsSpan() => _bytes ?? [];
+    /// <returns>Exactly 16 bytes, including for the default value.</returns>
+    public ReadOnlySpan<byte> AsSpan() => _bytes ?? ZeroBytes;
 
     /// <summary>
     /// Gets the AAGUID as a <see cref="Guid"/>.
@@ -68,24 +68,12 @@ public readonly struct Aaguid : IEquatable<Aaguid>
     /// <remarks>
     /// Converts from WebAuthn's big-endian AAGUID to .NET's mixed-endian GUID representation.
     /// </remarks>
-    public Guid Value
-    {
-        get
-        {
-            if (_bytes is null or { Length: 0 })
-            {
-                return Guid.Empty;
-            }
-
-            return AaguidConverter.FromBigEndianBytes(_bytes);
-        }
-    }
+    public Guid Value => AaguidConverter.FromBigEndianBytes(AsSpan());
 
     /// <summary>
     /// Determines whether two <see cref="Aaguid"/> instances are equal.
     /// </summary>
-    public bool Equals(Aaguid other) =>
-        _bytes is not null && other._bytes is not null && _bytes.AsSpan().SequenceEqual(other._bytes);
+    public bool Equals(Aaguid other) => AsSpan().SequenceEqual(other.AsSpan());
 
     /// <summary>
     /// Determines whether this instance and a specified object are equal.
@@ -95,15 +83,7 @@ public readonly struct Aaguid : IEquatable<Aaguid>
     /// <summary>
     /// Returns the hash code for this instance.
     /// </summary>
-    public override int GetHashCode()
-    {
-        if (_bytes is null or { Length: 0 })
-        {
-            return 0;
-        }
-        // Use first 4 bytes as hash seed
-        return MemoryMarshal.Read<int>(_bytes);
-    }
+    public override int GetHashCode() => Value.GetHashCode();
 
     /// <summary>
     /// Returns the AAGUID as a hyphenated hex string (8-4-4-4-12 format).

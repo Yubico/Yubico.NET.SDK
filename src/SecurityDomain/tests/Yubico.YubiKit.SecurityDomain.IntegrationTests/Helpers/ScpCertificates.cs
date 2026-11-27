@@ -2,6 +2,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Yubico.YubiKit.SecurityDomain.IntegrationTests.Helpers;
 
+/// <summary>Arranges known test certificates by issuer/subject names and key usage, without trust validation.</summary>
 public class ScpCertificates
 {
     private ScpCertificates(X509Certificate2? ca, IReadOnlyList<X509Certificate2> bundle, X509Certificate2? leaf)
@@ -23,7 +24,7 @@ public class ScpCertificates
         // Order the certificates: root CA first, then intermediates, then leaf
         var orderedCerts = OrderCertificates(certList);
 
-        // Identify CA: the first cert if it's self-signed
+        // Treat matching issuer/subject names as the fixture root; no signature is verified.
         X509Certificate2? ca = null;
         if (orderedCerts.Count > 0 && IsSelfSigned(orderedCerts[0]))
         {
@@ -47,14 +48,14 @@ public class ScpCertificates
     {
         if (certList.Count == 0) return [];
 
-        // Find the root certificate (self-signed)
+        // Find a certificate whose issuer and subject names match (not proof of a self-signature).
         var root = certList.FirstOrDefault(IsSelfSigned);
         if (root is null) throw new InvalidOperationException("No root certificate found in the collection");
 
         var ordered = new List<X509Certificate2> { root };
         certList.Remove(root);
 
-        // Build the chain by following issuer-subject links
+        // Arrange by issuer-subject name links, without verifying signatures or constraints.
         while (certList.Count > 0)
         {
             var next = certList.FirstOrDefault(c => IsIssuedBy(c, ordered[^1]));

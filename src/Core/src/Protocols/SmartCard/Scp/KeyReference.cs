@@ -15,8 +15,13 @@
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 /// <summary>
-///     Reference to an SCP key, uniquely identified by KID (Key ID) and KVN (Key Version Number).
+///     Carries an SCP key ID (KID), key version number (KVN), and cached constructor encoding.
 /// </summary>
+/// <remarks>
+///     Construct a new value when changing the reference. Init-property changes, including with-expressions,
+///     leave the cached encoding unchanged; default(KeyReference) has empty encoding. Generated equality also
+///     includes that cached memory, so separately constructed values are not a content-key comparison contract.
+/// </remarks>
 public readonly record struct KeyReference(byte Kid, byte Kvn)
 {
     private readonly Memory<byte> _bytes = new byte[] { Kid, Kvn };
@@ -34,9 +39,9 @@ public readonly record struct KeyReference(byte Kid, byte Kvn)
     public static KeyReference Default => new(0x01, 0xFF);
 
     /// <summary>
-    ///     Returns a byte array representation of this key reference.
+    ///     Returns a view of the cached constructor encoding.
     /// </summary>
-    /// <returns>A two-byte array containing [Kid, Kvn].</returns>
+    /// <returns>Constructor bytes [Kid, Kvn], or empty memory for the default value.</returns>
     public ReadOnlyMemory<byte> AsMemory() => _bytes;
 
     public ReadOnlySpan<byte> AsSpan() => _bytes.Span;

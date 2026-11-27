@@ -16,8 +16,14 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 namespace Yubico.YubiKit.SecurityDomain;
 
+/// <summary>A two-byte component descriptor returned in a Security Domain key-information entry.</summary>
+/// <param name="Tag">Device-reported key type, for example 0x88 for AES.</param>
+/// <param name="Value">Associated length descriptor, for example 0x10 for a 16-byte AES key.</param>
 public readonly record struct SecurityDomainKeyInfoComponent(byte Tag, byte Value);
 
+/// <summary>Parsed metadata for one Security Domain key reference; contains no secret key bytes.</summary>
+/// <param name="KeyReference">The device-reported key identifier and version.</param>
+/// <param name="Components">Component descriptors in response order, not a complete raw entry.</param>
 public sealed record KeyInfo(
     KeyReference KeyReference,
     IReadOnlyList<SecurityDomainKeyInfoComponent> Components);

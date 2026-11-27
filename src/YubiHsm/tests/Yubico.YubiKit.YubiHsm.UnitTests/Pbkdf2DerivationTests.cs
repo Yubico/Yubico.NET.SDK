@@ -19,18 +19,15 @@ namespace Yubico.YubiKit.YubiHsm.UnitTests;
 
 public class Pbkdf2DerivationTests
 {
-    [Fact]
-    public void DeriveKeys_KnownVector_MatchesExpected()
+    [Theory]
+    // hashlib.pbkdf2_hmac('sha256', b'password', b'Yubico', 10000, 32).hex()
+    [InlineData("password", "090b47dbed595654901dee1cc655e420592fd483f759e29909a04c4505d2ce0a")]
+    // hashlib.pbkdf2_hmac('sha256', 'páss🔑'.encode('utf-8'), b'Yubico', 10000, 32).hex()
+    [InlineData("páss🔑", "3c07639daab7689bfcc41b29717cc6d4e065cf5fd980c827d4615aa2ad88c131")]
+    public void DeriveKeys_KnownVector_MatchesExpected(string password, string expectedHex)
     {
-        // Independently compute PBKDF2-HMAC-SHA256("password", "Yubico", 10000, 32)
-        var expected = Rfc2898DeriveBytes.Pbkdf2(
-            Encoding.UTF8.GetBytes("password"),
-            "Yubico"u8,
-            10_000,
-            HashAlgorithmName.SHA256,
-            32);
-
-        var result = HsmAuthSession.DeriveKeys("password"u8.ToArray());
+        var expected = Convert.FromHexString(expectedHex);
+        var result = HsmAuthSession.DeriveKeys(Encoding.UTF8.GetBytes(password));
 
         Assert.Equal(32, result.Length);
         Assert.True(CryptographicOperations.FixedTimeEquals(expected, result));

@@ -1,14 +1,135 @@
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
+using System.Collections;
+using System.Collections.ObjectModel;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Ctap2.Backend;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
+[CollectionDefinition(nameof(Ctap2BackendLifecycleTests), DisableParallelization = true)]
+public sealed class Ctap2BackendLoggingCollection;
+
+[Collection(nameof(Ctap2BackendLifecycleTests))]
 public class Ctap2BackendLifecycleTests
 {
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task FailedExchange_UnwritableExceptionDataPreservesExactFailureAndClearsResponse(bool getterThrows)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] response = [0x00, 0x11, 0x22];
+        var protocol = Substitute.For<IFidoHidProtocol>();
+        protocol.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(call => RequestAndReturnResponseAsync(call.ArgAt<UserPresenceNotification>(2), response, ct));
+        var expected = new UnwritableDiagnosticException(getterThrows);
+        var notification = CreateNotification(new RecordingUserPresencePrompt(new InvalidOperationException("resolution failed")));
+        var backend = new HidBackend(protocol);
+        using var factory = new FailingResolutionLoggerFactory(new InvalidOperationException("logging failed"));
+        using var logging = YubiKitLogging.UseTemporary(factory);
+
+        var actual = await Record.ExceptionAsync(() =>
+            backend.SendCborAsync(new byte[] { CtapCommand.Reset }, notification, ct, onSuccess: () => throw expected));
+
+        Assert.All(response, value => Assert.Equal(0, value));
+        Assert.Same(expected, actual);
+    }
+
+    private sealed class UnwritableDiagnosticException(bool getterThrows) : Exception
+    {
+        public override IDictionary Data => getterThrows
+            ? throw new InvalidOperationException("Diagnostics unavailable")
+            : new ReadOnlyDictionary<object, object>(new Dictionary<object, object>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task FailedExchange_PreservesStatusAndClearsResponseWhenResolutionAndLoggingFail(bool useHid)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        const CtapStatus status = CtapStatus.PinInvalid;
+        byte[] response = [(byte)status, 0x11, 0x22, 0x33];
+        byte[] apduBytes = [.. response, 0x90, 0x00];
+        var apdu = new ApduResponse(apduBytes);
+        var hid = Substitute.For<IFidoHidProtocol>();
+        hid.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(call => RequestAndReturnResponseAsync(call.ArgAt<UserPresenceNotification>(2), response, ct));
+        var smartCard = Substitute.For<ISmartCardProtocol>();
+        smartCard.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), cancellationToken: ct).Returns(apdu);
+        ICtap2Backend backend = useHid ? new HidBackend(hid) : new SmartCardBackend(smartCard);
+        ReadOnlyMemory<byte> retained = useHid ? response : apdu.Data;
+        var callbackFailure = new InvalidOperationException("resolution failed");
+        var loggerFailure = new InvalidOperationException("logging failed");
+        var notification = CreateNotification(new RecordingUserPresencePrompt(callbackFailure));
+        using var factory = new FailingResolutionLoggerFactory(loggerFailure);
+        using var logging = YubiKitLogging.UseTemporary(factory);
+
+        var error = await Assert.ThrowsAsync<CtapException>(() => backend.SendCborAsync(new byte[] { 4 }, notification, ct));
+
+        Assert.Equal(status, error.Status);
+        Assert.Same(callbackFailure, error.Data["UserPresenceResolutionException"]);
+        Assert.Same(loggerFailure, error.Data["UserPresenceLoggingException"]);
+        Assert.All(retained.ToArray(), value => Assert.Equal(0, value));
+    }
+
+    private sealed class FailingResolutionLoggerFactory(Exception failure) : ILoggerFactory
+    {
+        public ILogger CreateLogger(string categoryName) => categoryName.EndsWith(nameof(UserPresenceNotification), StringComparison.Ordinal)
+            ? new FailingResolutionLogger(failure) : NullLogger.Instance;
+        public void AddProvider(ILoggerProvider provider) { }
+        public void Dispose() { }
+    }
+
+    private sealed class FailingResolutionLogger(Exception failure) : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => true;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) => throw failure;
+    }
+    [Theory]
+    [InlineData(0x6A82, true)]
+    [InlineData(0x6D00, true)]
+    [InlineData(0x6E00, true)]
+    [InlineData(0x6F00, false)]
+    public async Task SmartCardSelect_MapsOnlyUnavailableStatuses(short sw, bool unavailable)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var expected = ApduException.FromStatusWord(sw);
+        var protocol = Substitute.For<ISmartCardProtocol>();
+        protocol.SelectAsync(Arg.Any<ReadOnlyMemory<byte>>(), ct).ThrowsAsync(expected);
+        var backend = new SmartCardBackend(protocol);
+
+        var actual = await Record.ExceptionAsync(() => backend.SelectApplicationAsync(ct));
+
+        if (unavailable)
+            Assert.Same(expected, Assert.IsType<NotSupportedException>(actual).InnerException);
+        else
+            Assert.Same(expected, actual);
+    }
+
+    [Fact]
+    public async Task CborBackends_RejectMissingStatusByte()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var smartCard = Substitute.For<ISmartCardProtocol>();
+        smartCard.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), cancellationToken: ct)
+            .Returns(new ApduResponse(new byte[] { 0x90, 0x00 }));
+        var hid = Substitute.For<IFidoHidProtocol>();
+        hid.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(ReadOnlyMemory<byte>.Empty);
+        byte[] request = [CtapCommand.GetInfo];
+
+        await Assert.ThrowsAsync<BadResponseException>(() => new SmartCardBackend(smartCard).SendCborAsync(request, UserPresenceNotification.None, ct));
+        await Assert.ThrowsAsync<BadResponseException>(() => new HidBackend(hid).SendCborAsync(request, UserPresenceNotification.None, ct));
+    }
+
     [Fact]
     public void ICtap2Backend_DoesNotAdvertiseResourceOwnership()
     {
@@ -172,6 +293,58 @@ public class Ctap2BackendLifecycleTests
     {
         await notification.RequestAsync(UserPresenceBasis.DeviceWaiting, cancellationToken);
         return new byte[] { (byte)status };
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    public async Task SelectionStatus_RequiresCompletedResolutionAndClearsUntransferredResponse(bool useHid, bool failResolution)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] hidResponse = [(byte)CtapStatus.NoCredentials];
+        var cardResponse = new ApduResponse(new byte[] { (byte)CtapStatus.NoCredentials, 0x90, 0x00 });
+        var hid = Substitute.For<IFidoHidProtocol>();
+        hid.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(call => RequestAndReturnResponseAsync(call.ArgAt<UserPresenceNotification>(2), hidResponse, ct));
+        var card = Substitute.For<ISmartCardProtocol>();
+        card.TransmitAndReceiveAsync(Arg.Any<ApduCommand>(), cancellationToken: ct).Returns(cardResponse);
+        ICtap2Backend backend = useHid ? new HidBackend(hid) : new SmartCardBackend(card);
+        var callbackFailure = new CtapException(CtapStatus.RequestTooLarge);
+        var prompt = new RecordingUserPresencePrompt(failResolution ? callbackFailure : null);
+        var notification = CreateNotification(prompt);
+
+        if (failResolution)
+            Assert.Same(callbackFailure, await Assert.ThrowsAsync<CtapException>(() => SendAsync()));
+        else
+        {
+            var result = await SendAsync();
+            Assert.Equal(CtapStatus.NoCredentials, result.Status);
+            Assert.True(result.Data.IsEmpty);
+        }
+
+        Assert.Equal(UserPresenceOutcome.Failed, Assert.Single(prompt.Outcomes));
+        Assert.Equal(0, useHid ? hidResponse[0] : cardResponse.Data.Span[0]);
+
+        Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendAsync() =>
+            backend.SendAssertionForSelectionAsync(new byte[] { CtapCommand.GetAssertion }, notification, ct);
+    }
+
+    [Fact]
+    public async Task HidSelection_PropagatesRequestCallbackFailureBeforeResponseHandoff()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var failure = new CtapException(CtapStatus.NoCredentials);
+        var protocol = Substitute.For<IFidoHidProtocol>();
+        // The FIDO protocol throws a captured request-callback failure after draining, instead of
+        // handing bytes to the backend. Model that failure at its handoff boundary.
+        protocol.SendCommandAsync(Arg.Any<byte>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<UserPresenceNotification>(), ct)
+            .Returns(Task.FromException<ReadOnlyMemory<byte>>(failure));
+        var backend = new HidBackend(protocol);
+        var exception = await Assert.ThrowsAsync<CtapException>(() => backend.SendAssertionForSelectionAsync(
+            new byte[] { CtapCommand.GetAssertion }, CreateNotification(new RecordingUserPresencePrompt()), ct));
+        Assert.Same(failure, exception);
     }
 
     private static async Task<ReadOnlyMemory<byte>> RequestAndReturnResponseAsync(

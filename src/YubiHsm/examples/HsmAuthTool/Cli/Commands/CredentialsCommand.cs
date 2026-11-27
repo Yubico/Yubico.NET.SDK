@@ -6,8 +6,6 @@ using System.Security.Cryptography;
 using Yubico.YubiKit.Cli.Commands.HsmAuth;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Output;
 using Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Prompts;
-using PinPrompt = Yubico.YubiKit.Cli.Shared.Output.PinPrompt;
-using SecureCredential = Yubico.YubiKit.Cli.Shared.Output.SecureCredential;
 
 namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 
@@ -15,9 +13,15 @@ namespace Yubico.YubiKit.YubiHsm.Examples.HsmAuthTool.Cli.Commands;
 /// Implements: hsmauth credentials {list|add|delete|generate}
 /// Manages credentials stored in the YubiHSM Auth applet.
 /// </summary>
+/// <remarks>
+///     This diagnostic command prints generated symmetric keys. The operator provisions matching HSM
+///     authentication objects separately and protects terminal/process history. Some parsing failures
+///     occur before byte-buffer clearing scopes; use total acquisition/cleanup scopes in an application.
+/// </remarks>
 internal static class CredentialsCommand
 {
-    public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken)
+    public static async Task<int> RunAsync(string[] args, CancellationToken cancellationToken,
+        Func<string[], CancellationToken, Task<int>>? add = null)
     {
         if (args.Length < 2)
         {
@@ -28,7 +32,7 @@ internal static class CredentialsCommand
         return args[1].ToLowerInvariant() switch
         {
             "list" => await ListAsync(args, cancellationToken),
-            "add" => await AddAsync(args, cancellationToken),
+            "add" => await RunAddAsync(args, add ?? AddAsync, cancellationToken),
             "delete" => await DeleteAsync(args, cancellationToken),
             "generate" => await GenerateAsync(args, cancellationToken),
             _ => PrintUsageAndReturn()
@@ -65,6 +69,28 @@ internal static class CredentialsCommand
 
     // ── credentials add LABEL ────────────────────────────────────────────────
 
+    private static Task<int> RunAddAsync(string[] args, Func<string[], CancellationToken, Task<int>> add,
+        CancellationToken cancellationToken)
+    {
+        if (args.Skip(2).Any(arg => IsRetiredOption(arg, "--derivation-password")))
+        {
+            OutputHelpers.WriteError("--derivation-password was removed. Use --derive to enter the password at a masked prompt.");
+            return Task.FromResult(1);
+        }
+
+        if (args.Skip(2).Any(arg => IsRetiredOption(arg, "--key-enc") || IsRetiredOption(arg, "--key-mac")))
+        {
+            OutputHelpers.WriteError("--key-enc and --key-mac were removed. Use --import-keys to enter the keys at masked prompts.");
+            return Task.FromResult(1);
+        }
+
+        return add(args, cancellationToken);
+    }
+
+    private static bool IsRetiredOption(string argument, string option) =>
+        string.Equals(argument, option, StringComparison.OrdinalIgnoreCase) ||
+        argument.StartsWith(option + "=", StringComparison.OrdinalIgnoreCase);
+
     private static async Task<int> AddAsync(string[] args, CancellationToken cancellationToken)
     {
         var label = CommandArgs.GetPositional(args, subcommandCount: 2);
@@ -81,7 +107,7 @@ internal static class CredentialsCommand
         return algorithmStr.ToLowerInvariant() switch
         {
             "symmetric" => await AddSymmetricAsync(args, label, touchRequired, cancellationToken),
-            "asymmetric" => await AddAsymmetricAsync(args, label, touchRequired, cancellationToken),
+            "asymmetric" => await AddAsymmetricAsync(label, touchRequired, cancellationToken),
             _ => PrintInvalidAlgorithm(algorithmStr)
         };
     }
@@ -89,169 +115,117 @@ internal static class CredentialsCommand
     private static async Task<int> AddSymmetricAsync(
         string[] args, string label, bool touchRequired, CancellationToken cancellationToken)
     {
-        var mgmtKey = ResolveManagementKey(args);
+        using var mgmtKey = OutputHelpers.ReadKey("Management key (16 bytes, hex)", 16, cancellationToken);
         if (mgmtKey is null)
         {
             return 1;
         }
 
-        // Check for --derivation-password for PBKDF2-derived mode
-        var derivationPasswordOption = CommandArgs.GetOption(args, "--derivation-password");
-        var keyEncHex = CommandArgs.GetOption(args, "--key-enc");
-        var keyMacHex = CommandArgs.GetOption(args, "--key-mac");
-
-        try
+        var derive = CommandArgs.HasFlag(args, "--derive");
+        var import = CommandArgs.HasFlag(args, "--import-keys");
+        if (derive && import)
         {
-            // Both secrets are resolved inside the try so that an aborted prompt, a declined
-            // prompt, or a rejected encoding still leaves mgmtKey zeroed by the finally below.
-            using var credentialPassword = PinPrompt.Resolve(
-                CommandArgs.GetOption(args, "--credential-password"), "Credential password");
-            using var derivationPassword = derivationPasswordOption is null
-                ? null
-                : SecureCredential.FromUtf8String(derivationPasswordOption);
-            if (credentialPassword is null)
-            {
-                OutputHelpers.WriteError("Credential password is required.");
-                return 1;
-            }
-
-            var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-            if (selection is null)
-            {
-                return 1;
-            }
-
-            await using var session = await selection.Device.CreateHsmAuthSessionAsync(
-                cancellationToken: cancellationToken);
-
-            if (derivationPassword is not null)
-            {
-                await session.PutCredentialDerivedAsync(
-                    mgmtKey,
-                    label,
-                    derivationPassword.Memory,
-                    credentialPassword.Memory,
-                    touchRequired,
-                    cancellationToken);
-
-                OutputHelpers.WriteSuccess($"Derived credential '{label}' stored successfully.");
-                OutputHelpers.WriteInfo(
-                    "Keys derived using PBKDF2-HMAC-SHA256 (10,000 iterations, salt='Yubico').");
-            }
-            else
-            {
-                byte[] keyEnc;
-                byte[] keyMac;
-                bool generated = false;
-
-                if (keyEncHex is not null && keyMacHex is not null)
-                {
-                    keyEnc = Convert.FromHexString(keyEncHex);
-                    keyMac = Convert.FromHexString(keyMacHex);
-                }
-                else
-                {
-                    keyEnc = RandomNumberGenerator.GetBytes(16);
-                    keyMac = RandomNumberGenerator.GetBytes(16);
-                    generated = true;
-                }
-
-                try
-                {
-                    await session.PutCredentialSymmetricAsync(
-                        mgmtKey,
-                        label,
-                        keyEnc,
-                        keyMac,
-                        credentialPassword.Memory,
-                        touchRequired,
-                        cancellationToken);
-
-                    OutputHelpers.WriteSuccess($"Symmetric credential '{label}' stored successfully.");
-
-                    if (generated)
-                    {
-                        OutputHelpers.WriteHex("K-ENC (generated)", keyEnc);
-                        OutputHelpers.WriteHex("K-MAC (generated)", keyMac);
-                    }
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(keyEnc);
-                    CryptographicOperations.ZeroMemory(keyMac);
-                }
-            }
-
-            return 0;
+            OutputHelpers.WriteError("Select either --derive or --import-keys.");
+            return 1;
         }
-        finally
+
+        using var credentialPassword = OutputHelpers.ReadPassword("Credential password", cancellationToken);
+        if (credentialPassword is null)
+            return 1;
+
+        using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+        using var derivationPassword = derive ? OutputHelpers.ReadDerivationPassword(cancellationToken) : null;
+        if (derive && derivationPassword is null)
+            return 1;
+
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null)
+            return 1;
+
+        await using var session = await selection.Device.CreateHsmAuthSessionAsync(cancellationToken: cancellationToken);
+        if (derivationPassword is null)
+            return await StoreSymmetricAsync(session, mgmtKey.Memory, label, password, touchRequired, import, cancellationToken);
+
+        await session.PutCredentialDerivedAsync(mgmtKey.Memory, label, derivationPassword.Memory, password, touchRequired, cancellationToken);
+        OutputHelpers.WriteSuccess($"Derived credential '{label}' stored successfully.");
+        return 0;
+    }
+
+    private static async Task<int> StoreSymmetricAsync(
+        IHsmAuthSession session, ReadOnlyMemory<byte> managementKey, string label, CredentialPassword password,
+        bool touchRequired, bool import, CancellationToken cancellationToken)
+    {
+        if (import)
         {
-            CryptographicOperations.ZeroMemory(mgmtKey);
+            using var enc = OutputHelpers.ReadKey("Encryption key (16 bytes, hex)", 16, cancellationToken);
+            using var mac = OutputHelpers.ReadKey("MAC key (16 bytes, hex)", 16, cancellationToken);
+            if (enc is null || mac is null)
+                return 1;
+
+            await session.PutCredentialSymmetricAsync(managementKey, label, enc.Memory, mac.Memory, password, touchRequired, cancellationToken);
         }
+        else
+        {
+            var keyEnc = RandomNumberGenerator.GetBytes(16);
+            var keyMac = RandomNumberGenerator.GetBytes(16);
+            try
+            {
+                await session.PutCredentialSymmetricAsync(managementKey, label, keyEnc, keyMac, password, touchRequired, cancellationToken);
+                OutputHelpers.WriteHex("K-ENC (generated, demo only)", keyEnc);
+                OutputHelpers.WriteHex("K-MAC (generated, demo only)", keyMac);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(keyEnc);
+                CryptographicOperations.ZeroMemory(keyMac);
+            }
+        }
+
+        OutputHelpers.WriteSuccess($"Symmetric credential '{label}' stored successfully.");
+        return 0;
     }
 
     private static async Task<int> AddAsymmetricAsync(
-        string[] args, string label, bool touchRequired, CancellationToken cancellationToken)
+        string label, bool touchRequired, CancellationToken cancellationToken)
     {
-        var mgmtKey = ResolveManagementKey(args);
+        using var mgmtKey = OutputHelpers.ReadKey("Management key (16 bytes, hex)", 16, cancellationToken);
         if (mgmtKey is null)
         {
             return 1;
         }
 
-        var privateKeyHex = CommandArgs.GetOption(args, "--private-key");
-        if (privateKeyHex is null)
+        using var privateKey = OutputHelpers.ReadKey("EC P-256 private key (32 bytes, hex)", 32, cancellationToken);
+        if (privateKey is null)
+            return 1;
+
+        using var credentialPassword = OutputHelpers.ReadPassword("Credential password", cancellationToken);
+        if (credentialPassword is null)
         {
-            OutputHelpers.WriteError(
-                "Missing --private-key for asymmetric add. Use 'credentials generate' for on-device key generation.");
-            CryptographicOperations.ZeroMemory(mgmtKey);
+            OutputHelpers.WriteError("Credential password is required.");
             return 1;
         }
 
-        var privateKey = CommandArgs.ParseHex(privateKeyHex);
-        if (privateKey is null || privateKey.Length != 32)
+        using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null)
         {
-            OutputHelpers.WriteError("Invalid private key. Must be 32 bytes (64 hex characters).");
-            CryptographicOperations.ZeroMemory(mgmtKey);
             return 1;
         }
 
-        try
-        {
-            // Resolved inside the try so an aborted or rejected prompt still zeros mgmtKey.
-            using var credentialPassword = PinPrompt.Resolve(
-                CommandArgs.GetOption(args, "--credential-password"), "Credential password");
-            if (credentialPassword is null)
-            {
-                OutputHelpers.WriteError("Credential password is required.");
-                return 1;
-            }
+        await using var session = await selection.Device.CreateHsmAuthSessionAsync(
+            cancellationToken: cancellationToken);
 
-            var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-            if (selection is null)
-            {
-                return 1;
-            }
+        await session.PutCredentialAsymmetricAsync(
+            mgmtKey.Memory,
+            label,
+            privateKey.Memory,
+            password,
+            touchRequired,
+            cancellationToken);
 
-            await using var session = await selection.Device.CreateHsmAuthSessionAsync(
-                cancellationToken: cancellationToken);
-
-            await session.PutCredentialAsymmetricAsync(
-                mgmtKey,
-                label,
-                privateKey,
-                credentialPassword.Memory,
-                touchRequired,
-                cancellationToken);
-
-            OutputHelpers.WriteSuccess($"Asymmetric credential '{label}' stored successfully.");
-            return 0;
-        }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(mgmtKey);
-            CryptographicOperations.ZeroMemory(privateKey);
-        }
+        OutputHelpers.WriteSuccess($"Asymmetric credential '{label}' stored successfully.");
+        return 0;
     }
 
     // ── credentials delete LABEL ─────────────────────────────────────────────
@@ -277,31 +251,24 @@ internal static class CredentialsCommand
             }
         }
 
-        var mgmtKey = ResolveManagementKey(args);
+        using var mgmtKey = OutputHelpers.ReadKey("Management key (16 bytes, hex)", 16, cancellationToken);
         if (mgmtKey is null)
         {
             return 1;
         }
 
-        try
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null)
         {
-            var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-            if (selection is null)
-            {
-                return 1;
-            }
-
-            await using var session = await selection.Device.CreateHsmAuthSessionAsync(
-                cancellationToken: cancellationToken);
-
-            await session.DeleteCredentialAsync(mgmtKey, label, cancellationToken);
-            OutputHelpers.WriteSuccess($"Credential '{label}' deleted.");
-            return 0;
+            return 1;
         }
-        finally
-        {
-            CryptographicOperations.ZeroMemory(mgmtKey);
-        }
+
+        await using var session = await selection.Device.CreateHsmAuthSessionAsync(
+            cancellationToken: cancellationToken);
+
+        await session.DeleteCredentialAsync(mgmtKey.Memory, label, cancellationToken);
+        OutputHelpers.WriteSuccess($"Credential '{label}' deleted.");
+        return 0;
     }
 
     // ── credentials generate LABEL ───────────────────────────────────────────
@@ -319,81 +286,50 @@ internal static class CredentialsCommand
 
         var touchRequired = CommandArgs.HasFlag(args, "--touch");
 
-        var mgmtKey = ResolveManagementKey(args);
+        using var mgmtKey = OutputHelpers.ReadKey("Management key (16 bytes, hex)", 16, cancellationToken);
         if (mgmtKey is null)
         {
             return 1;
         }
 
-        try
+        using var credentialPassword = OutputHelpers.ReadPassword("Credential password", cancellationToken);
+        if (credentialPassword is null)
         {
-            // Resolved inside the try so an aborted or rejected prompt still zeros mgmtKey.
-            using var credentialPassword = PinPrompt.Resolve(
-                CommandArgs.GetOption(args, "--credential-password"), "Credential password");
-            if (credentialPassword is null)
-            {
-                OutputHelpers.WriteError("Credential password is required.");
-                return 1;
-            }
-
-            var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
-            if (selection is null)
-            {
-                return 1;
-            }
-
-            await using var session = await selection.Device.CreateHsmAuthSessionAsync(
-                cancellationToken: cancellationToken);
-
-            await session.GenerateCredentialAsymmetricAsync(
-                mgmtKey,
-                label,
-                credentialPassword.Memory,
-                touchRequired,
-                cancellationToken);
-
-            OutputHelpers.WriteSuccess(
-                $"Asymmetric credential '{label}' generated on device.");
-            OutputHelpers.WriteInfo("Private key was generated on-device and never leaves the YubiKey.");
-
-            // Retrieve and display the public key
-            var publicKey = await session.GetPublicKeyAsync(label, cancellationToken);
-            OutputHelpers.WriteHex("Public key", publicKey.Span);
-
-            return 0;
+            OutputHelpers.WriteError("Credential password is required.");
+            return 1;
         }
-        finally
+
+        using var password = CredentialPassword.FromUtf8(credentialPassword.Memory.Span);
+
+        var selection = await DeviceSelector.SelectDeviceAsync(cancellationToken);
+        if (selection is null)
         {
-            CryptographicOperations.ZeroMemory(mgmtKey);
+            return 1;
         }
+
+        await using var session = await selection.Device.CreateHsmAuthSessionAsync(
+            cancellationToken: cancellationToken);
+
+        await session.GenerateCredentialAsymmetricAsync(
+            mgmtKey.Memory,
+            label,
+            password,
+            touchRequired,
+            cancellationToken);
+
+        OutputHelpers.WriteSuccess(
+            $"Asymmetric credential '{label}' generated on device.");
+        OutputHelpers.WriteInfo("Private key was generated on-device and never leaves the YubiKey.");
+
+        // Export credential PK-OCE for enrollment in the matching HSM authentication object.
+        // The HSM's own trusted static public key is obtained separately through HSM provisioning.
+        var publicKey = await session.GetPublicKeyAsync(label, cancellationToken);
+        OutputHelpers.WriteHex("Public key", publicKey.Span);
+
+        return 0;
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Resolves the management key from --management-key option or prompts.
-    /// Returns null if the key is invalid.
-    /// </summary>
-    private static byte[]? ResolveManagementKey(string[] args)
-    {
-        var mgmtKeyHex = CommandArgs.GetOption(args, "--management-key");
-
-        if (mgmtKeyHex is null)
-        {
-            mgmtKeyHex = AnsiConsole.Prompt(
-                new TextPrompt<string>("Management key (hex, 16 bytes):")
-                    .DefaultValue("00000000000000000000000000000000"));
-        }
-
-        var mgmtKey = CommandArgs.ParseHex(mgmtKeyHex);
-        if (mgmtKey is null || mgmtKey.Length != 16)
-        {
-            OutputHelpers.WriteError("Invalid management key. Must be 16 bytes (32 hex characters).");
-            return null;
-        }
-
-        return mgmtKey;
-    }
 
     private static int PrintInvalidAlgorithm(string algorithm)
     {
@@ -417,23 +353,17 @@ internal static class CredentialsCommand
         AnsiConsole.MarkupLine("  delete LABEL                Delete a credential");
         AnsiConsole.MarkupLine("  generate LABEL              Generate asymmetric credential on device");
         AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLine("Passwords and keys are prompted for, not accepted as arguments.");
         AnsiConsole.MarkupLine("[bold]Add options:[/]");
+        AnsiConsole.MarkupLine("  --derive                    Derive symmetric keys via PBKDF2");
+        AnsiConsole.MarkupLine("  --import-keys               Prompt for existing symmetric keys instead of generating them");
         AnsiConsole.MarkupLine("  --algorithm <type>          symmetric (default) or asymmetric");
-        AnsiConsole.MarkupLine("  --credential-password PWD   Credential password");
-        AnsiConsole.MarkupLine("  --management-key HEX        Management key (hex, 16 bytes)");
         AnsiConsole.MarkupLine("  --touch                     Require touch for credential use");
-        AnsiConsole.MarkupLine("  --derivation-password PWD   Derive keys via PBKDF2 (symmetric only)");
-        AnsiConsole.MarkupLine("  --key-enc HEX               Encryption key (symmetric only, hex)");
-        AnsiConsole.MarkupLine("  --key-mac HEX               MAC key (symmetric only, hex)");
-        AnsiConsole.MarkupLine("  --private-key HEX           EC P256 private key (asymmetric only)");
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]Delete options:[/]");
         AnsiConsole.MarkupLine("  -f, --force                 Skip confirmation prompt");
-        AnsiConsole.MarkupLine("  --management-key HEX        Management key (hex, 16 bytes)");
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold]Generate options:[/]");
-        AnsiConsole.MarkupLine("  --credential-password PWD   Credential password");
-        AnsiConsole.MarkupLine("  --management-key HEX        Management key (hex, 16 bytes)");
         AnsiConsole.MarkupLine("  --touch                     Require touch for credential use");
     }
 }

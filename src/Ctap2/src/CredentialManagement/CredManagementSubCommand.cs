@@ -15,7 +15,7 @@
 namespace Yubico.YubiKit.Ctap2.CredentialManagement;
 
 /// <summary>
-/// CTAP2 authenticatorCredentialManagement sub-command codes.
+/// Standard authenticatorCredentialManagement subcommand codes (CTAP 2.1, 2022-06-21 errata, Section 6.8).
 /// </summary>
 /// <remarks>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#authenticatorCredentialManagement

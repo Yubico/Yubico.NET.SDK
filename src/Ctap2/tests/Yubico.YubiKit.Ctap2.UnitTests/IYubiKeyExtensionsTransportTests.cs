@@ -22,8 +22,8 @@ using Yubico.YubiKit.Core.Transports.SmartCard;
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
 /// <summary>
-///     Phase 38: CTAP2 transport selection — app-specific smart default (HID FIDO first, then SmartCard)
-///     plus explicit caller override, validated over a fake probe that records the requested connection type.
+///     Checks CTAP2 transport selection and explicit preference using a fake connect probe.
+///     The probe records the requested type and fails before protocol initialization or device operations.
 /// </summary>
 public class IYubiKeyExtensionsTransportTests
 {
@@ -40,7 +40,7 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal(typeof(IFidoHidConnection), device.RequestedConnection);
     }
 
-    // (b) default fallback: first choice (HID FIDO) absent -> SmartCard.
+    // SmartCard is selected when HID FIDO is absent, not retried after a HID connection failure.
     [Fact]
     public async Task CreateCtap2SessionAsync_DefaultSmartCardOnly_FallsBackToSmartCard()
     {
@@ -144,10 +144,8 @@ public class IYubiKeyExtensionsTransportTests
         Assert.Equal(typeof(ISmartCardConnection), device.RequestedConnection);
     }
 
-    // Phase 38.5 (ISC-10/ISC-14): the CTAP2 "no FIDO-capable connection" remap stays scoped to the
-    // ResolveSessionTransport call only. When resolution succeeds but the HID FIDO connect
-    // fails with a non-held error, that error must surface unchanged — NOT be masked as the generic
-    // NotSupportedException — proving the remap did not widen around session connection creation.
+    // Connection failure after successful resolution must retain its diagnostic, rather than
+    // being masked by the resolve-only "no FIDO-capable connection" translation.
     [Fact]
     public async Task CreateCtap2SessionAsync_ConnectFailsNonHeld_SurfacesErrorNotGenericRemap()
     {

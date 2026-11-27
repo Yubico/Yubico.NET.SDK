@@ -22,8 +22,6 @@ public sealed class PublicReturnContractTests
             "Existing low-level TLV decoder intentionally builds a caller-consumed mutable map.",
         [Mutable("Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlySpan<System.Byte>): System.Collections.Generic.IDictionary<System.Int32, System.ReadOnlyMemory<System.Byte>>", "System.Collections.Generic.IDictionary<System.Int32, System.ReadOnlyMemory<System.Byte>>")] =
             "Existing low-level TLV decoder intentionally builds a caller-consumed mutable map.",
-        [Tuple("Yubico.YubiKit.Ctap2.Extensions.PreviewSignCbor.DecodeRegistrationOutput(System.Formats.Cbor.CborReader): System.ValueTuple<System.Int32, System.Nullable<System.Int32>>", "System.ValueTuple<System.Int32, System.Nullable<System.Int32>>")] =
-            "Existing CBOR helper returns the two decoded protocol fields as a pair.",
         [Tuple("Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol.Encapsulate(System.Collections.Generic.IReadOnlyDictionary<System.Int32, System.Object>): System.ValueTuple<System.Collections.Generic.Dictionary<System.Int32, System.Object>, System.Byte[]>", "System.ValueTuple<System.Collections.Generic.Dictionary<System.Int32, System.Object>, System.Byte[]>")] =
             "Existing low-level PIN/UV protocol seam returns an encoded map and binary shared secret together.",
         [Mutable("Yubico.YubiKit.Ctap2.Pin.IPinUvAuthProtocol.Encapsulate(System.Collections.Generic.IReadOnlyDictionary<System.Int32, System.Object>): System.ValueTuple<System.Collections.Generic.Dictionary<System.Int32, System.Object>, System.Byte[]>", "System.Collections.Generic.Dictionary<System.Int32, System.Object>")] =

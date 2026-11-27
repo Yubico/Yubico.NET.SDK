@@ -22,9 +22,9 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Piv.IntegrationTests;
 
 /// <summary>
-///     Proves contention bugs between device discovery/enumeration and already-open applet sessions.
-///     Human-coordinated: these tests mutate PIV state (reset, key generation) and hold the card busy
-///     for the duration of an RSA-4096 on-card key generation.
+///     Regression checks for discovery timing and an already-open PIV session's usability.
+///     These mutate dedicated allowlisted keys without touch/hotplug coordination; RSA-4096 keeps
+///     the card busy during the timing check.
 /// </summary>
 public class PivDiscoveryContentionTests
 {
@@ -48,11 +48,9 @@ public class PivDiscoveryContentionTests
         version >= new FirmwareVersion(5, 7, 0) ? DefaultAesManagementKey : DefaultTripleDesManagementKey;
 
     /// <summary>
-    ///     Bug A: a discovery scan whose metadata/identity reads land on a card that is busy inside a
-    ///     long-running operation must not stall until the card operation finishes. The reads are
-    ///     best-effort with a bounded (3s) budget by design; today the in-flight PC/SC transmit ignores
-    ///     that budget, so the scan queues behind the RSA-4096 keygen for its full duration — backing up
-    ///     the monitor pipeline behind FindYubiKeys' scan lock.
+    ///     Measures a cold-cache scan during RSA-4096 generation and checks a four-second budget.
+    ///     Discovery skips in-use interfaces and can use conservative/cached identity information;
+    ///     the final drain observes key-generation completion before disposing the session.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "5.7.0")]
@@ -75,9 +73,7 @@ public class PivDiscoveryContentionTests
             Assert.False(keygenTask.IsCompleted,
                 "RSA-4096 keygen finished before the scan started; card was never busy, test proves nothing.");
 
-            // Fresh FindYubiKeys instance = cold identity/metadata caches, exactly what a first
-            // enumeration or post-replug rescan does. Its composite metadata read opens a second
-            // shared-mode CCID handle to the busy card.
+            // A fresh finder exercises cold caches while the ownership guard protects the busy interface.
             var finder = FindYubiKeys.Create();
             var stopwatch = Stopwatch.StartNew();
             var devices = await finder.FindAllAsync(ConnectionType.All);
@@ -104,11 +100,9 @@ public class PivDiscoveryContentionTests
     }
 
     /// <summary>
-    ///     Bug B: a cold-cache discovery scan's best-effort metadata read opens a SECOND shared-mode CCID
-    ///     handle to the card and issues SELECT Management on it. PC/SC shared handles share the card's
-    ///     basic logical channel, so that SELECT deselects the PIV applet and destroys the open session's
-    ///     security state (verified PIN). Enumerating devices must not break an already-open, authenticated
-    ///     applet session: a PIN-gated sign that succeeded before the scan must still succeed after it.
+    ///     Checks nonempty PIN-gated signatures before and after a cold-cache discovery scan.
+    ///     Discovery's in-use-interface guard preserves the open session; these assertions check
+    ///     usability rather than independently verifying the signatures or their key binding.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
@@ -127,8 +121,7 @@ public class PivDiscoveryContentionTests
         var before = await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest);
         Assert.NotEqual(0, before.Length);
 
-        // Fresh FindYubiKeys instance = cold caches, exactly what a first enumeration or
-        // post-replug rescan does. Its metadata read SELECTs Management on a second handle.
+        // A fresh finder starts with cold caches; discovery skips metadata reads on the held interface.
         var devices = await FindYubiKeys.Create().FindAllAsync(ConnectionType.All);
         Assert.NotEmpty(devices);
 

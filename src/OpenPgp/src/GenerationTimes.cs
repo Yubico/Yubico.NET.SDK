@@ -17,23 +17,27 @@ using System.Collections;
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     Generation timestamps for each key slot (Unix epoch seconds).
+///     Stored generation-time metadata for reported key slots; zero denotes an unspecified time.
 /// </summary>
-public sealed class GenerationTimes : IReadOnlyDictionary<KeyRef, int>
+/// <remarks>
+///     Values are unsigned seconds since 1970-01-01 UTC. Card specification 3.4.1 §4.4.1
+///     defines zero as unspecified, not the epoch.
+/// </remarks>
+public sealed class GenerationTimes : IReadOnlyDictionary<KeyRef, uint>
 {
-    private readonly Dictionary<KeyRef, int> _entries;
+    private readonly Dictionary<KeyRef, uint> _entries;
 
-    internal GenerationTimes(Dictionary<KeyRef, int> entries) =>
+    internal GenerationTimes(Dictionary<KeyRef, uint> entries) =>
         _entries = entries;
 
     /// <inheritdoc />
-    public int this[KeyRef key] => _entries[key];
+    public uint this[KeyRef key] => _entries[key];
 
     /// <inheritdoc />
     public IEnumerable<KeyRef> Keys => _entries.Keys;
 
     /// <inheritdoc />
-    public IEnumerable<int> Values => _entries.Values;
+    public IEnumerable<uint> Values => _entries.Values;
 
     /// <inheritdoc />
     public int Count => _entries.Count;
@@ -42,10 +46,10 @@ public sealed class GenerationTimes : IReadOnlyDictionary<KeyRef, int>
     public bool ContainsKey(KeyRef key) => _entries.ContainsKey(key);
 
     /// <inheritdoc />
-    public bool TryGetValue(KeyRef key, out int value) => _entries.TryGetValue(key, out value);
+    public bool TryGetValue(KeyRef key, out uint value) => _entries.TryGetValue(key, out value);
 
     /// <inheritdoc />
-    public IEnumerator<KeyValuePair<KeyRef, int>> GetEnumerator() => _entries.GetEnumerator();
+    public IEnumerator<KeyValuePair<KeyRef, uint>> GetEnumerator() => _entries.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

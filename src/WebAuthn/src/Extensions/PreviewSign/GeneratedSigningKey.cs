@@ -28,10 +28,19 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// extension specification. The generated signing key is represented by an embedded attestation
 /// object whose attested credential data contains the signing key handle and public key.
 /// </para>
+/// <para>
+/// The SDK decodes this object; it does not verify its signature or trust chain. When generated-key
+/// attestation is required by RP policy, the relying party must verify it before trusting the key
+/// and handle. The attestation and public key do not expose the private signing key.
+/// </para>
 /// </remarks>
 /// <param name="KeyHandle">
 /// The key handle used to request signatures from this generated signing key. This is copied from
 /// the credential ID in the embedded attestation object's attested credential data and can be empty.
+/// Pass it as the required handle to <see cref="PreviewSignSigningParams"/> even when empty. The SDK
+/// sends it as a byte string under CTAP key 2 for the selected credential. An empty handle relies on
+/// authenticator-held state; it does not select a global default key. Signing still requires nonempty
+/// TBS and, if supplied, a complete CBOR <c>COSE_Sign_Args</c> map.
 /// </param>
 /// <param name="PublicKey">
 /// The COSE public key for the generated signing key. This is the
@@ -40,13 +49,15 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// extension output.
 /// </param>
 /// <param name="Algorithm">
-/// The signing algorithm chosen from the <c>algorithms</c> extension input.
+/// The signing algorithm chosen from the <c>algorithms</c> extension input. It can differ from the
+/// public key's algorithm identifier for algorithms that split signing and verification roles.
 /// </param>
 /// <param name="AttestationObject">
 /// The attestation object for the generated signing key pair. Always present: the previewSign draft
 /// (v4 §10.2.1) makes it a required member, and <see cref="KeyHandle"/> and <see cref="PublicKey"/>
 /// are taken from its attested credential data.
 /// </param>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class GeneratedSigningKey(
     ReadOnlyMemory<byte> KeyHandle,
     CoseKey PublicKey,

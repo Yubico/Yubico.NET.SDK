@@ -76,6 +76,7 @@ public static class CertificatesMenu
         var slot = SlotSelector.SelectSlot("Select slot:");
 
         var result = await PivExamples.Certificates.GetCertificateAsync(session, slot, ct);
+        using var certificate = result.Certificate;
         if (!result.Success)
         {
             OutputHelpers.WriteError(result.ErrorMessage ?? "Failed to read certificate");
@@ -99,15 +100,16 @@ public static class CertificatesMenu
         var slot = SlotSelector.SelectSlot("Select slot:");
 
         var result = await PivExamples.Certificates.ExportCertificatePemAsync(session, slot, ct);
+        using var certificate = result.Certificate;
 
-        if (!result.Success || result.CsrPem is null)
+        if (!result.Success || certificate is null)
         {
             OutputHelpers.WriteError(result.ErrorMessage ?? "Export failed");
             return;
         }
 
         var filename = AnsiConsole.Ask<string>("Enter filename to save:");
-        await File.WriteAllTextAsync(filename, result.CsrPem, ct);
+        await File.WriteAllTextAsync(filename, certificate.ExportCertificatePem(), ct);
         OutputHelpers.WriteSuccess($"Certificate exported to {filename}");
     }
 
@@ -184,6 +186,7 @@ public static class CertificatesMenu
         var validDays = AnsiConsole.Ask("Enter validity in days:", 365);
 
         var result = await PivExamples.Certificates.GenerateSelfSignedAsync(session, slot, subject, validDays, ct);
+        using var certificate = result.Certificate;
 
         if (result.Success)
         {
@@ -204,6 +207,16 @@ public static class CertificatesMenu
     {
         var slot = SlotSelector.SelectSlot("Select slot (must have existing key):");
         var subject = AnsiConsole.Ask("Enter subject (e.g., CN=Test User):", "CN=Test User");
+
+        using var pin = PinPrompt.GetPinWithDefault("PIN");
+        if (pin is null)
+            return;
+        var pinResult = await PinManagement.VerifyPinAsync(session, pin.Memory, ct);
+        if (!pinResult.Success)
+        {
+            OutputHelpers.WriteError(pinResult.ErrorMessage ?? "PIN verification failed");
+            return;
+        }
 
         var result = await PivExamples.Certificates.GenerateCsrAsync(session, slot, subject, ct);
 

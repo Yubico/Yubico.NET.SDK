@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core.Credentials;
-using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Utilities;
 
@@ -64,7 +63,7 @@ public sealed partial class OpenPgpSession
     }
 
     /// <inheritdoc />
-    public async Task<ReadOnlyMemory<byte>> DecryptAsync(
+    public async Task<Memory<byte>> DecryptAsync(
         ReadOnlyMemory<byte> ciphertext,
         CancellationToken cancellationToken = default)
     {
@@ -85,17 +84,9 @@ public sealed partial class OpenPgpSession
                     userPresenceNotification,
                     async token =>
                     {
-                        var response = await TransmitWithResponseAsync(command, token).ConfigureAwait(false);
-                        try
-                        {
-                            await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
-                                .ConfigureAwait(false);
-                            return response.Data.ToArray();
-                        }
-                        finally
-                        {
-                            CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(response.RawData).Span);
-                        }
+                        var response = await TransmitNoThrowAsync(command, token).ConfigureAwait(false);
+                        return await ResolveAndCopyDecipherResponseAsync(response, command,
+                            () => userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)).ConfigureAwait(false);
                     },
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -103,6 +94,23 @@ public sealed partial class OpenPgpSession
         finally
         {
             CryptographicOperations.ZeroMemory(payload);
+        }
+    }
+
+    internal static async Task<Memory<byte>> ResolveAndCopyDecipherResponseAsync(
+        ApduResponse response, ApduCommand command, Func<ValueTask> resolveCompleted)
+    {
+        try
+        {
+            if (!response.IsOK())
+                throw ApduException.FromResponse(response, command, "DECIPHER failed");
+
+            await resolveCompleted().ConfigureAwait(false);
+            return response.Data.ToArray();
+        }
+        finally
+        {
+            response.Clear();
         }
     }
 
@@ -189,7 +197,8 @@ public sealed partial class OpenPgpSession
 
     /// <summary>
     ///     Formats an owned Sign or Authenticate response, resolves completion, and transfers the signature.
-    ///     EC signatures are DER-encoded from the raw (r || s) concatenation; abandoned buffers are cleared.
+    ///     ECDSA signatures are DER-encoded from raw (r || s); RSA/EdDSA transfer successful raw storage.
+    ///     Abandoned buffers are cleared after formatting or completion-resolution failure.
     /// </summary>
     internal static async Task<ReadOnlyMemory<byte>> FormatResolveAndTransferSignatureAsync(
         AlgorithmAttributes attrs,
@@ -251,10 +260,10 @@ public sealed partial class OpenPgpSession
         AlgorithmAttributes attrs,
         ReadOnlySpan<byte> ciphertext)
     {
+        // Card §7.2.11: wrap the peer public point in A6 { 7F49 { 86 point } }.
         return attrs switch
         {
             RsaAttributes => FormatRsaDecryptPayload(ciphertext),
-            EcAttributes { KeyType: KeyType.X25519 } => ciphertext.ToArray(),
             EcAttributes => FormatEcDecryptPayload(ciphertext),
             _ => throw new NotSupportedException($"Unsupported algorithm: {attrs.AlgorithmId}"),
         };

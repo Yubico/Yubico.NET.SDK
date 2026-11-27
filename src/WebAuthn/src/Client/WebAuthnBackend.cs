@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKit.Ctap2;
+using Yubico.YubiKit.Ctap2.Cbor;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.Ctap2.LargeBlobs;
 using Yubico.YubiKit.Ctap2.Pin;
@@ -24,12 +25,12 @@ namespace Yubico.YubiKit.WebAuthn.Client;
 /// Concrete implementation of IWebAuthnBackend that wraps ICtap2Session.
 /// </summary>
 /// <remarks>
-/// This adapter owns the Ctap2Session lifetime and manages the PinUvAuthProtocolV2 instance.
+/// This adapter owns the CTAP session and the PIN/UV protocol selected from GetInfo.
 /// </remarks>
 internal sealed class WebAuthnBackend : IWebAuthnBackend
 {
     private readonly ICtap2Session _session;
-    private PinUvAuthProtocolV2? _protocol;
+    private IPinUvAuthProtocol? _protocol;
     private AuthenticatorInfo? _cachedInfo;
     private bool _disposed;
 
@@ -50,6 +51,9 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         if (_cachedInfo is null)
         {
             _cachedInfo = await _session.GetInfoAsync(cancellationToken).ConfigureAwait(false);
+            _protocol = _cachedInfo.PinUvAuthProtocols.Contains(2) ? new PinUvAuthProtocolV2()
+                : _cachedInfo.PinUvAuthProtocols.Contains(1) ? new PinUvAuthProtocolV1()
+                : null;
         }
 
         return _cachedInfo;
@@ -61,8 +65,8 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         get
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            EnsureProtocolInitialized();
-            return _protocol!;
+            return _protocol ?? throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "The authenticator does not advertise a supported PIN/UV protocol.");
         }
     }
 
@@ -71,10 +75,10 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol!);
+        var protocol = Protocol;
+        var clientPin = new ClientPin(_session, protocol);
         var authenticatorKey = await clientPin.GetKeyAgreementAsync(cancellationToken).ConfigureAwait(false);
-        var (keyAgreement, sharedSecret) = _protocol!.Encapsulate(authenticatorKey);
+        var (keyAgreement, sharedSecret) = protocol.Encapsulate(authenticatorKey);
         return new PinUvSharedSecret(keyAgreement, sharedSecret);
     }
 
@@ -92,8 +96,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol!);
+        var clientPin = new ClientPin(_session, Protocol);
 
         var status = await clientPin.GetPinRetriesAsync(cancellationToken).ConfigureAwait(false);
         return status.RetriesRemaining;
@@ -109,8 +112,8 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        EnsureProtocolInitialized();
-        var clientPin = new ClientPin(_session, _protocol!);
+        var protocol = Protocol;
+        var clientPin = new ClientPin(_session, protocol);
 
         // ClientPin allocates and returns the decrypted token to this single caller and keeps no
         // reference to it, so ownership passes straight to the session below. Copying it here (or
@@ -132,7 +135,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         };
 
         // Ownership transfer: the session zeroes this array when the caller disposes it.
-        return new PinUvAuthTokenSession(_protocol!, token);
+        return new PinUvAuthTokenSession(protocol, token);
     }
 
     /// <inheritdoc/>
@@ -144,39 +147,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
 
         ArgumentNullException.ThrowIfNull(request);
 
-        // Build options
-        var options = new MakeCredentialOptions
-        {
-            ExcludeList = request.ExcludeList?.Select(desc => new PublicKeyCredentialDescriptor(
-                desc.Id,
-                desc.Type,
-                desc.Transports
-            )).ToList(),
-
-            // Absent stays absent, as in GetAssertionAsync: an explicit "uv": false is still the uv
-            // option key, which CTAP §6.1 forbids next to pinUvAuthParam.
-            ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true ? rk : null,
-            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true ? uv : null
-        };
-
-        // Add PIN/UV auth if provided
-        if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
-        {
-            // The copy is load-bearing, not defensive: the finally below zeroes whatever is in
-            // options, and the parameter belongs to the caller, which zeroes it once the ceremony
-            // is done with it. Without the copy this method would be destroying a buffer it does
-            // not own. Unlike GetAssertionAsync there is no multi-call reuse to protect here -
-            // registration builds a fresh request per attempt and sends it once - so ownership,
-            // not reuse, is what makes the copy necessary.
-            options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
-            options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
-        }
-
-        if (request.Extensions is not null)
-        {
-            options.Extensions = request.Extensions;
-        }
-
+        var options = ProjectMakeCredentialOptions(request);
         try
         {
             return await _session.MakeCredentialAsync(
@@ -193,6 +164,49 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         }
     }
 
+    /// <summary>Checks the full command, including the command byte, without sending it.</summary>
+    internal static bool FitsMakeCredential(BackendMakeCredentialRequest request, AuthenticatorInfo info)
+    {
+        var options = ProjectMakeCredentialOptions(request);
+        byte[]? encoded = null;
+        try
+        {
+            encoded = Ctap2SessionRequestEncoding.BuildMakeCredentialRequest(
+                request.ClientDataHash, request.Rp, request.User, request.PubKeyCredParams, options);
+            return encoded.Length <= (info.MaxMsgSize ?? Ctap2Session.DefaultMaxMessageSize);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(encoded);
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
+    private static MakeCredentialOptions ProjectMakeCredentialOptions(BackendMakeCredentialRequest request)
+    {
+        var options = new MakeCredentialOptions
+        {
+            ExcludeList = request.ExcludeList,
+
+            // Absent stays absent, as in GetAssertionAsync: an explicit "uv": false is still the uv
+            // option key, which CTAP §6.1 forbids next to pinUvAuthParam.
+            ResidentKey = request.Options?.TryGetValue("rk", out var rk) == true ? rk : null,
+            UserVerification = request.Options?.TryGetValue("uv", out var uv) == true ? uv : null,
+            EnterpriseAttestation = request.EnterpriseAttestation,
+            Extensions = request.Extensions
+        };
+
+        // Add PIN/UV auth if provided
+        if (request.PinUvAuthParam is not null && request.PinUvAuthProtocol is not null)
+        {
+            // The caller owns the source parameter; the backend clears only its projection's copy.
+            options.PinUvAuthParam = request.PinUvAuthParam.Value.ToArray();
+            options.PinUvAuthProtocol = request.PinUvAuthProtocol.Value;
+        }
+
+        return options;
+    }
+
     /// <inheritdoc/>
     public async Task<GetAssertionResponse> GetAssertionAsync(
         BackendGetAssertionRequest request,
@@ -202,7 +216,57 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
 
         ArgumentNullException.ThrowIfNull(request);
 
-        // Build options
+        var options = ProjectGetAssertionOptions(request);
+        try
+        {
+            return await _session.GetAssertionAsync(
+                request.RpId, request.ClientDataHash, options, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
+    internal static bool FitsGetAssertion(BackendGetAssertionRequest request, AuthenticatorInfo info)
+    {
+        var options = ProjectGetAssertionOptions(request);
+        byte[]? encoded = null;
+        try
+        {
+            encoded = Ctap2SessionRequestEncoding.BuildGetAssertionRequest(request.RpId, request.ClientDataHash, options);
+            return encoded.Length <= (info.MaxMsgSize ?? Ctap2Session.DefaultMaxMessageSize);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(encoded);
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
+    internal bool HasConcreteSession => _session is Ctap2Session;
+
+    internal async Task<(CtapStatus Status, GetAssertionResponse? Response)> GetAssertionForSelectionAsync(
+        BackendGetAssertionRequest request, CancellationToken ct)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (_session is not Ctap2Session concrete)
+            throw new InvalidOperationException("Selection status requires the SDK CTAP session.");
+
+        var options = ProjectGetAssertionOptions(request);
+        try
+        {
+            return await concrete.GetAssertionForSelectionAsync(request.RpId, request.ClientDataHash, options, ct)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            SensitiveMemory.Zero(options.PinUvAuthParam);
+        }
+    }
+
+    private static GetAssertionOptions ProjectGetAssertionOptions(BackendGetAssertionRequest request)
+    {
         var options = new GetAssertionOptions();
 
         // Map allow list if provided
@@ -237,18 +301,7 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
             options.Extensions = request.Extensions;
         }
 
-        try
-        {
-            return await _session.GetAssertionAsync(
-                request.RpId,
-                request.ClientDataHash,
-                options,
-                cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            SensitiveMemory.Zero(options.PinUvAuthParam);
-        }
+        return options;
     }
 
     /// <inheritdoc/>
@@ -281,13 +334,4 @@ internal sealed class WebAuthnBackend : IWebAuthnBackend
         }
     }
 
-    private void EnsureProtocolInitialized()
-    {
-        if (_protocol is null)
-        {
-            _protocol = new PinUvAuthProtocolV2();
-            // Protocol initialization is async in the session context, but we defer it
-            // until the first use in ClientPin methods which handle initialization
-        }
-    }
 }

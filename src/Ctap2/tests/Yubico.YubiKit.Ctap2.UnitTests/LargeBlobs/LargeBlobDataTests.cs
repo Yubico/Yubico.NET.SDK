@@ -44,7 +44,7 @@ public class LargeBlobDataTests
         // Assert
         Assert.NotNull(entry);
         Assert.Equal(12, entry.Nonce.Length);
-        Assert.Equal(data.Length, entry.OriginalSize);
+        Assert.Equal((ulong)data.Length, entry.OriginalSize);
         Assert.True(entry.Ciphertext.Length >= 16); // includes the tag
     }
 

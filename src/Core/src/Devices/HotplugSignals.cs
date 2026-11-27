@@ -32,7 +32,11 @@ internal sealed class HotplugSignals : IDisposable
         });
     private bool _disposed;
 
-    /// <summary>Creates and starts each listener, logging failures without preventing other listeners from starting.</summary>
+    /// <summary>Attempts to create and start transport listeners in order.</summary>
+    /// <remarks>
+    /// Listener failures are logged and partial listeners receive best-effort cleanup before the next
+    /// listener is attempted. A logging exception can escape and interrupt cleanup or remaining startup.
+    /// </remarks>
     internal HotplugSignals(
         IReadOnlyList<ListenerSource> listeners,
         ILogger logger)
@@ -79,7 +83,17 @@ internal sealed class HotplugSignals : IDisposable
         }
     }
 
-    /// <summary>Clears all callbacks, stops all listeners, disposes all listeners, then completes the signal channel.</summary>
+    /// <summary>
+    /// Attempts to detach callbacks for all retained listeners, then stop all listeners, then dispose them.
+    /// Attempts signal-channel completion after those three passes return.
+    /// </summary>
+    /// <remarks>
+    /// The pass order prioritizes detaching signal producers before stopping and disposing them. Cleanup
+    /// exceptions are logged; failed operations can leave callback, listener, or native state active.
+    /// A logging exception can interrupt later passes and prevent channel completion. The disposed flag
+    /// is already set, so later calls return without retrying cleanup. Channel completion alone supplies
+    /// no proof that listener or native resources were released.
+    /// </remarks>
     public void Dispose()
     {
         if (_disposed)

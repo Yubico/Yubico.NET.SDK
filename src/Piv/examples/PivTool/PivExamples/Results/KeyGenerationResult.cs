@@ -37,7 +37,7 @@ public sealed record KeyGenerationResult
     public KeyType KeyType { get; init; }
 
     /// <summary>
-    /// Gets the public key bytes when successful.
+    /// Gets the DER-encoded SubjectPublicKeyInfo produced by KeyGeneration.GenerateKeyAsync on success.
     /// </summary>
     public ReadOnlyMemory<byte> PublicKey { get; init; }
 
@@ -49,6 +49,8 @@ public sealed record KeyGenerationResult
     /// <summary>
     /// Creates a successful key generation result.
     /// </summary>
+    /// <remarks>The factory retains the supplied memory view and performs no encoding validation.
+    /// Supply DER-encoded SubjectPublicKeyInfo when constructing a key-generation result.</remarks>
     public static KeyGenerationResult Succeeded(Slot slot, KeyType keyType, ReadOnlyMemory<byte> publicKey) =>
         new() { Success = true, Slot = slot, KeyType = keyType, PublicKey = publicKey };
 

@@ -345,6 +345,11 @@ public class PcscConnectionLifetimeTests
         }
     }
 
+    /// <summary>
+    ///     Holds transmit while requesting scope end, checks that end has not been submitted, then releases
+    ///     transmit and observes one end call. A repeated scope dispose is inert and a later synchronous begin
+    ///     adds one end call. The fake EndTransaction itself is not held, so this is not a held-native-end oracle.
+    /// </summary>
     [Fact]
     public async Task AsyncTransaction_AsyncScopeEndAwaitsNativeEndAndSyncBeginStillWorks()
     {
@@ -373,6 +378,11 @@ public class PcscConnectionLifetimeTests
         }
     }
 
+    /// <summary>
+    ///     Injects an end failure: scope disposal returns, subsequent raw work is refused, and connection
+    ///     disposal reports SCardException after one end, disconnect, and context-release call. Native release
+    ///     routing and error reporting are separate observations; no physical transaction/reset result is tested.
+    /// </summary>
     [Fact]
     public async Task AsyncTransaction_FailedAsyncEnd_RefusesFurtherWorkAndShutdownReportsFailure()
     {

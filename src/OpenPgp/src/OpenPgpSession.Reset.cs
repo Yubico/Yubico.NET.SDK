@@ -26,7 +26,8 @@ public sealed partial class OpenPgpSession
     {
         ThrowIfDisposed();
 
-        EnsureSupports(FeatureReset);
+        if (!FeatureReset.IsSupportedByFirmware(_appletGateVersion))
+            throw new NotSupportedException("OpenPGP reset is not supported on this applet version.");
 
         _logger.LogInformation("Starting OpenPGP factory reset");
 
@@ -41,31 +42,36 @@ public sealed partial class OpenPgpSession
         await BlockPinAsync((byte)Pw.Admin, status.AttemptsAdmin, cancellationToken)
             .ConfigureAwait(false);
 
-        // Step 4: TERMINATE
-        _logger.LogDebug("Sending TERMINATE");
+        // Confirm both commands. The vendor ATT key/certificate are outside the ordinary reset scope.
         var terminateCmd = new ApduCommand(0x00, (int)Ins.Terminate, 0x00, 0x00);
-        await TransmitNoThrowAsync(terminateCmd, cancellationToken).ConfigureAwait(false);
+        await TransmitAsync(terminateCmd, cancellationToken).ConfigureAwait(false);
 
-        // Step 5: ACTIVATE
-        _logger.LogDebug("Sending ACTIVATE");
         var activateCmd = new ApduCommand(0x00, (int)Ins.Activate, 0x00, 0x00);
-        await TransmitNoThrowAsync(activateCmd, cancellationToken).ConfigureAwait(false);
+        await TransmitAsync(activateCmd, cancellationToken).ConfigureAwait(false);
 
-        // Step 6: Re-initialize — re-SELECT and refresh cached state
-        _logger.LogDebug("Re-initializing session after reset");
-
-        // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet
-        // state, not caller policy, so a SessionCreationOptions.FirmwareVersionOverride supplied at
-        // creation must survive it; otherwise the override would silently lapse mid-session and
-        // later feature gates would disagree with earlier ones.
-        _ = await _backend!.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
-
-        _appData = await GetApplicationRelatedDataCoreAsync(cancellationToken)
-            .ConfigureAwait(false);
+        IsInitialized = false;
+        IsAuthenticated = false;
+        _backend = null;
         _updatedUifs.Clear();
-        _kdf = null;
+        var oldProtocol = Protocol;
+        Protocol = null;
+        try
+        {
+            if (oldProtocol is IAsyncDisposable asyncProtocol)
+                await asyncProtocol.DisposeAsync().ConfigureAwait(false);
+            else
+                oldProtocol?.Dispose();
 
-        _logger.LogInformation("OpenPGP factory reset complete");
+            // After confirmation, restore the session even if the request was cancelled during ACTIVATE.
+            await InitializeSessionAsync(token => InitializeAsync(_configuration, _scpKeyParameters,
+                _firmwareVersionOverride, token), CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            _endingAfterResetFailure = true;
+            await DisposeAsync().ConfigureAwait(false);
+            throw new InvalidOperationException("OpenPGP reset succeeded, but session refresh failed and the session ended.", exception);
+        }
     }
 
     private async Task BlockPinAsync(
@@ -81,14 +87,26 @@ public sealed partial class OpenPgpSession
             var response = await TransmitNoThrowAsync(command, cancellationToken)
                 .ConfigureAwait(false);
 
-            // 0x6983 = authentication blocked, we're done
-            if (response.SW == SWConstants.AuthenticationMethodBlocked)
-            {
-                _logger.LogDebug("PIN P2=0x{P2:X2} blocked after {Count} attempts", p2, i + 1);
+            if (response.SW is SWConstants.AuthenticationMethodBlocked or unchecked((short)0x63C0))
                 return;
-            }
+            if (response.IsOK() || ((response.SW & 0xFFF0) != 0x63C0 && response.SW != SWConstants.SecurityStatusNotSatisfied))
+                throw ApduException.FromResponse(response, command, "Blocking OpenPGP PIN for reset failed");
         }
 
-        _logger.LogDebug("PIN P2=0x{P2:X2} exhausted {Count} attempts", p2, remainingAttempts);
+        var status = await GetPinStatusAsync(cancellationToken).ConfigureAwait(false);
+        if ((p2 == (byte)Pw.User ? status.AttemptsUser : status.AttemptsAdmin) != 0)
+            throw new InvalidOperationException("OpenPGP PIN blocking was not confirmed; reset was not attempted.");
+    }
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        catch when (_endingAfterResetFailure)
+        {
+            // The refresh exception is primary; implicit disposal must not replay a teardown failure.
+        }
     }
 }

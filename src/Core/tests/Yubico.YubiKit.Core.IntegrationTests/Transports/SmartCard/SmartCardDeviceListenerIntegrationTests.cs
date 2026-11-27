@@ -100,7 +100,7 @@ public class SmartCardDeviceListenerIntegrationTests
             // Act - wait briefly with listener running
             Thread.Sleep(500);
 
-            // Assert - no spurious events while running
+            // Count callbacks during this quiet interval, not native status-call cadence or CPU use.
             Assert.Equal(0, eventCount);
             _output.WriteLine("No spurious events fired during quiet period with listener running");
         }

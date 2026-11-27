@@ -19,6 +19,7 @@ using Yubico.YubiKit.Ctap2.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.WebAuthn.Client;
 using Yubico.YubiKit.WebAuthn.Client.Registration;
+using Yubico.YubiKit.WebAuthn.Preferences;
 using Yubico.YubiKit.WebAuthn.UnitTests.TestSupport;
 
 namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
@@ -26,6 +27,29 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Client;
 [Trait("Audit", "YESDK-1608")]
 public class RegistrationTransportTests
 {
+    [Theory]
+    [InlineData(true, AttestationPreference.Enterprise, 1)]
+    [InlineData(false, AttestationPreference.Enterprise, null)]
+    [InlineData(null, AttestationPreference.Enterprise, null)]
+    [InlineData(true, AttestationPreference.Indirect, null)]
+    [InlineData(true, AttestationPreference.Direct, null)]
+    [InlineData(true, AttestationPreference.None, null)]
+    public async Task MakeCredential_ForwardsVendorEnterpriseModeOnlyWhenEnabled(
+        bool? enabled, AttestationPreference preference, int? expectedMode)
+    {
+        var session = CreateSession(DecodeInfo(null, enabled));
+        await using var client = CreateClient(session);
+
+        await client.MakeCredentialAsync(CreateOptions() with { Attestation = preference },
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        await session.Received(1).MakeCredentialAsync(
+            Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<PublicKeyCredentialRpEntity>(),
+            Arg.Any<PublicKeyCredentialUserEntity>(), Arg.Any<IReadOnlyList<PublicKeyCredentialParameters>>(),
+            Arg.Is<MakeCredentialOptions>(options => options.EnterpriseAttestation == expectedMode),
+            Arg.Any<CancellationToken>());
+    }
+
     [Fact]
     public async Task MakeCredential_AdvertisedKnownAndFutureTransports_UsesCachedInfoWithoutExtraQuery()
     {
@@ -160,14 +184,22 @@ public class RegistrationTransportTests
         PubKeyCredParams = [CoseAlgorithm.Es256]
     };
 
-    private static AuthenticatorInfo DecodeInfo(IReadOnlyList<string>? transports)
+    private static AuthenticatorInfo DecodeInfo(IReadOnlyList<string>? transports, bool? enterprise = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(transports is null ? 2 : 3);
+        writer.WriteStartMap(2 + (transports is null ? 0 : 1) + (enterprise.HasValue ? 1 : 0));
         writer.WriteInt32(0x01);
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_1");
         writer.WriteEndArray();
+        if (enterprise is { } enabled)
+        {
+            writer.WriteInt32(4);
+            writer.WriteStartMap(1);
+            writer.WriteTextString("ep");
+            writer.WriteBoolean(enabled);
+            writer.WriteEndMap();
+        }
         writer.WriteInt32(0x03);
         writer.WriteByteString(new byte[16]);
         if (transports is not null)

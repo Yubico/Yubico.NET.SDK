@@ -21,8 +21,15 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 
 /// <summary>
-/// Integration tests for enhanced PIN complexity requirements.
+/// Inspects optional PIN-policy fields and checks configured PIN state after SetOrVerifyPinAsync.
 /// </summary>
+/// <remarks>
+/// All cases use the helper's default PIN normalization, which may set/change a PIN or request a
+/// token before the callback. These are known-state PIN workflows, not read-only GetInfo lanes.
+/// The first case returns without assertions below its firmware gate; when reached, it checks
+/// clientPin=true, not complexity-policy enforcement. Optional-field cases check only present
+/// scalar values, and the retry case checks a count in 0–8. No case asserts secret-buffer clearing.
+/// </remarks>
 [Trait("Category", "Integration")]
 public class Ctap2EnhancedPinTests
 {
@@ -36,6 +43,7 @@ public class Ctap2EnhancedPinTests
             if (info.FirmwareVersion is null || info.FirmwareVersion.Major < 5 ||
                 (info.FirmwareVersion.Major == 5 && info.FirmwareVersion.Minor < 8))
             {
+                // This early return does not exercise enhanced PIN behavior or assert support.
                 return;
             }
 
@@ -63,7 +71,7 @@ public class Ctap2EnhancedPinTests
                 Assert.True(info.MinPinLength.Value >= 4,
                     $"Minimum PIN length should be at least 4, got {info.MinPinLength.Value}");
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -76,7 +84,7 @@ public class Ctap2EnhancedPinTests
             {
                 Assert.IsType<bool>(info.ForcePinChange.Value);
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -90,7 +98,7 @@ public class Ctap2EnhancedPinTests
                 Assert.True(info.MaxRpidsForSetMinPinLength.Value >= 0,
                     "MaxRpidsForSetMinPinLength should be non-negative");
             }
-        });
+        }, normalizePin: false);
 
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]

@@ -317,11 +317,8 @@ public class OathSessionTests
             // Reset
             await session.ResetAsync(NewToken());
 
-            // Credentials should be gone
-            credentials = await session.ListCredentialsAsync(NewToken());
-            Assert.Empty(credentials);
-
-            // DeviceId changes after reset (new salt)
+            Assert.True(session.IsInitialized);
+            Assert.Empty(await session.ListCredentialsAsync(NewToken()));
             Assert.NotEqual(oldDeviceId, session.DeviceId);
             Assert.False(session.IsLocked);
         }, cancellationToken: NewToken());

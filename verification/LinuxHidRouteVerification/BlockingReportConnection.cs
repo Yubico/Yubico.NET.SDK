@@ -8,8 +8,8 @@ namespace LinuxHidRouteVerification;
 /// The verifier wraps this fake in the retained synchronous
 /// <see cref="Yubico.YubiKit.Core.Protocols.Fido.Hid.FidoHidConnection" /> adapter,
 /// not the built-in Linux async connection. Holding <see cref="GetReport" /> proves the responsiveness
-/// gate detects a blocking adapter. The adapter remains supported for Windows/custom report providers;
-/// this fixture is not obsolete production Linux code to remove.
+/// gate detects a blocking adapter. The adapter remains supported for custom report providers;
+/// built-in Windows bypasses it. This fixture is not obsolete production Linux code to remove.
 /// </remarks>
 internal sealed class BlockingReportConnection : IHidConnection
 {

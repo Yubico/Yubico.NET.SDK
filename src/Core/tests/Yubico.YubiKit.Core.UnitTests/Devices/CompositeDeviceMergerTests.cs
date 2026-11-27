@@ -64,7 +64,7 @@ public class CompositeDeviceMergerTests
     [Fact]
     public void Merge_SkySingleFidoInterface_PublishesFlatOneSlotDeviceWithTransportId()
     {
-        // SKY (Security Key): FIDO-HID only, no serial — passes through as one device, keyed by PID alone.
+        // SKY (Security Key): FIDO-HID only, no serial — publishes one slot with its transport-shaped id.
         var sky = new FakeSlot("hid:fido", ConnectionType.HidFido);
         var merged = CompositeDeviceMerger.Merge([
             new DeviceInterfaceDescriptor(sky, ConnectionType.HidFido, IsUsb: true, SkyPid, null, null)
@@ -80,12 +80,11 @@ public class CompositeDeviceMergerTests
     [Fact]
     public void Merge_PartialSeriallessSamePid_TwoHidNoCcid_StaysConservativelySplit()
     {
-        // Phase-2 generalized guard (composite-merge remediation PLAN.md, verified premise 4b): two HID
+        // The generalized guard: two HID
         // interfaces of a full-triple PID with no CCID and no serials are byte-indistinguishable from the
         // disjoint interfaces of TWO same-model keys, so the merger keeps them conservatively split until
         // the observed set equals the PID's expected set (or serial/topology evidence arrives). This
-        // replaces the pre-Phase-2 behavior ("Phase 37.5": merge any same-PID interfaces when the PID
-        // count is 1), which could fuse two physical keys.
+        // prevents PID count 1 alone from fusing these possibly cross-key interfaces.
         var merged = CompositeDeviceMerger.Merge([
             Usb("hid:fido", ConnectionType.HidFido, FullKeyPid),
             Usb("hid:otp", ConnectionType.HidOtp, FullKeyPid)

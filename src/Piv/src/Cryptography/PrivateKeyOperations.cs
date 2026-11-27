@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Formats.Asn1;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
@@ -34,6 +35,9 @@ internal static class PrivateKeyOperations
     private const byte TagResponse = 0x82;
     private const byte TagChallenge = 0x81;
     private const byte TagExponentiation = 0x85;
+
+    private static readonly byte[] P256Order = Convert.FromHexString("FFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551");
+    private static readonly byte[] P384Order = Convert.FromHexString("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC7634D81F4372DDF581A0DB248B0A77AECEC196ACCC52973");
 
     private static ILogger Logger => YubiKitLogging.CreateLogger(nameof(PrivateKeyOperations));
 
@@ -135,6 +139,7 @@ internal static class PrivateKeyOperations
 
                 // Parse response: TAG 0x7C [ TAG 0x82 (response data) ]
                 result = ParseCryptoResponse(response.Data);
+                ValidateSignatureOrRsaResult(keyType, result);
                 byte[] transferredResult = await ResolveAndTransferCryptoResultAsync(
                         result,
                         userPresenceNotification)
@@ -237,10 +242,10 @@ internal static class PrivateKeyOperations
         var exp = new System.Numerics.BigInteger(expBytes, isUnsigned: true, isBigEndian: true);
         var mod = new System.Numerics.BigInteger(modBytes, isUnsigned: true, isBigEndian: true);
 
-        // The re-wrap technique requires b < mod. If the raw YubiKey output (interpreted as an integer)
-        // is >= the dummy modulus, ModPow silently reduces it and the result won't unpad correctly.
-        // This is astronomically unlikely with a fresh random modulus of equal bit length, but we
-        // guard explicitly so any failure produces a clear error rather than a corrupt padding message.
+        // Re-wrapping requires b < mod to preserve the original integer through exponentiation.
+        // Valid full-width PKCS#1 v1.5 and OAEP encryption blocks begin with 00 and fit below a
+        // same-width, full-bit-length dummy modulus. Reject raw output at or above the modulus
+        // before modular reduction could change its value; host unpadding validates the encoding afterward.
         if (b >= mod)
         {
             throw new CryptographicException(
@@ -280,7 +285,7 @@ internal static class PrivateKeyOperations
     /// <param name="slot">The slot containing the private key.</param>
     /// <param name="peerPublicKey">The peer's public key.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>The shared secret (x-coordinate for NIST curves, point for Curve25519).</returns>
+    /// <returns>Raw shared-secret bytes: the x-coordinate for NIST ECDH, or the 32-byte X25519 result.</returns>
     internal static async Task<byte[]> CalculateSecretAsync(
         IBackend backend,
         Slot slot,
@@ -351,6 +356,8 @@ internal static class PrivateKeyOperations
 
                 // Parse response: TAG 0x7C [ TAG 0x82 (shared secret) ]
                 result = ParseCryptoResponse(response.Data);
+                if (result.Length != keyType.GetKeySizeBytes())
+                    throw new ApduException($"Invalid PIV agreement result width for {keyType}.");
                 byte[] transferredResult = await ResolveAndTransferCryptoResultAsync(
                         result,
                         userPresenceNotification)
@@ -419,22 +426,65 @@ internal static class PrivateKeyOperations
 
     private static byte[] ParseCryptoResponse(ReadOnlyMemory<byte> data)
     {
-        // Parse outer TLV (0x7C - Dynamic Auth Template)
-        using var outer = Tlv.Create(data.Span);
-        if (outer.Tag != TagDynamicAuth)
+        // Check the remainder of the original BER, not a TLV's re-encoded length.
+        var remainder = data.Span;
+        var (outerTag, _, outerValue) = Tlv.ParseData(ref remainder);
+        try
         {
-            throw new ApduException("Invalid crypto response format");
-        }
+            if (outerTag != TagDynamicAuth || !remainder.IsEmpty)
+                throw new ApduException("Invalid crypto response format");
 
-        // Parse inner TLV (0x82 - Response data)
-        using var inner = Tlv.Create(outer.Value.Span);
-        if (inner.Tag != TagResponse)
+            ReadOnlySpan<byte> innerRemainder = outerValue;
+            var (innerTag, _, result) = Tlv.ParseData(ref innerRemainder);
+            if (innerTag == TagResponse && innerRemainder.IsEmpty)
+                return result;
+
+            CryptographicOperations.ZeroMemory(result);
+            throw new ApduException("Invalid crypto response - expected exactly one TAG 0x82");
+        }
+        finally
         {
-            throw new ApduException("Invalid crypto response - expected TAG 0x82");
+            CryptographicOperations.ZeroMemory(outerValue);
         }
+    }
 
-        // Copy the value before the Tlv objects are disposed. The caller owns this buffer until transfer.
-        return inner.Value.ToArray();
+    private static void ValidateSignatureOrRsaResult(KeyType keyType, ReadOnlyMemory<byte> result)
+    {
+        bool valid = keyType switch
+        {
+            KeyType.P256 => IsValidEcdsaSignature(result, P256Order),
+            KeyType.P384 => IsValidEcdsaSignature(result, P384Order),
+            KeyType.Ed25519 => result.Length == 64,
+            _ => keyType.IsRsa() && result.Length == keyType.GetKeySizeBytes()
+        };
+        if (!valid)
+            throw new ApduException($"Invalid PIV sign/decrypt result for {keyType}.");
+    }
+
+    private static bool IsValidEcdsaSignature(ReadOnlyMemory<byte> result, ReadOnlySpan<byte> order)
+    {
+        try
+        {
+            var reader = new AsnReader(result, AsnEncodingRules.DER);
+            var sequence = reader.ReadSequence();
+            var r = sequence.ReadIntegerBytes();
+            var s = sequence.ReadIntegerBytes();
+            return !reader.HasData && !sequence.HasData
+                && IsValidScalar(r.Span, order) && IsValidScalar(s.Span, order);
+        }
+        catch (AsnContentException)
+        {
+            return false;
+        }
+    }
+
+    private static bool IsValidScalar(ReadOnlySpan<byte> encoded, ReadOnlySpan<byte> order)
+    {
+        if ((encoded[0] & 0x80) != 0)
+            return false;
+        var magnitude = encoded[0] == 0 ? encoded[1..] : encoded;
+        return !magnitude.IsEmpty && (magnitude.Length < order.Length
+            || (magnitude.Length == order.Length && magnitude.SequenceCompareTo(order) < 0));
     }
 
     /// <summary>Resolves successful user presence before transferring an owned cryptographic result.</summary>

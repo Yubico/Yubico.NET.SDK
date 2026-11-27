@@ -14,6 +14,7 @@
 
 using Microsoft.Extensions.Logging;
 using System.Buffers;
+using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKit.Core;
@@ -33,6 +34,7 @@ internal static class CertificateProtocol
     private const byte CompressedCertificate = 0x01;
     private const byte UncompressedCertificate = 0x00;
     private const int MaximumUncompressedCertificateLength = 1856;
+    private const int DecompressedCertificateLimit = 64 * 1024;
     private const int CertificateInfoTlvLength = 3;
     private const int LrcTlvLength = 2;
 
@@ -70,9 +72,11 @@ internal static class CertificateProtocol
             ? cert.ToArray()
             : null;
 
-        bool isCompressed = tlvDict.TryGetValue(TagCertificateInfo, out var info)
-            && info.Length > 0
-            && info.Span[0] == CompressedCertificate;
+        byte mode = tlvDict.TryGetValue(TagCertificateInfo, out var info) && !info.IsEmpty
+            ? info.Span[0]
+            : UncompressedCertificate;
+        if (mode is not (CompressedCertificate or UncompressedCertificate))
+            throw new NotSupportedException($"Unsupported PIV certificate compression mode 0x{mode:X2}. Inspect the raw certificate object instead.");
 
         if (certBytes is null || certBytes.Length == 0)
         {
@@ -80,18 +84,46 @@ internal static class CertificateProtocol
         }
 
         // Decompress if needed
-        if (isCompressed)
-        {
-            using var input = new MemoryStream(certBytes);
-            using var gzip = new GZipStream(input, CompressionMode.Decompress);
-            using var output = new MemoryStream();
-            await gzip.CopyToAsync(output, cancellationToken).ConfigureAwait(false);
-            certBytes = output.ToArray();
-        }
+        if (mode == CompressedCertificate)
+            certBytes = await DecompressCertificateAsync(certBytes, cancellationToken).ConfigureAwait(false);
 
 #pragma warning disable SYSLIB0057 // X509Certificate2(byte[]) is obsolete
         return new X509Certificate2(certBytes);
 #pragma warning restore SYSLIB0057
+    }
+
+    private static async Task<byte[]> DecompressCertificateAsync(byte[] encoded, CancellationToken cancellationToken)
+    {
+        bool isNetId = encoded.AsSpan().StartsWith((ReadOnlySpan<byte>)[0x01, 0x00]);
+        if (isNetId && encoded.Length < 4)
+            throw new InvalidDataException("The Net iD certificate compression header is truncated.");
+
+        int offset = isNetId ? 4 : 0;
+        using var input = new MemoryStream(encoded, offset, encoded.Length - offset, writable: false);
+        using Stream decoder = isNetId
+            ? new ZLibStream(input, CompressionMode.Decompress)
+            : new GZipStream(input, CompressionMode.Decompress);
+        using var output = new MemoryStream();
+        byte[] chunk = ArrayPool<byte>.Shared.Rent(4096);
+        try
+        {
+            int read;
+            while ((read = await decoder.ReadAsync(chunk.AsMemory(0, 4096), cancellationToken).ConfigureAwait(false)) != 0)
+            {
+                if (read > DecompressedCertificateLimit - output.Length)
+                    throw new InvalidDataException("The decompressed certificate exceeds the SDK's 64 KiB safety limit.");
+                output.Write(chunk, 0, read);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(chunk);
+        }
+
+        if (isNetId && output.Length != BinaryPrimitives.ReadUInt16LittleEndian(encoded.AsSpan(2, 2)))
+            throw new InvalidDataException("The decompressed certificate does not match the Net iD header length.");
+
+        return output.ToArray();
     }
 
     /// <summary>

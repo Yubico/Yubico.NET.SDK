@@ -293,6 +293,8 @@ public class PrivateKeyDecodingZeroingTests
         }
     }
 
+    // The extra NULL is inside PrivateKeyInfo after privateKey, not after the top-level value
+    // or within the nested private OCTET STRING. Only the captured decoded scalar is observed.
     [Fact]
     public void GetCurve25519PrivateKeyData_TrailingDataThrowsAndZeroesDecodedScalar()
     {

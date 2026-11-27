@@ -24,7 +24,7 @@ YubiOtpSession (public API, orchestration)
     |
     +-- IYubiOtpBackend (internal, 2 methods)
         |-- SmartCardBackend (APDUs, prog_seq validation)
-        |-- OtpHidBackend (feature reports, CRC validation)
+        |-- HidBackend (feature reports, data-response prefix CRC validation)
 ```
 
 Backend has only two primitives:
@@ -41,31 +41,41 @@ Static `ReadInitialStateAsync` helpers on each concrete backend perform discover
 `IYubiOtpBackend` exposes only operational commands, not initialization.
 
 SmartCard path:
-1. SELECT `AID.MANAGEMENT` (for NEO version reliability)
+1. Without cached device info, SELECT `AID.MANAGEMENT` (for NEO version reliability)
 2. SELECT `AID.OTP` → store status bytes
-3. Extract firmware version (NEO workaround: use max of management/OTP versions)
+3. Use Management's version when available; when OTP major is 3, use the higher Management/OTP version.
+   This Management probe runs for both USB CCID and NFC. Cached ConfigState still exposes raw OTP status.
 4. `ConfigureProtocolAsync` → configure protocol, optionally establish SCP
 5. Construct the SmartCard backend once with the effective protocol, firmware, and SELECT programming sequence
 
 OTP HID path:
-1. `ReadStatusAsync()` → store status bytes
-2. Extract firmware version from protocol or status bytes
+1. `ReadStatusAsync()` → Core's first report initializes protocol firmware, with the NEO refresh if needed;
+   a second report supplies the returned cached status
+2. Prefer protocol firmware over the second status version; retain the raw status separately
 3. `ConfigureProtocolAsync` → configure protocol
 4. Construct the HID backend with the effective protocol
+
+An explicit override takes precedence; otherwise cached device info wins over the applet version for admission.
+Unknown or prerelease firmware bypasses command preflight, without discarding a known numeric framing version.
+Required status and cancellation failures still propagate. ConfigState gates still use raw status.
+Core's local readiness/touch windows are checked between awaited native calls, not hard
+call-duration bounds. Custom IOtpHidConnection providers must supply eight-byte reports; built-in length
+checks do not establish central defensive handling for malformed custom input. Keep Core report/NEO
+failure classification and polling policy separate from applet sequence/CRC interpretation.
 
 ## User-presence notifications
 
 When `SessionCreationOptions.UserPresencePrompt` is supplied, only HMAC-SHA1 and Yubico OTP
 challenge-response operations can notify it. OTP HID waits until the device reports the touch-wait flag,
 then the Core protocol requests the operation's shared handle once with `DeviceWaiting`; `HidBackend` owns
-terminal resolution after response-length and CRC validation. SmartCard has no in-flight wait signal, so
-`SmartCardBackend` owns both the `PolicyRequires` request and terminal resolution when cached OTP status
-identifies the selected slot as touch-triggered. Unknown and non-touch SmartCard slot state remains silent.
+terminal resolution after response-length and CRC validation. SmartCard has no in-flight wait signal and
+never notifies; cached OTP status identifies the keyboard trigger, not challenge-response policy.
 Only expiration of an OTP HID wait after the device reports the touch-wait flag resolves as `TimedOut`;
-transport and readiness timeouts, including all SmartCard timeouts, resolve as `Failed`. Challenge-response
+other HID transport and readiness timeouts resolve as `Failed`. Challenge-response
 output remains backend-owned until successful resolution and is cleared if the callback prevents transfer.
 Notification context uses application `YubiOTP` and the slot enum name as its scope; configuration and status
-operations never notify.
+operations never notify. Prefer explicit OTP HID for USB
+challenge recipes instead of assuming SmartCard command parity across devices/interfaces.
 
 ## Slot Configuration Model
 
@@ -89,7 +99,13 @@ Configuration hierarchy:
 `SetNdefConfigurationAsync` builds a 56-byte NDEF payload:
 - URI type (`0x55`): Compresses prefixes using 36-entry NFC Forum URI prefix table
 - Text type (`0x54`): Language header `[0x02]["en"]` + content
-- Null content disables NDEF (all zeros)
+- `DisableNdefAsync` sends an all-zero disable request
+
+Null content is rejected; empty URI/text configuration is distinct from disable. On-tap effects
+need target-device verification. URI remainder allows 53 UTF-8 bytes after longest ordinal/case-insensitive
+prefix matching; text allows 51 UTF-8 bytes. The block configures an existing compatible slot on NFC hardware,
+not a complete NDEF record; legacy URI output can append OTP. There is no NFC read-back or arbitrary language/
+UTF-16 option. Undefined enum values are rejected, but the encoder does not validate URI syntax.
 
 ## HMAC-SHA1 Challenge Padding
 
@@ -114,14 +130,43 @@ does not know or enforce the slot mode. In either mode, a short input and its ex
 
 Unit tests in `YubiOtpSessionTests.HmacChallengeSemantics` pin both zero- and one-padding
 collisions through the public SmartCard session and the 63/64-byte boundary. Device
-marker behavior is covered by `YubiOtpHmacChallengeKnownAnswerTests` in integration tests.
+marker behavior is checked against host HMAC by `YubiOtpHmacChallengeKnownAnswerTests` when those integration
+tests execute. Minimum-one-byte interpretation is not established by wire-only tests or a universal firmware
+guarantee; prefer 1–63 bytes in short mode and verify empty/64-byte boundaries on target hardware.
 
 ## Security Considerations
 
-- Access codes zeroed via `CryptographicOperations.ZeroMemory()` in `finally` blocks
-- HMAC keys zeroed in `SlotConfiguration.Dispose()`
-- Challenge data zeroed after HMAC operation
+- Configurations copy inputs; Dispose clears private fixed/UID/key fields, not source buffers or GetConfig results.
+- Caller owns source buffers, every GetConfig array, and successful calculation output. Clear them separately.
+- One-shot HMAC transfers output only after hidden-session disposal; it clears the retained output on
+  teardown failure. A calculation failure remains primary if teardown also fails.
+- Clearing returned prefixes/owned encodings does not clear every incoming report, Windows report-ID
+  staging array, APDU owner, fragment or decrypted temporary. Ordinary callback-failure cleanup is narrower
+  than all-path erasure when a logging provider itself throws.
+- HMAC clears its padded copy; AES borrows the unpadded six-byte input. Keep borrowed inputs stable until await ends.
+- Immutable password/CLI strings cannot be deterministically erased. Raw translated scan codes permit mutable-source cleanup.
+- WriteConfig validates both access codes before copying secret fields and clears its assembled blocks on
+  success or failure. Separate lower-layer copies remain outside this cleanup scope.
 - Never log keys, access codes, or challenge data
+
+## Current implementation constraints
+
+Await complete workflows before disposal: write/status fallback, CRC/sequence checks, cached publication
+and terminal callbacks extend beyond guarded exchanges. Borrowed configurations/services remain alive
+through actual completion, not an outer cancelled wait. Grouped connection exclusion is process-local
+and limited to overlapping known member IDs.
+
+- Updates send complete masked values, not patches. Defaults are SerialApiVisible/AllowUpdate, other update
+  flags clear. New code omission sends zeros; repeat current code in both code arguments to retain protection.
+- HOTP stores `imf / 16` as a big-endian `ushort`. Nonzero preset output still needs physical qualification.
+- Scan-map programming takes 45 bytes at firmware 3.0.0 or later. The separate reset sends 45 zeros.
+- Type/operation minimums do not validate every legacy flag, password length, preset counter, or hardware feature.
+- SmartCard rejects write status shorter than six bytes after fallback. It accepts a sequence increment
+  or a reset from a positive sequence when empty or in the effective [5.0.0, 5.4.3) window.
+- SmartCard data reads return the expected prefix, allowing excess data. HID data reads validate CRC over
+  expected length plus two bytes and return the expected prefix; HID writes only check status length here.
+- OtpTool's static command uses its selected layout to translate text. It does not generate TOTP codes;
+  settings are not patches, and generated human output intentionally includes secrets. See README.
 
 ## Test Infrastructure
 
@@ -142,24 +187,57 @@ extra hidden Configure I/O. See [L6a managed evidence](../../docs/research/linux
 ### Integration Tests
 - Use `[WithYubiKey]` attribute with firmware filters
 - Touch-triggered tests marked with `[Trait(TestCategories.Category, TestCategories.RequiresUserPresence)]`
-- Always clean up: delete programmed slots in `finally` blocks
-- Use slot 2 for test programming to avoid disrupting slot 1 OTP
+- Tests are destructive: slot-2 programming can replace that slot, swap affects both slots, and the
+  protection suite also resets slot 1. Use dedicated, authorized fixtures; original unreadable secrets are
+  not restored. Start tests from known state, resetting or restoring the relevant fixture state beforehand.
+- Configured-bit/response-length assertions do not prove keyboard output, digit count, ticket validity,
+  NFC read-back, or real-device compatibility. Reflection zeroing tests inspect fields; disposal rejection alone does not.
 
 ## Common Operations
 
 ### Program a slot
+
+Composable fragment: `IConnection connection` is a caller-owned open SmartCard or OTP HID connection;
+`byte[] key` is a caller-owned 20-byte secret. Import System.Security.Cryptography,
+Yubico.YubiKit.Core.Abstractions and Yubico.YubiKit.YubiOtp. This task clears key even if session creation fails;
+the caller disposes connection after the session scope ends.
+
 ```csharp
-await using var session = await YubiOtpSession.CreateAsync(connection);
-using var config = new HmacSha1SlotConfiguration(key);
-await session.PutConfigurationAsync(Slot.Two, config);
+try
+{
+    await using var session = await YubiOtpSession.CreateAsync(connection);
+    using var config = new HmacSha1SlotConfiguration(key);
+    await session.PutConfigurationAsync(Slot.Two, config);
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(key);
+}
 ```
 
 ### Challenge-response
+
+Composable fragment within an already open `YubiOtpSession session` for a correctly provisioned slot.
+`byte[] challenge` is owned by this task. Import System and System.Security.Cryptography plus the module namespace.
+
 ```csharp
-var response = await session.CalculateHmacSha1Async(Slot.Two, challenge);
+Memory<byte> response = default;
+try
+{
+    response = await session.CalculateHmacSha1Async(Slot.Two, challenge);
+    // Consume with the application's verifier.
+}
+finally
+{
+    CryptographicOperations.ZeroMemory(challenge);
+    CryptographicOperations.ZeroMemory(response.Span);
+}
 ```
 
 ### Check slot state
+
+Composable fragment within an open `YubiOtpSession session` on firmware supporting configured status:
+
 ```csharp
 var state = session.GetConfigState();
 bool isConfigured = state.IsConfigured(Slot.One);

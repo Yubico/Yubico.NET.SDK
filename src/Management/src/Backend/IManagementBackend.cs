@@ -29,15 +29,8 @@ internal interface IManagementBackend
     /// <summary>
     /// Write configuration data to the device.
     /// </summary>
-    /// <param name="config">TLV-encoded configuration data.</param>
+    /// <param name="config">A one-byte body length followed by configuration TLVs; borrowed until the write completes.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     ValueTask WriteConfigAsync(ReadOnlyMemory<byte> config, CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Set device mode (legacy operation for older YubiKeys).
-    /// </summary>
-    /// <param name="data">Mode configuration data.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    ValueTask SetModeAsync(byte[] data, CancellationToken cancellationToken);
 
 }

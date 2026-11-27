@@ -13,10 +13,11 @@
 // limitations under the License.
 
 using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
+using Yubico.YubiKit.Core.Cryptography;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
@@ -33,15 +34,20 @@ namespace Yubico.YubiKit.YubiHsm;
 /// </summary>
 public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 {
-    // Feature detection constants
+    /// <summary>Describes the base applet firmware floor, 5.4.3.</summary>
     public static readonly Feature FeatureHsmAuth = new("YubiHSM Auth", 5, 4, 3);
+    /// <summary>Gates asymmetric credential operations at version 5.6.0.</summary>
     public static readonly Feature FeatureAsymmetric = new("Asymmetric credentials", 5, 6, 0);
+    /// <summary>Gates challenge retrieval at version 5.6.0.</summary>
     public static readonly Feature FeatureGetChallenge = new("Get challenge", 5, 6, 0);
+    /// <summary>Gates user and administrator credential-password changes at version 5.8.0.</summary>
     public static readonly Feature FeaturePasswordChange = new("Credential password change", 5, 8, 0);
+    /// <summary>Controls transmission of a supplied challenge password from version 5.7.1.</summary>
     public static readonly Feature FeatureGetChallengeWithPassword = new("Get challenge with password", 5, 7, 1);
 
     /// <summary>
-    /// Compatibility alias for <see cref="FeatureGetChallengeWithPassword"/>.
+    ///     Obsolete alias for <see cref="FeatureGetChallengeWithPassword" />. Use that field to test
+    ///     password transmission and <see cref="FeatureGetChallenge" /> to test challenge availability.
     /// </summary>
     [Obsolete("Use FeatureGetChallengeWithPassword. Firmware 5.7.1 added password support; earlier firmware already allowed GetChallenge without a password.")]
     public static readonly Feature FeatureGetChallengeNoPassword = FeatureGetChallengeWithPassword;
@@ -77,9 +83,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     private const byte ResetP1 = 0xDE;
     private const byte ResetP2 = 0xAD;
 
-    // Credential password constraints
-    internal const int CredentialPasswordLength = 16;
-
     // Management key length
     internal const int ManagementKeyLength = 16;
 
@@ -100,56 +103,79 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     internal const int Pbkdf2DerivedKeyLength = 32;
 
     private IHsmAuthBackend _backend = null!;
+    private readonly ProtocolConfiguration? _configuration;
+    private readonly FirmwareVersion? _firmwareOverride;
+    private readonly Func<DeviceInfo?>? _readCachedDeviceInfo;
+    private readonly ScpKeyParameters? _scpKeyParameters;
+    private bool _endingAfterRefreshFailure;
+    private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 
     private HsmAuthSession(
         ISmartCardConnection connection,
-        IUserPresencePrompt? userPresencePrompt = null)
-        : base(connection, userPresencePrompt)
+        SessionCreationOptions? options,
+        Func<DeviceInfo?>? readCachedDeviceInfo)
+        : base(connection, options?.UserPresencePrompt)
     {
         ArgumentNullException.ThrowIfNull(connection);
+        _configuration = options?.ProtocolConfiguration;
+        _firmwareOverride = options?.FirmwareVersionOverride;
+        _readCachedDeviceInfo = readCachedDeviceInfo;
+        _scpKeyParameters = options?.ScpKeyParameters;
     }
 
     /// <summary>
     ///     Factory helper that creates and initializes a YubiHSM Auth session.
     /// </summary>
-    /// <param name="connection">The SmartCard connection to use.</param>
-    /// <param name="options">Optional cross-cutting session creation settings.</param>
+    /// <param name="connection">The borrowed SmartCard connection. The caller closes it after disposing the session.</param>
+    /// <param name="options">
+    ///     Optional session settings. A firmware override takes precedence over applet version detection.
+    ///     Missing, unparseable or major-zero applet versions admit applet feature gates optimistically.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An initialized <see cref="HsmAuthSession" />.</returns>
+    /// <remarks>
+    ///     An override does not skip required SELECT. Keep SCP parameters and their key/certificate owners alive through session disposal:
+    ///     a confirmed reset uses them again to establish a new channel. Keep other borrowed inputs and
+    ///     prompt services alive through complete public tasks,
+    ///     including policy lookup, CALCULATE and callbacks, before disposing the session.
+    /// </remarks>
     public static Task<HsmAuthSession> CreateAsync(
         ISmartCardConnection connection,
         SessionCreationOptions? options = null,
         CancellationToken cancellationToken = default) =>
+        CreateAsync(connection, options, null, cancellationToken);
+
+    internal static Task<HsmAuthSession> CreateAsync(
+        ISmartCardConnection connection,
+        SessionCreationOptions? options,
+        Func<DeviceInfo?>? readCachedDeviceInfo,
+        CancellationToken cancellationToken) =>
         ConstructInitializedAsync(
             connection,
             options,
-            () => new HsmAuthSession(connection, options?.UserPresencePrompt),
-            (session, token) => session.InitializeAsync(
-                options?.ProtocolConfiguration, options?.FirmwareVersionOverride, options?.ScpKeyParameters, token),
+            () => new HsmAuthSession(connection, options, readCachedDeviceInfo),
+            (session, token) => session.InitializeAsync(token),
             cancellationToken);
 
-    private async Task InitializeAsync(
-        ProtocolConfiguration? configuration,
-        FirmwareVersion? firmwareVersion,
-        ScpKeyParameters? scpKeyParams,
-        CancellationToken cancellationToken)
+    private async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (IsInitialized)
             return;
 
-        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(scpKeyParams, cancellationToken)
+        var protocol = (ISmartCardProtocol)await PrepareProtocolAsync(_scpKeyParameters, cancellationToken)
             .ConfigureAwait(false);
         IHsmAuthBackend backend = new HsmAuthBackend(protocol);
 
-        var initializationFirmwareVersion = await backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
-        var resolvedFirmwareVersion = firmwareVersion ?? initializationFirmwareVersion;
+        var selectResponse = await backend.SelectAsync(cancellationToken).ConfigureAwait(false);
+        var (framingVersion, featureVersion) = ResolveFirmware(selectResponse);
 
         var effectiveProtocol = (ISmartCardProtocol)await ConfigureProtocolAsync(
                 protocol,
-                resolvedFirmwareVersion,
-                configuration,
-                scpKeyParams,
-                cancellationToken)
+                framingVersion,
+                _configuration,
+                _scpKeyParameters,
+                cancellationToken,
+                scpEligibilityFirmwareVersion: featureVersion)
             .ConfigureAwait(false);
 
         if (!ReferenceEquals(protocol, effectiveProtocol))
@@ -158,54 +184,29 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
 
         _backend = backend;
+        FirmwareVersion = featureVersion;
     }
 
-    /// <summary>
-    ///     Validates a UTF-8 encoded credential password.
-    /// </summary>
-    /// <param name="password">The UTF-8 encoded password bytes.</param>
-    /// <param name="paramName">
-    ///     The name of the public parameter <paramref name="password" /> was supplied through. The
-    ///     public surface spells this parameter three different ways —
-    ///     <c>credentialPassword</c>, <c>currentPassword</c> and <c>newPassword</c> — so the caller
-    ///     has to name its own, otherwise <see cref="ArgumentException.ParamName" /> would report
-    ///     this helper's local name, which matches nothing a caller can filter on.
-    /// </param>
-    /// <remarks>
-    ///     The applet wire format carries a fixed 16-byte credential password. The SDK accepts at
-    ///     most 16 bytes and null-pads shorter values in <see cref="ParseCredentialPassword" />.
-    /// </remarks>
-    /// <exception cref="ArgumentException">Thrown when the password exceeds 16 bytes.</exception>
-    internal static void ValidateCredentialPassword(ReadOnlySpan<byte> password, string paramName)
+    private (FirmwareVersion Framing, FirmwareVersion Features) ResolveFirmware(ReadOnlyMemory<byte> selectResponse)
     {
-        if (password.Length > CredentialPasswordLength)
-            throw new ArgumentException(
-                $"Credential password UTF-8 encoding ({password.Length} bytes) exceeds maximum of {CredentialPasswordLength} bytes.",
-                paramName);
+        var cachedInfo = ReadDeviceInfoWithoutOverride();
+        var knownVersion = _firmwareOverride ?? cachedInfo?.FirmwareVersion;
+        var knownFramingVersion = GetNumericVersion(knownVersion);
+        var appletVersion = knownFramingVersion is null ? HsmAuthBackend.ReadVersion(selectResponse) : null;
+        var version = knownVersion ?? appletVersion;
+        var framing = knownFramingVersion ?? GetNumericVersion(appletVersion) ?? FeatureHsmAuth.Version;
+        var features = IsPrerelease(cachedInfo) ? new FirmwareVersion() : version ?? new FirmwareVersion();
+        return (framing, features);
     }
 
-    /// <summary>
-    ///     Validates a UTF-8 encoded credential password and copies it into a 16-byte buffer,
-    ///     null-padding any remaining bytes.
-    /// </summary>
-    /// <param name="password">The UTF-8 encoded password bytes (at most 16).</param>
-    /// <param name="paramName">
-    ///     The name of the public parameter <paramref name="password" /> was supplied through; see
-    ///     <see cref="ValidateCredentialPassword" />.
-    /// </param>
-    /// <returns>
-    ///     A newly allocated 16-byte array containing the padded password. The caller owns the
-    ///     buffer and must zero it with <see cref="CryptographicOperations.ZeroMemory(Span{byte})" />.
-    /// </returns>
-    /// <exception cref="ArgumentException">Thrown when the password exceeds 16 bytes.</exception>
-    internal static byte[] ParseCredentialPassword(ReadOnlySpan<byte> password, string paramName)
-    {
-        ValidateCredentialPassword(password, paramName);
+    private static FirmwareVersion? GetNumericVersion(FirmwareVersion? version) =>
+        version is { IsAlphaOrBeta: false } ? version : null;
 
-        var buffer = new byte[CredentialPasswordLength];
-        password.CopyTo(buffer);
-        return buffer;
-    }
+    private DeviceInfo? ReadDeviceInfoWithoutOverride() =>
+        _firmwareOverride is null ? _readCachedDeviceInfo?.Invoke() : null;
+
+    private static bool IsPrerelease(DeviceInfo? deviceInfo) =>
+        deviceInfo?.VersionQualifier is { Type: not VersionQualifierType.Final };
 
     /// <summary>
     ///     Validates and encodes a credential label to UTF-8 bytes.
@@ -258,8 +259,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 continue;
 
             var value = tlv.Value.Span;
-            if (value.Length < 3)
-                continue;
+            if (value.Length is < (MinLabelLength + 3) or > (MaxLabelLength + 3))
+                throw new BadResponseException("LIST returned a credential record with an invalid label length.");
 
             var algorithm = (HsmAuthAlgorithm)value[0];
             var touchByte = value[1];
@@ -271,12 +272,24 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             };
             var labelBytes = value[2..^1]; // Everything except algorithm, touch, and retries-remaining
             var retriesRemaining = value[^1];
-            var label = Encoding.UTF8.GetString(labelBytes);
+            var label = DecodeListedLabel(labelBytes);
 
             credentials.Add(new HsmAuthCredential(label, algorithm, retriesRemaining, touchRequired));
         }
 
         return credentials;
+    }
+
+    private static string DecodeListedLabel(ReadOnlySpan<byte> label)
+    {
+        try
+        {
+            return StrictUtf8.GetString(label);
+        }
+        catch (DecoderFallbackException)
+        {
+            throw new BadResponseException("LIST returned a credential label that is not valid UTF-8.");
+        }
     }
 
     /// <inheritdoc />
@@ -285,7 +298,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         ReadOnlyMemory<byte> keyEnc,
         ReadOnlyMemory<byte> keyMac,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -303,12 +316,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 $"MAC key must be {HsmAuthAlgorithm.Aes128YubicoAuthentication.KeyLength} bytes.",
                 nameof(keyMac));
 
-        byte[]? credPwBytes = null;
+        ArgumentNullException.ThrowIfNull(credentialPassword);
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
@@ -324,8 +336,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -336,7 +346,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> managementKey,
         string label,
         ReadOnlyMemory<byte> derivationPassword,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -400,23 +410,22 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task<SessionKeys> CalculateSessionKeysSymmetricAsync(
         string label,
         ReadOnlyMemory<byte> context,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         ReadOnlyMemory<byte>? cardCryptogram = null,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
+        ArgumentNullException.ThrowIfNull(credentialPassword);
         ValidateContextLength(context, SymmetricContextLength);
         var labelBytes = ValidateAndEncodeLabel(label);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(label, UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysSymmetric, cancellationToken).ConfigureAwait(false));
 
-        byte[]? credPwBytes = null;
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
             var tlvs = new List<Tlv>
             {
                 new(TagLabel, labelBytes),
@@ -440,8 +449,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -503,15 +510,51 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         await _backend.SendAsync(command, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
-        // Re-SELECT the applet using the existing protocol to refresh cached state.
-        // Do NOT create a new protocol here — that would abandon the current one without
-        // disposing it, leaking the PCSC transaction and causing SW=0x6985 on next operation.
-        //
-        // The version reported by the re-SELECT is deliberately discarded. Reset refreshes applet
-        // state, not caller policy, so a SessionCreationOptions.FirmwareVersionOverride supplied at
-        // creation must survive it; otherwise the override would silently lapse mid-session and
-        // later feature gates would disagree with earlier ones.
-        _ = await _backend.ReadInitialStateAsync(cancellationToken).ConfigureAwait(false);
+        // The applet reset does not reset Security Domain keys. Retire the old protocol graph and
+        // reselect/re-handshake on the same connection using the caller's original SCP parameters.
+        var previousProtocol = Protocol;
+        Protocol = null;
+        _backend = null!; // Published only after successful reinitialization.
+        IsInitialized = false;
+        IsAuthenticated = false;
+        FirmwareVersion = new FirmwareVersion();
+        try
+        {
+            previousProtocol?.Dispose();
+            await InitializeSessionAsync(InitializeAsync, cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            _endingAfterRefreshFailure = true;
+            await DisposeAsync().ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        try
+        {
+            await base.DisposeAsyncCore().ConfigureAwait(false);
+        }
+        catch when (_endingAfterRefreshFailure)
+        {
+            // Do not cache a cleanup failure in the disposal gate or mask the refresh error.
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void Dispose(bool disposing)
+    {
+        try
+        {
+            base.Dispose(disposing);
+        }
+        catch when (_endingAfterRefreshFailure)
+        {
+            // The refresh exception is the primary error, including for implicit disposal.
+        }
     }
 
     /// <inheritdoc />
@@ -519,26 +562,33 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         string label,
         ReadOnlyMemory<byte> context,
         ReadOnlyMemory<byte> publicKey,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         ReadOnlyMemory<byte> cardCryptogram,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         EnsureSupports(FeatureAsymmetric);
         ValidateContextLength(context, AsymmetricContextLength);
+        try
+        {
+            ValidateP256Point(publicKey.Span);
+        }
+        catch (CryptographicException ex)
+        {
+            throw new ArgumentException("The HSM public key must be an uncompressed P-256 point.", nameof(publicKey), ex);
+        }
         var labelBytes = ValidateAndEncodeLabel(label);
 
         UserPresenceNotification userPresenceNotification = CreateUserPresenceNotification(
             await GetUserPresenceContextAsync(label, UserPresenceOperations.YubiHsmAuth.CalculateSessionKeysAsymmetric, cancellationToken).ConfigureAwait(false));
 
-        byte[]? credPwBytes = null;
+        ArgumentNullException.ThrowIfNull(credentialPassword);
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
-            // APDU payload order matches Python canonical SDK:
-            // TAG_LABEL, TAG_CONTEXT, TAG_PUBLIC_KEY, TAG_RESPONSE, TAG_CREDENTIAL_PASSWORD
+            // Keep the handshake inputs in wire order: label, context, HSM static public key,
+            // HSM cryptogram, then credential password.
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagContext, context.Span),
@@ -556,8 +606,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -576,25 +624,23 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// <inheritdoc />
     public async Task<ReadOnlyMemory<byte>> GetChallengeAsync(
         string label,
-        ReadOnlyMemory<byte>? credentialPassword = null,
+        CredentialPassword? credentialPassword = null,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         EnsureSupports(FeatureGetChallenge);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        byte[]? credPwBytes = null;
+        var credPwBytes = credentialPassword is not null && IsSupported(FeatureGetChallengeWithPassword)
+            ? credentialPassword.Bytes
+            : default;
         Memory<byte> data = default;
         try
         {
             var tlvs = new List<Tlv> { new(TagLabel, labelBytes) };
 
-            if (credentialPassword is { } suppliedPassword &&
-                IsSupported(FeatureGetChallengeWithPassword))
-            {
-                credPwBytes = ParseCredentialPassword(suppliedPassword.Span, nameof(credentialPassword));
+            if (!credPwBytes.IsEmpty)
                 tlvs.Add(new Tlv(TagCredentialPassword, credPwBytes));
-            }
 
             data = TlvHelper.EncodeAndDisposeList([.. tlvs]);
 
@@ -607,8 +653,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -619,7 +663,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ReadOnlyMemory<byte> managementKey,
         string label,
         ReadOnlyMemory<byte> privateKey,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -633,12 +677,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 $"EC P256 private key must be exactly {EcP256PrivateKeyLength} bytes.",
                 nameof(privateKey));
 
-        byte[]? credPwBytes = null;
+        ArgumentNullException.ThrowIfNull(credentialPassword);
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
@@ -653,8 +696,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -664,7 +705,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task GenerateCredentialAsymmetricAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        ReadOnlyMemory<byte> credentialPassword,
+        CredentialPassword credentialPassword,
         bool touchRequired = false,
         CancellationToken cancellationToken = default)
     {
@@ -673,14 +714,12 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        byte[]? credPwBytes = null;
+        ArgumentNullException.ThrowIfNull(credentialPassword);
+        var credPwBytes = credentialPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            credPwBytes = ParseCredentialPassword(credentialPassword.Span, nameof(credentialPassword));
-
             // TAG_PRIVATE_KEY with empty value signals on-device key generation.
-            // Python canonical: _put_credential(management_key, label, b"", EC_P256, credential_password)
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagManagementKey, managementKey.Span),
                 new Tlv(TagLabel, labelBytes),
@@ -695,8 +734,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (credPwBytes is not null)
-                CryptographicOperations.ZeroMemory(credPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -719,32 +756,47 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
             .ConfigureAwait(false);
 
         var publicKey = response.Data;
-        if (publicKey.Length != EcP256PublicKeyLength)
-            throw new InvalidOperationException(
-                $"Expected {EcP256PublicKeyLength}-byte public key, got {publicKey.Length}");
+        try
+        {
+            ValidateP256Point(publicKey.Span);
+        }
+        catch (CryptographicException)
+        {
+            throw new BadResponseException("GET PUBLIC KEY did not return an uncompressed P-256 point.");
+        }
 
         return publicKey;
+    }
+
+    private static void ValidateP256Point(ReadOnlySpan<byte> point)
+    {
+        const int coordinateLength = (EcP256PublicKeyLength - 1) / 2;
+        AsnUtilities.ValidateDecodedEcPoint(point, "1.2.840.10045.3.1.7");
+        using var key = ECDiffieHellman.Create(new ECParameters
+        {
+            Curve = ECCurve.NamedCurves.nistP256,
+            Q = new ECPoint { X = point.Slice(1, coordinateLength).ToArray(), Y = point[(1 + coordinateLength)..].ToArray() }
+        });
     }
 
     /// <inheritdoc />
     public async Task ChangeCredentialPasswordAsync(
         string label,
-        ReadOnlyMemory<byte> currentPassword,
-        ReadOnlyMemory<byte> newPassword,
+        CredentialPassword currentPassword,
+        CredentialPassword newPassword,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
         EnsureSupports(FeaturePasswordChange);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        byte[]? currentPwBytes = null;
-        byte[]? newPwBytes = null;
+        ArgumentNullException.ThrowIfNull(currentPassword);
+        ArgumentNullException.ThrowIfNull(newPassword);
+        var currentPwBytes = currentPassword.Bytes;
+        var newPwBytes = newPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            currentPwBytes = ParseCredentialPassword(currentPassword.Span, nameof(currentPassword));
-            newPwBytes = ParseCredentialPassword(newPassword.Span, nameof(newPassword));
-
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagCredentialPassword, currentPwBytes),
@@ -756,10 +808,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (currentPwBytes is not null)
-                CryptographicOperations.ZeroMemory(currentPwBytes);
-            if (newPwBytes is not null)
-                CryptographicOperations.ZeroMemory(newPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -769,7 +817,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     public async Task ChangeCredentialPasswordAdminAsync(
         ReadOnlyMemory<byte> managementKey,
         string label,
-        ReadOnlyMemory<byte> newPassword,
+        CredentialPassword newPassword,
         CancellationToken cancellationToken = default)
     {
         ThrowIfDisposed();
@@ -777,12 +825,11 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         ValidateManagementKey(managementKey.Span);
         var labelBytes = ValidateAndEncodeLabel(label);
 
-        byte[]? newPwBytes = null;
+        ArgumentNullException.ThrowIfNull(newPassword);
+        var newPwBytes = newPassword.Bytes;
         Memory<byte> data = default;
         try
         {
-            newPwBytes = ParseCredentialPassword(newPassword.Span, nameof(newPassword));
-
             data = TlvHelper.EncodeAndDisposeList(
                 new Tlv(TagLabel, labelBytes),
                 new Tlv(TagManagementKey, managementKey.Span),
@@ -794,8 +841,6 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
         }
         finally
         {
-            if (newPwBytes is not null)
-                CryptographicOperations.ZeroMemory(newPwBytes);
             if (!data.IsEmpty)
                 CryptographicOperations.ZeroMemory(data.Span);
         }
@@ -813,7 +858,8 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
     /// </returns>
     /// <remarks>
     ///     The caller owns <paramref name="derivationPassword" /> and is responsible for
-    ///     zeroing it; this method makes no copy of the input.
+    ///     zeroing it. This helper passes its span directly to PBKDF2 and creates no explicit input copy;
+    ///     the returned derived-key array has its own clearing obligation.
     /// </remarks>
     internal static byte[] DeriveKeys(ReadOnlyMemory<byte> derivationPassword) =>
         Rfc2898DeriveBytes.Pbkdf2(
@@ -907,9 +953,19 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                             token)
                         .ConfigureAwait(false);
 
+                    // This is the final successful response owner. Earlier transport, fragment and
+                    // decrypted copies, and errors before the send returns, are outside this scope.
                     try
                     {
-                        SessionKeys sessionKeys = SessionKeys.Parse(response.Data.Span);
+                        int length = response.Data.Length;
+                        if (length < SessionKeys.ExpectedResponseLength)
+                            throw new BadResponseException(
+                                $"CALCULATE returned {length} bytes; expected at least {SessionKeys.ExpectedResponseLength}.");
+
+                        if (length > SessionKeys.ExpectedResponseLength)
+                            Logger.LogDebug("CALCULATE returned {Length} bytes", length);
+
+                        SessionKeys sessionKeys = SessionKeys.Parse(response.Data.Span[..SessionKeys.ExpectedResponseLength]);
                         try
                         {
                             await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed)
@@ -924,7 +980,7 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                     }
                     finally
                     {
-                        ZeroApduResponse(response);
+                        response.Clear();
                     }
                 },
                 cancellationToken)
@@ -939,15 +995,9 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
                 nameof(managementKey));
     }
 
-    internal static void ZeroApduResponse(ApduResponse response)
-    {
-        if (MemoryMarshal.TryGetArray(response.RawData, out var rawData))
-            CryptographicOperations.ZeroMemory(rawData.AsSpan());
-    }
-
     /// <summary>
     ///     Checks an APDU response for the 0x63Cx retry failure pattern and throws
-    ///     <see cref="ApduException" /> with retry information if detected.
+    ///     <see cref="HsmAuthRetryException" /> with retry information if detected.
     /// </summary>
     private static void ThrowOnRetryFailure(ApduResponse response, ApduCommand command, string errorContext)
     {
@@ -969,15 +1019,14 @@ public sealed class HsmAuthSession : ApplicationSession, IHsmAuthSession
 
     /// <summary>
     ///     Checks an APDU response for the 0x63Cx management key verification failure pattern.
-    ///     Throws <see cref="ApduException" /> with retry information if detected.
+    ///     Throws <see cref="HsmAuthRetryException" /> with retry information if detected.
     /// </summary>
     private static void ThrowOnManagementKeyFailure(ApduResponse response, ApduCommand command) =>
         ThrowOnRetryFailure(response, command, "Management key verification failed");
 
     /// <summary>
     ///     Checks an APDU response for the 0x63Cx credential password verification failure pattern.
-    ///     Throws <see cref="ApduException" /> with retry information if detected.
-    ///     Matches the Python SDK behavior in <c>_calculate_session_keys</c>.
+    ///     Throws <see cref="HsmAuthRetryException" /> with retry information if detected.
     /// </summary>
     private static void ThrowOnCredentialPasswordFailure(ApduResponse response, ApduCommand command) =>
         ThrowOnRetryFailure(response, command, "Invalid credential password");

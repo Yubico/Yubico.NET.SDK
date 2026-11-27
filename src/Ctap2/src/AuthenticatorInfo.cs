@@ -24,7 +24,14 @@ namespace Yubico.YubiKit.Ctap2;
 /// </summary>
 /// <remarks>
 /// <para>
+/// A GetInfo response is a snapshot, not SDK enforcement or permission to use a feature. Some option
+/// values describe configured state. Query again after state changes, outside any continuation sequence.
+/// Absent optional lists and maps become empty; absent optional scalar and encrypted metadata fields
+/// remain null. Decoding requires a nonempty versions list and a 16-byte AAGUID.
+/// </para>
+/// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#authenticatorGetInfo
+/// CTAP2.3 fields: https://fidoalliance.org/specs/fido-v2.3-ps-20260226/fido-client-to-authenticator-protocol-v2.3-ps-20260226.html#authenticatorGetInfo
 /// </para>
 /// </remarks>
 public sealed class AuthenticatorInfo
@@ -75,7 +82,8 @@ public sealed class AuthenticatorInfo
     /// Gets the CTAP versions supported by the authenticator.
     /// </summary>
     /// <remarks>
-    /// Common values: "FIDO_2_0", "FIDO_2_1", "FIDO_2_1_PRE", "U2F_V2"
+    /// Common values: "FIDO_2_0", "FIDO_2_1", "FIDO_2_1_PRE", "FIDO_2_3", "U2F_V2".
+    /// Advertisement does not establish complete SDK implementation of that revision.
     /// </remarks>
     public IReadOnlyList<string> Versions { get; init; } = [];
 
@@ -88,26 +96,33 @@ public sealed class AuthenticatorInfo
     /// Gets the AAGUID (Authenticator Attestation GUID).
     /// </summary>
     /// <remarks>
-    /// This is a 128-bit identifier that identifies the type of authenticator.
+    /// The protocol requires a 16-byte identifier for the authenticator type, not an individual
+    /// credential. An all-zero AAGUID is not treated as missing.
     /// </remarks>
     public ReadOnlyMemory<byte> Aaguid { get; init; }
 
     /// <summary>
-    /// Gets the options supported by the authenticator.
+    /// Gets reported capability and configured-state option values.
     /// </summary>
     /// <remarks>
-    /// Common options: "rk" (resident key), "up" (user presence), "uv" (user verification),
-    /// "plat" (platform device), "clientPin", "credentialMgmt", "bioEnroll", etc.
+    /// Common keys include "rk", "up", "plat", "clientPin", "uv", "credMgmt", "authnrCfg" and
+    /// "bioEnroll". For clientPin, true means capable with a PIN set, false means capable without
+    /// a PIN, and absence means not capable. For uv, true means built-in verification is configured,
+    /// false means capable but unconfigured, and absence means unsupported. A false bioEnroll value
+    /// still indicates enrollment capability, with no enrollment provisioned. Interpret each key's
+    /// protocol definition rather than treating every false or absent value as the same condition.
     /// </remarks>
     public IReadOnlyDictionary<string, bool> Options { get; init; } = ReadOnlyDictionary<string, bool>.Empty;
 
     /// <summary>
     /// Gets the maximum message size in bytes.
     /// </summary>
+    /// <remarks>Null preserves absence; the CTAP2.1 protocol default is 1024 bytes. This model
+    /// does not enforce the limit on requests, and the HID framing limit is a separate constraint.</remarks>
     public int? MaxMsgSize { get; init; }
 
     /// <summary>
-    /// Gets the PIN/UV auth protocol versions supported.
+    /// Gets advertised PIN/UV auth protocol versions in decreasing authenticator preference.
     /// </summary>
     public IReadOnlyList<int> PinUvAuthProtocols { get; init; } = [];
 
@@ -124,10 +139,12 @@ public sealed class AuthenticatorInfo
     /// <summary>
     /// Gets the transports supported by the authenticator.
     /// </summary>
+    /// <remarks>Advertised names are not proof of an exposed or reachable host connection.
+    /// Unknown names are preserved; callers must tolerate them.</remarks>
     public IReadOnlyList<string> Transports { get; init; } = [];
 
     /// <summary>
-    /// Gets the algorithms supported for credential creation.
+    /// Gets advertised credential-creation algorithms in authenticator preference order.
     /// </summary>
     public IReadOnlyList<PublicKeyCredentialParameters> Algorithms { get; init; } = [];
 
@@ -142,13 +159,15 @@ public sealed class AuthenticatorInfo
     public bool? ForcePinChange { get; init; }
 
     /// <summary>
-    /// Gets the minimum PIN length required.
+    /// Gets the current minimum PIN length in Unicode code points, when reported.
     /// </summary>
     public int? MinPinLength { get; init; }
 
     /// <summary>
-    /// Gets the firmware version as reported by the authenticator.
+    /// Gets the reported firmware value interpreted using YubiKey's packed major/minor/patch layout.
     /// </summary>
+    /// <remarks>CTAP's unsigned firmwareVersion field does not standardize this layout. This
+    /// property is not a Management firmware lookup or an update to the session firmware snapshot.</remarks>
     public FirmwareVersion? FirmwareVersion { get; init; }
 
     /// <summary>
@@ -177,14 +196,15 @@ public sealed class AuthenticatorInfo
     public IReadOnlyDictionary<string, int> Certifications { get; init; } = ReadOnlyDictionary<string, int>.Empty;
 
     /// <summary>
-    /// Gets the remaining discoverable credential slots.
+    /// Gets the estimated number of additional discoverable credentials, when reported.
     /// </summary>
+    /// <remarks>The estimate uses credential-size assumptions; it is not an exact free-slot count.</remarks>
     public int? RemainingDiscoverableCredentials { get; init; }
 
     /// <summary>
-    /// Gets the vendor prototype config commands supported.
+    /// Gets the supported vendor prototype configuration command IDs (CTAP §6.4 and §6.11.3).
     /// </summary>
-    public IReadOnlyList<int> VendorPrototypeConfigCommands { get; init; } = [];
+    public IReadOnlyList<ulong> VendorPrototypeConfigCommands { get; init; } = [];
 
     /// <summary>
     /// Gets the attestation formats supported.
@@ -199,19 +219,27 @@ public sealed class AuthenticatorInfo
     /// <summary>
     /// Gets whether long touch is required for reset.
     /// </summary>
+    /// <remarks>In CTAP2.3, true means supported and enabled (touch for at least five seconds),
+    /// false means supported but disabled, and absence means unsupported (represented here by null).
+    /// This is separate from reset's
+    /// power-up-to-command-receipt window; see <see cref="ICtap2Session.ResetAsync"/>.</remarks>
     public bool? LongTouchForReset { get; init; }
 
     /// <summary>
-    /// Gets the encrypted credential identifier (YubiKey 5.7+).
+    /// Gets the optional encrypted device identifier defined by CTAP2.3.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This field contains an encrypted unique identifier for discoverable credentials.
-    /// It can be decrypted using the PPUAT (Persistent PIN/UV Auth Token) with the
+    /// The representation is IV followed by ciphertext for a 128-bit device identifier, not a
+    /// credential ID or a means to select a credential. It can be decrypted using the corresponding
+    /// persistent PIN/UV auth token with the
     /// <see cref="Crypto.EncryptedMetadataDecryptor.DecryptIdentifier"/> method.
     /// </para>
     /// <para>
-    /// Available on YubiKey firmware 5.7+ when a PPUAT is active.
+    /// Field availability depends on product, firmware and persistent-token state; an ordinary
+    /// permission-scoped token is not interchangeable. Decode reads the bytes without validating
+    /// encrypted length or decryptability.
+    /// Null means the field was absent; a present value does not establish decryptability.
     /// </para>
     /// </remarks>
     public ReadOnlyMemory<byte>? EncIdentifier { get; init; }
@@ -222,6 +250,9 @@ public sealed class AuthenticatorInfo
     /// <remarks>
     /// This field indicates which transport methods can be used to reset the authenticator.
     /// Common values include "usb", "nfc", and "ble".
+    /// Absence becomes an empty list in this model, not a conclusion that reset is unsupported.
+    /// Unknown transport names are retained. This list does not arrange the reset timing or presence
+    /// ceremony; see <see cref="ICtap2Session.ResetAsync"/>.
     /// </remarks>
     public IReadOnlyList<string> TransportsForReset { get; init; } = [];
 
@@ -229,8 +260,9 @@ public sealed class AuthenticatorInfo
     /// Gets whether PIN complexity policy is enforced (CTAP 2.3).
     /// </summary>
     /// <remarks>
-    /// When true, the authenticator enforces a PIN complexity policy as defined
-    /// by <see cref="PinComplexityPolicyUrl"/>.
+    /// In CTAP2.3, true means supported and enabled; false means supported but disabled; absence
+    /// means unsupported (represented here by null). <see cref="PinComplexityPolicyUrl"/> can
+    /// explain the policy to the user but is optional.
     /// </remarks>
     public bool? PinComplexityPolicy { get; init; }
 
@@ -238,8 +270,8 @@ public sealed class AuthenticatorInfo
     /// Gets the URL describing the PIN complexity policy (CTAP 2.3).
     /// </summary>
     /// <remarks>
-    /// This URL points to a human-readable description of the PIN complexity requirements
-    /// enforced by the authenticator.
+    /// The protocol field is an optional UTF-8 byte string, decoded here as text. It can inform the
+    /// user about the policy; the SDK does not fetch the URL or validate the described requirements.
     /// </remarks>
     public string? PinComplexityPolicyUrl { get; init; }
 
@@ -249,20 +281,24 @@ public sealed class AuthenticatorInfo
     /// <remarks>
     /// This value indicates the maximum number of Unicode code points allowed in a PIN.
     /// Complements <see cref="MinPinLength"/>.
+    /// Null preserves absence; with ClientPIN support the CTAP2.3 effective default is 63 code points.
+    /// The UTF-8 byte-length restriction remains separate; this value is not complete PIN validation.
     /// </remarks>
     public int? MaxPinLength { get; init; }
 
     /// <summary>
-    /// Gets the encrypted credential store state (YubiKey 5.8+).
+    /// Gets optional encrypted credential-store state defined by CTAP2.3.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This field contains encrypted metadata about the credential storage state.
-    /// It can be decrypted using the PPUAT (Persistent PIN/UV Auth Token) with the
+    /// This is IV followed by ciphertext for a 128-bit credential-store state. It can be decrypted
+    /// using the corresponding persistent PIN/UV auth token with the
     /// <see cref="Crypto.EncryptedMetadataDecryptor.DecryptCredStoreState"/> method.
     /// </para>
     /// <para>
-    /// Available on YubiKey firmware 5.8+ when a PPUAT is active.
+    /// Availability depends on product, firmware and persistent-token state. Decode retains the
+    /// byte string without validating encrypted length or proving decryptability.
+    /// Null means the field was absent; a present value does not establish decryptability.
     /// </para>
     /// </remarks>
     public ReadOnlyMemory<byte>? EncCredStoreState { get; init; }
@@ -284,6 +320,10 @@ public sealed class AuthenticatorInfo
     /// <summary>
     /// Decodes an AuthenticatorInfo from CBOR-encoded data.
     /// </summary>
+    /// <remarks>The input is borrowed and left unchanged; the result owns an independent complete
+    /// RawData copy and separately materialized fields. Unknown fields are skipped at the typed
+    /// surface and preserved in RawData. Absent EncIdentifier and EncCredStoreState fields are null;
+    /// an encoded empty byte string remains present. A decoded result is not a conformance verdict.</remarks>
     /// <param name="data">The CBOR-encoded response data.</param>
     /// <returns>The decoded AuthenticatorInfo.</returns>
     public static AuthenticatorInfo Decode(ReadOnlyMemory<byte> data)
@@ -320,7 +360,7 @@ public sealed class AuthenticatorInfo
         int? uvModality = null;
         Dictionary<string, int>? certifications = null;
         int? remainingDiscoverableCredentials = null;
-        List<int>? vendorPrototypeConfigCommands = null;
+        List<ulong>? vendorPrototypeConfigCommands = null;
         List<string>? attestationFormats = null;
         int? uvCountSinceLastPinEntry = null;
         bool? longTouchForReset = null;
@@ -334,7 +374,7 @@ public sealed class AuthenticatorInfo
 
         for (var i = 0; i < mapLength; i++)
         {
-            var key = reader.ReadInt32();
+            var key = reader.ReadUInt64();
 
             switch (key)
             {
@@ -355,7 +395,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxMsgSize:
-                    maxMsgSize = reader.ReadInt32();
+                    maxMsgSize = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyPinUvAuthProtocols:
@@ -363,11 +403,11 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxCredentialCountInList:
-                    maxCredentialCountInList = reader.ReadInt32();
+                    maxCredentialCountInList = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyMaxCredentialIdLength:
-                    maxCredentialIdLength = reader.ReadInt32();
+                    maxCredentialIdLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyTransports:
@@ -379,7 +419,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxSerializedLargeBlobArray:
-                    maxSerializedLargeBlobArray = reader.ReadInt32();
+                    maxSerializedLargeBlobArray = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyForcePinChange:
@@ -387,7 +427,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMinPinLength:
-                    minPinLength = reader.ReadInt32();
+                    minPinLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyFirmwareVersion:
@@ -396,19 +436,19 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxCredBlobLength:
-                    maxCredBlobLength = reader.ReadInt32();
+                    maxCredBlobLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyMaxRpidsForSetMinPinLength:
-                    maxRpidsForSetMinPinLength = reader.ReadInt32();
+                    maxRpidsForSetMinPinLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyPreferredPlatformUvAttempts:
-                    preferredPlatformUvAttempts = reader.ReadInt32();
+                    preferredPlatformUvAttempts = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyUvModality:
-                    uvModality = reader.ReadInt32();
+                    uvModality = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyCertifications:
@@ -416,11 +456,11 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyRemainingDiscoverableCredentials:
-                    remainingDiscoverableCredentials = reader.ReadInt32();
+                    remainingDiscoverableCredentials = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyVendorPrototypeConfigCommands:
-                    vendorPrototypeConfigCommands = ReadIntArray(reader);
+                    vendorPrototypeConfigCommands = ReadUInt64Array(reader);
                     break;
 
                 case KeyAttestationFormats:
@@ -428,7 +468,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyUvCountSinceLastPinEntry:
-                    uvCountSinceLastPinEntry = reader.ReadInt32();
+                    uvCountSinceLastPinEntry = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyLongTouchForReset:
@@ -454,7 +494,7 @@ public sealed class AuthenticatorInfo
                     break;
 
                 case KeyMaxPinLength:
-                    maxPinLength = reader.ReadInt32();
+                    maxPinLength = checked((int)reader.ReadUInt32());
                     break;
 
                 case KeyEncCredStoreState:
@@ -473,12 +513,19 @@ public sealed class AuthenticatorInfo
 
         reader.ReadEndMap();
 
+        if (reader.BytesRemaining != 0)
+            throw new CborContentException("GetInfo contains data after the response map.");
+        if (versions is not { Count: > 0 })
+            throw new CborContentException("GetInfo must report at least one version.");
+        if (aaguid is not { Length: 16 })
+            throw new CborContentException("GetInfo must report a 16-byte AAGUID.");
+
         return new AuthenticatorInfo
         {
             RawData = rawCbor,
-            Versions = versions ?? [],
+            Versions = versions,
             Extensions = extensions ?? [],
-            Aaguid = aaguid ?? [],
+            Aaguid = aaguid,
             Options = options is not null
                 ? new ReadOnlyDictionary<string, bool>(options)
                 : ReadOnlyDictionary<string, bool>.Empty,
@@ -504,12 +551,12 @@ public sealed class AuthenticatorInfo
             AttestationFormats = attestationFormats ?? [],
             UvCountSinceLastPinEntry = uvCountSinceLastPinEntry,
             LongTouchForReset = longTouchForReset,
-            EncIdentifier = encIdentifier,
+            EncIdentifier = encIdentifier is null ? (ReadOnlyMemory<byte>?)null : encIdentifier.AsMemory(),
             TransportsForReset = transportsForReset ?? [],
             PinComplexityPolicy = pinComplexityPolicy,
             PinComplexityPolicyUrl = pinComplexityPolicyUrl,
             MaxPinLength = maxPinLength,
-            EncCredStoreState = encCredStoreState,
+            EncCredStoreState = encCredStoreState is null ? (ReadOnlyMemory<byte>?)null : encCredStoreState.AsMemory(),
             AuthenticatorConfigCommands = authenticatorConfigCommands ?? []
         };
     }
@@ -538,6 +585,18 @@ public sealed class AuthenticatorInfo
             result.Add(reader.ReadInt32());
         }
 
+        reader.ReadEndArray();
+        return result;
+    }
+
+    private static List<ulong> ReadUInt64Array(CborReader reader)
+    {
+        var length = reader.ReadStartArray() ?? 0;
+        var result = new List<ulong>(length);
+        for (var i = 0; i < length; i++)
+        {
+            result.Add(reader.ReadUInt64());
+        }
         reader.ReadEndArray();
         return result;
     }
@@ -589,8 +648,8 @@ public sealed class AuthenticatorInfo
 
     private static FirmwareVersion DecodeFirmwareVersion(ulong value)
     {
-        // Firmware version is encoded as major.minor.patch in the upper bytes
-        // YubiKey encodes as: major << 16 | minor << 8 | patch
+        // Interpret the YubiKey packed layout: major << 16 | minor << 8 | patch.
+        // CTAP itself specifies an unsigned model version, not these component bytes.
         var major = (byte)((value >> 16) & 0xFF);
         var minor = (byte)((value >> 8) & 0xFF);
         var patch = (byte)(value & 0xFF);
@@ -606,13 +665,15 @@ public sealed class PublicKeyCredentialParameters
     private const string TypePublicKey = "public-key";
 
     /// <summary>
-    /// Gets the credential type (always "public-key").
+    /// Gets the credential type; defaults to "public-key" but can retain other supplied values.
     /// </summary>
     public string Type { get; init; } = TypePublicKey;
 
     /// <summary>
     /// Gets the COSE algorithm identifier.
     /// </summary>
+    /// <remarks>An identifier is not device support, mathematical key validation or an RP's
+    /// approved-algorithm policy. The GetInfo parser defaults a missing algorithm to None.</remarks>
     public CoseAlgorithmIdentifier Algorithm { get; init; }
 
     /// <summary>

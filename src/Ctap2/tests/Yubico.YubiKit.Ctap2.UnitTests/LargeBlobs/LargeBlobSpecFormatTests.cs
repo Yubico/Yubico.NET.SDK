@@ -22,9 +22,9 @@ using Yubico.YubiKit.Ctap2.LargeBlobs;
 namespace Yubico.YubiKit.Ctap2.UnitTests.LargeBlobs;
 
 /// <summary>
-///     CTAP 2.1-2.3 §6.10 large-blob format and storage rules, written before the rewrite that implements them
-///     (#13 format, #12 fragment length, #14 corrupt array, #16 zeroing). The reference encoder below is a
-///     transliteration of python-fido2 blob.py (_compress, _lb_ad, _lb_pack, write_blob_array).
+///     Local CTAP 2.1-2.3 §6.10 format, first-fragment/limit and scoped temporary-clearing fixtures.
+///     The handcrafted encoder follows raw DEFLATE/GCM/AAD/array-hash layout; it does not run python-fido2
+///     or establish arbitrary foreign-client interoperability or end-to-end sensitive-buffer cleanup.
 /// </summary>
 public class LargeBlobSpecFormatTests
 {
@@ -42,7 +42,7 @@ public class LargeBlobSpecFormatTests
     private static readonly byte[] BlobA = "hello from credential A"u8.ToArray();
     private static readonly byte[] BlobB = "a different blob for B"u8.ToArray();
 
-    // ---- reference encoder (python-fido2 blob.py) ----
+    // Local independent format encoder, not an executed sibling-client integration.
 
     private static byte[] Deflate(byte[] data)
     {
@@ -97,7 +97,7 @@ public class LargeBlobSpecFormatTests
         return session;
     }
 
-    // ---- #13 format ----
+    // Format fixtures.
 
     [Fact]
     [Trait("Audit", "YESDK-1621")]
@@ -106,7 +106,7 @@ public class LargeBlobSpecFormatTests
         var entry = LargeBlobEntry.Encrypt(KeyA, BlobA);
 
         Assert.Equal(NonceSize, entry.Nonce.Length);
-        Assert.Equal(BlobA.Length, entry.OriginalSize);
+        Assert.Equal((ulong)BlobA.Length, entry.OriginalSize);
         Assert.True(entry.Ciphertext.Length > TagSize);
         Assert.Equal(BlobA, entry.TryDecrypt(KeyA));
         Assert.Null(entry.TryDecrypt(KeyB));
@@ -129,7 +129,7 @@ public class LargeBlobSpecFormatTests
         Assert.Null(tampered.TryDecrypt(KeyA));
     }
 
-    /// <summary>§6.10.2/§6.10.3: an entry written by another client for another key is carried through byte-for-byte, unknown elements included.</summary>
+    /// <summary>One local canonical foreign-key entry with unknown byte-string element 99 survives this rewrite fixture.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1621")]
     public void Array_RewriteKeepsForeignEntriesByteForByte()
@@ -177,7 +177,44 @@ public class LargeBlobSpecFormatTests
         Assert.Null(huge.TryDecrypt(KeyA));
     }
 
-    // ---- #12 fragment length ----
+    [Fact]
+    public void Array_PreservesFullWidthOriginalSizeAndUnknownKey()
+    {
+        var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
+        writer.WriteStartArray(1);
+        writer.WriteStartMap(4);
+        writer.WriteInt32(1);
+        writer.WriteByteString(new byte[16]);
+        writer.WriteInt32(2);
+        writer.WriteByteString(new byte[12]);
+        writer.WriteInt32(3);
+        writer.WriteUInt64(ulong.MaxValue);
+        writer.WriteUInt64(ulong.MaxValue);
+        writer.WriteBoolean(true);
+        writer.WriteEndMap();
+        writer.WriteEndArray();
+        byte[] serialized = Finish(writer);
+
+        var array = LargeBlobArray.Deserialize(serialized);
+
+        Assert.Equal(ulong.MaxValue, Assert.Single(array.Entries).OriginalSize);
+        Assert.Null(array.FindAndDecrypt(KeyA));
+        Assert.Equal(serialized, array.Serialize());
+    }
+
+    [Fact]
+    public void Entry_EncryptAndDecryptShareOneMiBLimit()
+    {
+        var data = new byte[(int)LargeBlobEntry.MaxOriginalSize + 1];
+
+        Assert.Throws<ArgumentOutOfRangeException>("data", () => LargeBlobEntry.Encrypt(KeyA, data));
+        var atLimit = data.AsSpan()[..^1];
+        var decrypted = LargeBlobEntry.Encrypt(KeyA, atLimit).TryDecrypt(KeyA);
+        Assert.NotNull(decrypted);
+        Assert.True(atLimit.SequenceEqual(decrypted));
+    }
+
+    // First-fragment length and reported write-capacity fixtures.
 
     [Theory]
     [Trait("Audit", "YESDK-1620")]
@@ -188,7 +225,7 @@ public class LargeBlobSpecFormatTests
         var session = SessionWithInfo(maxMsgSize);
         ReadOnlyMemory<byte> request = default;
         session.SendCborRequestAsync(Arg.Do<ReadOnlyMemory<byte>>(r => request = r.ToArray()), Arg.Any<CancellationToken>())
-            .Returns(ReadOnlyMemory<byte>.Empty);
+            .Returns((ReadOnlyMemory<byte>)new byte[] { 0xA1, 0x01, 0x40 }); // {1: h''}
 
         await new LargeBlobStorage(session).ReadLargeBlobArrayAsync(TestContext.Current.CancellationToken);
 
@@ -212,9 +249,9 @@ public class LargeBlobSpecFormatTests
         await session.DidNotReceive().SendCborRequestAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>());
     }
 
-    // ---- #16 zeroing ----
+    // Scoped success-path temporary-clearing fixture.
 
-    /// <summary>Encrypt leaves no plaintext or compressed copy behind in SDK-owned buffers (probe via the deflate output the SDK allocates).</summary>
+    /// <summary>Successful TryDecrypt returns plaintext and reports cleared compressed/inflation arrays through its seam; not Encrypt/provider/failure-path cleanup.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1624")]
     public void Decrypt_ReturnsACopyAndZeroesItsTemporaries()

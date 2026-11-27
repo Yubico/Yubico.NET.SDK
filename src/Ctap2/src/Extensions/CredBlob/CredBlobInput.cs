@@ -22,7 +22,9 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// <remarks>
 /// <para>
 /// The credBlob extension allows storing a small blob of data with a credential.
-/// The maximum size is determined by the authenticator's maxCredBlobLength (up to 32 bytes minimum).
+/// The authenticator advertises maxCredBlobLength and must support at least 32 bytes, not exactly
+/// 32 bytes. This DTO currently restricts input to 1–32 bytes as an SDK limitation; the builder's
+/// WithCredBlob method has no corresponding size check.
 /// </para>
 /// <para>
 /// This is useful for storing small amounts of credential-specific data like:
@@ -33,31 +35,26 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// </list>
 /// </para>
 /// <para>
+/// For PII or other sensitive content, CTAP 2.1 §12.2 requires the RP to request
+/// UserVerificationRequired credential protection with enforcement enabled. ExtensionBuilder currently
+/// does not enforce that policy; check support before creation when prevention is required and inspect
+/// the returned protection policy. Post-creation inspection cannot undo creation.
+/// </para>
+/// <para>
 /// See: https://fidoalliance.org/specs/fido-v2.1-ps-20210615/fido-client-to-authenticator-protocol-v2.1-ps-errata-20220621.html#sctn-credBlob-extension
 /// </para>
 /// </remarks>
 public sealed class CredBlobInput
 {
-    private ReadOnlyMemory<byte> _blob;
-
     /// <summary>
     /// Gets or sets the blob data to store with the credential.
     /// </summary>
     /// <remarks>
-    /// Must be between 1 and 32 bytes per CTAP2.1.
+    /// MakeCredential checks nonemptiness and the authenticator's advertised capacity.
+    /// The memory is borrowed, not copied. Keep it unchanged through encoding and transmission,
+    /// then clear caller-owned sensitive storage when it is no longer needed.
     /// </remarks>
-    public required ReadOnlyMemory<byte> Blob
-    {
-        get => _blob;
-        init
-        {
-            if (value.Length is < 1 or > 32)
-            {
-                throw new ArgumentException("CredBlob must be between 1 and 32 bytes", nameof(Blob));
-            }
-            _blob = value;
-        }
-    }
+    public required ReadOnlyMemory<byte> Blob { get; init; }
 
     /// <summary>
     /// Encodes this credBlob input as CBOR (the raw blob bytes).
@@ -74,7 +71,7 @@ public sealed class CredBlobInput
     /// <summary>
     /// Encodes this credBlob input as a CBOR byte array.
     /// </summary>
-    /// <returns>The CBOR-encoded input.</returns>
+    /// <returns>A new caller-owned CBOR copy; clear it after use if the blob is sensitive.</returns>
     public byte[] Encode()
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);

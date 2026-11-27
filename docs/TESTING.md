@@ -14,7 +14,7 @@ This codebase uses a mix of xUnit v2 and xUnit v3 test projects that require dif
 
 | Runner | Command | Filter Syntax |
 |--------|---------|---------------|
-| xUnit v3 (Microsoft.Testing.Platform) | `dotnet run --project <proj>` | `-- --filter "..."` |
+| xUnit v3 (Microsoft.Testing.Platform) | `dotnet run --project <proj>` | `-- --filter-method "*TestName*"` |
 | xUnit v2 (traditional) | `dotnet test <proj>` | `--filter "..."` |
 
 If you use the wrong command or filter syntax, tests will fail with confusing errors like:
@@ -124,9 +124,9 @@ The build script checks each test project's `.csproj` file for:
 
 Tests are organized per-module:
 ```
-Yubico.YubiKit.Core/tests/Yubico.YubiKit.Core.UnitTests/
+src/Core/tests/Yubico.YubiKit.Core.UnitTests/
 src/Ctap2/tests/Yubico.YubiKit.Ctap2.UnitTests/
-Yubico.YubiKit.Piv/tests/Yubico.YubiKit.Piv.UnitTests/
+src/Piv/tests/Yubico.YubiKit.Piv.UnitTests/
 ... etc
 ```
 
@@ -136,22 +136,33 @@ Run `dotnet toolchain.cs -- --help` to see all discovered test projects.
 
 ### xUnit v2 vs v3 Filter Differences
 
-When running filtered tests **outside** the build script (ad-hoc debugging), syntax differs by xUnit version:
+When inspecting a filtered invocation **outside** the build script (ad-hoc debugging), distinguish the
+runner's CLI mode as well as the xUnit generation. This repository uses the following modes; the MTP
+row is not the native xUnit console CLI:
 
-| Version | Detection | Filter Syntax |
+| Framework / runner | Project opt-in | Runner filter arguments |
 |---------|-----------|---------------|
-| xUnit v2 | No `UseMicrosoftTestingPlatformRunner` | `--filter "FullyQualifiedName~TestName"` |
-| xUnit v3 | Has `UseMicrosoftTestingPlatformRunner` | `-m TestName` or `--method TestName` |
+| xUnit v2 / VSTest | No `UseMicrosoftTestingPlatformRunner` | `--filter "FullyQualifiedName~TestName"` |
+| xUnit v3 / Microsoft.Testing.Platform | `UseMicrosoftTestingPlatformRunner=true` | `--filter-method "*TestName*"` after `dotnet run ... --` |
 
-**Check version:** Look for `<PackageReference Include="xunit"` in the `.csproj`:
-- `3.x.x` → xUnit v3 syntax
-- `2.x.x` → xUnit v2 syntax
+**Check framework and runner separately.** Projects reference `xunit` for v2 or `xunit.v3` for v3;
+versions come from central `Directory.Packages.props`, currently 2.9.3 and 3.0.0 respectively, rather
+than inline project `Version` attributes. The toolchain selects its runner branch from the project's
+`UseMicrosoftTestingPlatformRunner` opt-in. A package version alone does not determine the CLI mode.
+`TestTargets` emits MTP `--filter-method` arguments for method terms; native xUnit console options
+such as `-method` are a different command-line interface.
 
 **Recommendation:** Use `dotnet toolchain.cs -- test --filter "..."` which handles this automatically.
 
 ### xUnit v3 Focused Filters
 
 `toolchain.cs` translates common VSTest-style filters to Microsoft.Testing.Platform-native xUnit v3 flags. Positive filters are preflighted with `--list-tests`; if a selected xUnit v3 project has no matching tests, that project is reported as `no matching tests`. If every selected xUnit v3 project preflighted by the positive filter has no matching tests, the toolchain fails clearly with `No tests matched the specified filter`. Exclusion filters still apply to the actual run.
+
+For `&`, the current translator emits separate switches for the terms; it does not combine same-kind
+method terms into one wildcard. Repeated-switch selection semantics depend on the pinned runner and
+remain unqualified here. Inspect the selected test list and executed totals rather than assuming a
+complex expression exercised the intended population. Prefer one unambiguous fully qualified selector
+when a specific acceptance lane matters.
 
 This matters when a project filter selects multiple Ctap2/WebAuthn test projects and only one contains the focused method.
 
@@ -174,9 +185,12 @@ Name!=SkipMe                   Exclude tests named 'SkipMe'
 
 ## Hardware Authorization
 
-Integration tests only ever touch devices whose serial number is in the gitignored
-`YubiKeyTests:AllowedSerialNumbers` list; anything else hard-fails with `Environment.Exit(-1)`
-before a single hardware operation runs. Those listed keys are **dedicated test keys**.
+The shared fixture loader identifies devices with live reads before applying the gitignored
+`YubiKeyTests:AllowedSerialNumbers` list. Those discovery/identification reads can already open
+connections and select applets. The allow-list controls which identified devices become test fixtures,
+not whether every discovery operation can reach an unlisted device. An empty configured list triggers
+the loader's exit path; nonmatching devices and failed reads have their own filtering outcomes.
+Listed fixtures are **dedicated test keys**.
 
 That makes the authorization boundary simple, and worth stating plainly so it is not
 re-litigated per run:
@@ -206,7 +220,11 @@ Use these lanes:
 | FIDO2 reset | `authenticatorReset` | No | Needs the power-cycle window plus touch — timing, not destruction, is why |
 | Insert/remove/touch timing | Reset power-cycle window, physical insertion/removal | No | Human-coordinated timing only |
 
-Agent-safe FIDO2/WebAuthn integration commands must skip User Presence:
+These filters skip User Presence, but are not by themselves an agent-safety guarantee. In particular,
+CTAP2 `WithCtap2SessionAsync` defaults to PIN normalization before its callback: it can set/change a PIN
+or consume a retry even when the final operation is GetInfo. Inspect the selected tests' setup and apply
+the existing PIN/interaction policy; GetInfo itself needs no additional approval gate. See
+[CTAP2 test guidance](../src/Ctap2/tests/CLAUDE.md#reset-before-tests).
 
 ```bash
 dotnet toolchain.cs -- test --integration --project Ctap2 --smoke
@@ -268,6 +286,11 @@ Each `[WithYubiKey]` attribute:
 2. Binds that row to the first matching authorized device during execution.
 3. Applies `ConnectionType` as a device filter; it does not open that connection or force a session to use it.
 
+The row is lazy first-match binding, not one row for every connected key. Fixture metadata is run-local
+and can differ from a fresh one-shot Find or Management read. State-changing and reset/reinsertion
+prerequisites remain owned by the actual applet test/helper; a category name alone supplies no universal
+recovery procedure or physical qualification.
+
 With an unfiltered `[WithYubiKey]`, `state.ConnectionType` is the device's complete `AvailableConnections` flag set and can contain several values. With a concrete filter such as `[WithYubiKey(ConnectionType = ConnectionType.HidFido)]`, `state.ConnectionType` records that requested connection type while `state.AvailableConnections` still reports the device's complete set.
 
 To create separate rows for separate connection types, apply one attribute per concrete connection type. Each attribute still binds independently to a matching authorized device.
@@ -280,19 +303,32 @@ Use the `ConnectionType` property to require that the bound device exposes a con
 // One device row; state.ConnectionType may contain multiple flags.
 [SkippableTheory]
 [WithYubiKey]
-public async Task DefaultSelection(YubiKeyTestState state) { }
+public async Task DefaultSelection(YubiKeyTestState state)
+{
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}
 
 // One row whose device must expose SmartCard.
 [SkippableTheory]
 [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
-public async Task SmartCardOnly(YubiKeyTestState state) { }
+public async Task SmartCardOnly(YubiKeyTestState state)
+{
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}
 
 // Three separate rows, one for each requested connection type.
 [SkippableTheory]
 [WithYubiKey(ConnectionType = ConnectionType.SmartCard)]
 [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
 [WithYubiKey(ConnectionType = ConnectionType.HidOtp)]
-public async Task EachManagementConnection(YubiKeyTestState state) { }
+public async Task EachManagementConnection(YubiKeyTestState state)
+{
+    // This demonstrates independent device-filter rows, not operation-transport coverage.
+    var info = await state.Device.GetDeviceInfoAsync();
+    Assert.Equal(state.SerialNumber, info.SerialNumber);
+}
 ```
 
 The filter alone does not pin Management to that connection. Pin the session explicitly when the test's meaning depends on the connection used.
@@ -303,7 +339,10 @@ Test output includes `state.ConnectionType`. An unfiltered row can therefore dis
 
 ### Default Management Selection
 
-`WithManagementAsync` leaves `preferredConnection` as `null` unless the caller supplies it. Management then tries its default order: SmartCard, HID FIDO, and HID OTP. Use this form when the behavior under test is transport-independent:
+`WithManagementAsync` leaves `preferredConnection` as `null` unless the caller supplies it. Management
+selects the first exposed supported interface in its default order: SmartCard, HID FIDO, then HID OTP.
+Connection or initialization failure does not try another interface. The callback receives cached
+`state.DeviceInfo`, not a fresh query at helper entry. Use this form for transport-independent tests:
 
 ```csharp
 [SkippableTheory]
@@ -322,7 +361,7 @@ Do not pass `preferredConnection: state.ConnectionType` from an unfiltered row. 
 
 ### Transport-Specific Testing
 
-When behavior must be exercised over concrete connections, declare one row per connection, pass the row's concrete `state.ConnectionType` as `preferredConnection`, and assert the session's actual `Transport`:
+When behavior must be exercised over concrete connections, declare one row per connection, pass the row's concrete `state.ConnectionType` as `preferredConnection`, and assert the session's actual `ConnectionType`:
 
 ```csharp
 [SkippableTheory]
@@ -336,7 +375,7 @@ public async Task GetDeviceInfo_UsesRequestedManagementConnection(YubiKeyTestSta
 
     await state.WithManagementAsync(async (mgmt, _) =>
     {
-        Assert.Equal(state.ConnectionType, mgmt.Transport);
+        Assert.Equal(state.ConnectionType, mgmt.ConnectionType);
 
         var info = await mgmt.GetDeviceInfoAsync();
         Assert.Equal(state.SerialNumber, info.SerialNumber);
@@ -350,7 +389,7 @@ An explicit `preferredConnection` is a single-candidate request and does not fal
 
 1. **Use default selection for transport-independent tests**: Apply one unfiltered `[WithYubiKey]` and omit `preferredConnection`.
 2. **Create explicit rows for connection-specific tests**: Apply separate attributes with one concrete `ConnectionType` each.
-3. **Pin and verify concrete connections**: Pass `preferredConnection: state.ConnectionType` and assert `mgmt.Transport` in those rows.
+3. **Pin and verify concrete connections**: Pass `preferredConnection: state.ConnectionType` and assert `mgmt.ConnectionType` in those rows.
 4. **Do not pin from unfiltered state**: Its `ConnectionType` can be a multi-flag set that is invalid as a preference.
 5. **Avoid DeviceId parsing**: Use `ConnectionType` filters instead of inferring interfaces from identifier strings.
 
@@ -371,8 +410,9 @@ public async Task ManagementOverFido_Works(YubiKeyTestState state)
 {
     await state.WithManagementAsync(async (mgmt, _) =>
     {
-        Assert.Equal(ConnectionType.HidFido, mgmt.Transport);
-        // Exercise HID FIDO-specific Management behavior.
+        Assert.Equal(ConnectionType.HidFido, mgmt.ConnectionType);
+        var info = await mgmt.GetDeviceInfoAsync();
+        Assert.Equal(state.SerialNumber, info.SerialNumber);
     }, preferredConnection: state.ConnectionType);
 }
 ```
@@ -511,19 +551,23 @@ Rule references: [xUnit1051](https://xunit.net/xunit.analyzers/rules/xUnit1051) 
 
 ### Test All Public APIs
 
+The following illustrative assertion helper borrows an application-supplied `IYubiKey` fake configured
+to return a SmartCard connection. It checks the public connection type, not live device health or
+protocol behavior. The helper owns and disposes the returned connection even when an assertion fails:
+
 ```csharp
-[Fact]
-public async Task ConnectAsync_WhenDeviceAvailable_ReturnsConnection()
+using Xunit;
+using Yubico.YubiKit.Core.Abstractions;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Transports.SmartCard;
+
+static async Task AssertSmartCardConnectionAsync(IYubiKey device, CancellationToken cancellationToken)
 {
-    // Arrange
-    var device = new MockYubiKey { IsConnected = true };
+    await using ISmartCardConnection connection =
+        await device.ConnectAsync<ISmartCardConnection>(cancellationToken);
 
-    // Act
-    var connection = await device.ConnectAsync<ISmartCardConnection>();
-
-    // Assert
     Assert.NotNull(connection);
-    Assert.True(connection.IsConnected);
+    Assert.Equal(ConnectionType.SmartCard, connection.Type);
 }
 ```
 
@@ -543,6 +587,10 @@ Naming pattern: `Subject_WhenCondition_ExpectedBehavior`.
 
 ### Clean Up in Integration Tests
 
+This is an illustrative cleanup shape: `ResetDeviceAsync` is a test-specific helper, not a Core API.
+Choose restoration from the owning applet's instructions and observed state. In particular, reset,
+power-cycle/reinsertion, and touch are not interchangeable generic cleanup operations.
+
 ```csharp
 [Fact]
 public async Task IntegrationTest_WithRealDevice()
@@ -551,8 +599,8 @@ public async Task IntegrationTest_WithRealDevice()
 
     try
     {
-        var result = await connection.TransmitAsync(apdu);
-        Assert.NotNull(result);
+        ReadOnlyMemory<byte> result = await connection.TransmitAndReceiveAsync(apdu);
+        Assert.True(result.Length >= 2); // Framing only, not command success or protocol conformance.
     }
     finally
     {

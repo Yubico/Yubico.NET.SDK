@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2.Credentials;
 using Yubico.YubiKit.WebAuthn.Attestation;
@@ -21,6 +22,35 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Attestation;
 
 public class AttestationObjectTests
 {
+    [Fact]
+    public void Decode_BorrowsOuterAndStatementCbor_ButMaterializesAuthenticatorData()
+    {
+        var source = BuildPackedAttestationObject(includeUnknownField: true);
+        var decoded = WebAuthnAttestationObject.Decode(source);
+        Assert.True(MemoryMarshal.TryGetArray(decoded.RawCbor, out var raw));
+        Assert.Same(source, raw.Array);
+        Assert.Equal(source.Length, raw.Count);
+        Assert.True(MemoryMarshal.TryGetArray(decoded.Statement.RawCbor, out var statement));
+        Assert.Same(source, statement.Array);
+
+        byte[] previousEncoding = decoded.Encode();
+        Assert.NotEqual(source.Length, previousEncoding.Length); // unknown outer field is only in RawCbor
+        int signatureOffset = source.AsSpan().IndexOf(new byte[] { 0xDE, 0xAD, 0xBE, 0xEF });
+        int authDataOffset = source.AsSpan().IndexOf(decoded.AuthenticatorData.Raw.Span);
+        Assert.True(signatureOffset >= statement.Offset && signatureOffset < statement.Offset + statement.Count);
+        Assert.True(authDataOffset >= 0);
+
+        // Deliberately violate the borrowing contract to demonstrate the retained views.
+        source[signatureOffset] = 0xDA;
+        source[authDataOffset + 32] = 0;
+        Assert.Equal(0xDA, decoded.RawCbor.Span[signatureOffset]);
+        Assert.Equal(0xDA, decoded.Statement.RawCbor.Span[signatureOffset - statement.Offset]);
+        Assert.Equal(0x01, decoded.AuthenticatorData.Raw.Span[32]);
+        Assert.True(decoded.AuthenticatorData.UserPresent);
+        Assert.Equal(0xDA, Assert.IsType<PackedAttestationStatement>(
+            WebAuthnAttestationObject.Decode(decoded.Encode()).Statement).Signature.Span[0]);
+    }
+
     [Fact]
     public void Decode_PackedAttestation_RoundTripIdentical()
     {
@@ -98,11 +128,11 @@ public class AttestationObjectTests
     }
 
     // Helper: Build a minimal packed attestation object
-    private static byte[] BuildPackedAttestationObject()
+    private static byte[] BuildPackedAttestationObject(bool includeUnknownField = false)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
 
-        writer.WriteStartMap(3);
+        writer.WriteStartMap(includeUnknownField ? 4 : 3);
 
         // "authData" - minimal authenticator data (37 bytes: rpIdHash + flags + signCount)
         writer.WriteTextString("authData");
@@ -124,6 +154,12 @@ public class AttestationObjectTests
         // "fmt"
         writer.WriteTextString("fmt");
         writer.WriteTextString("packed");
+
+        if (includeUnknownField)
+        {
+            writer.WriteTextString("future");
+            writer.WriteInt32(42);
+        }
 
         writer.WriteEndMap();
 

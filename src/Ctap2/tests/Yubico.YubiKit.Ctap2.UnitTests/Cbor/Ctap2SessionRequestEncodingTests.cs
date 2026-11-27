@@ -19,6 +19,12 @@ using Yubico.YubiKit.Ctap2.Credentials;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Cbor;
 
+/// <summary>Mechanical request-encoding fixtures, not authorized CTAP ceremonies.</summary>
+/// <remarks>
+/// All-options fixtures deliberately combine uv with token auth, use short fake tags and synthetic
+/// extension inputs. CTAP prohibits the uv key beside pinUvAuthParam. These assertions expose current
+/// independent field encoding, not valid capability/permission selection or extension cryptography.
+/// </remarks>
 public sealed class Ctap2SessionRequestEncodingTests
 {
     [Fact]
@@ -149,6 +155,44 @@ public sealed class Ctap2SessionRequestEncodingTests
         Assert.Equal(7, reader.ReadInt32());
         Assert.Equal(1, reader.ReadInt32());
         reader.ReadEndMap();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void BuildMakeCredentialRequest_EncodesTokenAndBuiltInUvAsSeparateChoices(bool useToken)
+    {
+        var options = new MakeCredentialOptions().WithResidentKey(true);
+        if (useToken)
+            options.WithPinUvAuth(new byte[16], 1);
+        else
+            options.WithUserVerification(true);
+
+        var reader = CborPayloadReader(Ctap2SessionRequestEncoding.BuildMakeCredentialRequest(
+            ClientDataHash(), new PublicKeyCredentialRpEntity("example.com", "Example"),
+            new PublicKeyCredentialUserEntity(new byte[] { 1 }, "user", "User"),
+            [PublicKeyCredentialParameters.CreateES256()], options));
+
+        int fields = reader.ReadStartMap() ?? throw new InvalidOperationException();
+        var keys = new List<int>();
+        for (int i = 0; i < fields; i++)
+        {
+            int key = reader.ReadInt32();
+            keys.Add(key);
+            if (key == 7)
+            {
+                if (useToken) AssertOptionMap(reader, ("rk", true));
+                else AssertOptionMap(reader, ("rk", true), ("uv", true));
+            }
+            else
+            {
+                reader.SkipValue();
+            }
+        }
+        reader.ReadEndMap();
+        Assert.Contains(7, keys);
+        Assert.Equal(useToken, keys.Contains(8));
+        Assert.Equal(useToken, keys.Contains(9));
     }
 
     private static ReadOnlyMemory<byte> ClientDataHash()

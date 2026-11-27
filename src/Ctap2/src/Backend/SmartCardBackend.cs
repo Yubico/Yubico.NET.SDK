@@ -19,13 +19,19 @@ using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Sessions;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.Backend;
 
 /// <summary>
 /// FIDO backend that communicates over SmartCard (CCID) transport using ISO 7816-4 APDUs.
 /// </summary>
+/// <remarks>Uses a borrowed protocol. With no in-flight presence signal, an operation's supplied
+/// policy notification is requested before transmission. Resolution uses CTAP status before typed
+/// decoding, not verified UP/UV or RP success. The returned status-stripped view shares ApduResponse's
+/// copied Data storage; other transport, SCP and decoded copies have separate lifetimes. Failure cleanup
+/// clears the received, untransferred Data view after resolution. It cannot reach an APDU error response
+/// that Core never returns, and a logging provider throwing while a secondary resolution failure is
+/// logged can bypass the later clearing statement.</remarks>
 internal sealed class SmartCardBackend : ICtap2Backend
 {
     private const byte NfcCtapMsg = 0x10;  // Used as APDU INS
@@ -43,6 +49,8 @@ internal sealed class SmartCardBackend : ICtap2Backend
     /// <summary>
     /// Selects the FIDO2 application.
     /// </summary>
+    /// <remarks>Only unavailable SELECT responses (6A82, 6D00 and 6E00) are wrapped as
+    /// <see cref="NotSupportedException"/>. Other APDU failures propagate unchanged.</remarks>
     public async Task SelectApplicationAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -50,7 +58,7 @@ internal sealed class SmartCardBackend : ICtap2Backend
             _logger.LogDebug("Selecting FIDO2 application via SmartCard");
             await _protocol.SelectAsync(ApplicationIds.Fido, cancellationToken).ConfigureAwait(false);
         }
-        catch (ApduException ex)
+        catch (ApduException ex) when (ex.SW is 0x6A82 or 0x6D00 or 0x6E00)
         {
             throw new NotSupportedException(
                 "FIDO2 over SmartCard is not supported because the authenticator did not expose the FIDO2 AID.",
@@ -61,7 +69,18 @@ internal sealed class SmartCardBackend : ICtap2Backend
     public async Task<ReadOnlyMemory<byte>> SendCborAsync(
         ReadOnlyMemory<byte> request,
         UserPresenceNotification userPresenceNotification,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Action? onSuccess = null) =>
+        (await SendCborCoreAsync(request, userPresenceNotification, cancellationToken, onSuccess, reportSelectionStatus: false)
+            .ConfigureAwait(false)).Data;
+
+    public Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendAssertionForSelectionAsync(
+        ReadOnlyMemory<byte> request, UserPresenceNotification notification, CancellationToken cancellationToken) =>
+        SendCborCoreAsync(request, notification, cancellationToken, onSuccess: null, reportSelectionStatus: true);
+
+    private async Task<(CtapStatus Status, ReadOnlyMemory<byte> Data)> SendCborCoreAsync(
+        ReadOnlyMemory<byte> request, UserPresenceNotification userPresenceNotification,
+        CancellationToken cancellationToken, Action? onSuccess, bool reportSelectionStatus)
     {
         ArgumentNullException.ThrowIfNull(userPresenceNotification);
 
@@ -91,16 +110,15 @@ internal sealed class SmartCardBackend : ICtap2Backend
                 P1 = 0x00,
                 P2 = 0x00,
                 Data = request,
-                Le = 0  // Maximum response length
+                Le = 0  // Formatter emits wire Le=0 (maximum for the selected format), not an absent Le.
             };
 
             var apduResponse = await _protocol.TransmitAndReceiveAsync(apdu, cancellationToken: cancellationToken).ConfigureAwait(false);
             responseData = apduResponse.Data;
 
-            // First byte of response data is the CTAP status
             if (responseData.Length < 1)
             {
-                throw new CtapException(CtapStatus.Other, "Empty response from authenticator");
+                throw new BadResponseException("The SmartCard CTAP response did not contain a status byte.");
             }
 
             var status = (CtapStatus)responseData.Span[0];
@@ -111,16 +129,25 @@ internal sealed class SmartCardBackend : ICtap2Backend
                 CtapStatus.UserActionTimeout => UserPresenceOutcome.TimedOut,
                 _ => UserPresenceOutcome.Failed
             };
+            if (reportSelectionStatus && status is CtapStatus.NoCredentials or CtapStatus.RequestTooLarge)
+            {
+                if (responseData.Length != 1)
+                    throw new BadResponseException("A CTAP error response must contain only the status byte.");
+                // This status is a normal result, not a primary exception. Resolution failure must propagate.
+                await userPresenceNotification.ResolveAsync(outcome).ConfigureAwait(false);
+                return (status, default); // The finally clears the untransferred response.
+            }
             CtapException.ThrowIfError(status);
+            onSuccess?.Invoke();
 
             _logger.LogDebug("CTAP CBOR response: status={Status}, data={Length} bytes",
                 status, responseData.Length - 1);
 
             await userPresenceNotification.ResolveAsync(UserPresenceOutcome.Completed).ConfigureAwait(false);
 
-            // Return the response data (without status byte)
+            // Transfer after notification resolution; success here does not guarantee typed decoding.
             responseTransferred = true;
-            return responseData[1..];
+            return (status, responseData[1..]);
         }
         catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
         {
@@ -135,10 +162,14 @@ internal sealed class SmartCardBackend : ICtap2Backend
         }
         finally
         {
-            await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
-            if (!responseTransferred && !responseData.IsEmpty)
+            try
             {
-                CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(responseData).Span);
+                await userPresenceNotification.ResolveAsync(outcome, primaryException).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (!responseTransferred && !responseData.IsEmpty)
+                    CryptographicOperations.ZeroMemory(MemoryMarshal.AsMemory(responseData).Span);
             }
         }
     }

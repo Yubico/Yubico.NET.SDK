@@ -43,15 +43,21 @@ public static class SlotInfoQuery
     /// <returns>Result containing slot information or error.</returns>
     /// <example>
     /// <code>
-    /// await using var session = await device.CreatePivSessionAsync(ct);
+    /// await using var session = await device.CreatePivSessionAsync(cancellationToken: ct);
     /// 
     /// var result = await SlotInfoQuery.GetAllSlotsInfoAsync(session, ct);
-    /// if (result.Success)
+    /// try
+    /// {
+    ///     if (result.Success)
+    ///     {
+    ///         foreach (var slot in result.Slots)
+    ///             Console.WriteLine($"{slot.Name}: Key={slot.HasKey}, Cert={slot.HasCertificate}");
+    ///     }
+    /// }
+    /// finally
     /// {
     ///     foreach (var slot in result.Slots)
-    ///     {
-    ///         Console.WriteLine($"{slot.Name}: Key={slot.HasKey}, Cert={slot.HasCertificate}");
-    ///     }
+    ///         slot.Certificate?.Dispose();
     /// }
     /// </code>
     /// </example>
@@ -61,9 +67,10 @@ public static class SlotInfoQuery
     {
         ArgumentNullException.ThrowIfNull(session);
 
+        var slots = new List<SlotInfo>(StandardSlots.Length);
+        bool transferred = false;
         try
         {
-            var slots = new List<SlotInfo>();
 
             foreach (var (slot, name) in StandardSlots)
             {
@@ -71,11 +78,21 @@ public static class SlotInfoQuery
                 slots.Add(slotInfo);
             }
 
-            return SlotInfoResult.Succeeded(slots);
+            var result = SlotInfoResult.Succeeded(slots);
+            transferred = true;
+            return result;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return SlotInfoResult.Failed($"Failed to get slot info: {ex.Message}");
+        }
+        finally
+        {
+            if (!transferred)
+            {
+                foreach (var slot in slots)
+                    slot.Certificate?.Dispose();
+            }
         }
     }
 
@@ -99,7 +116,7 @@ public static class SlotInfoQuery
             var slotInfo = await GetSlotInfoAsync(session, slot, name, cancellationToken);
             return SlotInfoResult.Succeeded([slotInfo]);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return SlotInfoResult.Failed($"Failed to get slot info: {ex.Message}");
         }

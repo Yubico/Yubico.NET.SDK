@@ -228,7 +228,7 @@ public class Ctap2SessionLinuxCrossLayerTests
                 CancelSent.TrySetResult();
             }
         }
-        internal void EmitInfo() => Emit(Response(Channel, 0x90, [0, 0xA1, 1, 0x81, 0x68, 0x46, 0x49, 0x44, 0x4F, 0x5F, 0x32, 0x5F, 0x30]));
+        internal void EmitInfo() => Emit(Response(Channel, 0x90, [0, 0xA2, 1, 0x81, 0x68, .. "FIDO_2_0"u8, 3, 0x50, .. new byte[16]]));
         internal void ReleaseCancelResponse() => Emit(Response(Channel, 0, []));
         private void Emit(byte[] report) { _reports.Enqueue(report); _ready?.Invoke(Generation, 1); }
         private static byte[] Response(uint channel, byte command, ReadOnlySpan<byte> data)

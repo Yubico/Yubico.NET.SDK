@@ -161,6 +161,17 @@ public class PublicKeyCredentialTypesTests
     }
 
     [Fact]
+    public void PublicKeyCredentialUserEntity_ParseAcceptsIdOnlyWithoutInventingNames()
+    {
+        byte[] response = [0xA1, 0x62, (byte)'i', (byte)'d', 0x41, 0xA5];
+        var user = PublicKeyCredentialUserEntity.Parse(new CborReader(response));
+
+        Assert.Equal(new byte[] { 0xA5 }, user.Id.ToArray());
+        Assert.Null(user.Name);
+        Assert.Null(user.DisplayName);
+    }
+
+    [Fact]
     public void PublicKeyCredentialUserEntity_IdTooLong_ThrowsArgumentException()
     {
         var longId = new byte[65]; // Max is 64
@@ -245,6 +256,7 @@ public class PublicKeyCredentialTypesTests
     [Fact]
     public void GetAssertionOptions_FluentApi_ChainsCorrectly()
     {
+        // Setter-storage fixture only: uv + token auth is prohibited on CTAP wire, and the short tag is synthetic.
         var authParam = new byte[] { 0xAB, 0xCD };
 
         var options = new GetAssertionOptions()

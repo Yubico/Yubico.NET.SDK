@@ -46,9 +46,10 @@ public class WebAuthnBackendTests
     private const int SharedSecretLengthV2 = 64;             // PIN/UV protocol 2: HMAC key (32) || AES key (32)
 
     /// <summary>
-    ///     CTAP §6.5.5.4 getKeyAgreement + §6.5.6 encapsulate: the backend asks the authenticator for its
-    ///     COSE key, derives the shared secret with the protocol's own ephemeral key, and the secret is
-    ///     zeroed on dispose. The authenticator here is a real P-256 key so the ECDH actually runs.
+    ///     CTAP2.3 §6.5.5.4 getKeyAgreement and §6.5.7 protocol-2 encapsulation: checks key shape,
+    ///     nonzero derived secret bytes, and the disposal access guard. The fake authenticator supplies
+    ///     a real P-256 key, so ECDH runs. No retained view is inspected after disposal; these assertions
+    ///     do not establish that the owner's shared-secret bytes were zeroed.
     /// </summary>
     [Fact]
     public async Task EncapsulateAsync_DerivesSharedSecretFromAuthenticatorKeyAgreement_AndZeroesOnDispose()
@@ -70,24 +71,37 @@ public class WebAuthnBackendTests
             .Returns(new ReadOnlyMemory<byte>(response.Encode()));
 
         await using var backend = new WebAuthnBackend(_session);
-        var secret = await backend.EncapsulateAsync(TestContext.Current.CancellationToken);
+        _session.GetInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            new AuthenticatorInfo { PinUvAuthProtocols = [2] });
+        await backend.GetCachedInfoAsync(TestContext.Current.CancellationToken);
+        using var secret = await backend.EncapsulateAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(2, secret.KeyAgreement[1]);                 // the platform key sent back is EC2
         Assert.Equal(SharedSecretLengthV2, secret.SharedSecret.Length);
-        Assert.Contains(secret.SharedSecret.ToArray(), b => b != 0);
-        var copy = secret.SharedSecret.ToArray();
+        var retained = secret.SharedSecret;
+        Assert.True(retained.Span.ContainsAnyExcept((byte)0));
         secret.Dispose();
         Assert.Throws<ObjectDisposedException>(() => secret.SharedSecret);
-        Assert.NotEqual(copy, new byte[copy.Length]); // the copy proves the secret existed; the owner is zeroed
+        Assert.False(retained.Span.ContainsAnyExcept((byte)0));
     }
 
-    /// <summary>The protocol is reachable without a token, as hmac-secret on CTAP 2.0 requires.</summary>
-    [Fact]
-    public async Task Protocol_IsAvailableWithoutAToken()
+    /// <summary>The backend exposes its protocol-2 object without acquiring a token; this does not prove protocol-1 compatibility.</summary>
+    [Theory]
+    [InlineData(new[] { 1 }, 1)]
+    [InlineData(new[] { 2 }, 2)]
+    [InlineData(new[] { 1, 2 }, 2)]
+    [InlineData(new[] { 3 }, 0)]
+    public async Task Protocol_IsNegotiatedFromGetInfo(int[] advertised, int expected)
     {
+        _session.GetInfoAsync(Arg.Any<CancellationToken>()).Returns(
+            new AuthenticatorInfo { PinUvAuthProtocols = advertised });
         await using var backend = new WebAuthnBackend(_session);
+        await backend.GetCachedInfoAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(2, backend.Protocol.Version);
+        if (expected == 0)
+            Assert.Equal(WebAuthnClientErrorCode.NotSupported, Assert.Throws<WebAuthnClientError>(() => backend.Protocol).Code);
+        else
+            Assert.Equal(expected, backend.Protocol.Version);
     }
 
     [Fact]

@@ -40,19 +40,28 @@ internal static class PinUvAuthHelpers
     /// <summary>
     /// Performs ECDH P-256 key agreement with the peer's COSE key.
     /// </summary>
-    /// <param name="peerCoseKey">The peer's COSE key containing EC2 P-256 public key coordinates.</param>
+    /// <param name="peerCoseKey">The borrowed peer key: kty=2, alg=-25, crv=1 and 32-byte big-endian X/Y coordinates.</param>
     /// <returns>
-    /// A tuple of the our COSE key dictionary (for key agreement) and the raw ECDH shared secret (Z).
-    /// The caller MUST zero the raw shared secret after deriving protocol-specific keys via KDF.
+    /// A new platform public-key dictionary and a caller-owned raw ECDH secret (Z), the 32-byte
+    /// big-endian X coordinate of the shared point. Clear Z after deriving protocol-specific keys,
+    /// including when that derivation fails. Public coordinates are not secret material.
     /// </returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="peerCoseKey"/> is null.</exception>
-    /// <exception cref="ArgumentException">Thrown when the peer key is missing, invalid, or ECDH derivation fails.</exception>
+    /// <remarks>
+    /// Unknown labels are ignored and are not echoed in the platform key. CTAP's getPublicKey
+    /// profile does not define extra parameters; accepting them does not relax any required label.
+    /// Import forces P-256 and delegates point validation to the
+    /// provider. The ephemeral crypto objects are disposed. The platform public map is allocated
+    /// before deriving the raw secret.
+    /// </remarks>
+    /// <exception cref="ArgumentException">Thrown for missing/invalid coordinate types or lengths, or a wrapped cryptographic error from raw-secret derivation.</exception>
+    /// <exception cref="CryptographicException">Peer-key import can raise an unwrapped provider error before the derivation catch.</exception>
     internal static (Dictionary<int, object?> KeyAgreement, byte[] RawSharedSecret)
         PerformEcdhKeyAgreement(IReadOnlyDictionary<int, object?> peerCoseKey)
     {
         ArgumentNullException.ThrowIfNull(peerCoseKey);
 
-        // Validate and extract peer's public key coordinates
+        // Check coordinate storage before using the public point.
         if (!peerCoseKey.TryGetValue(CoseEC2X, out var xObj) || xObj is not byte[] peerX)
         {
             throw new ArgumentException("Peer COSE key missing or invalid X coordinate (-2).", nameof(peerCoseKey));
@@ -74,11 +83,16 @@ internal static class PinUvAuthHelpers
             throw new ArgumentException($"Invalid Y coordinate length: expected 32, got {peerY.Length}.", nameof(peerCoseKey));
         }
 
+        if (!HasRequiredLabels(peerCoseKey))
+        {
+            throw new ArgumentException("Peer COSE key must identify EC2, ECDH-ES + HKDF-256, and P-256.", nameof(peerCoseKey));
+        }
+
         // Generate ephemeral ECDH key pair
         using var ecdh = ECDiffieHellman.Create(ECCurve.NamedCurves.nistP256);
         var ourParams = ecdh.ExportParameters(includePrivateParameters: false);
 
-        // Import peer's public key
+        // Import as P-256; provider point-validation errors here are outside the derivation catch.
         var peerParams = new ECParameters
         {
             Curve = ECCurve.NamedCurves.nistP256,
@@ -86,17 +100,6 @@ internal static class PinUvAuthHelpers
         };
 
         using var peerEcdh = ECDiffieHellman.Create(peerParams);
-
-        // Derive raw shared secret (X coordinate of ECDH shared point)
-        byte[] z;
-        try
-        {
-            z = ecdh.DeriveRawSecretAgreement(peerEcdh.PublicKey);
-        }
-        catch (CryptographicException ex)
-        {
-            throw new ArgumentException("Failed to derive shared secret. Peer key may be invalid.", nameof(peerCoseKey), ex);
-        }
 
         // Build our COSE key for key agreement
         var keyAgreement = new Dictionary<int, object?>
@@ -108,6 +111,19 @@ internal static class PinUvAuthHelpers
             { CoseEC2Y, ourParams.Q.Y }
         };
 
-        return (keyAgreement, z);
+        using var peerPublicKey = peerEcdh.PublicKey;
+        try
+        {
+            return (keyAgreement, ecdh.DeriveRawSecretAgreement(peerPublicKey));
+        }
+        catch (CryptographicException ex)
+        {
+            throw new ArgumentException("Failed to derive shared secret. Peer key may be invalid.", nameof(peerCoseKey), ex);
+        }
     }
+
+    private static bool HasRequiredLabels(IReadOnlyDictionary<int, object?> peerKey) =>
+        peerKey.GetValueOrDefault(CoseKeyType) is CoseKeyTypeEC2
+        && peerKey.GetValueOrDefault(CoseAlgorithm) is CoseAlgEcdhEsHkdf256
+        && peerKey.GetValueOrDefault(CoseEC2Curve) is CoseEC2CurveP256;
 }

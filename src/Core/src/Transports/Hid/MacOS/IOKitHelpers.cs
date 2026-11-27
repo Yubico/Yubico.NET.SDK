@@ -27,7 +27,8 @@ internal static class IOKitHelpers
     ///     Gets an integer-typed property value from a device.
     /// </summary>
     /// <param name="device">
-    ///     The previously opened device against which the property should be queried.
+    ///     The valid IOHIDDeviceRef to query. The caller keeps this reference valid for the query;
+    ///     an opened report connection is not required.
     /// </param>
     /// <param name="propertyName">
     ///     The name of the property to query for.
@@ -38,8 +39,8 @@ internal static class IOKitHelpers
     /// <exception cref="PlatformApiException">
     ///     The type requested and the type returned by IOKit do not match.
     /// </exception>
-    /// <exception cref="NullReferenceException">
-    ///     An attempt was made to dereference the property, even though it was null.
+    /// <exception cref="InvalidOperationException">
+    ///     The property is absent, so the nullable result has no value.
     /// </exception>
     public static int GetIntPropertyValue(IntPtr device, string propertyName)
     {
@@ -54,16 +55,18 @@ internal static class IOKitHelpers
     }
 
     /// <summary>
-    ///     Gets an nullable integer-typed property value from a device.
+    ///     Gets a nullable integer-typed property value from a device.
     /// </summary>
     /// <param name="device">
-    ///     The previously opened device against which the property should be queried.
+    ///     The valid IOHIDDeviceRef to query. The caller keeps this reference valid for the query;
+    ///     an opened report connection is not required.
     /// </param>
     /// <param name="propertyName">
     ///     The name of the property to query for.
     /// </param>
     /// <returns>
-    ///     The value of the property.
+    ///     The signed 32-bit property value, null when absent, or zero when CFNumberGetValue reports a
+    ///     lossy or out-of-range conversion. Zero therefore does not distinguish a stored zero from conversion failure.
     /// </returns>
     /// <exception cref="PlatformApiException">
     ///     The type requested and the type returned by IOKit do not match.

@@ -23,9 +23,11 @@ namespace Yubico.YubiKit.Core.Sessions;
 ///     Configures cross-cutting behavior when an application session is created.
 /// </summary>
 /// <remarks>
-///     Factories snapshot these values when called and do not retain this object. Sessions retain the referenced
-///     <see cref="UserPresencePrompt" /> for their lifetime without taking ownership of it. The caller retains
-///     ownership and disposal responsibility for both that service and <see cref="ScpKeyParameters" />.
+///     Factories pass the settings to initialization. An initializer can retain this options object while
+///     creation is pending; returned sessions retain the selected values and references rather than the carrier.
+///     Referenced keys, certificates, and services are shared objects, not deep copies. Sessions that use
+///     <see cref="UserPresencePrompt" /> retain it without taking ownership; Management and Security Domain
+///     ignore it. The caller owns the prompt and <see cref="ScpKeyParameters" />.
 /// </remarks>
 public sealed class SessionCreationOptions
 {
@@ -33,8 +35,10 @@ public sealed class SessionCreationOptions
     public ProtocolConfiguration? ProtocolConfiguration { get; init; }
 
     /// <summary>
-    ///     Gets optional Secure Channel Protocol key parameters. The parameters are borrowed for initialization;
-    ///     the caller retains ownership and disposal responsibility.
+    ///     Gets optional Secure Channel Protocol key parameters. Sessions borrow them for initialization.
+    ///     Keep them alive and unchanged through session disposal when the applet reuses them for reset,
+    ///     as OATH does. Security Domain borrows them for its initial handshake and uses its own default
+    ///     SCP03 parameters after reset. The caller owns and disposes any supplied parameters.
     /// </summary>
     public ScpKeyParameters? ScpKeyParameters { get; init; }
 
@@ -44,10 +48,12 @@ public sealed class SessionCreationOptions
     public ConnectionType? PreferredConnectionType { get; init; }
 
     /// <summary>
-    ///     Gets an explicit override for the effective firmware version used to configure the protocol and
-    ///     evaluate feature support after required applet initialization exchanges complete. Security Domain
-    ///     is the exception: it cannot detect firmware, so this value is its only exact version source and
-    ///     directly controls feature gates; without it, that session conservatively assumes version 5.3.0.
+    ///     Gets an explicit firmware version override for applet compatibility checks and protocol configuration,
+    ///     according to the applet's rules. Required initialization still runs. Numeric framing can use a separate
+    ///     observed version, for example when OpenPGP receives a major-zero development override. Security Domain
+    ///     has no version probe of its own. Without an override, its device factory uses cached device
+    ///     firmware when available. Without either source, the session uses 5.3.0 framing and admits
+    ///     firmware-gated attempts without assuming support.
     /// </summary>
     public FirmwareVersion? FirmwareVersionOverride { get; init; }
 
@@ -56,7 +62,9 @@ public sealed class SessionCreationOptions
     ///     presence.
     /// </summary>
     /// <remarks>
-    ///     A session retains the referenced service for its lifetime. The SDK does not own or dispose it.
+    ///     Sessions that use this service retain it for their lifetime without disposing it. Management and
+    ///     Security Domain ignore it. Keep callbacks non-reentrant: disposing the session from its own callback,
+    ///     synchronously or asynchronously, can wait on the exchange that is awaiting that callback.
     /// </remarks>
     public IUserPresencePrompt? UserPresencePrompt { get; init; }
 

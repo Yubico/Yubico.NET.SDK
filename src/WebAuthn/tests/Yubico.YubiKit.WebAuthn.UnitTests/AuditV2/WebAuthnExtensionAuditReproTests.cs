@@ -73,7 +73,7 @@ public class WebAuthnExtensionAuditReproTests
         var selected = new PublicKeyCredentialDescriptor(id);
         using var session = AuthenticationExtensionSession.Create(
             new AuthenticationExtensionInputs(Prf: input), [selected], PrfContext());
-        await session.PrepareAsync(TestContext.Current.CancellationToken);
+        await session.PrepareAsync(TestContext.Current.CancellationToken, selected);
 
         var extensions = session.PrepareInputs(selected, token: null);
 
@@ -85,12 +85,14 @@ public class WebAuthnExtensionAuditReproTests
     }
 
     /// <summary>
-    ///     The adapter's InvalidState must reach the caller: ExtensionPipeline only swallows CborContentException, so a
-    ///     registration whose previewSign output lacks the inner attestation fails instead of returning the WebAuthn
-    ///     credential's key as the signing key.
+    ///     The codec's explicit InvalidState reaches the caller: RegistrationExtensionSession catches
+    ///     CborContentException and InvalidOperationException, not WebAuthnClientError. This missing unsigned
+    ///     previewSign output fails instead of substituting the outer credential's key as the signing key.
+    ///     Other malformed shapes can take the session's output-omission path instead.
     /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public async Task YESDK1634_RegistrationFailsWhenPreviewSignInnerAttestationIsMissing()
     {
         var extensions = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -129,6 +131,7 @@ public class WebAuthnExtensionAuditReproTests
 
     [Fact]
     [Trait("Audit", "YESDK-1634")]
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public void YESDK1634_PreviewSignMissingInnerAttestationDoesNotSubstituteCredentialKey()
     {
         var publicKey = new CborWriter(CborConformanceMode.Ctap2Canonical);
@@ -187,7 +190,8 @@ public class WebAuthnExtensionAuditReproTests
         backend.GetCachedInfoAsync(Arg.Any<CancellationToken>())
             .Returns(MockCtap2Responses.CreateMockAuthenticatorInfo(extensions: MockCtap2Responses.AllKnownExtensions));
         BackendGetAssertionRequest? sent = null;
-        backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => sent = r), Arg.Any<CancellationToken>())
+        ReadOnlyMemory<byte>? sentExtensions = null;
+        backend.GetAssertionAsync(Arg.Do<BackendGetAssertionRequest>(r => { sent = r; sentExtensions = r.Extensions?.ToArray(); }), Arg.Any<CancellationToken>())
             .Returns(MockCtap2Responses.CreateMockGetAssertionResponse(authDataExtensionsCbor: outputExtensions.Encode()));
         Assert.True(WebAuthnOrigin.TryParse("https://example.com", out var origin));
         await using var client = new WebAuthnClient(backend, Assert.IsType<WebAuthnOrigin>(origin),
@@ -205,7 +209,7 @@ public class WebAuthnExtensionAuditReproTests
         Assert.NotNull(sent);
         if (getCredBlob)
         {
-            var reader = new CborReader(sent.Extensions!.Value, CborConformanceMode.Ctap2Canonical);
+            var reader = new CborReader(Assert.IsType<ReadOnlyMemory<byte>>(sentExtensions), CborConformanceMode.Ctap2Canonical);
             Assert.Equal(1, reader.ReadStartMap());
             Assert.Equal("credBlob", reader.ReadTextString());
             Assert.True(reader.ReadBoolean());

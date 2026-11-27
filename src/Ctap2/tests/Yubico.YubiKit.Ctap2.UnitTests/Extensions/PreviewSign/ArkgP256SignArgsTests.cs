@@ -18,6 +18,7 @@ using Yubico.YubiKit.Ctap2.Extensions;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests.Extensions;
 
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class ArkgP256SignArgsTests
 {
     [Fact]
@@ -60,7 +61,7 @@ public class ArkgP256SignArgsTests
     public void ArkgP256SignArgs_AcceptsEmptyContext()
     {
         var args = new ArkgP256SignArgs(new byte[81], ReadOnlyMemory<byte>.Empty);
-        byte[] cbor = PreviewSignCbor.EncodeCoseSignArgs(args);
+        byte[] cbor = args.ToAdditionalArgs();
 
         Assert.Equal(0x21, cbor[^2]);
         Assert.Equal(0x40, cbor[^1]);
@@ -70,7 +71,7 @@ public class ArkgP256SignArgsTests
     public void ArkgP256SignArgs_AcceptsExactly64ByteContext()
     {
         var args = new ArkgP256SignArgs(new byte[81], new byte[64]);
-        byte[] cbor = PreviewSignCbor.EncodeCoseSignArgs(args);
+        byte[] cbor = args.ToAdditionalArgs();
 
         var reader = new CborReader(cbor, CborConformanceMode.Ctap2Canonical);
         reader.ReadStartMap();
@@ -81,5 +82,25 @@ public class ArkgP256SignArgsTests
         reader.ReadInt32();
         byte[] ctxOut = reader.ReadByteString();
         Assert.Equal(64, ctxOut.Length);
+    }
+
+    [Theory]
+    [InlineData("", "40")] // Empty byte string.
+    [InlineData("ARKG-P256.test vectors", "56")] // 22-byte string.
+    public void ToAdditionalArgs_EncodesExactSigningAlgorithmAndArguments(string label, string contextHeader)
+    {
+        // Synthetic wire fixture: 16-byte tag and 65-byte uncompressed point, not a valid key.
+        var keyHandle = new byte[81];
+        keyHandle.AsSpan(0, 16).Fill(0x33);
+        keyHandle[16] = 0x04;
+        keyHandle.AsSpan(17).Fill(0x44);
+        byte[] context = System.Text.Encoding.ASCII.GetBytes(label);
+        var args = CoseSignArgs.ArkgP256(keyHandle, context);
+
+        // {3: -65539, -1: bstr(81), -2: bstr(ctx)} in canonical order.
+        byte[] expected = [.. Convert.FromHexString("A3033A00010002205851"), .. keyHandle,
+            0x21, .. Convert.FromHexString(contextHeader), .. context];
+
+        Assert.Equal(expected, args.ToAdditionalArgs());
     }
 }

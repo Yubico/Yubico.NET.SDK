@@ -331,7 +331,7 @@ public sealed class PivResetCommand : YkCommandBase<PivResetSettings>
         if (!settings.Force)
         {
             if (!ConfirmationPrompts.ConfirmDestructive(
-                    "reset the PIV application, deleting ALL keys, certificates, and resetting PIN/PUK"))
+                    "reset the PIV application, deleting ordinary PIV keys, certificates and data objects, resetting the PIN, PUK and management key, and retaining the F9 attestation key and certificate"))
             {
                 OutputHelpers.WriteInfo("Reset cancelled.");
                 return ExitCode.UserCancelled;
@@ -550,7 +550,7 @@ public sealed class PivKeysAttestCommand : YkCommandBase<PivSlotSettings>
         var slot = PivHelpers.ParseSlot(settings.Slot);
 
         await using var session = await deviceContext.Device.CreatePivSessionAsync();
-        var cert = await session.AttestKeyAsync(slot);
+        using var cert = await session.AttestKeyAsync(slot);
 
         OutputHelpers.WriteHeader($"Attestation — Slot {PivHelpers.FormatSlot(slot)}");
         OutputHelpers.WriteKeyValue("Subject", cert.Subject);

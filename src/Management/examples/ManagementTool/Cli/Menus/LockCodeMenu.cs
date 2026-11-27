@@ -49,7 +49,8 @@ public static class LockCodeMenu
         }
         AnsiConsole.WriteLine();
 
-        // Warning about lock codes
+        // The displayed reset-recovery suggestion is not established for Management lock codes.
+        // Preserve the current code securely; the combined reset is a Bio MPE application operation.
         AnsiConsole.MarkupLine("[red bold]⚠️  IMPORTANT WARNING ⚠️[/]");
         AnsiConsole.MarkupLine("[red]If you set a lock code and forget it, you will NOT be able to change[/]");
         AnsiConsole.MarkupLine("[red]the device configuration. The only recovery is a factory reset (5.6.0+),[/]");
@@ -99,7 +100,7 @@ public static class LockCodeMenu
         byte[]? newLockCode = null;
         try
         {
-            newLockCode = LockCodePrompt.PromptForNewLockCode("Enter new lock code:");
+            newLockCode = LockCodePrompt.PromptForNewLockCode("Enter new lock code", cancellationToken);
             if (newLockCode is null)
             {
                 return;
@@ -147,14 +148,14 @@ public static class LockCodeMenu
         byte[]? newLockCode = null;
         try
         {
-            currentLockCode = LockCodePrompt.PromptForLockCode("Enter current lock code:");
+            currentLockCode = LockCodePrompt.PromptForLockCode("Enter current lock code", cancellationToken);
             if (currentLockCode is null)
             {
                 return;
             }
 
             AnsiConsole.WriteLine();
-            newLockCode = LockCodePrompt.PromptForNewLockCode("Enter new lock code:");
+            newLockCode = LockCodePrompt.PromptForNewLockCode("Enter new lock code", cancellationToken);
             if (newLockCode is null)
             {
                 return;
@@ -205,7 +206,7 @@ public static class LockCodeMenu
         byte[]? currentLockCode = null;
         try
         {
-            currentLockCode = LockCodePrompt.PromptForLockCode("Enter current lock code:");
+            currentLockCode = LockCodePrompt.PromptForLockCode("Enter current lock code", cancellationToken);
             if (currentLockCode is null)
             {
                 return;

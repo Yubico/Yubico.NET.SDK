@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKit.Management.csproj"/>
+    <Compile Include="..\..\..\SecurityDomain\tests\Yubico.YubiKit.SecurityDomain.UnitTests\Scp03HandshakeFakeConnection.cs" Link="TestSupport\Scp03HandshakeFakeConnection.cs"/>
   </ItemGroup>
 
 </Project>

@@ -16,7 +16,7 @@ using System.Collections.Concurrent;
 
 namespace Yubico.YubiKit.Core.Devices;
 
-// A finder owns one read scope, so its single-flight reads cannot be joined by a replacement manager.
+// A finder owns one read scope, so its single-flight reads cannot be joined by an independent finder.
 // Within that scope, generation and supersede token live in one immutable transport epoch captured under
 // a short lock. Transport activity either advances the default direct-call scope or terminally retires a
 // finder scope; a read admitted after retirement fails before worker admission or hardware open.

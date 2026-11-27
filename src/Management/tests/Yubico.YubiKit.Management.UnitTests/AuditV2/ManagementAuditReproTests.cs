@@ -17,12 +17,53 @@ using Yubico.YubiKit.Core.Devices;
 namespace Yubico.YubiKit.Management.UnitTests.AuditV2;
 
 /// <summary>
-///     Audit 26n (YESDK-1634): a built DeviceConfig must not change when its source changes, and the
-///     "at least one USB application" rule must hold for every configuration that reaches the key,
-///     however it was constructed.
+///     YESDK-1634 regression checks for immutable record derivation, explicit USB None rejection,
+///     null USB omission, SDK timeout limits, and a representative encoded configuration.
+///     These checks do not validate arbitrary masks against device-supported applications.
 /// </summary>
 public sealed class ManagementAuditReproTests
 {
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0x10001)]
+    public void GetBytes_DoesNotTruncateCapabilityRequests(int mask)
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { UsbEnabled = (DeviceCapabilities)mask }.GetBytes());
+        Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { NfcEnabled = (DeviceCapabilities)mask }.GetBytes());
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0x101)]
+    public void GetBytes_DoesNotTruncateDeviceFlags(int flags) =>
+        Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { DeviceFlags = (DeviceFlags)flags }.GetBytes());
+
+    [Fact]
+    public void ReportedCapabilityMasks_RoundTripThroughConfigurationWithoutLosingHighBit()
+    {
+        using var usb = new Yubico.YubiKit.Core.Utilities.Tlv(0x03, [0x80, 0x01]);
+        using var nfc = new Yubico.YubiKit.Core.Utilities.Tlv(0x0E, [0x80, 0x20]);
+        var info = DeviceInfo.CreateFromTlvs([usb, nfc], new FirmwareVersion(5, 7, 0));
+        var config = new DeviceConfig { UsbEnabled = info.UsbEnabled, NfcEnabled = info.NfcEnabled };
+
+        byte[] expected = [8, 0x03, 2, 0x80, 0x01, 0x0E, 2, 0x80, 0x20];
+        Assert.Equal(expected, config.GetBytes().Span);
+    }
+
+    [Fact]
+    public void GetBytes_PreservesInWidthUnknownMaskAndFlagBits()
+    {
+        var config = new DeviceConfig
+        {
+            UsbEnabled = (DeviceCapabilities)0x8001,
+            NfcEnabled = DeviceCapabilities.None,
+            DeviceFlags = (DeviceFlags)0x80,
+        };
+
+        byte[] expected = [0x0B, 0x03, 0x02, 0x80, 0x01, 0x0E, 0x02, 0, 0, 0x08, 0x01, 0x80];
+        Assert.Equal(expected, config.GetBytes().Span);
+    }
+
     [Fact]
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1634_DerivedConfiguration_DoesNotAffectOriginal()
@@ -68,7 +109,10 @@ public sealed class ManagementAuditReproTests
     public void YESDK1634_ChallengeResponseTimeoutAboveLimit_RejectedAtAssignment() =>
         Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { ChallengeResponseTimeout = 61 });
 
-    /// <summary>Wire order follows yubikit/management.py DeviceConfig.get_bytes (4ca60f7).</summary>
+    /// <summary>
+    ///     Pins this encoder's representative TLV order, matching yubikit/management.py DeviceConfig.get_bytes (4ca60f7).
+    ///     Sibling implementation agreement is not a protocol requirement that TLVs use this order.
+    /// </summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
     public void YESDK1634_GetBytes_EmitsTlvsInYkmanOrder()

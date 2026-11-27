@@ -19,6 +19,13 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// <summary>
 /// Base class for attestation statements.
 /// </summary>
+/// <remarks>
+/// Typed decoding is provided for packed, fido-u2f, apple and none; other formats remain opaque.
+/// Decoding does not verify signatures, certificates, trust or RP policy. RawCbor borrows the supplied
+/// statement encoding (or the parent makeCredential buffer); keep it unchanged while referenced.
+/// Typed decoders materialize byte-string fields separately. Direct constructors retain supplied
+/// memory/collections without copying or validation; read-only views are not immutable snapshots.
+/// </remarks>
 public abstract record AttestationStatement
 {
     /// <summary>
@@ -56,7 +63,7 @@ public abstract record AttestationStatement
             return NoneAttestationStatement.Decode(rawCbor);
         }
 
-        // Unknown format - capture as opaque
+        // Unmodeled formats, including recognized IDs without a typed decoder, remain opaque.
         return new UnknownAttestationStatement(format, rawCbor);
     }
 }
@@ -66,13 +73,25 @@ public abstract record AttestationStatement
 /// </summary>
 public sealed record PackedAttestationStatement : AttestationStatement
 {
+    /// <summary>Gets the received COSE signature algorithm identifier.</summary>
     public int Algorithm { get; }
+    /// <summary>Gets the attestation signature bytes, not a verified signature result.</summary>
     public ReadOnlyMemory<byte> Signature { get; }
+    /// <summary>Gets the optional DER certificate chain, leaf first; trust is not checked here.</summary>
     public IReadOnlyList<ReadOnlyMemory<byte>>? X5c { get; }
+    /// <summary>Gets the optional ECDAA key identifier.</summary>
     public ReadOnlyMemory<byte>? EcdaaKeyId { get; }
+    /// <summary>Gets the borrowed encoded statement, not the complete CTAP response.</summary>
     public override ReadOnlyMemory<byte> RawCbor { get; }
+    /// <summary>Gets the packed format identifier.</summary>
     public override AttestationFormat Format => AttestationFormat.Packed;
 
+    /// <summary>Creates a packed statement carrier without validation or copying.</summary>
+    /// <param name="algorithm">The COSE signature algorithm.</param>
+    /// <param name="signature">Borrowed signature bytes.</param>
+    /// <param name="x5c">Optional borrowed certificate collection and bytes.</param>
+    /// <param name="ecdaaKeyId">Optional borrowed ECDAA identifier.</param>
+    /// <param name="rawCbor">Borrowed encoded statement.</param>
     public PackedAttestationStatement(
         int algorithm,
         ReadOnlyMemory<byte> signature,
@@ -151,11 +170,19 @@ public sealed record PackedAttestationStatement : AttestationStatement
 /// </summary>
 public sealed record FidoU2FAttestationStatement : AttestationStatement
 {
+    /// <summary>Gets the received attestation signature, not a verification result.</summary>
     public ReadOnlyMemory<byte> Signature { get; }
+    /// <summary>Gets the received DER certificates; decoding does not validate chain trust or format cardinality.</summary>
     public IReadOnlyList<ReadOnlyMemory<byte>> X5c { get; }
+    /// <summary>Gets the borrowed encoded statement.</summary>
     public override ReadOnlyMemory<byte> RawCbor { get; }
+    /// <summary>Gets the fido-u2f format identifier.</summary>
     public override AttestationFormat Format => AttestationFormat.FidoU2F;
 
+    /// <summary>Creates a FIDO U2F statement carrier without validation or copying.</summary>
+    /// <param name="signature">Borrowed signature bytes.</param>
+    /// <param name="x5c">Borrowed certificate collection and bytes.</param>
+    /// <param name="rawCbor">Borrowed encoded statement.</param>
     public FidoU2FAttestationStatement(
         ReadOnlyMemory<byte> signature,
         IReadOnlyList<ReadOnlyMemory<byte>> x5c,
@@ -213,10 +240,16 @@ public sealed record FidoU2FAttestationStatement : AttestationStatement
 /// </summary>
 public sealed record AppleAttestationStatement : AttestationStatement
 {
+    /// <summary>Gets the received DER certificate chain; decoding does not verify chain trust or nonce binding.</summary>
     public IReadOnlyList<ReadOnlyMemory<byte>> X5c { get; }
+    /// <summary>Gets the borrowed encoded statement.</summary>
     public override ReadOnlyMemory<byte> RawCbor { get; }
+    /// <summary>Gets the apple format identifier.</summary>
     public override AttestationFormat Format => AttestationFormat.Apple;
 
+    /// <summary>Creates an Apple statement carrier without validation or copying.</summary>
+    /// <param name="x5c">Borrowed certificate collection and bytes.</param>
+    /// <param name="rawCbor">Borrowed encoded statement.</param>
     public AppleAttestationStatement(
         IReadOnlyList<ReadOnlyMemory<byte>> x5c,
         ReadOnlyMemory<byte> rawCbor)
@@ -264,19 +297,23 @@ public sealed record AppleAttestationStatement : AttestationStatement
 }
 
 /// <summary>
-/// None attestation (self-attestation).
+/// None attestation: no attestation information, not signed self attestation.
 /// </summary>
 public sealed record NoneAttestationStatement : AttestationStatement
 {
     /// <summary>
     /// The "none" statement WebAuthn clients substitute for an authenticator's statement: an empty
-    /// CBOR map (WebAuthn L3 §8.7).
+    /// CBOR map (WebAuthn L2 §8.7).
     /// </summary>
     public static NoneAttestationStatement Empty { get; } = new(new byte[] { 0xA0 });
 
+    /// <summary>Gets the borrowed encoded statement; construction does not enforce an empty map.</summary>
     public override ReadOnlyMemory<byte> RawCbor { get; }
+    /// <summary>Gets the none format identifier.</summary>
     public override AttestationFormat Format => AttestationFormat.None;
 
+    /// <summary>Creates a none statement carrier without validating its encoding.</summary>
+    /// <param name="rawCbor">Borrowed statement bytes; the protocol format requires an empty CBOR map.</param>
     public NoneAttestationStatement(ReadOnlyMemory<byte> rawCbor)
     {
         RawCbor = rawCbor;
@@ -284,19 +321,24 @@ public sealed record NoneAttestationStatement : AttestationStatement
 
     internal static NoneAttestationStatement Decode(ReadOnlyMemory<byte> rawCbor)
     {
-        // "none" attestation should be an empty CBOR map
+        // The format requires an empty map; this decoder retains bytes without enforcing that shape.
         return new NoneAttestationStatement(rawCbor);
     }
 }
 
 /// <summary>
-/// Unknown attestation format (opaque).
+/// Opaque statement for a format without a typed decoder, including recognized unmodeled formats.
 /// </summary>
 public sealed record UnknownAttestationStatement : AttestationStatement
 {
+    /// <summary>Gets the supplied format identifier.</summary>
     public override AttestationFormat Format { get; }
+    /// <summary>Gets the borrowed encoded statement, not a validated attestation or complete response.</summary>
     public override ReadOnlyMemory<byte> RawCbor { get; }
 
+    /// <summary>Creates an opaque statement carrier without validation or copying.</summary>
+    /// <param name="format">The attestation format.</param>
+    /// <param name="rawCbor">Borrowed encoded statement bytes.</param>
     public UnknownAttestationStatement(AttestationFormat format, ReadOnlyMemory<byte> rawCbor)
     {
         Format = format;

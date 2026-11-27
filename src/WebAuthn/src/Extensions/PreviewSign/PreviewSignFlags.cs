@@ -21,9 +21,13 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <para>
 /// Defines the authenticator behavior required for signing operations. These flags are set at
 /// registration time and enforced during signing.
+/// The public registration input does not expose a flag setter. The ceremony derives its flags from
+/// the UV preference: Required selects UP and UV; other values select UP. The enum's Unattended
+/// value therefore does not imply that this WebAuthn API can request unattended signing.
 /// </para>
 /// </remarks>
 [Flags]
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public enum PreviewSignFlags : byte
 {
     /// <summary>
@@ -45,6 +49,7 @@ public enum PreviewSignFlags : byte
 /// <summary>
 /// Extension methods for <see cref="PreviewSignFlags"/>.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 internal static class PreviewSignFlagsExtensions
 {
     /// <summary>

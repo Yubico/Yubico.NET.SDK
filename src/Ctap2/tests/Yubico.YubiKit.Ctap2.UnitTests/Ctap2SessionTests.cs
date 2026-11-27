@@ -1,6 +1,8 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System.Buffers.Binary;
+using System.Collections;
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Abstractions;
@@ -8,14 +10,15 @@ using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 using Yubico.YubiKit.Core.Sessions;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 using Yubico.YubiKit.Ctap2.Backend;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.UnitTests;
 
+[Collection(nameof(Ctap2BackendLifecycleTests))]
 public class Ctap2SessionTests
 {
     [Fact]
@@ -50,8 +53,7 @@ public class Ctap2SessionTests
             Ctap2Session.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
         // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // The assertion covers this failed probe's connection lifetime, not device interoperability.
         connection.DidNotReceive().Dispose();
     }
 
@@ -184,7 +186,7 @@ public class Ctap2SessionTests
         Assert.Equal(transmissionsBeforeCall, connection.TransmittedCommands.Count);
     }
 
-    /// <summary>up=false is refused at the session boundary, before any CBOR or prompt.</summary>
+    /// <summary>up=false refuses the makeCredential request and prompt; session initialization I/O occurs first.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1618")]
     public async Task MakeCredentialAsync_FalseUserPresence_ThrowsBeforeSendingOrPrompting()
@@ -454,6 +456,32 @@ public class Ctap2SessionTests
     }
 
     [Fact]
+    public async Task ReadOnlyInfoAndSelection_SendNoClientPinCommands()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] info = [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00];
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], info, info, [0x00, 0x90, 0x00]);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+
+        Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+        await session.SelectionAsync(ct);
+
+        Assert.Collection(connection.TransmittedCommands,
+            select => Assert.Equal(0xA4, select[1]),
+            probe => AssertCtapCommand(probe, CtapCommand.GetInfo),
+            read => AssertCtapCommand(read, CtapCommand.GetInfo),
+            selection => AssertCtapCommand(selection, CtapCommand.Selection));
+
+        static void AssertCtapCommand(byte[] apdu, byte command)
+        {
+            Assert.Equal(0x10, apdu[1]);
+            Assert.Equal(1, apdu[4]);
+            Assert.Equal(command, apdu[5]);
+        }
+    }
+
+    [Fact]
     public async Task SelectionAsync_WithSmartCardPrompt_DoesNotPredictUserPresence()
     {
         var connection = new DisposeTrackingSmartCardConnection(
@@ -495,14 +523,475 @@ public class Ctap2SessionTests
         Assert.Same(requested, Assert.Single(prompt.Resolved).Context);
     }
 
-    private static byte[] MinimalGetInfoResponse()
+    [Fact]
+    public async Task ResetAsync_ConfirmedResetReselectsAndUsesRefreshedLimitsOnSameSession()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] before = [0x00, .. MinimalGetInfoResponse(maxMsgSize: 2048, firmwareVersion: 0x050800), 0x90, 0x00];
+        byte[] after = [0x00, .. MinimalGetInfoResponse(firmwareVersion: 0x050801), 0x90, 0x00];
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], before, [0x00, 0x90, 0x00], [0x90, 0x00], after, [0x00, 0x90, 0x00]);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+
+        await session.ResetAsync(ct);
+
+        Assert.True(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        Assert.Equal(new FirmwareVersion(5, 8, 1), session.FirmwareVersion);
+        await Assert.ThrowsAsync<ArgumentException>(() => session.SendCborRequestAsync(new byte[1025], ct));
+        await session.SelectionAsync(ct);
+        Assert.Equal(new byte[] { 0xA4, 0x10, 0x10, 0xA4, 0x10, 0x10 },
+            connection.TransmittedCommands.Select(command => command[1]).ToArray());
+        Assert.Equal(CtapCommand.Reset, connection.TransmittedCommands[2][5]);
+        Assert.Equal(CtapCommand.GetInfo, connection.TransmittedCommands[4][5]);
+        Assert.Equal(CtapCommand.Selection, connection.TransmittedCommands[5][5]);
+        Assert.Equal(0, connection.DisposeAsyncCount);
+    }
+
+    [Fact]
+    public async Task ResetAsync_RefusedResetDoesNotReselectOrEndSession()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        byte[] info = [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00];
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], info, [(byte)CtapStatus.NotAllowed, 0x90, 0x00], info);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+
+        Assert.Equal(CtapStatus.NotAllowed, (await Assert.ThrowsAsync<CtapException>(() => session.ResetAsync(ct))).Status);
+
+        Assert.True(session.IsInitialized);
+        Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+        Assert.Equal(new byte[] { 0xA4, 0x10, 0x10, 0x10 },
+            connection.TransmittedCommands.Select(command => command[1]).ToArray());
+    }
+
+    [Theory]
+    [InlineData(true, false, false)]
+    [InlineData(false, false, false)]
+    [InlineData(true, true, false)]
+    [InlineData(true, false, true)]
+    [InlineData(true, true, true)]
+    public async Task ResetAsync_HidRequestCallbackFailureRefreshesOnlyAfterSuccessfulDrain(bool success, bool partial, bool failLog)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse(), resetSucceeds: success)
+        {
+            PartialReset = partial
+        };
+        var failure = new InvalidOperationException("presence request failed");
+        var prompt = new RecordingUserPresencePrompt(requestException: failure);
+        string template = partial
+            ? "User-presence callback failed before CTAP HID terminal response validation also failed; exception type {ExceptionType}"
+            : "Received {Length} bytes in response";
+        var provider = new TerminalTraceFailureProvider(template, new InvalidOperationException("logger failed"), partial ? null : 1);
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        using var logging = YubiKitLogging.UseTemporary(factory);
+        await using var session = await Ctap2Session.CreateAsync(connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt }, ct);
+        provider.Armed = failLog;
+
+        var actual = await Record.ExceptionAsync(() => session.ResetAsync(ct));
+
+        if (partial)
+        {
+            Assert.Equal("CTAP HID continuation packet channel mismatch", Assert.IsType<InvalidOperationException>(actual).Message);
+        }
+        else
+            Assert.Same(failure, actual);
+        Assert.Equal(success && !partial ? 2 : 1, connection.InitCount);
+        Assert.True(session.IsInitialized);
+        if (success && !partial)
+            Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+        Assert.Equal(failLog && !partial, provider.Armed); // Warning was attempted; post-drain trace was skipped.
+        Assert.Single(prompt.Requested);
+        Assert.Empty(prompt.Resolved);
+    }
+
+    [Theory]
+    [InlineData("Received {Length} bytes in response")]
+    [InlineData("Received CTAP HID command response: {Length} bytes")]
+    public async Task ResetAsync_HidTraceFailureStillRefreshesAfterSuccessfulDrain(string template)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse(), resetSucceeds: true);
+        var failure = new InvalidOperationException("trace provider failed");
+        var provider = new TerminalTraceFailureProvider(template, failure);
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        using var logging = YubiKitLogging.UseTemporary(factory);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+        provider.Armed = true;
+
+        var actual = await Assert.ThrowsAsync<AggregateException>(() => session.ResetAsync(ct));
+
+        Assert.Same(failure, Assert.Single(actual.InnerExceptions));
+        Assert.Equal(2, connection.InitCount);
+        Assert.True(session.IsInitialized);
+        Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("Received {Length} bytes in response")]
+    [InlineData("Received CTAP HID command response: {Length} bytes")]
+    public async Task Reset_HidHandoffFailureClearsOwnedBufferAndConfirmsDrainedSuccess(string? template)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var failure = new InvalidOperationException("host handoff failed");
+        using var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse(), resetSucceeds: true)
+        {
+            ResetPayload = [0x00, 0xA5] // Nonzero sentinel in the accumulated array, not a CTAP Reset output field.
+        };
+        var provider = new TerminalTraceFailureProvider(template, failure);
+        using var factory = LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Trace).AddProvider(provider));
+        byte[] retained = [];
+        await using var protocol = new FidoHidProtocol(connection, factory.CreateLogger<FidoHidProtocol>(),
+            length => retained = new byte[length]);
+        var backend = new HidBackend(protocol);
+        await protocol.InitializeAsync(ct);
+        await backend.SendCborAsync(new byte[] { CtapCommand.GetInfo }, UserPresenceNotification.None, ct);
+        provider.Armed = template is not null;
+        var prompt = new RecordingUserPresencePrompt(requestException: template is null ? failure : null);
+        var notification = UserPresenceNotification.Create(prompt, new UserPresenceContext
+        {
+            Basis = UserPresenceBasis.PolicyMayRequire,
+            Application = UserPresenceApplications.Fido2
+        });
+        bool confirmed = false;
+
+        var error = await Record.ExceptionAsync(() =>
+            backend.SendCborAsync(new byte[] { CtapCommand.Reset }, notification, ct, () => confirmed = true));
+
+        Assert.Equal(new byte[2], retained);
+        Assert.Same(failure, error is AggregateException aggregate ? Assert.Single(aggregate.InnerExceptions) : error);
+        Assert.True(confirmed);
+    }
+
+    private sealed class TerminalTraceFailureProvider(string? template, Exception failure, int? expectedLength = null) : ILoggerProvider, ILogger
+    {
+        public bool Armed { get; set; }
+        public ILogger CreateLogger(string categoryName) => this;
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+        public bool IsEnabled(LogLevel logLevel) => logLevel is LogLevel.Trace or LogLevel.Warning;
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (Armed && state is IReadOnlyList<KeyValuePair<string, object?>> fields &&
+                Equals(fields[^1].Value, template) && (expectedLength is null || Equals(fields[0].Value, expectedLength)))
+            {
+                Armed = false;
+                throw failure;
+            }
+        }
+        public void Dispose() { }
+    }
+
+    [Fact]
+    public async Task ResetAsync_HidConfirmationRefreshesEvenWhenPresenceResolutionThrows()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new TouchWaitingHidConnection(MinimalGetInfoResponse(), resetSucceeds: true);
+        var expected = new InvalidOperationException("presence resolution failed after success");
+        var prompt = new RecordingUserPresencePrompt(resolutionException: expected);
+        await using var session = await Ctap2Session.CreateAsync(connection,
+            new SessionCreationOptions { UserPresencePrompt = prompt }, ct);
+
+        Assert.Same(expected, await Assert.ThrowsAsync<InvalidOperationException>(() => session.ResetAsync(ct)));
+
+        Assert.True(session.IsInitialized);
+        Assert.Equal(2, connection.InitCount);
+        Assert.Equal(UserPresenceOutcome.Completed, Assert.Single(prompt.Resolved).Outcome);
+        Assert.Contains("FIDO_2_0", (await session.GetInfoAsync(ct)).Versions);
+    }
+
+    [Fact]
+    public async Task ResetAsync_FailedRefreshWithThrowingExceptionDataPreservesExactFailure()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var primary = new UnwritableDiagnosticException();
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00], [0x00, 0x90, 0x00])
+        {
+            ExhaustedResponsesException = primary,
+            DisposeAsyncException = new InvalidOperationException("owned connection teardown failed")
+        };
+        var device = new SingleConnectionYubiKey(connection);
+        await using var session = await device.CreateCtap2SessionAsync(cancellationToken: ct);
+
+        Assert.Same(primary, await Assert.ThrowsAsync<UnwritableDiagnosticException>(() => session.ResetAsync(ct)));
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetInfoAsync(ct));
+        await session.DisposeAsync();
+        Assert.Equal(1, connection.DisposeAsyncCount);
+    }
+
+    private sealed class UnwritableDiagnosticException : Exception
+    {
+        public override IDictionary Data => throw new InvalidOperationException("Diagnostics unavailable");
+    }
+
+    [Fact]
+    public async Task ResetAsync_FailedRefreshIsTerminalAndDisposalDoesNotReplaceIt()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var secondary = new InvalidOperationException("owned connection teardown failed");
+        var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(), 0x90, 0x00], [0x00, 0x90, 0x00],
+            [0x90, 0x00], [0x00, 0xA0, 0x90, 0x00]) // Malformed refresh GetInfo.
+        {
+            DisposeAsyncException = secondary
+        };
+        var device = new SingleConnectionYubiKey(connection);
+        await using var session = await device.CreateCtap2SessionAsync(
+            new SessionCreationOptions { PreferredConnectionType = ConnectionType.SmartCard }, ct);
+
+        var primary = await Assert.ThrowsAsync<CborContentException>(() => session.ResetAsync(ct));
+
+        Assert.Same(secondary, primary.Data["ResetRefreshCleanupException"]);
+        Assert.False(session.IsInitialized);
+        Assert.False(session.IsAuthenticated);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => session.GetInfoAsync(ct));
+        await session.DisposeAsync();
+        Assert.Equal(1, connection.DisposeAsyncCount);
+        Assert.Equal(5, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
+    [InlineData(null, 1024)]
+    [InlineData(1200, 1200)]
+    public async Task SendsAtAdvertisedSizeButRejectsOversizedRawAndTypedRequests(int? advertised, int limit)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(advertised), 0x90, 0x00], [0x00, 0x90, 0x00])
+        {
+            ExtendedApdu = true
+        };
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+        int initialTransmissions = connection.TransmittedCommands.Count;
+        var oversized = new byte[limit + 1];
+        oversized[0] = CtapCommand.GetInfo;
+
+        await Assert.ThrowsAsync<ArgumentException>(() => session.SendCborRequestAsync(oversized, ct));
+        await Assert.ThrowsAsync<ArgumentException>(() => session.GetAssertionAsync(new string('a', limit), new byte[32], cancellationToken: ct));
+        Assert.Equal(initialTransmissions, connection.TransmittedCommands.Count);
+        await session.SendCborRequestAsync(oversized.AsMemory(0, limit), ct);
+        Assert.Equal(initialTransmissions + 1, connection.TransmittedCommands.Count);
+    }
+
+    [Theory]
+    [InlineData(0x000001u, 5, 7, false)]
+    [InlineData(0x050700u, 5, 8, true)]
+    [InlineData(0x050700u, 0, 0, true)]
+    [InlineData(0x050700u, null, null, false)]
+    [InlineData(null, null, null, true)]
+    public async Task UsbSmartCard_UsesCachedFirmwareBeforeAppletFirmware(uint? applet, int? cachedMajor, int? cachedMinor, bool supported)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(firmwareVersion: applet), 0x90, 0x00]);
+        var device = new SingleConnectionYubiKey(connection)
+        {
+            CachedDeviceInfo = cachedMajor is int major && cachedMinor is int minor
+                ? DeviceInfo.CreateFromTlvs([], new FirmwareVersion(major, minor, 0))
+                : null
+        };
+
+        if (supported)
+        {
+            await using var session = await device.CreateCtap2SessionAsync(cancellationToken: ct);
+            var framing = applet == 0x050700u && cachedMajor == 0
+                ? new FirmwareVersion(5, 7, 0)
+                : device.CachedDeviceInfo?.FirmwareVersion ?? new FirmwareVersion();
+            Assert.Equal(framing, session.FirmwareVersion);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<NotSupportedException>(() => device.CreateCtap2SessionAsync(cancellationToken: ct));
+        }
+    }
+
+    [Theory]
+    [InlineData(VersionQualifierType.Beta, false)]
+    [InlineData((VersionQualifierType)42, false)]
+    [InlineData(null, false)]
+    [InlineData(VersionQualifierType.Beta, true)]
+    public async Task UsbSmartCard_OptimisticGateRetainsNumericApduConfiguration(VersionQualifierType? qualifier, bool useOverride)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(firmwareVersion: 0x050600), 0x90, 0x00],
+            [0x00, 0x90, 0x00])
+        { ExtendedApdu = true };
+        var cachedVersion = qualifier is not null ? new FirmwareVersion(5, 7, 0) : new FirmwareVersion();
+        var device = new SingleConnectionYubiKey(connection)
+        {
+            CachedDeviceInfo = DeviceInfo.CreateFromTlvs([], cachedVersion) with
+            {
+                VersionQualifier = qualifier is { } type ? new VersionQualifier(cachedVersion, type, 1) : null!
+            }
+        };
+        var options = new SessionCreationOptions
+        {
+            FirmwareVersionOverride = useOverride ? new FirmwareVersion(5, 5, 0) : null,
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true }
+        };
+
+        await using var session = await device.CreateCtap2SessionAsync(options, ct);
+        await session.SelectionAsync(ct);
+
+        Assert.Equal(options.FirmwareVersionOverride ?? (qualifier is not null ? cachedVersion : new FirmwareVersion(5, 6, 0)), session.FirmwareVersion);
+        Assert.Equal(3, connection.TransmittedCommands.Count);
+        Assert.Equal([0x80, 0x10, 0x00, 0x00, 0x01, 0x0B, 0x00], connection.TransmittedCommands[2]);
+    }
+
+    [Theory]
+    [InlineData(VersionQualifierType.Final, 2, null, false)]
+    [InlineData(VersionQualifierType.Final, 3, null, true)]
+    [InlineData(null, 2, null, false)]
+    [InlineData(null, null, null, true)]
+    [InlineData(VersionQualifierType.Beta, 2, null, true)]
+    [InlineData((VersionQualifierType)42, 2, null, true)]
+    [InlineData(VersionQualifierType.Beta, 2, 2, false)]
+    [InlineData(VersionQualifierType.Final, 2, 3, true)]
+    public async Task NfcSmartCard_ScpAdmissionDoesNotChangeNumericFraming(
+        VersionQualifierType? qualifier, int? cachedMinor, int? overrideMinor, bool attemptsScp)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(firmwareVersion: 0x050200), 0x90, 0x00],
+            [0x90, 0x00]) // Too short to establish SCP, but sufficient to observe INITIALIZE UPDATE.
+        { ExtendedApdu = true, Transport = Transport.Nfc };
+        var cachedVersion = cachedMinor is { } minor ? new FirmwareVersion(5, minor, 0) : FirmwareVersion.Default;
+        var device = new SingleConnectionYubiKey(connection)
+        {
+            CachedDeviceInfo = DeviceInfo.CreateFromTlvs([], cachedVersion) with
+            {
+                VersionQualifier = qualifier is { } type ? new VersionQualifier(cachedVersion, type, 1) : null!
+            }
+        };
+        using var keys = Scp03KeyParameters.Default;
+        var options = new SessionCreationOptions
+        {
+            ScpKeyParameters = keys,
+            FirmwareVersionOverride = overrideMinor is { } configuredMinor ? new FirmwareVersion(5, configuredMinor, 0) : null,
+            ProtocolConfiguration = new ProtocolConfiguration { ForceShortApdus = true }
+        };
+
+        if (attemptsScp)
+        {
+            var failure = await Assert.ThrowsAsync<BadResponseException>(() => device.CreateCtap2SessionAsync(options, ct));
+            Assert.Contains("INITIALIZE UPDATE response too short", failure.Message);
+            Assert.Equal(3, connection.TransmittedCommands.Count);
+            byte[] initializeUpdate = connection.TransmittedCommands[2];
+            Assert.Equal(14, initializeUpdate.Length);
+            Assert.Equal([0x80, 0x50, keys.KeyReference.Kvn, 0x00, 0x08], initializeUpdate[..5]);
+            Assert.Equal(0x00, initializeUpdate[^1]); // Short Le follows the eight-byte challenge.
+        }
+        else
+        {
+            var failure = await Assert.ThrowsAsync<NotSupportedException>(() => device.CreateCtap2SessionAsync(options, ct));
+            Assert.Contains("SCP03", failure.Message);
+            Assert.Equal(2, connection.TransmittedCommands.Count);
+        }
+    }
+
+    [Fact]
+    public async Task UsbSmartCard_OverrideAndPermissiveCacheDoNotSuppressRequiredGetInfoFailure()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [(byte)CtapStatus.OperationDenied, 0x90, 0x00]);
+        var device = new SingleConnectionYubiKey(connection)
+        {
+            CachedDeviceInfo = DeviceInfo.CreateFromTlvs([], new FirmwareVersion())
+        };
+
+        var error = await Assert.ThrowsAsync<CtapException>(() => device.CreateCtap2SessionAsync(
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) }, ct));
+
+        Assert.Equal(CtapStatus.OperationDenied, error.Status);
+        Assert.Equal(2, connection.TransmittedCommands.Count);
+    }
+
+    [Fact]
+    public async Task UsbSmartCard_OverrideDoesNotSuppressCancellationDuringRequiredGetInfo()
+    {
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var ct = cancellation.Token;
+        var connection = Substitute.For<ISmartCardConnection>();
+        connection.Transport.Returns(Transport.Usb);
+        connection.Type.Returns(ConnectionType.SmartCard);
+        connection.TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), CancellationToken.None)
+            .Returns(_ => Task.FromResult<ReadOnlyMemory<byte>>(new byte[] { 0x90, 0x00 }), call =>
+            {
+                Assert.Equal(new byte[] { 0x80, 0x10, 0x00, 0x00, 1, 4, 0 }, call.Arg<ReadOnlyMemory<byte>>().ToArray());
+                cancellation.Cancel();
+                return Task.FromCanceled<ReadOnlyMemory<byte>>(ct);
+            });
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => Ctap2Session.CreateAsync(connection,
+            new SessionCreationOptions { FirmwareVersionOverride = new FirmwareVersion(5, 8, 0) }, ct));
+        await connection.Received(2).TransmitAndReceiveAsync(Arg.Any<ReadOnlyMemory<byte>>(), CancellationToken.None);
+    }
+
+    [Theory]
+    [InlineData(0, false)]
+    [InlineData(64, true)]
+    [InlineData(65, false)]
+    public async Task MakeCredentialChecksCredBlobAgainstAdvertisedCapacity(int length, bool sends)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        using var connection = new DisposeTrackingSmartCardConnection(
+            [0x90, 0x00], [0x00, .. MinimalGetInfoResponse(maxCredBlobLength: 64), 0x90, 0x00],
+            [(byte)CtapStatus.OperationDenied, 0x90, 0x00]);
+        await using var session = await Ctap2Session.CreateAsync(connection, cancellationToken: ct);
+        int before = connection.TransmittedCommands.Count;
+        var options = new MakeCredentialOptions
+        {
+            Extensions = new Yubico.YubiKit.Ctap2.Extensions.ExtensionBuilder().WithCredBlob(new byte[length]).Build()
+        };
+
+        Task<MakeCredentialResponse> Send() => session.MakeCredentialAsync(new byte[32],
+            new PublicKeyCredentialRpEntity("example.com"),
+            new PublicKeyCredentialUserEntity(new byte[] { 1 }, "demo", "Demo"),
+            [PublicKeyCredentialParameters.CreateES256()], options, ct);
+
+        if (sends)
+        {
+            Assert.Equal(CtapStatus.OperationDenied, (await Assert.ThrowsAsync<CtapException>(Send)).Status);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<ArgumentException>("options", Send);
+        }
+        Assert.Equal(before + (sends ? 1 : 0), connection.TransmittedCommands.Count);
+    }
+
+    private static byte[] MinimalGetInfoResponse(int? maxMsgSize = null, uint? firmwareVersion = null, int? maxCredBlobLength = null)
     {
         var writer = new CborWriter(CborConformanceMode.Ctap2Canonical);
-        writer.WriteStartMap(1);
+        writer.WriteStartMap(2 + (maxMsgSize.HasValue ? 1 : 0) + (firmwareVersion.HasValue ? 1 : 0) +
+            (maxCredBlobLength.HasValue ? 1 : 0));
         writer.WriteInt32(0x01);
         writer.WriteStartArray(1);
         writer.WriteTextString("FIDO_2_0");
         writer.WriteEndArray();
+        writer.WriteInt32(0x03);
+        writer.WriteByteString(new byte[16]);
+        if (maxMsgSize is int maxSize)
+        {
+            writer.WriteInt32(0x05);
+            writer.WriteInt32(maxSize);
+        }
+        if (firmwareVersion is uint wireVersion)
+        {
+            writer.WriteInt32(0x0E);
+            writer.WriteUInt32(wireVersion);
+        }
+        if (maxCredBlobLength is int blobLimit)
+        {
+            writer.WriteInt32(0x0F);
+            writer.WriteInt32(blobLimit);
+        }
         writer.WriteEndMap();
         return writer.Encode();
     }
@@ -514,17 +1003,23 @@ public class Ctap2SessionTests
         Scope = "example.com"
     };
 
-    private sealed class TouchWaitingHidConnection(byte[] getInfo) : IFidoHidConnection
+    private sealed class TouchWaitingHidConnection(byte[] getInfo, bool resetSucceeds = false) : IFidoHidConnection
     {
         private byte[]? _init;
         private int _responseCount;
         public int PacketSize => CtapConstants.PacketSize;
         public ConnectionType Type => ConnectionType.HidFido;
+        public int InitCount { get; private set; }
+        public byte[] ResetPayload { get; init; } = [0x00];
+        public bool PartialReset { get; init; }
 
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default)
         {
             if ((packet.Span[4] & 0x7F) == CtapConstants.CtapHidInit)
+            {
+                InitCount++;
                 _init = packet.ToArray();
+            }
             return Task.CompletedTask;
         }
 
@@ -535,9 +1030,20 @@ public class Ctap2SessionTests
                 0 => InitResponse(),
                 1 => Packet(0x01020304, CtapConstants.CtapHidCbor, [0x00, .. getInfo]),
                 2 => Packet(0x01020304, CtapConstants.CtapHidKeepAlive, [0x02]),
+                3 when resetSucceeds => ResetResponse(),
+                4 when resetSucceeds => InitResponse(),
+                5 or 6 when resetSucceeds => Packet(0x01020304, CtapConstants.CtapHidCbor, [0x00, .. getInfo]),
                 _ => Packet(0x01020304, CtapConstants.CtapHidCbor, [(byte)CtapStatus.UserActionTimeout])
             };
             return Task.FromResult<ReadOnlyMemory<byte>>(response);
+        }
+
+        private byte[] ResetResponse()
+        {
+            var packet = Packet(0x01020304, CtapConstants.CtapHidCbor, ResetPayload);
+            if (PartialReset)
+                packet[6] = 60; // Requires a continuation, but the next report is not one.
+            return packet;
         }
 
         private byte[] InitResponse()
@@ -576,10 +1082,11 @@ public class Ctap2SessionTests
         public int DisposeCount { get; private set; }
         public int DisposeAsyncCount { get; private set; }
         public Exception? DisposeAsyncException { get; init; }
+        public Exception? ExhaustedResponsesException { get; init; }
         public bool PauseAsyncDisposal { get; init; }
         public Task AsyncDisposalStarted => _asyncDisposalStarted.Task;
         public List<byte[]> TransmittedCommands { get; } = [];
-        public Transport Transport => Transport.Usb;
+        public Transport Transport { get; init; } = Transport.Usb;
         public ConnectionType Type => ConnectionType.SmartCard;
 
         public Task<ReadOnlyMemory<byte>> TransmitAndReceiveAsync(
@@ -587,13 +1094,16 @@ public class Ctap2SessionTests
             CancellationToken cancellationToken = default)
         {
             TransmittedCommands.Add(command.ToArray());
+            if (_responses.Count == 0 && ExhaustedResponsesException is not null)
+                throw ExhaustedResponsesException;
             return Task.FromResult((ReadOnlyMemory<byte>)_responses.Dequeue());
         }
 
         public IDisposable BeginTransaction(CancellationToken cancellationToken = default) =>
             NullDisposable.Instance;
 
-        public bool SupportsExtendedApdu() => false;
+        public bool ExtendedApdu { get; init; }
+        public bool SupportsExtendedApdu() => ExtendedApdu;
 
         public void Dispose() => DisposeCount++;
 
@@ -620,6 +1130,7 @@ public class Ctap2SessionTests
     {
         public string DeviceId => "fido-disposal-probe";
         public ConnectionType AvailableConnections => ConnectionType.SmartCard;
+        public DeviceInfo? CachedDeviceInfo { get; init; }
 
         public Task<TConnection> ConnectAsync<TConnection>(CancellationToken cancellationToken = default)
             where TConnection : class, IConnection =>

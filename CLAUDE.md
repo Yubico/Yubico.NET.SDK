@@ -61,7 +61,7 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 - ✅ ALWAYS use `CryptographicOperations.FixedTimeEquals` for secret-derived comparisons
 - ❌ NEVER log PINs, keys, or sensitive payloads
 - ❌ NEVER use timing-vulnerable comparisons (`SequenceEqual`) on secrets
-- ❌ NEVER store a privately-cloned `byte[]` of sensitive data in a `struct`. Struct copies each hold their own reference — you cannot zero all copies. Use a `sealed class` with `IDisposable` and call `ZeroMemory` in `Dispose()`.
+- ❌ NEVER store a privately-cloned `byte[]` of sensitive data in a `struct`. Struct copies share the array reference, so zeroing that storage reaches its aliases; the hazard is shared mutation and ambiguous lifetime/disposal ownership. Use a `sealed class` with `IDisposable` and call `ZeroMemory` in `Dispose()`.
 - ✅ `ReadOnlyMemory<byte>` passthrough **is** safe in a `readonly record struct` — all copies reference the same caller-owned memory, so zeroing the source zeroes all views. Caller is responsible for zeroing after transmission. See `ApduCommand` as the canonical passthrough example.
 
 > Deep dive: `.claude/skills/domain-security-guidelines/SKILL.md` and `.claude/skills/domain-secure-credential-prompt/SKILL.md` (load when handling PIN/PUK/keys, designing a sensitive-data type, or auditing for memory hygiene).
@@ -111,7 +111,7 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 > Deep dive: `docs/CRYPTO-APIS.md` (load when computing hashes/HMAC, AES, RNG, or replacing legacy crypto patterns).
 
 **Logging:**
-- ✅ Use static `YubiKitLogging.CreateLogger<T>()` — NEVER inject `ILogger`
+- ✅ Use a static logger: call internal `YubiKitLogging.CreateLogger<T>()` where Core/friend access is available; otherwise use public `YubiKitLogging.LoggerFactory.CreateLogger<T>()` with `Microsoft.Extensions.Logging`. Configure the factory before first use and keep its providers alive through all captured logger use — NEVER inject `ILogger`.
 - ❌ NEVER log PIN/key/credential values; log lengths and IDs only
 
 > Deep dive: `docs/LOGGING.md` (load when adding logging, choosing log level, or configuring providers).
@@ -163,8 +163,8 @@ Valid device response data that the SDK does not yet model must not block users.
 - **Access tiers** — Applet sessions are the golden path; public `RawSmartCardSession`, `RawCtapHidSession`, and `RawOtpHidSession` provide guarded low-level exchanges; public raw connection I/O is explicitly unguarded direct raw-connection access, with framing, sequencing, and recovery left to the caller. `ProtocolFactory` and the `IProtocol` family are internal session machinery. See [Raw Access Tiers](docs/architecture/raw-access-tiers.md).
 - **Connection abstraction** — `IConnection` is the public transport base. Typed raw connections remain public; protocol implementations and factories are internal.
 - **HID vocabulary** — `IYubiKey` is the physical key; `IHidInterface` is an operating-system-exposed report interface enumerated by `FindHidInterfaces`; `IHidConnection` is an opened report connection. Windows `IWindowsHidReportApi` and `IWindowsHidFeatureReportApi` are internal native-report seams subordinate to their lifetime owners, not additional physical-device abstractions.
-- **APDU pipeline** — `IApduFormatter` (`Short`/`Extended`) → `IApduProcessor` decorators (`CommandChainingProcessor`, `ChainedResponseProcessor`, `ApduFormatProcessor`). Transparent size-limit + chaining handling.
-- **Application sessions** — `ApplicationSession` base; protocol-specific sessions like `ManagementSession<TConnection>` are generic over connection type.
+- **APDU pipeline** — `ChainedResponseReceiver` wraps `ApduTransmitter` or `ChainedApduTransmitter`, using `ApduFormatterShort`/`ApduFormatterExtended`. Keep complete-command ceilings, short data-chunk sizes, response ownership and recovery/profile limits distinct; see Core's guide.
+- **Application sessions** — `ApplicationSession` base; the non-generic `ManagementSession` accepts supported SmartCard, FIDO HID or OTP HID connections through its `IConnection` factory parameter.
 - **User interaction** — `ICredentialPrompt` acquires secret bytes where adopted; `IUserPresencePrompt`, supplied through `SessionCreationOptions.UserPresencePrompt`, is the cross-applet touch-notification contract. Sessions retain but do not own the prompt. See [User interaction](docs/usage/user-interaction.md).
 - **Device discovery entry point** — static `YubiKeyManager`; Core no longer requires a DI registration.
 
@@ -175,16 +175,20 @@ Choose the appropriate type based on size, mutability, and usage patterns.
 #### Use `readonly struct` (PREFERRED for value types)
 
 **✅ When:**
-- Type is ≤16 bytes (2 machine words)
+- Type is ≤16 bytes (two 64-bit words)
 - Immutable data (no fields change after construction)
 - Passed by value frequently
 - Used in hot paths (APDU processing, protocol handling)
 
 **✅ Benefits:**
-- Prevents defensive copies
-- Clear immutability contract
-- Potential stack allocation
-- No GC pressure
+- Avoids defensive copies needed for non-readonly instance members in readonly contexts
+- Read-only struct state; referenced mutable objects can still change
+- Can avoid a separate heap object when stored unboxed; storage and boxing determine allocation
+
+`List<T>` and `T[]` store value-type elements without per-element boxing, although the collection and
+backing array can allocate. Converting a struct value to `object` or an implemented interface, or
+storing it in an object-based non-generic collection, can box it. `readonly` neither guarantees stack
+allocation or zero GC pressure nor makes referenced objects deeply immutable.
 ```csharp
 // ✅ BEST - Small, immutable, value semantics
 public readonly struct StatusWord
@@ -226,7 +230,9 @@ public readonly struct ApduHeader
 **❌ Don't use for:**
 - Types >16 bytes (expensive copying)
 - Mutable data
-- Types stored in collections (boxing overhead)
+
+Collection storage alone is not a reason to reject a small value type. Consider copying costs and
+the actual use of boxing separately from the project's size and immutability preferences.
 
 #### Use `struct` (mutable value types)
 
@@ -292,8 +298,8 @@ public readonly struct CommandApdu
 - Represents entities or services
 - Implements interfaces with mutable operations
 ```csharp
-// ✅ GOOD - Large data structure
-public class DeviceInfo
+// ✅ GOOD - Illustrative application model, not Core's readonly record struct DeviceInfo
+public class DeviceMetadataExample
 {
     public string SerialNumber { get; init; }
     public Version FirmwareVersion { get; init; }
@@ -311,14 +317,8 @@ public sealed class SmartCardConnection : IConnection
     // ... implementation
 }
 
-// ✅ GOOD - Service/manager implementation type
-internal sealed class YubiKeyDeviceManager
-{
-    private readonly IDeviceRepository _repository;
-    private readonly IYubiKeyFactory _factory;
-    
-    // ... implementation
-}
+// Device monitoring uses the owned YubiKeyMonitor reference type.
+// Create it with YubiKeyManager.CreateMonitorAsync and dispose it with await using.
 ```
 
 #### Special Case: APDU Types
@@ -385,7 +385,7 @@ public readonly struct Timestamp
 }
 
 // ❌ 24+ bytes - Use class instead
-public struct DeviceInfo  // BAD - too large, expensive to copy
+public struct DeviceMetadataExample  // Illustrative large value type, not the SDK DeviceInfo
 {
     public Guid Id { get; }              // 16 bytes
     public long Timestamp { get; }        // 8 bytes
@@ -394,7 +394,7 @@ public struct DeviceInfo  // BAD - too large, expensive to copy
 }
 
 // ✅ Convert to class
-public sealed class DeviceInfo
+public sealed class DeviceMetadataExample
 {
     public Guid Id { get; init; }
     public long Timestamp { get; init; }
@@ -408,7 +408,7 @@ public sealed class DeviceInfo
 ```csharp
 public struct SensitivePayload  // 32+ bytes, owns private clone!
 {
-    private readonly byte[] _data;  // Each struct copy has its own reference — can't zero all copies
+    private readonly byte[] _data;  // Copies share storage but have no single disposal/lifetime owner
     public DateTime Timestamp { get; set; }
     public Guid CorrelationId { get; set; }
 }
@@ -432,12 +432,12 @@ public sealed class SessionKey : IDisposable { /* Owns private byte[] clone — 
 | Criterion | readonly struct | struct | class |
 |-----------|----------------|--------|-------|
 | Size | ≤16 bytes | ≤16 bytes | Any size |
-| Mutability | Immutable | Mutable | Either |
+| Mutability | Read-only struct state; references may remain mutable | Mutable | Either |
 | Contains references | No | No | Yes |
 | Hot path | ✅ Ideal | ⚠️ Careful | ✅ OK |
-| Stack allocation | ✅ Yes | ✅ Yes | ❌ Heap only |
-| Defensive copies | ✅ None | ❌ Many | N/A |
-| GC pressure | ✅ None | ✅ None | ❌ Yes |
+| Stack allocation | Possible; depends on storage | Possible; depends on storage | Reference-type storage |
+| Defensive copies | Avoids readonly-context defensive copies | Context-dependent | N/A |
+| GC pressure | Depends on containing storage and boxing | Depends on containing storage and boxing | Object allocation contributes |
 
 **When in doubt:** Use `class` for correctness, profile if performance critical, then consider `readonly struct` if ≤16 bytes and immutable.
 
@@ -505,16 +505,27 @@ public void Method_ActualBehavior_WorksCorrectly()
 #### ✅ DO Write These Tests
 
 **Behavior Tests** - Tests that verify actual functionality:
+
+This example belongs in the Core unit-test assembly, which can access the internal protocol and its
+existing fake. The test owns the fake connection; the protocol borrows it and is disposed first.
 ```csharp
-// ✅ GOOD - Tests real protocol configuration logic
-[Fact]
-public void Configure_FirmwareBelow400_UsesNeoMaxSize()
+using Xunit;
+using Yubico.YubiKit.Core.Devices;
+using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
+using Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Apdu.Fakes;
+
+public class ProtocolConfigurationExamples
 {
-    var protocol = new PcscProtocol(logger, connection);
+    [Fact]
+    public void Configure_FirmwareBelow400_UsesNeoMaxSize()
+    {
+        using var connection = new FakeSmartCardConnection { SupportsExtendedApduValue = false };
+        using var protocol = new PcscProtocol(connection);
 
-    protocol.Configure(new FirmwareVersion(3, 5, 0));
+        protocol.Configure(new FirmwareVersion(3, 5, 0));
 
-    Assert.Equal(254, protocol.MaxApduSize);
+        Assert.Equal(1390, protocol.MaxApduSize); // Complete-command ceiling, not a short data chunk.
+    }
 }
 ```
 
@@ -524,14 +535,20 @@ public void Configure_FirmwareBelow400_UsesNeoMaxSize()
 [Fact]
 public async Task CreateSession_WithSCP03_AuthenticatesAndCommunicates()
 {
-    var device = await YubiKeyManager.FindFirstAsync();
-    using var session = await ManagementSession.CreateAsync(
-        device, scpKeyParams: scp03Keys);
+    var device = await YubiKeyManager.FindFirstAsync(cancellationToken: TestContext.Current.CancellationToken);
+    using var scpKeyParams = Scp03KeyParameters.Default;
+    await using var session = await device.CreateManagementSessionAsync(
+        new SessionCreationOptions { ScpKeyParameters = scpKeyParams },
+        cancellationToken: TestContext.Current.CancellationToken);
 
-    var deviceInfo = await session.GetDeviceInfoAsync();
-    Assert.NotEqual(0, deviceInfo.SerialNumber);
+    var deviceInfo = await session.GetDeviceInfoAsync(TestContext.Current.CancellationToken);
+    Assert.Equal(device.SerialNumber, deviceInfo.SerialNumber);
 }
 ```
+
+This example requires an authorized dedicated SmartCard key configured with the supplied SCP03 defaults.
+The caller owns the parameters: the session is disposed before their enclosing using scope clears the
+owned static key arrays.
 
 #### When You Can't Write Meaningful Tests
 
@@ -545,18 +562,20 @@ If you can't test actual behavior due to:
 2. **Point to integration tests** that exercise the code path
 3. **Don't create fake tests** just to have coverage
 
-**Example:**
+**Example comment** (illustrative class shell, not the Core implementation):
 ```csharp
 /// <summary>
-///     ScpInitializer routes SCP initialization requests.
-///
-///     LIMITATION: Cannot unit test actual SCP initialization because
-///     ScpState.Scp03InitAsync is a static method. This is tested via
-///     integration tests in ManagementTests.CreateManagementSession_with_SCP03_DefaultKeys.
+///     SCP initialization has a fakeable APDU-processor seam, even though Scp03InitAsync is static.
 /// </summary>
+/// <remarks>
+///     CoreScpAuditReproTests.N2_Scp03InitializeUpdateShortResponse_ThrowsBadResponse supplies a fake
+///     INITIALIZE UPDATE response and checks rejection of malformed lengths. That unit test does not
+///     establish real-device interoperability. Device communication is exercised by integration tests
+///     such as ManagementSessionSimpleTests.CreateManagementSession_WithScp03DefaultKeys_CommunicatesSecurely.
+/// </remarks>
 public class ScpInitializer
 {
-    // Only test the routing logic, not the static method calls
+    // Test fakeable wire behavior directly; use hardware integration tests for device interoperability.
 }
 ```
 

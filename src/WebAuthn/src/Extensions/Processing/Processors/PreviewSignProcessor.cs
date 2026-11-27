@@ -25,6 +25,7 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.Processing.Processors;
 /// previewSign (Yubico draft v4 §10.2.1): generates a signing key at registration; at authentication
 /// signs with the <c>signByCredential</c> entry of the credential the client selected.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 internal sealed class PreviewSignProcessor : IRegistrationExtensionProcessor, IAuthenticationExtensionProcessor
 {
     private readonly PreviewSign.PreviewSignRegistrationInput? _registration;
@@ -73,24 +74,7 @@ internal sealed class PreviewSignProcessor : IRegistrationExtensionProcessor, IA
 
     private static PreviewSign.PreviewSignSigningParams? FindEntry(
         PreviewSign.PreviewSignAuthenticationInput input,
-        PublicKeyCredentialDescriptor credential)
-    {
-        if (input.SignByCredential.TryGetValue(credential.Id, out var exact))
-        {
-            return exact;
-        }
-
-        // The relying party may have supplied a dictionary without ByteArrayKeyComparer; match by content.
-        foreach (var (id, signingParams) in input.SignByCredential)
-        {
-            if (id.Span.SequenceEqual(credential.Id.Span))
-            {
-                return signingParams;
-            }
-        }
-
-        return null;
-    }
+        PublicKeyCredentialDescriptor credential) => input.SignByCredential.GetValueOrDefault(credential.Id);
 
     public string Name => ExtensionIdentifiers.PreviewSign;
     public PinUvAuthTokenPermissions Permissions => PinUvAuthTokenPermissions.None;

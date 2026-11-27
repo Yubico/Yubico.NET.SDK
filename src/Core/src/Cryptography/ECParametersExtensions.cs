@@ -25,9 +25,9 @@ public static class ECParametersExtensions
     extension(ECParameters original)
     {
         /// <summary>
-        ///     Performs a deep copy of the EC parameters.
+        ///     Copies the D and Q coordinate arrays while retaining the curve descriptor.
         /// </summary>
-        /// <returns>A new ECParameters with the same values as the original.</returns>
+        /// <returns>Parameters with independent D and Q arrays. Explicit arrays within Curve remain shared.</returns>
         public ECParameters DeepCopy()
         {
             var copy = new ECParameters

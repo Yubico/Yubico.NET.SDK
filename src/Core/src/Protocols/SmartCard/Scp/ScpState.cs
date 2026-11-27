@@ -23,13 +23,16 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 /// <summary>
 ///     Per-session secure messaging state for an established SCP03 or SCP11 channel: the session keys,
 ///     the MAC chaining value and the encryption counter. Applies and removes C-MAC, C-DECRYPTION, R-MAC
-///     and R-ENCRYPTION (GlobalPlatform Card Spec v2.3 Amd D v1.1.2.6 §6.2). SCP11 reuses the SCP03
-///     secure messaging layer once its keys are derived (Amd F v1.4 §6).
+///     and R-ENCRYPTION. The inspected authority is GlobalPlatform Card Spec v2.3 Amendment D,
+///     SCP03 1.1.2 Public Release (March 2019), §6.2. The previously cited 1.1.2.6 is a separate
+///     December 2019 Public Review edition. SCP11 1.3.0.13 Public Review (August 2023), §4.4 applies
+///     SCP03 messaging after key establishment; final SCP11 1.4 clauses were not verified here.
 /// </summary>
 /// <remarks>
 ///     Establish a session with <see cref="Scp03InitAsync" /> or <see cref="Scp11InitAsync" />; the
 ///     partial files hold the protocol-specific handshakes. <c>macChain</c> is the initial MAC chaining
-///     value: 16 zero bytes for SCP03 (Amd D §6.2.4), the receipt for SCP11 (Amd F §6.2.1).
+///     value: 16 zero bytes for SCP03 EXTERNAL AUTHENTICATE (the inspected Public Release §6.2.3), the receipt for SCP11
+///     (the inspected Public Review §5.3.2). These citations describe selected rules, not blanket conformance.
 /// </remarks>
 internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpState>? logger = null) : IDisposable
 {
@@ -56,7 +59,8 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
 
     /// <summary>
     ///     Returns an encryptor using the session DEK, for wrapping key material carried inside a
-    ///     command (for example PUT KEY). Zero IV, caller supplies whole blocks.
+    ///     command (for example PUT KEY). The caller supplies whole blocks. CbcEncrypt's stack IV has no
+    ///     explicit initialization, so its storage declaration alone does not establish a zero-IV guarantee.
     /// </summary>
     public DataEncryptor GetDataEncryptor() =>
         keys.Dek.IsEmpty
@@ -67,8 +71,10 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     ///     Pads and encrypts a command data field (GlobalPlatform SCP03 Amd D §6.2.6).
     /// </summary>
     /// <remarks>
-    ///     Advances the encryption counter. Call exactly once per protected command, even for an empty
-    ///     data field, so the counter stays in step with the card.
+    ///     Advances the counter before IV derivation completes, including on some provider failures. Current
+    ///     empty input produces an encrypted padding block. When C-DECRYPTION and C-MAC are both required,
+    ///     SCP03 1.1.2 Public Release §6.2.6 instead requires the off-card entity to advance the counter without
+    ///     encryption when command data is absent. Core's SCP03 initializer selects these protections in 0x33.
     /// </remarks>
     /// <returns>The ciphertext. The caller owns it and must zero it after transmission.</returns>
     public byte[] Encrypt(ReadOnlySpan<byte> data)
@@ -240,7 +246,8 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     /// <summary>
     ///     The R-MAC the card would put on a response of <paramref name="data" /> and <paramref name="sw" />
     ///     at the current chaining value (the same computation <see cref="Unmac" /> checks against).
-    ///     Does not change state. Lets a test double answer a secured command the way the card does.
+    ///     Does not change state. Supplies a synthetic response MAC; callers must separately model whether
+    ///     the selected status carries protection under the applicable profile.
     /// </summary>
     internal byte[] ComputeRmac(ReadOnlySpan<byte> data, short sw)
     {
@@ -262,8 +269,8 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
 
     /// <summary>
     ///     Writes CMAC(<paramref name="key" />, <paramref name="chain" /> || <paramref name="data" />) to
-    ///     <paramref name="destination" />. Only provider failures are wrapped, as
-    ///     <see cref="NotSupportedException" />; other exceptions propagate unchanged.
+    ///     <paramref name="destination" />. Exceptions from primitive creation, initialization, update,
+    ///     finalization, or disposal are wrapped as <see cref="NotSupportedException" />.
     /// </summary>
     private static void ComputeCmac(
         ReadOnlySpan<byte> key, ReadOnlySpan<byte> chain, ReadOnlySpan<byte> data, Span<byte> destination)
@@ -284,11 +291,14 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     }
 
     /// <summary>
-    ///     Writes the SCP03 ICV, AES-ECB(S-ENC, prefix || 0..0 || counter), to <paramref name="destination" />
-    ///     (GlobalPlatform SCP03 Amd D §6.2.6).
+    ///     Derives an SCP03 ICV with AES-ECB, the command/response prefix, and counter, writing to
+    ///     <paramref name="destination" />. The zero-filled layout is specified in the inspected Public Release
+    ///     §6.2.6; this implementation explicitly initializes only the prefix and counter fields.
     /// </summary>
     private static void DeriveIv(Aes aes, byte prefix, int counter, Span<byte> destination)
     {
+        // Only prefix and counter are explicitly written. The intervening stack bytes need separate
+        // initialization before a portable prefix || zeros || counter guarantee can be made.
         Span<byte> ivData = stackalloc byte[BlockSize];
         ivData[0] = prefix;
         BinaryPrimitives.WriteInt32BigEndian(ivData[12..], counter);
@@ -302,7 +312,7 @@ internal partial class ScpState(SessionKeys keys, byte[] macChain, ILogger<ScpSt
     {
         using var aes = Aes.Create();
         aes.SetKey(key);
-        Span<byte> iv = stackalloc byte[BlockSize]; // Zero IV
+        Span<byte> iv = stackalloc byte[BlockSize]; // No explicit initialization; stackalloc alone is not a zero-IV guarantee.
         var encrypted = new byte[data.Length];
         var bytesWritten = aes.EncryptCbc(data, iv, encrypted, PaddingMode.None);
         return bytesWritten != data.Length

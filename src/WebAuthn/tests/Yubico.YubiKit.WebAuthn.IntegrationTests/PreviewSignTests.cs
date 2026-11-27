@@ -31,6 +31,7 @@ using Fido2Extensions = Yubico.YubiKit.Ctap2.Extensions;
 namespace Yubico.YubiKit.WebAuthn.IntegrationTests;
 
 [Trait("Category", "Integration")]
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public class PreviewSignTests
 {
     [SkippableTheory]
@@ -73,6 +74,7 @@ public class PreviewSignTests
         Assert.NotNull(previewSignOutput);
 
         var generatedKey = previewSignOutput.GeneratedKey;
+        // This fixture expects a nonempty handle; draft v4 also permits empty generated handles.
         Assert.True(generatedKey.KeyHandle.Length > 0, "KeyHandle should not be empty");
         Assert.NotNull(generatedKey.PublicKey);
         Assert.True(generatedKey.Algorithm.IsKnown, $"Algorithm {generatedKey.Algorithm} should be known");
@@ -102,8 +104,8 @@ public class PreviewSignTests
         Skip.IfNot(await SupportsPreviewSignAsync(session1),
             "YubiKey does not advertise previewSign extension");
 
-        // Verified end-to-end on YK 5.8.0 after switching generic previewSign auth to raw
-        // additionalArgs and using the ARKG bridge to build the algorithm-specific payload.
+        // This test uses raw additionalArgs built by the experimental ARKG bridge and checks the
+        // resulting signature offline. Advertising previewSign alone does not guarantee ARKG support.
 
         await NormalizePinAsync(session1);
 
@@ -119,8 +121,7 @@ public class PreviewSignTests
             ResidentKey = ResidentKeyPreference.Required,
             UserVerification = UserVerificationPreference.Discouraged,
             // WARNING -- EXPERIMENTAL -- test only: ARKG-P256 (-65539) is the request signing algorithm for this ARKG path.
-            // -9 (Esp256) is the OUTPUT signature alg, not the request alg — sending -9 here
-            // is the bug class the ARKG additionalArgs bridge makes explicit.
+            // -9 (Esp256) is the output signature algorithm, not this path's request signing algorithm.
             Extensions = new RegistrationExtensionInputs(
                 PreviewSign: PreviewSignRegistrationInput.GenerateKey(
                     CoseAlgorithm.ArkgP256))
@@ -146,10 +147,11 @@ public class PreviewSignTests
         byte[] ikm = RandomNumberGenerator.GetBytes(32);
         byte[] ctx = Encoding.ASCII.GetBytes("integration-test-ctx");
 
-        // Convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey
-        var fido2GeneratedKey = ConvertToCtap2GeneratedKey(keyHandle, arkgSeedKey);
+        // Use the generated WebAuthn key with the experimental ARKG derivation helper.
+        var arkgKey = new Ctap2.Extensions.ArkgP256GeneratedKey(
+            keyHandle, arkgSeedKey, generatedKey.Algorithm, generatedKey.AttestationObject.RawCbor);
 
-        var derivedKey = fido2GeneratedKey.DerivePublicKey(ikm, ctx);
+        var derivedKey = arkgKey.DerivePublicKey(ikm, ctx);
         Assert.Equal(65, derivedKey.PublicKey.Length); // SEC1 uncompressed
         Assert.NotEmpty(derivedKey.ArkgKeyHandle.Span.ToArray());
 
@@ -163,16 +165,14 @@ public class PreviewSignTests
         var messageBytes = Encoding.UTF8.GetBytes("Hello from previewSign integration test!");
         var toBeSigned = SHA256.HashData(messageBytes);
 
-        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(
-            ByteArrayKeyComparer.Instance)
+        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
         {
             [credentialId] = new PreviewSignSigningParams(
                 keyHandle: keyHandle,
                 tbs: toBeSigned,
-                additionalArgs: Fido2Extensions.PreviewSignCbor.EncodeAdditionalArgs(
-                    Fido2Extensions.CoseSignArgs.ArkgP256(
-                        derivedKey.ArkgKeyHandle,
-                        derivedKey.Context)))
+                additionalArgs: Fido2Extensions.CoseSignArgs.ArkgP256(
+                    derivedKey.ArkgKeyHandle,
+                    derivedKey.Context).ToAdditionalArgs())
         };
 
         var authOptions = new PublicKeyCredentialRequestOptions
@@ -208,9 +208,11 @@ public class PreviewSignTests
     }
 
     /// <summary>
-    ///     26d on hardware: two previewSign credentials for one RP, an allow list naming both and a signByCredential
-    ///     entry for each. The client selects the credential the key answers for and sends that entry; the returned
-    ///     signature verifies against the derived key of the credential that was actually returned.
+    ///     Exercises two previewSign credentials for one RP, an allow list naming both and a signByCredential
+    ///     entry for each. The fixture verifies with the first derived key when the reported ID matches the
+    ///     first credential, and otherwise with the second. It does not separately assert that the reported
+    ///     ID belongs to the allow list.
+    ///     This uses the experimental ARKG bridge; previewSign advertisement alone does not establish ARKG support.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.HidFido)]
@@ -229,7 +231,7 @@ public class PreviewSignTests
 
         var messageA = Encoding.UTF8.GetBytes("message for credential A");
         var messageB = Encoding.UTF8.GetBytes("message for credential B");
-        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>(ByteArrayKeyComparer.Instance)
+        var signByCredential = new Dictionary<ReadOnlyMemory<byte>, PreviewSignSigningParams>
         {
             [first.CredentialId] = SigningParamsFor(first, messageA),
             [second.CredentialId] = SigningParamsFor(second, messageB)
@@ -249,9 +251,10 @@ public class PreviewSignTests
         var response = await Assert.Single(matches).SelectAsync();
         var signature = response.ClientExtensionResults?.PreviewSign?.Signature;
         Assert.NotNull(signature);
-        var (returned, message) = response.CredentialId.Span.SequenceEqual(first.CredentialId.Span)
-            ? (first, messageA)
-            : (second, messageB);
+        bool isFirst = response.CredentialId.Span.SequenceEqual(first.CredentialId.Span);
+        bool isSecond = response.CredentialId.Span.SequenceEqual(second.CredentialId.Span);
+        Assert.True(isFirst || isSecond, "Returned credential ID must belong to the original allow list.");
+        var (returned, message) = isFirst ? (first, messageA) : (second, messageB);
         Assert.True(returned.DerivedKey.VerifySignature(message, signature.Value.Span),
             "the previewSign signature must verify against the key of the credential the authenticator returned");
     }
@@ -274,7 +277,8 @@ public class PreviewSignTests
         }, pin);
         var generatedKey = response.ClientExtensionResults!.PreviewSign!.GeneratedKey;
         var seedKey = Assert.IsType<Ctap2.Cose.CoseArkgP256SeedKey>(generatedKey.PublicKey);
-        var derived = ConvertToCtap2GeneratedKey(generatedKey.KeyHandle, seedKey)
+        var derived = new Ctap2.Extensions.ArkgP256GeneratedKey(
+            generatedKey.KeyHandle, seedKey, generatedKey.Algorithm, generatedKey.AttestationObject.RawCbor)
             .DerivePublicKey(RandomNumberGenerator.GetBytes(32), Encoding.ASCII.GetBytes("two-credential-ctx"));
         return new ArkgCredential(response.CredentialId, generatedKey.KeyHandle, derived);
     }
@@ -283,43 +287,7 @@ public class PreviewSignTests
         new(
             keyHandle: credential.KeyHandle,
             tbs: SHA256.HashData(message),
-            additionalArgs: Fido2Extensions.PreviewSignCbor.EncodeAdditionalArgs(
-                Fido2Extensions.CoseSignArgs.ArkgP256(credential.DerivedKey.ArkgKeyHandle, credential.DerivedKey.Context)));
-
-    /// <summary>
-    /// Helper to convert WebAuthn GeneratedSigningKey to Fido2 PreviewSignGeneratedKey.
-    /// </summary>
-    /// <remarks>
-    /// WARNING -- EXPERIMENTAL -- test only: this ARKG bridge exists for integration-test coverage and must not be
-    /// treated as production cryptographic guidance.
-    /// <para>
-    /// This bridges the WebAuthn layer (which exposes CoseKey directly) to the Fido2 layer
-    /// (which has the DerivePublicKey method). Uses reflection because PreviewSignGeneratedKey's
-    /// constructor is internal to the Fido2 assembly.
-    /// </para>
-    /// </remarks>
-    private static Ctap2.Extensions.PreviewSignGeneratedKey ConvertToCtap2GeneratedKey(
-        ReadOnlyMemory<byte> keyHandle,
-        Ctap2.Cose.CoseArkgP256SeedKey arkgSeedKey)
-    {
-        var generatedKeyType = typeof(Ctap2.Extensions.PreviewSignGeneratedKey);
-        var constructor = generatedKeyType.GetConstructor(
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
-            null,
-            [typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(Ctap2.Cose.CoseAlgorithm)],
-            null);
-
-        if (constructor is null)
-        {
-            throw new InvalidOperationException(
-                "PreviewSignGeneratedKey constructor not found. This indicates a breaking change in the Fido2 layer.");
-        }
-
-        return (Ctap2.Extensions.PreviewSignGeneratedKey)constructor.Invoke([
-            keyHandle,
-            arkgSeedKey.BlPublicKey,
-            arkgSeedKey.KemPublicKey,
-            arkgSeedKey.Algorithm
-        ]);
-    }
+            additionalArgs: Fido2Extensions.CoseSignArgs.ArkgP256(
+                credential.DerivedKey.ArkgKeyHandle,
+                credential.DerivedKey.Context).ToAdditionalArgs());
 }

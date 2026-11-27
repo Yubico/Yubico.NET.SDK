@@ -25,7 +25,7 @@ namespace Yubico.YubiKit.Core.Transports.Hid.Linux;
 /// <see cref="HidDeviceListener.Changed"/> callback.
 /// </para>
 /// <para>
-/// Each <see cref="Start"/> creates an independent session that owns its native resources
+/// Each new listener session owns its native resources
 /// (udev context, monitor, shutdown event fd). The session's listener thread disposes those
 /// resources when its loop exits. If <see cref="Stop"/> times out waiting for a wedged thread,
 /// the cancelled session is abandoned rather than torn down, so a late-exiting thread can never
@@ -58,8 +58,8 @@ internal sealed class LinuxHidDeviceListener : HidDeviceListener
     /// fake <see cref="ILinuxHidEventSource"/> for no-hardware fault injection.
     /// </summary>
     /// <param name="eventSourceFactory">
-    /// Factory invoked once per <see cref="Start"/> to create the session's event source,
-    /// or null to use the udev-backed production source.
+    /// Factory invoked once when <see cref="Start"/> creates a new session's event source. Calls that return
+    /// because the listener is already started do not invoke it. Use null for the udev-backed production source.
     /// </param>
     internal LinuxHidDeviceListener(Func<ILinuxHidEventSource>? eventSourceFactory)
     {

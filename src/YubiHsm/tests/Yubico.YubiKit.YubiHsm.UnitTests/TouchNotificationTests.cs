@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Text;
-using Yubico.YubiKit.Core;
 using Yubico.YubiKit.Core.Credentials;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
@@ -51,11 +50,12 @@ public class TouchNotificationTests
         var prompt = new RecordingUserPresencePrompt();
         await using var session = await CreateSessionAsync(connection, prompt, new FirmwareVersion(5, 6, 0));
 
+        using var password = CredentialPassword.FromUtf8("pass"u8);
         using var keys = await session.CalculateSessionKeysAsymmetricAsync(
             "cred",
             Sequence(0x40, 130),
-            Sequence(0x60, 65),
-            "pass"u8.ToArray(),
+            HsmAuthSessionByteLevelTests.P256Point(),
+            password,
             Sequence(0x70, 8),
             TestContext.Current.CancellationToken);
 
@@ -240,14 +240,17 @@ public class TouchNotificationTests
             },
             TestContext.Current.CancellationToken);
 
-    private static Task<SessionKeys> CalculateSymmetricAsync(
+    private static async Task<SessionKeys> CalculateSymmetricAsync(
         HsmAuthSession session,
-        CancellationToken cancellationToken) =>
-        session.CalculateSessionKeysSymmetricAsync(
+        CancellationToken cancellationToken)
+    {
+        using var password = CredentialPassword.FromUtf8("pass"u8);
+        return await session.CalculateSessionKeysSymmetricAsync(
             "cred",
             Sequence(0x40, 16),
-            "pass"u8.ToArray(),
+            password,
             cancellationToken: cancellationToken);
+    }
 
     private static RecordingSmartCardConnection CreateInitializedConnection(params byte[][] trailingResponses) =>
         new([OkResponse(), .. trailingResponses]);

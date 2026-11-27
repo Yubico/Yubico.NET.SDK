@@ -17,14 +17,18 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Yubico.YubiKit.Core;
 
 /// <summary>
-///     ONLY FOR TESTING, DONT USE IN PRODUCTION CODE.
+///     Holds a process-global service provider for tests, not the SDK's discovery entry point.
 /// </summary>
+/// <remarks>The caller owns the provider; replacing it does not dispose the previous provider.</remarks>
 public static class ServiceLocator
 {
     private static IServiceProvider? _serviceProvider;
 
+    /// <summary>Sets the caller-owned provider used by subsequent lookups.</summary>
     public static void SetLocatorProvider(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
+    /// <summary>Resolves a required service from the configured provider.</summary>
+    /// <exception cref="InvalidOperationException">No provider is set, or the provider cannot resolve T.</exception>
     public static T GetService<T>() where T : notnull => _serviceProvider is null
         ? throw new InvalidOperationException("Service provider not set.")
         : _serviceProvider.GetRequiredService<T>();

@@ -24,17 +24,35 @@ namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 ///     <b>Ownership and zeroing:</b> <see cref="ApduCommand"/> stores a reference to the caller-provided
 ///     <see cref="Data"/> buffer — it does <b>not</b> clone it. When the payload carries sensitive material
 ///     such as PIN bytes, key material, or cryptograms, the <b>caller</b> is responsible for zeroing the
-///     source buffer after the command has been transmitted.
+///     source buffer in finally after the actual exchange task is terminal. Keep the data unchanged until then;
+///     a canceled outer wait does not end the borrow.
 ///     </para>
 ///     <code>
-///     // ✅ Correct — caller zeroes the source buffer after transmission
-///     var command = new ApduCommand(0x00, InsVerify, 0x00, 0x80, pinnedPin.AsMemory(0, 8));
-///     await protocol.TransmitAndReceiveAsync(command, ct);
-///     CryptographicOperations.ZeroMemory(pinnedPin); // zeroes the buffer command.Data referenced
-///
-///     // ✅ Non-sensitive commands need no special handling
-///     var command = new ApduCommand(0x00, InsSelect, 0x04, 0x00, appId);
-///     var response = await protocol.TransmitAndReceiveAsync(command, ct);
+///     // The caller supplies an open connection, an applet-specific header, and owned payload bytes.
+///     // This helper borrows the connection and consumes the payload, clearing it even if creation fails.
+///     static async Task&lt;short&gt; SendAndClearAsync(
+///         Yubico.YubiKit.Core.Transports.SmartCard.ISmartCardConnection connection,
+///         byte cla, byte ins, byte p1, byte p2, byte[] payload, CancellationToken ct)
+///     {
+///         try
+///         {
+///             await using var session = await Yubico.YubiKit.Core.Sessions.RawSmartCardSession.CreateAsync(connection, ct);
+///             var command = new ApduCommand(cla, ins, p1, p2, payload);
+///             var response = await session.TransmitAndReceiveAsync(command, throwOnError: false, cancellationToken: ct);
+///             try
+///             {
+///                 return response.SW; // Inspect status before clearing the response owner.
+///             }
+///             finally
+///             {
+///                 response.Clear();
+///             }
+///         }
+///         finally
+///         {
+///             System.Security.Cryptography.CryptographicOperations.ZeroMemory(payload);
+///         }
+///     }
 ///     </code>
 /// </remarks>
 public readonly record struct ApduCommand
@@ -62,7 +80,12 @@ public readonly record struct ApduCommand
     /// <summary>Gets the P2 byte.</summary>
     public byte P2 { get; init; }
 
-    /// <summary>Gets the Le value.</summary>
+    /// <summary>Gets the expected response-length value passed to the selected formatter.</summary>
+    /// <remarks>
+    ///     Both SDK formatters append Le; zero encodes a zero field rather than omitting it. Short formatting
+    ///     accepts 0 through 255 (use zero for the maximum wire encoding); extended formatting accepts 0 through
+    ///     65536, with both zero and 65536 encoded as two zero bytes. There is no absent-Le representation here.
+    /// </remarks>
     public int Le { get; init; }
 
     /// <summary>

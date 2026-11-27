@@ -220,7 +220,7 @@ public class SlotConfigurationTests
     [Fact]
     public void HmacSha1_ExactLengthKey_PreservedByteForByte_NotHashedOrPadded()
     {
-        // ISC-30: valid-length keys must survive into the wire format unmodified.
+        // Valid-length keys must survive into the wire format unmodified.
         byte[] hmacKey = Enumerable.Range(1, 20).Select(i => (byte)i).ToArray();
 
         using var config = new HmacSha1SlotConfiguration(hmacKey);
@@ -298,7 +298,7 @@ public class SlotConfigurationTests
     [Fact]
     public void YubicoOtpChallengeResponse_ExactLengthKey_PreservedByteForByte()
     {
-        // ISC-30: valid-length keys must survive into the wire format unmodified.
+        // Valid-length keys must survive into the wire format unmodified.
         byte[] aesKey = Enumerable.Range(1, 16).Select(i => (byte)i).ToArray();
 
         using var config = new YubicoOtpChallengeResponseSlotConfiguration(aesKey);
@@ -420,62 +420,33 @@ public class SlotConfigurationTests
         Assert.Equal(hmacKey[16..20], result[UidOffset..(UidOffset + 4)]);
     }
 
-    [Fact]
-    public void Hotp_WithImf_StoresInUid()
+    [Theory]
+    [InlineData(0, 0x00, 0x00)]
+    [InlineData(16, 0x00, 0x01)]
+    [InlineData(0x30000, 0x30, 0x00)]
+    [InlineData(0xFFFF0, 0xFF, 0xFF)]
+    public void Hotp_WithImf_StoresCounterUnitsInUid(int imf, byte high, byte low)
     {
         byte[] hmacKey = new byte[20];
-        int imf = 0x30000; // 3 * 0x10000
 
         using var config = new HotpSlotConfiguration(hmacKey, imf);
         var result = config.GetConfig();
 
-        // IMF / 0x10000 = 3, stored big-endian in uid[4..6]
-        Assert.Equal(0x00, result[UidOffset + 4]);
-        Assert.Equal(0x03, result[UidOffset + 5]);
+        Assert.Equal(high, result[UidOffset + 4]);
+        Assert.Equal(low, result[UidOffset + 5]);
         AssertValidCrc(result);
     }
 
-    [Fact]
-    public void Hotp_WithLargeImf_StoresCorrectly()
-    {
-        byte[] hmacKey = new byte[20];
-        int imf = 0xFF0000; // 0xFF * 0x10000
-
-        using var config = new HotpSlotConfiguration(hmacKey, imf);
-        var result = config.GetConfig();
-
-        // IMF / 0x10000 = 0x00FF, big-endian
-        Assert.Equal(0x00, result[UidOffset + 4]);
-        Assert.Equal(0xFF, result[UidOffset + 5]);
-    }
-
-    [Fact]
-    public void Hotp_ZeroImf_NoDataInUid45()
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(8)]
+    [InlineData(100)]
+    [InlineData(0x100000)]
+    public void Hotp_UnrepresentableImf_Throws(int imf)
     {
         byte[] hmacKey = new byte[20];
 
-        using var config = new HotpSlotConfiguration(hmacKey, imf: 0);
-        var result = config.GetConfig();
-
-        Assert.Equal(0, result[UidOffset + 4]);
-        Assert.Equal(0, result[UidOffset + 5]);
-    }
-
-    [Fact]
-    public void Hotp_InvalidImf_Throws()
-    {
-        byte[] hmacKey = new byte[20];
-
-        // Not a multiple of 0x10000
-        Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(hmacKey, imf: 100));
-    }
-
-    [Fact]
-    public void Hotp_NegativeImf_Throws()
-    {
-        byte[] hmacKey = new byte[20];
-
-        Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(hmacKey, imf: -1));
+        Assert.Throws<ArgumentException>("imf", () => new HotpSlotConfiguration(hmacKey, imf));
     }
 
     [Fact]
@@ -507,9 +478,7 @@ public class SlotConfigurationTests
     [Fact]
     public void Hotp_InvalidImfAndInvalidKeyLength_ThrowsForImfFirst()
     {
-        // Locks in validation order: IMF is checked before the key length (via ProcessHmacKey).
-        // If this ordering is intentionally reversed in the future, this test must be updated
-        // to match, so the change is deliberate rather than an unnoticed side effect.
+        // Validate the counter before copying the key into the configuration.
         byte[] shortKey = [0x01, 0x02, 0x03];
 
         var ex = Assert.Throws<ArgumentException>(() => new HotpSlotConfiguration(shortKey, imf: 100));
@@ -518,13 +487,13 @@ public class SlotConfigurationTests
     }
 
     [Fact]
-    public void Hotp_MinimumFirmware_Is210()
+    public void Hotp_MinimumFirmware_Is220()
     {
         byte[] hmacKey = new byte[20];
         using var config = new HotpSlotConfiguration(hmacKey);
 
-        Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 1, 0)));
-        Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 0, 9)));
+        Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 2, 0)));
+        Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 1, 9)));
     }
 
 
@@ -623,7 +592,7 @@ public class SlotConfigurationTests
     [Fact]
     public void StaticPassword_FromString_EnUsLayout_TranslatesToExpectedScanCodes()
     {
-        // ISC-27: exact HID scan-code vectors matching HidCodeTranslator's en_US mapping.
+        // Exact HID scan-code vectors matching HidCodeTranslator's en_US mapping.
         using var config = new StaticPasswordSlotConfiguration("abc", KeyboardLayout.en_US);
         var result = config.GetConfig();
 
@@ -652,6 +621,26 @@ public class SlotConfigurationTests
 
         byte[] expectedScanCodes = [translator['c'], translator['c'], translator['c'], translator['b']];
         Assert.Equal(expectedScanCodes, result[FixedOffset..(FixedOffset + 4)]);
+    }
+
+    [Fact]
+    public void StaticPassword_FromString_UsesSelectedLayoutRatherThanUtf8Bytes()
+    {
+        using var us = new StaticPasswordSlotConfiguration("aA", KeyboardLayout.en_US);
+        using var french = new StaticPasswordSlotConfiguration("aA", KeyboardLayout.fr_FR);
+
+        Assert.Equal(new byte[] { 0x04, 0x84 }, us.GetConfig()[..2]);
+        Assert.Equal(new byte[] { 0x14, 0x94 }, french.GetConfig()[..2]);
+    }
+
+    [Fact]
+    public void StaticPassword_DemoAlphabetIsRepresentableInEverySelectableLayout()
+    {
+        foreach (var layout in Enum.GetValues<KeyboardLayout>())
+        {
+            using var config = new StaticPasswordSlotConfiguration("cbdefghijklnrtuv", layout);
+            Assert.Equal(16, config.GetConfig()[FixedSizeOffset]);
+        }
     }
 
     [Fact]
@@ -814,8 +803,8 @@ public class SlotConfigurationTests
         var result = config.GetConfig();
         byte extFlags = result[ExtFlagsOffset];
 
-        // AllowUpdate is NOT in the update mask, so shouldn't be writable through the mask
-        // But Dormant, UseNumericKeypad, FastTrigger ARE in the mask
+        // These three flags survive the complete extended update mask. AllowUpdate is also in that
+        // mask; its inclusion is asserted separately below.
         Assert.Equal((byte)ExtendedFlag.Dormant, extFlags & (byte)ExtendedFlag.Dormant);
         Assert.Equal((byte)ExtendedFlag.UseNumericKeypad, extFlags & (byte)ExtendedFlag.UseNumericKeypad);
         Assert.Equal((byte)ExtendedFlag.FastTrigger, extFlags & (byte)ExtendedFlag.FastTrigger);
@@ -876,12 +865,12 @@ public class SlotConfigurationTests
     }
 
     [Fact]
-    public void Update_MinimumFirmware_Is230()
+    public void Update_MinimumFirmware_Is220()
     {
         using var config = new UpdateConfiguration();
 
-        Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 3, 0)));
-        Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 2, 9)));
+        Assert.True(config.IsSupportedBy(new FirmwareVersion(2, 2, 0)));
+        Assert.False(config.IsSupportedBy(new FirmwareVersion(2, 1, 9)));
     }
 
 
@@ -1021,7 +1010,8 @@ public class SlotConfigurationTests
 
         config.Dispose();
 
-        // After dispose, GetConfig should throw
+        // This checks post-disposal access rejection, not erasure of fields or priorResult. Actual
+        // private-array zeroing is inspected in SlotConfigurationEncapsulationTests.
         Assert.Throws<ObjectDisposedException>(() => config.GetConfig());
     }
 
@@ -1041,7 +1031,8 @@ public class SlotConfigurationTests
     [Fact]
     public void Crc_AllZeroConfig_ValidCrc()
     {
-        // UpdateConfiguration with no flags produces a mostly-zero config
+        // Default update flags remain present (SerialApiVisible/AllowUpdate); check the assembled CRC,
+        // not an all-zero wire vector or an independently supplied CRC known answer.
         using var config = new UpdateConfiguration();
         var result = config.GetConfig();
 

@@ -30,8 +30,9 @@ namespace Yubico.YubiKit.Piv.IntegrationTests;
 /// COVERAGE:
 ///   - PKCS#1 v1.5 decryption (RSA 2048)
 ///   - OAEP SHA-256 decryption (RSA 2048)
-///   - Wrong key type rejection (ECC slot → ArgumentException before APDU)
-///   - Wrong ciphertext length rejection (ArgumentException before APDU)
+///   - Wrong key type rejection after slot metadata, before the private-key APDU
+///   - Wrong ciphertext length rejection after slot metadata, before the private-key APDU
+/// DecryptAsync requires metadata (5.3+); some fixture attributes currently admit older firmware.
 /// </summary>
 public class PivDecryptTests
 {
@@ -89,11 +90,10 @@ public class PivDecryptTests
     }
 
     /// <summary>
-    /// Verifies that DecryptAsync rejects ECC slots with ArgumentException before
-    /// sending any APDU to the YubiKey, matching the Python API's slot validation.
+    /// Checks ArgumentException for an ECC slot after metadata retrieval and before private-key use.
     /// </summary>
     [SkippableTheory]
-    // ECC P256 is supported since firmware 4.0.0 (no MinFirmware constraint needed — ECC is universally available)
+    // P-256 support predates metadata; this fixture still needs the metadata-capable decryption path.
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.0.0")]
     public async Task DecryptAsync_EccSlot_ThrowsArgumentException(YubiKeyTestState state)
     {
@@ -114,7 +114,7 @@ public class PivDecryptTests
 
     /// <summary>
     /// Verifies that DecryptAsync rejects ciphertext whose length does not match
-    /// the RSA key size, preventing malformed inputs from reaching the YubiKey.
+    /// the RSA key size after metadata retrieval and before the private-key command.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(ConnectionType = ConnectionType.SmartCard, MinFirmware = "4.3.5")]

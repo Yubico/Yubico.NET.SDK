@@ -18,9 +18,9 @@ using Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 namespace Yubico.YubiKit.Core.UnitTests.Protocols.SmartCard.Scp;
 
 /// <summary>
-///     Unit tests for AES-CMAC implementation using official test vectors from:
-///     - RFC 4493: The AES-CMAC Algorithm
-///     - NIST SP 800-38B: Recommendation for Block Cipher Modes of Operation (CMAC)
+///     Checks RFC 4493 (Informational, June 2006), §4 full-value examples alongside separate length,
+///     chunking-consistency, and disposed-method-refusal cases. Those narrower cases do not independently
+///     verify a MAC value or observe retained key storage after disposal.
 /// </summary>
 public class AesCmacTests
 {
@@ -56,8 +56,7 @@ public class AesCmacTests
         Assert.True(cmac.DebugGetSubkey1().SequenceEqual(ExpectedK1));
         Assert.True(cmac.DebugGetSubkey2().SequenceEqual(ExpectedK2));
 #else
-    // In release builds, skip internal validation
-    // RFC vectors provide end-to-end verification
+    // This release branch makes no subkey assertion; the separate RFC cases check full MAC values.
     Assert.True(true);
 #endif
     }
@@ -206,8 +205,7 @@ public class AesCmacTests
 
         Assert.Equal(16, mac.Length);
 
-        // Verify padding path was taken (incomplete block)
-        // Single byte should be padded with 0x80 followed by zeros
+        // The preceding assertion checks output length for a single-byte message, not the padding bytes.
     }
 
     [Fact]
@@ -241,7 +239,7 @@ public class AesCmacTests
         // First call: 10 bytes (partial buffer)
         cmac.AppendData(data[..10]);
 
-        // Second call: 6 bytes (completes buffer to 16, triggers ProcessBlock)
+        // Second call: 6 bytes fills the candidate final block; processing waits for more input.
         cmac.AppendData(data[10..16]);
 
         // Third call: 32 bytes (2 complete blocks)

@@ -21,9 +21,10 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.YubiOtp.IntegrationTests.AuditV2;
 
 /// <summary>
-///     Audit 26l (YESDK-1634): <see cref="SlotConfiguration.ProtectSlot2" /> must set the PROTECT_CFG2 bit
+///     <see cref="SlotConfiguration.ProtectSlot2" /> must set the PROTECT_CFG2 bit
 ///     (0x80, yubikit/yubiotp.py TKTFLAG.PROTECT_CFG2) and leave the challenge-response bit (0x40) alone.
-///     These tests write both slots of the test key and clear them afterwards.
+///     Use only a dedicated, authorized fixture with no unknown access codes. Setup may clear both slots;
+///     the tests leave their own state and cannot restore original secrets.
 /// </summary>
 public sealed class YubiOtpProtectSlot2Tests
 {
@@ -40,87 +41,69 @@ public sealed class YubiOtpProtectSlot2Tests
     [Trait("Audit", "YESDK-1634")]
     public async Task YESDK1634_ProtectSlot2_DoesNotDisturbChallengeResponseBit(YubiKeyTestState state)
     {
-        // Challenge-response over CCID answers 6985 on this applet; pin the HID transport as the
-        // existing CalculateHmacSha1 test does.
+        // Pin OTP HID for this challenge test. Its results do not establish USB CCID/NFC support or a
+        // universal SmartCard rejection code across device generations and firmware.
         await using var session = await state.Device.CreateYubiOtpSessionAsync(
             new SessionCreationOptions { PreferredConnectionType = state.ConnectionType });
-        try
+        // Slot 1 may still protect slot 2 after an earlier fixture failed during setup.
+        await DeleteIfConfiguredAsync(session, Slot.One);
+        await DeleteIfConfiguredAsync(session, Slot.Two);
+        using (var protectedConfig = new HmacSha1SlotConfiguration(Key))
         {
-            using (var protectedConfig = new HmacSha1SlotConfiguration(Key))
-            {
-                protectedConfig.ProtectSlot2();
-                await session.PutConfigurationAsync(Slot.Two, protectedConfig);
-            }
-
-            Assert.Equal(Expected, (await session.CalculateHmacSha1Async(Slot.Two, Challenge)).ToArray());
-
-            using (var unprotectedConfig = new HmacSha1SlotConfiguration(Key))
-            {
-                unprotectedConfig.ProtectSlot2(false);
-                await session.PutConfigurationAsync(Slot.Two, unprotectedConfig);
-            }
-
-            Assert.Equal(Expected, (await session.CalculateHmacSha1Async(Slot.Two, Challenge)).ToArray());
+            protectedConfig.ProtectSlot2();
+            await session.PutConfigurationAsync(Slot.Two, protectedConfig);
         }
-        finally
+
+        Assert.Equal(Expected, (await session.CalculateHmacSha1Async(Slot.Two, Challenge)).ToArray());
+
+        using (var unprotectedConfig = new HmacSha1SlotConfiguration(Key))
         {
-            await DeleteIfConfiguredAsync(session, Slot.Two);
+            unprotectedConfig.ProtectSlot2(false);
+            await session.PutConfigurationAsync(Slot.Two, unprotectedConfig);
         }
+
+        Assert.Equal(Expected, (await session.CalculateHmacSha1Async(Slot.Two, Challenge)).ToArray());
     }
 
     /// <summary>
-    ///     The bit's meaning: set on slot 1, the YubiKey refuses to write slot 2 while slot 2 is not itself
-    ///     configured with the same bit. Rewriting slot 1 without it lifts the block.
+    ///     Checks rejection of a plain slot-2 write after protecting slot 1, then successful programming
+    ///     after replacing slot 1 without protection. The broad exception assertion does not pin the
+    ///     rejection's exact device reason or cover every pre-existing-slot protection combination.
     /// </summary>
     [SkippableTheory]
     [WithYubiKey(MinFirmware = "2.2.0", ConnectionType = ConnectionType.HidOtp)]
     [Trait("Audit", "YESDK-1634")]
     public async Task YESDK1634_ProtectSlot2OnSlot1_BlocksSlot2Write(YubiKeyTestState state)
     {
-        // Challenge-response over CCID answers 6985 on this applet; pin the HID transport as the
-        // existing CalculateHmacSha1 test does.
+        // Pin OTP HID; no device/firmware-specific SmartCard challenge behavior is asserted here.
         await using var session = await state.Device.CreateYubiOtpSessionAsync(
             new SessionCreationOptions { PreferredConnectionType = state.ConnectionType });
-        try
+        // Clear any protection from a previous fixture in slot 1 before touching slot 2.
+        await DeleteIfConfiguredAsync(session, Slot.One);
+        await DeleteIfConfiguredAsync(session, Slot.Two);
+
+        using (var slot1Protecting = new HmacSha1SlotConfiguration(Key))
         {
-            await DeleteIfConfiguredAsync(session, Slot.Two);
-
-            using (var slot1Protecting = new HmacSha1SlotConfiguration(Key))
-            {
-                slot1Protecting.ProtectSlot2();
-                await session.PutConfigurationAsync(Slot.One, slot1Protecting);
-            }
-
-            using (var slot2Plain = new HmacSha1SlotConfiguration(Key))
-            {
-                var rejection = await Record.ExceptionAsync(() => session.PutConfigurationAsync(Slot.Two, slot2Plain));
-                Assert.NotNull(rejection);
-            }
-
-            Assert.False(session.GetConfigState().IsConfigured(Slot.Two),
-                "Slot 2 was written although slot 1 carries the protect flag.");
-
-            using (var slot1Open = new HmacSha1SlotConfiguration(Key))
-            {
-                await session.PutConfigurationAsync(Slot.One, slot1Open);
-            }
-
-            using (var slot2Plain = new HmacSha1SlotConfiguration(Key))
-            {
-                await session.PutConfigurationAsync(Slot.Two, slot2Plain);
-            }
-
-            Assert.True(session.GetConfigState().IsConfigured(Slot.Two));
-            Assert.Equal(Expected, (await session.CalculateHmacSha1Async(Slot.Two, Challenge)).ToArray());
+            slot1Protecting.ProtectSlot2();
+            await session.PutConfigurationAsync(Slot.One, slot1Protecting);
         }
-        finally
-        {
-            await DeleteIfConfiguredAsync(session, Slot.Two);
-            await DeleteIfConfiguredAsync(session, Slot.One);
-        }
+
+        using var slot2Plain = new HmacSha1SlotConfiguration(Key);
+        var rejection = await Record.ExceptionAsync(() => session.PutConfigurationAsync(Slot.Two, slot2Plain));
+        Assert.NotNull(rejection);
+        Assert.False(session.GetConfigState().IsConfigured(Slot.Two),
+            "Slot 2 was written although slot 1 carries the protect flag.");
+
+        using var slot1Open = new HmacSha1SlotConfiguration(Key);
+        await session.PutConfigurationAsync(Slot.One, slot1Open);
+        await session.PutConfigurationAsync(Slot.Two, slot2Plain);
+
+        Assert.True(session.GetConfigState().IsConfigured(Slot.Two));
+        Assert.Equal(Expected, (await session.CalculateHmacSha1Async(Slot.Two, Challenge)).ToArray());
     }
 
-    // Over HID, deleting an already-empty slot does not answer and times out; only delete what is there.
+    // Avoid unnecessary empty-slot deletion; historical HID timeout observations are not a universal
+    // device/firmware contract. This uses the session's cached configured status.
     private static async Task DeleteIfConfiguredAsync(IYubiOtpSession session, Slot slot)
     {
         if (session.GetConfigState().IsConfigured(slot))

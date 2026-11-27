@@ -20,10 +20,13 @@ namespace Yubico.YubiKit.WebAuthn.Extensions.PreviewSign;
 /// <remarks>
 /// <para>
 /// Represents the generated key material returned by the YubiKey during
-/// previewSign extension registration.
+/// previewSign extension registration: a handle, public key, and decoded attestation, not a private
+/// key. The SDK does not verify the generated-key attestation. The relying party must verify it before
+/// trusting the key and handle when its attestation policy requires that verification.
 /// </para>
 /// </remarks>
 /// <param name="GeneratedKey">
 /// The generated signing key.
 /// </param>
+[System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
 public sealed record class PreviewSignRegistrationOutput(GeneratedSigningKey GeneratedKey);

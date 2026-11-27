@@ -43,6 +43,10 @@ internal static class ScpInitializer
     /// <param name="keyParams">SCP key parameters (SCP03 or SCP11)</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <param name="onRecoveryRequired">Notifies the owning protocol when a secure exchange requires recovery.</param>
+    /// <param name="scpEligibilityFirmwareVersion">
+    ///     Overrides the firmware used only for SCP feature floors. Null uses the processor's firmware;
+    ///     major zero permits an optimistic attempt without affecting framing.
+    /// </param>
     /// <returns>Tuple of (SCP-wrapped processor, data encryptor)</returns>
     /// <exception cref="ArgumentException">Thrown when keyParams type is unsupported</exception>
     /// <exception cref="NotSupportedException">Thrown when device doesn't support SCP</exception>
@@ -53,7 +57,8 @@ internal static class ScpInitializer
         byte insSendRemaining,
         ScpKeyParameters keyParams,
         CancellationToken cancellationToken = default,
-        Action<Exception>? onRecoveryRequired = null)
+        Action<Exception>? onRecoveryRequired = null,
+        FirmwareVersion? scpEligibilityFirmwareVersion = null)
     {
         if (initializationProcessor is not ChainedResponseReceiver { FirmwareVersion: not null } mainProcessor)
             throw new ArgumentException("Initialization processor must be a ChainedResponseReceiver",
@@ -61,9 +66,11 @@ internal static class ScpInitializer
 
         try
         {
+            var eligibilityFirmware = scpEligibilityFirmwareVersion ?? mainProcessor.FirmwareVersion;
             return keyParams switch
             {
-                Scp03KeyParameters scp03Parameters => Supports(mainProcessor.FirmwareVersion, FeatureScp03)
+                Scp03KeyParameters scp03Parameters =>
+                    FeatureScp03.IsSupportedByFirmware(eligibilityFirmware)
                     ? await InitScp03Async(
                             mainProcessor,
                             commandProcessor,
@@ -73,7 +80,8 @@ internal static class ScpInitializer
                             onRecoveryRequired)
                         .ConfigureAwait(false)
                     : throw new NotSupportedException("SCP03 only supported on YubiKey 5.3.0 and later"),
-                Scp11KeyParameters scp11Parameters => Supports(mainProcessor.FirmwareVersion, FeatureScp11)
+                Scp11KeyParameters scp11Parameters =>
+                    FeatureScp11.IsSupportedByFirmware(eligibilityFirmware)
                     ? await InitScp11Async(
                             mainProcessor,
                             commandProcessor,
@@ -91,9 +99,6 @@ internal static class ScpInitializer
             throw new NotSupportedException("SCP is not supported by this YubiKey", ex);
         }
     }
-
-    private static bool Supports(FirmwareVersion firmwareVersion, Feature feature) =>
-        feature.IsSupportedByFirmware(firmwareVersion);
 
     internal static IApduProcessor CreateSecureProcessor(
         IApduProcessor commandProcessor,
@@ -128,9 +133,10 @@ internal static class ScpInitializer
         try
         {
             // Construct the SCP processor, send EXTERNAL AUTHENTICATE with the host cryptogram, then
-            // request the data encryptor. Dispose state (and its session keys) on ANY failure in this
-            // block — including SCP processor construction, EXTERNAL AUTHENTICATE, or a missing-DEK
-            // failure from GetDataEncryptor() — otherwise session keys leak to the GC finalizer (T10).
+            // request the data encryptor. Dispose returned state on failure in this block, including
+            // processor construction, EXTERNAL AUTHENTICATE, or missing DEK. State and SessionKeys have
+            // no finalizer; deterministic disposal owns their cleanup. Earlier Scp03InitAsync failures
+            // have their own narrower cleanup scope.
             // Disposing state directly (rather than a possibly-not-yet-constructed scpProcessor) mirrors
             // InitScp11Async and stays correct even if the guarded block's first statement throws.
             try
@@ -186,9 +192,8 @@ internal static class ScpInitializer
                 cancellationToken)
             .ConfigureAwait(false);
 
-        // Dispose state (and its live session keys) on any post-init failure — otherwise
-        // session keys leak to the GC finalizer, mirroring the SCP03 EXTERNAL AUTHENTICATE
-        // failure-cleanup discipline above (T10).
+        // Dispose returned state on post-init failure. State and SessionKeys have no finalizer;
+        // this guard owns cleanup until the secure processor takes over the returned state.
         try
         {
             var scpProcessor = CreateSecureProcessor(

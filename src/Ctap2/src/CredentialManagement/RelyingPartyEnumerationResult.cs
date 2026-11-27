@@ -27,6 +27,8 @@ public sealed class RelyingPartyEnumerationResult
     /// <summary>
     /// Gets the total reported by the first authenticator response, if present.
     /// </summary>
+    /// <remarks>This is copied, not recomputed or checked against RelyingParties.Count.
+    /// A null total does not establish that the returned collection is complete.</remarks>
     public int? ReportedTotal { get; }
 
     internal RelyingPartyEnumerationResult(List<RelyingPartyInfo> relyingParties, int? reportedTotal)

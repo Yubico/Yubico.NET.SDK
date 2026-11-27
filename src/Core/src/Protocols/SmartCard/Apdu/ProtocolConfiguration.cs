@@ -14,9 +14,18 @@
 
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 
+/// <summary>Supplies APDU formatting and response-follow-up settings before SCP establishment.</summary>
 public readonly record struct ProtocolConfiguration
 {
+    /// <summary>Gets whether configured production firmware should use short APDU command chaining.</summary>
+    /// <remarks>
+    ///     Applied for production firmware 4.0 and later. Earlier firmware retains the existing format;
+    ///     major-zero development firmware follows a separate permissive configuration path.
+    /// </remarks>
     public bool ForceShortApdus { get; init; }
 
+    /// <summary>Gets the instruction for 0x61 response follow-ups; null leaves the current instruction unchanged.</summary>
+    /// <value>The override instruction, or null. A default protocol starts with 0xC0.</value>
+    /// <remarks>Follow-ups use CLA, P1, P2, and API Le zero rather than copying the original header or SW2.</remarks>
     public byte? InsSendRemaining { get; init; }
 }

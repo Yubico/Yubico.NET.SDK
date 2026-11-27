@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2;
 using Yubico.YubiKit.Ctap2.Credentials;
 
@@ -21,16 +22,20 @@ namespace Yubico.YubiKit.WebAuthn.Client.Authentication;
 /// Internal helper for matching credentials during authentication.
 /// </summary>
 /// <remarks>
-/// Handles both allow-list probing and discoverable credential enumeration
-/// via GetAssertion + GetNextAssertion.
+/// Collects final assertions starting with the successful GetAssertion response. CredentialFilter performs
+/// allow-list probing before this helper receives the narrowed request.
 /// </remarks>
 internal sealed class CredentialMatcher
 {
+    private const uint MaxAssertionsPerCeremony = 1024;
+
     /// <summary>
     /// Matches credentials for an authentication request.
     /// </summary>
     /// <param name="backend">The WebAuthn backend to use.</param>
-    /// <param name="request">The backend GetAssertion request.</param>
+    /// <param name="firstResponse">The successful GetAssertion response.</param>
+    /// <param name="hasAllowList">Whether the final request included an allow list.</param>
+    /// <param name="selected">The real descriptor selected by probing, never the dummy descriptor.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
     /// A list of tuples containing credential ID, optional user, and the GetAssertionResponse.
@@ -39,46 +44,95 @@ internal sealed class CredentialMatcher
     internal static async Task<IReadOnlyList<(ReadOnlyMemory<byte> CredentialId, PublicKeyCredentialUserEntity? User, GetAssertionResponse Response)>>
         MatchAsync(
             IWebAuthnBackend backend,
-            BackendGetAssertionRequest request,
+            GetAssertionResponse firstResponse,
+            bool hasAllowList,
+            PublicKeyCredentialDescriptor? selected,
             CancellationToken cancellationToken)
     {
-        GetAssertionResponse firstResponse;
+        var results = new List<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
+
+        uint? numberOfCredentials = CheckAssertionCount(firstResponse, hasAllowList);
 
         try
         {
-            firstResponse = await backend.GetAssertionAsync(request, cancellationToken);
-        }
-        catch (CtapException ex) when (IsNoCredentialsError(ex.Status))
-        {
-            // Authenticator has no matching credentials - return empty list
-            return Array.Empty<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
-        }
+            var firstCredId = ResolveCredentialId(firstResponse, selected, hasAllowList);
+            results.Add((firstCredId, firstResponse.User, firstResponse));
 
-        var results = new List<(ReadOnlyMemory<byte>, PublicKeyCredentialUserEntity?, GetAssertionResponse)>();
-
-        // Add the first response
-        var firstCredId = firstResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
-        results.Add((firstCredId, firstResponse.User, firstResponse));
-
-        // Check if there are more credentials to enumerate
-        int? numberOfCredentials = firstResponse.NumberOfCredentials;
-        if (numberOfCredentials.HasValue && numberOfCredentials.Value > 1)
-        {
-            // Enumerate remaining credentials via GetNextAssertion
-            int remaining = numberOfCredentials.Value - 1;
-
-            for (int i = 0; i < remaining; i++)
+            for (uint i = 1; i < numberOfCredentials; i++)
             {
-                var nextResponse = await backend.GetNextAssertionAsync(cancellationToken);
-                var nextCredId = nextResponse.Credential?.Id ?? ReadOnlyMemory<byte>.Empty;
+                var nextResponse = await GetContinuationAsync(backend, cancellationToken).ConfigureAwait(false);
+                var nextCredId = ResolveCredentialId(nextResponse, selected, hasAllowList, allowOmission: false);
                 results.Add((nextCredId, nextResponse.User, nextResponse));
             }
+            return results;
         }
-
-        return results;
+        catch
+        {
+            foreach (var (_, _, response) in results)
+                ClearUnreturnedAssertion(response);
+            throw;
+        }
     }
 
-    private static bool IsNoCredentialsError(CtapStatus status)
+    private static async Task<GetAssertionResponse> GetContinuationAsync(IWebAuthnBackend backend, CancellationToken ct)
+    {
+        try
+        {
+            return await backend.GetNextAssertionAsync(ct).ConfigureAwait(false);
+        }
+        catch (CtapException ex)
+        {
+            throw WebAuthnClient.MapCtapStatusToWebAuthnError(ex);
+        }
+    }
+
+    private static ReadOnlyMemory<byte> ResolveCredentialId(
+        GetAssertionResponse response, PublicKeyCredentialDescriptor? selected, bool hasAllowList, bool allowOmission = true)
+    {
+        if (response.Credential is null && allowOmission && selected is not null)
+            return selected.Id.ToArray(); // The response outlives the caller's allow-list storage.
+
+        if (response.Credential is { Id.IsEmpty: false } descriptor
+            && (!hasAllowList || (selected is not null && descriptor.Id.Span.SequenceEqual(selected.Id.Span))))
+            return descriptor.Id;
+
+        ClearUnreturnedAssertion(response);
+        throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
+            "The assertion did not identify a credential matching the request.");
+    }
+
+    private static uint? CheckAssertionCount(GetAssertionResponse response, bool hasAllowList)
+    {
+        uint? count = response.NumberOfCredentials;
+        if (count is > MaxAssertionsPerCeremony)
+        {
+            ClearUnreturnedAssertion(response);
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.Constraint,
+                $"Authenticator reported {count} assertions; the SDK supports at most {MaxAssertionsPerCeremony} per ceremony.");
+        }
+
+        // CTAP selects one credential for a nonempty allow list, without continuations.
+        if (hasAllowList && count is > 1)
+        {
+            ClearUnreturnedAssertion(response);
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.InvalidState,
+                "The authenticator reported multiple assertions for a nonempty allow list.");
+        }
+        return count;
+    }
+
+    internal static void ClearUnreturnedAssertion(GetAssertionResponse response)
+    {
+        CryptographicOperations.ZeroMemory(response.AuthenticatorDataRaw.Span);
+        if (response.LargeBlobKey is { } key)
+            CryptographicOperations.ZeroMemory(key.Span);
+        // These views are independently owned by the decoded response, not the request descriptors.
+        Util.SensitiveMemory.Zero(response.Signature);
+        Util.SensitiveMemory.Zero(response.Credential?.Id);
+        Util.SensitiveMemory.Zero(response.User?.Id);
+    }
+
+    internal static bool IsNoCredentialsError(CtapStatus status)
     {
         // NotAllowed (0x30) is "device denied the operation" (user cancel, policy reject) —
         // semantically distinct from "no matching credential" and must propagate so callers

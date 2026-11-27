@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Buffers.Binary;
+using System.Formats.Cbor;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Ctap2.Credentials;
@@ -31,6 +32,18 @@ namespace Yubico.YubiKit.Ctap2.Credentials;
 /// </para>
 /// <para>
 /// See: https://www.w3.org/TR/webauthn-2/#sctn-authenticator-data
+/// for the base layout. BE/BS meanings are defined in WebAuthn Level 3, Recommendation 25 August
+/// 2026, §6.1.3 (https://www.w3.org/TR/2026/REC-webauthn-3-20260825/#sctn-credential-backup).
+/// </para>
+/// <para>
+/// Parse copies the input once. The hash, attested fields and extensions are views into that snapshot.
+/// Keep it unchanged through signature verification. The caller can zero <see cref="RawData"/> when
+/// finished; this also clears every aliased view. Neither clearing the input nor disposing the session
+/// clears the returned snapshot. Do not log secret-derived extension material.
+/// </para>
+/// <para>
+/// Flags report received bits, not independently verified events. Parsing and RP-hash comparison do not
+/// verify a signature, origin/challenge, account binding, requested policy or attestation trust.
 /// </para>
 /// </remarks>
 public sealed class AuthenticatorData
@@ -53,6 +66,11 @@ public sealed class AuthenticatorData
     /// <summary>
     /// Gets the signature counter value.
     /// </summary>
+    /// <remarks>
+    /// The authenticator can use a per-credential or global counter, or report zero without counter
+    /// support. The RP compares stored state and chooses a risk policy (WebAuthn L2 §6.1.1); this SDK
+    /// enforces no monotonicity. A counter mismatch is not certain proof of cloning.
+    /// </remarks>
     public uint SignCount { get; }
 
     /// <summary>
@@ -63,30 +81,31 @@ public sealed class AuthenticatorData
     /// <summary>
     /// Gets the CBOR-encoded extensions data, if present (when ED flag is set).
     /// </summary>
-    public ReadOnlyMemory<byte>? Extensions { get; }
+    /// <remarks>Aliases the complete encoded extension map in RawData.</remarks>
+    public Memory<byte>? Extensions { get; }
 
     /// <summary>
     /// Gets the raw authenticator data bytes.
     /// </summary>
-    public ReadOnlyMemory<byte> RawData { get; }
+    public Memory<byte> RawData { get; }
 
     /// <summary>
-    /// Gets a value indicating whether user presence was verified.
+    /// Gets whether the received UP bit reports user presence.
     /// </summary>
     public bool UserPresent => Flags.HasFlag(AuthenticatorDataFlags.UserPresent);
 
     /// <summary>
-    /// Gets a value indicating whether user verification was performed.
+    /// Gets whether the received UV bit reports user verification.
     /// </summary>
     public bool UserVerified => Flags.HasFlag(AuthenticatorDataFlags.UserVerified);
 
     /// <summary>
-    /// Gets a value indicating whether backup eligibility is supported.
+    /// Gets whether the received BE bit reports that this credential is backup eligible.
     /// </summary>
     public bool BackupEligible => Flags.HasFlag(AuthenticatorDataFlags.BackupEligibility);
 
     /// <summary>
-    /// Gets a value indicating whether the credential has been backed up.
+    /// Gets whether the received BS bit reports that this credential is currently backed up.
     /// </summary>
     public bool BackedUp => Flags.HasFlag(AuthenticatorDataFlags.BackupState);
 
@@ -101,12 +120,12 @@ public sealed class AuthenticatorData
     public bool HasExtensions => Flags.HasFlag(AuthenticatorDataFlags.ExtensionData);
 
     private AuthenticatorData(
-        ReadOnlyMemory<byte> rawData,
+        Memory<byte> rawData,
         ReadOnlyMemory<byte> rpIdHash,
         AuthenticatorDataFlags flags,
         uint signCount,
         AttestedCredentialData? attestedCredentialData,
-        ReadOnlyMemory<byte>? extensions)
+        Memory<byte>? extensions)
     {
         RawData = rawData;
         RpIdHash = rpIdHash;
@@ -121,9 +140,30 @@ public sealed class AuthenticatorData
     /// </summary>
     /// <param name="data">The raw authenticator data bytes.</param>
     /// <returns>The parsed AuthenticatorData.</returns>
-    /// <exception cref="ArgumentException">If the data is malformed.</exception>
+    /// <remarks>
+    /// Checks the 37-byte prefix and parses attested data when AT is set. With ED set, the remaining
+    /// bytes must encode exactly one CBOR map; otherwise no suffix is allowed. It does not enforce
+    /// request-specific flag relationships or ceremony rules.
+    /// </remarks>
+    /// <exception cref="ArgumentException">The fixed prefix or declared attested fields are too short.</exception>
+    /// <exception cref="CborContentException">An attested value or the extension-map suffix is malformed.</exception>
     public static AuthenticatorData Parse(ReadOnlySpan<byte> data)
     {
+        byte[] owned = data.ToArray();
+        try
+        {
+            return ParseOwned(owned);
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(owned);
+            throw;
+        }
+    }
+
+    internal static AuthenticatorData ParseOwned(Memory<byte> rawData)
+    {
+        ReadOnlySpan<byte> data = rawData.Span;
         if (data.Length < MinimumLength)
         {
             throw new ArgumentException(
@@ -131,11 +171,10 @@ public sealed class AuthenticatorData
                 nameof(data));
         }
 
-        var rawData = data.ToArray();
         int offset = 0;
 
         // Parse RP ID hash (32 bytes)
-        var rpIdHash = data.Slice(offset, 32).ToArray();
+        var rpIdHash = rawData.Slice(offset, 32);
         offset += 32;
 
         // Parse flags (1 byte)
@@ -150,17 +189,8 @@ public sealed class AuthenticatorData
         AttestedCredentialData? attestedCredentialData = null;
         if (flags.HasFlag(AuthenticatorDataFlags.AttestedCredentialData))
         {
-            var remaining = data[offset..];
-            attestedCredentialData = AttestedCredentialData.Parse(remaining, out var bytesRead);
+            attestedCredentialData = AttestedCredentialData.ParseBorrowed(rawData[offset..], out var bytesRead);
             offset += bytesRead;
-        }
-
-        // Parse extensions if present
-        ReadOnlyMemory<byte>? extensions = null;
-        if (flags.HasFlag(AuthenticatorDataFlags.ExtensionData))
-        {
-            // Extensions are the remaining bytes (CBOR-encoded)
-            extensions = data[offset..].ToArray();
         }
 
         return new AuthenticatorData(
@@ -169,7 +199,29 @@ public sealed class AuthenticatorData
             flags,
             signCount,
             attestedCredentialData,
-            extensions);
+            ParseExtensions(rawData[offset..], flags.HasFlag(AuthenticatorDataFlags.ExtensionData)));
+    }
+
+    private static Memory<byte>? ParseExtensions(Memory<byte> suffix, bool hasExtensions)
+    {
+        if (!hasExtensions)
+        {
+            return suffix.IsEmpty
+                ? (Memory<byte>?)null
+                : throw new CborContentException("Unexpected bytes after authenticator data without the ED flag.");
+        }
+
+        var reader = new CborReader(suffix, CborConformanceMode.Lax);
+        if (reader.PeekState() is not CborReaderState.StartMap)
+        {
+            throw new CborContentException("Authenticator extensions must be a CBOR map.");
+        }
+        reader.SkipValue();
+        if (reader.BytesRemaining != 0)
+        {
+            throw new CborContentException("Unexpected bytes after the authenticator extension map.");
+        }
+        return suffix;
     }
 
     /// <summary>
@@ -177,13 +229,15 @@ public sealed class AuthenticatorData
     /// </summary>
     /// <param name="data">The raw authenticator data.</param>
     /// <returns>The parsed AuthenticatorData.</returns>
+    /// <remarks>Copies storage and applies the same parsing limits as the span overload.</remarks>
     public static AuthenticatorData Parse(ReadOnlyMemory<byte> data) => Parse(data.Span);
 
     /// <summary>
-    /// Verifies that the RP ID hash matches the expected RP ID.
+    /// Compares the received RP ID hash with SHA-256 of the UTF-8-encoded expected RP ID.
     /// </summary>
     /// <param name="rpId">The expected RP ID string.</param>
     /// <returns>True if the hash matches, false otherwise.</returns>
+    /// <remarks>A match is only this hash comparison, not origin authorization or complete RP assertion verification.</remarks>
     public bool VerifyRpIdHash(string rpId)
     {
         ArgumentException.ThrowIfNullOrEmpty(rpId);

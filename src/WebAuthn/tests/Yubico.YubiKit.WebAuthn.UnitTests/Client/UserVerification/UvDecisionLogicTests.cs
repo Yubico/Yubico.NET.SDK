@@ -51,7 +51,8 @@ public class UvDecisionLogicTests
         bool? uv = null,
         bool? alwaysUv = null,
         bool? makeCredUvNotRqd = null,
-        bool? bioEnroll = null)
+        bool? bioEnroll = null,
+        bool pinUvAuthToken = false)
     {
         var options = new Dictionary<string, bool>(StringComparer.Ordinal);
 
@@ -60,6 +61,7 @@ public class UvDecisionLogicTests
         if (alwaysUv is { } alwaysUvValue) options["alwaysUv"] = alwaysUvValue;
         if (makeCredUvNotRqd is { } makeCredValue) options["makeCredUvNotRqd"] = makeCredValue;
         if (bioEnroll is { } bioEnrollValue) options["bioEnroll"] = bioEnrollValue;
+        if (pinUvAuthToken) options["pinUvAuthToken"] = true;
 
         return new AuthenticatorInfo { Options = options };
     }
@@ -171,7 +173,7 @@ public class UvDecisionLogicTests
     [Fact]
     public void Decide_DiscouragedWithPrivilegedPermission_RequestsToken()
     {
-        var info = InfoWithOptions(clientPin: true, uv: false, makeCredUvNotRqd: true);
+        var info = InfoWithOptions(clientPin: true, uv: false, makeCredUvNotRqd: true, pinUvAuthToken: true);
 
         var decision = UvDecisionLogic.Decide(
             info,
@@ -186,17 +188,17 @@ public class UvDecisionLogicTests
     /// A privileged permission still cannot conjure verification on a key that has none configured.
     /// </summary>
     [Fact]
-    public void Decide_DiscouragedWithPrivilegedPermissionButNoUvConfigured_DoesNotRequestToken()
+    public void Decide_DiscouragedWithPrivilegedPermissionButNoUvConfigured_FailsClosed()
     {
         var info = InfoWithOptions(clientPin: false, makeCredUvNotRqd: true);
 
-        var decision = UvDecisionLogic.Decide(
+        var error = Assert.Throws<WebAuthnClientError>(() => UvDecisionLogic.Decide(
             info,
             UserVerificationPreference.Discouraged,
             pinAvailable: true,
-            LargeBlobWritePermissions);
+            LargeBlobWritePermissions));
 
-        Assert.False(decision.UseToken);
+        Assert.Equal(WebAuthnClientErrorCode.NotSupported, error.Code);
     }
 
     /// <summary>
@@ -256,7 +258,7 @@ public class UvDecisionLogicTests
         Assert.True(decision.UseToken);
         Assert.Equal(PinUvAuthMethod.Pin, decision.Method);
 
-        // Only Required pins the CTAP 'uv' option to true; Preferred leaves it unset.
+        // The token carries verification; the CTAP 'uv' option stays absent, including for Required.
         Assert.Null(decision.UvOption);
     }
 
@@ -283,7 +285,7 @@ public class UvDecisionLogicTests
     [Fact]
     public void Decide_PreferredWithBuiltInUvAndNoPin_UsesBuiltInUv()
     {
-        var info = InfoWithOptions(clientPin: false, uv: true, makeCredUvNotRqd: true);
+        var info = InfoWithOptions(clientPin: false, uv: true, makeCredUvNotRqd: true, pinUvAuthToken: true);
 
         var decision = UvDecisionLogic.Decide(
             info,
@@ -302,7 +304,7 @@ public class UvDecisionLogicTests
     // ---------------------------------------------------------------------------------------
 
     /// <summary>
-    /// Required always verifies, and pins the CTAP <c>uv</c> option to true.
+    /// Required selects a PIN token and leaves the CTAP <c>uv</c> option absent.
     /// </summary>
     [Fact]
     public void Decide_RequiredWithPinSet_RequestsTokenWithoutUvOption()
@@ -325,8 +327,8 @@ public class UvDecisionLogicTests
     /// asked for a guarantee the authenticator cannot give.
     /// </summary>
     [Theory]
-    [InlineData(false, false, true)]  // PIN set but unobtainable
-    [InlineData(false, true, false)]  // no PIN configured at all
+    [InlineData(false, false, true)]  // no PIN configured at all
+    [InlineData(false, true, false)]  // PIN set but unobtainable
     public void Decide_RequiredWithNoUsableMethod_ThrowsNotAllowed(
         bool uv,
         bool clientPin,
@@ -349,7 +351,7 @@ public class UvDecisionLogicTests
     [Fact]
     public void Decide_RequiredWithBuiltInUvOnly_UsesBuiltInUv()
     {
-        var info = InfoWithOptions(clientPin: false, uv: true, makeCredUvNotRqd: true);
+        var info = InfoWithOptions(clientPin: false, uv: true, makeCredUvNotRqd: true, pinUvAuthToken: true);
 
         var decision = UvDecisionLogic.Decide(
             info,

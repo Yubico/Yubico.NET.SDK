@@ -15,7 +15,7 @@
 namespace Yubico.YubiKit.OpenPgp;
 
 /// <summary>
-///     Supported RSA key sizes for OpenPGP operations.
+///     RSA key sizes modeled by the SDK, in bits; check the card's supported algorithms before provisioning.
 /// </summary>
 public enum RsaSize
 {

@@ -22,7 +22,7 @@ namespace Yubico.YubiKit.Piv.UnitTests.Bio;
 
 /// <summary>
 /// Security regression test: <see cref="BioProtocol.VerifyUvAsync"/> copies the plaintext
-/// temporary PIN into its returned deliverable, but the original GET DATA response buffer (the
+/// temporary PIN into its returned deliverable, but the original VERIFY response buffer (the
 /// device's raw APDU response, also holding the temporary PIN in the clear) must be zeroed too.
 /// </summary>
 public class BioProtocolTests

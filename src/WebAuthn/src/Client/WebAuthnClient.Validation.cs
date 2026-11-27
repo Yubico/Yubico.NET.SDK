@@ -93,8 +93,7 @@ public sealed partial class WebAuthnClient
 
         if (options.Timeout is { } timeout && timeout <= TimeSpan.Zero)
         {
-            // WebAuthn L3 §5.1.3 corrects an out-of-range timeout; this client does not clamp, so a
-            // value that could never be waited for is a malformed request (null means no deadline).
+            // A nonpositive timeout is malformed. Only oversized positive values are clamped.
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,
                 "Timeout must be positive, or null for no deadline");
@@ -126,6 +125,14 @@ public sealed partial class WebAuthnClient
                 "RP ID cannot be null or empty");
         }
 
+        // L3 §10.1.5 requires exactly one original entry. The SDK permits additional entries,
+        // but never a discoverable write: the silent probe must bind storage to one credential.
+        if (options.Extensions?.LargeBlob?.Write is not null && options.AllowCredentials is not { Count: > 0 })
+        {
+            throw new WebAuthnClientError(WebAuthnClientErrorCode.NotSupported,
+                "A largeBlob write requires a nonempty allow list (WebAuthn L3 §10.1.5).");
+        }
+
         if (options.TopOrigin is not null && options.CrossOrigin != true)
         {
             // WebAuthn L3 §5.8.1: topOrigin "is set only if the call was made from a context that is not
@@ -137,7 +144,7 @@ public sealed partial class WebAuthnClient
 
         if (options.Timeout is { } timeout && timeout <= TimeSpan.Zero)
         {
-            // WebAuthn L3 §5.1.3 corrects an out-of-range timeout; this client does not clamp, so a
+            // WebAuthn L3 §5.1.4 corrects an out-of-range timeout; this client does not clamp, so a
             // value that could never be waited for is a malformed request (null means no deadline).
             throw new WebAuthnClientError(
                 WebAuthnClientErrorCode.InvalidRequest,
@@ -148,17 +155,19 @@ public sealed partial class WebAuthnClient
     /// <summary>
     /// WebAuthn L3 §5.1.3 / §5.1.4: "If lifetimeTimer expires ... invoke the authenticatorCancel operation
     /// ... Throw a "NotAllowedError" DOMException." The cancel was already signalled through the deadline
-    /// token; this turns the resulting cancellation into the typed error. Caller cancellation is not
-    /// wrapped (module rule: cancelling the token abandons the ceremony with OperationCanceledException).
+    /// token; this turns a resulting cancellation into the typed error. There is no final deadline check
+    /// that rejects a successful response racing cancellation. Caller cancellation is not
+    /// wrapped: an OperationCanceledException propagates unchanged when the caller's token is cancelled.
     /// </summary>
     private static WebAuthnClientError CeremonyTimedOut(TimeSpan? timeout, OperationCanceledException inner) =>
         new(WebAuthnClientErrorCode.NotAllowed, $"The ceremony did not complete within its timeout of {timeout}", inner);
 
     /// <summary>
-    /// Maps a raw <see cref="CtapException"/> to a typed <see cref="WebAuthnClientError"/> per
-    /// the WebAuthn module rule that low-level CTAP status codes never escape the public API.
-    /// CredentialExcluded and previewSign-specific statuses are handled by their own catch arms
-    /// upstream and never reach this mapper.
+    /// Maps a caught <see cref="CtapException"/> to a typed <see cref="WebAuthnClientError"/>, retaining
+    /// the original exception as its cause. GetInfo and token failures use this general mapper;
+    /// probe, credential-command and extension-output handling have separate contracts.
+    /// During ceremonies, MapCeremonyCtapException handles CredentialExcluded and previewSign-specific
+    /// mapping before delegating here.
     /// </summary>
     internal static WebAuthnClientError MapCtapStatusToWebAuthnError(CtapException ex) =>
         ex.Status switch

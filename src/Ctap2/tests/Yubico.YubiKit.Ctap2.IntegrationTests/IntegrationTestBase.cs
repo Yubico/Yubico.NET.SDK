@@ -19,7 +19,7 @@ namespace Yubico.YubiKit.Ctap2.IntegrationTests;
 /// Tests use [WithYubiKey] attribute and YubiKeyTestState for device discovery.
 /// </summary>
 /// <remarks>
-/// This base class exists for shared test utilities. Device discovery is handled
+/// This empty base class supplies no utilities. Device discovery is handled
 /// by the standard WithYubiKey test infrastructure from Yubico.YubiKit.Tests.Shared.
 /// </remarks>
 public abstract class IntegrationTestBase

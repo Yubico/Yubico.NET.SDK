@@ -15,10 +15,18 @@
 using System.Formats.Cbor;
 using Yubico.YubiKit.Core.Cryptography.Cose;
 using Yubico.YubiKit.Ctap2.Credentials;
-using Yubico.YubiKit.Ctap2;
 
 namespace Yubico.YubiKit.Ctap2.Cbor;
 
+/// <summary>
+/// Encodes credential requests; session validation and client/RP ceremony duties are separate.
+/// </summary>
+/// <remarks>
+/// Nullable booleans preserve omission versus explicit false. Auth bytes and uv are encoded
+/// independently: callers must omit uv with pinUvAuthParam and select a supported matching protocol.
+/// The version-2 fallback is only an encoding default. Inputs are borrowed during synchronous Build;
+/// the returned command-prefixed array is a new copy that its caller must clear when sensitive.
+/// </remarks>
 internal static class Ctap2SessionRequestEncoding
 {
     internal static byte[] BuildMakeCredentialRequest(

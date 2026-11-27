@@ -19,8 +19,9 @@ namespace Yubico.YubiKit.Core.UnitTests.Cryptography;
 
 public class NamedCurveCatalogVectorsTests
 {
-    // d=1, Q=G from SEC 2 v2 §2.4.1 and RFC 5639 §3.4-3.6. OpenSSL ecparam independently
-    // confirms these published generator points. Prefixes below are independent DER SPKI vectors.
+    // d=1, Q=G from the retrieved SEC 2 v2.0 §2.4.1 copy (with Draft page headers) and
+    // RFC 5639 §§3.4, 3.6, 3.7. These published points are distinct from the assembled DER SPKI
+    // prefixes. Provider-backed assertions below are conditional on RequireHostCurve.
     [Theory]
     [InlineData(KeyType.Secp256k1, "1.3.132.0.10", 32, "3056301006072A8648CE3D020106052B8104000A034200",
         "0479BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8")]

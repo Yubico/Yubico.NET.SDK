@@ -21,10 +21,10 @@ using Yubico.YubiKit.Tests.Shared.Infrastructure;
 namespace Yubico.YubiKit.Piv.IntegrationTests;
 
 /// <summary>
-///     Demonstrates on hardware that a single session refuses concurrent calls before APDUs can
-///     interleave on the shared connection. The deterministic gate for this behavior is
-///     <c>Core.UnitTests PcscProtocolConcurrencyTests</c>; this test shows the end-to-end effect on a
-///     real card.
+///     Attempts to overlap a large GET exchange with signing on one session and checks refusal.
+///     Core guards a logical exchange, not every complete public workflow. The deterministic
+///     exchange-admission oracle is <c>Core.UnitTests PcscProtocolConcurrencyTests</c>; this hardware
+///     test depends on the read still owning the exchange when signing reaches it.
 /// </summary>
 public class PivConnectionConcurrencyTests
 {
@@ -72,8 +72,17 @@ public class PivConnectionConcurrencyTests
         for (var iteration = 0; iteration < 10; iteration++)
         {
             var readTask = session.GetObjectAsync(DataObject.Retired1);
-            await Assert.ThrowsAsync<InvalidOperationException>(
-                async () => await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
+            try
+            {
+                await Assert.ThrowsAsync<InvalidOperationException>(
+                    async () => await session.SignOrDecryptAsync(Slot.Authentication, KeyType.P256, digest));
+            }
+            catch
+            {
+                // Observe the outstanding operation before disposal, without replacing the assertion failure.
+                _ = await Record.ExceptionAsync(async () => { await readTask; });
+                throw;
+            }
             var readBack = await readTask;
             Assert.Equal(storedObject, readBack.ToArray());
         }

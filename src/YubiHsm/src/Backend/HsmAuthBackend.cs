@@ -24,12 +24,6 @@ internal sealed class HsmAuthBackend(ISmartCardProtocol protocol) : IHsmAuthBack
     private readonly ISmartCardProtocol _protocol =
         protocol ?? throw new ArgumentNullException(nameof(protocol));
 
-    public async Task<FirmwareVersion> ReadInitialStateAsync(CancellationToken cancellationToken = default)
-    {
-        var selectResponse = await SelectAsync(cancellationToken).ConfigureAwait(false);
-        return ParseVersionFromSelectResponse(selectResponse) ?? HsmAuthSession.FeatureHsmAuth.Version;
-    }
-
     public Task<ReadOnlyMemory<byte>> SelectAsync(CancellationToken cancellationToken = default) =>
         _protocol.SelectAsync(ApplicationIds.YubiHsmAuth, cancellationToken);
 
@@ -39,18 +33,20 @@ internal sealed class HsmAuthBackend(ISmartCardProtocol protocol) : IHsmAuthBack
         CancellationToken cancellationToken = default) =>
         _protocol.TransmitAndReceiveAsync(command, throwOnError, cancellationToken);
 
-    private static FirmwareVersion? ParseVersionFromSelectResponse(ReadOnlyMemory<byte> response)
+    internal static FirmwareVersion? ReadVersion(ReadOnlyMemory<byte> response)
     {
-        if (response.IsEmpty)
-            return null;
+        try
+        {
+            if (!TlvHelper.TryFindValue(HsmAuthSession.TagVersion, response.Span, out var versionData) || versionData.Length != 3)
+                return null;
 
-        if (!TlvHelper.TryFindValue(HsmAuthSession.TagVersion, response.Span, out var versionData))
+            var span = versionData.Span;
+            return new FirmwareVersion(span[0], span[1], span[2]);
+        }
+        catch (ArgumentException)
+        {
+            // Version metadata is advisory. SELECT itself is required and not caught here.
             return null;
-
-        if (versionData.Length != 3)
-            return null;
-
-        var span = versionData.Span;
-        return new FirmwareVersion(span[0], span[1], span[2]);
+        }
     }
 }

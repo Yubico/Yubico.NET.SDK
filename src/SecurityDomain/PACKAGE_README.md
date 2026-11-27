@@ -2,7 +2,7 @@
 
 Security Domain support for YubiKey devices: inspect, generate, import, rotate, and delete the Secure
 Channel Protocol (SCP) keys other applet sessions use, manage SCP11 certificates and allow lists, and
-factory-reset the application.
+request a destructive Security Domain reset. Reset completion does not verify factory contents.
 
 > ## Alpha - not for production
 >

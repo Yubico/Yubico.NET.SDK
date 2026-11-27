@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System.Formats.Cbor;
+using System.Security.Cryptography;
 using Yubico.YubiKit.Ctap2.Pin;
 
 namespace Yubico.YubiKit.Ctap2.Extensions;
@@ -25,9 +26,16 @@ namespace Yubico.YubiKit.Ctap2.Extensions;
 /// This builder creates the CBOR-encoded extensions map used in makeCredential
 /// and getAssertion requests. Extensions are added using the fluent API and
 /// encoded to CBOR when Build() is called.
+/// The builder retains borrowed inputs; keep their storage unchanged through the last Encode/Build
+/// that reads them. Build creates an independent encoded copy; retain that encoded map/request through
+/// awaited transmission. Clearing inputs does not clear the copy, which has no disposable owner.
+/// The builder does not negotiate capabilities or generally validate ceremony/protocol coherence.
+/// Helper-generated salt buffers and authentication copies are not comprehensively cleared by this builder.
 /// </para>
 /// <para>
-/// Example usage:
+/// Composable registration fragment with an existing ReadOnlyMemory&lt;byte&gt; myBlobData within the
+/// authenticator's maxCredBlobLength. For sensitive content, check credProtect support before creation
+/// and enforce level 3 in the application; this builder does not implement enforcement.
 /// <code>
 /// var extensions = new ExtensionBuilder()
 ///     .WithCredProtect(CredProtectPolicy.UserVerificationRequired)
@@ -47,14 +55,23 @@ public sealed class ExtensionBuilder
     private bool _minPinLength;
     private bool _largeBlobKey;
     private bool _hmacSecretRequested;
+#pragma warning disable YKEXP001 // Only WithPreviewSign can populate these fields.
     private PreviewSignRegistrationInput? _previewSignRegistration;
     private PreviewSignSigningParams? _previewSignAuthentication;
+    internal bool HasPreviewSign => _previewSignRegistration is not null || _previewSignAuthentication is not null;
+#pragma warning restore YKEXP001
 
     /// <summary>
     /// Adds the credProtect extension with the specified policy.
     /// </summary>
     /// <param name="policy">The credential protection policy.</param>
-    /// <param name="enforcePolicy">If true, credential creation fails if policy cannot be honored.</param>
+    /// <param name="enforcePolicy">Currently recorded but not enforced by the SDK; has no effect on encoding or creation.</param>
+    /// <remarks>
+    /// CTAP 2.1 §12.1.1 says the platform SHOULD NOT create a credential without requested level-2/3
+    /// protection when enforcement is requested. This is not an authenticator wire flag. Check support
+    /// before creation if prevention is required and inspect the effective returned policy, which may
+    /// be stronger than requested. Rejecting a result afterward does not undo creation.
+    /// </remarks>
     /// <returns>This builder for chaining.</returns>
     public ExtensionBuilder WithCredProtect(
         CredProtectPolicy policy,
@@ -72,6 +89,9 @@ public sealed class ExtensionBuilder
     /// CTAP 2.1-2.3 §12.2.1: the makeCredential input is a "Byte String containing the credBlob value".
     /// To read a stored blob back at getAssertion use <see cref="WithGetCredBlob"/>; a byte string is
     /// not the getAssertion input.
+    /// This builder does not check size or capability. A supporting authenticator advertises
+    /// maxCredBlobLength of at least 32 bytes. For PII/sensitive content the RP MUST request level-3
+    /// credProtect with enforcement; the SDK currently leaves enforcement to the application.
     /// </remarks>
     /// <param name="blob">The blob data to store (at most the authenticator's maxCredBlobLength).</param>
     /// <returns>This builder for chaining.</returns>
@@ -106,10 +126,13 @@ public sealed class ExtensionBuilder
     /// </para>
     /// <para>
     /// WebAuthn's <c>largeBlob</c> client extension ({support}, read, write; L3 §10.1.5) is built on this
-    /// key in the WebAuthn package together with <see cref="LargeBlobs.LargeBlobStorage"/> (§6.10); CTAP
-    /// itself carries no <c>largeBlob: {support}</c>. The direct getAssertion largeBlob read/write
-    /// extension of CTAP 2.2-2.3 §12.4 is a mutually exclusive alternative to largeBlobKey (§12.4:
+    /// key in the WebAuthn package together with <see cref="LargeBlobs.LargeBlobStorage"/> (§6.10).
+    /// This builder's route sends no <c>largeBlob: {support}</c>. The direct largeBlob registration
+    /// and assertion extension of CTAP 2.2-2.3 §12.4 does define support/read/write inputs and is a
+    /// mutually exclusive alternative to largeBlobKey (§12.4:
     /// authenticators "MUST NOT support both extensions") and is not offered by this builder.
+    /// Check largeBlobKey advertisement and largeBlobs:true; creation requires a discoverable credential
+    /// (rk:true). Read the key from the credential response envelope, not its signed extensions map.
     /// </para>
     /// </remarks>
     /// <returns>This builder for chaining.</returns>
@@ -120,7 +143,8 @@ public sealed class ExtensionBuilder
     }
 
     /// <summary>
-    /// Requests hmac-secret at authenticatorMakeCredential: CTAP 2.1-2.3 §12.7 <c>"hmac-secret": true</c>.
+    /// Requests hmac-secret at authenticatorMakeCredential: <c>"hmac-secret": true</c>
+    /// (CTAP 2.1 §12.5; CTAP 2.2-2.3 §12.7).
     /// WebAuthn's prf extension (L3 §10.1.4) sends this at registration.
     /// </summary>
     /// <returns>This builder for chaining.</returns>
@@ -134,6 +158,7 @@ public sealed class ExtensionBuilder
     /// Adds the hmac-secret extension for getAssertion.
     /// </summary>
     /// <param name="input">The hmac-secret input parameters.</param>
+    /// <remarks>Input is borrowed until encoding. Capability and protocol coherence remain caller responsibilities.</remarks>
     /// <returns>This builder for chaining.</returns>
     public ExtensionBuilder WithHmacSecret(HmacSecretInput input)
     {
@@ -150,6 +175,15 @@ public sealed class ExtensionBuilder
     /// <param name="keyAgreement">The platform's key agreement public key.</param>
     /// <param name="salt1">The first salt (32 bytes).</param>
     /// <param name="salt2">Optional second salt (32 bytes). Pass empty span for no second salt.</param>
+    /// <remarks>
+    /// Use a mutually supported protocol and its matching encapsulated shared secret (32 bytes for
+    /// protocol 1, 64 for protocol 2), not a PIN token. Encrypted salts are 32/64 bytes for protocol 1
+    /// or 48/80 bytes including the IV for protocol 2; saltAuth is 16/32 bytes respectively.
+    /// The helper reads spans during this call, retains the public dictionary and creates encrypted
+    /// copies. It does not clear all plaintext/intermediate copies, including failure paths.
+    /// Keep borrowed dictionary storage stable until encoding and clear caller-owned secrets after use.
+    /// Actual UV mode selects the credential-secret variant; hmac-secret does not support up:false.
+    /// </remarks>
     /// <returns>This builder for chaining.</returns>
     public ExtensionBuilder WithHmacSecret(
         IPinUvAuthProtocol protocol,
@@ -159,7 +193,7 @@ public sealed class ExtensionBuilder
         ReadOnlySpan<byte> salt2 = default) =>
         WithHmacSecret(BuildHmacSecretInput(protocol, sharedSecret, keyAgreement, salt1, salt2));
 
-    /// <summary>CTAP §12.7: saltEnc = encrypt(sharedSecret, salt1 || salt2), saltAuth = authenticate(sharedSecret, saltEnc).</summary>
+    /// <summary>CTAP 2.1 §12.5 / 2.2-2.3 §12.7: encrypt salts, then authenticate saltEnc with the same shared secret.</summary>
     private static HmacSecretInput BuildHmacSecretInput(
         IPinUvAuthProtocol protocol,
         ReadOnlySpan<byte> sharedSecret,
@@ -193,19 +227,30 @@ public sealed class ExtensionBuilder
             saltData = salt1.ToArray();
         }
 
-        // Encrypt salts
-        var saltEnc = protocol.Encrypt(sharedSecret, saltData);
-
-        // Compute auth tag
-        var saltAuth = protocol.Authenticate(sharedSecret, saltEnc);
-
-        return new HmacSecretInput
+        byte[]? saltEnc = null;
+        byte[]? saltAuth = null;
+        try
         {
-            KeyAgreement = keyAgreement,
-            SaltEnc = saltEnc,
-            SaltAuth = saltAuth,
-            PinUvAuthProtocol = protocol.Version
-        };
+            saltEnc = protocol.Encrypt(sharedSecret, saltData);
+            saltAuth = protocol.Authenticate(sharedSecret, saltEnc);
+            return new HmacSecretInput
+            {
+                KeyAgreement = keyAgreement,
+                SaltEnc = saltEnc,
+                SaltAuth = saltAuth,
+                PinUvAuthProtocol = protocol.Version
+            };
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(saltEnc);
+            CryptographicOperations.ZeroMemory(saltAuth);
+            throw;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(saltData);
+        }
     }
 
     /// <summary>
@@ -215,7 +260,9 @@ public sealed class ExtensionBuilder
     /// <remarks>
     /// §12.8: "This extension input is the same as the hmac secret extension's getAssertion input" and
     /// "the hmac-secret extension MUST also be present with the value of "hmac-secret" set to true", so
-    /// this method also emits <c>"hmac-secret": true</c>. Advertised by YubiKey 5.8 and later.
+    /// this method also emits <c>"hmac-secret": true</c>. Check hmac-secret-mc advertisement on the actual
+    /// authenticator; firmware alone is not capability evidence. Use raw hmac-secret-mc output with
+    /// HmacSecretOutput.Decode; TryGetHmacSecret only addresses the hmac-secret key's assertion shape.
     /// </remarks>
     /// <param name="input">The encrypted and authenticated salts, as for getAssertion.</param>
     /// <returns>This builder for chaining.</returns>
@@ -240,8 +287,9 @@ public sealed class ExtensionBuilder
         WithHmacSecretMakeCredential(BuildHmacSecretInput(protocol, sharedSecret, keyAgreement, salt1, salt2));
 
     /// <summary>
-    /// Adds the minPinLength extension.
+    /// Requests disclosure of the current minimum PIN length during credential creation.
     /// </summary>
+    /// <remarks>Only authorized minPinLengthRPIDs receive output, in Unicode code points. This does not set PIN policy.</remarks>
     /// <returns>This builder for chaining.</returns>
     public ExtensionBuilder WithMinPinLength()
     {
@@ -255,7 +303,13 @@ public sealed class ExtensionBuilder
     /// Adds previewSign extension with key generation parameters for makeCredential.
     /// </summary>
     /// <param name="input">The previewSign registration input.</param>
+    /// <remarks>
+    /// Experimental Yubico Labs previewSign v4 Editor's Draft input, not CTAP version 4 or production
+    /// cryptographic guidance. Add only the input for this ceremony. If both overloads are used,
+    /// this builder currently emits registration input and ignores signing input.
+    /// </remarks>
     /// <returns>This builder for chaining.</returns>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public ExtensionBuilder WithPreviewSign(PreviewSignRegistrationInput input)
     {
         ArgumentNullException.ThrowIfNull(input);
@@ -270,9 +324,13 @@ public sealed class ExtensionBuilder
     /// <remarks>
     /// CTAP carries exactly one credential's parameters. Choosing among a relying party's per-credential
     /// map (<c>signByCredential</c>) is the WebAuthn client's job, after it has selected the credential.
+    /// Use a nonempty allow list for the selected credential and only this ceremony's previewSign input.
+    /// The builder does not validate selection or algorithm-specific arguments. The Yubico Labs v4
+    /// Editor's Draft is experimental, not a CTAP version or production cryptographic guidance.
     /// </remarks>
     /// <param name="signingParams">The selected credential's signing parameters.</param>
     /// <returns>This builder for chaining.</returns>
+    [System.Diagnostics.CodeAnalysis.Experimental("YKEXP001")]
     public ExtensionBuilder WithPreviewSign(PreviewSignSigningParams signingParams)
     {
         ArgumentNullException.ThrowIfNull(signingParams);
@@ -283,7 +341,7 @@ public sealed class ExtensionBuilder
     /// <summary>
     /// Builds the CBOR-encoded extensions map.
     /// </summary>
-    /// <returns>The CBOR-encoded extensions map, or null if no extensions.</returns>
+    /// <returns>An independent encoded copy, or null if no extensions. No disposal/zeroing owner is provided.</returns>
     public ReadOnlyMemory<byte>? Build()
     {
         if (!HasExtensions())
@@ -307,8 +365,7 @@ public sealed class ExtensionBuilder
         var count = CountExtensions();
         writer.WriteStartMap(count);
 
-        // Extensions must be sorted by key for canonical CBOR
-        // Sort order: "credBlob" < "credProtect" < "hmac-secret" < "hmac-secret-mc" < "largeBlob" < "minPinLength" < "previewSign"
+        // Ctap2Canonical sorts encoded keys when the map closes; insertion order is not wire order.
 
         if (_credBlob.HasValue && _getCredBlob)
         {
@@ -368,95 +425,20 @@ public sealed class ExtensionBuilder
             writer.WriteBoolean(true);
         }
 
+#pragma warning disable YKEXP001 // Encode only an explicit previewSign opt-in.
         if (_previewSignRegistration is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
-            EncodePreviewSignRegistrationInput(writer, _previewSignRegistration);
+            _previewSignRegistration.Encode(writer);
         }
         else if (_previewSignAuthentication is not null)
         {
             writer.WriteTextString(ExtensionIdentifiers.PreviewSign);
-            EncodePreviewSignSigningParams(writer, _previewSignAuthentication);
+            _previewSignAuthentication.Encode(writer);
         }
+#pragma warning restore YKEXP001
 
         writer.WriteEndMap();
-    }
-
-    private static void EncodePreviewSignRegistrationInput(CborWriter writer, PreviewSignRegistrationInput input)
-    {
-        var encodedBytes = PreviewSignCbor.EncodeRegistrationInput(input);
-        var reader = new CborReader(encodedBytes, CborConformanceMode.Ctap2Canonical);
-
-        // Copy the CBOR map directly
-        CopyCborValue(reader, writer);
-    }
-
-    private static void EncodePreviewSignSigningParams(CborWriter writer, PreviewSignSigningParams signingParams)
-    {
-        var encodedBytes = PreviewSignCbor.EncodeAuthenticationInput(signingParams);
-        var reader = new CborReader(encodedBytes, CborConformanceMode.Ctap2Canonical);
-
-        // Copy the CBOR map directly
-        CopyCborValue(reader, writer);
-    }
-
-    private static void CopyCborValue(CborReader reader, CborWriter writer)
-    {
-        var state = reader.PeekState();
-
-        switch (state)
-        {
-            case CborReaderState.StartMap:
-                int? mapSize = reader.ReadStartMap();
-                writer.WriteStartMap(mapSize);
-                for (int i = 0; i < mapSize; i++)
-                {
-                    CopyCborValue(reader, writer);
-                    CopyCborValue(reader, writer);
-                }
-                reader.ReadEndMap();
-                writer.WriteEndMap();
-                break;
-
-            case CborReaderState.StartArray:
-                int? arraySize = reader.ReadStartArray();
-                writer.WriteStartArray(arraySize);
-                for (int i = 0; i < arraySize; i++)
-                {
-                    CopyCborValue(reader, writer);
-                }
-                reader.ReadEndArray();
-                writer.WriteEndArray();
-                break;
-
-            case CborReaderState.UnsignedInteger:
-                writer.WriteUInt64(reader.ReadUInt64());
-                break;
-
-            case CborReaderState.NegativeInteger:
-                writer.WriteInt64(reader.ReadInt64());
-                break;
-
-            case CborReaderState.ByteString:
-                writer.WriteByteString(reader.ReadByteString());
-                break;
-
-            case CborReaderState.TextString:
-                writer.WriteTextString(reader.ReadTextString());
-                break;
-
-            case CborReaderState.Boolean:
-                writer.WriteBoolean(reader.ReadBoolean());
-                break;
-
-            case CborReaderState.Null:
-                reader.ReadNull();
-                writer.WriteNull();
-                break;
-
-            default:
-                throw new InvalidOperationException($"Unsupported CBOR state: {state}");
-        }
     }
 
     private bool HasExtensions()

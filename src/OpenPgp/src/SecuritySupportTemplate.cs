@@ -23,7 +23,8 @@ namespace Yubico.YubiKit.OpenPgp;
 public sealed class SecuritySupportTemplate
 {
     /// <summary>
-    ///     The number of signatures performed with the Signature key since last reset.
+    ///     The Signature key's digital-signature count. Application reset and Signature key generation/import
+    ///     reset it to zero (Card specification 3.4.1 §§4.4.3.12 and 7.2.14).
     /// </summary>
     public int SignatureCounter { get; init; }
 

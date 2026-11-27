@@ -20,6 +20,26 @@ namespace Yubico.YubiKit.WebAuthn.UnitTests.Cose;
 public class AaguidTests
 {
     [Fact]
+    public void Default_IsTheSixteenByteZeroAaguid()
+    {
+        Aaguid value = default;
+        Aaguid fromBytes = new(new byte[16]);
+        Aaguid fromGuid = new(Guid.Empty);
+        var lookup = new Dictionary<Aaguid, string> { [fromGuid] = "zero" };
+
+        Assert.Equal(new byte[16], value.AsSpan());
+        Assert.Equal(Guid.Empty, value.Value);
+        Assert.Equal("00000000-0000-0000-0000-000000000000", value.ToString());
+        Assert.True(value.Equals(default(Aaguid)));
+        Assert.True(value.Equals((object)fromBytes));
+        Assert.True(fromGuid == value);
+        Assert.False(value != fromGuid);
+        Assert.Equal(fromBytes.GetHashCode(), value.GetHashCode());
+        Assert.Equal("zero", lookup[value]);
+        Assert.NotEqual(new Aaguid(new Guid("00000000-0000-0000-0000-000000000001")), value);
+    }
+
+    [Fact]
     public void RoundTrip_FromGuid_ToBytes_ToGuid()
     {
         // Arrange

@@ -25,7 +25,13 @@ public enum LargeBlobSupport
     Preferred,
 
     /// <summary>
-    /// Large blob support is required; credential creation fails without it.
+    /// Requests required large blob support.
     /// </summary>
+    /// <remarks>
+    /// The client rejects an authenticator without the supported storage route, but currently does
+    /// not fail every registration whose resulting credential lacks blob support. Request a
+    /// discoverable credential with <c>ResidentKey = Required</c> and inspect <c>LargeBlob.Supported</c>;
+    /// this limitation means the value alone is not a guarantee of usable blob storage.
+    /// </remarks>
     Required
 }

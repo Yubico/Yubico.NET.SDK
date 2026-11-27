@@ -17,13 +17,14 @@ using System.Diagnostics.CodeAnalysis;
 namespace Yubico.YubiKit.WebAuthn.Client;
 
 /// <summary>
-/// A validated WebAuthn origin.
+/// A parsed origin within the SDK's supported scheme and host policy.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Represents the serialized origin (scheme://host[:port]) for WebAuthn operations.
-/// Path, query, and fragment components are stripped. The origin must be a secure
-/// context (https:// or http://localhost).
+/// Path, query, and fragment components are stripped. HTTPS is supported; HTTP is supported only
+/// for localhost and host names ending in .localhost. This scheme/host check is not a complete
+/// browser Secure Contexts evaluation and does not check document ancestry or name resolution.
 /// </para>
 /// <para>
 /// Origin parsing is independent of application RP validity and authorization. Arbitrary native-app,
@@ -70,7 +71,7 @@ public sealed class WebAuthnOrigin : IEquatable<WebAuthnOrigin>
     /// </summary>
     /// <param name="url">The URL string to parse.</param>
     /// <param name="origin">The parsed origin, or null if parsing failed.</param>
-    /// <returns>True if the URL is a valid secure origin; false otherwise.</returns>
+    /// <returns>True if the URL parses and meets the supported HTTPS or HTTP localhost/.localhost policy; false otherwise.</returns>
     public static bool TryParse(string url, [NotNullWhen(true)] out WebAuthnOrigin? origin)
     {
         origin = null;
@@ -105,7 +106,7 @@ public sealed class WebAuthnOrigin : IEquatable<WebAuthnOrigin>
             return false;
         }
 
-        // Secure context validation: https, or http only for localhost
+        // Restricted HTTP policy: localhost names only, not a complete Secure Contexts evaluation.
         if (scheme == "http" && !IsLoopback(host))
         {
             return false;
@@ -129,7 +130,7 @@ public sealed class WebAuthnOrigin : IEquatable<WebAuthnOrigin>
     }
 
     /// <summary>
-    /// Checks if the host is localhost per W3C Secure Contexts spec.
+    /// Checks for localhost or a .localhost suffix; does not resolve names or accept loopback IP addresses.
     /// </summary>
     private static bool IsLoopback(string host)
     {

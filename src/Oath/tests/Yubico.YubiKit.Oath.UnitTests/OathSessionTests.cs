@@ -36,8 +36,7 @@ public class OathSessionTests
             OathSession.CreateAsync(connection, cancellationToken: TestContext.Current.CancellationToken));
 
         // Borrowed: the session did not create this connection, so disposal is the caller's.
-        // Upstream asserted 1 here because its protocols disposed the connection; this branch
-        // deliberately removed that (see ProtocolConnectionOwnershipTests).
+        // Initialization failure must not transfer ownership (see ProtocolConnectionOwnershipTests).
         Assert.Equal(0, connection.DisposeCount);
     }
 
@@ -116,8 +115,8 @@ public class OathSessionTests
     [Fact]
     public void DeriveKey_WithKnownInputs_ProducesDeterministicOutput()
     {
-        // DeriveKey is an instance method that uses the session's salt.
-        // We can verify the PBKDF2 algorithm independently.
+        // Direct BCL PBKDF2 parameter/shape and repeatability check. This does not call session.DeriveKey
+        // or compare against an independently supplied known-answer vector.
         string password = "test_password";
         byte[] salt = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
 
@@ -144,6 +143,7 @@ public class OathSessionTests
     [Fact]
     public void DeriveKey_DifferentPasswords_ProduceDifferentKeys()
     {
+        // Compare direct BCL calls, not the session method or its salt handling.
         byte[] salt = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
 
         byte[] key1 = Rfc2898DeriveBytes.Pbkdf2(
@@ -166,6 +166,7 @@ public class OathSessionTests
     [Fact]
     public void DeriveKey_DifferentSalts_ProduceDifferentKeys()
     {
+        // Compare direct BCL calls with different salts; no independent expected key is asserted.
         byte[] salt1 = [0x01, 0x02, 0x03, 0x04];
         byte[] salt2 = [0x05, 0x06, 0x07, 0x08];
 
@@ -325,7 +326,7 @@ public class OathSessionTests
             new byte[8],
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(new byte[] { 0x01, 0x02, 0x03, 0x04 }, result.ToArray());
+        Assert.Equal(Enumerable.Range(1, 20).Select(value => (byte)value).ToArray(), result.ToArray());
         Assert.Empty(prompt.Requested);
         Assert.Empty(prompt.Resolved);
         Assert.Contains(connection.TransmittedCommands, command => command[1] == OathConstants.InsCalculate);
@@ -576,10 +577,9 @@ public class OathSessionTests
     // ------------------------------------------------------------------------------------------------
 
     /// <summary>
-    ///     INVARIANT PIN (must hold before and after the ownership change). The convenience entry point opens
-    ///     a connection the caller never sees, so disposing the session it returned must close that connection.
-    ///     If this ever regresses, every <c>CreateOathSessionAsync</c> call leaks a PC/SC handle and the
-    ///     interface stays locked for the process lifetime.
+    ///     The convenience entry point opens a connection the caller never sees, so disposing the returned
+    ///     session must close it. This guards against retaining the PC/SC handle and physical-device lease
+    ///     after session disposal.
     /// </summary>
     [Fact]
     public async Task CreateOathSessionAsync_DisposingSession_DisposesTheConnectionItOpened()
@@ -628,9 +628,9 @@ public class OathSessionTests
     }
 
     /// <summary>
-    ///     A session that fails to initialize must release its claim on the connection. The connection
-    ///     outlives the failure and belongs to the caller, so a retry — or a different applet — must not be
-    ///     refused by a ghost holder that no reference points at any more.
+    ///     Checks guard release and borrowed-connection reuse after this fake's first SELECT returns 6A82.
+    ///     The second scripted SELECT succeeds. This does not establish recovery after every factory
+    ///     failure, an uncertain secure-channel state, or an actual device/native failure.
     /// </summary>
     [Fact]
     public async Task CreateAsync_InitializationFails_LeavesTheConnectionUsableByTheNextSession()
@@ -671,7 +671,8 @@ public class OathSessionTests
         [OathConstants.TagTruncated, 0x05, 0x06, 0x00, 0x00, 0x00, 0x01, 0x90, 0x00];
 
     private static byte[] FullResponse() =>
-        [OathConstants.TagResponse, 0x04, 0x01, 0x02, 0x03, 0x04, 0x90, 0x00];
+        [OathConstants.TagResponse, 0x15, 0x06,
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 0x90, 0x00];
 
     private sealed class RecordingUserPresencePrompt(
         RecordingSmartCardConnection connection,

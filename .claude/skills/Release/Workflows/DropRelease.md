@@ -12,9 +12,9 @@ End-to-end Yubico .NET SDK release wizard. The operator answers AskUserQuestion 
 4. Packs from the signed binaries.
 5. **Scribe round 2** — NuGet-signs the packages (and SDK symbol packages).
 6. Verifies every signature on Windows against the pinned certificate and attests the signed packages.
-7. **Waits for approval of the `nuget-org` environment**, then tags the built commit, publishes to NuGet.org (Trusted Publishing), waits for indexing and creates the GitHub release with the signed packages attached. An SDK release also deploys the docs to prod.
+7. **Waits for approval of the `nuget-org` environment**, then tags the built commit, publishes to NuGet.org (Trusted Publishing), waits for indexing and creates the GitHub release with the signed packages attached. An SDK release also posts the announcement in GitHub Discussions (Announcements, titled `<version>`, built by `.github/scripts/sdk-discussion-body.sh` from the `whats-new.md` section) and deploys the docs to prod.
 
-Each Scribe round needs two approvals in Scribe (approvers are notified on Slack) within about 5h45m, or the run fails and must be re-run (a new submission). Only one release runs at a time.
+Each Scribe round needs two approvals in Scribe (approvers are notified on Slack) within about 5h45m, or the run fails and must be re-run (a new submission). Only one release runs at a time. If Scribe is unavailable, wait for it and re-run the failed jobs; there is no local signing fallback.
 
 | Release | Branch | Tag | GitHub release |
 |---|---|---|---|
@@ -54,21 +54,21 @@ The state file is the single source of truth for resume. Update it before any op
 
 ## Watching a release run
 
-Used by phases 2 and 4. After `gh workflow run`, capture the run ID (`gh run list --workflow=<file> --limit 1 --json databaseId -q '.[0].databaseId'`), store it in state, and poll in the background every 120s:
+Used by phases 2 and 4. After `gh workflow run`, capture the run ID (`gh run list --workflow=<file> --limit 1 --json databaseId -q '.[0].databaseId'`), store it in state, and poll in the background every 30s. Scribe rounds can be approved within a minute, so a slower poll misses them:
 
 ```bash
 while true; do
   status=$(gh run view <runId> --json status,conclusion -q '[.status,.conclusion] | join(",")')
   if [[ "$status" == completed,* ]]; then echo "$status"; break; fi
-  sleep 120
+  sleep 30
 done
 ```
 
-While it runs, tell the operator when action is needed — check `gh run view <runId> --json jobs` for:
-- a running `Sign …` job: "Scribe signing job submitted — approvals needed in Scribe (two approvers, Slack notifies them)." Print the run URL; it is the reference shown in Scribe.
+While it runs, tell the operator when action is needed. Check job **steps**, not just jobs — Scribe round 1 is the `Sign assemblies` step inside the `Build artifacts` job:
+- an in-progress step or job whose name starts with `Sign` (`gh run view <runId> --json jobs -q '.jobs[] | select(.status=="in_progress") | .name as $j | .steps[] | select(.status=="in_progress") | "\($j): \(.name)"'`): "Scribe signing job submitted — approvals needed in Scribe (two approvers, Slack notifies them)." Print the run URL; it is the reference shown in Scribe.
 - `gh api repos/Yubico/Yubico.NET.SDK/actions/runs/<runId>/pending_deployments` non-empty: "Signed packages verified. Approve the `nuget-org` deployment to publish: <run URL>."
 
-On `failure`: STOP and print `gh run view <runId> --log-failed`. A failed publish job can be re-run with `gh run rerun <runId> --failed`; tagging, pushing and the GitHub release skip what already exists. Never start a new release run for a version that is already partly published.
+On `failure`: STOP and print `gh run view <runId> --log-failed`. A failed publish job can be re-run with `gh run rerun <runId> --failed`; tagging, pushing, the GitHub release and the Discussions announcement skip what already exists. Never start a new release run for a version that is already partly published.
 
 ## Phase 1 — Pre-flight
 
@@ -119,7 +119,8 @@ On `failure`: STOP and print `gh run view <runId> --log-failed`. A failed publis
    - `security` bucket items (CodeQL, fuzzing, static analysis) are NOT rendered under a separate "Security:" header in whats-new.md. Fold them into Bug Fixes (if they fix bugs) or Miscellaneous (if they add tooling).
    - Cache full categorization (all 6 buckets including `misc`) into `state.categorizedPRs` for phase 7 Slack reuse
 5. **Insert into `docs/users-manual/getting-started/whats-new.md`**:
-   - **Read the PREVIOUS release's section first** as the style reference — match its voice, phrasing, and structure exactly
+   - Write the new section exactly in the format of `Templates/whats-new-section.md`: `### <version>`, a `Release date:` line, one of the headings `Features:`, `Bug Fixes:`, `Documentation:`, `Miscellaneous:`, `Dependencies:` per non-empty bucket, single-line `- ` bullets each ending in `([#n](url))` (or `([#n](url), [#m](url))`), no sub-bullets, and the `_________` separator. CI builds both the GitHub release notes and the Discussions announcement from this format.
+   - Read the previous release's section for voice and phrasing
    - Insert new `### <version>` block under the appropriate `## 1.x.x Releases` heading (create the heading if needed)
    - **Style rules** (derived from existing whats-new.md patterns):
      - Bug Fixes: "Fixed an issue where..." pattern, passive voice
@@ -127,7 +128,6 @@ On `failure`: STOP and print `gh run view <runId> --log-failed`. A failed publis
      - Miscellaneous: passive voice ("...has been switched/added/updated")
      - Features: active voice is acceptable ("Added...", "Introduced...")
      - Dependencies: brief, passive ("Dependencies have been updated...")
-   - Emit subsections only for non-empty buckets (Features, Bug Fixes, Documentation, Miscellaneous, Dependencies)
    - Show diff via `git diff docs/users-manual/getting-started/whats-new.md`
 6. `AskUserQuestion`: "Release notes look correct?" Options: "Yes, commit" / "Let me edit first" / "Regenerate from PRs"
 7. On approval: `git add docs/users-manual/getting-started/whats-new.md && git commit -m "docs: release notes for <version>"`
@@ -150,11 +150,12 @@ On `failure`: STOP and print `gh run view <runId> --log-failed`. A failed publis
 
 ## Phase 4 — Merge + SDK release (scope `sdk` or `both`)
 
-1. **Wait for merge** — poll `gh pr view <prNumber> --json state,mergedAt` every 60s until `state=MERGED`. If the operator wants to stop and resume later, the state file already has the PR number.
+1. **Wait for merge** — poll `gh pr view <prNumber> --json state,reviewDecision,mergeStateStatus` every 60s. `main` restricts pushes with an empty allow-list, so an approved PR with all checks green still reports `BLOCKED`. Once `reviewDecision=APPROVED` and no check is failing, ask the operator for permission and merge with `gh pr merge <prNumber> --merge --admin`. Never use `--admin` before an approval. If the operator wants to stop and resume later, the state file already has the PR number.
 2. After merge: `git checkout main && git pull origin main`
 3. If scope is `both` and NativeShims waits for main: run phase 2 now from `main`, and continue only once NativeShims is on NuGet.org.
-4. Dispatch: `gh workflow run build.yml --ref main -f release=true -f version=<version>` — store `buildRunId`.
-5. Watch the run (see above). Expect two Scribe rounds and the `nuget-org` approval.
+4. **Release date**: if today differs from `state.releaseDate`, update the `Release date:` line in `whats-new.md` on `main` (PR) before dispatching. CI uses it for the GitHub release notes and the Discussions announcement.
+5. Dispatch: `gh workflow run build.yml --ref main -f release=true -f version=<version>` — store `buildRunId`.
+6. Watch the run (see above). Expect two Scribe rounds and the `nuget-org` approval.
 
 ## Phase 5 — Verify the release
 
@@ -162,6 +163,7 @@ On `failure`: STOP and print `gh run view <runId> --log-failed`. A failed publis
 2. **NuGet.org**: `https://api.nuget.org/v3-flatcontainer/yubico.core/<version>/yubico.core.<version>.nupkg` and the same for `yubico.yubikey` return 200.
 3. **GitHub release**: `gh release view <version> --json isDraft,assets -q '[.isDraft, [.assets[].name]]'` — published, with both `.nupkg` and both `.snupkg`.
 4. **Docs**: the run's `Deploy docs` job succeeded.
+5. **Discussions**: the `Announce the release in GitHub Discussions` step succeeded; its log has the post URL.
 
 ## Phase 6 — Merge main back to develop
 
@@ -209,7 +211,6 @@ For a NativeShims-only release, post a short note instead: version, `https://www
 
 2. **Print closing checklist** (manual — skill cannot automate):
    - [ ] Post drafted message in Slack #ask-tla
-   - [ ] Post on GitHub Discussions (link to release)
    - [ ] Close release in Jira
 3. Mark `.state.json` as `currentPhase: 7, complete: true`
 

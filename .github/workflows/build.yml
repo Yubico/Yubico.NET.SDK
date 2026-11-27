@@ -474,6 +474,7 @@ jobs:
     environment: nuget-org # Requires approval before anything is published.
     permissions:
       contents: write # Creates the tag and the GitHub release.
+      discussions: write # Posts the release announcement.
       id-token: write # NuGet.org Trusted Publishing.
     steps:
       - name: Harden the runner (Audit all outbound calls)
@@ -506,6 +507,12 @@ jobs:
           prerelease: ${{ contains(inputs.version, '-') }}
           nuget-user: ${{ vars.NUGET_USER }}
           github-token: ${{ github.token }}
+
+      - name: Announce the release in GitHub Discussions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: bash .github/scripts/sdk-announce-discussion.sh "$VERSION"
 
   deploy-docs:
     name: Deploy docs

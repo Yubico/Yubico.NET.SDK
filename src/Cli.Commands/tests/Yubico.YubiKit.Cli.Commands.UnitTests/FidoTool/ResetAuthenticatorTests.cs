@@ -133,8 +133,8 @@ public class ResetAuthenticatorTests
             return Task.CompletedTask;
         }
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult<ReadOnlyMemory<byte>>(_response);
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(_response);
 
         private byte[] ManagementInfo()
         {

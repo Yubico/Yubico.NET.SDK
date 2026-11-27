@@ -224,10 +224,10 @@ internal sealed class MacOSOtpHidNativeOwner
         return result.Task;
     }
 
-    internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken, bool expert = false)
+    internal Task<byte[]> ReceiveAsync(CancellationToken cancellationToken, bool expert = false)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var result = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var result = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         byte[]? report = null;
         lock (_sync)
         {
@@ -279,7 +279,7 @@ internal sealed class MacOSOtpHidNativeOwner
             throw new InvalidOperationException($"Expected 8-byte OTP feature report, got {length} bytes.");
     }
 
-    private static void CompleteReceive(TaskCompletionSource<ReadOnlyMemory<byte>> result, byte[]? report,
+    private static void CompleteReceive(TaskCompletionSource<byte[]> result, byte[]? report,
         Exception? error, bool cancelled, CancellationToken cancellationToken)
     {
         if (cancelled) result.TrySetCanceled(cancellationToken);

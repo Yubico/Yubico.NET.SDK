@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Buffers;
 using System.Security.Cryptography;
 
 namespace Yubico.YubiKit.Core.Utilities;
@@ -75,26 +74,49 @@ public static class TlvHelper
     ///     Iteration order is preserved. If the same tag occurs more than once only the latest will be kept.
     /// </summary>
     /// <param name="tlvData">Sequence of TLV encoded data</param>
-    /// <returns>Dictionary of Tag-Value pairs</returns>
+    /// <returns>Dictionary of tag-value pairs with independent, caller-owned writable values.</returns>
     /// <remarks>
-    ///     Values are independent copies exposed through read-only views, without a disposable clearing
-    ///     owner. For sensitive sequences, prefer <see cref="DecodeList(ReadOnlySpan{byte})"/> and dispose
-    ///     its result. Dictionary decoding does not clear discarded duplicates or partial results on failure.
+    ///     Clear returned values after use when they contain sensitive data. This method clears discarded
+    ///     duplicates and unreturned values on failure, but never clears the borrowed input.
     /// </remarks>
-    public static IDictionary<int, ReadOnlyMemory<byte>> DecodeDictionary(ReadOnlySpan<byte> tlvData)
-    {
-        var tlvs = new Dictionary<int, ReadOnlyMemory<byte>>();
-        var buffer = tlvData;
-        while (!buffer.IsEmpty)
-        {
-            var tlv = Tlv.ParseData(ref buffer);
-            tlvs[tlv.Tag] = tlv.Value;
-        }
+    public static IDictionary<int, Memory<byte>> DecodeDictionary(ReadOnlySpan<byte> tlvData) =>
+        DecodeDictionary(tlvData, observeValue: null);
 
-        return tlvs;
+    // The invocation-local observer is for synthetic tests of the actual parsed arrays.
+    internal static IDictionary<int, Memory<byte>> DecodeDictionary(
+        ReadOnlySpan<byte> tlvData, Action<byte[]>? observeValue)
+    {
+        var tlvs = new Dictionary<int, Memory<byte>>();
+        var buffer = tlvData;
+        byte[]? pending = null;
+        try
+        {
+            while (!buffer.IsEmpty)
+            {
+                var (tag, _, value) = Tlv.ParseData(ref buffer);
+                pending = value;
+                observeValue?.Invoke(value);
+                tlvs.TryGetValue(tag, out var previous);
+                tlvs[tag] = value;
+                pending = null;
+                CryptographicOperations.ZeroMemory(previous.Span);
+            }
+
+            return tlvs;
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(pending);
+            // Enumerate the concrete dictionary to avoid allocating its Values collection in cleanup.
+            foreach (var entry in tlvs)
+                CryptographicOperations.ZeroMemory(entry.Value.Span);
+
+            throw;
+        }
     }
 
-    public static IDictionary<int, ReadOnlyMemory<byte>> DecodeDictionary(ReadOnlyMemory<byte> tlvData) =>
+    /// <inheritdoc cref="DecodeDictionary(ReadOnlySpan{byte})"/>
+    public static IDictionary<int, Memory<byte>> DecodeDictionary(ReadOnlyMemory<byte> tlvData) =>
         DecodeDictionary(tlvData.Span);
 
     /// <summary>
@@ -206,20 +228,34 @@ public static class TlvHelper
     /// <remarks>
     ///     When this method returns <see langword="true" />, <paramref name="value" /> is a caller-owned buffer.
     ///     The caller must securely clear it when it contains sensitive data.
-    ///     This clears only the returned copy. The current search also allocates intermediate value
-    ///     copies that it leaves uncleared; for sensitive sequences, prefer <see cref="DecodeList(ReadOnlySpan{byte})"/>
-    ///     and dispose the returned list. The input remains caller-owned in either case.
+    ///     The search clears skipped value copies and never clears the borrowed input. It stops at the
+    ///     first match without validating any trailing bytes.
     /// </remarks>
-    public static bool TryFindValue(int tag, ReadOnlySpan<byte> tlvData, out Memory<byte> value)
+    public static bool TryFindValue(int tag, ReadOnlySpan<byte> tlvData, out Memory<byte> value) =>
+        TryFindValue(tag, tlvData, out value, observeValue: null);
+
+    internal static bool TryFindValue(
+        int tag, ReadOnlySpan<byte> tlvData, out Memory<byte> value, Action<byte[]>? observeValue)
     {
         var buffer = tlvData;
         while (!buffer.IsEmpty)
         {
             var (currentTag, _, currentValue) = Tlv.ParseData(ref buffer);
-            if (currentTag == tag)
+            var transferred = false;
+            try
             {
-                value = currentValue.ToArray();
-                return true;
+                observeValue?.Invoke(currentValue);
+                if (currentTag == tag)
+                {
+                    value = currentValue;
+                    transferred = true;
+                    return true;
+                }
+            }
+            finally
+            {
+                if (!transferred)
+                    CryptographicOperations.ZeroMemory(currentValue);
             }
         }
 

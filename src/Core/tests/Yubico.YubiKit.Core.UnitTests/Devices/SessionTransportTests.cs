@@ -299,7 +299,7 @@ public class SessionTransportTests
         public Task SendAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
     }
 

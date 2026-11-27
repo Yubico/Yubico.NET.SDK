@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System.Buffers.Binary;
 using System.Text;
 using Yubico.YubiKit.Core.Utilities;
@@ -22,11 +23,13 @@ namespace Yubico.YubiKit.Core.Devices;
 /// <remarks>
 ///     Supported applications describe device capability; enabled applications describe configuration on each
 ///     transport. These values describe an observation, not current presence or operation success. Decoding
-///     supplies defaults for absent optional fields, so false, zero, and empty values can also mean unreported.
-///     <see cref="ChallengeResponseTimeout"/> retains its source memory; copying this struct shares that memory.
+///     supplies defaults for absent optional fields, so false, zero, or null can mean unreported, depending
+///     on the field.
 /// </remarks>
 public readonly record struct DeviceInfo
 {
+    private static readonly ILogger Logger = YubiKitLogging.CreateLogger<DeviceInfo>();
+
     private const int TAG_USB_SUPPORTED = 0x01;
     private const int TAG_SERIAL_NUMBER = 0x02;
     private const int TAG_USB_ENABLED = 0x03;
@@ -86,13 +89,9 @@ public readonly record struct DeviceInfo
     /// <summary>The CCID inactivity timeout in seconds, decoded from two big-endian bytes; zero when absent.</summary>
     /// <remarks>The timeout is meaningful with <see cref="DeviceFlags.TouchEject"/> enabled.</remarks>
     public required ushort AutoEjectTimeout { get; init; }
-    /// <summary>The OTP challenge-response timeout as one byte containing seconds, or empty memory when absent.</summary>
-    /// <remarks>
-    ///     Decoding retains a view of the input TLV's value. Keep that TLV storage alive and unchanged while
-    ///     using this value. Caller-supplied memory is likewise shared. The hardware default of 15 seconds
-    ///     is distinct from the decoder's empty-memory default for an omitted field.
-    /// </remarks>
-    public required ReadOnlyMemory<byte> ChallengeResponseTimeout { get; init; }
+    /// <summary>The reported OTP challenge-response timeout in seconds, or null when absent.</summary>
+    /// <remarks>A reported byte is preserved as-is, including zero; omission does not imply the hardware default.</remarks>
+    public required byte? ChallengeResponseTimeout { get; init; }
     /// <summary>The reported device-wide configuration flags, or <see cref="DeviceFlags.None"/> when absent.</summary>
     public required DeviceFlags DeviceFlags { get; init; }
     /// <summary>The effective firmware version used for compatibility checks.</summary>
@@ -110,13 +109,9 @@ public readonly record struct DeviceInfo
         ? FirmwareVersion.ToString()
         : VersionQualifier.ToString();
 
-    /// <summary>Compares every field by value, including the bytes of <see cref="ChallengeResponseTimeout"/>.</summary>
+    /// <summary>Compares every field by value, including the reported timeout and its absence.</summary>
     /// <remarks>
-    ///     The compiler-generated record equality compares <see cref="ReadOnlyMemory{T}"/> by storage identity, so equal
-    ///     timeout bytes from separate response buffers would compare unequal. Discovery relies on this comparison
-    ///     to publish <see cref="DeviceUpdated"/> only when metadata actually changed.
-    ///     Equality and hashing read the current timeout bytes; keep their backing storage unchanged while
-    ///     comparing values or using a value as a hash-collection key.
+    ///     Discovery relies on this comparison to publish <see cref="DeviceUpdated"/> only when metadata actually changed.
     /// </remarks>
     public bool Equals(DeviceInfo other) =>
         IsSky == other.IsSky &&
@@ -136,14 +131,14 @@ public readonly record struct DeviceInfo
         PartNumber == other.PartNumber &&
         IsNfcRestricted == other.IsNfcRestricted &&
         AutoEjectTimeout == other.AutoEjectTimeout &&
-        ChallengeResponseTimeout.Span.SequenceEqual(other.ChallengeResponseTimeout.Span) &&
+        ChallengeResponseTimeout == other.ChallengeResponseTimeout &&
         DeviceFlags == other.DeviceFlags &&
         Equals(FirmwareVersion, other.FirmwareVersion) &&
         Equals(VersionQualifier, other.VersionQualifier) &&
         Equals(FpsVersion, other.FpsVersion) &&
         Equals(StmVersion, other.StmVersion);
 
-    /// <summary>Hashes every field, including the current contents of <see cref="ChallengeResponseTimeout"/>.</summary>
+    /// <summary>Hashes every field, including <see cref="ChallengeResponseTimeout"/>.</summary>
     public override int GetHashCode()
     {
         var hash = new HashCode();
@@ -164,7 +159,7 @@ public readonly record struct DeviceInfo
         hash.Add(PartNumber);
         hash.Add(IsNfcRestricted);
         hash.Add(AutoEjectTimeout);
-        hash.AddBytes(ChallengeResponseTimeout.Span);
+        hash.Add(ChallengeResponseTimeout);
         hash.Add(DeviceFlags);
         hash.Add(FirmwareVersion);
         hash.Add(VersionQualifier);
@@ -175,20 +170,23 @@ public readonly record struct DeviceInfo
 
     /// <summary>Decodes device-information TLVs, ignoring unknown tags.</summary>
     /// <remarks>
-    ///     Absent optional fields use false, zero, null, or empty-memory defaults. A supplied firmware version takes precedence
+    ///     Absent optional fields use false, zero, or null defaults. A supplied firmware version takes precedence
     ///     over tag 0x05, but a present firmware field must still have a valid encoding.
     ///     A qualifier whose type differs from <see cref="VersionQualifierType.Final"/> supplies the effective
-    ///     firmware version, including an unnamed qualifier type. The returned timeout memory borrows its
-    ///     input TLV storage; keep that storage alive and unchanged while using the result.
+    ///     firmware version, including an unnamed qualifier type. An omitted challenge-response timeout is null.
+    ///     Ordinary capability masks are unsigned big-endian integers. Leading zero bytes are accepted and
+    ///     unnamed bits are preserved up to 32 bits; values outside this SDK range are rejected.
     /// </remarks>
-    /// <param name="tlvs">Decoded device-information fields. Unknown tags are ignored; duplicate tags are rejected.</param>
+    /// <param name="tlvs">Decoded device-information fields. Unknown tags are ignored, even when repeated.</param>
     /// <param name="defaultVersion">Version used in preference to tag 0x05, or null to use that tag.</param>
-    /// <returns>The decoded metadata, including a borrowed timeout value when present.</returns>
-    /// <exception cref="ArgumentException">The collection contains duplicate tags.</exception>
+    /// <returns>The decoded metadata.</returns>
+    /// <exception cref="ArgumentException">The collection repeats a known top-level device-information tag.</exception>
     /// <exception cref="BadResponseException">A known field is malformed or no firmware version is available.</exception>
     public static DeviceInfo CreateFromTlvs(IReadOnlyCollection<Tlv> tlvs, FirmwareVersion? defaultVersion)
     {
-        var tlvDict = tlvs.ToDictionary(tlv => tlv.Tag, tlv => tlv.Value);
+        ArgumentNullException.ThrowIfNull(tlvs);
+
+        var tlvDict = IndexKnownFields(tlvs);
 
         var snBytes = ReadFixedField(tlvDict, TAG_SERIAL_NUMBER, 4);
         int? serialNumber = snBytes.IsEmpty ? null : BinaryPrimitives.ReadInt32BigEndian(snBytes.Span);
@@ -245,7 +243,7 @@ public readonly record struct DeviceInfo
             PartNumber = partNumber,
             IsNfcRestricted = isNfcRestricted,
             AutoEjectTimeout = autoEjectTimeout,
-            ChallengeResponseTimeout = challengeResponseTimeout,
+            ChallengeResponseTimeout = challengeResponseTimeout.IsEmpty ? null : challengeResponseTimeout.Span[0],
             DeviceFlags = deviceFlags,
             FirmwareVersion = firmwareVersion,
             VersionQualifier = versionQualifier,
@@ -254,6 +252,32 @@ public readonly record struct DeviceInfo
         };
     }
 
+    private static Dictionary<int, ReadOnlyMemory<byte>> IndexKnownFields(IReadOnlyCollection<Tlv> tlvs)
+    {
+        var fields = new Dictionary<int, ReadOnlyMemory<byte>>();
+        foreach (var tlv in tlvs)
+        {
+            if (!IsKnownDeviceInfoTag(tlv.Tag))
+            {
+                if (Logger.IsEnabled(LogLevel.Trace))
+                    Logger.LogTrace("Ignoring unknown device-info tag 0x{Tag:X2} ({Length} bytes).", tlv.Tag, tlv.Length);
+                continue;
+            }
+
+            if (!fields.TryAdd(tlv.Tag, tlv.Value))
+                throw new ArgumentException($"Duplicate device info tag 0x{tlv.Tag:X2}.", nameof(tlvs));
+        }
+        return fields;
+    }
+
+    // Keep this list in sync with the top-level fields consumed by the decoder.
+    private static bool IsKnownDeviceInfoTag(int tag) => tag is
+        TAG_USB_SUPPORTED or TAG_SERIAL_NUMBER or TAG_USB_ENABLED or TAG_FORMFACTOR or
+        TAG_FIRMWARE_VERSION or TAG_AUTO_EJECT_TIMEOUT or TAG_CHALLENGE_RESPONSE_TIMEOUT or TAG_DEVICE_FLAGS or
+        TAG_NFC_SUPPORTED or TAG_NFC_ENABLED or TAG_CONFIG_LOCKED or TAG_PART_NUMBER or
+        TAG_FIPS_CAPABLE or TAG_FIPS_APPROVED or TAG_PIN_COMPLEXITY or TAG_NFC_RESTRICTED or
+        TAG_RESET_BLOCKED or TAG_VERSION_QUALIFIER or TAG_FPS_VERSION or TAG_STM_VERSION;
+
     // Fixed widths follow the YubiKey configuration reference (serial/version/timeout/scalars).
     // Absence is not a malformed value: older firmware and non-NFC devices omit optional metadata.
     private static ReadOnlyMemory<byte> ReadFixedField(
@@ -261,6 +285,11 @@ public readonly record struct DeviceInfo
     {
         if (!data.TryGetValue(tag, out var value))
             return default;
+        return RequireFieldLength(value, tag, expectedLength);
+    }
+
+    private static ReadOnlyMemory<byte> RequireFieldLength(ReadOnlyMemory<byte> value, int tag, int expectedLength)
+    {
         if (value.Length != expectedLength)
             throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length {value.Length}; expected {expectedLength}.");
         return value;
@@ -288,10 +317,11 @@ public readonly record struct DeviceInfo
     {
         if (!data.TryGetValue(tag, out var value))
             return DeviceCapabilities.None;
-        // Accept nonempty fields here; CapabilityMapper.FromApp determines which bytes are interpreted.
         if (value.IsEmpty)
             throw new BadResponseException($"Invalid device info tag 0x{tag:X2} length 0; expected a capability value.");
-        return CapabilityMapper.FromApp(value);
+        if (!CapabilityMapper.TryFromApp(value.Span, out var capabilities))
+            throw new BadResponseException($"Device info tag 0x{tag:X2} exceeds the SDK's 32-bit capability range.");
+        return capabilities;
     }
 
     private static DeviceCapabilities ReadFipsCapabilities(IDictionary<int, ReadOnlyMemory<byte>> data, int tag)
@@ -315,7 +345,7 @@ public readonly record struct DeviceInfo
         const byte tagType = 0x02;
         const byte tagIteration = 0x03;
 
-        IDictionary<int, ReadOnlyMemory<byte>> data;
+        IDictionary<int, Memory<byte>> data;
         try
         {
             // The container is extensible. Validate its children, not the original 14-byte total.
@@ -328,16 +358,15 @@ public readonly record struct DeviceInfo
 
         if (versionQualifierBytes.IsEmpty)
             throw new BadResponseException($"Invalid device info tag 0x{TAG_VERSION_QUALIFIER:X2} length 0; expected qualifier TLVs.");
-        if (!data.ContainsKey(tagVersion))
+        if (!data.TryGetValue(tagVersion, out var versionBytes))
             throw new BadResponseException($"Missing version qualifier tag 0x{tagVersion:X2}.");
-        if (!data.ContainsKey(tagType))
+        if (!data.TryGetValue(tagType, out var typeBytes))
             throw new BadResponseException($"Missing version qualifier tag 0x{tagType:X2}.");
         if (!data.TryGetValue(tagIteration, out var iterationBytes))
             throw new BadResponseException($"Missing version qualifier tag 0x{tagIteration:X2}.");
 
-        var qualifierVersion = ReadFirmwareVersion(data, tagVersion)
-            ?? throw new BadResponseException($"Missing version qualifier tag 0x{tagVersion:X2}.");
-        var versionType = (VersionQualifierType)ReadByte(data, tagType);
+        var qualifierVersion = FirmwareVersion.FromBytes(RequireFieldLength(versionBytes, tagVersion, 3).Span);
+        var versionType = (VersionQualifierType)RequireFieldLength(typeBytes, tagType, 1).Span[0];
         long iteration = ReadQualifierIteration(iterationBytes.Span, tagIteration);
 
         var versionQualifier = new VersionQualifier(
@@ -413,12 +442,21 @@ internal static class CapabilityMapper
         return capabilities;
     }
 
-    public static DeviceCapabilities FromApp(ReadOnlyMemory<byte> appData)
+    public static bool TryFromApp(ReadOnlySpan<byte> appData, out DeviceCapabilities capabilities)
     {
-        if (appData.IsEmpty) return DeviceCapabilities.None;
+        uint mask = 0;
+        foreach (byte b in appData)
+        {
+            if (mask > (uint.MaxValue >> 8))
+            {
+                capabilities = DeviceCapabilities.None;
+                return false;
+            }
 
-        return appData.Length == 1
-            ? (DeviceCapabilities)appData.Span[0]
-            : (DeviceCapabilities)BinaryPrimitives.ReadUInt16BigEndian(appData.Span);
+            mask = (mask << 8) | b;
+        }
+
+        capabilities = (DeviceCapabilities)mask;
+        return true;
     }
 }

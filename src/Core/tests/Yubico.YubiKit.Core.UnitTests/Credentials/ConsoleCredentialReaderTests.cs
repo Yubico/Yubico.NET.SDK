@@ -219,4 +219,134 @@ public class ConsoleCredentialReaderTests
         Assert.Throws<OperationCanceledException>(() =>
             reader.ReadCredential(options, cts.Token));
     }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ReadCredential_PreCancelledWithReadyInput_DoesNotPromptOrConsumeInput(bool interactive)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var input = new MockConsoleInput { IsInteractive = interactive };
+        input.EnqueueKeys("123456");
+        input.EnqueueKey(ConsoleKey.Enter);
+        input.EnqueueLine("123456");
+        int readCount = 0;
+        var console = new CallbackConsole(input)
+        {
+            AfterReadKey = () => readCount++,
+            ReadRedirectedLine = () =>
+            {
+                readCount++;
+                return input.ReadLine();
+            },
+        };
+        var reader = new ConsoleCredentialReader(console);
+        var options = CredentialReaderOptions.ForPin();
+        cts.Cancel();
+
+        var error = Assert.Throws<OperationCanceledException>(() =>
+        {
+            using var unexpectedResult = reader.ReadCredential(options, cts.Token);
+        });
+
+        Assert.Equal(cts.Token, error.CancellationToken);
+        Assert.Empty(input.Output);
+        Assert.Equal(0, readCount);
+    }
+
+    [Theory]
+    [InlineData(3)]
+    [InlineData(7)] // Enter
+    public void ReadCredential_CancelledInsideReadKey_StopsBeforeNextKeyOrResult(int cancelOnRead)
+    {
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var input = new MockConsoleInput();
+        input.EnqueueKeys("123456");
+        input.EnqueueKey(ConsoleKey.Enter);
+        input.EnqueueKey(ConsoleKey.Escape);
+        int readCount = 0;
+        var console = new CallbackConsole(input)
+        {
+            AfterReadKey = () =>
+            {
+                if (++readCount == cancelOnRead)
+                {
+                    cts.Cancel();
+                }
+            },
+        };
+        var reader = new ConsoleCredentialReader(console);
+
+        var error = Assert.Throws<OperationCanceledException>(() =>
+        {
+            using var unexpectedResult = reader.ReadCredential(CredentialReaderOptions.ForPin(), cts.Token);
+        });
+
+        Assert.Equal(cts.Token, error.CancellationToken);
+        Assert.Equal(cancelOnRead, readCount);
+        Assert.True(input.KeyAvailable);
+    }
+
+    [Fact]
+    public async Task ReadCredential_CancelledDuringRedirectedRead_WaitsForLineThenThrows()
+    {
+        var testToken = TestContext.Current.CancellationToken;
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(testToken);
+        using var release = new ManualResetEventSlim();
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var timeout = TimeSpan.FromSeconds(10);
+        var console = new CallbackConsole(new MockConsoleInput { IsInteractive = false })
+        {
+            ReadRedirectedLine = () =>
+            {
+                entered.SetResult();
+                if (!release.Wait(timeout, testToken))
+                {
+                    throw new TimeoutException("The test did not release the redirected read.");
+                }
+
+                return "123456";
+            },
+        };
+        var reader = new ConsoleCredentialReader(console);
+        var read = Task.Factory.StartNew(() => Record.Exception(() =>
+        {
+            using var unexpectedResult = reader.ReadCredential(CredentialReaderOptions.ForPin(), cts.Token);
+        }), testToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+        Exception? error;
+        try
+        {
+            await entered.Task.WaitAsync(timeout, testToken);
+            cts.Cancel();
+            Assert.False(read.IsCompleted);
+        }
+        finally
+        {
+            release.Set();
+            // Drain the caller before disposing its gate and token source, even if the test is canceled.
+            error = await read.WaitAsync(timeout, CancellationToken.None);
+        }
+
+        Assert.Equal(cts.Token, Assert.IsType<OperationCanceledException>(error).CancellationToken);
+    }
+
+    private sealed class CallbackConsole(MockConsoleInput input) : IConsoleInputSource
+    {
+        public Action? AfterReadKey { get; init; }
+        public Func<string?>? ReadRedirectedLine { get; init; }
+        public bool IsInteractive => input.IsInteractive;
+        public bool KeyAvailable => input.KeyAvailable;
+
+        public ConsoleKeyInfo ReadKey(bool intercept)
+        {
+            var key = input.ReadKey(intercept);
+            AfterReadKey?.Invoke();
+            return key;
+        }
+
+        public string? ReadLine() => ReadRedirectedLine is null ? input.ReadLine() : ReadRedirectedLine();
+        public void Write(string text) => input.Write(text);
+        public void WriteLine(string text) => input.WriteLine(text);
+    }
 }

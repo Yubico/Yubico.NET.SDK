@@ -96,7 +96,14 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         var featureReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
 
         // Extract version from feature report bytes 1-3
-        _firmwareVersion = new FirmwareVersion(featureReport.Span[1], featureReport.Span[2], featureReport.Span[3]);
+        try
+        {
+            _firmwareVersion = new FirmwareVersion(featureReport[1], featureReport[2], featureReport[3]);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(featureReport);
+        }
 
         // Handle NEO quirk: if major version is 3, may have cached pgmSeq in arbitrator
         if (_firmwareVersion.Major == 3)
@@ -241,13 +248,20 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
 
         if (!hasData)
         {
-            // Status-only response (config command, sequence updated)
-            ReadOnlyMemory<byte> statusResponse = firstReport.Slice(1, 6).ToArray();
-            _logger.LogDebug("Status-only response received ({ByteCount} bytes)", statusResponse.Length);
-            return statusResponse;
+            try
+            {
+                // Status-only response (config command, sequence updated).
+                ReadOnlyMemory<byte> statusResponse = firstReport.AsSpan(1, 6).ToArray();
+                _logger.LogDebug("Status-only response received ({ByteCount} bytes)", statusResponse.Length);
+                return statusResponse;
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(firstReport);
+            }
         }
 
-        // Assemble the pending data reports.
+        // Transfer the first report to the data reader for assembly and cleanup.
         return await ReadDataPacketsAsync(firstReport, exchangeToken).ConfigureAwait(false);
     }
 
@@ -256,7 +270,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     /// Unchanged status and busy reports are polled without a delay. The local three-second deadline is
     /// checked between reads, so it does not bound native GET duration or guarantee asynchronous invocation.
     /// </summary>
-    private async Task<(ReadOnlyMemory<byte> Report, bool HasData)> WaitForReadyToReadAsync(
+    private async Task<(byte[] Report, bool HasData)> WaitForReadyToReadAsync(
         int programmingSequence,
         Func<ValueTask> notifyUserPresenceAsync,
         CancellationToken exchangeToken,
@@ -268,54 +282,61 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         while (stopwatch.ElapsedMilliseconds < timeLimitMs)
         {
             var report = await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
-            var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
-
-            _logger.LogTrace("WaitForReadyToRead: statusByte=0x{Status:X2}, report={ByteCount} bytes",
-                statusByte, report.Length);
-
-            // Check for touch pending
-            if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) != 0)
+            var transferred = false;
+            try
             {
-                _logger.LogDebug("Touch pending, waiting for user interaction...");
-                await notifyUserPresenceAsync().ConfigureAwait(false);
-                report = await WaitForTouchCompleteAsync(exchangeToken, callerToken).ConfigureAwait(false);
-                statusByte = report.Span[OtpConstants.FeatureReportDataSize];
-                stopwatch.Restart();
-            }
+                var statusByte = report[OtpConstants.FeatureReportDataSize];
 
-            // Check for ReadPending flag - data is ready
-            if ((statusByte & OtpConstants.ResponsePendingFlag) != 0)
-            {
-                _logger.LogDebug("ReadPending flag detected, data ready");
-                return (report, true); // Has data
-            }
+                _logger.LogTrace("WaitForReadyToRead: statusByte=0x{Status:X2}, report={ByteCount} bytes",
+                    statusByte, report.Length);
 
-            // Status response (statusByte == 0) - check if command completed
-            if (statusByte == 0)
-            {
-                var nextSeq = report.Span[OtpConstants.StatusOffsetProgSeq];
-                var touchLow = report.Span[OtpConstants.StatusOffsetTouchLow];
-
-                _logger.LogTrace("Status response: nextSeq={NextSeq}, progSeq={ProgSeq}",
-                    nextSeq, programmingSequence);
-
-                // Check if sequence incremented (command completed without data)
-                if (nextSeq == programmingSequence + 1 ||
-                    (nextSeq == 0 && programmingSequence > 0 &&
-                     (touchLow & OtpConstants.ConfigSlotsProgrammedMask) == 0))
+                // Check for touch pending before replacing the report.
+                if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) != 0)
                 {
-                    _logger.LogDebug("Sequence updated from {OldSeq} to {NewSeq}, no data response",
-                        programmingSequence, nextSeq);
-                    return (report, false); // No data, just status
+                    CryptographicOperations.ZeroMemory(report);
+                    _logger.LogDebug("Touch pending, waiting for user interaction...");
+                    await notifyUserPresenceAsync().ConfigureAwait(false);
+                    report = await WaitForTouchCompleteAsync(exchangeToken, callerToken).ConfigureAwait(false);
+                    statusByte = report[OtpConstants.FeatureReportDataSize];
+                    stopwatch.Restart();
                 }
 
-                // Sequence hasn't changed - device still processing, keep polling
-                _logger.LogTrace("Device still processing (seq unchanged), continuing poll");
-                continue;
-            }
+                if ((statusByte & OtpConstants.ResponsePendingFlag) != 0)
+                {
+                    _logger.LogDebug("ReadPending flag detected, data ready");
+                    transferred = true;
+                    return (report, true);
+                }
 
-            // WritePending or other flags - device is busy, keep polling
-            _logger.LogTrace("Device busy (statusByte=0x{Status:X2}), continuing poll", statusByte);
+                // Status response (statusByte == 0) - check if command completed.
+                if (statusByte == 0)
+                {
+                    var nextSeq = report[OtpConstants.StatusOffsetProgSeq];
+                    var touchLow = report[OtpConstants.StatusOffsetTouchLow];
+
+                    _logger.LogTrace("Status response: nextSeq={NextSeq}, progSeq={ProgSeq}", nextSeq, programmingSequence);
+
+                    if (nextSeq == programmingSequence + 1 ||
+                        (nextSeq == 0 && programmingSequence > 0 &&
+                         (touchLow & OtpConstants.ConfigSlotsProgrammedMask) == 0))
+                    {
+                        _logger.LogDebug("Sequence updated from {OldSeq} to {NewSeq}, no data response",
+                            programmingSequence, nextSeq);
+                        transferred = true;
+                        return (report, false);
+                    }
+
+                    _logger.LogTrace("Device still processing (seq unchanged), continuing poll");
+                    continue;
+                }
+
+                _logger.LogTrace("Device busy (statusByte=0x{Status:X2}), continuing poll", statusByte);
+            }
+            finally
+            {
+                if (!transferred)
+                    CryptographicOperations.ZeroMemory(report);
+            }
         }
 
         throw new TimeoutException($"Timeout waiting for device response after {stopwatch.ElapsedMilliseconds}ms");
@@ -323,26 +344,25 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
 
     /// <summary>
     /// Reads data packets after ReadPending was detected.
-    /// The accumulation buffer is cleared and returned; individual connection-returned report storage has
-    /// a separate lifetime and is not cleared by this reader.
+    /// Takes ownership of the first report and clears every consumed report and the rented accumulator.
     /// </summary>
     private async Task<ReadOnlyMemory<byte>> ReadDataPacketsAsync(
-        ReadOnlyMemory<byte> firstReport,
+        byte[] firstReport,
         CancellationToken cancellationToken)
     {
         const int maximumResponseLength = (OtpConstants.SequenceMask + 1) * OtpConstants.FeatureReportDataSize;
-        byte[] responseBuffer = _bufferPool.Rent(maximumResponseLength);
+        byte[]? responseBuffer = null;
         var expectedSequence = 0;
         var responseLength = 0;
+        var report = firstReport;
 
         try
         {
-            // Process the first report (already has ReadPending set)
-            var report = firstReport;
+            responseBuffer = _bufferPool.Rent(maximumResponseLength);
 
             while (true)
             {
-                var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
+                var statusByte = report[OtpConstants.FeatureReportDataSize];
 
                 // Check if ReadPending is still set
                 if ((statusByte & OtpConstants.ResponsePendingFlag) == 0)
@@ -370,25 +390,28 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                     throw new InvalidOperationException("OTP HID response exceeds the maximum packet sequence range.");
 
                 // Add payload to buffer (7 bytes)
-                report.Span[..OtpConstants.FeatureReportDataSize]
+                report.AsSpan(0, OtpConstants.FeatureReportDataSize)
                     .CopyTo(responseBuffer.AsSpan(responseLength));
                 responseLength += OtpConstants.FeatureReportDataSize;
                 expectedSequence++;
 
                 _logger.LogTrace("Added packet seq={Seq}, total={Total} bytes", packetSeq, responseLength);
 
-                // Read next report
+                CryptographicOperations.ZeroMemory(report);
                 report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            var rawResponse = responseBuffer.AsSpan(0, responseLength).ToArray();
-            _logger.LogDebug("{Length} bytes read over HID", rawResponse.Length);
-            return rawResponse;
+            _logger.LogDebug("{Length} bytes read over HID", responseLength);
+            return responseBuffer.AsSpan(0, responseLength).ToArray();
         }
         finally
         {
-            CryptographicOperations.ZeroMemory(responseBuffer);
-            _bufferPool.Return(responseBuffer);
+            CryptographicOperations.ZeroMemory(report);
+            if (responseBuffer is not null)
+            {
+                CryptographicOperations.ZeroMemory(responseBuffer);
+                _bufferPool.Return(responseBuffer);
+            }
         }
     }
 
@@ -398,7 +421,7 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
     /// <param name="exchangeToken">Uncancellable token for the admitted protocol exchange.</param>
     /// <param name="callerToken">Caller token used as a cancellation signal while waiting for touch.</param>
     /// <returns>The first report that no longer indicates a touch wait.</returns>
-    private async Task<ReadOnlyMemory<byte>> WaitForTouchCompleteAsync(
+    private async Task<byte[]> WaitForTouchCompleteAsync(
         CancellationToken exchangeToken,
         CancellationToken callerToken)
     {
@@ -414,17 +437,22 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
             await Task.Delay(250, exchangeToken).ConfigureAwait(false);
 
             var report = await ReadFeatureReportAsync(exchangeToken).ConfigureAwait(false);
-            var statusByte = report.Span[OtpConstants.FeatureReportDataSize];
-
-            if ((statusByte & OtpConstants.ResponseTimeoutWaitFlag) == 0)
+            var transferred = false;
+            try
             {
-                _logger.LogDebug("Touch completed after {Ms}ms", stopwatch.ElapsedMilliseconds);
-                return report;
-            }
+                if ((report[OtpConstants.FeatureReportDataSize] & OtpConstants.ResponseTimeoutWaitFlag) == 0)
+                {
+                    _logger.LogDebug("Touch completed after {Ms}ms", stopwatch.ElapsedMilliseconds);
+                    transferred = true;
+                    return report;
+                }
 
-            if (callerToken.IsCancellationRequested)
-            {
                 callerToken.ThrowIfCancellationRequested();
+            }
+            finally
+            {
+                if (!transferred)
+                    CryptographicOperations.ZeroMemory(report);
             }
         }
 
@@ -476,18 +504,34 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
                 cancellationToken)
             .ConfigureAwait(false);
 
-        // Return bytes 1-6 (skip first and last byte)
-        return featureReport.Slice(1, 6);
+        // Publish a view of the status report; do not clear the caller's backing array.
+        try
+        {
+            return featureReport.AsMemory(1, 6);
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(featureReport);
+            throw;
+        }
     }
 
     /// <summary>
     /// Reads a single 8-byte feature report asynchronously.
     /// </summary>
-    private async Task<ReadOnlyMemory<byte>> ReadFeatureReportAsync(CancellationToken cancellationToken)
+    private async Task<byte[]> ReadFeatureReportAsync(CancellationToken cancellationToken)
     {
         var report = await _connection.ReceiveAsync(cancellationToken).ConfigureAwait(false);
-        _logger.LogTrace("Read feature report ({ByteCount} bytes)", report.Span.Length);
-        return report;
+        try
+        {
+            _logger.LogTrace("Read feature report ({ByteCount} bytes)", report.Length);
+            return report;
+        }
+        catch
+        {
+            CryptographicOperations.ZeroMemory(report);
+            throw;
+        }
     }
 
     /// <summary>
@@ -511,9 +555,14 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
         while (stopwatch.ElapsedMilliseconds < timeLimitMs)
         {
             var report = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
-            if ((report.Span[OtpConstants.FeatureReportDataSize] & OtpConstants.SlotWriteFlag) == 0)
+            try
             {
-                return;
+                if ((report[OtpConstants.FeatureReportDataSize] & OtpConstants.SlotWriteFlag) == 0)
+                    return;
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(report);
             }
 
             await Task.Delay(pollIntervalMs, cancellationToken).ConfigureAwait(false);
@@ -548,10 +597,17 @@ internal sealed class OtpHidProtocol : IOtpHidProtocol, IAsyncDisposable
 
             // Get current programming sequence
             var statusReport = await ReadFeatureReportAsync(cancellationToken).ConfigureAwait(false);
-            var programmingSequence = statusReport.Span[OtpConstants.StatusOffsetProgSeq];
-
-            _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {ByteCount} bytes",
-                programmingSequence, statusReport.Length);
+            int programmingSequence;
+            try
+            {
+                programmingSequence = statusReport[OtpConstants.StatusOffsetProgSeq];
+                _logger.LogDebug("Initial programming sequence: {ProgSeq}, statusReport: {ByteCount} bytes",
+                    programmingSequence, statusReport.Length);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(statusReport);
+            }
 
             // Send frame as 8-byte feature reports
             report = new byte[OtpConstants.FeatureReportSize];

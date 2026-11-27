@@ -48,6 +48,23 @@ Record of Dennis's review of `pass-2-applet-master.md`, card by card over voice 
 | [AG-31](#ag-31-november-21-follow-up-approvals) | 2026-11-21 | Dennis approved the OATH reset follow-up, CTAP reset rediscovery, WebAuthn continuation limit, PIV adoption of X13 and legacy-derived retry refusal; requested a Rust/Python PIV PIN-only design comparison and directed public NuGet.org sourcing for NativeShims. | Approved within the scope below; PIV PIN-only API design and NativeShims availability verification pending |
 | [AG-32](#ag-32-previewsign-empty-generated-handle) | 2026-11-21 | Dennis explicitly approved accepting an empty but present previewSign signing handle. | Approved: amends only the CTAP-IMP-040 handle-length facet and unblocks WA-IMP-019 |
 | [AG-33](#ag-33-review-adjudication-and-compatibility) | 2026-11-21 | Dennis approved recording human review adjudication, sibling SDK harmony, and compatibility with existing .NET V1 provisioning. | Approved; existing specific decisions stand |
+| [AG-34](#ag-34-core-atr-byte-hashing) | 2026-11-22 | Dennis approved the byte-hash facet of CORE-B6-C016 (FPT-082). | Approved for hashing only; null-operator behavior remains open |
+| [AG-35](#ag-35-core-pcsc-enumeration-context) | 2026-11-23 | Dennis approved moving PC/SC enumeration context cleanup earlier, provided the context is no longer needed when disposed or afterward. | Approved for CORE-B1-C002 (FPT-023) within the lifetime bound below |
+| [AG-36](#ag-36-core-tlv-decoder-ownership) | 2026-11-23 | Dennis approved writable TLV dictionary results and regression-tested cleanup of unpublished copies. | Approved for CORE-C-C006 (FPT-088) within the ownership scope below |
+| [AG-37](#ag-37-core-console-credential-cancellation) | 2026-11-23 | Dennis approved simple cancellation checks for queued keys, confirmation, and redirected line reads. | Approved for CORE-C-C004 (FPT-086) within the synchronous scope below |
+| [AG-38](#ag-38-core-pcsc-post-open-logging) | 2026-11-24 | Dennis chose to skip hardening the three PC/SC slot success logs against exceptions. | Implementation skipped for CORE-B1-C009 (FPT-030); current behavior retained |
+| [AG-39](#ag-39-core-chained-apdu-response-cleanup) | 2026-11-24 | Dennis approved clearing consumed APDU response fragments and the live assembly buffer. | Approved for the receiver-only facet of CORE-B6-C002 (FPT-068) |
+| [AG-40](#ag-40-core-scp03-pre-handoff-key-cleanup) | 2026-11-24 | Dennis approved disposing derived SCP03 session keys on pre-handoff failure. | Approved for the pre-handoff facet of CORE-B6-C006 (FPT-072) |
+| [AG-41](#ag-41-core-pcsc-listener-success-cadence) | 2026-11-24 | Dennis approved a 1,000 ms combined native and managed interval after successful PC/SC listener status calls. | Approved for CORE-B1-C003 (FPT-024), including PnP-only success |
+| [AG-42](#ag-42-core-macos-hid-enumeration-null-handles) | 2026-11-24 | Dennis approved treating a null macOS HID manager as a scan error and a null copied device set as empty. | Approved for CORE-B3-C002 (FPT-041) |
+| [AG-43](#ag-43-core-windows-hid-listener-disposed-restart) | 2026-11-24 | Dennis approved refusing to restart a disposed Windows HID listener and testing that it cannot attempt registration. | Approved for the disposed-restart facet of CORE-B4-C002 (FPT-049) only |
+| [AG-44](#ag-44-core-timeout-scalar-ownership) | 2026-11-24 | Dennis approved a nullable scalar for the read-side challenge-response timeout and requested a sibling comparison. | Approved for CORE-A-C003 (FPT-003); Python and Android checked, Rust unverified |
+| [AG-45](#ag-45-core-ordinary-capability-mask-width) | 2026-11-24 | Dennis approved `DeviceCapabilities : uint` and full ordinary-mask decoding with a 32-bit SDK limit. | Approved for the residual width facet of CORE-A-C006 (FPT-006) |
+| [AG-46](#ag-46-core-duplicate-device-information-tags) | 2026-11-24 | Dennis approved ignoring repeated unknown device-information tags under the forward-compatibility policy. | Approved for the top-level duplicate facet of CORE-A-C016 (FPT-016) |
+| [AG-47](#ag-47-core-typed-hid-receive-ownership) | 2026-11-24 | Dennis approved caller-owned arrays for the two typed HID receives and cleanup of consumed reports. | Approved for CORE-B5-C005 (FPT-062) within the two-API exception below |
+| [AG-48](#ag-48-core-scp-key-reference-value) | 2026-11-24 | Dennis approved two-field SCP key references with field-based equality and a zero-pair default encoding. | Approved for CORE-B6-C008 (FPT-074) |
+| [AG-49](#ag-49-core-startup-executioncontext-flow) | 2026-11-24 | Dennis chose to keep current startup `ExecutionContext` flow on four Core thread starts. | Policy only for FPT-031 (CORE-B1-C010 and CORE-B3-C006); no runtime change |
+| [AG-50](#ag-50-core-custom-hid-fallback-and-sealed-finders) | 2026-11-24 | Dennis retained the custom HID fallback disposal policy and requested sealing the two concrete finders. | CORE-B1-C005 (FPT-026): retain fallback behavior; seal `FindYubiKeys` and `FindHidInterfaces` |
 
 ### AG-8 classification run
 
@@ -704,6 +721,209 @@ Dennis confirmed these directions in chat on 2026-11-21 and instructed the team 
 Keep existing approved decisions. Bring concrete conflicts with security, protocol, or previously
 approved legacy support limits to Dennis rather than reversing those decisions silently. This guidance
 does not commission a new broad audit or hardware test campaign.
+
+### AG-34 Core ATR byte hashing
+
+Dennis explicitly approved the hashing-only facet of `CORE-B6-C016` (`FPT-082`) on 2026-11-22
+(`Interview`). `AnswerToReset.GetHashCode()` uses a local `HashCode`, calls `AddBytes(_bytes)`,
+and returns `ToHashCode()`. The regression checks that independent equal ATRs hash equally and
+that a hash set finds the equal ATR but not a distinct ATR, without requiring distinct hashes.
+The null/null operator question remains open; no equality operator, representation, wire format,
+or provisioning change is approved. This decision does not close the Core pass.
+
+### AG-35 Core PC/SC enumeration context
+
+Dennis approved the acquired-context cleanup facet of `CORE-B1-C002` (`FPT-023`) on 2026-11-23
+(`Interview`), provided the context is no longer needed at disposal or later. The enumeration worker
+finishes its synchronous PC/SC calls and returns materialized reader names and copied ATRs, not the
+context. Later connections acquire their own context. Caller cancellation or a bounded wait does not
+end the worker's ownership. Enter the context's `using` scope after successful establishment and
+before listing readers; preserve reader-name cleanup before disposal and leave statuses, exceptions,
+and native release reporting unchanged. This approves a disposal attempt, not native release proof,
+and does not close the Core pass or the separate listener findings.
+
+### AG-36 Core TLV decoder ownership
+
+Dennis approved the `CORE-C-C006` (`FPT-088`) facet on 2026-11-23 (`Interview`). Both
+`DecodeDictionary` overloads return `IDictionary<int, Memory<byte>>` with independent writable
+values. Callers clear sensitive successful results when needed; the SDK clears replaced values and
+unreturned copies on failure. `TryFindValue` transfers the first matched parser array and clears
+skipped or otherwise unreturned arrays. Borrowed input, parser grammar, and dictionary ordering
+remain unchanged. This supersedes the proposed (never implemented) `MemoryMarshal` helper.
+`Tlv.Value`, `AsMemory()`, and disposal remain unchanged. As in AG-27, the SDK still clears sensitive
+storage it owns; this is not a general zeroing waiver or Core-pass closure.
+
+### AG-37 Core console credential cancellation
+
+Dennis approved `CORE-C-C004` (`FPT-086`) on 2026-11-23 (`Interview`): “I approve Card 4,
+just dont make it too complex”. Keep cancellation cooperative and local: check before prompting or
+consuming input, around queued key reads and redirected `ReadLine`, before the confirmation entry, and
+before handing off a credential. Retain the existing cleanup for unreturned owners and character buffers.
+An active synchronous `ReadLine` is not interrupted; a returned line can be consumed and rejected, and its
+managed string cannot be cleared. Checks do not make cancellation atomic with input or return. No queue
+flush, background read, async API, or change to credential input policy is approved here.
+
+### AG-38 Core PC/SC post-open logging
+
+Dennis decided on 2026-11-24 to skip the proposed `CORE-B1-C009` (`FPT-030`) hardening: “Good skip this one”.
+Retain the current behavior of the three post-open Information logs in `PcscConnectionSlot` (raw,
+built-in registered, and external registered) and the expectation that application logging providers
+do not throw at these sites. No failure was observed here; the source-derived exception and ownership
+gap is neither disproven nor fixed. No factory, registration, native behavior, or broader SDK logging
+policy changes are approved by this decision.
+
+### AG-39 Core chained APDU response cleanup
+
+Dennis approved the receiver-only facet of `CORE-B6-C002` (`FPT-068`) on 2026-11-24 (`Interview`).
+Clear consumed fragment owners after copying their data, including the terminal fragment after copying
+its status. Clear the current assembly buffer on all chained exits, including continuation failure.
+Keep the original single-response owner and the independent assembled result intact for the caller.
+Wire behavior and recovery notification are unchanged. Retired writer arrays, transport and formatter
+buffers, and separate SCP copies remain open; this does not close the compound finding.
+
+### AG-40 Core SCP03 pre-handoff key cleanup
+
+Dennis approved the pre-handoff facet of `CORE-B6-C006` (`FPT-072`) on 2026-11-24 (`Interview`).
+Immediately after derivation returns, the small internal `CompleteScp03Init` step takes the derived
+`SessionKeys` owner. It disposes those keys on failure or transfers them to the returned state on
+success, without changing the supplied static keys. This does not change cryptogram derivation,
+response admission or the optional-DEK contract, or address failures before derivation returns or
+other provider-owned copies. The remaining facets stay open.
+
+### AG-41 Core PC/SC listener success cadence
+
+Dennis approved `CORE-B1-C003` (`FPT-024`) on 2026-11-24 (`Interview`). Keep the native status
+timeout at 1,000 ms. On success, including PnP-only calls, wait only the positive remainder of that
+interval before the next reader-list check. Failure backoff, reader-name hints, and native state flags
+are unchanged. Reader-list checks may be delayed by up to the remainder; transient changes between
+checks may be missed. Stop wakes the managed wait but must still cancel and join the native worker
+as before. This wake is not native drain proof. Partial startup and timed-out restart remain open.
+
+### AG-42 Core macOS HID enumeration null handles
+
+Dennis approved `CORE-B3-C002` (`FPT-041`) on 2026-11-24 (`Interview`). A null result from
+`IOHIDManagerCreate` fails the scan with `PlatformApiException`. A null result from
+`IOHIDManagerCopyDevices` yields an empty HID snapshot. It does not distinguish an absent device set
+from every possible native failure; Dennis accepted that the empty result can remove previously
+published HID interfaces. Guard before native use and release only acquired handles. The small internal
+enumeration seam supplies portable managed coverage, not macOS native qualification.
+
+### AG-43 Core Windows HID listener disposed restart
+
+Dennis approved only the disposed-restart facet of `CORE-B4-C002` (`FPT-049`) and its registration-attempt
+regression on 2026-11-24 (`Interview`). Windows HID `Start()` throws `ObjectDisposedException` before
+allocating callback state or attempting registration on a disposed listener. This does not change `Stop()`,
+disposal, live restart, or platform-wide lifecycle contracts. Failed unregister, callback rooting and
+exception handling, partial startup, and finalizer lifetime issues remain open. The fake registration
+test is managed evidence only. This is the last initial engineering candidate, not Core-pass closure.
+
+### AG-44 Core timeout scalar ownership
+
+Dennis approved the nullable-byte contract for `DeviceInfo.ChallengeResponseTimeout` (`CORE-A-C003`,
+`FPT-003`) on 2026-11-24 (`Interview`). Preserve a reported byte from 0 through 255 and return `null`
+when omitted. This supersedes the proposed (never implemented) owned-memory copy and leaves the
+read-side one-byte validation and the separate write-side 0–60 validation unchanged. There is no
+reader cleanup or wire-format change.
+
+**D1 sibling comparison.** [ykman at `4ca60f70`][ag44-ykman] and [Android at `f4626856`][ag44-android]
+both decode numeric metadata and map absence to zero. ykman reads `FF` as 255, while Android's signed
+Java byte exposes it as −1 with the same raw bits; Android's [reader][ag44-android-reader] and ykman
+accept variable-width values. The .NET scalar preserves the existing distinction between absent and
+reported zero, unsigned byte values, strict one-byte response width, and separate write bound. Rust
+`90940e9bb734e4daec04bdb17dae155ff3c85c57` remains unverified because its pinned source checkout was unavailable.
+
+[ag44-ykman]: https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/management.py#L353-L355
+[ag44-android]: https://github.com/Yubico/yubikit-android/blob/f46268563437ac52910001222a77741d229b9b99/management/src/main/java/com/yubico/yubikit/management/DeviceInfo.java#L242-L244
+[ag44-android-reader]: https://github.com/Yubico/yubikit-android/blob/f46268563437ac52910001222a77741d229b9b99/management/src/main/java/com/yubico/yubikit/management/DeviceInfo.java#L438-L447
+
+### AG-45 Core ordinary capability mask width
+
+Dennis approved the residual width facet of `CORE-A-C006` (`FPT-006`) on 2026-11-24 (`Interview`).
+Change the alpha enum's public underlying type from `int` to `uint`. Decode the full ordinary big-endian
+mask, accepting leading zeroes and retaining bits 0–31. Nonzero overflow is a tag-specific
+`BadResponseException`, not evidence of malformed firmware data. This is a bounded SDK API, not a raw-byte
+readback contract. Preserve the unsigned two-byte fix in `35590eeee`, the two-byte configuration write
+limit and wire format, and the separate FIPS and duplicate-tag behavior.
+
+**D1 sibling comparison.** [ykman at `4ca60f70`][ag45-ykman] reads the full unsigned integer without a
+32-bit ceiling. [Android at `f4626856`][ag44-android-reader] accumulates into a Java `int` and keeps the
+low 32 bits on overflow. .NET instead rejects overflow. The [Configuration Reference][ag45-vendor] does
+not specify a fixed or future capability-field width. Rust `90940e9bb734e4daec04bdb17dae155ff3c85c57`
+remains unverified because the pinned source checkout was unavailable.
+
+[ag45-ykman]: https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/management.py#L357-L382
+[ag45-vendor]: https://developers.yubico.com/yubikey-manager/Config_Reference.html#_device_information
+
+### AG-46 Core duplicate device-information tags
+
+Dennis approved the top-level duplicate facet of `CORE-A-C016` (`FPT-016`) on 2026-11-24 (`Interview`),
+conditioned on forward compatibility. Ignore well-formed unknown fields even when they repeat. Reject
+repeats of any field the top-level decoder consumes, even if identical, with `ArgumentException`.
+Malformed TLV encoding is still rejected; per-page continuation checks and nested qualifier behavior
+are unchanged. This replaces the blanket top-level duplicate rule retained by AG-45 without
+changing mask width or timeout handling. Raw response and unknown-field preservation remain open.
+At Dennis's request, log ignored tags at Trace with tag ID and length only, never value bytes.
+Known duplicates already carry the tag in the exception and are not logged here.
+
+**D1 sibling comparison.** [ykman at `4ca60f70`][ag46-ykman] and [Android at `f4626856`][ag46-android]
+overwrite duplicates within and across pages. .NET retains rejection of ambiguous known metadata rather
+than silently choosing a value. The [Configuration Reference][ag45-vendor] says “once for each TAG” for
+listed fields, but does not prescribe a duplicate error or a rule for unknown tags. The pinned Rust
+checkout was unavailable; no Rust behavior or three-way consensus is asserted here.
+
+[ag46-ykman]: https://github.com/Yubico/yubikey-manager/blob/4ca60f706af930459138d8dc0f0f953480e1c7a4/yubikit/management.py#L655-L662
+[ag46-android]: https://github.com/Yubico/yubikit-android/blob/f46268563437ac52910001222a77741d229b9b99/management/src/main/java/com/yubico/yubikit/management/ManagementSession.java#L381-L389
+
+### AG-47 Core typed HID receive ownership
+
+Dennis approved `CORE-B5-C005` (`FPT-062`) on 2026-11-24 (`Interview`): the two typed HID
+`ReceiveAsync` methods return `Task<byte[]>`; all other buffer APIs follow existing memory rules.
+This API-specific exception covers `IFidoHidConnection.ReceiveAsync`, `IOtpHidConnection.ReceiveAsync`,
+and their direct implementation/forwarding paths. Built-in owners already publish whole arrays; the
+synchronous expert facades can transfer these without backing-array recovery or an extra copy.
+
+Successful receive transfers independent unpooled storage. Custom typed providers must not reuse it;
+SDK adapters copy validated legacy reports without mutating potentially shared provider storage.
+Protocols clear consumed reports and retain the published OTP status backing array and successful
+logical results. Native admission, drain, framing, `IHidConnection.GetReport()` and logical response
+contracts are unchanged. This is managed ownership evidence, not platform qualification or all-copy erasure.
+
+### AG-48 Core SCP key reference value
+
+Dennis approved `CORE-B6-C008` (`FPT-074`) on 2026-11-24 (`Interview`). Store only KID and KVN;
+encode the current fields into a new two-byte buffer and compare by field values. Zero initialization,
+parameterless construction, and explicit `(0, 0)` all encode `00 00`; the named factory default is still
+`01 FF`. For tag `83`, this replaces an empty encoding with `83 02 00 00` for zero initialization and
+does not imply device acceptance. Explicit reference byte order, nullable OCE absence and fallback,
+and the separate AG-30 `KeyReplacement` policy are unchanged.
+
+### AG-49 Core startup ExecutionContext flow
+
+Dennis chose to “Keep current behaviour” for `FPT-031` (`CORE-B1-C010` and `CORE-B3-C006`) on
+2026-11-24. Retain the current thread-start behavior for the lazy PC/SC connection owner, the macOS
+FIDO and OTP connection owners, and the macOS HID listener. When flow is enabled, `Thread.Start`
+captures the starting caller's execution context; already-suppressed flow remains suppressed.
+
+A long-lived thread can retain startup `AsyncLocal` values and other ambient state. This is a
+documented mechanism, not a confirmed bug or a promise of per-operation correlation. Preserving
+potential Windows PC/SC caller-identity behavior informed the decision; it does not qualify native
+identity behavior. The desktop PC/SC listener, other task and reactor paths, and the existing
+Windows/Linux HID suppression policies are outside this decision and unchanged. This is not a
+global context-flow policy or Core-pass closure.
+
+### AG-50 Core custom HID fallback and sealed finders
+
+Dennis chose on 2026-11-24 (`Interview`) to retain release-on-disposal-failure for the registered
+FIDO/OTP compatibility wrappers (`CORE-B1-C005`, `FPT-026`). Public SDK discovery cannot inject a
+custom HID backend; the three built-in backends bypass these wrappers and own their native claims.
+The existing FIDO test marks fake teardown complete before throwing; it does not show a live handle
+escaping cleanup. The conditional ownership gap is neither disproven nor fixed, and the separate
+custom discovery-lease behavior is unchanged. Revisit only if an explicit design change adds a
+registered custom HID path.
+
+Dennis expects no further implementations through these concrete finders. Seal `FindYubiKeys` and
+`FindHidInterfaces`; the built-in HID implementations and registered wrappers are already sealed.
+Keep the finder interfaces, constructors, internal seams, and caller-supplied raw connection contracts.
 
 ### AG-14 firmware rule detail
 

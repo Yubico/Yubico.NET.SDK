@@ -309,7 +309,7 @@ internal class FidoHidProtocol(
         var terminalResponseDrained = false;
         try
         {
-            int responseLength = ValidateTerminalResponse(initPacket.Span, channelId, expectedCommand);
+            int responseLength = ValidateTerminalResponse(initPacket, channelId, expectedCommand);
             byte[] responseData = _responseBufferFactory(responseLength);
             var ownershipTransferred = false;
             try
@@ -345,6 +345,10 @@ internal class FidoHidProtocol(
             WarnAboutTerminalValidationFailure(promptFailure.SourceException);
             throw;
         }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(initPacket);
+        }
     }
 
     private void WarnAboutTerminalValidationFailure(Exception promptFailure)
@@ -361,7 +365,7 @@ internal class FidoHidProtocol(
         }
     }
 
-    private async Task<(ReadOnlyMemory<byte> Packet, bool CancelRequested, ExceptionDispatchInfo? PromptFailure)>
+    private async Task<(byte[] Packet, bool CancelRequested, ExceptionDispatchInfo? PromptFailure)>
         ReceiveTerminalPacketAsync(uint channelId, UserPresenceNotification userPresenceNotification,
             CancellationToken exchangeToken, CancellationToken callerToken)
     {
@@ -370,11 +374,20 @@ internal class FidoHidProtocol(
 
         // Get initialization packet, handling keep-alive
         var initPacket = await _connection.ReceiveAsync(exchangeToken).ConfigureAwait(false);
-        while (IsKeepAlivePacket(initPacket.Span))
+        while (IsKeepAlivePacket(initPacket))
         {
-            ValidateInitPacket(initPacket.Span, channelId);
+            bool userPresenceNeeded;
+            try
+            {
+                ValidateInitPacket(initPacket, channelId);
+                userPresenceNeeded = promptFailure is null && IsUserPresenceKeepAlive(initPacket);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(initPacket);
+            }
 
-            if (promptFailure is null && IsUserPresenceKeepAlive(initPacket.Span))
+            if (userPresenceNeeded)
             {
                 try
                 {
@@ -451,8 +464,7 @@ internal class FidoHidProtocol(
     private async Task ReadResponseDataAsync(ReadOnlyMemory<byte> initPacket, byte[] responseData,
         int responseLength, uint channelId, CancellationToken exchangeToken)
     {
-        // responseData is a separate accumulation owner. This reader copies connection-returned reports
-        // without clearing their storage; clearing the result alone does not erase those incoming copies.
+        // The caller owns the initial packet; this method owns each continuation it receives.
         int initDataLength = Math.Min(responseLength, CtapConstants.InitDataSize);
         initPacket.Span.Slice(CtapConstants.InitHeaderSize, initDataLength).CopyTo(responseData);
 
@@ -461,13 +473,20 @@ internal class FidoHidProtocol(
         while (bytesReceived < responseLength)
         {
             var contPacket = await _connection.ReceiveAsync(exchangeToken).ConfigureAwait(false);
-            ValidateContinuationPacket(contPacket.Span, channelId, expectedSequence);
-            int contDataLength = Math.Min(responseLength - bytesReceived, CtapConstants.ContinuationDataSize);
-            contPacket.Span.Slice(CtapConstants.ContinuationHeaderSize, contDataLength)
-                .CopyTo(responseData.AsSpan(bytesReceived));
+            try
+            {
+                ValidateContinuationPacket(contPacket, channelId, expectedSequence);
+                int contDataLength = Math.Min(responseLength - bytesReceived, CtapConstants.ContinuationDataSize);
+                contPacket.AsSpan(CtapConstants.ContinuationHeaderSize, contDataLength)
+                    .CopyTo(responseData.AsSpan(bytesReceived));
 
-            bytesReceived += contDataLength;
-            expectedSequence++;
+                bytesReceived += contDataLength;
+                expectedSequence++;
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(contPacket);
+            }
         }
     }
 

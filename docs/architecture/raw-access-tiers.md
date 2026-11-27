@@ -376,10 +376,13 @@ for either case. These Core-only inventories do not certify other SDK-wide bound
 
 ## Sensitive Buffers
 
-FIDO and OTP protocols clear selected SDK-owned outgoing payload copies, frames, and report staging in
-`finally`. Incoming report arrays, accumulated responses, transport staging, and applet-decoded output
-are separate owners; cleanup of one does not erase the others. Caller-owned request memory remains
-unchanged. Retain sensitive response data only as long as needed and clear mutable storage you own.
+Typed `IFidoHidConnection.ReceiveAsync` and `IOtpHidConnection.ReceiveAsync` return caller-owned
+`Task<byte[]>` results; custom typed implementations must transfer independent arrays. SDK adapters
+copy validated legacy `IHidConnection.GetReport()` results without modifying the provider's storage.
+The protocols clear consumed report arrays after use, independently of transport staging and assembly
+cleanup. The OTP status view retains its published backing array. Logical response API types and
+caller-owned request memory are unchanged. Clearing one owner does not erase other copies.
+See [typed HID receive ownership](../MEMORY-MANAGEMENT.md#typed-hid-receive-ownership).
 `ReadOnlyMemory<byte>` alone supplies neither a disposal contract nor permission to cast its backing
 storage writable. A separately cleared copy also leaves the original intact. For SmartCard responses,
 use the explicit `ApduResponse.Clear()` owner API after inspecting status.

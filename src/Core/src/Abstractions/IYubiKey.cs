@@ -131,8 +131,8 @@ public interface IYubiKey
     ///     <para>
     ///         This is last-known metadata. A monitor replaces changed metadata on a retained object and emits
     ///         <see cref="DeviceUpdated"/>; a failed metadata read preserves the previous successful snapshot.
-    ///         Replacing the snapshot leaves the scalar fields of a previously returned value unchanged.
-    ///         <see cref="DeviceInfo.ChallengeResponseTimeout"/> retains its source-memory ownership qualification.
+    ///         Replacing the snapshot leaves the scalar fields, including the reported timeout, of a previously
+    ///         returned value unchanged.
     ///     </para>
     ///     <para>
     ///         Metadata may be stale after configuration changes or disconnection. A retained device object

@@ -35,7 +35,7 @@ public interface IFindHidInterfaces
 }
 
 /// <summary>Enumerates platform HID interfaces and filters them to the Yubico vendor ID.</summary>
-public class FindHidInterfaces : IFindHidInterfaces
+public sealed class FindHidInterfaces : IFindHidInterfaces
 {
     private readonly ILogger<FindHidInterfaces> _logger;
     private readonly Func<IReadOnlyList<IHidInterface>> _getPlatformDevices;

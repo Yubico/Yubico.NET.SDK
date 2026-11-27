@@ -89,8 +89,8 @@ have already changed.
 Each call performs device I/O, but the firmware field also uses the version captured during session
 initialization: that default takes precedence over the ordinary firmware tag, while a non-final qualifier
 can replace it. A firmware override changes session policy, not this returned value. Live reads and writes
-do not refresh `IYubiKey.CachedDeviceInfo` or a test fixture's initial snapshot. The current `DeviceInfo`
-also contains memory-backed timeout data; copying the record or a result wrapper does not clone those bytes.
+do not refresh `IYubiKey.CachedDeviceInfo` or a test fixture's initial snapshot. The reported
+challenge-response timeout is a nullable byte; `null` means the device did not report it.
 
 Core decodes the reported FIPS capability and approval masks separately from ordinary application masks.
 These are metadata, not proof that a particular operation ran in an approved configuration. `IsFips` is

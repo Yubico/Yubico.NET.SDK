@@ -24,9 +24,9 @@ namespace Yubico.YubiKit.Management.UnitTests.AuditV2;
 public sealed class ManagementAuditReproTests
 {
     [Theory]
-    [InlineData(-1)]
-    [InlineData(0x10001)]
-    public void GetBytes_DoesNotTruncateCapabilityRequests(int mask)
+    [InlineData(uint.MaxValue)]
+    [InlineData(0x10001u)]
+    public void GetBytes_DoesNotTruncateCapabilityRequests(uint mask)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { UsbEnabled = (DeviceCapabilities)mask }.GetBytes());
         Assert.Throws<ArgumentOutOfRangeException>(() => new DeviceConfig { NfcEnabled = (DeviceCapabilities)mask }.GetBytes());

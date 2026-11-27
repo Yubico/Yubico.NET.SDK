@@ -31,7 +31,7 @@ internal sealed class LinuxOtpHidNativeOwner
     private Action? _work;
     // Independent of the dispatch delegate: loop failure must terminalize accepted work.
     private TaskCompletionSource? _workCompletion;
-    private TaskCompletionSource<ReadOnlyMemory<byte>>? _reader;
+    private TaskCompletionSource<byte[]>? _reader;
     private byte[]? _outputCopy;
     private byte[]? _inputCopy;
     private LinuxFileSafeHandle? _handle;
@@ -242,18 +242,17 @@ internal sealed class LinuxOtpHidNativeOwner
 
     /// <summary>Admits one feature GET into worker-allocated eight-byte storage and returns its actual completion task.</summary>
     /// <param name="token">Checked at entry and dispatch; cancellation cannot detach a submitted GET or free its operation slot.</param>
-    /// <returns>Caller-owned exact eight-byte array storage exposed through a read-only view after a complete native GET.</returns>
+    /// <returns>A whole independent, unpooled eight-byte array transferred after a complete native GET.</returns>
     /// <remarks>
     /// Failed/partial staging is cleared before failure. Successfully returned storage is transferred
-    /// to the caller and never cleared by this owner, including at shutdown. The view provides no
-    /// disposal/zeroing API; sensitive output requires caller-managed backing-storage cleanup, and a
-    /// copy alone does not erase the original. A successful GET can complete successfully despite
+    /// to the caller and never cleared by this owner, including at shutdown. The caller clears sensitive
+    /// contents directly with <c>CryptographicOperations.ZeroMemory(report)</c> after use. A GET can succeed despite
     /// cancellation after dispatch. Admission is locked, overlap is rejected, and continuations run asynchronously.
     /// </remarks>
-    internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken token)
+    internal Task<byte[]> ReceiveAsync(CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        var reader = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var reader = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (_sync)
         {
             Admit();
@@ -264,7 +263,7 @@ internal sealed class LinuxOtpHidNativeOwner
         return reader.Task;
     }
 
-    private void Receive(CancellationToken token, TaskCompletionSource<ReadOnlyMemory<byte>> reader)
+    private void Receive(CancellationToken token, TaskCompletionSource<byte[]> reader)
     {
         Exception? error = null;
         bool cancelled = token.IsCancellationRequested;

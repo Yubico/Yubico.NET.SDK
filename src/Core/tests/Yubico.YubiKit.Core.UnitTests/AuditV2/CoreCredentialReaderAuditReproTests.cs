@@ -75,6 +75,27 @@ public class CoreCredentialReaderAuditReproTests
             $"First credential buffer was not cleared: {Convert.ToHexString(seeded.AsSpan(0, 8))}");
     }
 
+    [Fact]
+    public void ReadCredentialWithConfirmation_CancelledAtConfirmPrompt_LeavesMatchingInputUnread()
+    {
+        var options = CredentialReaderOptions.ForPin();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        var console = new CancelOnConfirmPromptConsole(options.ConfirmPrompt, cts);
+        console.Inner.EnqueueKeys("123456");
+        console.Inner.EnqueueKey(ConsoleKey.Enter);
+        console.Inner.EnqueueKeys("123456");
+        console.Inner.EnqueueKey(ConsoleKey.Enter);
+        var reader = new ConsoleCredentialReader(console);
+
+        var error = Assert.Throws<OperationCanceledException>(() =>
+        {
+            using var unexpectedResult = reader.ReadCredentialWithConfirmation(options, cts.Token);
+        });
+
+        Assert.Equal(cts.Token, error.CancellationToken);
+        Assert.Equal(7, console.KeysRead);
+    }
+
     /// <summary>Positive control for g): a policy-conforming redirected PIN is still accepted.</summary>
     [Fact]
     [Trait("Audit", "YESDK-1634")]
@@ -171,12 +192,17 @@ public class CoreCredentialReaderAuditReproTests
         : IConsoleInputSource
     {
         public MockConsoleInput Inner { get; } = new();
+        public int KeysRead { get; private set; }
 
         public bool IsInteractive => true;
 
         public bool KeyAvailable => Inner.KeyAvailable;
 
-        public ConsoleKeyInfo ReadKey(bool intercept) => Inner.ReadKey(intercept);
+        public ConsoleKeyInfo ReadKey(bool intercept)
+        {
+            KeysRead++;
+            return Inner.ReadKey(intercept);
+        }
 
         public string? ReadLine() => Inner.ReadLine();
 

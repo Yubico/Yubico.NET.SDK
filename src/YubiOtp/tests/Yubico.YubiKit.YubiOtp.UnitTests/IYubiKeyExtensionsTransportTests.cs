@@ -275,7 +275,7 @@ public class IYubiKeyExtensionsTransportTests
         public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("session-init probe failure");
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("session-init probe failure");
     }
 

@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Yubico.YubiKit.Core.Abstractions;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Protocols.Fido.Hid;
-using Yubico.YubiKit.Core.Protocols.SmartCard.Apdu;
 using Yubico.YubiKit.Core.Transports.Hid;
 using Yubico.YubiKit.Core.Transports.SmartCard;
 
@@ -538,8 +537,8 @@ public class DeviceConnectionRegistryTests
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(Array.Empty<byte>());
     }
 
     private sealed class FakeOtpHidConnection : FakeDisposableConnection, IOtpHidConnection
@@ -551,7 +550,7 @@ public class DeviceConnectionRegistryTests
         public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(Array.Empty<byte>());
     }
 }

@@ -340,7 +340,7 @@ Yubico.YubiKit.Core.Devices.DeviceFlags.TouchEject = 128 -> Yubico.YubiKit.Core.
 Yubico.YubiKit.Core.Devices.DeviceInfo
 Yubico.YubiKit.Core.Devices.DeviceInfo.AutoEjectTimeout.get -> ushort
 Yubico.YubiKit.Core.Devices.DeviceInfo.AutoEjectTimeout.init -> void
-Yubico.YubiKit.Core.Devices.DeviceInfo.ChallengeResponseTimeout.get -> System.ReadOnlyMemory<byte>
+Yubico.YubiKit.Core.Devices.DeviceInfo.ChallengeResponseTimeout.get -> byte?
 Yubico.YubiKit.Core.Devices.DeviceInfo.ChallengeResponseTimeout.init -> void
 Yubico.YubiKit.Core.Devices.DeviceInfo.DeviceFlags.get -> Yubico.YubiKit.Core.Devices.DeviceFlags
 Yubico.YubiKit.Core.Devices.DeviceInfo.DeviceFlags.init -> void
@@ -507,7 +507,7 @@ Yubico.YubiKit.Core.PlatformInteropException.PlatformInteropException(string! me
 Yubico.YubiKit.Core.ProductAtrs
 Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection
 Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.PacketSize.get -> int
-Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
 Yubico.YubiKit.Core.Protocols.Fido.Hid.IFidoHidConnection.SendAsync(System.ReadOnlyMemory<byte> packet, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Core.Protocols.Otp.Hid.ChecksumUtils
 Yubico.YubiKit.Core.Protocols.Otp.Hid.OtpConstants
@@ -696,7 +696,7 @@ Yubico.YubiKit.Core.Transports.Hid.IHidInterface.DescriptorInfo.get -> Yubico.Yu
 Yubico.YubiKit.Core.Transports.Hid.IHidInterface.InterfaceType.get -> Yubico.YubiKit.Core.Transports.Hid.HidInterfaceType
 Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection
 Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.FeatureReportSize.get -> int
-Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.ReadOnlyMemory<byte>>!
+Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.ReceiveAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<byte[]!>!
 Yubico.YubiKit.Core.Transports.Hid.IOtpHidConnection.SendAsync(System.ReadOnlyMemory<byte> report, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
 Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator
 Yubico.YubiKit.Core.Transports.Hid.Keyboard.HidCodeTranslator.GetCharacters(byte[]! hidCodes) -> System.Collections.Generic.IEnumerable<char>!
@@ -1116,8 +1116,8 @@ static Yubico.YubiKit.Core.Utilities.MemoryExtensions.TryGetSpan<TKey, TValue>(t
 static Yubico.YubiKit.Core.Utilities.MultiString.GetBytes(string![]! value, System.Text.Encoding! encoding) -> byte[]!
 static Yubico.YubiKit.Core.Utilities.MultiString.GetStrings(byte[]! value, System.Text.Encoding! encoding) -> string![]!
 static Yubico.YubiKit.Core.Utilities.Tlv.Create(System.ReadOnlySpan<byte> data) -> Yubico.YubiKit.Core.Utilities.Tlv!
-static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlyMemory<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.ReadOnlyMemory<byte>>!
-static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlySpan<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.ReadOnlyMemory<byte>>!
+static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlyMemory<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.Memory<byte>>!
+static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeDictionary(System.ReadOnlySpan<byte> tlvData) -> System.Collections.Generic.IDictionary<int, System.Memory<byte>>!
 static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeList(System.ReadOnlyMemory<byte> tlvData) -> Yubico.YubiKit.Core.Utilities.DisposableTlvList!
 static Yubico.YubiKit.Core.Utilities.TlvHelper.DecodeList(System.ReadOnlySpan<byte> tlvData) -> Yubico.YubiKit.Core.Utilities.DisposableTlvList!
 static Yubico.YubiKit.Core.Utilities.TlvHelper.EncodeAndDisposeList(params Yubico.YubiKit.Core.Utilities.Tlv![]! tlvData) -> System.Memory<byte>

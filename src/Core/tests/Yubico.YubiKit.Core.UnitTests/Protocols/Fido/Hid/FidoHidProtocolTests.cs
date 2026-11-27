@@ -468,9 +468,9 @@ public class FidoHidProtocolTests
         byte[] responsePayload = Enumerable.Range(1, CtapConstants.InitDataSize + 1)
             .Select(value => (byte)value)
             .ToArray();
-        connection.QueueResponsePackets(
-            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload),
-            CreateContinuationPacket(TestChannelId, sequence: 1, responsePayload.AsSpan(CtapConstants.InitDataSize)));
+        byte[] first = CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload);
+        byte[] rejected = CreateContinuationPacket(TestChannelId, sequence: 1, responsePayload.AsSpan(CtapConstants.InitDataSize));
+        connection.QueueResponsePackets(first, rejected);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => protocol.SendCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -480,6 +480,8 @@ public class FidoHidProtocolTests
         byte[] partialResponseBuffer = allocatedBuffers[^1];
         Assert.Equal(responsePayload.Length, partialResponseBuffer.Length);
         Assert.All(partialResponseBuffer, value => Assert.Equal(0, value));
+        Assert.All(first, value => Assert.Equal(0, value));
+        Assert.All(rejected, value => Assert.Equal(0, value));
     }
 
     [Fact]
@@ -494,8 +496,8 @@ public class FidoHidProtocolTests
             return buffer;
         });
         byte[] responsePayload = [0xAA, 0xBB, 0xCC];
-        connection.QueueResponsePackets(
-            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload));
+        byte[] terminal = CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, responsePayload);
+        connection.QueueResponsePackets(terminal);
 
         ReadOnlyMemory<byte> response = await protocol.SendCommandAsync(
             CtapConstants.CtapVendorFirst,
@@ -505,6 +507,8 @@ public class FidoHidProtocolTests
         Assert.True(MemoryMarshal.TryGetArray(response, out ArraySegment<byte> responseSegment));
         Assert.Same(allocatedBuffers[^1], responseSegment.Array);
         Assert.Equal(responsePayload, response.ToArray());
+        Assert.All(terminal, value => Assert.Equal(0, value));
+        Assert.All(Assert.IsType<byte[]>(connection.DeliveredInitResponse), value => Assert.Equal(0, value));
     }
 
     [Theory]
@@ -704,10 +708,10 @@ public class FidoHidProtocolTests
         var racedPayload = new byte[CtapConstants.InitDataSize + 20];
         racedPayload.AsSpan().Fill(0x5A);
 
-        connection.QueueResponsePackets(
-            CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]),
-            CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, racedPayload),
-            CreateContinuationPacket(TestChannelId, sequence: 0, racedPayload.AsSpan(CtapConstants.InitDataSize)));
+        byte[] keepAlive = CreateInitPacket(TestChannelId, CtapConstants.CtapHidKeepAlive, [KeepAliveUpNeeded]);
+        byte[] first = CreateInitPacket(TestChannelId, CtapConstants.CtapVendorFirst, racedPayload);
+        byte[] continuation = CreateContinuationPacket(TestChannelId, sequence: 0, racedPayload.AsSpan(CtapConstants.InitDataSize));
+        connection.QueueResponsePackets(keepAlive, first, continuation);
 
         connection.OnResponseDequeued = packet =>
         {
@@ -720,6 +724,9 @@ public class FidoHidProtocolTests
                 CtapConstants.CtapVendorFirst,
                 ReadOnlyMemory<byte>.Empty,
                 cancellationToken: cts.Token));
+
+        Assert.All(new[] { keepAlive, first, continuation }, packet =>
+            Assert.All(packet, value => Assert.Equal(0, value)));
 
         // The continuation frame was consumed, so the next exchange sees its own response rather
         // than the tail of the abandoned one.
@@ -887,7 +894,7 @@ public class FidoHidProtocolTests
     private sealed class FakeFidoHidConnection : IFidoHidConnection, ITerminalWakeControl
     {
         private readonly Queue<byte[]> _responsePackets = new();
-        private readonly TaskCompletionSource<ReadOnlyMemory<byte>> _heldRead =
+        private readonly TaskCompletionSource<byte[]> _heldRead =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
         private byte[]? _lastInitRequest;
         private bool _initResponseSent;
@@ -912,6 +919,7 @@ public class FidoHidProtocolTests
 
         public List<ReadOnlyMemory<byte>> RetainedSentPackets { get; } = [];
         public List<byte[]> SentPacketSnapshots { get; } = [];
+        public byte[]? DeliveredInitResponse { get; private set; }
 
         public void QueueResponsePackets(params byte[][] packets)
         {
@@ -949,7 +957,7 @@ public class FidoHidProtocolTests
             SentPacketSnapshots.Clear();
         }
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (HoldNextReceive)
@@ -961,12 +969,14 @@ public class FidoHidProtocolTests
             if (!_initResponseSent)
             {
                 _initResponseSent = true;
-                return Task.FromResult<ReadOnlyMemory<byte>>(CreateInitResponse());
+                var response = CreateInitResponse();
+                DeliveredInitResponse = response;
+                return Task.FromResult(response);
             }
 
             var packet = _responsePackets.Dequeue();
             OnResponseDequeued?.Invoke(packet);
-            return Task.FromResult<ReadOnlyMemory<byte>>(packet);
+            return Task.FromResult(packet);
         }
 
         public void Dispose()

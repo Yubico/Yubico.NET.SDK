@@ -1,7 +1,6 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Devices;
 using Yubico.YubiKit.Core.Native;
@@ -46,12 +45,7 @@ internal sealed class MacOSHidIOReportConnection : IHidConnection
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(6));
         try
         {
-            ReadOnlyMemory<byte> report = _connection.ReceiveAsync(timeout.Token).GetAwaiter().GetResult();
-            // The FIDO owner dequeues a whole owned array; transfer it rather than leave a second copy behind.
-            if (!MemoryMarshal.TryGetArray(report, out ArraySegment<byte> segment) || segment.Array is not { } array ||
-                segment.Offset != 0 || segment.Count != array.Length)
-                throw new InvalidOperationException("FIDO report owner did not return a whole array.");
-            return array;
+            return _connection.ReceiveAsync(timeout.Token).GetAwaiter().GetResult();
         }
         catch (OperationCanceledException) when (timeout.IsCancellationRequested)
         {

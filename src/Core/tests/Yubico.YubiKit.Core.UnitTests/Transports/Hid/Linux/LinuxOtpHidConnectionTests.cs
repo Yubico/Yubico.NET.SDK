@@ -79,7 +79,7 @@ public class LinuxOtpHidConnectionTests
         connection.Dispose();
         if (!send)
         {
-            var actual = Assert.IsType<Task<ReadOnlyMemory<byte>>>(await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), Token));
+            var actual = Assert.IsType<Task<byte[]>>(await probe.Invocation.Task.WaitAsync(TimeSpan.FromSeconds(5), Token));
             Assert.All((await actual).ToArray(), value => Assert.Equal(0xA7, value));
         }
         Assert.Equal(1, api.Closes);

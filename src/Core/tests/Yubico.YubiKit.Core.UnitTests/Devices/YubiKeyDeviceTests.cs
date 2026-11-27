@@ -422,8 +422,8 @@ public class YubiKeyDeviceTests
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(Array.Empty<byte>());
 
         public void Dispose()
         {
@@ -441,8 +441,8 @@ public class YubiKeyDeviceTests
         public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(ReadOnlyMemory<byte>.Empty);
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult(Array.Empty<byte>());
 
         public void Dispose()
         {

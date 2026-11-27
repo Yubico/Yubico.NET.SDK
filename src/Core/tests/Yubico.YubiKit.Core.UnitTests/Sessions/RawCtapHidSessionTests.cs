@@ -94,7 +94,7 @@ public class RawCtapHidSessionTests
 
     private sealed class ScriptedFidoConnection : IFidoHidConnection
     {
-        private readonly Queue<ReadOnlyMemory<byte>> _responses = new();
+        private readonly Queue<byte[]> _responses = new();
         private byte[]? _initRequest;
         private TaskCompletionSource? _sendHold;
 
@@ -132,7 +132,7 @@ public class RawCtapHidSessionTests
 
         public void ReleaseSend() => _sendHold?.TrySetResult();
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (_initRequest is not null)
@@ -144,7 +144,7 @@ public class RawCtapHidSessionTests
                 payload[13] = 5;
                 payload[14] = 8;
                 _initRequest = null;
-                return Task.FromResult<ReadOnlyMemory<byte>>(CreateInitPacket(uint.MaxValue, 0x06, payload));
+                return Task.FromResult(CreateInitPacket(uint.MaxValue, 0x06, payload));
             }
 
             return Task.FromResult(_responses.Dequeue());

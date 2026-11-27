@@ -81,11 +81,7 @@ internal sealed class LinuxHidIOReportConnection : IHidConnection
     {
         // Deliberately indefinite, as the original Linux blocking hidraw read. No macOS timeout.
         // Raw descriptor-sized reports are not restricted to typed FIDO64.
-        var report = _owner.ReceiveAsync(false, CancellationToken.None).GetAwaiter().GetResult();
-        // Native owner returns an owned exact-length array; transfer it without another copy.
-        return System.Runtime.InteropServices.MemoryMarshal.TryGetArray(report, out var segment) && segment.Array is { } array
-            ? array
-            : throw new InvalidOperationException("Linux HID owner did not return an owned report.");
+        return _owner.ReceiveAsync(false, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     /// <summary>Synchronously sends an unnumbered output payload, preserving its supplied length.</summary>

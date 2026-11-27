@@ -468,13 +468,13 @@ public class HidBackendTests
 
     private sealed class ScriptedOtpHidConnection : IOtpHidConnection
     {
-        private readonly Queue<ReadOnlyMemory<byte>> _reports = new();
+        private readonly Queue<byte[]> _reports = new();
 
         public int FeatureReportSize => OtpConstants.FeatureReportSize;
         public ConnectionType Type => ConnectionType.HidOtp;
         public int ReportsRemaining => _reports.Count;
 
-        public void Enqueue(ReadOnlyMemory<byte> report) => _reports.Enqueue(report);
+        public void Enqueue(byte[] report) => _reports.Enqueue(report);
 
         public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default)
         {
@@ -482,7 +482,7 @@ public class HidBackendTests
             return Task.CompletedTask;
         }
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(_reports.Dequeue());

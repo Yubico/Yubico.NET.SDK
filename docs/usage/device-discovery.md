@@ -162,9 +162,8 @@ the default implementation returns `null`.
 This is **last-known data, not guaranteed-current state**. Monitoring can
 replace the snapshot on a retained object and emit `DeviceUpdated`; a failed metadata read does
 not erase the last successful value. Replacing the snapshot preserves the scalar fields in a value
-already returned to your code. `DeviceInfo.ChallengeResponseTimeout` is a separate storage caveat: it currently
-aliases the input TLV's memory rather than owning an independent copy. Its read-only type does not
-guarantee stable bytes after that owner is changed or cleared. Metadata
+already returned to your code. `DeviceInfo.ChallengeResponseTimeout` is a nullable byte: `null` means
+the device did not report it, not that it reported zero or its default. Metadata
 can be stale after configuration changes, and a retained object can still expose historical data after
 disconnection. Reading the property does not refresh it, and there is no freshness or presence guarantee.
 
@@ -365,9 +364,10 @@ their own lifetimes.
 - Disposal waits for the in-flight scan within its discovery budgets; cancellation is not proof of native
   release. See [monitor lifecycle](../architecture/event-driven-device-discovery.md#monitor-lifecycle-and-disposal).
 
-If a PC/SC listener consumes unexpected CPU, remember that its native timeout is a maximum wait,
-not a minimum sleep: an UNAWARE-state query can return success immediately. The current success-loop
-cadence and partial-start/timeout cleanup paths have separate implementation limitations. Repeated
+The PC/SC listener's native timeout is a maximum wait: an UNAWARE-state query can succeed immediately.
+After success, the listener waits out any remainder of the one-second interval before checking the
+reader list again. This can delay hints, and transient changes between checks can be missed. Stop wakes
+the managed wait but does not prove native drain; partial-start and timeout cleanup are separate. Repeated
 empty discovery is likewise not a native health check: service availability, enumeration context cleanup,
 and nullable macOS manager/device-set handling need their own diagnostics. Preserve the actual backend
 code and outcome rather than inferring a physical disconnect or successful native release from an empty list.

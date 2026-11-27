@@ -510,7 +510,7 @@ public class ApplicationSessionScpTests
             throw new IOException("HID initialization failure");
         }
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("No HID request succeeded.");
 
         public void Dispose() => DisposeCount++;

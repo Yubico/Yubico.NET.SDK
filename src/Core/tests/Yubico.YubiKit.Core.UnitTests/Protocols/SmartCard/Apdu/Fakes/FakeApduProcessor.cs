@@ -23,6 +23,7 @@ internal sealed class FakeApduProcessor : IApduProcessor
 {
     private readonly Queue<Func<ApduResponse>> _responses = new();
     public List<ApduCommand> TransmittedCommands { get; } = [];
+    public List<(bool UseScp, CancellationToken Token)> TransmitOptions { get; } = [];
 
 
     public IApduFormatter Formatter { get; set; } = new FakeApduFormatter();
@@ -35,6 +36,7 @@ internal sealed class FakeApduProcessor : IApduProcessor
         cancellationToken.ThrowIfCancellationRequested();
 
         TransmittedCommands.Add(command);
+        TransmitOptions.Add((useScp, cancellationToken));
 
         if (_responses.Count == 0)
             throw new InvalidOperationException("No response enqueued for transmission");

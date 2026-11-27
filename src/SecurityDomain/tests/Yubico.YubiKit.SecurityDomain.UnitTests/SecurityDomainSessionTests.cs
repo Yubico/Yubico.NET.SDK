@@ -788,29 +788,23 @@ public class SecurityDomainSessionTests
             connection.TransmittedCommands[1]);
     }
 
-    [Fact]
-    public async Task StoreCaIssuerAsync_TransmitsStoreDataWithKlccSkiAndKeyReference()
+    [Theory]
+    [InlineData(false, "00E290000FA60D8001014204010203048302130200")]
+    [InlineData(true, "00E290000FA60D8001014204010203048302130300")]
+    public async Task StoreCaIssuerAsync_TransmitsStoreDataWithKlccSkiAndKeyReference(bool updateReference, string expectedApdu)
     {
-        var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
+        await using var connection = new RecordingSmartCardConnection(OkResponse(), OkResponse());
         using var session = await SecurityDomainSession.CreateAsync(
             connection,
             cancellationToken: TestContext.Current.CancellationToken);
 
+        var reference = new KeyReference(0x13, 0x02);
         await session.StoreCaIssuerAsync(
-            new KeyReference(0x13, 0x02),
+            updateReference ? reference with { Kvn = 0x03 } : reference,
             new byte[] { 0x01, 0x02, 0x03, 0x04 },
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(
-            [
-                0x00, 0xE2, 0x90, 0x00, 0x0F,
-                0xA6, 0x0D,
-                0x80, 0x01, 0x01,
-                0x42, 0x04, 0x01, 0x02, 0x03, 0x04,
-                0x83, 0x02, 0x13, 0x02,
-                0x00
-            ],
-            connection.TransmittedCommands[1]);
+        Assert.Equal(Convert.FromHexString(expectedApdu), connection.TransmittedCommands[1]);
     }
 
     [Fact]

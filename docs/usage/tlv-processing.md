@@ -37,10 +37,13 @@ nesting.
 
 `Tlv.Value` is a borrowed view into the TLV's owned encoding, not another copy. Use it only while that
 owner remains alive and unchanged. Disposing `DisposableTlvList` disposes its elements; clearing the
-collection alone is a different action. `TryFindValue` returns an independent mutable value copy, but
-the current search implementation also leaves an intermediate copied encoding outside that returned
-owner. Clearing the returned value cannot erase that intermediate. Prefer an explicitly disposed
-`DecodeList` for sensitive sequences and retain the original response's own cleanup scope.
+collection alone is a different action. `TryFindValue` and both `DecodeDictionary` overloads return
+independent, writable `Memory<byte>` values. Clear sensitive results with
+`CryptographicOperations.ZeroMemory(value.Span)` after use; public metadata does not need clearing.
+The search clears skipped value copies and stops at the first match. Dictionary decode keeps the last
+value per tag, clearing superseded values and any unreturned copies on failure. Neither helper clears
+its borrowed input; retain the original response's own cleanup scope. Code that explicitly types the
+decoded map should use `IDictionary<int, Memory<byte>>`.
 
 These helpers implement bounded, definite-length TLV handling, rather than a complete BER validator.
 The current tag helper handles at most two tag octets; single-item parsing and tag admission do not

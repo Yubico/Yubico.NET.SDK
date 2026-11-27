@@ -259,7 +259,7 @@ public class FidoHidProtocolConcurrencyTests
                 await hold.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public async Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             await _responseAvailable.WaitAsync(cancellationToken).ConfigureAwait(false);
             lock (_lock)

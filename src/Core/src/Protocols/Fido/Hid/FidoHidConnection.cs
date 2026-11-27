@@ -49,7 +49,7 @@ internal class FidoHidConnection(IHidConnection connection) : IFidoHidConnection
         }
     }
 
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -57,7 +57,8 @@ internal class FidoHidConnection(IHidConnection connection) : IFidoHidConnection
         if (report.Length != PacketSize)
             throw new InvalidOperationException($"Expected {PacketSize}-byte packet, got {report.Length} bytes");
 
-        return Task.FromResult<ReadOnlyMemory<byte>>(report);
+        // The legacy provider may reuse its array; only the independent copy transfers.
+        return Task.FromResult(report.AsSpan().ToArray());
     }
 
     public void Dispose()

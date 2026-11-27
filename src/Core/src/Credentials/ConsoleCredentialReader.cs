@@ -43,8 +43,9 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// surrogate input. These input options do not replace the consuming operation's applet-specific checks.
 /// </para>
 /// <para>
-/// Cancellation is checked while waiting for an interactive key. Queued keys and redirected line reads
-/// do not check the token. Empty input that reaches result allocation currently throws because the
+/// Cancellation is checked before prompting, while waiting for keys, around reads, and before returning
+/// a credential. It cannot interrupt a blocking read or undo input already consumed. Unread keys are
+/// not flushed. Empty input that reaches result allocation currently throws because the
 /// pooled byte owner requires a positive size; use a positive minimum and a positive expected hex length.
 /// </para>
 /// </remarks>
@@ -73,16 +74,22 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
     public IMemoryOwner<byte>? ReadCredential(CredentialReaderOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
+        cancellationToken.ThrowIfCancellationRequested();
 
-        return _console.IsInteractive
-            ? ReadInteractive(options, cancellationToken)
-            : ReadNonInteractive(options);
+        var interactive = _console.IsInteractive;
+        if (!interactive)
+        {
+            WriteNonInteractiveWarning();
+        }
+
+        return ReadEntry(options.Prompt, interactive, options, cancellationToken);
     }
 
     /// <inheritdoc />
     public IMemoryOwner<byte>? ReadCredentialWithConfirmation(CredentialReaderOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(options);
+        cancellationToken.ThrowIfCancellationRequested();
 
         IMemoryOwner<byte>? first = null;
         IMemoryOwner<byte>? second = null;
@@ -118,6 +125,7 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
                 return null;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             returnFirst = true;
             return first;
         }
@@ -132,33 +140,34 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         }
     }
 
-    private IMemoryOwner<byte>? ReadInteractive(CredentialReaderOptions options, CancellationToken cancellationToken)
-    {
-        _console.Write(options.Prompt);
-        return ReadCredentialCore(options, cancellationToken);
-    }
-
     private IMemoryOwner<byte>? ReadEntry(string prompt, bool interactive, CredentialReaderOptions options, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         _console.Write(prompt);
-        return interactive
+        var result = interactive
             ? ReadCredentialCore(options, cancellationToken)
-            : ReadLineEntry(options);
+            : ReadLineEntry(options, cancellationToken);
+
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            result?.Dispose();
+            throw;
+        }
     }
 
     private void WriteNonInteractiveWarning() =>
         _console.WriteLine("Warning: Running in non-interactive mode. Input will not be masked.");
 
-    private IMemoryOwner<byte>? ReadNonInteractive(CredentialReaderOptions options)
+    private IMemoryOwner<byte>? ReadLineEntry(CredentialReaderOptions options, CancellationToken cancellationToken)
     {
-        WriteNonInteractiveWarning();
-        _console.Write(options.Prompt);
-        return ReadLineEntry(options);
-    }
-
-    private IMemoryOwner<byte>? ReadLineEntry(CredentialReaderOptions options)
-    {
+        cancellationToken.ThrowIfCancellationRequested();
         string? line = _console.ReadLine();
+        cancellationToken.ThrowIfCancellationRequested();
         if (line is null)
         {
             return null;
@@ -219,14 +228,15 @@ public sealed class ConsoleCredentialReader : ISecureCredentialReader
         {
             while (true)
             {
-                // Poll cancellation while waiting; already queued keys bypass this wait.
                 while (!_console.KeyAvailable)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     Thread.Sleep(10);
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
                 var keyInfo = _console.ReadKey(intercept: true);
+                cancellationToken.ThrowIfCancellationRequested();
 
                 switch (keyInfo.Key)
                 {

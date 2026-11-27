@@ -17,8 +17,12 @@ public class MacOSHidFidoReadCancellationTests
         Assert.Equal(0, bridge.CancelCount);
 
         var next = connection.ReceiveAsync(TestContext.Current.CancellationToken);
-        bridge.Emit(7);
-        Assert.Equal((byte)7, (await next.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Span[0]);
+        byte[] nativeSource = bridge.Emit(7);
+        byte[] received = await next.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        Assert.Equal((byte)7, received[0]);
+        Assert.NotSame(nativeSource, received);
+        Array.Clear(received);
+        Assert.Equal((byte)7, nativeSource[0]);
     }
 
     [Fact]
@@ -32,8 +36,8 @@ public class MacOSHidFidoReadCancellationTests
 
         oldCancellation.Cancel();
         bridge.Emit(2);
-        Assert.Equal((byte)1, (await first.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Span[0]);
-        Assert.Equal((byte)2, (await connection.ReceiveAsync(TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Span[0]);
+        Assert.Equal((byte)1, (await first.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken))[0]);
+        Assert.Equal((byte)2, (await connection.ReceiveAsync(TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken))[0]);
     }
 
     [Fact]
@@ -47,7 +51,7 @@ public class MacOSHidFidoReadCancellationTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => first.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken));
 
         bridge.Emit(3);
-        Assert.Equal((byte)3, (await connection.ReceiveAsync(TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Span[0]);
+        Assert.Equal((byte)3, (await connection.ReceiveAsync(TestContext.Current.CancellationToken).WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken))[0]);
     }
 
     [Fact]
@@ -61,10 +65,10 @@ public class MacOSHidFidoReadCancellationTests
         var next = connection.ReceiveAsync(TestContext.Current.CancellationToken);
 
         oldCancellation.Cancel();
-        Assert.Equal((byte)4, (await first.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Span[0]);
+        Assert.Equal((byte)4, (await first.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken))[0]);
         Assert.False(next.IsCompleted);
         bridge.Emit(5);
-        Assert.Equal((byte)5, (await next.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Span[0]);
+        Assert.Equal((byte)5, (await next.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken))[0]);
     }
 
     [Fact]
@@ -130,11 +134,12 @@ public class MacOSHidFidoReadCancellationTests
         public int CancelCount;
         public int ReleaseCount;
 
-        public void Emit(byte value)
+        public byte[] Emit(byte value)
         {
             var packet = new byte[64];
             packet[0] = value;
             (_report ?? throw new InvalidOperationException("Input not started"))(packet);
+            return packet;
         }
 
         public nint CreateDevice(long entryId) => 1;

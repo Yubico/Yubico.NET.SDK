@@ -82,7 +82,7 @@ public class ProtocolFactoryTests
         public Task SendAsync(ReadOnlyMemory<byte> packet, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
     }
 
@@ -93,7 +93,7 @@ public class ProtocolFactoryTests
         public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
             throw new NotSupportedException();
     }
 }

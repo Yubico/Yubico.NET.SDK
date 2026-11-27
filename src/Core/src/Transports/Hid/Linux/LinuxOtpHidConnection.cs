@@ -69,19 +69,15 @@ internal sealed class LinuxOtpHidConnection : IOtpHidConnection
 
     /// <inheritdoc cref="IOtpHidConnection.ReceiveAsync" />
     /// <remarks>
-    ///     The worker allocates eight bytes for GET. Failed or partial output is cleared; successful output
-    ///     transfers to the caller through a read-only view and is not cleared by connection disposal. The view
-    ///     does not make its backing array immutable or automatically clear sensitive data: the caller owns
-    ///     that storage's lifetime and sensitive-data cleanup. Native framing uses nine bytes, including a zero
-    ///     report ID that is not returned. Cancellation after native dispatch cannot detach GET.
-    ///     For these built-in array-backed results, use <c>MemoryMarshal.TryGetArray</c> to obtain the owned
-    ///     segment, then <c>CryptographicOperations.ZeroMemory(segment.AsSpan())</c> after use. Clearing a
-    ///     separate copy does not clear the original. Do not apply this ownership assumption to arbitrary
-    ///     custom-provider results without that provider's contract.
+    ///     The worker allocates eight bytes for GET. Failed or partial output is cleared; success transfers the
+    ///     whole independent, unpooled array to the caller. Connection disposal does not clear it. Clear sensitive
+    ///     contents directly with <c>CryptographicOperations.ZeroMemory(report)</c> after use. Native framing
+    ///     uses nine bytes, including a zero report ID that is not returned. Cancellation after native dispatch
+    ///     cannot detach GET.
     /// </remarks>
     /// <param name="cancellationToken">Cancels GET only before native dispatch.</param>
     /// <returns>A task yielding eight caller-owned payload bytes after native GET completes.</returns>
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
         _owner.ReceiveAsync(cancellationToken);
 
     /// <summary>Stops admission and synchronously waits for the shared native shutdown outcome.</summary>

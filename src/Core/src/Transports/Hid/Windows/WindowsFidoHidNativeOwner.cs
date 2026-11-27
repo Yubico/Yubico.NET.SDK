@@ -136,7 +136,7 @@ internal sealed class WindowsFidoHidNativeOwner
     }
 
     /// <summary>Returns the actual operation TCS task; successful payload storage escapes independently.</summary>
-    internal Task<ReadOnlyMemory<byte>> ReceiveAsync(bool typed, CancellationToken cancellationToken)
+    internal Task<byte[]> ReceiveAsync(bool typed, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         if (typed && Metadata.InputReportByteLength != 65)
@@ -144,7 +144,7 @@ internal sealed class WindowsFidoHidNativeOwner
         return Admit(WindowsHidReportDirection.Input, default, typed, cancellationToken);
     }
 
-    private Task<ReadOnlyMemory<byte>> Admit(WindowsHidReportDirection direction, ReadOnlyMemory<byte> payload,
+    private Task<byte[]> Admit(WindowsHidReportDirection direction, ReadOnlyMemory<byte> payload,
         bool typed, CancellationToken cancellationToken)
     {
         lock (_sync)
@@ -294,7 +294,7 @@ internal sealed class WindowsFidoHidNativeOwner
         request.Registration.Dispose();
         Exception? error = null;
         bool canceled = request.PreDispatch && request.CancellationToken.IsCancellationRequested;
-        ReadOnlyMemory<byte> payload = default;
+        byte[] payload = [];
         if (!request.PreDispatch)
         {
             uint nativeError = request.SubmissionError != 0 ? request.SubmissionError : completion.GetValueOrDefault().ErrorCode;
@@ -402,7 +402,7 @@ internal sealed class WindowsFidoHidNativeOwner
         internal WindowsHidOverlappedOperation Operation { get; } = operation;
         internal CancellationToken CancellationToken { get; } = cancellationToken;
         internal bool Typed { get; } = typed;
-        internal TaskCompletionSource<ReadOnlyMemory<byte>> Completion { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        internal TaskCompletionSource<byte[]> Completion { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
         internal CancellationTokenRegistration Registration;
         internal WindowsHidCompletion? NativeCompletion;
         internal bool CancellationRequested, DispatchStarted, SubmitReturned, CancelIssued, PreDispatch, RetirementStarted;

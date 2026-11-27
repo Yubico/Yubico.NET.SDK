@@ -122,6 +122,10 @@ Do not introduce operation-specific command classes such as `PutKeyCommand`, `Ge
 The selector supplies P1; the target KVN remains the first data byte. Keep the existing P2 KID and the
 static PUT KEY multi-key flag. Do not query existing keys to infer replacement intent.
 
+Tag `83` uses the current `KeyReference` fields in KID/KVN order. A zero-initialized reference emits
+`83 02 00 00`, not an empty selector; this does not establish device acceptance or alter PUT KEY's
+separate replacement argument.
+
 Use `CaIdentifierType` flags to select KLOC, KLCC, or both; preserve KLOC-before-KLCC result ordering.
 
 ### SCP Parameter Types

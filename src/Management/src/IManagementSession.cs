@@ -40,8 +40,8 @@ public interface IManagementSession : IApplicationSession
     ///     Later reads use the firmware captured during initialization as the decoder's default, which
     ///     takes precedence over the ordinary firmware tag; a non-final version qualifier can replace it.
     ///     A firmware override controls session policy, not this returned value. Neither this read nor a
-    ///     configuration write updates the device's discovery snapshot. The current DeviceInfo value
-    ///     contains memory-backed timeout data: copying it does not create independent timeout storage.
+    ///     configuration write updates the device's discovery snapshot. The reported challenge-response
+    ///     timeout is a nullable byte, with null meaning the device did not report it.
     ///     Device, transport, and parsing errors propagate from their respective layers.
     /// </remarks>
     /// <param name="cancellationToken">A token requesting cancellation, subject to the transport's exchange boundaries.</param>

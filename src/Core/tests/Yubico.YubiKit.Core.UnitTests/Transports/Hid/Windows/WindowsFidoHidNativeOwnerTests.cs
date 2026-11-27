@@ -20,7 +20,7 @@ public sealed class WindowsFidoHidNativeOwnerTests
     {
         var api = new ReportApi { HoldSubmit = holdSubmit, HoldClose = true };
         var claim = new Claim();
-        Task<ReadOnlyMemory<byte>>? receive = null;
+        Task<byte[]>? receive = null;
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
             await using (api)

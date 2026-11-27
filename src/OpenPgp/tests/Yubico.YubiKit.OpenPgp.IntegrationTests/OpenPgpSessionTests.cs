@@ -446,7 +446,7 @@ public class OpenPgpSessionTests
         };
     }
 
-    private static async Task<IDictionary<int, ReadOnlyMemory<byte>>> ReadSigningKeyFieldsAsync(IOpenPgpSession session)
+    private static async Task<IDictionary<int, Memory<byte>>> ReadSigningKeyFieldsAsync(IOpenPgpSession session)
     {
         var bytes = await session.GetPublicKeyAsync(KeyRef.Sig);
         using var outer = Tlv.Create(bytes.Span);

@@ -30,7 +30,7 @@ internal sealed class MacOSFidoHidNativeOwner
     private Thread? _worker;
     private Action? _work;
     private TaskCompletionSource? _ordinaryCompletion;
-    private TaskCompletionSource<ReadOnlyMemory<byte>>? _reader;
+    private TaskCompletionSource<byte[]>? _reader;
     private nint _device;
     private nint _input;
     private bool _openAttempted;
@@ -239,7 +239,7 @@ internal sealed class MacOSFidoHidNativeOwner
         _reader = null;
     }
 
-    private void CancelRead(TaskCompletionSource<ReadOnlyMemory<byte>> reader, CancellationToken cancellationToken)
+    private void CancelRead(TaskCompletionSource<byte[]> reader, CancellationToken cancellationToken)
     {
         bool detached;
         lock (_sync)
@@ -257,17 +257,17 @@ internal sealed class MacOSFidoHidNativeOwner
         }
     }
 
-    private static async Task<ReadOnlyMemory<byte>> AwaitReadAsync(
-        Task<ReadOnlyMemory<byte>> task, CancellationTokenRegistration registration)
+    private static async Task<byte[]> AwaitReadAsync(
+        Task<byte[]> task, CancellationTokenRegistration registration)
     {
         try { return await task.ConfigureAwait(false); }
         finally { registration.Dispose(); }
     }
 
-    internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken)
+    internal Task<byte[]> ReceiveAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        TaskCompletionSource<ReadOnlyMemory<byte>> reader;
+        TaskCompletionSource<byte[]> reader;
         CancellationTokenRegistration registration;
         var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (_sync)
@@ -282,17 +282,17 @@ internal sealed class MacOSFidoHidNativeOwner
             }
             if (_reports.TryDequeue(out var report))
             {
-                return Task.FromResult<ReadOnlyMemory<byte>>(report);
+                return Task.FromResult(report);
             }
             _active = true;
-            reader = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
+            reader = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
             _reader = reader;
             // Register may invoke synchronously for an already-cancelled token.
             // The lock is reentrant, and the callback only detaches this reader.
             registration = cancellationToken.Register(static state =>
             {
                 var (owner, pending, cancellation) =
-                    ((MacOSFidoHidNativeOwner, TaskCompletionSource<ReadOnlyMemory<byte>>, CancellationToken))state!;
+                    ((MacOSFidoHidNativeOwner, TaskCompletionSource<byte[]>, CancellationToken))state!;
                 owner.CancelRead(pending, cancellation);
             }, (this, reader, cancellationToken));
             _publicReads.Add(finished.Task);

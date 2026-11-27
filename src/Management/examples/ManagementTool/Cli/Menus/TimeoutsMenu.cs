@@ -38,10 +38,9 @@ public static class TimeoutsMenu
 
         var info = infoResult.DeviceInfo.Value;
 
-        // Display the live query's timeout view; copying DeviceInfo does not clone its timeout bytes.
         AnsiConsole.MarkupLine("[bold]Current Timeouts[/]");
         OutputHelpers.WriteKeyValue("Auto-Eject Timeout", info.AutoEjectTimeout > 0 ? $"{info.AutoEjectTimeout} seconds" : "Disabled (0)");
-        OutputHelpers.WriteKeyValue("Challenge-Response Timeout", info.ChallengeResponseTimeout.Length > 0 ? $"{info.ChallengeResponseTimeout.Span[0]} seconds" : "Unknown");
+        OutputHelpers.WriteKeyValue("Challenge-Response Timeout", info.ChallengeResponseTimeout is { } timeout ? $"{timeout} seconds" : "Unknown");
         AnsiConsole.WriteLine();
 
         // Prompt for new auto-eject timeout
@@ -53,7 +52,7 @@ public static class TimeoutsMenu
                     : ValidationResult.Error("[red]Value must be 0-3600 seconds[/]")));
 
         // Prompt for challenge-response timeout
-        byte currentCrTimeout = info.ChallengeResponseTimeout.Length > 0 ? info.ChallengeResponseTimeout.Span[0] : (byte)15;
+        byte currentCrTimeout = info.ChallengeResponseTimeout ?? 15;
         var crTimeout = AnsiConsole.Prompt(
             new TextPrompt<byte>("[blue]Challenge-response timeout (0-60 seconds):[/]")
                 .DefaultValue(currentCrTimeout)

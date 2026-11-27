@@ -238,6 +238,7 @@ Follow the root `CLAUDE.md` security rules as non-negotiable SDK practice:
 - Use `Span<byte>` and `stackalloc` for small synchronous buffers.
 - Use `ArrayPool<byte>.Shared.Rent()` with `try/finally` for larger temporary buffers.
 - Use `Memory<byte>` / `ReadOnlyMemory<byte>` for data that crosses async boundaries.
+- The two typed HID `ReceiveAsync` methods and their direct implementation/forwarding paths use `Task<byte[]>`. This is an API-specific exception; see [typed HID receive ownership](MEMORY-MANAGEMENT.md#typed-hid-receive-ownership).
 - Avoid `.ToArray()` unless data must escape the current scope.
 - Do not store a privately cloned sensitive `byte[]` in a struct.
 - Use sealed disposable classes for owned sensitive buffers.

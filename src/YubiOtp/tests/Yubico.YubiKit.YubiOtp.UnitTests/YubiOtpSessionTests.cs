@@ -70,7 +70,7 @@ public class YubiOtpSessionTests
         connection.SendAsync(Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromException(new InvalidOperationException("session-init probe failure")));
         connection.ReceiveAsync(Arg.Any<CancellationToken>())
-            .Returns(Task.FromException<ReadOnlyMemory<byte>>(
+            .Returns(Task.FromException<byte[]>(
                 new InvalidOperationException("session-init probe failure")));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>

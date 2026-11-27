@@ -222,7 +222,7 @@ public class RawSessionYubiKeyExtensionsTests
         : ISmartCardConnection, IFidoHidConnection, IOtpHidConnection
     {
         public ConnectionType Type { get; } = type;
-        private readonly Queue<ReadOnlyMemory<byte>> _responses = new();
+        private readonly Queue<byte[]> _responses = new();
         private TaskCompletionSource? _operationHold;
         private byte[]? _fidoInitRequest;
 
@@ -251,7 +251,7 @@ public class RawSessionYubiKeyExtensionsTests
             await WaitIfHeldAsync(cancellationToken);
         }
 
-        public async Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public async Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             await WaitIfHeldAsync(cancellationToken);
             if (_fidoInitRequest is not null)
@@ -269,7 +269,7 @@ public class RawSessionYubiKeyExtensionsTests
             return _responses.Dequeue();
         }
 
-        public void Enqueue(ReadOnlyMemory<byte> response) => _responses.Enqueue(response);
+        public void Enqueue(byte[] response) => _responses.Enqueue(response);
 
         public void HoldNextOperation() =>
             _operationHold = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);

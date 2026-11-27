@@ -45,7 +45,7 @@ internal sealed class LinuxFidoHidNativeOwner
     private Exception? _workerFailure;
     private LinuxFileSafeHandle? _handle;
     private ILinuxHidReadRegistration? _registration;
-    private TaskCompletionSource<ReadOnlyMemory<byte>>? _reader;
+    private TaskCompletionSource<byte[]>? _reader;
     private CancellationTokenRegistration _readerCancellation;
     private bool _typedReader;
     private bool _active;
@@ -293,22 +293,21 @@ internal sealed class LinuxFidoHidNativeOwner
     /// <summary>Admits one reader for the next exact-length owned report, consuming queued input when available.</summary>
     /// <param name="typed">Whether delivery must contain exactly 64 bytes; a mismatch clears the report and terminalizes input.</param>
     /// <param name="token">Checked at entry; cancellation of a pending reader detaches only that reader, not native input.</param>
-    /// <returns>The reader's actual completion task, yielding caller-owned array storage through a read-only view.</returns>
+    /// <returns>The reader's actual completion task, transferring a whole independent, unpooled report array.</returns>
     /// <remarks>
     /// Raw input preserves actual read length rather than padding to descriptor capacity. Delivery
     /// races cancellation exactly once; undelivered reports remain available for a successor. The
     /// owner clears temporary, rejected and abandoned queued reports, but never a successfully returned
-    /// array, including during shutdown. The view offers no disposal/zeroing API; read-only does not
-    /// mean immutable or automatically erased. Sensitive successful output requires caller-managed
-    /// backing-storage cleanup; copying it does not erase the original. Continuations run asynchronously.
+    /// array, including during shutdown. The caller clears sensitive contents directly with
+    /// <c>CryptographicOperations.ZeroMemory(report)</c> after use. Continuations run asynchronously.
     /// </remarks>
-    internal Task<ReadOnlyMemory<byte>> ReceiveAsync(bool typed, CancellationToken token)
+    internal Task<byte[]> ReceiveAsync(bool typed, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         lock (_sync)
         {
             Admit();
-            var reader = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var reader = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
             _reader = reader;
             _typedReader = typed;
             if (_reports.TryDequeue(out var report)) CompleteReadLocked(report);
@@ -323,7 +322,7 @@ internal sealed class LinuxFidoHidNativeOwner
         }
     }
 
-    private void CancelRead(TaskCompletionSource<ReadOnlyMemory<byte>> reader, CancellationToken token)
+    private void CancelRead(TaskCompletionSource<byte[]> reader, CancellationToken token)
     {
         lock (_sync)
         {

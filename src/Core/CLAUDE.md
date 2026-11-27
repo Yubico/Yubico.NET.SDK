@@ -146,6 +146,12 @@ creation-only SCP parameters to the callback rather than retaining them on the s
 its own default SCP03 parameters after confirmed reset, not the caller's original parameters. Base `Protocol`
 remains the disposal owner even while applet setup is incomplete.
 
+### macOS HID enumeration
+
+macOS HID enumeration fails on a null `IOHIDManagerCreate` result and treats a null copied
+device set as empty, not as proof that no physical device is attached. `MacOSHidEnumeration` owns
+both temporary references; its platform-neutral boundary supports managed tests without IOKit.
+
 ### Built-in macOS FIDO lifetime
 
 The built-in macOS FIDO report connection opens asynchronously through
@@ -364,9 +370,20 @@ L6a changed no shipping source sites; its historical 219-site snapshot remains d
 The current merged inventory incorporates upstream discovery/monitor changes; see the boundary-inventory README. See
 [managed evidence and remaining L6b scope](../../docs/research/linux-managed-acceptance.md).
 
+### Typed HID report ownership
+
+Typed FIDO/OTP `ReceiveAsync` transfers whole independent report arrays under the two-API exception
+in [typed HID receive ownership](../../docs/MEMORY-MANAGEMENT.md#typed-hid-receive-ownership).
+Clear consumed reports, not borrowed legacy provider arrays or published logical results. Keep the
+existing native owner task-completion and drain boundaries when forwarding a report.
+
 ### Listener and Native Retry Loops
 
 Background listeners and native/resource-manager retry loops must block, back off, exit, or throttle on every failure path. Do not ignore native return values inside loops unless another call in the same path provides a bounded wait. Persistent failures such as stale PC/SC handles must have no-hardware fault-injection tests that prove call cadence is backoff-bounded.
+
+The PC/SC listener waits out the remainder of its 1,000 ms status interval after successful native
+calls, including PnP-only calls. Stop wakes this managed wait separately from native cancel and
+join. Do not treat either wake or cancel as evidence that the worker has exited.
 
 If a change touches Core runtime loops, polling paths, recovery logic, or listener lifecycle cleanup, run `dotnet toolchain.cs -- resilience --fast` in addition to the normal focused tests. Prefer adding or extending no-hardware `Category=RuntimeResilience` coverage before considering live diagnostics.
 
@@ -390,6 +407,12 @@ resolve after CTAP status or CRC validation. Policy-driven SmartCard operations 
 and resolve at the applet operation boundary. Do not pass nullable prompt/context pairs through
 downstream APIs or create competing lifecycle owners.
 
+### Console credential cancellation
+
+Keep `ConsoleCredentialReader` synchronous. Observe cancellation around input reads and before transferring
+a credential owner; dispose any unreturned owner. Do not detach a blocking `ReadLine` or flush queued keys.
+See [Acquiring credentials](../../docs/usage/user-interaction.md#acquiring-credentials) for caller-visible limits.
+
 ### APDU Processing Pipeline
 
 The APDU processing pipeline composes transmit and response processors. Short mode splits data into
@@ -397,6 +420,11 @@ The APDU processing pipeline composes transmit and response processors. Short mo
 The current formatters append Le, including zero; zero is not an absent-Le representation. Response
 continuations use the configured remaining instruction and fixed zero CLA/P1/P2/Le. There is no
 automatic `6Cxx` corrected-length retry.
+
+`ChainedResponseReceiver` transfers a single response intact. For a chain it clears consumed
+`ApduResponse` owners after copying their data and terminal status, and clears the live assembly
+buffer in `finally`. The assembled result owns a separate copy. Writer arrays replaced during growth
+and transport or SCP temporaries are outside this cleanup scope.
 
 ```
 ApduCommand
@@ -433,12 +461,18 @@ Core owns SCP key-parameter types, handshake processing, and the secure PC/SC pr
 Applet session factories accept the key parameters and establish the channel through the internal
 `PcscProtocol.InitializeScpAsync` capability; consumers cannot construct the decorator directly.
 
+`KeyReference` stores only KID and KVN; each encoding uses a new two-byte buffer in that order.
+Zero initialization encodes `00 00`, unlike the named factory reference `KeyReference.Default` (`01 FF`).
+
 Parameters retain contained owners. `StaticKeys` clones its source spans; `Scp03KeyParameters` retains
 and disposes that exact object. `Scp11KeyParameters` copies the certificate collection but retains its
 key/certificate objects, disposing the OCE private key and certificates while leaving the SD public
 wrapper intact. Record `with` copies share these owners. Keep parameters alive through initialization
 and any reset reuse, and clear source buffers independently. See the complete scoped
 [SCP example](README.md#use-a-secure-channel).
+
+After SCP03 derives a `SessionKeys` owner, `CompleteScp03Init` disposes it on pre-return failure or
+transfers it to the returned state. The initializer separately owns cleanup after state handoff.
 
 The implementation uses a fixed P-256/AES-128 SCP11 profile. Constructor admission alone establishes
 neither a complete profile/trust check nor applet authorization. `IsAuthenticated` reflects protocol
@@ -471,6 +505,9 @@ Contributor rules:
   call; `EncodeList` does not.
 - Neither encoding method clears caller-owned source buffers. `EncodeAndDisposeList` also does not clear its
   returned encoding or a returned encoding used as an intermediate value in nested TLV construction.
+- `DecodeDictionary` and `TryFindValue` return independent writable values. The SDK clears its own
+  discarded value copies before return or on failure; callers clear sensitive returned values and their
+  own input separately. This does not change `Tlv.Value` or `Tlv.AsMemory()` borrowing and disposal.
 - Classify buffers by semantics. For sensitive nested data, clear source buffers plus returned and intermediate
   encodings in `finally`; public or nonsecret encodings do not require special clearing.
 
@@ -662,8 +699,11 @@ and identity contract remain unchanged, even if a newer metadata snapshot omits 
 coverage is in `YubiKeyDeviceTests` (no connection on access, snapshot replacement, default implementations,
 serial independence) and `SnapshotDiffTests` (retention and replacement isolation).
 
-Snapshot replacement preserves previously returned scalar fields, but `ChallengeResponseTimeout` currently
-aliases an input TLV's memory. Read-only access is not independent ownership or post-clear stability.
+Snapshot replacement preserves previously returned scalar fields, including `ChallengeResponseTimeout`.
+The parser preserves a reported timeout byte as-is and returns `null` when the field is omitted.
+The top-level `DeviceInfo` decoder ignores unknown fields, including repeats, and rejects repeats of
+fields it consumes. Wire TLV validation and the reader's per-page continuation checks run separately.
+Trace logs for ignored fields include only the tag and length, not the value.
 Successful serial-less metadata can remain cached; unchanged scans need not retry it. Identity-cache
 PID checks do not extend to the separate metadata cache's member-ID keyed entries.
 
@@ -680,6 +720,9 @@ across different scopes: its cache eviction treats unobserved members as absent.
 factories are not called. Filter HID by concrete type before slot creation/topology/protocol reads;
 OTP and FIDO necessarily share OS descriptor enumeration. Ignore undefined scope bits like `Matches`.
 Do not reinterpret partial scope as PID completeness or import sibling slots from prior scans.
+
+`FindYubiKeys` and `FindHidInterfaces` are sealed. Their interfaces can still be implemented for
+application-owned composition or tests, but public SDK discovery does not install custom HID backends.
 
 One-shot exit terminally retires its read scope in `finally`, including cancellation and budget expiry.
 This cancels queued identity admission and prevents later opens; already-open native work keeps its
@@ -744,6 +787,9 @@ Only the sequential producer calls `Apply`. `SnapshotDiff` computes a successor 
 gate; published dictionaries are never mutated. It groups removals before additions before metadata
 updates, retaining the original device unless connection flags or contradicting known serials prove
 replacement. `DeviceInfo` has value equality, so equal metadata produces no update notification.
+Ordinary capability fields decode the full unsigned big-endian value into `DeviceCapabilities : uint`.
+Accept leading zeroes and reject nonzero overflow with tag context. This is an SDK read limit, not a
+firmware width rule; FIPS mapping and the Management two-byte write limit are separate.
 
 `YubiKeyMonitor.WatchAsync` delegates directly to `DeviceChangeFeed.Subscribe`. On first `MoveNextAsync`,
 snapshot capture and subscription registration share the publication gate. Replay happens outside the
@@ -772,6 +818,9 @@ callback before `Start()` and never stop or dispose inside it. HID hint details 
 listener's Trace logging; callbacks are diagnostic rescan hints, never physical-device truth.
 `YubiKeyMonitor.WatchAsync` remains snapshot-diffed output after a rescan. Unknown HID removals still
 trigger a rescan rather than being suppressed: they may be the only native signal for a device diff.
+
+Windows HID `Start()` rejects disposed listeners before allocating callback state or calling the native
+registration API. This guard does not change how unregister results are handled or prove callback drain.
 
 `HotplugSignals` owns listener creation and teardown and carries transport hints in a capacity-one
 drop-write channel into the monitor's single-reader loop. Each listener starts independently. A listener

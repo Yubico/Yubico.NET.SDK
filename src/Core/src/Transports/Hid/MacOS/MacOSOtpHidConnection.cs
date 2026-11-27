@@ -42,9 +42,9 @@ internal sealed class MacOSOtpHidConnection : IOtpHidConnection
     public Task SendAsync(ReadOnlyMemory<byte> report, CancellationToken cancellationToken = default) =>
         _owner.SendAsync(report, cancellationToken);
     internal Task SendReportAsync(ReadOnlyMemory<byte> report) => _owner.SendAsync(report, CancellationToken.None, expert: true);
-    public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default) =>
+    public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default) =>
         _owner.ReceiveAsync(cancellationToken);
-    internal Task<ReadOnlyMemory<byte>> GetReportAsync() => _owner.ReceiveAsync(CancellationToken.None, expert: true);
+    internal Task<byte[]> GetReportAsync() => _owner.ReceiveAsync(CancellationToken.None, expert: true);
     public void Dispose()
     {
         if (_owner.IsWorkerThread)

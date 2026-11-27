@@ -25,9 +25,10 @@ response material, preferably in `finally`. It zeroes the complete owned respons
 obtained views, without changing constructor input. Read/check status before clearing. Aliasing a response
 shares its owner; there is no default empty response or synthesized value equality.
 
-Clearing this owner leaves constructor inputs, transport staging, earlier response fragments, and any
-separate decrypted temporary outside its reach. Clear caller-owned copies separately; this API is not
-an end-to-end erasure guarantee.
+For chained responses, Core separately clears consumed fragments and the live assembly buffer, leaving
+the returned response intact. Constructor inputs, retired assembly arrays, transport staging, and
+separate decrypted temporaries are outside that cleanup. Clear caller-owned copies separately; this
+API is not an end-to-end erasure guarantee.
 
 ## Requirements
 
@@ -100,12 +101,19 @@ stop/restart mode: dispose the monitor and create a new one to recover from term
 process-global monitoring lifetime or device cache.
 
 Transport listeners share payload-less `IDeviceChangeListener.Changed` hints, not physical-device truth.
+On Windows, calling `Start()` on a disposed HID listener throws `ObjectDisposedException`. Create a new
+listener instead.
+After a successful PC/SC status call, the listener waits out any remainder of its one-second interval
+before checking reader names again. Transient changes between checks can be missed.
 The monitor reconciles scans. Listener startup failure leads to logging and cleanup attempts; later
 listener attempts depend on logging returning. If construction completes without listeners, interval
 discovery remains available. An enumeration timeout is
 handled per path: one-shot `Find…Async` logs a warning and returns the other transport's results for that
 call; a monitor never publishes a partial scan, so the timeout fails `CreateMonitorAsync` on the first scan
 and, after initialization, keeps the previous snapshot until a later scan succeeds.
+
+On macOS, a null HID manager fails the scan. A null copied HID device set instead counts as an empty
+HID result and can remove previously published interfaces; it does not prove that no device is attached.
 
 Share one host-owned monitor between long-lived components rather than letting each component take over
 tracking. Short commands should normally use the one-shot Find family. A configuration editor can use a
@@ -173,13 +181,19 @@ it does not promise to update discovery metadata. Continue using `device.SerialN
 identity: its independent contract can retain a known serial even when the latest snapshot omits it.
 See [cached device metadata](../../docs/usage/device-discovery.md#cached-device-metadata) for details.
 
-`DeviceInfo` copies scalar fields when returned, but `ChallengeResponseTimeout` currently retains read-only
-memory backed by the input TLV. A read-only view prevents writes through that view; it does not create
-independent storage or guarantee stability after the backing owner is cleared. Avoid treating the
-whole value as an immutable cache key. Firmware, enabled-capability fields, and transport presence also
-answer different questions: use the applet operation's prerequisites rather than inferring success
+`ChallengeResponseTimeout` is a nullable byte: a reported value stays independent of input TLV storage,
+and `null` means unreported rather than zero or the hardware default. Firmware, enabled-capability fields,
+and transport presence answer different questions: use the applet operation's prerequisites rather than inferring success
 from any one of them. Major-zero firmware versions, including `0.0.0`, pass optimistic SDK feature
 checks; that is compatibility policy, not evidence that hardware implements every feature.
+
+`DeviceCapabilities` is now a `uint`-backed flags enum. If you store or cast numeric masks, use unsigned
+32-bit values. Ordinary USB/NFC and reset-blocked masks preserve every reported bit that fits this range,
+including unnamed bits, and accept leading zero bytes. A mask outside the SDK's range fails the metadata
+read with `BadResponseException`. Management configuration writes still use two-byte masks.
+
+Repeated known device-information fields fail decoding. Well-formed unknown fields are ignored,
+even if they repeat. This does not relax TLV encoding checks or preserve the ignored fields in the snapshot.
 
 ### PC/SC sharing policy and migration
 
@@ -256,6 +270,9 @@ Touch notification contexts carry an `Application` and an optional `Operation` i
 contexts set `Operation` to a unique constant such as `UserPresenceOperations.Ctap2.GetAssertion`, so a prompt
 can switch on it directly. Wrap a call in `UserPresenceIntent.BeginScope("approve the transfer")` to pass the
 application's reason to the prompt as `UserPresenceContext.Intent`.
+
+`ConsoleCredentialReader` checks cancellation even when keys are queued, but cancellation cannot interrupt
+an active redirected line read. See [Acquiring credentials](../../docs/usage/user-interaction.md#acquiring-credentials).
 
 Applet factories share connection binding, protocol preparation, and failure cleanup in `ApplicationSession`.
 SCP requires PC/SC SmartCard: requesting it on a HID connection fails before any initialization commands are
@@ -339,6 +356,9 @@ finally
 
 `RawCtapHidSession` and `RawOtpHidSession` are the HID equivalents, created with
 `device.CreateRawCtapHidSessionAsync()` and `device.CreateRawOtpHidSessionAsync()`.
+The lower-level typed FIDO and OTP `ReceiveAsync` methods transfer independent `byte[]` reports;
+clear sensitive report bytes after use. Logical raw-session responses and the legacy `GetReport()`
+contract are unchanged. See [typed HID receive ownership](../../docs/MEMORY-MANAGEMENT.md#typed-hid-receive-ownership).
 
 `RawCtapHidSession` (formerly `RawFidoHidSession`) exchanges shared CTAPHID commands, not
 CTAP2 operations. FIDO HID connection types and `ConnectionType.HidFido` retain their names.
@@ -398,6 +418,10 @@ The built-in transaction-end failure path currently logs the failure and closes 
 connection disposal reports the stored error. Scope-disposal completion alone is therefore not a
 universal transaction-success signal. Keep scope end, native completion, disconnect/context release,
 and the final connection disposal outcome distinct when deciding whether to reopen.
+
+`FindYubiKeys` and `FindHidInterfaces` are sealed. For application-owned discovery, implement
+`IFindYubiKeys` or `IFindHidInterfaces` rather than subclassing; these interfaces do not register
+a backend with SDK discovery.
 
 `IYubiKey` represents a physical key; `FindHidInterfaces` returns operating-system-exposed
 `IHidInterface` report interfaces, not necessarily one per physical USB interface. An opened
@@ -740,13 +764,19 @@ metadata is available through `keyInfo.GetOpenPgpInfo()` when the OpenPgp packag
 
 ## Security notes
 
+- `KeyReference` compares by KID and KVN and encodes those current values into a new two-byte buffer.
+  `default(KeyReference)` encodes `00 00`; the named factory reference `KeyReference.Default` is `01 FF`.
 - Dispose SCP parameters and their contained owners as described above; clear source buffers separately.
+  SCP03 clears derived session keys if startup fails after derivation and before handing off session state;
+  this does not clear supplied static keys.
 - Keep keys and credentials out of diagnostics. Ordinary APDU trace templates record headers and lengths,
   while SELECT records caller-supplied identifier bytes and exception text has its own provenance.
   Review providers and output destinations before enabling diagnostics; see [logging](../../docs/LOGGING.md).
 - `Tlv` and the collection from `TlvHelper.DecodeList` own buffers and must be disposed. The encode helpers
   do not clear your source buffers or their own returned encodings; for sensitive data, zero both in a
-  `finally`. Full examples: [TLV processing](../../docs/usage/tlv-processing.md).
+  `finally`. `DecodeDictionary` and `TryFindValue` return independent writable values; clear sensitive
+  results after use. The helpers clear discarded copies, not the supplied input.
+  Full examples: [TLV processing](../../docs/usage/tlv-processing.md).
 - `ApduCommand` stores a reference to your data, not a copy. Keep it unchanged until the original exchange
   task is terminal, then clear sensitive source bytes. Canceling an outer `WaitAsync` wait does not end
   the underlying borrow. Dispose outside callbacks and only after the complete workflow has finished;

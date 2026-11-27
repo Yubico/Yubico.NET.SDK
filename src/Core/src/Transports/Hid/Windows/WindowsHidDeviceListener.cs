@@ -40,7 +40,11 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
     /// </summary>
     private const int SymbolicLinkOffset = 24;
 
+    internal delegate NativeMethods.CmErrorCode RegisterNotification(
+        IntPtr filter, IntPtr context, NativeMethods.CM_NOTIFY_CALLBACK callback, out IntPtr notificationHandle);
+
     private readonly Lock _syncLock = new();
+    private readonly RegisterNotification? _registerNotification;
     private GCHandle _marshalableThisPtr;
     private NativeMethods.CM_NOTIFY_CALLBACK? _callbackDelegate;
     private IntPtr _notificationHandle;
@@ -55,11 +59,16 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
         // Lazy start - do nothing in constructor
     }
 
+    internal WindowsHidDeviceListener(RegisterNotification registerNotification) =>
+        _registerNotification = registerNotification;
+
     /// <inheritdoc />
+    /// <exception cref="ObjectDisposedException">This listener has been disposed.</exception>
     public override void Start()
     {
         lock (_syncLock)
         {
+            ObjectDisposedException.ThrowIf(_disposed, this);
             if (Status == DeviceListenerStatus.Started)
             {
                 return;
@@ -95,11 +104,10 @@ internal sealed class WindowsHidDeviceListener : HidDeviceListener
                 {
                     Marshal.StructureToPtr(filter, filterPtr, false);
 
-                    var result = NativeMethods.CM_Register_Notification(
-                        filterPtr,
-                        GCHandle.ToIntPtr(_marshalableThisPtr),
-                        _callbackDelegate,
-                        out _notificationHandle);
+                    var context = GCHandle.ToIntPtr(_marshalableThisPtr);
+                    var result = _registerNotification is null
+                        ? NativeMethods.CM_Register_Notification(filterPtr, context, _callbackDelegate, out _notificationHandle)
+                        : _registerNotification(filterPtr, context, _callbackDelegate, out _notificationHandle);
 
                     if (result != NativeMethods.CmErrorCode.CR_SUCCESS)
                     {

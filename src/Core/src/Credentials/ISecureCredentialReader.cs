@@ -31,6 +31,10 @@ namespace Yubico.YubiKit.Core.Credentials;
 /// SDK-to-application callback carrying protocol context for secrets requested during an operation.
 /// </para>
 /// <para>
+/// The console reader checks cancellation around input reads and before returning a credential.
+/// Cancellation does not interrupt an in-progress redirected line read or restore consumed input.
+/// </para>
+/// <para>
 /// This method borrows an open PIV session. The credential owner remains alive until verification
 /// completes and is then cleared, including on failure. The caller retains session ownership.
 /// <code>
@@ -62,7 +66,7 @@ public interface ISecureCredentialReader
     /// The returned memory owner automatically zeros its contents when disposed.
     /// Callers must dispose the result to ensure sensitive data is cleared.
     /// </remarks>
-    /// <exception cref="OperationCanceledException">The implementation observes cancellation. The console reader checks while waiting for an interactive key, rather than during redirected reads.</exception>
+    /// <exception cref="OperationCanceledException">The implementation observes token cancellation.</exception>
     IMemoryOwner<byte>? ReadCredential(CredentialReaderOptions options, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -84,6 +88,6 @@ public interface ISecureCredentialReader
     /// on every other exit. The caller must dispose the successful result.
     /// </para>
     /// </remarks>
-    /// <exception cref="OperationCanceledException">The implementation observes cancellation while reading an entry.</exception>
+    /// <exception cref="OperationCanceledException">The implementation observes token cancellation.</exception>
     IMemoryOwner<byte>? ReadCredentialWithConfirmation(CredentialReaderOptions options, CancellationToken cancellationToken = default);
 }

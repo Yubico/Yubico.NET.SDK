@@ -15,17 +15,14 @@
 namespace Yubico.YubiKit.Core.Protocols.SmartCard.Scp;
 
 /// <summary>
-///     Carries an SCP key ID (KID), key version number (KVN), and cached constructor encoding.
+///     Carries an SCP key ID (KID) and key version number (KVN).
 /// </summary>
 /// <remarks>
-///     Construct a new value when changing the reference. Init-property changes, including with-expressions,
-///     leave the cached encoding unchanged; default(KeyReference) has empty encoding. Generated equality also
-///     includes that cached memory, so separately constructed values are not a content-key comparison contract.
+///     Equality and encoding use the current KID and KVN. A zero-initialized reference encodes as 00 00,
+///     not as an empty value or the factory SCP03 reference provided by <see cref="Default"/>.
 /// </remarks>
 public readonly record struct KeyReference(byte Kid, byte Kvn)
 {
-    private readonly Memory<byte> _bytes = new byte[] { Kid, Kvn };
-
     /// <summary>
     ///     Gets the Key ID.
     /// </summary>
@@ -39,12 +36,13 @@ public readonly record struct KeyReference(byte Kid, byte Kvn)
     public static KeyReference Default => new(0x01, 0xFF);
 
     /// <summary>
-    ///     Returns a view of the cached constructor encoding.
+    ///     Encodes the current key reference into a new buffer.
     /// </summary>
-    /// <returns>Constructor bytes [Kid, Kvn], or empty memory for the default value.</returns>
-    public ReadOnlyMemory<byte> AsMemory() => _bytes;
+    /// <returns>Two bytes in KID, KVN order.</returns>
+    public ReadOnlyMemory<byte> AsMemory() => new byte[] { Kid, Kvn };
 
-    public ReadOnlySpan<byte> AsSpan() => _bytes.Span;
+    /// <inheritdoc cref="AsMemory()"/>
+    public ReadOnlySpan<byte> AsSpan() => AsMemory().Span;
 
     /// <summary>
     ///     Returns a string representation of this key reference.

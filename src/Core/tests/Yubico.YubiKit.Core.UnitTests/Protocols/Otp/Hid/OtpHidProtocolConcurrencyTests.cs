@@ -211,12 +211,12 @@ public class OtpHidProtocolConcurrencyTests
                 await hold.Task.WaitAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default)
+        public Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default)
         {
             lock (_lock)
             {
                 if (_pendingReads.Count > 0)
-                    return Task.FromResult<ReadOnlyMemory<byte>>(_pendingReads.Dequeue());
+                    return Task.FromResult(_pendingReads.Dequeue());
             }
 
             // Idle status: version in bytes 1-3, programming sequence at offset 4, flags clear
@@ -225,7 +225,7 @@ public class OtpHidProtocolConcurrencyTests
             status[1] = version.Major;
             status[2] = version.Minor;
             status[3] = version.Patch;
-            return Task.FromResult<ReadOnlyMemory<byte>>(status);
+            return Task.FromResult(status);
         }
 
         public void Dispose()

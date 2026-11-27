@@ -15,11 +15,14 @@
 namespace Yubico.YubiKit.Core.Devices;
 
 /// <summary>Application bits carried by device capability and configuration fields.</summary>
-/// <remarks>The containing field determines whether bits mean supported, enabled, or another application status.</remarks>
+/// <remarks>
+/// The containing field determines whether bits mean supported, enabled, or another application status.
+/// The unsigned 32-bit carrier can retain unnamed response flags; configuration writes have their own width limit.
+/// </remarks>
 [Flags]
-public enum DeviceCapabilities
+public enum DeviceCapabilities : uint
 {
-    /// <summary>No modeled application bits are set.</summary>
+    /// <summary>No application bits are set.</summary>
     None = 0,
 
     /// <summary>

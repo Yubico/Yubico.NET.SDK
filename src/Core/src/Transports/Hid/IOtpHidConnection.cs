@@ -57,6 +57,7 @@ public interface IOtpHidConnection : IConnection
     ///     interruption or interleaving, dispose and reopen it, awaiting disposal for native drain.
     /// </remarks>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The received report (8 bytes).</returns>
-    Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken = default);
+    /// <returns>The complete, independent, unpooled 8-byte report, transferred to the caller. The provider
+    /// must not reuse, modify, or clear it after transfer. The caller clears sensitive bytes after use.</returns>
+    Task<byte[]> ReceiveAsync(CancellationToken cancellationToken = default);
 }

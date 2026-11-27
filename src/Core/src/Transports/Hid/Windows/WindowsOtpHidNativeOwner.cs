@@ -25,7 +25,7 @@ internal sealed class WindowsOtpHidNativeOwner
     private int _workerId;
     private Action? _work;
     private TaskCompletionSource? _workCompletion;
-    private TaskCompletionSource<ReadOnlyMemory<byte>>? _reader;
+    private TaskCompletionSource<byte[]>? _reader;
     private byte[]? _outputCopy;
     private byte[]? _inputCopy;
     private Exception? _workerFailure;
@@ -243,10 +243,10 @@ internal sealed class WindowsOtpHidNativeOwner
     /// No actual-count proof is available from HidD. The caller owns successful payload storage and
     /// its sensitive-data cleanup. Failed staging is cleared. Accepted native success wins late cancellation.
     /// </remarks>
-    internal Task<ReadOnlyMemory<byte>> ReceiveAsync(CancellationToken cancellationToken)
+    internal Task<byte[]> ReceiveAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var reader = new TaskCompletionSource<ReadOnlyMemory<byte>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var reader = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (_sync)
         {
             Admit();
@@ -257,7 +257,7 @@ internal sealed class WindowsOtpHidNativeOwner
         return reader.Task;
     }
 
-    private void Receive(CancellationToken cancellationToken, TaskCompletionSource<ReadOnlyMemory<byte>> reader)
+    private void Receive(CancellationToken cancellationToken, TaskCompletionSource<byte[]> reader)
     {
         Exception? error = null;
         byte[]? payload = null;

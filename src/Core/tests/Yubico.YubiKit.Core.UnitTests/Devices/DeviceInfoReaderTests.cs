@@ -61,7 +61,46 @@ public class DeviceInfoReaderTests
 
         Assert.Equal(0x01020304, info.SerialNumber);
         Assert.Equal(new FirmwareVersion(5, 7, 2), info.FirmwareVersion);
-        Assert.Equal([0x2A], info.ChallengeResponseTimeout.ToArray());
+        Assert.Equal((byte)0x2A, info.ChallengeResponseTimeout);
+        Assert.Equal([0], protocol.RequestedPages);
+    }
+
+    [Fact]
+    public async Task ReadAsync_UnknownDuplicatesWithinAndAcrossPages_PreservesKnownMetadata()
+    {
+        var protocol = new FakeSmartCardProtocol(
+            [0x09, 0x7E, 0x01, 0xAA, 0x7E, 0x01, 0xBB, 0x10, 0x01, 0x01],
+            [0x06, 0x7E, 0x01, 0xCC, 0x07, 0x01, 0x0F]);
+
+        var info = await DeviceInfoReader.ReadAsync(protocol, new FirmwareVersion(5, 7, 2),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal((byte)15, info.ChallengeResponseTimeout);
+        Assert.Equal([0, 1], protocol.RequestedPages);
+    }
+
+    [Fact]
+    public async Task ReadAsync_RepeatedKnownTagAcrossPages_IsRejected()
+    {
+        var protocol = new FakeSmartCardProtocol(
+            [0x06, 0x07, 0x01, 0x0F, 0x10, 0x01, 0x01],
+            [0x03, 0x07, 0x01, 0x10]);
+
+        await Assert.ThrowsAsync<ArgumentException>(() => DeviceInfoReader.ReadAsync(protocol,
+            new FirmwareVersion(5, 7, 2), TestContext.Current.CancellationToken));
+
+        Assert.Equal([0, 1], protocol.RequestedPages);
+    }
+
+    [Fact]
+    public async Task ReadAsync_MalformedUnknownTlv_IsRejectedBeforeFieldDecoding()
+    {
+        var protocol = new FakeSmartCardProtocol([0x06, 0x07, 0x01, 0x0F, 0x7E, 0x02, 0xAA]);
+
+        var error = await Assert.ThrowsAsync<ArgumentException>(() => DeviceInfoReader.ReadAsync(protocol,
+            new FirmwareVersion(5, 7, 2), TestContext.Current.CancellationToken));
+
+        Assert.Equal("Insufficient data for value", error.Message);
         Assert.Equal([0], protocol.RequestedPages);
     }
 

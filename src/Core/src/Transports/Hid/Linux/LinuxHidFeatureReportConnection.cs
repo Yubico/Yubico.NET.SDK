@@ -1,7 +1,6 @@
 // Copyright 2026 Yubico AB
 // Licensed under the Apache License, Version 2.0 (the "License").
 
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Yubico.YubiKit.Core.Devices;
 
@@ -55,11 +54,7 @@ internal sealed class LinuxHidFeatureReportConnection : IHidConnection
     /// <returns>A caller-owned eight-byte payload array without the native report-ID prefix.</returns>
     public byte[] GetReport()
     {
-        var report = _owner.ReceiveAsync(CancellationToken.None).GetAwaiter().GetResult();
-        // The owner returns an exact, exclusively owned array; transfer without a second copy.
-        return MemoryMarshal.TryGetArray(report, out var segment) && segment.Array is { } array && segment.Offset == 0 && segment.Count == array.Length
-            ? array
-            : throw new InvalidOperationException("Linux OTP owner returned non-array storage.");
+        return _owner.ReceiveAsync(CancellationToken.None).GetAwaiter().GetResult();
     }
 
     /// <summary>Synchronously sends a feature payload, preserving its supplied length.</summary>

@@ -26,6 +26,9 @@ Keys are addressed by a `KeyReference(byte Kid, byte Kvn)`. The KID (key identif
 `ScpKid.SCP03` (0x01), `ScpKid.SCP11a` (0x11), `ScpKid.SCP11b` (0x13), `ScpKid.SCP11c` (0x15) — and the KVN
 (key version number) distinguishes multiple versions of the same protocol. `KeyReference.Default` is the
 factory SCP03 reference, KID 0x01 and KVN 0xFF.
+Certificate, allowlist, and CA-issuer operations serialize the current KID and KVN into tag `83`.
+A zero-initialized reference now encodes `83 02 00 00`, not `83 00`; supply an explicit reference for
+the intended operation. This encoding does not imply the device accepts the zero pair.
 
 SCP03 is a symmetric channel built on a `StaticKeys` triple (ENC, MAC, DEK). SCP11 is asymmetric and uses
 EC P-256 keys. SCP11b authenticates the device to the host using a trusted device public key; it does not

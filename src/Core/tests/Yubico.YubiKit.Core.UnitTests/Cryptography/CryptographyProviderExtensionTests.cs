@@ -312,6 +312,110 @@ public class CryptographyProviderExtensionTests
     }
 
     [Fact]
+    public void CompleteScp03Init_WhenHostCryptogramDerivationFails_ClearsDerivedKeys()
+    {
+        byte[] sourceKey = Convert.FromHexString("000102030405060708090A0B0C0D0E0F");
+        byte[] context = Convert.FromHexString("101112131415161718191A1B1C1D1E1F");
+        byte[] cardCryptogram = Convert.FromHexString("3B2DA5E6C72D12D9");
+        using var staticKeys = new StaticKeys(sourceKey, sourceKey, sourceKey);
+        using var sessionKeys = staticKeys.Derive(context);
+        var senc = sessionKeys.Senc;
+        var smac = sessionKeys.Smac;
+        var srmac = sessionKeys.Srmac;
+        var dek = sessionKeys.Dek;
+        Assert.True(smac.IndexOfAnyExcept((byte)0) >= 0);
+
+        var failure = new CryptographicException("Injected host cryptogram failure.");
+        var originalCreator = CryptographyProviders.CmacPrimitivesCreator;
+        var finalCalls = 0;
+        try
+        {
+            CryptographyProviders.CmacPrimitivesCreator = _ => new FailingFinalCmacPrimitives(
+                () => ++finalCalls, cardCryptogram, failure);
+
+            var actual = Assert.Throws<CryptographicException>(
+                () => ScpState.CompleteScp03Init(sessionKeys, context, cardCryptogram));
+
+            Assert.Same(failure, actual);
+            Assert.Equal(2, finalCalls);
+            AssertClearedSessionKeys(senc, smac, srmac, dek);
+            Assert.Equal(Convert.FromHexString("000102030405060708090A0B0C0D0E0F"), sourceKey);
+            Assert.True(sourceKey.AsSpan().SequenceEqual(staticKeys.Enc));
+            Assert.True(sourceKey.AsSpan().SequenceEqual(staticKeys.Mac));
+            Assert.True(sourceKey.AsSpan().SequenceEqual(staticKeys.Dek));
+        }
+        finally
+        {
+            CryptographyProviders.CmacPrimitivesCreator = originalCreator;
+        }
+    }
+
+    [Fact]
+    public void CompleteScp03Init_OnSuccess_KeepsKeysLiveUntilStateDisposal()
+    {
+        // Fixed synthetic challenge/key vector cross-checked with OpenSSL AES-128 CMAC.
+        byte[] sourceKey = Convert.FromHexString("000102030405060708090A0B0C0D0E0F");
+        byte[] context = Convert.FromHexString("101112131415161718191A1B1C1D1E1F");
+        byte[] cardCryptogram = Convert.FromHexString("3B2DA5E6C72D12D9");
+        using var staticKeys = new StaticKeys(sourceKey, sourceKey, sourceKey);
+        using var sessionKeys = staticKeys.Derive(context);
+        var senc = sessionKeys.Senc;
+        var smac = sessionKeys.Smac;
+        var srmac = sessionKeys.Srmac;
+        var dek = sessionKeys.Dek;
+        var (state, hostCryptogram) = ScpState.CompleteScp03Init(sessionKeys, context, cardCryptogram);
+        using (state)
+        {
+            Span<byte> commandMac = stackalloc byte[8];
+            try
+            {
+                Assert.Equal(Convert.FromHexString("75C189A23F612C02"), hostCryptogram);
+                state.Mac([0x01, 0x02], commandMac);
+                Assert.True(commandMac.SequenceEqual(Convert.FromHexString("36EF02AEC966D7A3")));
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(hostCryptogram);
+                CryptographicOperations.ZeroMemory(commandMac);
+            }
+        }
+
+        AssertClearedSessionKeys(senc, smac, srmac, dek);
+        Assert.True(sourceKey.AsSpan().SequenceEqual(staticKeys.Mac));
+    }
+
+    [Fact]
+    public void CompleteScp03Init_WhenCardCryptogramMismatches_ClearsDerivedKeys()
+    {
+        using var staticKeys = StaticKeys.GetDefaultKeys();
+        var context = new byte[16];
+        using var sessionKeys = staticKeys.Derive(context);
+        var senc = sessionKeys.Senc;
+        var smac = sessionKeys.Smac;
+        var srmac = sessionKeys.Srmac;
+        var dek = sessionKeys.Dek;
+
+        var failure = Assert.Throws<BadResponseException>(
+            () => ScpState.CompleteScp03Init(sessionKeys, context, new byte[8]));
+
+        Assert.Equal("Wrong SCP03 key set - card cryptogram verification failed", failure.Message);
+        AssertClearedSessionKeys(senc, smac, srmac, dek);
+    }
+
+    private static void AssertClearedSessionKeys(
+        ReadOnlySpan<byte> senc, ReadOnlySpan<byte> smac, ReadOnlySpan<byte> srmac, ReadOnlySpan<byte> dek)
+    {
+        Assert.Equal(16, senc.Length);
+        Assert.Equal(16, smac.Length);
+        Assert.Equal(16, srmac.Length);
+        Assert.Equal(16, dek.Length);
+        Assert.Equal(-1, senc.IndexOfAnyExcept((byte)0));
+        Assert.Equal(-1, smac.IndexOfAnyExcept((byte)0));
+        Assert.Equal(-1, srmac.IndexOfAnyExcept((byte)0));
+        Assert.Equal(-1, dek.IndexOfAnyExcept((byte)0));
+    }
+
+    [Fact]
     public void GenerateOceReceipt_WhenProviderDisposeFails_ZeroesAbandonedReceipt()
     {
         Func<CmacBlockCipherAlgorithm, ICmacPrimitives> original = CryptographyProviders.CmacPrimitivesCreator;
@@ -412,7 +516,8 @@ public class CryptographyProviderExtensionTests
         public void Dispose() => throw new CryptographicException("Injected CMAC disposal failure.");
     }
 
-    private sealed class FailingFinalCmacPrimitives(Func<int> getFinalCall) : ICmacPrimitives
+    private sealed class FailingFinalCmacPrimitives(
+        Func<int> getFinalCall, byte[]? firstMac = null, CryptographicException? failure = null) : ICmacPrimitives
     {
         public void CmacInit(ReadOnlySpan<byte> keyData) { }
 
@@ -421,9 +526,10 @@ public class CryptographyProviderExtensionTests
         public void CmacFinal(Span<byte> macBuffer)
         {
             macBuffer.Fill(0xA5);
+            firstMac.AsSpan().CopyTo(macBuffer);
             if (getFinalCall() == 2)
             {
-                throw new CryptographicException("Injected second derivation failure.");
+                throw failure ?? new CryptographicException("Injected second derivation failure.");
             }
         }
 

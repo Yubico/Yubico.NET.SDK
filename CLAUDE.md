@@ -48,7 +48,7 @@ These are the always-loaded mandates. Each section ends with a JIT pointer to de
 **Memory Management:**
 - ✅ Sync + ≤512 bytes → `Span<byte>` with `stackalloc`
 - ✅ Sync + >512 bytes → `ArrayPool<byte>.Shared.Rent()`
-- ✅ Async → `Memory<byte>` or `IMemoryOwner<byte>`
+- ✅ Async → `Memory<byte>` or `IMemoryOwner<byte>`; only the two typed HID `ReceiveAsync` contracts and their direct implementation/forwarding paths use `Task<byte[]>` (see [HID receive ownership](docs/MEMORY-MANAGEMENT.md#typed-hid-receive-ownership))
 - ❌ NEVER use `.ToArray()` unless data must escape scope
 - ❌ NEVER forget to return `ArrayPool` buffers (use try/finally)
 

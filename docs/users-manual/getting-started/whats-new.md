@@ -18,6 +18,21 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.18.x Releases
 
+### 1.18.2
+
+Release date: November 26th, 2026
+
+Bug Fixes:
+
+- Fixed an issue where device info was not fully read when the YubiKey reported more than one remaining page, causing the firmware version qualifier on some YubiKeys (for example, alpha or beta keys) to be missed. Unknown device info tags are now ignored. ([#781](https://github.com/Yubico/Yubico.NET.SDK/pull/781))
+- Fixed an issue where FIDO2 PIN/UV auth protocol one rejected the 16-byte PIN token returned by some YubiKey firmware versions, such as 5.2.7. ([#714](https://github.com/Yubico/Yubico.NET.SDK/pull/714))
+
+Dependencies:
+
+- Dependencies across the SDK, GitHub Actions workflows, and Docker-based documentation image have been updated to newer versions. ([#804](https://github.com/Yubico/Yubico.NET.SDK/pull/804), [#803](https://github.com/Yubico/Yubico.NET.SDK/pull/803), [#800](https://github.com/Yubico/Yubico.NET.SDK/pull/800), [#756](https://github.com/Yubico/Yubico.NET.SDK/pull/756), [#741](https://github.com/Yubico/Yubico.NET.SDK/pull/741))
+
+_________
+
 ### 1.18.1
 
 Release date: October 30th, 2026

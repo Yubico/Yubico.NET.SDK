@@ -5,7 +5,7 @@ description: Drives the Yubico .NET SDK and Yubico.NativeShims releases end-to-e
 
 # Release
 
-Project-local skill for shipping a Yubico .NET SDK or Yubico.NativeShims release. The operator answers gating questions, signs off on the release notes, and approves in two places: the Scribe signing jobs (two approvers per round) and the `nuget-org` GitHub environment. Building, signing, verification, tagging, publishing to NuGet.org, the GitHub release and the docs deploy all run in GitHub Actions — nothing is downloaded or signed locally.
+Project-local skill for shipping a Yubico .NET SDK or Yubico.NativeShims release. The operator answers gating questions, signs off on the release notes, and approves in two places: the Scribe signing jobs (two approvers per round) and the `nuget-org` GitHub environment. Building, signing, verification, tagging, publishing to NuGet.org, the GitHub release, the Discussions announcement and the docs deploy all run in GitHub Actions — nothing is downloaded or signed locally.
 
 The skill works in two modes:
 - **`/Release`** — full flow from phase 1 (pre-flight) onward

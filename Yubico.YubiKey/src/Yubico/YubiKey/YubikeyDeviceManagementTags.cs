@@ -43,6 +43,7 @@ namespace Yubico.YubiKey
         internal const byte NfcRestrictedTag = 0x17;
         internal const byte ResetBlockedTag = 0x18;
         internal const byte VersionQualifierTag = 0x19;
+        internal const byte NameTag = 0x1b;
         internal const byte TemplateStorageVersionTag = 0x20; // FPS version tag
         internal const byte ImageProcessorVersionTag = 0x21; // STM version tag
         internal const byte TempTouchThresholdTag = 0x85;

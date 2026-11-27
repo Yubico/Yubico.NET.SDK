@@ -19,13 +19,24 @@ on:
     inputs:
       push-to-dev:
         description: 'Push to internal NuGet'
-        required: true
+        required: false
+        default: false
         type: boolean
       version:
         description: 'Version (optional; a unique prerelease is generated when omitted)'
         required: false
         default: ""
         type: string
+      sign:
+        description: 'Sign the libraries and package with Scribe (needs two Scribe approvals per round)'
+        required: false
+        default: false
+        type: boolean
+      release:
+        description: 'Release to NuGet.org (signs; needs a version, develop or main, and approval of the nuget-org environment)'
+        required: false
+        default: false
+        type: boolean
   schedule:
     - cron: '0 0 * * *' # Every day at midnight
 
@@ -33,23 +44,48 @@ permissions:
   contents: read
 
 jobs:
-  build-windows:
-    name: Build Windows
-    runs-on: windows-2022
+  release-preflight:
+    name: Release preflight
+    if: ${{ inputs.release }}
+    runs-on: ubuntu-latest
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - run: |
+
+      # NativeShims can be released from develop, which may hold Core and YubiKey changes that are not ready for main.
+      - name: Check that the release can be published
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: bash .github/scripts/release-preflight.sh "$VERSION" "nativeshims-$VERSION" main,develop Yubico.NativeShims
+
+  build-windows:
+    name: Build Windows
+    needs: release-preflight
+    if: ${{ !cancelled() && !failure() }}
+    runs-on: windows-2022
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - env:
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
           echo 'Running build script: Windows'
           cd Yubico.NativeShims
-          if ("${{ github.event.inputs.version }}" -ne "") {
-            $versionInput = "${{ github.event.inputs.version }}"
+          if ($env:VERSION_INPUT -ne "") {
+            $versionInput = $env:VERSION_INPUT
             if ($versionInput -like "*-*") {
               $baseVersion = $versionInput.Split('-')[0]
             } else {
@@ -126,10 +162,12 @@ jobs:
 
   build-linux-amd64:
     name: Build Linux (amd64)
+    needs: release-preflight
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-24.04
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
@@ -138,11 +176,13 @@ jobs:
           persist-credentials: false
       - name: Install and configure Zig
         run: bash Yubico.NativeShims/ci/setup-zig.sh x86_64-linux-gnu.2.23
-      - run: |
+      - env:
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
           echo 'Running build script: Linux (amd64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
-          if [ ! -z "${{ github.event.inputs.version }}" ]; then
-            BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
+          if [ -n "$VERSION_INPUT" ]; then
+            BASE_VERSION=$(echo "$VERSION_INPUT" | cut -d'-' -f1)
             bash ./build-linux-amd64.sh "$BASE_VERSION"
           else
             bash ./build-linux-amd64.sh "0.0.0"
@@ -189,10 +229,12 @@ jobs:
           
   build-linux-arm64:
     name: Build Linux (arm64)
+    needs: release-preflight
+    if: ${{ !cancelled() && !failure() }}
     runs-on: ubuntu-24.04
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
@@ -201,11 +243,13 @@ jobs:
           persist-credentials: false
       - name: Install and configure Zig
         run: bash Yubico.NativeShims/ci/setup-zig.sh aarch64-linux-gnu.2.23
-      - run: |
+      - env:
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
           echo 'Running build script: Linux (arm64) with Zig targeting glibc 2.23'
           cd Yubico.NativeShims
-          if [ ! -z "${{ github.event.inputs.version }}" ]; then
-            BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
+          if [ -n "$VERSION_INPUT" ]; then
+            BASE_VERSION=$(echo "$VERSION_INPUT" | cut -d'-' -f1)
             bash ./build-linux-arm64.sh "$BASE_VERSION"
           else
             bash ./build-linux-arm64.sh "0.0.0"
@@ -258,24 +302,28 @@ jobs:
 
   build-macos:
     name: Build macOS
-    runs-on: macos-14
+    needs: release-preflight
+    if: ${{ !cancelled() && !failure() }}
+    runs-on: macos-15
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
         with:
           global-json-file: global.json
-      - run: |
+      - env:
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
           echo 'Running build script: macOS'
           cd Yubico.NativeShims
-          if [ ! -z "${{ github.event.inputs.version }}" ]; then
-            BASE_VERSION=$(echo "${{ github.event.inputs.version }}" | cut -d'-' -f1)
+          if [ -n "$VERSION_INPUT" ]; then
+            BASE_VERSION=$(echo "$VERSION_INPUT" | cut -d'-' -f1)
             bash ./build-macOS.sh "$BASE_VERSION"
           else
             bash ./build-macOS.sh "0.0.0"
@@ -313,6 +361,49 @@ jobs:
             Yubico.NativeShims/osx-arm64/*.dylib
             Yubico.NativeShims/osx-arm64/static/**
 
+  sign-libraries:
+    name: Sign Windows libraries
+    # Release preflight is skipped outside releases; without a status check that skip would skip every job after it.
+    if: ${{ !cancelled() && needs.build-windows.result == 'success' && (inputs.sign || inputs.release) }}
+    needs: build-windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 360 # Waits for Scribe approvals.
+    concurrency:
+      group: scribe-signing
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: read # Pulls the scribe-ci image.
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          pattern: win-*
+          path: scribe-input
+
+      - uses: ./.github/actions/scribe-sign
+        with:
+          config: .github/scribe/nativeshims-assemblies.yaml
+          directory: scribe-input
+          round: nativeshims-assemblies
+          expected-count: 3
+          scribe-sa: ${{ secrets.SCRIBE_SA }}
+          github-token: ${{ github.token }}
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: signed-windows-libraries
+          path: scribe-input/win-*/Yubico.NativeShims.dll
+          if-no-files-found: error
+
   pack:
     name: Package artifacts
     outputs:
@@ -323,13 +414,15 @@ jobs:
       packages: read
       attestations: write
     runs-on: windows-2022
-    needs: [build-windows, build-linux-amd64, build-linux-arm64, build-macos]
+    needs: [build-windows, build-linux-amd64, build-linux-arm64, build-macos, sign-libraries]
+    # sign-libraries is skipped unless signing; the builds are skipped when the release preflight fails.
+    if: ${{ !cancelled() && !failure() && needs.build-windows.result == 'success' && (needs.sign-libraries.result == 'success' || !(inputs.sign || inputs.release)) }}
     env:
       PACKAGE_VERSION: ${{ inputs.version != '' && inputs.version || format('0.0.0-prerelease.{0}.{1}', github.run_id, github.run_attempt) }}
       GITHUB_REPO_URL: https://github.com/${{ github.repository }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
@@ -339,6 +432,22 @@ jobs:
           path: source
       - name: Download contents, set metadata and package
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+      - name: Use signed Windows libraries
+        if: ${{ needs.sign-libraries.result == 'success' }}
+        shell: pwsh
+        env:
+          CERTIFICATE_FINGERPRINT: ${{ vars.CODESIGN_CERT_SHA256 }}
+        run: |
+          foreach ($arch in @('win-x64', 'win-x86', 'win-arm64')) {
+            $library = "signed-windows-libraries/$arch/Yubico.NativeShims.dll"
+            $signature = Get-AuthenticodeSignature -LiteralPath $library
+            if ($signature.Status -ne 'Valid') { throw "Authenticode signature is $($signature.Status): $library" }
+            if ($signature.SignerCertificate.GetCertHashString([Security.Cryptography.HashAlgorithmName]::SHA256) -ne $env:CERTIFICATE_FINGERPRINT.ToUpperInvariant()) {
+              throw "Unexpected signer for ${library}: $($signature.SignerCertificate.Subject)"
+            }
+            Copy-Item -LiteralPath $library -Destination "$arch/Yubico.NativeShims.dll" -Force
+            Write-Host "Using signed $arch/Yubico.NativeShims.dll"
+          }
       - name: Set package metadata
         id: package-metadata
         shell: pwsh
@@ -448,6 +557,7 @@ jobs:
   verify-native-aot:
     name: Native AOT (${{ matrix.rid }})
     needs: pack
+    if: ${{ !cancelled() && needs.pack.result == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -474,12 +584,12 @@ jobs:
             runner: macos-15-intel
             os: macos
           - rid: osx-arm64
-            runner: macos-14
+            runner: macos-15
             os: macos
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
@@ -487,13 +597,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
         with:
           global-json-file: global.json
 
       - name: Install x86 .NET runtime for framework-dependent checks
         if: ${{ matrix.rid == 'win-x86' }}
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
         with:
           global-json-file: global.json
           architecture: x86
@@ -617,23 +727,159 @@ jobs:
             throw "Static archive symbols remain dynamically exported:`n$($leakedSymbols -join [Environment]::NewLine)"
           }
 
+  sign-package:
+    name: Sign package
+    if: ${{ !cancelled() && needs.verify-native-aot.result == 'success' && (inputs.sign || inputs.release) }}
+    needs: verify-native-aot
+    runs-on: ubuntu-latest
+    timeout-minutes: 360 # Waits for Scribe approvals.
+    concurrency:
+      group: scribe-signing
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: read # Pulls the scribe-ci image.
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: NuGet Package NativeShims
+          path: scribe-input
+
+      - uses: ./.github/actions/scribe-sign
+        with:
+          config: .github/scribe/nativeshims-packages.yaml
+          directory: scribe-input
+          round: nativeshims-packages
+          expected-count: 1
+          scribe-sa: ${{ secrets.SCRIBE_SA }}
+          github-token: ${{ github.token }}
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: NuGet Package NativeShims (signed)
+          path: scribe-input/Yubico.NativeShims.*.nupkg
+          if-no-files-found: error
+
+  verify-signed-package:
+    name: Verify signed package
+    needs: sign-package
+    if: ${{ !cancelled() && needs.sign-package.result == 'success' }}
+    runs-on: windows-2022
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
+        with:
+          global-json-file: global.json
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: NuGet Package NativeShims (signed)
+          path: signed
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: NuGet Package NativeShims
+          path: unsigned
+
+      - name: Verify signatures
+        shell: pwsh
+        env:
+          CERTIFICATE_FINGERPRINT: ${{ vars.CODESIGN_CERT_SHA256 }}
+        run: >
+          ./.github/scripts/verify-signed-packages.ps1
+          -SignedPath signed -UnsignedPath unsigned
+          -CertificateFingerprint $env:CERTIFICATE_FINGERPRINT -ExpectedCount 1
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-path: signed/Yubico.NativeShims.*.nupkg
+
+  publish-nuget:
+    name: Publish to NuGet.org
+    if: ${{ inputs.release }}
+    needs: verify-signed-package
+    runs-on: ubuntu-latest
+    environment: nuget-org # Requires approval before anything is published.
+    permissions:
+      contents: write # Creates the tag and the GitHub release.
+      id-token: write # NuGet.org Trusted Publishing.
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: NuGet Package NativeShims (signed)
+          path: release
+
+      - name: Write release notes
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          cat > "$RUNNER_TEMP/release-notes.md" <<EOF
+          Yubico.NativeShims $VERSION.
+
+          This release contains only the signed Yubico.NativeShims NuGet package.
+
+          Package: https://www.nuget.org/packages/Yubico.NativeShims/$VERSION
+          EOF
+
+      - uses: ./.github/actions/publish-nuget-release
+        with:
+          tag: nativeshims-${{ inputs.version }}
+          title: Yubico.NativeShims ${{ inputs.version }}
+          notes-file: ${{ runner.temp }}/release-notes.md
+          packages-directory: release
+          latest: false
+          prerelease: ${{ contains(inputs.version, '-') }}
+          nuget-user: ${{ vars.NUGET_USER }}
+          github-token: ${{ github.token }}
+
   publish-internal:
     name: Publish to internal NuGet
     runs-on: windows-2022
-    needs: verify-native-aot
+    needs: [verify-native-aot, verify-signed-package]
     environment: Internal NuGet feed
     permissions:
       packages: write
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.push-to-dev }}
+    if: ${{ !cancelled() && !failure() && github.event_name == 'workflow_dispatch' && inputs.push-to-dev && (needs.verify-signed-package.result == 'success' || !(inputs.sign || inputs.release)) }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
-          name: NuGet Package NativeShims
+          name: ${{ needs.verify-signed-package.result == 'success' && 'NuGet Package NativeShims (signed)' || 'NuGet Package NativeShims' }}
       - run: |
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
           dotnet nuget push Yubico.NativeShims.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

@@ -45,6 +45,16 @@ on:
         required: false
         default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
+      sign:
+        description: 'Sign the assemblies and packages with Scribe (needs two Scribe approvals per round)'
+        required: false
+        default: false
+        type: boolean
+      release:
+        description: 'Release to NuGet.org (signs and pushes docs; needs a version, main, and approval of the nuget-org environment)'
+        required: false
+        default: false
+        type: boolean
   schedule:
     - cron: '0 0 * * *' # Every day at midnight
 
@@ -59,13 +69,26 @@ jobs:
       contents: read
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Check that the release can be published
+        if: ${{ inputs.release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$VERSION" = "0.0.0-prerelease.YYYYMMDD.B" ]; then
+            echo "::error::Set the version to release."
+            exit 1
+          fi
+          bash .github/scripts/release-preflight.sh "$VERSION" "$VERSION" main Yubico.Core Yubico.YubiKey
+          bash .github/scripts/sdk-release-notes.sh "$VERSION" > /dev/null
 
       # main branch lockfile policy: warn if a prerelease Yubico.NativeShims is pinned.
       # The build-artifacts job auto-resolves via --force-evaluate, so this is advisory
@@ -98,23 +121,26 @@ jobs:
 
   build-artifacts:
     name: Build artifacts
-    runs-on: windows-2022
+    # Linux, so that the assemblies can be signed by Scribe (a Linux container) between build and pack.
+    runs-on: ubuntu-latest
     needs: run-tests
+    timeout-minutes: 360 # Waits for Scribe approvals when signing.
+    concurrency:
+      group: ${{ (inputs.sign || inputs.release) && 'scribe-signing' || format('build-artifacts-{0}', github.run_id) }}
+      cancel-in-progress: false
     # Requires write permissions to generate artifact attestations
     permissions:
       id-token: write       # Required for OIDC token generation
       attestations: write   # Required to attest build provenance
       contents: read
-      packages: read
+      packages: read        # Internal NuGet feed and the scribe-ci image
     outputs:
-      docs-log-id: ${{ steps.docs-log-upload.outputs.artifact-id }}
-      docs-id: ${{ steps.docs-upload.outputs.artifact-id }}
       nuget-packages-id: ${{ steps.nuget-upload.outputs.artifact-id }}
       symbols-packages-id: ${{ steps.symbols-upload.outputs.artifact-id }}
       assemblies-id: ${{ steps.assemblies-upload.outputs.artifact-id }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
@@ -126,7 +152,7 @@ jobs:
       # feed in addition to nuget.org so prerelease Yubico.NativeShims can resolve.
       - name: Setup .NET (non-main, with internal Yubico feed)
         if: github.ref != 'refs/heads/main'
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
         with:
           global-json-file: "./global.json"
           source-url: https://nuget.pkg.github.com/Yubico/index.json
@@ -137,16 +163,19 @@ jobs:
       # Yubico.NativeShims pinned in the lockfile would fail restore even without the policy guard.
       - name: Setup .NET (main, nuget.org only)
         if: github.ref == 'refs/heads/main'
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
         with:
           global-json-file: "./global.json"
 
       - name: Set build version
-        if: ${{ github.event.inputs.version }}
+        if: ${{ inputs.version }}
+        shell: pwsh
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
           $file = gci ./build/Versions.props
           $versionProp = [xml](gc $file.FullName)
-          $versionProp.Project.PropertyGroup.CommonVersion = "${{ github.event.inputs.version }}"
+          $versionProp.Project.PropertyGroup.CommonVersion = $env:VERSION
           $versionProp.Save($file.FullName)
 
       # On main, force-evaluate the lockfile so the build resolves the latest stable
@@ -157,17 +186,155 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: dotnet restore Yubico.NET.SDK.sln --force-evaluate --verbosity minimal
 
-      # Build the project
       - name: Build Yubico.NET.SDK.sln
-        run: dotnet pack --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln
+        run: dotnet build --configuration Release --nologo --verbosity minimal -p:treatWarningsAsErrors=true Yubico.NET.SDK.sln
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sign assemblies
+        if: ${{ inputs.sign || inputs.release }}
+        uses: ./.github/actions/scribe-sign
+        with:
+          config: .github/scribe/sdk-assemblies.yaml
+          directory: .
+          round: sdk-assemblies
+          expected-count: 6
+          scribe-sa: ${{ secrets.SCRIBE_SA }}
+          github-token: ${{ github.token }}
+
+      # Pack reads the build output, so put the signed assemblies in both the output (bin) and
+      # intermediate (obj) directories.
+      - name: Use signed assemblies for packing
+        if: ${{ inputs.sign || inputs.release }}
+        run: |
+          set -euo pipefail
+          for assembly in Yubico.{Core,YubiKey}/src/bin/Release/*/Yubico.{Core,YubiKey}.dll; do
+            project=${assembly%%/*}
+            name=$(basename "$assembly")
+            [ "$name" = "$project.dll" ] || continue
+            framework=$(basename "$(dirname "$assembly")")
+            cp "$assembly" "$project/src/obj/Release/$framework/$name"
+          done
+
+      - name: Pack Yubico.NET.SDK.sln
+        run: dotnet pack --no-build --configuration Release --nologo --verbosity minimal Yubico.NET.SDK.sln
+
+      - name: Check that the packages contain the signed assemblies
+        if: ${{ inputs.sign || inputs.release }}
+        run: |
+          python3 - <<'PY'
+          import glob, pathlib, sys, zipfile
+
+          checked = 0
+          for project in ("Yubico.Core", "Yubico.YubiKey"):
+              packages = glob.glob(f"{project}/src/bin/Release/{project}.*.nupkg")
+              if len(packages) != 1:
+                  sys.exit(f"Expected one {project} package, found {packages}")
+              with zipfile.ZipFile(packages[0]) as package:
+                  for entry in package.namelist():
+                      if entry.startswith("lib/") and entry.endswith(f"/{project}.dll"):
+                          framework = entry.split("/")[1]
+                          signed = pathlib.Path(f"{project}/src/bin/Release/{framework}/{project}.dll").read_bytes()
+                          if package.read(entry) != signed:
+                              sys.exit(f"{packages[0]}: {entry} is not the signed assembly")
+                          checked += 1
+          if checked != 6:
+              sys.exit(f"Expected 6 packaged assemblies, checked {checked}")
+          print(f"All {checked} packaged assemblies are the signed assemblies.")
+          PY
+
+      # Upload NuGet packages
+      - name: "Save build artifacts: Nuget Packages"
+        id: nuget-upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: Nuget Packages
+          path: |
+            Yubico.Core/src/bin/Release/*.nupkg
+            Yubico.YubiKey/src/bin/Release/*.nupkg
+          if-no-files-found: error
+
+      # Upload symbols
+      - name: "Save build artifacts: Symbols Packages"
+        id: symbols-upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: Symbols Packages
+          path: |
+            Yubico.Core/src/bin/Release/*.snupkg
+            Yubico.YubiKey/src/bin/Release/*.snupkg
+          if-no-files-found: error
+
+      # Upload assemblies
+      - name: "Save build artifacts: Assemblies"
+        id: assemblies-upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: Assemblies
+          path: |
+            Yubico.Core/src/bin/Release/**/*.dll
+            Yubico.YubiKey/src/bin/Release/**/*.dll
+          if-no-files-found: error
+
+      # Generate artifact attestation
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-path: |
+            Yubico.Core/src/bin/Release/*.nupkg
+            Yubico.YubiKey/src/bin/Release/*.nupkg
+            Yubico.Core/src/bin/Release/*.snupkg
+            Yubico.YubiKey/src/bin/Release/*.snupkg
+            Yubico.Core/src/bin/Release/**/*.dll
+            Yubico.YubiKey/src/bin/Release/**/*.dll
+
+  build-docs:
+    name: Build docs
+    runs-on: windows-2022
+    needs: run-tests
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      docs-log-id: ${{ steps.docs-log-upload.outputs.artifact-id }}
+      docs-id: ${{ steps.docs-upload.outputs.artifact-id }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup .NET (non-main, with internal Yubico feed)
+        if: github.ref != 'refs/heads/main'
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
+        with:
+          global-json-file: "./global.json"
+          source-url: https://nuget.pkg.github.com/Yubico/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup .NET (main, nuget.org only)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
+        with:
+          global-json-file: "./global.json"
+
+      # docfx restores the projects itself; on main, resolve NativeShims the same way as build-artifacts.
+      - name: Force-evaluate NativeShims lockfile (main only)
+        if: github.ref == 'refs/heads/main'
+        run: dotnet restore Yubico.NET.SDK.sln --force-evaluate --verbosity minimal
 
       # Build the documentation
       - name: Build docs
         run: |
           dotnet tool install --global docfx --version "2.*"
           docfx docfx.json --logLevel warning --log docfx.log --warningsAsErrors
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Upload documentation log
       - name: "Save build artifacts: Docs log"
@@ -186,98 +353,208 @@ jobs:
           name: Documentation
           path: docs/_site/
           if-no-files-found: error
-          
-      # Upload NuGet packages
-      - name: "Save build artifacts: Nuget Packages"
-        id: nuget-upload
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+
+  sign-packages:
+    name: Sign packages
+    if: ${{ inputs.sign || inputs.release }}
+    needs: build-artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 360 # Waits for Scribe approvals.
+    concurrency:
+      group: scribe-signing
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: read # Pulls the scribe-ci image.
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
           name: Nuget Packages
-          path: |
-            Yubico.Core/src/bin/Release/*.nupkg
-            Yubico.YubiKey/src/bin/Release/*.nupkg
-          if-no-files-found: error
-      
-      # Upload symbols
-      - name: "Save build artifacts: Symbols Packages"
-        id: symbols-upload
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+          path: scribe-input
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
           name: Symbols Packages
-          path: |
-            Yubico.Core/src/bin/Release/*.snupkg
-            Yubico.YubiKey/src/bin/Release/*.snupkg
-          if-no-files-found: error
-      
-      # Upload assemblies
-      - name: "Save build artifacts: Assemblies"
-        id: assemblies-upload
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+          path: scribe-input
+
+      - uses: ./.github/actions/scribe-sign
         with:
-          name: Assemblies
+          config: .github/scribe/sdk-packages.yaml
+          directory: scribe-input
+          round: sdk-packages
+          expected-count: 4
+          scribe-sa: ${{ secrets.SCRIBE_SA }}
+          github-token: ${{ github.token }}
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: Signed NuGet Packages
           path: |
-            Yubico.Core/src/bin/Release/**/*.dll
-            Yubico.YubiKey/src/bin/Release/**/*.dll
+            scribe-input/**/*.nupkg
+            scribe-input/**/*.snupkg
           if-no-files-found: error
-      
-      # Generate artifact attestation
+
+  verify-signed-packages:
+    name: Verify signed packages
+    needs: sign-packages
+    runs-on: windows-2022
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
+        with:
+          global-json-file: "./global.json"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: Signed NuGet Packages
+          path: signed
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: Nuget Packages
+          path: unsigned
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: Symbols Packages
+          path: unsigned
+
+      - name: Verify signatures
+        shell: pwsh
+        env:
+          CERTIFICATE_FINGERPRINT: ${{ vars.CODESIGN_CERT_SHA256 }}
+        run: >
+          ./.github/scripts/verify-signed-packages.ps1
+          -SignedPath signed -UnsignedPath unsigned
+          -CertificateFingerprint $env:CERTIFICATE_FINGERPRINT -ExpectedCount 4
+
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
         with:
           subject-path: |
-            Yubico.Core/src/bin/Release/*.nupkg
-            Yubico.YubiKey/src/bin/Release/*.nupkg
-            Yubico.Core/src/bin/Release/*.snupkg
-            Yubico.YubiKey/src/bin/Release/*.snupkg
-            Yubico.Core/src/bin/Release/**/*.dll
-            Yubico.YubiKey/src/bin/Release/**/*.dll
-      
+            signed/**/*.nupkg
+            signed/**/*.snupkg
+
   upload-docs:
     name: Upload docs
-    if: ${{ github.event.inputs.push-to-docs == 'true' }}
+    if: ${{ inputs.push-to-docs || inputs.release }}
     # Requires write permission for OIDC authentication to GCP
     permissions:
       id-token: write       # Required for OIDC token generation
       contents: read
     uses: ./.github/workflows/upload-docs.yml
-    needs: build-artifacts
+    needs: build-docs
+
+  publish-nuget:
+    name: Publish to NuGet.org
+    if: ${{ inputs.release }}
+    needs: [verify-signed-packages, upload-docs]
+    runs-on: ubuntu-latest
+    environment: nuget-org # Requires approval before anything is published.
+    permissions:
+      contents: write # Creates the tag and the GitHub release.
+      id-token: write # NuGet.org Trusted Publishing.
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: Signed NuGet Packages
+          path: release
+
+      - name: Write release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: bash .github/scripts/sdk-release-notes.sh "$VERSION" > "$RUNNER_TEMP/release-notes.md"
+
+      - uses: ./.github/actions/publish-nuget-release
+        with:
+          tag: ${{ inputs.version }}
+          title: ${{ inputs.version }}
+          notes-file: ${{ runner.temp }}/release-notes.md
+          packages-directory: release
+          latest: ${{ !contains(inputs.version, '-') }}
+          prerelease: ${{ contains(inputs.version, '-') }}
+          nuget-user: ${{ vars.NUGET_USER }}
+          github-token: ${{ github.token }}
+
+  deploy-docs:
+    name: Deploy docs
+    if: ${{ inputs.release }}
+    needs: publish-nuget
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/deploy-docs.yml
+    with:
+      gitops-branch: prod
+      image-tag: ${{ github.sha }}
 
   publish-internal:
     name: Publish to internal NuGet
     runs-on: windows-2022
-    needs: build-artifacts
-    if: ${{ github.event.inputs.push-to-dev == 'true' }}
+    needs: [build-artifacts, verify-signed-packages]
+    if: ${{ !cancelled() && !failure() && inputs.push-to-dev && (needs.verify-signed-packages.result == 'success' || !(inputs.sign || inputs.release)) }}
     # Requires write permission to publish NuGet packages
     permissions:
       packages: write       # Required to publish to GitHub Packages
       contents: read
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
-          name: Nuget Packages
-      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
+          name: ${{ needs.verify-signed-packages.result == 'success' && 'Signed NuGet Packages' || 'Nuget Packages' }}
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73  # v6.1.0
       - run: |
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
           $core = (Get-ChildItem -Recurse Yubico.Core/*.nupkg)[0].FullName
           $yubikey = (Get-ChildItem -Recurse Yubico.YubiKey/*.nupkg)[0].FullName
-          dotnet nuget push $core --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
-          dotnet nuget push $yubikey --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push $core --source "github" --api-key ${{ secrets.GITHUB_TOKEN }} --no-symbols
+          dotnet nuget push $yubikey --source "github" --api-key ${{ secrets.GITHUB_TOKEN }} --no-symbols
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-summary:
     name: Build summary
     runs-on: ubuntu-latest
-    needs: [enforce-branch-policy, run-tests, build-artifacts, publish-internal, upload-docs]
+    needs: [enforce-branch-policy, run-tests, build-artifacts, build-docs, sign-packages, publish-nuget, publish-internal, upload-docs]
     if: always()
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c # v2.23.0
         with:
           egress-policy: audit
 
@@ -286,14 +563,17 @@ jobs:
           # Pass job results into the environment
           RUN_TESTS_RESULT: ${{ needs.run-tests.result }}
           BUILD_ARTIFACTS_RESULT: ${{ needs.build-artifacts.result }}
+          BUILD_DOCS_RESULT: ${{ needs.build-docs.result }}
+          SIGN_PACKAGES_RESULT: ${{ needs.sign-packages.result }}
           UPLOAD_DOCS_RESULT: ${{ needs.upload-docs.result }}
           PUBLISH_INTERNAL_RESULT: ${{ needs.publish-internal.result }}
+          PUBLISH_NUGET_RESULT: ${{ needs.publish-nuget.result }}
           DOCS_IMAGE_TAG: ${{ needs.upload-docs.outputs.image-tag }}
           DOCS_IMAGE_HASH: ${{ needs.upload-docs.outputs.image-hash }}
-          
-          # Pass artifact IDs from the build-artifacts job outputs
-          DOCS_LOG_ID: ${{ needs.build-artifacts.outputs.docs-log-id }}
-          DOCS_ID: ${{ needs.build-artifacts.outputs.docs-id }}
+
+          # Pass artifact IDs from the build jobs' outputs
+          DOCS_LOG_ID: ${{ needs.build-docs.outputs.docs-log-id }}
+          DOCS_ID: ${{ needs.build-docs.outputs.docs-id }}
           NUGET_ID: ${{ needs.build-artifacts.outputs.nuget-packages-id }}
           SYMBOLS_ID: ${{ needs.build-artifacts.outputs.symbols-packages-id }}
           ASSEMBLIES_ID: ${{ needs.build-artifacts.outputs.assemblies-id }}
@@ -307,8 +587,11 @@ jobs:
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| Run tests | **${{ env.RUN_TESTS_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
           echo "| Build artifacts | **${{ env.BUILD_ARTIFACTS_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build docs | **${{ env.BUILD_DOCS_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "| Sign packages | **${{ env.SIGN_PACKAGES_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
           echo "| Upload docs | **${{ env.UPLOAD_DOCS_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
           echo "| Publish to internal NuGet | **${{ env.PUBLISH_INTERNAL_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
+          echo "| Publish to NuGet.org | **${{ env.PUBLISH_NUGET_RESULT }}** |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Only show artifacts list if the build succeeded
@@ -316,11 +599,15 @@ jobs:
             echo "### Built Artifacts" >> $GITHUB_STEP_SUMMARY
             echo "Direct links to artifacts produced by this build run:" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "- [Documentation log]($ARTIFACT_URL_BASE/${{ env.DOCS_LOG_ID }})" >> $GITHUB_STEP_SUMMARY
-            echo "- [Documentation Site]($ARTIFACT_URL_BASE/${{ env.DOCS_ID }})" >> $GITHUB_STEP_SUMMARY
             echo "- [Nuget Packages]($ARTIFACT_URL_BASE/${{ env.NUGET_ID }})" >> $GITHUB_STEP_SUMMARY
             echo "- [Symbols Packages]($ARTIFACT_URL_BASE/${{ env.SYMBOLS_ID }})" >> $GITHUB_STEP_SUMMARY
             echo "- [Assemblies]($ARTIFACT_URL_BASE/${{ env.ASSEMBLIES_ID }})" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ env.BUILD_DOCS_RESULT }}" == "success" ]; then
+            echo "- [Documentation log]($ARTIFACT_URL_BASE/${{ env.DOCS_LOG_ID }})" >> $GITHUB_STEP_SUMMARY
+            echo "- [Documentation Site]($ARTIFACT_URL_BASE/${{ env.DOCS_ID }})" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
 

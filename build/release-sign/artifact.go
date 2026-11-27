@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -12,6 +13,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 )
 
 const maxPackageSize = int64(1 << 30)
@@ -24,13 +26,21 @@ type extractedPackage struct {
 
 type commandRunner interface {
 	Run(context.Context, string, ...string) ([]byte, error)
-	RunAttached(context.Context, string, []string, ...string) error
+	RunAttached(context.Context, string, []byte, ...string) error
 }
 
-func (osRunner) RunAttached(ctx context.Context, name string, environment []string, args ...string) error {
+func (osRunner) RunAttached(ctx context.Context, name string, pin []byte, args ...string) error {
 	command := exec.CommandContext(ctx, name, args...)
-	command.Env = append(os.Environ(), environment...)
+	purpose := "sign"
 	command.Stdin = os.Stdin
+	if pin != nil {
+		purpose = "sign-pin"
+		// os/exec creates an anonymous pipe and closes it after copying these
+		// bytes. Wait joins the writer, including on early exit/cancellation.
+		command.Stdin = bytes.NewReader(pin)
+	}
+	command.Env = childEnvironment(purpose)
+	command.WaitDelay = 2 * time.Second
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 	return command.Run()
@@ -40,6 +50,12 @@ type osRunner struct{}
 
 func (osRunner) Run(ctx context.Context, name string, args ...string) ([]byte, error) {
 	command := exec.CommandContext(ctx, name, args...)
+	purpose := "verify"
+	if strings.TrimSuffix(strings.ToLower(filepath.Base(name)), ".exe") == "gh" {
+		purpose = "attest"
+	}
+	command.Env = childEnvironment(purpose)
+	command.WaitDelay = 2 * time.Second
 	output, err := command.Output()
 	if err != nil {
 		var exit *exec.ExitError
